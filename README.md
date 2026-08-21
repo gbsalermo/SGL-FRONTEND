@@ -1,14 +1,17 @@
 <a id="readme-top"></a>
 
 <div align="center">
-  <img src="docs/images/readme-banner.webp" alt="SGL — Sistema de Gestão de Laboratórios" width="900" />
 
-  # SGL — Sistema de Gestão de Laboratórios
+# SGL — Sistema de Gestão de Laboratórios
 
-  **Frontend corporativo para pedidos, estoque, lotes, movimentações, relatórios e administração laboratorial.**
+**Frontend corporativo para pedidos, estoque, lotes, movimentações, relatórios e administração laboratorial.**
 
-  [Backend](https://github.com/gbsalermo/Sistema-SGL) · [Continuidade](CONTINUIDADE.md) · [Inventário de telas](docs/INVENTARIO_TELAS.md) · [Arquitetura](docs/ESTRUTURA_FRONTEND.md)
+[Backend](https://github.com/gbsalermo/Sistema-SGL) · [Continuidade](CONTINUIDADE.md) · [Inventário de telas](docs/INVENTARIO_TELAS.md) · [Arquitetura](docs/ESTRUTURA_FRONTEND.md)
+
 </div>
+
+> [!NOTE]
+> As imagens de referência visual do README serão adicionadas manualmente pelo mantenedor. A documentação já registra o papel de cada exemplo para que possam ser inseridos sem alterar as decisões do projeto.
 
 ---
 
@@ -49,13 +52,13 @@ A próxima parte da 1.3 é definir **componentes reutilizáveis e estados de int
 
 A identidade do SGL combina a linguagem institucional da Embrapa/Publica com padrões de aplicações administrativas modernas.
 
+### Imagem de capa do README
+
+**A adicionar manualmente.** Deve usar a identidade oficial do SGL e funcionar como apresentação do projeto. Não usar símbolos aproximados gerados em mockups quando diferirem da marca oficial.
+
 ### Ícones e microinterações
 
-<div align="center">
-  <img src="docs/images/exemplo-iconografia.webp" alt="Referência conceitual de ícones e microanimações do SGL" width="900" />
-</div>
-
-Referência conceitual:
+**Imagem-exemplo a adicionar manualmente.** Deve demonstrar o padrão já aprovado:
 
 ```text
 ícone normal       → outline, visível e monocromático
@@ -77,13 +80,9 @@ verde    → sucesso / confirmação
 
 ### Sidebar + Topbar
 
-<div align="center">
-  <img src="docs/images/exemplo-shell.webp" alt="Referência conceitual da sidebar e topbar do SGL" width="900" />
-</div>
+**Imagem-exemplo a adicionar manualmente.** Deve mostrar a composição aprovada do shell: sidebar aberta/recolhida, alertas, área de usuário e topbar simples.
 
-O mockup acima é **referência de composição**, não da marca desenhada dentro dele. A implementação deverá usar exclusivamente a logo oficial do SGL.
-
-O shell aprovado segue:
+O mockup é referência de composição, não de desenho da marca. A implementação deverá usar exclusivamente a logo oficial do SGL.
 
 ```text
 Sidebar aberta       ~240–248 px
@@ -96,9 +95,13 @@ conteúdo             realiza transição suave
 
 ### Busca e filtros
 
-<div align="center">
-  <img src="docs/images/exemplo-busca-filtros.webp" alt="Referência conceitual para busca e filtros em listagens" width="900" />
-</div>
+**Imagem-exemplo a adicionar manualmente.** Deve ilustrar:
+
+- busca global simples na topbar;
+- busca local dentro da página;
+- botão `Filtros` para abrir refinamentos contextuais;
+- exemplo de filtro de Pedidos por status/laboratório/período;
+- tabela operacional após aplicação dos filtros.
 
 Regra aprovada:
 
@@ -571,6 +574,7 @@ Autenticação, autorização, auditoria e futura integração corporativa.
 |---|---|
 | [`CONTINUIDADE.md`](CONTINUIDADE.md) | fonte principal para retomar o desenvolvimento |
 | [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) | inventário funcional de telas e cobertura da API |
+| [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) | jornadas, rotas e regras de navegação |
 | [`docs/ESTRUTURA_FRONTEND.md`](docs/ESTRUTURA_FRONTEND.md) | estrutura física e responsabilidades das pastas |
 | [`docs/IDENTIDADE_VISUAL.md`](docs/IDENTIDADE_VISUAL.md) | identidade, paleta, densidade e motion |
 | [`docs/ICONOGRAFIA.md`](docs/ICONOGRAFIA.md) | padrão conceitual de ícones e microinterações |
