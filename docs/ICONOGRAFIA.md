@@ -207,10 +207,14 @@ Futuramente:
 
 ## 9. Referência visual
 
-Arquivo no repositório:
+A imagem-exemplo de iconografia será adicionada manualmente ao README pelo mantenedor.
 
-```text
-docs/images/exemplo-iconografia.webp
-```
+Ela deve servir apenas como **guia conceitual** e demonstrar:
 
-A imagem é um **guia conceitual**, não uma implementação final ou biblioteca obrigatória.
+- outline em estado normal;
+- filled em estado ativo;
+- preto/grafite como cor operacional padrão em fundo claro;
+- microinteração de hover/click;
+- cores auxiliares semânticas para estados.
+
+A imagem não define biblioteca obrigatória nem substitui estas regras escritas.
