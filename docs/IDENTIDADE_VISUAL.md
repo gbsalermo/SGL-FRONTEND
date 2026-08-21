@@ -244,27 +244,308 @@ não misturar exploração visual com implementação
 
 ---
 
-# 9. Estado atual da identidade
+# 9. Referências de interface administrativa
+
+Além do Publica / Embrapa, ficam adotados como referências conceituais de organização administrativa:
+
+- `iview/iview-admin` — branch/template;
+- `Armour/vue-typescript-admin-template`;
+- `PanJiaChen/vue-admin-template`.
+
+Papel de cada grupo de referência:
+
+```text
+PUBLICA / EMBRAPA
+→ identidade institucional
+→ cores
+→ leveza visual
+→ contraste branco × azul
+→ login
+
+IVIEW ADMIN
+→ organização administrativa
+→ sidebar
+→ navegação
+→ tabelas
+→ hierarquia operacional
+
+VUE TYPESCRIPT ADMIN TEMPLATE
+→ densidade de dashboard
+→ filtros
+→ organização de conteúdo
+→ comportamento de aplicações administrativas
+
+VUE ADMIN TEMPLATE
+→ continuidade visual entre rotas
+→ transições suaves
+→ shell estável durante a navegação
+```
+
+Esses projetos são referências de UX e composição. Não determinam a arquitetura técnica do SGL e não devem ser copiados como base de código.
+
+---
+
+# 10. Espaçamento, bordas, arredondamentos, sombras e densidade
+
+## Densidade visual
+
+A densidade aprovada para o SGL é **média-compacta**.
+
+Objetivo:
+
+```text
+mais denso que uma landing page
++ mais respirado que sistemas administrativos antigos
++ adequado a tabelas, filtros e formulários frequentes
++ sem desperdício de área útil
+```
+
+## Grade de espaçamento
+
+A referência conceitual será uma grade baseada em múltiplos de 8, permitindo valores intermediários menores quando necessários.
+
+```text
+4  → micro ajuste
+8  → elementos muito próximos
+12 → controles relacionados
+16 → espaçamento padrão
+24 → separação de grupos
+32 → separação de seções
+48+ → blocos independentes
+```
+
+Referências de composição:
+
+| Contexto | Referência |
+|---|---:|
+| margem interna principal da página | 24 px |
+| distância entre cards | 16–24 px |
+| padding interno de card | 20–24 px |
+| label → campo | 8 px |
+| campos relacionados | 16 px |
+| grupos de formulário | 24 px |
+| grandes seções | 32 px |
+
+Os valores são referências de Figma/Design System, não CSS definitivo nesta etapa.
+
+## Bordas
+
+As bordas devem ser finas, claras e discretas.
+
+```text
+borda neutra
+→ separação funcional
+→ baixa presença visual
+
+borda azul
+→ foco
+→ seleção
+→ estado ativo
+
+borda semântica
+→ somente quando o estado exigir
+```
+
+A interface não deve depender de bordas fortes para separar cada elemento. Fundo, espaçamento e tipografia devem resolver a maior parte da hierarquia.
+
+## Arredondamentos
+
+Direção aprovada: **moderada**, evitando tanto o aspecto completamente quadrado quanto cards excessivamente arredondados.
+
+| Elemento | Referência |
+|---|---:|
+| Inputs / selects | 6 px |
+| Botões | 6 px |
+| Cards | 8 px |
+| Tabelas / containers | 8 px |
+| Modais / drawers | 8–10 px |
+| Alertas | 6–8 px |
+| Status chips | pill |
+| Avatar | circular |
+
+## Sombras
+
+Sombras devem ser usadas com parcimônia.
+
+```text
+NÍVEL 0
+→ sem sombra
+→ tabelas
+→ formulários
+→ seções internas
+
+NÍVEL 1
+→ sombra muito discreta
+→ cards de dashboard
+→ containers principais quando necessário
+
+NÍVEL 2
+→ sombra mais perceptível, ainda suave
+→ modais
+→ menus flutuantes
+→ dropdowns
+→ elementos sobrepostos
+```
+
+Regra de hierarquia:
+
+```text
+espaço
+→ fundo
+→ borda
+→ tipografia
+→ sombra
+```
+
+## Dimensões de referência
+
+| Elemento | Referência |
+|---|---:|
+| Topbar | ~64 px |
+| Sidebar aberta | ~240–248 px |
+| Sidebar recolhida | ~64–72 px |
+| Input | ~40–44 px |
+| Botão padrão | ~40 px |
+| Linha de tabela | ~44–48 px |
+
+A sidebar fica deliberadamente entre templates administrativos mais estreitos e o projeto institucional mais largo, preservando espaço para rótulos em português como `Movimentações`, `Laboratórios` e `Estagiários`.
+
+## Cards e tabelas
+
+Regra de uso:
+
+```text
+card
+→ resumo
+→ indicador
+→ agrupamento de informação
+→ dashboard
+
+tabela
+→ operação
+→ consulta repetitiva
+→ pedidos
+→ estoque
+→ movimentações
+→ cadastros
+```
+
+Não transformar cada registro operacional em um card grande quando uma tabela for mais eficiente.
+
+---
+
+# 11. Motion e continuidade espacial
+
+O SGL deve transmitir a sensação de **aplicação contínua**, e não de várias páginas independentes abrindo e fechando.
+
+A referência principal para este comportamento é o `PanJiaChen/vue-admin-template`, especialmente a ideia de transição entre rotas com combinação de fade e pequeno deslocamento horizontal.
+
+Princípio aprovado:
+
+> Navegar no SGL deve parecer mover-se dentro do sistema, e não fechar uma página para abrir outra.
+
+## Troca entre páginas
+
+Conceito:
+
+```text
+página atual
+→ perde opacidade
+→ desloca-se suavemente alguns pixels
+
+nova página
+→ entra do sentido complementar
+→ ganha opacidade
+→ assume a mesma área de conteúdo
+```
+
+A transição deve ser curta e discreta. A referência de movimento fica em aproximadamente **20–30 px**, com duração percebida na faixa de **250–350 ms**.
+
+Esses valores serão validados no protótipo antes da implementação definitiva.
+
+## Shell estável
+
+Durante a troca de rota:
+
+```text
+sidebar
+→ permanece
+
+topbar
+→ permanece
+
+estrutura global
+→ permanece
+
+área central de conteúdo
+→ realiza a transição
+```
+
+Esse comportamento reforça a noção de continuidade espacial.
+
+## Transições por contexto
+
+```text
+rota principal
+→ fade + pequeno deslocamento horizontal
+
+breadcrumb / título
+→ transição ainda mais discreta
+
+modal
+→ fade + elevação suave
+→ não usar o mesmo slide lateral das páginas
+
+drawer
+→ deslize lateral coerente com sua origem física
+
+dropdown / menu flutuante
+→ aparição curta e discreta
+```
+
+## Regras de motion
+
+- animação não deve atrasar a operação;
+- evitar movimentos longos ou decorativos;
+- preservar posição e estrutura do shell;
+- evitar saltos de layout durante loading;
+- feedback de ação deve ser mais rápido que transição de página;
+- futuramente respeitar preferência do usuário por movimento reduzido (`prefers-reduced-motion` ou equivalente da stack escolhida).
+
+Motion é parte da experiência visual, mas não deve esconder lentidão real nem substituir estados de loading.
+
+---
+
+# 12. Estado atual da identidade
 
 ## Fechado
 
 - referência institucional: Publica / Embrapa;
+- referências administrativas: iView Admin, Vue TypeScript Admin Template e Vue Admin Template;
 - direção visual clean e corporativa;
 - predominância branco + azul;
 - azul como cor principal;
 - verde como apoio institucional/semântico;
 - paleta base aprovada;
 - Inter como tipografia principal;
-- login do Publica como referência estrutural do login SGL.
+- login do Publica como referência estrutural do login SGL;
+- densidade média-compacta;
+- grade conceitual de espaçamento;
+- bordas discretas;
+- arredondamento moderado;
+- sombras mínimas e hierárquicas;
+- dimensões-base de shell e controles;
+- cards para resumo e tabelas para operação;
+- continuidade espacial entre rotas;
+- transição de página com fade + pequeno deslocamento horizontal;
+- sidebar/topbar estáveis durante navegação.
 
 ## Próximos conceitos a definir
 
-- espaçamento;
-- bordas e arredondamentos;
-- sombras;
-- densidade visual;
 - estilo de ícones;
 - shell principal: sidebar + topbar + conteúdo;
+- comportamento visual da sidebar aberta/recolhida;
+- hierarquia de títulos e breadcrumbs dentro do shell;
 - padrões de tabelas, formulários e estados.
 
 Nenhum desses itens deve ser tratado como código até o momento de implementação correspondente.
