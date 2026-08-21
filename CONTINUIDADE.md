@@ -4,16 +4,14 @@
 **Repositório:** `gbsalermo/SGL-FRONTEND`  
 **Backend de referência:** `gbsalermo/Sistema-SGL`  
 **Última atualização:** 21/08/2026  
-**Fase atual:** planejamento inicial do frontend  
-**Próxima etapa:** Etapa 1 — fundação visual e técnica
+**Fase atual:** Etapa 1 — fundação visual e técnica  
+**Subetapa atual:** 1.2 — fluxos e navegação
 
-Este arquivo registra decisões, etapas concluídas, arquitetura do frontend e o ponto exato de continuidade. Ele passa a ser o documento principal de acompanhamento desta fase do SGL.
+Este arquivo registra decisões, etapas concluídas, arquitetura planejada e o ponto exato de continuidade do frontend do SGL.
 
 ---
 
-## 1. Handoff do backend — CONCLUÍDO
-
-O backend funcional e estrutural do protótipo foi encerrado antes do início deste frontend.
+# 1. Handoff do backend — CONCLUÍDO
 
 Estado herdado:
 
@@ -29,7 +27,7 @@ autenticação + auditoria local ← após frontend
 integração corporativa ← futura
 ```
 
-Regra de fronteira que o frontend deve respeitar:
+Regra de fronteira:
 
 ```text
 Long id
@@ -41,36 +39,34 @@ UUID publicId
 → URLs, requests, responses e estado do frontend
 ```
 
-O Swagger/OpenAPI do backend é a referência operacional para endpoints, parâmetros, request bodies, responses e erros. Não manter uma documentação paralela de contratos HTTP neste repositório.
+O Swagger/OpenAPI do backend é a referência operacional para endpoints, parâmetros, request bodies, responses e erros.
 
 ---
 
-## 2. Diretrizes de produto já aprovadas
+# 2. Diretrizes de produto aprovadas
 
-### Dashboards claros e funcionais
+## Dashboards claros e funcionais
 
 ```text
 leitura rápida
 → poucos indicadores realmente úteis
-→ prioridade por perfil/responsabilidade
+→ prioridade por responsabilidade/perfil
 → evitar excesso de cards, gráficos e informação decorativa
 ```
 
-### Login inspirado no Publica
+## Login inspirado no Publica
 
-A tela de login deve preservar familiaridade visual com o Publica, adaptada à identidade do SGL.
+A tela de login deve manter familiaridade visual com o Publica, adaptada à identidade do SGL.
 
-A autenticação definitiva ainda não será implementada nesta fase inicial. A interface deve ser criada de forma que o mecanismo temporário de sessão possa ser substituído posteriormente sem refazer as telas.
+A autenticação definitiva será implementada após a primeira fase funcional do frontend. A interface deve permitir substituir a sessão temporária sem reconstruir as telas.
 
-### Pedidos separados por responsabilidade
-
-Existirão duas experiências distintas:
+## Pedidos separados por responsabilidade
 
 ```text
 SOLICITANTE
 → criar pedido
 → acompanhar pedidos próprios
-→ consultar status e histórico
+→ consultar status e detalhe
 → interface simples e orientada à tarefa
 
 GESTÃO
@@ -84,45 +80,40 @@ GESTÃO
 
 Não misturar ações administrativas na experiência de quem apenas solicita materiais.
 
-### Página 404 customizada
-
-Responsabilidade do frontend.
-
-Distinguir:
+## Página 404 customizada
 
 ```text
 rota inexistente
 → página 404 própria
 
 recurso inexistente retornado pela API
-→ mensagem contextual na própria experiência
-→ página, estado vazio, mensagem inline ou notificação conforme o caso
+→ mensagem contextual
+→ estado vazio, inline, notificação ou página conforme o caso
 ```
 
-### Relatórios e documentos fazem parte do produto
+## Relatórios e documentos
 
-O frontend também deve contemplar, de forma explícita:
+Fazem parte do escopo do produto.
 
 ```text
 documentos/anexos
 → upload
 → visualização/download
-→ remoção quando permitida
+→ remoção/substituição quando permitida
 → associação ao contexto correto
 
 relatórios
 → filtros operacionais
-→ visualização dos resultados
-→ exportação em formatos adequados
+→ visualização
+→ impressão quando útil
+→ exportação
 ```
 
-Essas funcionalidades serão desenhadas no frontend, mas qualquer persistência de arquivos, consulta adicional ou geração que dependa do servidor deve possuir contrato próprio no backend.
+Persistência de arquivos, consultas adicionais e geração oficial de relatórios dependentes do servidor devem possuir contrato próprio no backend.
 
 ---
 
-## 3. Perfis existentes no domínio
-
-O backend possui atualmente:
+# 3. Perfis existentes no domínio
 
 ```text
 ADMINISTRADOR
@@ -133,13 +124,19 @@ PESQUISADOR
 ESTAGIARIO
 ```
 
-Nesta fase, o frontend deve primeiro organizar funcionalidades por **responsabilidade de uso** — solicitante, gestão e administração — e não congelar regras de autorização antes da implementação da autenticação.
+Durante o desenvolvimento inicial, o frontend será organizado por **responsabilidade de uso**:
 
-O mapeamento final entre perfil e permissão será consolidado junto da etapa futura de autenticação/autorização.
+```text
+solicitante
+gestão
+administração
+```
+
+O mapeamento definitivo perfil → permissão será consolidado junto da autenticação/autorização.
 
 ---
 
-## 4. Referências visuais registradas
+# 4. Referências visuais
 
 ```text
 Salvia Kit
@@ -149,7 +146,7 @@ Sneat Vuetify
 Publica — referência para login
 ```
 
-Fluxo aprovado:
+Fluxo visual aprovado:
 
 ```text
 referências/templates
@@ -157,17 +154,15 @@ referências/templates
 → selecionar padrões
 → adaptar ao SGL
 → componentes reutilizáveis
-→ Design System
+→ Design System mínimo
 → implementação
 ```
 
-Referências servem para composição, hierarquia e padrões de UX. O objetivo não é copiar um template inteiro.
+O objetivo não é copiar um template inteiro.
 
 ---
 
-## 5. Stack inicial planejada
-
-Direção técnica inicial:
+# 5. Stack inicial planejada
 
 ```text
 Vue 3
@@ -179,9 +174,7 @@ Axios
 Vuetify 3
 ```
 
-A stack será confirmada tecnicamente na Etapa 1 antes da criação do esqueleto definitivo.
-
-Ferramentas que podem entrar nas etapas posteriores:
+Ferramentas previstas para etapas posteriores:
 
 ```text
 Vitest
@@ -190,13 +183,11 @@ ESLint
 Prettier
 ```
 
+A stack será confirmada formalmente na Etapa 1.4 antes do bootstrap definitivo.
+
 ---
 
-## 6. Arquitetura frontend planejada
-
-Objetivo: separar infraestrutura compartilhada de módulos de negócio.
-
-Estrutura-base sugerida:
+# 6. Arquitetura frontend planejada
 
 ```text
 src/
@@ -209,13 +200,15 @@ src/
 │   ├── pedidos/
 │   ├── estoque/
 │   ├── lotes/
+│   ├── movimentacoes/
 │   ├── produtos/
 │   ├── documentos/
 │   ├── relatorios/
 │   ├── laboratorios/
 │   ├── unidades/
 │   ├── projetos/
-│   └── usuarios/
+│   ├── usuarios/
+│   └── estagiarios/
 ├── router/
 ├── services/
 ├── stores/
@@ -225,7 +218,7 @@ src/
 └── styles/
 ```
 
-Regra:
+Regras:
 
 ```text
 componente compartilhado
@@ -243,42 +236,40 @@ HTTP
 estado global real
 → stores
 
-tipos dos contratos consumidos
+tipos de contratos consumidos
 → types ou módulo responsável
 ```
 
-Evitar criar store global para estado que pode permanecer local ao componente ou módulo.
+Evitar store global e abstrações antes de existir necessidade real.
 
 ---
 
-## 7. Estratégia de integração com a API
+# 7. Estratégia de integração com a API
 
-### Configuração
+## Configuração
 
-A URL do backend deve vir de ambiente, por exemplo:
+Usar variável de ambiente:
 
 ```text
 VITE_API_BASE_URL
 ```
 
-Não espalhar URL fixa de `localhost` pelos componentes.
+Não espalhar `localhost` pelos componentes.
 
-### Cliente HTTP
+## Cliente HTTP
 
-Centralizar Axios em um cliente único para permitir posteriormente:
+Axios centralizado para permitir:
 
 ```text
 baseURL
 headers
 interceptors
-autenticação
+autenticação futura
 normalização de erros
 logging de desenvolvimento
 ```
 
-### Erros
-
-Tratar de forma consistente os contratos atuais do backend:
+## Erros
 
 ```text
 400 → validação / regra de negócio
@@ -286,14 +277,14 @@ Tratar de forma consistente os contratos atuais do backend:
 409 → conflito
 500 → falha inesperada
 fieldErrors → vincular aos campos quando aplicável
-message → mensagem contextual para o usuário
+message → mensagem contextual
 ```
 
-Não exibir stack trace ou detalhes técnicos internos na interface.
+Não exibir stack trace ou detalhes internos.
 
-### Estado assíncrono
+## Estado assíncrono
 
-Toda tela que consome API deve prever:
+Toda tela remota deve prever:
 
 ```text
 loading
@@ -303,37 +294,34 @@ error
 retry quando fizer sentido
 ```
 
-### Arquivos
+## Arquivos
 
-Chamadas de upload/download devem ficar centralizadas em services próprios e não dentro das views.
-
-Quando o backend disponibilizar os contratos definitivos, a camada deve tratar corretamente:
+Quando o backend disponibilizar os contratos:
 
 ```text
 multipart/form-data quando aplicável
-nome e tipo do arquivo
-limite de tamanho
+nome/tipo/tamanho
 progresso de envio quando útil
 download seguro
-erros de arquivo inválido
+tratamento de arquivo inválido
 ```
+
+Chamadas de arquivo ficam em services, não diretamente nas views.
 
 ---
 
-## 8. Sessão temporária e autenticação futura
-
-A autenticação local foi deliberadamente deixada para depois do frontend.
+# 8. Sessão temporária e autenticação futura
 
 Durante o desenvolvimento:
 
 ```text
 sessão temporária de desenvolvimento
-→ usuário/perfil controlado em um ponto único
+→ usuário/perfil controlado em ponto único
 → UUID público quando a API exigir usuário responsável
-→ nenhuma tela deve depender diretamente do mecanismo temporário
+→ nenhuma tela depende diretamente do mecanismo temporário
 ```
 
-Preparar abstrações como:
+Preparar:
 
 ```text
 auth/session store
@@ -341,47 +329,44 @@ route metadata
 permission helpers
 ```
 
-Mas não implementar uma segurança fictícia no frontend como substituta da autorização do backend.
+Não tratar segurança visual do frontend como substituta da autorização do backend.
 
 ---
 
-## 9. Relatórios e documentos — REQUISITO FUNCIONAL APROVADO
+# 9. Relatórios e documentos — REQUISITO FUNCIONAL APROVADO
 
-### Documentos e anexos
+## 9.1 Documentos/anexos
 
-O SGL deve permitir associar documentos ao contexto operacional adequado.
-
-Casos inicialmente previstos:
+Contextos previstos:
 
 ```text
 Pedido
-→ documento relacionado à solicitação quando necessário
+→ documentos da solicitação
 
 Produto
 → ficha técnica
-→ documentação geral do item
+→ documentação geral
 
 Lote
 → nota fiscal
 → certificado
 → laudo
 → documento de entrada
-→ documentação específica daquela aquisição/lote
+→ documentação específica da aquisição
 ```
 
-O vínculo com `Lote` merece atenção especial porque documentos de compra, validade, certificado ou recebimento normalmente pertencem a uma entrada física específica, e não somente ao cadastro genérico do produto.
+O vínculo com `Lote` merece atenção especial porque documentos de compra/recebimento normalmente pertencem à entrada física específica.
 
-Funcionalidades de frontend previstas:
+Frontend previsto:
 
-- [ ] selecionar arquivo;
-- [ ] realizar upload;
-- [ ] informar metadados exigidos pelo contrato;
-- [ ] listar documentos associados;
-- [ ] visualizar quando o formato permitir;
-- [ ] realizar download;
-- [ ] remover/substituir quando a regra de negócio permitir;
-- [ ] mostrar nome, tipo, tamanho e contexto do documento quando disponíveis;
-- [ ] tratar arquivo inválido, tamanho excedido e falha de envio.
+- selecionar arquivo;
+- upload;
+- metadados exigidos pelo contrato;
+- listagem;
+- visualização;
+- download;
+- remoção/substituição conforme regra;
+- feedback de tipo/tamanho/erro/progresso.
 
 Formatos iniciais desejáveis:
 
@@ -390,61 +375,53 @@ PDF
 imagens comuns
 ```
 
-Outros formatos somente devem ser habilitados conforme necessidade real e validação do backend.
-
 ### Estado atual do backend para arquivos
 
-O modelo `Pedido` já possui o campo `arquivoDocumento` como `String`.
-
-Isso registra que a ideia de documento associado ao pedido já existe no domínio, porém:
+Foi confirmado na Etapa 1.1:
 
 ```text
-campo String
-≠
-fluxo completo de upload/download/armazenamento
+Pedido possui arquivoDocumento como String ⚠️
+não existe endpoint MultipartFile ❌
+não existe fluxo real upload/download ❌
+não existem documentos de Produto/Lote ❌
 ```
 
-Durante a Etapa 1.1 deve ser verificado no Swagger/código atual se já existem endpoints de arquivo. Caso não existam, será registrada uma pequena necessidade complementar de backend para implementar o contrato antes da tela definitiva.
+Portanto, o frontend não deve criar armazenamento fictício local. O design reservará áreas para anexos, mas a funcionalidade definitiva exigirá contrato complementar do backend.
 
-Para documentos de `Produto` e `Lote`, considerar inicialmente que poderá ser necessária extensão do backend, pois o planejamento atual não deve assumir suporte que ainda não foi confirmado.
-
-### Responsabilidade frontend x backend para documentos
+Responsabilidades:
 
 ```text
 FRONTEND
-→ seleção do arquivo
+→ seleção
 → validação inicial de UX
 → upload
 → listagem
 → visualização/download
-→ feedback de progresso/erro
+→ feedback
 
 BACKEND
-→ validação definitiva de tipo e tamanho
+→ validação definitiva
 → armazenamento
-→ metadados persistidos
-→ associação ao recurso correto
-→ autorização de acesso
-→ endpoints de upload/download/delete
-→ integridade e rastreabilidade
+→ metadados
+→ vínculo ao recurso
+→ autorização
+→ upload/download/delete
+→ rastreabilidade
 ```
 
-O frontend nunca deve tratar armazenamento local do navegador como repositório oficial dos documentos do SGL.
-
-### Relatórios
-
-O SGL deve oferecer relatórios operacionais construídos sobre dados reais do backend.
+## 9.2 Relatórios
 
 Relatórios inicialmente previstos:
 
 ```text
 Estoque
-→ posição/saldo por produto e unidade
+→ saldo por produto/unidade
+→ estoque baixo
 
 Lotes
-→ lotes ativos
-→ validade
-→ lotes próximos do vencimento quando houver suporte confiável
+→ lotes por estoque
+→ vencidos
+→ próximos do vencimento quando houver contrato adequado
 
 Movimentações
 → entradas
@@ -453,72 +430,185 @@ Movimentações
 → restaurações/devoluções
 
 Pedidos
-→ período
 → status
-→ laboratório
-→ projeto quando aplicável
+→ usuário
+→ laboratório/projeto/período quando suportado
 
 Consumo / materiais recebidos
 → laboratório
+→ produto
 → projeto
 → período
 ```
 
-A Etapa 1.1 deve cruzar esses relatórios com os endpoints existentes antes de congelar o desenho das telas.
-
-Funcionalidades esperadas no frontend:
-
-- [ ] filtros claros;
-- [ ] período/data inicial e final quando aplicável;
-- [ ] filtros por laboratório, projeto, produto, unidade ou status conforme o relatório;
-- [ ] resultado tabular legível;
-- [ ] estados loading/empty/error;
-- [ ] impressão quando fizer sentido;
-- [ ] exportação.
-
-Formatos de exportação desejados:
+Formatos desejados:
 
 ```text
 PDF
 CSV e/ou XLSX
 ```
 
-A decisão entre gerar o arquivo no frontend ou solicitar arquivo pronto ao backend será tomada relatório a relatório.
-
 Regra:
 
 ```text
-relatório simples já carregado na interface
-→ exportação no frontend pode ser suficiente
+relatório simples já carregado
+→ exportação frontend pode ser suficiente
 
-relatório grande, oficial, auditável ou com processamento específico
-→ preferir geração/controladoria no backend
+relatório grande/oficial/auditável
+→ preferir geração no backend
 ```
 
-Não duplicar regras de negócio no navegador apenas para produzir um relatório.
+Não duplicar regra de negócio no navegador para produzir relatório.
 
-### Descoberta de lacunas do backend
+---
 
-O surgimento desses requisitos durante o desenho da interface não reabre o encerramento estrutural do backend.
+# 10. Etapa 1.1 — Inventário de telas ✅ CONCLUÍDA
 
-Se a Etapa 1.1 identificar contratos ausentes:
+Documento detalhado:
+
+- [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md)
+
+Controllers analisados:
 
 ```text
-frontend identifica necessidade real
-→ registra requisito e contrato desejado
-→ pequena etapa complementar no backend
-→ documenta no Swagger/OpenAPI
-→ frontend consome o contrato
+Pedidos
+Estoque Central
+Lotes
+Movimentações de Estoque
+Histórico de Laboratório
+Produtos
+Projetos
+Laboratórios
+Unidades
+Usuários
+Estagiários
 ```
 
-Isso vale especialmente para:
+## Decisões fechadas
 
 ```text
-upload/download de documentos
+Pedido
+→ tela de detalhe central
+
+Estoque
+→ porta principal para saldo, lotes e operações físicas
+
+Lotes
+→ inicialmente dentro de Estoque
+→ vencidos como filtro/aba
+
+Movimentações
+→ página própria de consulta/auditoria
+
+Histórico de laboratório
+→ alimenta relatórios e contextos
+→ sem item principal próprio no MVP
+
+Cadastros
+→ um único grupo na navegação
+→ Produtos, Unidades, Laboratórios, Projetos, Usuários, Estagiários
+
+Documentos
+→ contextuais a Pedido/Produto/Lote
+→ sem item principal próprio inicialmente
+
+Relatórios
+→ central única
+```
+
+## Mapa principal de navegação resultante
+
+### Solicitante
+
+```text
+Dashboard
+Pedidos
+├── Novo pedido
+└── Meus pedidos
+    └── Detalhe do pedido
+```
+
+### Gestão
+
+```text
+Dashboard
+Pedidos
+Estoque
+Movimentações
+Relatórios
+```
+
+### Administração
+
+```text
+Dashboard
+Pedidos
+Estoque
+Movimentações
+Relatórios
+Cadastros
+├── Produtos
+├── Unidades
+├── Laboratórios
+├── Projetos
+├── Usuários
+└── Estagiários
+```
+
+## Cobertura backend identificada
+
+### Cobertura suficiente ✅
+
+```text
+novo pedido
+meus pedidos
+listar/filtrar pedidos
+buscar detalhe de pedido
+aprovar/rejeitar/entregar/cancelar
+estoque central
+estoque baixo
+lotes por estoque
+lotes vencidos
+entrada de lote
+descarte de vencidos
+movimentações e filtros atuais
+CRUD Produto
+CRUD Unidade
+CRUD Laboratório
+CRUD Projeto
+CRUD/inativação Usuário
+gestão de Estagiário
+histórico/consumo de laboratório
+```
+
+### Cobertura parcial ⚠️
+
+```text
+dashboard gestão
+→ pode compor dados atuais; agregações podem ser otimizadas depois
+
+lotes próximos do vencimento
+→ não há consulta por janela de dias
+
+movimentações por período
+→ não há filtro de período atual
+
+pedidos com combinações livres de filtros
+→ contratos atuais cobrem apenas combinações específicas
+
+CSV/XLSX/PDF
+→ implementação/estratégia ainda será definida por relatório
+```
+
+### Contrato inexistente ❌
+
+```text
+login/autenticação real
+→ deliberadamente futuro
+
+upload/download/delete de documentos
 metadados de anexos
-associação documento ↔ lote/produto/pedido
-consultas agregadas de relatórios
-exportações que devam ser geradas pelo servidor
+documentos de Produto/Lote
 ```
 
 ---
@@ -528,104 +618,75 @@ exportações que devam ser geradas pelo servidor
 ## Etapa 0 — Transferência backend → frontend ✅
 
 - [x] confirmar encerramento da fase estrutural do backend;
-- [x] definir Swagger/OpenAPI como contrato vivo;
-- [x] registrar uso exclusivo de UUID público;
-- [x] trazer decisões visuais já aprovadas;
-- [x] registrar separação solicitante x gestão;
-- [x] registrar 404 customizada;
-- [x] registrar relatórios e documentos como requisitos funcionais;
-- [x] criar repositório e documentação inicial do frontend.
+- [x] Swagger/OpenAPI como contrato vivo;
+- [x] UUID público como identificador externo;
+- [x] decisões visuais iniciais;
+- [x] separação solicitante x gestão;
+- [x] 404 customizada;
+- [x] relatórios e documentos no escopo;
+- [x] documentação inicial do frontend.
 
 ---
 
 ## Etapa 1 — Fundação visual e técnica ⏳ ATUAL
 
-### 1.1 Inventário de telas
+### 1.1 Inventário de telas ✅
 
-Definir o mapa mínimo de páginas antes de começar a programar telas isoladas.
+- [x] revisar controllers/Swagger;
+- [x] mapear funcionalidades para telas reais;
+- [x] separar comum/solicitante/gestão/administração;
+- [x] incluir relatórios/documentos;
+- [x] criar mapa de cobertura frontend ↔ backend;
+- [x] identificar contratos complementares;
+- [x] criar `docs/INVENTARIO_TELAS.md`.
 
-Base inicial:
+### 1.2 Fluxos e navegação ⏳ ATUAL
 
-```text
-Comum
-├── Login
-├── Layout principal
-├── Dashboard
-├── Perfil/sessão temporária
-└── 404
-
-Solicitante
-├── Novo pedido
-├── Meus pedidos
-├── Detalhe do pedido
-└── Histórico/consultas relacionadas
-
-Gestão
-├── Fila de pedidos
-├── Detalhe/análise do pedido
-├── Estoque
-├── Lotes
-├── Movimentações
-├── Documentos/anexos relacionados
-├── Relatórios
-└── Entregas/histórico
-
-Administração / cadastros
-├── Produtos
-├── Unidades
-├── Laboratórios
-├── Projetos
-└── Usuários
-```
-
-O inventário será ajustado de acordo com os endpoints reais expostos no Swagger.
-
-Durante esse inventário também deve ser produzido um **mapa de cobertura do backend**:
-
-```text
-tela/ação necessária
-→ endpoint já existe ✅
-→ endpoint precisa ser adaptado ⚠️
-→ endpoint ainda precisa ser criado ❌
-```
-
-Isso será particularmente importante para documentos e relatórios.
-
-### 1.2 Fluxos e navegação
-
-Desenhar primeiro:
+Fechar os caminhos principais antes dos wireframes:
 
 ```text
 login → dashboard
-solicitante → novo pedido → confirmação → acompanhamento
-gestão → pendências → análise → decisão → atualização
-estoque → produto → lotes/movimentações
-lote/produto/pedido → documentos associados
+solicitante → novo pedido → revisão → envio → acompanhamento
+gestão → fila → análise → decisão → atualização
+estoque → detalhe → lotes → entrada/descarte
+pedido/produto/lote → documentos relacionados
 relatórios → filtros → resultado → exportação
+cadastros → listagem → criar/editar → confirmação
 rota inválida → 404 → retorno seguro
 ```
 
+**Critério:** fluxos sem contradições, origem/destino de cada ação principal definidos e navegação pronta para virar wireframe.
+
 ### 1.3 Figma e padrões
 
-Criar os primeiros wireframes do SGL com foco em:
+Wireframes prioritários:
 
-- sidebar/topbar;
+- login;
+- shell/sidebar/topbar;
 - dashboard;
 - tabela/listagem;
 - formulário;
+- novo pedido;
 - detalhe de pedido;
-- feedback de status;
-- estados vazio/loading/erro;
-- upload/listagem de documentos;
-- filtros e visualização de relatório;
-- login;
+- estoque/detalhe/lotes;
+- movimentações;
+- documentos contextuais;
+- relatórios;
+- estados loading/empty/error;
 - 404.
 
 ### 1.4 Confirmar stack
 
-Validar Vue 3 + Vite + TypeScript + Vuetify 3 e registrar qualquer mudança antes do bootstrap.
+Validar formalmente:
 
-**Critério de conclusão da Etapa 1:** mapa de telas + mapa de cobertura do backend + fluxo principal + direção visual + stack confirmados.
+```text
+Vue 3 + Vite + TypeScript + Vuetify 3
+Vue Router
+Pinia
+Axios
+```
+
+**Critério de conclusão da Etapa 1:** inventário + fluxos + direção visual + stack confirmados.
 
 ---
 
@@ -633,159 +694,141 @@ Validar Vue 3 + Vite + TypeScript + Vuetify 3 e registrar qualquer mudança ante
 
 - [ ] criar aplicação Vue/Vite;
 - [ ] configurar TypeScript;
-- [ ] configurar Vuetify;
-- [ ] configurar Vue Router;
-- [ ] configurar Pinia;
-- [ ] configurar Axios;
-- [ ] criar `.env.example`;
-- [ ] configurar aliases/imports;
-- [ ] definir estrutura inicial de pastas;
-- [ ] configurar lint/format;
+- [ ] Vuetify;
+- [ ] Vue Router;
+- [ ] Pinia;
+- [ ] Axios;
+- [ ] `.env.example`;
+- [ ] aliases/imports;
+- [ ] estrutura inicial de pastas;
+- [ ] lint/format;
 - [ ] validar build local.
-
-**Critério:** aplicação inicia, navega e compila com a infraestrutura base pronta.
 
 ---
 
-## Etapa 3 — Design System mínimo + shell da aplicação
+## Etapa 3 — Design System mínimo + shell
 
-- [ ] tokens de cor, tipografia e espaçamento;
-- [ ] botões e estados de ação;
-- [ ] inputs e validação visual;
+- [ ] tokens de cor/tipografia/espaçamento;
+- [ ] botões;
+- [ ] inputs;
 - [ ] cards;
 - [ ] tabelas;
-- [ ] badges/chips de status;
-- [ ] feedback de loading;
-- [ ] feedback vazio;
+- [ ] chips/status;
+- [ ] loading/empty/error;
 - [ ] alertas/notificações;
-- [ ] componente/padrão de upload quando necessário;
-- [ ] sidebar;
-- [ ] topbar;
-- [ ] layout responsivo;
+- [ ] padrão de upload quando necessário;
+- [ ] sidebar/topbar;
+- [ ] responsividade base;
 - [ ] página 404.
-
-Evitar criar um Design System excessivo antes das necessidades reais aparecerem.
 
 ---
 
 ## Etapa 4 — Camada de API e contratos
 
-- [ ] configurar `VITE_API_BASE_URL`;
-- [ ] criar cliente Axios central;
-- [ ] definir tipos principais consumidos da API;
-- [ ] criar serviços por domínio;
-- [ ] preparar serviço de arquivos quando o contrato existir;
-- [ ] normalizar erros;
-- [ ] tratar `fieldErrors`;
-- [ ] criar sessão temporária centralizada;
-- [ ] validar integração com endpoints reais via Swagger.
-
-**Critério:** pelo menos um fluxo real completo lê/escreve dados no backend sem chamadas HTTP espalhadas pelas views.
+- [ ] `VITE_API_BASE_URL`;
+- [ ] cliente Axios central;
+- [ ] tipos principais;
+- [ ] services por domínio;
+- [ ] normalização de erros;
+- [ ] `fieldErrors`;
+- [ ] sessão temporária centralizada;
+- [ ] validar integração real com Swagger;
+- [ ] preparar service de arquivos quando houver contrato.
 
 ---
 
 ## Etapa 5 — Fluxo do solicitante
 
 - [ ] dashboard do solicitante;
-- [ ] criação de pedido;
+- [ ] novo pedido;
 - [ ] seleção de laboratório/projeto;
-- [ ] seleção e quantidade de materiais;
-- [ ] revisão antes do envio;
-- [ ] documento do pedido quando suportado/aplicável;
-- [ ] confirmação;
-- [ ] listagem de pedidos próprios;
-- [ ] detalhe do pedido;
-- [ ] visualização clara de status;
-- [ ] erros e estados vazios.
-
-Prioridade: este fluxo deve ser simples, rápido e não expor ações de gestão.
+- [ ] seleção de materiais/quantidades;
+- [ ] revisão;
+- [ ] documento do pedido quando suportado;
+- [ ] envio/confirmação;
+- [ ] meus pedidos;
+- [ ] detalhe/status;
+- [ ] estados de erro/vazio.
 
 ---
 
-## Etapa 6 — Fluxo de gestão de pedidos
+## Etapa 6 — Gestão de pedidos
 
-- [ ] dashboard/fila de pendências;
-- [ ] filtros úteis;
-- [ ] detalhe completo do pedido;
-- [ ] documentos associados quando aplicável;
-- [ ] análise das quantidades;
+- [ ] fila/pendências;
+- [ ] filtros;
+- [ ] detalhe/análise;
+- [ ] documentos quando suportados;
 - [ ] aprovação;
 - [ ] rejeição;
 - [ ] entrega;
-- [ ] cancelamento quando permitido;
-- [ ] feedback de estoque insuficiente/conflitos;
-- [ ] histórico do pedido.
-
-As ações disponíveis devem respeitar o status retornado pela API.
+- [ ] cancelamento;
+- [ ] feedback de estoque/conflitos;
+- [ ] histórico relacionado.
 
 ---
 
-## Etapa 7 — Estoque, produtos, lotes e movimentações
+## Etapa 7 — Estoque, lotes e movimentações
 
-- [ ] visão de estoque central;
-- [ ] busca/filtro por produto/unidade;
+- [ ] estoque central;
+- [ ] filtro unidade/produto;
+- [ ] estoque baixo;
 - [ ] detalhe de saldo;
 - [ ] lotes;
-- [ ] validade;
+- [ ] vencidos;
 - [ ] entrada de lote;
-- [ ] documentos vinculados a produto/lote quando o backend suportar;
-- [ ] descarte quando aplicável;
+- [ ] descarte;
 - [ ] movimentações;
+- [ ] documentos Produto/Lote quando suportados;
 - [ ] indicadores de atenção úteis.
 
-FEFO/FIFO são regras do backend. O frontend deve representar o resultado e auxiliar a operação, não duplicar o algoritmo de saída.
+FEFO/FIFO continuam exclusivamente como regra do backend.
 
 ---
 
 ## Etapa 8 — Cadastros administrativos
 
-- [ ] produtos;
-- [ ] unidades;
-- [ ] laboratórios;
-- [ ] projetos;
-- [ ] usuários;
+- [ ] Produtos;
+- [ ] Unidades;
+- [ ] Laboratórios;
+- [ ] Projetos;
+- [ ] Usuários;
+- [ ] Estagiários;
 - [ ] formulários reutilizáveis;
-- [ ] ativação/inativação quando exposta pela API;
-- [ ] confirmação para ações destrutivas/relevantes.
+- [ ] ativação/inativação/encerramento conforme domínio;
+- [ ] confirmações para ações relevantes.
 
 ---
 
 ## Etapa 9 — Relatórios e documentos
 
-### 9.1 Documentos/anexos
+### 9.1 Documentos
 
-- [ ] confirmar contratos necessários no backend;
+- [ ] definir/implementar contratos complementares no backend;
 - [ ] upload;
-- [ ] listagem por recurso;
+- [ ] listagem;
 - [ ] visualização/download;
-- [ ] remoção/substituição conforme regra;
-- [ ] documentos de pedido;
-- [ ] documentos de produto;
-- [ ] documentos de lote;
-- [ ] tratamento de tipo/tamanho/erro;
-- [ ] estados de envio e feedback claros.
+- [ ] remoção/substituição;
+- [ ] documentos de Pedido;
+- [ ] documentos de Produto;
+- [ ] documentos de Lote;
+- [ ] tratamento de tipo/tamanho/erro.
 
 ### 9.2 Relatórios
 
-- [ ] definir relatórios realmente úteis com base nas necessidades do sistema;
 - [ ] estoque;
 - [ ] lotes/validade;
 - [ ] movimentações;
 - [ ] pedidos;
-- [ ] consumo/materiais recebidos por laboratório/projeto/período;
+- [ ] consumo/materiais recebidos;
 - [ ] filtros reutilizáveis;
 - [ ] resultado tabular;
-- [ ] exportação PDF;
-- [ ] exportação CSV e/ou XLSX;
+- [ ] PDF;
+- [ ] CSV e/ou XLSX;
 - [ ] impressão quando fizer sentido.
-
-**Critério:** documentos relevantes podem ser administrados pela interface e os relatórios prioritários podem ser consultados e exportados sem duplicar regras do backend.
 
 ---
 
 ## Etapa 10 — Dashboards finais
-
-Construir dashboards a partir das necessidades reais observadas nos módulos implementados.
 
 Possíveis indicadores:
 
@@ -793,37 +836,33 @@ Possíveis indicadores:
 pedidos pendentes
 pedidos por status
 estoque com atenção
-lotes próximos do vencimento, se a API fornecer o dado adequado
+lotes próximos do vencimento quando suportado
 atividade recente relevante
 ```
 
-Não inventar indicadores que o backend não suporte de forma confiável.
+Não inventar indicador sem suporte confiável do domínio.
 
 ---
 
-## Etapa 11 — Robustez e fechamento do frontend
+## Etapa 11 — Robustez e fechamento
 
 - [ ] responsividade final;
 - [ ] acessibilidade básica;
-- [ ] navegação por teclado nos fluxos essenciais;
+- [ ] teclado nos fluxos essenciais;
 - [ ] mensagens consistentes;
-- [ ] tratamento de 400/404/409/500;
-- [ ] loading/empty/error em todas as telas remotas;
-- [ ] testes dos componentes/fluxos críticos;
-- [ ] testes dos fluxos de upload/download quando existentes;
-- [ ] validação das exportações prioritárias;
+- [ ] 400/404/409/500;
+- [ ] loading/empty/error em telas remotas;
+- [ ] testes de componentes/fluxos críticos;
+- [ ] testes de upload/download;
+- [ ] validação das exportações;
 - [ ] build de produção;
-- [ ] revisão de variáveis de ambiente;
-- [ ] revisão de código morto;
-- [ ] atualização do README e deste arquivo.
+- [ ] variáveis de ambiente;
+- [ ] remover código morto;
+- [ ] atualizar documentação.
 
 ---
 
-## Etapa 12 — Integração com autenticação/autorização
-
-Esta etapa depende da implementação pós-frontend no backend.
-
-Quando o contrato estiver pronto:
+## Etapa 12 — Autenticação/autorização
 
 ```text
 sessão temporária
@@ -833,66 +872,76 @@ sessão temporária
 → futura autenticação corporativa
 ```
 
-O objetivo da arquitetura atual é permitir essa troca sem reconstruir os módulos de negócio.
+Objetivo: realizar a troca sem reconstruir módulos de negócio.
 
 ---
 
-# Regras de desenvolvimento do frontend
+# Regras de desenvolvimento
 
 ## 1. API é autoridade de negócio
 
-O frontend pode antecipar validações para melhorar UX, mas não substitui regras do backend.
+Frontend pode antecipar validações para UX, mas não substitui regras do backend.
 
 ## 2. UUID público somente
 
-Nenhum `Long` interno deve ser introduzido como contrato da interface.
+Nenhum `Long` interno atravessa a interface.
 
 ## 3. Componentizar pelo uso real
 
-Criar componente reutilizável quando houver responsabilidade clara ou repetição real; evitar abstrações prematuras.
+Evitar abstrações prematuras.
 
 ## 4. Separar solicitante de gestão
 
-A navegação e ações devem refletir responsabilidades distintas.
+Navegação e ações devem refletir responsabilidades distintas.
 
-## 5. Estados de tela são parte da funcionalidade
+## 5. Estados de tela são funcionalidade
 
-Não considerar uma tela concluída apenas com o caminho de sucesso.
+Uma tela não está concluída somente pelo caminho de sucesso.
 
 ## 6. Arquivos exigem contrato real
 
-Não simular armazenamento definitivo de documentos somente no frontend. Upload, metadados, vínculo e autorização devem possuir suporte do backend.
+Não usar navegador como repositório definitivo de documentos.
 
 ## 7. Relatórios não duplicam regra de negócio
 
-Filtros e apresentação pertencem ao frontend; cálculos e regras de domínio devem continuar centralizados na API quando forem parte da lógica oficial do sistema.
+Filtros/apresentação no frontend; regra oficial permanece na API.
 
-## 8. Atualizar continuidade ao fechar cada etapa
+## 8. Não criar página por endpoint
+
+Endpoint de consulta pode alimentar modal, drawer, aba, selector ou detalhe existente.
+
+## 9. Atualizar continuidade ao fechar etapas
 
 Registrar:
 
 ```text
 o que foi feito
-decisões tomadas
-arquivos/estrutura relevante
-testes realizados
+decisões
+testes/validações
 pendências
 próxima ação exata
 ```
 
 ---
 
+# Documentos desta fase
+
+- [`README.md`](README.md)
+- [`CONTINUIDADE.md`](CONTINUIDADE.md)
+- [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md)
+
+---
+
 # Próxima ação exata
 
 ```text
-ETAPA 1.1
-→ revisar os endpoints disponíveis no Swagger/backend
-→ transformar funcionalidades reais em inventário de telas
-→ separar telas comuns, solicitante, gestão e administração
-→ incluir documentos e relatórios no mapa funcional
-→ criar mapa de cobertura frontend ↔ backend
-→ identificar qualquer contrato complementar necessário
-→ fechar o primeiro mapa de navegação do SGL
-```
+ETAPA 1.2 — FLUXOS E NAVEGAÇÃO
 
-Somente depois avançar para wireframes/Figma e bootstrap técnico, evitando começar o frontend por componentes isolados sem fluxo definido.
+1. detalhar fluxo do solicitante
+2. detalhar fluxo de gestão de pedidos
+3. detalhar fluxo estoque → lotes → operações
+4. detalhar entrada em relatórios/cadastros
+5. definir comportamento da navegação por responsabilidade
+6. fechar origem/destino das ações principais
+7. preparar mapa pronto para virar wireframe/Figma
+```
