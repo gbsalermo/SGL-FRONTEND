@@ -1,5 +1,11 @@
 <a id="readme-top"></a>
 
+<!-- HERO SECTION -->
+<div align="center">
+  <a href="https://github.com/gbsalermo/SGL-FRONTEND">
+    <img src="https://raw.githubusercontent.com/gbsalermo/Sistema-SGL/main/docs/LOGO.png" alt="SGL Logo" width="340" height="auto">
+  </a>
+        
 <div align="center">
 
 # SGL — Sistema de Gestão de Laboratórios
