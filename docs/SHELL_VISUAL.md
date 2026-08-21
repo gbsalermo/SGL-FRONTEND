@@ -1,15 +1,14 @@
-# Shell visual — SGL Frontend
+# Shell Visual — SGL Frontend
 
 **Etapa:** 1.3 — Figma e padrões visuais  
-**Status:** decisão conceitual aprovada; implementação futura
+**Status:** decisão conceitual aprovada; implementação futura  
+**Próximo bloco:** componentes reutilizáveis
 
-Este documento registra apenas as decisões conceituais do shell principal do SGL. O mockup visual gerado durante o planejamento é ilustrativo: os símbolos desenhados automaticamente não substituem a logo oficial já aprovada para o projeto.
+Este documento registra o shell principal do SGL. Mockups gerados durante o planejamento servem apenas como referência de composição; símbolos aproximados nunca substituem a logo oficial do projeto.
 
 ---
 
-# 1. Princípio geral
-
-O shell deve transmitir continuidade entre as áreas do sistema.
+# 1. Estrutura geral
 
 ```text
 sidebar
@@ -17,17 +16,25 @@ sidebar
 + área principal de conteúdo
 ```
 
-Sidebar e topbar formam uma estrutura conectada e estável. O conteúdo troca de rota dentro desse shell com a transição suave já aprovada.
+O shell deve parecer uma única estrutura contínua.
+
+Durante a navegação:
+
+```text
+sidebar     permanece
+topbar      permanece
+conteúdo    troca de rota suavemente
+```
 
 ---
 
-# 2. Sidebar — estado consolidado
+# 2. Sidebar aberta
 
-## Aberta
+Largura de referência:
 
-Referência de largura: **240–248 px**.
+**240–248 px**.
 
-Estrutura conceitual:
+Estrutura:
 
 ```text
 [ LOGO SGL ]                         [ ‹ ]
@@ -50,49 +57,236 @@ Cadastros
 [ área central rolável ]
 
 ────────────────────────────
-Avatar  Nome               Perfil
-        email                  ⋮
+Avatar  Nome               [PERFIL]
+        e-mail                 ⋮
 ```
 
-## Recolhida
-
-Referência de largura: **64–72 px**.
-
-- a marca passa para sua versão compacta oficial;
-- a logo compacta pode ganhar ligeiramente mais presença visual, já que o texto desaparece;
-- a seta muda de sentido para indicar expansão;
-- textos de navegação desaparecem;
-- ícones permanecem centralizados;
-- hover exibe tooltip com o nome do item;
-- submenus podem abrir em flyout lateral;
-- avatar/iniciais permanece no rodapé;
-- a sidebar não expande inteira apenas por hover.
-
-A abertura/recolhimento deve ser contínua e suave, seguindo a linguagem de motion aprovada.
+A região central da navegação pode rolar quando faltar altura. Cabeçalho e usuário permanecem estáveis.
 
 ---
 
-# 3. Topbar — decisão visual
+# 3. Sidebar recolhida
 
-A topbar será propositalmente simples e conectada visualmente à sidebar.
+Largura:
 
-Referência conceitual inspirada em barras minimalistas como PrimeVue Toolbar e Mood UI Topbar, adaptada à identidade do SGL.
+**64–72 px**.
 
-Estrutura:
+Mantém:
+
+- marca compacta oficial;
+- seta de expansão;
+- ícones;
+- lâmpada de alertas quando aplicável;
+- avatar/iniciais;
+- tooltips;
+- flyout lateral para submenu/contexto quando necessário.
+
+A sidebar **não expande inteira ao hover**.
 
 ```text
-[ LOGO SGL ] | [ SETA ] |          espaço livre          | pesquisa | sair
+clique na seta
+→ expansão completa
+
+hover em ícone
+→ tooltip/flyout contextual
 ```
 
-## Relação com a sidebar
+Abertura/recolhimento devem ser suaves e contínuos, aproximadamente dentro da linguagem de motion de 250–350 ms.
 
-- utiliza a mesma identidade visual da sidebar;
-- a logo exibida é a mesma marca oficial do SGL;
-- quando a sidebar está recolhida, a versão compacta da logo pode aparecer um pouco maior;
-- a seta faz parte do mesmo controle de abrir/recolher a sidebar;
-- sidebar e topbar devem parecer uma única estrutura, não dois componentes visualmente desconectados.
+---
 
-## Pesquisa
+# 4. Controle de abrir/recolher
+
+Aberta:
+
+```text
+‹
+→ recolher
+```
+
+Recolhida:
+
+```text
+›
+→ expandir
+```
+
+A seta pode rotacionar/reposicionar suavemente durante a mudança de estado.
+
+---
+
+# 5. Navegação por responsabilidade
+
+A estrutura física da sidebar é única. O conteúdo varia conforme responsabilidade.
+
+## Solicitante
+
+```text
+Dashboard
+Pedidos
+  Novo pedido
+  Meus pedidos
+```
+
+## Gestão
+
+```text
+Dashboard
+Pedidos
+Estoque
+Movimentações
+Relatórios
+```
+
+## Administração
+
+```text
+Tudo da Gestão
++ Cadastros
+  Produtos
+  Unidades
+  Laboratórios
+  Projetos
+  Usuários
+  Estagiários
+```
+
+Administração reutiliza Gestão; não duplicar módulos.
+
+---
+
+# 6. Submenus
+
+Padrão:
+
+```text
+item fechado
+→ seta lateral
+
+click
+→ expansão vertical curta
+→ fade
+```
+
+Evitar mais de dois níveis de navegação sem necessidade real.
+
+Na sidebar recolhida, submenu pode aparecer como flyout lateral.
+
+---
+
+# 7. Aparência claro/escuro
+
+O seletor de aparência fica próximo do topo da sidebar.
+
+Ele controla o tema **da aplicação inteira**, não somente da sidebar.
+
+Conceito inicial:
+
+```text
+Claro
+Escuro
+```
+
+Possível evolução futura:
+
+```text
+Claro
+Escuro
+Sistema
+```
+
+Tema escuro deve usar grafites/azuis muito profundos, evitando preto absoluto como base universal.
+
+---
+
+# 8. Alertas operacionais
+
+Detalhes completos em `SIDEBAR_ALERTAS.md`.
+
+Disponíveis para Gestão/Administração.
+
+```text
+AZUL     → sem pendência
+AMARELO  → atenção
+VERMELHO → urgência/crítico
+```
+
+Categorias iniciais:
+
+- pedidos pendentes;
+- estoque baixo;
+- próximos do vencimento;
+- vencidos.
+
+Na sidebar recolhida, hover na lâmpada abre painel lateral resumido.
+
+---
+
+# 9. Área de usuário
+
+Rodapé aberto:
+
+```text
+Avatar/iniciais
+Nome                  [PERFIL]
+e-mail                    ⋮
+```
+
+Menu `⋮` conceitual:
+
+```text
+Minha conta
+Preferências
+Aparência
+Sair
+```
+
+Não assumir que o usuário pode alterar:
+
+- login;
+- e-mail institucional;
+- perfil;
+- unidade;
+- laboratório;
+- senha;
+- outros dados controlados administrativamente.
+
+Essas permissões serão confirmadas na etapa de autenticação/autorização.
+
+Sidebar recolhida:
+
+- avatar permanece;
+- hover mostra identificação;
+- clique abre menu de conta.
+
+---
+
+# 10. Topbar
+
+Objetivo:
+
+**simplicidade máxima**.
+
+Referências conceituais:
+
+- PrimeVue Toolbar;
+- Mood UI topbar.
+
+Composição aprovada:
+
+```text
+LOGO | SETA |                         PESQUISA | SAIR
+```
+
+A topbar deve parecer conectada à sidebar.
+
+A logo é a marca oficial do SGL. Quando a sidebar estiver recolhida, a marca compacta pode ganhar um pouco mais de presença visual.
+
+Não usar a topbar como segunda navegação principal.
+
+---
+
+# 11. Pesquisa global
 
 Estado normal:
 
@@ -100,58 +294,146 @@ Estado normal:
 ícone de pesquisa
 ```
 
-Ao interagir:
+Ao clicar:
 
 ```text
 ícone
-→ pequena microanimação
-→ campo de pesquisa se expande suavemente
+→ microanimação
+→ campo/painel se expande
 ```
 
-A pesquisa só será implementada quando houver escopo real e utilidade definida. O shell pode reservar o padrão visual sem inventar uma busca global sem contrato funcional.
-
-## Sair
-
-A ação `Sair` fica no extremo direito da topbar, ocupando o lugar que muitos templates reservam para avatar/foto.
-
-Direção visual:
-
-- botão discreto;
-- ícone + texto;
-- estado normal neutro;
-- hover pode assumir destaque vermelho suave por ser ação de encerramento de sessão;
-- não competir visualmente com ações operacionais da tela.
-
-O perfil do usuário continua concentrado no rodapé da sidebar, evitando duplicação de avatar/nome na topbar.
+O shell reserva esse padrão, mas a busca global só deve ser implementada quando o escopo real justificar.
 
 ---
 
-# 4. Logo oficial
+# 12. Sair
+
+A ação `Sair` fica no extremo direito.
+
+Direção:
+
+- discreta;
+- ícone + texto;
+- neutra em estado normal;
+- hover pode usar vermelho suave;
+- não competir com ações operacionais da página.
+
+Perfil/conta continua concentrado no rodapé da sidebar.
+
+---
+
+# 13. Área principal
+
+A área principal já foi fechada conceitualmente e é detalhada em `PADROES_PAGINA.md`.
+
+Referências:
+
+```text
+desktop  ~24 px de margem/padding
+Tablet   ~16 px
+Mobile   ~12–16 px
+```
+
+Hierarquia:
+
+```text
+breadcrumb quando necessário
+↓
+título + descrição opcional              ação principal
+↓
+busca/filtros contextuais
+↓
+conteúdo
+```
+
+A área é fluida para aproveitar tabelas e monitores grandes.
+
+---
+
+# 14. Busca e filtros
+
+Decisão aprovada:
+
+```text
+Topbar
+→ busca global
+
+Página
+→ busca local + botão Filtros
+
+Widget/relatório
+→ filtros próprios quando necessário
+```
+
+Não manter faixas enormes de filtros abertas permanentemente sem necessidade.
+
+---
+
+# 15. Responsividade
+
+Desktop:
+
+```text
+sidebar fixa + topbar + conteúdo
+```
+
+Mobile/tablet estreito:
+
+```text
+sidebar
+→ drawer/overlay
+```
+
+Não reutilizar automaticamente a mini-sidebar desktop como solução mobile.
+
+Tabelas devem preservar informação crítica e usar estratégias responsivas específicas quando chegarmos aos wireframes finais.
+
+---
+
+# 16. Logo oficial
 
 Regra obrigatória:
 
 ```text
-mockups gerados
-→ servem para composição e espaçamento
+mockup
+→ composição
 
-logo oficial aprovada
-→ única marca usada na implementação real
+logo oficial
+→ implementação
 ```
 
-Nenhum símbolo alternativo criado automaticamente em mockups deve substituir a identidade oficial do SGL.
+A imagem de exemplo da sidebar/topbar será adicionada manualmente ao README pelo mantenedor.
 
 ---
 
-# 5. Área principal de conteúdo — próximo bloco
+# 17. Estado do bloco Shell
 
-Com sidebar e topbar fechadas, o próximo conceito da Etapa 1.3 será definir:
+```text
+Sidebar aberta/recolhida      ✅
+Submenus                      ✅
+Aparência                     ✅
+Alertas                       ✅
+Usuário/footer                ✅
+Topbar                        ✅
+Pesquisa global conceitual    ✅
+Área principal                ✅
+Títulos/breadcrumbs           ✅
+Busca/filtros                 ✅
+```
 
-- margem e largura útil do conteúdo;
-- títulos de página;
-- subtítulos/contexto;
-- breadcrumbs;
-- posição de ações principais da página;
-- organização de filtros, cards, tabelas e formulários dentro do shell;
-- comportamento responsivo dessa área.
+O shell está **conceitualmente fechado**.
 
-Esse bloco deve preservar a densidade média-compacta e o espaçamento já aprovados.
+Próximo passo da Etapa 1.3:
+
+```text
+componentes reutilizáveis
+→ botões
+→ campos
+→ cards
+→ tabelas
+→ chips
+→ dialogs/modais/drawers
+→ paginação
+→ tooltips
+→ feedback
+```
