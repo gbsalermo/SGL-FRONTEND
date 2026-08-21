@@ -111,6 +111,97 @@ relatórios
 
 Persistência de arquivos, consultas adicionais e geração oficial de relatórios dependentes do servidor devem possuir contrato próprio no backend.
 
+## Fiscalização / auditoria regulatória
+
+O cliente precisa informar a uma organização de fiscalização dados de produtos específicos existentes no estoque. Esse requisito passa a fazer parte do planejamento do SGL e pode exigir complemento tanto no backend quanto no frontend.
+
+Objetivo funcional:
+
+```text
+selecionar/identificar produtos sujeitos à fiscalização
+→ consultar os dados oficiais já mantidos pelo SGL
+→ consolidar período e movimentações relevantes
+→ gerar relatório específico para fiscalização/auditoria
+→ exportar ou registrar a informação de forma rastreável
+```
+
+O relatório poderá utilizar, entre outros dados já existentes no domínio:
+
+```text
+Produto
+→ identificação/código de referência
+→ unidade de medida
+→ localização física
+→ risco, tipo e descrição de risco
+→ condições de armazenamento
+→ unidade de armazenamento
+
+EstoqueCentral
+→ quantidade atual por Unidade + Produto
+
+Lote
+→ quantidades e validade quando aplicável
+
+MovimentacaoEstoque
+→ entradas, saídas, descartes e restaurações
+→ apuração das saídas no período solicitado
+```
+
+Regra arquitetural inicial:
+
+```text
+NÃO duplicar no cadastro regulatório:
+quantidade atual
+risco
+armazenamento
+localização
+saídas
+
+esses dados continuam pertencendo às entidades operacionais existentes
+```
+
+A modelagem recomendada para avaliação é uma entidade auxiliar conceitualmente semelhante a:
+
+```text
+ProdutoFiscalizado / ProdutoControlado
+→ identifica quais produtos entram no escopo regulatório
+→ referencia Produto
+→ pode referenciar Unidade quando o controle depender do estoque/local
+→ guarda apenas metadados regulatórios
+→ não vira fonte paralela para dados de estoque
+```
+
+Metadados possíveis, a confirmar com o requisito real do órgão:
+
+```text
+órgão fiscalizador
+código/registro regulatório
+vigência/estado ativo
+observação
+outros campos específicos exigidos pela fiscalização
+```
+
+Não congelar nome da entidade nem seus campos antes de conhecer o formulário/relatório exigido pelo órgão.
+
+Caso o mesmo produto possa ser fiscalizado por órgãos diferentes, ou com regras distintas por unidade/local, uma entidade auxiliar é preferível a apenas adicionar `fiscalizado = true` em `Produto`.
+
+### Rastreabilidade do relatório emitido
+
+Se a auditoria exigir comprovar exatamente o conteúdo enviado em uma data/período, avaliar uma segunda estrutura conceitual:
+
+```text
+RelatorioFiscalizacao / DeclaracaoRegulatoria
+→ órgão destinatário
+→ período de referência
+→ data/hora de geração
+→ responsável
+→ produtos/valores declarados (snapshot quando necessário)
+→ arquivo/exportação ou identificador da declaração
+→ status quando houver fluxo de envio
+```
+
+Essa estrutura só deve ser criada se houver necessidade real de preservar o **snapshot do que foi declarado**. Se a exigência for apenas consulta atual/reprocessável, o histórico existente poderá ser suficiente.
+
 ---
 
 # 3. Perfis existentes no domínio
@@ -439,6 +530,15 @@ Consumo / materiais recebidos
 → produto
 → projeto
 → período
+
+Fiscalização / auditoria regulatória
+→ somente produtos marcados como sujeitos à fiscalização
+→ quantidade por unidade/estoque
+→ armazenamento e localização
+→ risco
+→ lotes/validade quando exigidos
+→ entradas/saídas por período
+→ demais campos exigidos pelo órgão
 ```
 
 Formatos desejados:
@@ -459,6 +559,33 @@ relatório grande/oficial/auditável
 ```
 
 Não duplicar regra de negócio no navegador para produzir relatório.
+
+## 9.3 Relatório regulatório — requisito em descoberta
+
+Antes de implementar a tela/relatório definitivo:
+
+- [ ] obter ou mapear o modelo de informação exigido pelo órgão fiscalizador;
+- [ ] confirmar se a fiscalização é por Produto ou por Produto + Unidade/local;
+- [ ] confirmar se um produto pode estar submetido a mais de um órgão/regra;
+- [ ] definir metadados regulatórios necessários;
+- [ ] definir como identificar produtos fiscalizados;
+- [ ] confirmar filtros/período exigidos;
+- [ ] definir se o relatório é apenas gerado ou também precisa ser registrado como declaração emitida;
+- [ ] confirmar necessidade de snapshot histórico do que foi informado;
+- [ ] definir formato oficial de saída (PDF, planilha ou outro);
+- [ ] criar/adaptar contratos do backend somente após essas respostas.
+
+Direção de UX:
+
+```text
+Relatórios
+→ Fiscalização / Auditoria
+→ selecionar órgão/período/unidade quando aplicável
+→ sistema carrega apenas produtos fiscalizados
+→ usuário revisa dados consolidados
+→ gerar/exportar relatório
+→ registrar emissão, se o domínio exigir
+```
 
 ---
 
@@ -514,6 +641,7 @@ Documentos
 
 Relatórios
 → central única
+→ inclui futura categoria Fiscalização/Auditoria
 ```
 
 ## Mapa principal de navegação resultante
@@ -598,6 +726,12 @@ pedidos com combinações livres de filtros
 
 CSV/XLSX/PDF
 → implementação/estratégia ainda será definida por relatório
+
+fiscalização/auditoria regulatória
+→ dados operacionais principais já existem
+→ falta definir identificação dos produtos fiscalizados e metadados regulatórios
+→ pode exigir entidade/contratos complementares no backend
+→ eventual snapshot de declaração emitida depende da exigência do órgão
 ```
 
 ### Contrato inexistente ❌
@@ -651,6 +785,7 @@ gestão → fila → análise → decisão → atualização
 estoque → detalhe → lotes → entrada/descarte
 pedido/produto/lote → documentos relacionados
 relatórios → filtros → resultado → exportação
+relatórios → fiscalização/auditoria → revisão → geração/exportação
 cadastros → listagem → criar/editar → confirmação
 rota inválida → 404 → retorno seguro
 ```
@@ -672,6 +807,7 @@ Wireframes prioritários:
 - movimentações;
 - documentos contextuais;
 - relatórios;
+- relatório regulatório/fiscalização como categoria da central;
 - estados loading/empty/error;
 - 404.
 
@@ -733,7 +869,8 @@ Axios
 - [ ] `fieldErrors`;
 - [ ] sessão temporária centralizada;
 - [ ] validar integração real com Swagger;
-- [ ] preparar service de arquivos quando houver contrato.
+- [ ] preparar service de arquivos quando houver contrato;
+- [ ] incorporar contratos de fiscalização quando a modelagem for aprovada.
 
 ---
 
@@ -793,6 +930,7 @@ FEFO/FIFO continuam exclusivamente como regra do backend.
 - [ ] Projetos;
 - [ ] Usuários;
 - [ ] Estagiários;
+- [ ] identificação/configuração de produtos fiscalizados quando o backend definir o contrato;
 - [ ] formulários reutilizáveis;
 - [ ] ativação/inativação/encerramento conforme domínio;
 - [ ] confirmações para ações relevantes.
@@ -820,11 +958,23 @@ FEFO/FIFO continuam exclusivamente como regra do backend.
 - [ ] movimentações;
 - [ ] pedidos;
 - [ ] consumo/materiais recebidos;
+- [ ] fiscalização/auditoria regulatória;
 - [ ] filtros reutilizáveis;
 - [ ] resultado tabular;
 - [ ] PDF;
 - [ ] CSV e/ou XLSX;
 - [ ] impressão quando fizer sentido.
+
+### 9.3 Fiscalização / auditoria
+
+- [ ] confirmar requisito oficial do órgão;
+- [ ] definir classificação de produtos fiscalizados;
+- [ ] definir metadados regulatórios;
+- [ ] cruzar Produto + Estoque + Lote + Movimentações;
+- [ ] definir período e campos do relatório;
+- [ ] decidir se há registro/snapshot da declaração emitida;
+- [ ] implementar exportação no formato exigido;
+- [ ] validar rastreabilidade para auditoria.
 
 ---
 
@@ -855,6 +1005,7 @@ Não inventar indicador sem suporte confiável do domínio.
 - [ ] testes de componentes/fluxos críticos;
 - [ ] testes de upload/download;
 - [ ] validação das exportações;
+- [ ] validação do relatório regulatório quando implementado;
 - [ ] build de produção;
 - [ ] variáveis de ambiente;
 - [ ] remover código morto;
@@ -906,11 +1057,15 @@ Não usar navegador como repositório definitivo de documentos.
 
 Filtros/apresentação no frontend; regra oficial permanece na API.
 
-## 8. Não criar página por endpoint
+## 8. Dados regulatórios não duplicam estoque
+
+A identificação de produto fiscalizado pode ser uma entidade/associação própria, mas quantidade, risco, armazenamento, localização, lotes e movimentações continuam vindo das fontes oficiais já existentes no domínio.
+
+## 9. Não criar página por endpoint
 
 Endpoint de consulta pode alimentar modal, drawer, aba, selector ou detalhe existente.
 
-## 9. Atualizar continuidade ao fechar etapas
+## 10. Atualizar continuidade ao fechar etapas
 
 Registrar:
 
@@ -941,7 +1096,14 @@ ETAPA 1.2 — FLUXOS E NAVEGAÇÃO
 2. detalhar fluxo de gestão de pedidos
 3. detalhar fluxo estoque → lotes → operações
 4. detalhar entrada em relatórios/cadastros
-5. definir comportamento da navegação por responsabilidade
-6. fechar origem/destino das ações principais
-7. preparar mapa pronto para virar wireframe/Figma
+5. incluir Fiscalização/Auditoria como categoria da central de relatórios
+6. definir comportamento da navegação por responsabilidade
+7. fechar origem/destino das ações principais
+8. preparar mapa pronto para virar wireframe/Figma
+
+REQUISITO REGULATÓRIO — PENDENTE DE DESCOBERTA
+
+→ obter o modelo/fields exigidos pelo órgão fiscalizador antes de congelar entidade ou contrato
+→ avaliar ProdutoFiscalizado/ProdutoControlado como associação auxiliar
+→ avaliar snapshot de RelatorioFiscalizacao somente se a auditoria exigir preservar exatamente o conteúdo declarado
 ```
