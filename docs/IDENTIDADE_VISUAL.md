@@ -1,393 +1,217 @@
-# Identidade visual — SGL Frontend
+# Identidade Visual — SGL Frontend
 
 **Etapa:** 1.3 — Figma e padrões visuais  
-**Status:** referência conceitual aprovada; implementação futura
+**Status:** base visual aprovada; implementação futura  
+**Próximo bloco:** componentes reutilizáveis
 
-Este documento registra somente as decisões de design escolhidas para orientar os wireframes e a implementação posterior. Nesta etapa não devem ser criados componentes, tema Vuetify, CSS definitivo ou código de interface a partir destas decisões.
+Este documento registra a identidade visual oficial escolhida para orientar os wireframes e a futura implementação do SGL. Nesta etapa as decisões são conceituais: não devem ser convertidas automaticamente em CSS, Vuetify ou componentes Vue antes do momento técnico correspondente.
 
 ---
 
-# 1. Referência institucional principal
+# 1. Direção visual
 
-A referência visual principal do SGL será a interface do sistema **Publica / Embrapa**, especialmente a tela de login apresentada durante o planejamento e o padrão global de cores/tipografia do projeto de referência.
+A referência institucional principal é o **Publica / Embrapa**.
 
 Objetivo:
 
 ```text
-manter familiaridade institucional
-+ aparência corporativa e limpa
-+ forte contraste entre branco e azuis institucionais
-+ uso comedido do verde Embrapa
-+ bastante espaço visual e hierarquia simples
+clean
++ corporativo
++ administrativo/laboratorial
++ branco predominante
++ contraste com azuis institucionais
++ verde como apoio
++ alta legibilidade
++ baixa carga decorativa
 ```
 
-A intenção é manter a linguagem institucional, sem copiar integralmente a implementação ou o CSS do sistema de referência.
+O SGL deve parecer parte do mesmo ambiente institucional, sem copiar integralmente a implementação do Publica.
 
 ---
 
-# 2. Direção visual aprovada
-
-O SGL deverá transmitir:
-
-- ambiente administrativo/laboratorial;
-- aparência clean;
-- leitura rápida;
-- predominância de branco e superfícies claras;
-- azul como identidade principal;
-- verde como identidade secundária/semântica;
-- baixa carga decorativa;
-- contraste e legibilidade acima de efeitos visuais.
-
-Regra conceitual:
-
-```text
-branco e neutros claros
-→ base da interface
-
-azul institucional
-→ navegação, ações principais, títulos e identidade
-
-verde institucional
-→ apoio visual, sucesso e situações semanticamente adequadas
-```
-
-Evitar uma interface inteiramente azul ou inteiramente colorida. As cores institucionais devem marcar hierarquia e estado, não preencher todas as superfícies.
-
----
-
-# 3. Paleta institucional escolhida
-
-A paleta de referência vem do projeto modelo da empresa.
+# 2. Paleta aprovada
 
 ## Azuis
 
-| Papel conceitual | Cor |
+| Papel | Cor |
 |---|---|
-| Azul principal | `#1A4DA1` |
-| Azul escuro | `#0D2B5E` |
-| Azul claro | `#2D6BC4` |
+| Principal | `#1A4DA1` |
+| Escuro | `#0D2B5E` |
+| Claro | `#2D6BC4` |
 
-Uso esperado:
+Uso conceitual:
 
 ```text
 #1A4DA1
 → ação principal
-→ elemento institucional
 → destaque ativo
+→ identidade
 
 #0D2B5E
 → navegação escura
-→ áreas institucionais de maior peso visual
+→ elementos institucionais de maior peso
 
 #2D6BC4
-→ hover, seleção e destaques mais leves
+→ hover
+→ apoio visual
+→ estados de interação
 ```
 
 ## Verdes
 
-| Papel conceitual | Cor |
+| Papel | Cor |
 |---|---|
-| Verde institucional | `#007A3D` |
-| Verde claro | `#4EA674` |
-| Verde suave | `#A5D6A7` |
+| Institucional | `#007A3D` |
+| Claro | `#4EA674` |
+| Suave | `#A5D6A7` |
 
-O verde não deve competir com o azul como cor principal do sistema. Seu uso deve ser secundário e, quando adequado, semântico.
+O verde não substitui o azul como cor principal. Ele funciona como apoio institucional e, principalmente, em estados semânticos positivos.
 
 ## Neutros
 
-| Papel conceitual | Cor |
+| Papel | Cor |
 |---|---|
-| Fundo da aplicação | `#F5F7FA` |
-| Superfície / cards | `#FFFFFF` |
+| Fundo | `#F5F7FA` |
+| Superfície | `#FFFFFF` |
 | Texto principal | `#1A1A2E` |
 | Texto secundário | `#64748B` |
 | Bordas | `#E2E8F0` |
 
-Direção de proporção visual:
+---
+
+# 3. Cores semânticas
 
 ```text
-predominância de superfícies brancas e neutras
-+ azul institucional em pontos de atenção
-+ verde apenas como apoio
+AZUL
+→ normal
+→ informação
+→ identidade
+
+VERDE
+→ sucesso
+→ confirmação
+
+AMARELO
+→ atenção
+→ pendência
+
+VERMELHO
+→ erro
+→ urgência
+→ crítico
 ```
 
----
-
-# 4. Tipografia escolhida
-
-Fonte principal: **Inter**.
-
-Fallback conceitual: Roboto / sans-serif.
-
-Motivos:
-
-- boa legibilidade em aplicações administrativas;
-- bom desempenho em tabelas, filtros, formulários e dashboards;
-- leitura clara de números e textos pequenos;
-- aparência moderna sem perder formalidade institucional.
-
-A hierarquia exata de tamanhos e pesos será fechada posteriormente no mini Design System. Nesta etapa fica aprovada apenas a família tipográfica e a direção de uso.
+A cor só deve aparecer quando comunica identidade, hierarquia ou estado real. Evitar colorir elementos apenas por decoração.
 
 ---
 
-# 5. Uso conceitual das cores em ações
+# 4. Tipografia
 
-Regra inicial:
+Tipografia principal:
+
+**Inter**.
+
+Referências iniciais:
 
 ```text
-ação primária
-→ azul principal
-
-ação secundária
-→ superfície branca / neutra com destaque azul
-
-sucesso ou confirmação semanticamente positiva
-→ verde
-
-ação destrutiva
-→ cor semântica de erro a definir no Design System
+Título de página   ~24 px / 700
+Título de seção    ~18 px / 600–700
+Título de card     ~16 px / 600
+Texto normal       ~14 px / 400
+Label              ~13 px / 600
+Texto auxiliar     ~12–13 px
 ```
 
-O verde do projeto de referência não será automaticamente usado como cor de todo botão principal do SGL. O azul será a cor de ação primária por coerência com a identidade do login e com a navegação institucional.
+Esses valores são guias de protótipo/Design System e serão convertidos em tokens somente na implementação.
 
 ---
 
-# 6. Login — referência estrutural aprovada
+# 5. Densidade visual
 
-A tela de login do Publica será a principal referência estrutural para o login do SGL.
-
-Estrutura conceitual:
-
-```text
-DESKTOP
-
-metade esquerda
-→ área institucional azul
-→ identidade Embrapa/SGL
-→ nome do sistema
-→ mensagem institucional curta
-→ elementos decorativos discretos
-
-metade direita
-→ superfície branca
-→ marca SGL
-→ mensagem de boas-vindas
-→ usuário
-→ senha
-→ ação Entrar
-```
-
-A tela deve preservar:
-
-- contraste forte azul × branco;
-- composição simples;
-- poucos elementos;
-- familiaridade com os sistemas internos da empresa;
-- formulário centralizado e de leitura imediata.
-
-A identidade do SGL substituirá a identidade específica do Publica, mantendo a linguagem visual institucional.
-
----
-
-# 7. Relação com o projeto modelo
-
-O CSS e a tela do projeto modelo são **referências de design**, não código-base para copiar.
-
-Devem ser reaproveitados conceitualmente:
-
-- paleta;
-- tipografia;
-- contraste;
-- leveza visual;
-- linguagem de login;
-- uso institucional de azul e verde.
-
-Devem ser redefinidos posteriormente de acordo com a arquitetura do SGL:
-
-- tema do framework visual;
-- botões;
-- tabelas;
-- modais;
-- fieldsets;
-- scrollbars;
-- estilos globais;
-- componentes e estados.
-
-Código específico do projeto antigo, seletores de versão anterior do framework e nomes ligados ao domínio do Publica não devem ser transportados automaticamente.
-
----
-
-# 8. Decisão de processo
-
-Durante a Etapa 1.3 trabalharemos primeiro os **conceitos e padrões visuais**.
-
-Fluxo aprovado:
-
-```text
-referência institucional
-→ decisão conceitual
-→ wireframes
-→ padrões visuais
-→ mini Design System
-→ confirmação da stack
-→ implementação seguindo a arquitetura do frontend
-```
-
-Portanto, enquanto estivermos nesta etapa:
-
-```text
-não transformar decisão visual em CSS definitivo
-não criar componentes apenas para experimentar a ideia
-não configurar tema Vuetify antes da etapa técnica
-não misturar exploração visual com implementação
-```
-
----
-
-# 9. Referências de interface administrativa
-
-Além do Publica / Embrapa, ficam adotados como referências conceituais de organização administrativa:
-
-- `iview/iview-admin` — branch/template;
-- `Armour/vue-typescript-admin-template`;
-- `PanJiaChen/vue-admin-template`.
-
-Papel de cada grupo de referência:
-
-```text
-PUBLICA / EMBRAPA
-→ identidade institucional
-→ cores
-→ leveza visual
-→ contraste branco × azul
-→ login
-
-IVIEW ADMIN
-→ organização administrativa
-→ sidebar
-→ navegação
-→ tabelas
-→ hierarquia operacional
-
-VUE TYPESCRIPT ADMIN TEMPLATE
-→ densidade de dashboard
-→ filtros
-→ organização de conteúdo
-→ comportamento de aplicações administrativas
-
-VUE ADMIN TEMPLATE
-→ continuidade visual entre rotas
-→ transições suaves
-→ shell estável durante a navegação
-```
-
-Esses projetos são referências de UX e composição. Não determinam a arquitetura técnica do SGL e não devem ser copiados como base de código.
-
----
-
-# 10. Espaçamento, bordas, arredondamentos, sombras e densidade
-
-## Densidade visual
-
-A densidade aprovada para o SGL é **média-compacta**.
+A densidade oficial do SGL é **média-compacta**.
 
 Objetivo:
 
 ```text
 mais denso que uma landing page
 + mais respirado que sistemas administrativos antigos
-+ adequado a tabelas, filtros e formulários frequentes
-+ sem desperdício de área útil
++ bom aproveitamento de área útil
++ adequado a tabelas e formulários frequentes
 ```
 
-## Grade de espaçamento
+---
 
-A referência conceitual será uma grade baseada em múltiplos de 8, permitindo valores intermediários menores quando necessários.
+# 6. Espaçamento
+
+Grade conceitual baseada em 8 px:
 
 ```text
-4  → micro ajuste
-8  → elementos muito próximos
-12 → controles relacionados
-16 → espaçamento padrão
-24 → separação de grupos
-32 → separação de seções
+4   → micro ajuste
+8   → elementos próximos
+12  → controles relacionados
+16  → padrão
+24  → grupos
+32  → seções
 48+ → blocos independentes
 ```
 
-Referências de composição:
+Referências:
 
-| Contexto | Referência |
+| Contexto | Valor aproximado |
 |---|---:|
-| margem interna principal da página | 24 px |
-| distância entre cards | 16–24 px |
-| padding interno de card | 20–24 px |
-| label → campo | 8 px |
-| campos relacionados | 16 px |
-| grupos de formulário | 24 px |
-| grandes seções | 32 px |
+| Padding principal desktop | 24 px |
+| Entre cards | 16–24 px |
+| Padding interno de card | 20–24 px |
+| Label → campo | 8 px |
+| Campos relacionados | 16 px |
+| Grupos de formulário | 24 px |
+| Grandes seções | 32 px |
 
-Os valores são referências de Figma/Design System, não CSS definitivo nesta etapa.
+---
+
+# 7. Bordas, arredondamentos e sombras
 
 ## Bordas
 
-As bordas devem ser finas, claras e discretas.
+- 1 px;
+- claras;
+- neutras;
+- discretas;
+- azul apenas para foco/seleção;
+- semânticas somente quando o estado exigir.
 
-```text
-borda neutra
-→ separação funcional
-→ baixa presença visual
-
-borda azul
-→ foco
-→ seleção
-→ estado ativo
-
-borda semântica
-→ somente quando o estado exigir
-```
-
-A interface não deve depender de bordas fortes para separar cada elemento. Fundo, espaçamento e tipografia devem resolver a maior parte da hierarquia.
+A interface deve depender primeiro de espaço, fundo e tipografia, não de caixas pesadas.
 
 ## Arredondamentos
 
-Direção aprovada: **moderada**, evitando tanto o aspecto completamente quadrado quanto cards excessivamente arredondados.
-
 | Elemento | Referência |
 |---|---:|
-| Inputs / selects | 6 px |
-| Botões | 6 px |
-| Cards | 8 px |
-| Tabelas / containers | 8 px |
-| Modais / drawers | 8–10 px |
-| Alertas | 6–8 px |
-| Status chips | pill |
+| Inputs/selects | ~6 px |
+| Botões | ~6 px |
+| Cards | ~8 px |
+| Tabelas/containers | ~8 px |
+| Modais/drawers | ~8–10 px |
+| Alertas | ~6–8 px |
+| Status chips | pill quando adequado |
 | Avatar | circular |
 
 ## Sombras
 
-Sombras devem ser usadas com parcimônia.
-
 ```text
-NÍVEL 0
+Nível 0
 → sem sombra
-→ tabelas
-→ formulários
-→ seções internas
+→ tabelas, formulários, seções internas
 
-NÍVEL 1
-→ sombra muito discreta
-→ cards de dashboard
-→ containers principais quando necessário
+Nível 1
+→ quase imperceptível
+→ cards/containers quando necessário
 
-NÍVEL 2
-→ sombra mais perceptível, ainda suave
-→ modais
-→ menus flutuantes
-→ dropdowns
-→ elementos sobrepostos
+Nível 2
+→ suave e visível
+→ modal, dropdown, menu flutuante
 ```
 
-Regra de hierarquia:
+Hierarquia preferida:
 
 ```text
 espaço
@@ -397,7 +221,9 @@ espaço
 → sombra
 ```
 
-## Dimensões de referência
+---
+
+# 8. Dimensões-base do shell e controles
 
 | Elemento | Referência |
 |---|---:|
@@ -408,20 +234,22 @@ espaço
 | Botão padrão | ~40 px |
 | Linha de tabela | ~44–48 px |
 
-A sidebar fica deliberadamente entre templates administrativos mais estreitos e o projeto institucional mais largo, preservando espaço para rótulos em português como `Movimentações`, `Laboratórios` e `Estagiários`.
+A sidebar foi deliberadamente mantida larga o suficiente para rótulos em português como `Movimentações`, `Laboratórios` e `Estagiários`, sem desperdiçar área útil.
 
-## Cards e tabelas
+---
 
-Regra de uso:
+# 9. Cards x tabelas
+
+Regra oficial:
 
 ```text
-card
+CARD
 → resumo
 → indicador
 → agrupamento de informação
 → dashboard
 
-tabela
+TABELA
 → operação
 → consulta repetitiva
 → pedidos
@@ -430,122 +258,203 @@ tabela
 → cadastros
 ```
 
-Não transformar cada registro operacional em um card grande quando uma tabela for mais eficiente.
+Não transformar cada registro em um card grande quando uma tabela for mais eficiente.
 
 ---
 
-# 11. Motion e continuidade espacial
+# 10. Motion e continuidade espacial
 
-O SGL deve transmitir a sensação de **aplicação contínua**, e não de várias páginas independentes abrindo e fechando.
+Referência principal: `PanJiaChen/vue-admin-template`.
 
-A referência principal para este comportamento é o `PanJiaChen/vue-admin-template`, especialmente a ideia de transição entre rotas com combinação de fade e pequeno deslocamento horizontal.
-
-Princípio aprovado:
+Princípio:
 
 > Navegar no SGL deve parecer mover-se dentro do sistema, e não fechar uma página para abrir outra.
 
-## Troca entre páginas
-
-Conceito:
+Troca de rota:
 
 ```text
-página atual
+conteúdo atual
 → perde opacidade
-→ desloca-se suavemente alguns pixels
+→ desloca-se poucos pixels
 
-nova página
-→ entra do sentido complementar
-→ ganha opacidade
-→ assume a mesma área de conteúdo
+novo conteúdo
+→ entra suavemente
+→ assume a mesma área
 ```
 
-A transição deve ser curta e discreta. A referência de movimento fica em aproximadamente **20–30 px**, com duração percebida na faixa de **250–350 ms**.
-
-Esses valores serão validados no protótipo antes da implementação definitiva.
-
-## Shell estável
-
-Durante a troca de rota:
+Referências iniciais:
 
 ```text
-sidebar
-→ permanece
-
-topbar
-→ permanece
-
-estrutura global
-→ permanece
-
-área central de conteúdo
-→ realiza a transição
+deslocamento ~20–30 px
+duração      ~250–350 ms
 ```
 
-Esse comportamento reforça a noção de continuidade espacial.
-
-## Transições por contexto
+Durante a troca:
 
 ```text
-rota principal
-→ fade + pequeno deslocamento horizontal
-
-breadcrumb / título
-→ transição ainda mais discreta
-
-modal
-→ fade + elevação suave
-→ não usar o mesmo slide lateral das páginas
-
-drawer
-→ deslize lateral coerente com sua origem física
-
-dropdown / menu flutuante
-→ aparição curta e discreta
+sidebar     permanece
+topbar      permanece
+shell       permanece
+conteúdo    realiza a transição
 ```
 
-## Regras de motion
+Por contexto:
 
-- animação não deve atrasar a operação;
-- evitar movimentos longos ou decorativos;
-- preservar posição e estrutura do shell;
-- evitar saltos de layout durante loading;
-- feedback de ação deve ser mais rápido que transição de página;
-- futuramente respeitar preferência do usuário por movimento reduzido (`prefers-reduced-motion` ou equivalente da stack escolhida).
+```text
+rota        → fade + deslocamento curto
+breadcrumb  → transição mais discreta
+modal       → fade + elevação
+Drawer      → slide coerente com origem
+Dropdown    → entrada curta
+```
 
-Motion é parte da experiência visual, mas não deve esconder lentidão real nem substituir estados de loading.
+Futuramente respeitar preferência de movimento reduzido.
 
 ---
 
-# 12. Estado atual da identidade
+# 11. Referências administrativas
+
+Além do Publica/Embrapa:
+
+```text
+iview/iview-admin
+→ organização administrativa
+→ navegação
+→ tabelas
+
+Armour/vue-typescript-admin-template
+→ densidade operacional
+→ filtros
+→ dashboard
+
+PanJiaChen/vue-admin-template
+→ motion entre rotas
+→ sensação de continuidade
+
+CoreUI
+→ organização visual de sidebar
+
+vue-awesome-sidebar
+→ suavidade de abrir/recolher
+
+PrimeVue Toolbar / Mood UI
+→ simplicidade de topbar
+```
+
+Esses projetos são **referências de UX e composição**, não base de código nem arquitetura do SGL.
+
+---
+
+# 12. Login
+
+A tela de login deve preservar a familiaridade visual do Publica:
+
+- contraste azul × branco;
+- composição simples;
+- poucos elementos;
+- leitura imediata;
+- identidade SGL no lugar da marca específica do Publica.
+
+O wireframe completo de Login ainda faz parte dos blocos pendentes da Etapa 1.3.
+
+---
+
+# 13. Iconografia
+
+Padrão aprovado em `ICONOGRAFIA.md`:
+
+```text
+normal → outline
+ativo  → filled quando disponível
+hover  → microanimação
+click  → pequeno press
+```
+
+Cor operacional padrão:
+
+- preto/grafite em fundo claro;
+- branco/claro em fundo escuro.
+
+Cores auxiliares apenas quando comunicam estado.
+
+---
+
+# 14. Shell
+
+Padrões detalhados em:
+
+- `SHELL_VISUAL.md`;
+- `SIDEBAR_ALERTAS.md`;
+- `PADROES_PAGINA.md`.
+
+Já fechados:
+
+```text
+sidebar aberta/recolhida    ✅
+alertas operacionais        ✅
+topbar                      ✅
+área principal              ✅
+títulos/breadcrumbs         ✅
+busca/filtros               ✅
+```
+
+---
+
+# 15. Imagens-exemplo
+
+As imagens de referência visual serão adicionadas manualmente pelo mantenedor ao README.
+
+Devem existir exemplos para:
+
+- identidade/capa;
+- iconografia;
+- sidebar + topbar;
+- busca + filtros.
+
+Regra:
+
+> Mockup demonstra composição. A logo oficial aprovada é a única marca válida para a implementação real.
+
+---
+
+# 16. Estado atual da Etapa 1.3
 
 ## Fechado
 
-- referência institucional: Publica / Embrapa;
-- referências administrativas: iView Admin, Vue TypeScript Admin Template e Vue Admin Template;
-- direção visual clean e corporativa;
-- predominância branco + azul;
-- azul como cor principal;
-- verde como apoio institucional/semântico;
-- paleta base aprovada;
-- Inter como tipografia principal;
-- login do Publica como referência estrutural do login SGL;
-- densidade média-compacta;
-- grade conceitual de espaçamento;
-- bordas discretas;
-- arredondamento moderado;
-- sombras mínimas e hierárquicas;
-- dimensões-base de shell e controles;
-- cards para resumo e tabelas para operação;
-- continuidade espacial entre rotas;
-- transição de página com fade + pequeno deslocamento horizontal;
-- sidebar/topbar estáveis durante navegação.
+```text
+Identidade                                  ✅
+Cores e tipografia                          ✅
+Espaçamento/densidade                       ✅
+Bordas/arredondamentos/sombras              ✅
+Motion                                      ✅
+Ícones                                      ✅
+Sidebar aberta/recolhida                    ✅
+Alertas operacionais                        ✅
+Topbar                                      ✅
+Área principal                              ✅
+Títulos/breadcrumbs                         ✅
+Busca/filtros                               ✅
+```
 
-## Próximos conceitos a definir
+## Próximo
 
-- estilo de ícones;
-- shell principal: sidebar + topbar + conteúdo;
-- comportamento visual da sidebar aberta/recolhida;
-- hierarquia de títulos e breadcrumbs dentro do shell;
-- padrões de tabelas, formulários e estados.
+```text
+1. componentes reutilizáveis
+2. estados padrão de interface
+3. Login
+4. Dashboards
+5. fluxos visuais por responsabilidade
+6. Estoque/Lotes/Movimentações
+7. Relatórios/Cadastros/Documentos
+8. 404/responsividade
+9. mini Design System + revisão final
+```
 
-Nenhum desses itens deve ser tratado como código até o momento de implementação correspondente.
+Depois disso:
+
+```text
+1.4 confirmar stack
+→ Etapa 2 bootstrap técnico
+```
+
+Nenhuma decisão acima deve ser tratada como CSS definitivo antes da implementação correspondente.
