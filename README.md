@@ -1,268 +1,368 @@
 <a id="readme-top"></a>
 
-<!-- HERO SECTION -->
 <div align="center">
-  <a href="https://github.com/gbsalermo/SGL-FRONTEND">
-    <img src="https://raw.githubusercontent.com/gbsalermo/Sistema-SGL/main/docs/LOGO.png" alt="SGL Logo" width="340" height="auto">
-  </a>
 
-  <h1 align="center">SGL — Sistema de Gestão de Laboratórios</h1>
+# SGL — Sistema de Gestão de Laboratórios
 
-  <p align="center">
-    <strong>Frontend corporativo para operação do SGL, reunindo pedidos, estoque, lotes, produtos, laboratórios, projetos, relatórios e rotinas administrativas em uma interface clara, funcional e orientada ao perfil do usuário.</strong>
-  </p>
+**Frontend corporativo para pedidos, estoque, lotes, movimentações, relatórios e administração laboratorial.**
 
-  <p align="center">
-    <a href="https://github.com/gbsalermo/Sistema-SGL"><strong>Ver Backend »</strong></a>
-    ·
-    <a href="http://localhost:8080/swagger-ui/index.html">Explorar Swagger UI</a>
-    ·
-    <a href="#-roadmap">Acompanhar Roadmap</a>
-  </p>
+[Backend](https://github.com/gbsalermo/Sistema-SGL) · [Continuidade](CONTINUIDADE.md) · [Inventário de telas](docs/INVENTARIO_TELAS.md) · [Arquitetura](docs/ESTRUTURA_FRONTEND.md)
 
-  <!-- BADGES -->
-  <p align="center">
-    <a href="https://vuejs.org/"><img src="https://img.shields.io/badge/Vue.js-3-42B883?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue.js"></a>
-    <a href="https://vite.dev/"><img src="https://img.shields.io/badge/Vite-Frontend-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"></a>
-    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Planned-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"></a>
-    <a href="https://vuetifyjs.com/"><img src="https://img.shields.io/badge/Vuetify-3-1867C0?style=for-the-badge&logo=vuetify&logoColor=white" alt="Vuetify"></a>
-    <a href="https://pinia.vuejs.org/"><img src="https://img.shields.io/badge/Pinia-State-FADA5E?style=for-the-badge&logo=vuedotjs&logoColor=black" alt="Pinia"></a>
-    <a href="https://axios-http.com/"><img src="https://img.shields.io/badge/Axios-HTTP-5A29E4?style=for-the-badge&logo=axios&logoColor=white" alt="Axios"></a>
-    <img src="https://img.shields.io/badge/Status-Frontend%20em%20Planejamento-orange?style=for-the-badge" alt="Status">
-  </p>
 </div>
-
-<br />
-
-<!-- QUICK NAVIGATION -->
-<div align="center">
-  <a href="#-sobre-o-projeto">Sobre o Projeto</a> •
-  <a href="#-experiência-por-perfil">Perfis</a> •
-  <a href="#-tecnologias-planejadas">Tecnologias</a> •
-  <a href="#-escopo-funcional">Funcionalidades</a> •
-  <a href="#-arquitetura-do-frontend">Arquitetura</a> •
-  <a href="#-integração-com-a-api">API</a> •
-  <a href="#-roadmap">Roadmap</a> •
-  <a href="#-autor">Autor</a>
-</div>
-
-<br />
-
----
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>📋 <strong>Tabela de Conteúdos (Clique para expandir)</strong></summary>
-  <ol>
-    <li>
-      <a href="#-sobre-o-projeto">Sobre o Projeto</a>
-      <ul>
-        <li><a href="#-objetivo-da-interface">Objetivo da Interface</a></li>
-        <li><a href="#-direção-visual">Direção Visual</a></li>
-      </ul>
-    </li>
-    <li><a href="#-experiência-por-perfil">Experiência por Perfil</a></li>
-    <li><a href="#-tecnologias-planejadas">Tecnologias Planejadas</a></li>
-    <li><a href="#-escopo-funcional">Escopo Funcional</a></li>
-    <li><a href="#-arquitetura-do-frontend">Arquitetura do Frontend</a></li>
-    <li><a href="#-fluxos-principais">Fluxos Principais</a></li>
-    <li><a href="#-integração-com-a-api">Integração com a API</a></li>
-    <li><a href="#-estados-de-interface-e-erros">Estados de Interface e Erros</a></li>
-    <li><a href="#-começando">Começando</a></li>
-    <li><a href="#-roadmap">Roadmap</a></li>
-    <li><a href="#-backend-e-documentação">Backend e Documentação</a></li>
-    <li><a href="#-autor">Autor</a></li>
-  </ol>
-</details>
-
----
-
-## 📌 Sobre o Projeto
-
-O **SGL Frontend** é a camada de interface do **Sistema de Gestão de Laboratórios**, responsável por transformar as regras e contratos do backend em fluxos operacionais simples para pesquisadores, solicitantes e responsáveis pela gestão de materiais.
-
-O frontend faz parte do mesmo ecossistema do repositório principal [`Sistema-SGL`](https://github.com/gbsalermo/Sistema-SGL), cujo backend em Java/Spring Boot já fornece a API REST e a documentação OpenAPI/Swagger utilizadas como contrato de integração.
 
 > [!NOTE]
-> Esta etapa parte de um backend funcional e documentado. A interface não deve recriar regras de domínio já existentes na API; o objetivo é oferecer uma experiência de uso consistente sobre os contratos atuais do sistema.
-
-### 🎯 Objetivo da Interface
-
-O frontend deve:
-
-- apresentar **dashboards claros e funcionais**, sem excesso de informação;
-- separar a experiência de quem **solicita materiais** daquela de quem **faz a gestão**;
-- facilitar a consulta e operação de produtos, lotes, estoque, laboratórios, projetos e pedidos;
-- oferecer feedback visual consistente para carregamento, sucesso, erro e ausência de dados;
-- disponibilizar relatórios e operações documentais de forma integrada aos fluxos do sistema;
-- possuir tratamento próprio para rotas inexistentes, incluindo uma **página 404 customizada**;
-- permanecer desacoplado do mecanismo definitivo de autenticação até a etapa específica de segurança.
+> As imagens de referência visual do README serão adicionadas manualmente pelo mantenedor. A documentação já registra o papel de cada exemplo para que possam ser inseridos sem alterar as decisões do projeto.
 
 ---
 
-### 🎨 Direção Visual
+## 📍 Estado atual
 
-A identidade visual deve manter uma aparência corporativa, limpa e adequada a um ambiente administrativo/laboratorial, priorizando legibilidade, hierarquia visual e rapidez de operação.
-
-Referências iniciais de interface:
-
-- **Salvia Kit**;
-- **Materio Vuetify**;
-- **Vue Notus**;
-- **Sneat Vuetify**;
-- interface de login do **Publica** como referência de familiaridade visual institucional.
-
-Fluxo planejado de design:
+O backend estrutural do SGL já foi encerrado e o frontend está na **Etapa 1 — Fundação visual e técnica**.
 
 ```text
-Referências / Templates
-        ↓
-       Figma
-        ↓
-Seleção de padrões visuais
-        ↓
-Adaptação aos fluxos do SGL
-        ↓
-Componentes reutilizáveis
-        ↓
-     Design System
-        ↓
-    Implementação
+Etapa 0 — Handoff backend → frontend             ✅
+Etapa 1.1 — Inventário de telas                  ✅
+Etapa 1.2 — Fluxos e navegação                   ✅
+Etapa 1.3 — Figma e padrões visuais              🟡 em andamento
+Etapa 1.4 — Confirmação final da stack           ⏳
+Etapa 2 — Bootstrap técnico                      ⏳
 ```
 
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
+Na Etapa 1.3 já foram aprovados:
 
----
+- identidade institucional;
+- paleta e tipografia;
+- densidade, espaçamento, bordas, arredondamentos e sombras;
+- motion e continuidade entre rotas;
+- padrão de ícones;
+- sidebar aberta/recolhida;
+- alertas operacionais;
+- topbar minimalista;
+- área principal, títulos e breadcrumbs;
+- comportamento de busca e filtros.
 
-## 👥 Experiência por Perfil
-
-A interface será organizada em três níveis de responsabilidade de uso.
-
-### 👤 Solicitante
-
-Voltada a pesquisadores, integrantes de laboratórios e usuários responsáveis por solicitar materiais.
-
-Principais necessidades:
-
-- visualizar informações relevantes do próprio contexto;
-- criar e acompanhar pedidos;
-- selecionar laboratório e projeto quando aplicável;
-- consultar status e histórico de solicitações;
-- acessar materiais efetivamente recebidos;
-- anexar ou consultar documentos quando o fluxo exigir.
-
-### 🧑‍💼 Gestão
-
-Voltada aos usuários responsáveis por estoque, aprovação e operação do sistema.
-
-Principais necessidades:
-
-- visualizar pendências e indicadores operacionais;
-- analisar pedidos;
-- aprovar, rejeitar, entregar ou cancelar pedidos conforme as regras disponíveis;
-- consultar estoque consolidado e lotes físicos;
-- acompanhar validade, disponibilidade e movimentações;
-- acessar relatórios e documentos relacionados às operações.
-
-### 🛠️ Administração
-
-Reutiliza a experiência e os módulos da Gestão e acrescenta os cadastros administrativos:
-
-- produtos;
-- unidades;
-- laboratórios;
-- projetos;
-- usuários;
-- estagiários.
+A próxima parte da 1.3 é definir **componentes reutilizáveis e estados de interface**, e depois validar as telas-chave do sistema.
 
 > [!IMPORTANT]
-> A separação de experiência não significa duplicar o sistema. O objetivo é compartilhar componentes e infraestrutura, alterando navegação, ações disponíveis e prioridade das informações conforme a responsabilidade do usuário.
-
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
+> Nesta fase as decisões são **conceituais/Figma**. Não estamos transformando cada decisão em CSS ou Vue imediatamente. A implementação será feita posteriormente seguindo a arquitetura oficial do frontend.
 
 ---
 
-## 🛠️ Tecnologias Planejadas
+## 🎨 Referências visuais aprovadas
 
-A configuração definitiva será consolidada na etapa inicial de implementação. A direção técnica atual é:
+A identidade do SGL combina a linguagem institucional da Embrapa/Publica com padrões de aplicações administrativas modernas.
 
-| Categoria | Tecnologia | Finalidade |
-|---|---|---|
-| **Framework** | ![Vue](https://img.shields.io/badge/Vue.js_3-42B883?style=flat-square&logo=vuedotjs&logoColor=white) | Construção da interface baseada em componentes |
-| **Build Tool** | ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) | Ambiente de desenvolvimento e build |
-| **Linguagem** | ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white) | Tipagem estática e contratos mais seguros no frontend |
-| **UI Framework** | ![Vuetify](https://img.shields.io/badge/Vuetify_3-1867C0?style=flat-square&logo=vuetify&logoColor=white) | Componentes visuais e base do Design System |
-| **Rotas** | ![Vue Router](https://img.shields.io/badge/Vue_Router-42B883?style=flat-square&logo=vuedotjs&logoColor=white) | Navegação e controle de rotas |
-| **Estado Global** | ![Pinia](https://img.shields.io/badge/Pinia-FADA5E?style=flat-square&logo=vuedotjs&logoColor=black) | Gerenciamento de estado compartilhado |
-| **HTTP Client** | ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white) | Comunicação centralizada com a API REST |
-| **Contrato da API** | ![Swagger](https://img.shields.io/badge/OpenAPI_3.0-Swagger_UI-85EA2D?style=flat-square&logo=swagger&logoColor=black) | Referência para endpoints, DTOs, parâmetros e respostas |
+### Imagem de capa do README
 
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
+**A adicionar manualmente.** Deve usar a identidade oficial do SGL e funcionar como apresentação do projeto. Não usar símbolos aproximados gerados em mockups quando diferirem da marca oficial.
 
----
+### Ícones e microinterações
 
-## ✨ Escopo Funcional
+**Imagem-exemplo a adicionar manualmente.** Deve demonstrar o padrão já aprovado:
 
-### Estrutura e navegação
+```text
+ícone normal       → outline, visível e monocromático
+hover              → microanimação curta
+clique             → pequeno efeito de pressão
+item ativo         → filled quando disponível
+cor padrão         → preto/grafite de destaque ou branco conforme superfície
+cores semânticas   → somente quando comunicam estado
+```
 
-- [ ] Layout base da aplicação;
-- [ ] navegação lateral/superior de acordo com a responsabilidade;
-- [ ] breadcrumbs quando úteis ao fluxo;
-- [ ] sistema consistente de títulos, ações e filtros;
-- [ ] página 404 customizada;
-- [ ] responsividade para diferentes tamanhos de tela.
+Os ícones ilustrativos podem usar símbolos auxiliares semânticos:
 
-### Dashboards
+```text
+azul     → neutro / informação / sem pendência
+amarelo  → atenção / pendência
+vermelho → urgente / crítico
+verde    → sucesso / confirmação
+```
 
-- [ ] dashboard do solicitante;
-- [ ] dashboard de gestão;
-- [ ] indicadores de pedidos pendentes;
-- [ ] visão resumida de estoque;
-- [ ] alertas para lotes críticos ou próximos do vencimento quando disponibilizados pela API;
-- [ ] atalhos para ações frequentes.
+### Sidebar + Topbar
 
-### Pedidos
+**Imagem-exemplo a adicionar manualmente.** Deve mostrar a composição aprovada do shell: sidebar aberta/recolhida, alertas, área de usuário e topbar simples.
 
-- [ ] criação de pedido;
-- [ ] seleção de laboratório e projeto;
-- [ ] inclusão e remoção de itens;
-- [ ] acompanhamento de status;
-- [ ] análise do pedido pela gestão;
-- [ ] aprovação e rejeição;
-- [ ] entrega e cancelamento quando permitidos;
-- [ ] consulta ao histórico.
+O mockup é referência de composição, não de desenho da marca. A implementação deverá usar exclusivamente a logo oficial do SGL.
 
-### Estoque e materiais
+```text
+Sidebar aberta       ~240–248 px
+Sidebar recolhida    ~64–72 px
+Topbar               ~64 px
 
-- [ ] consulta de produtos;
-- [ ] consulta de estoque central;
-- [ ] consulta e gestão de lotes conforme permissões;
-- [ ] visualização de validade e disponibilidade;
-- [ ] consulta de movimentações de estoque;
-- [ ] formulários administrativos necessários ao fluxo.
+sidebar/topbar       permanecem estáveis entre rotas
+conteúdo             realiza transição suave
+```
 
-### Estrutura organizacional
+### Busca e filtros
 
-- [ ] unidades;
-- [ ] laboratórios;
-- [ ] projetos;
-- [ ] usuários e perfis quando a etapa de autenticação/autorização for integrada.
+**Imagem-exemplo a adicionar manualmente.** Deve ilustrar:
 
-### Relatórios e documentos
+- busca global simples na topbar;
+- busca local dentro da página;
+- botão `Filtros` para abrir refinamentos contextuais;
+- exemplo de filtro de Pedidos por status/laboratório/período;
+- tabela operacional após aplicação dos filtros.
 
-- [ ] relatórios por laboratório e projeto;
-- [ ] consulta de materiais efetivamente recebidos;
-- [ ] fiscalização/auditoria regulatória para produtos sujeitos ao controle;
-- [ ] exportação/geração de relatórios quando prevista pelo contrato da API;
-- [ ] suporte visual para envio, consulta e download de arquivos vinculados a produtos, lotes ou pedidos quando aplicável.
+Regra aprovada:
 
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
+- a topbar possui uma **busca global simples**, acionada pelo ícone de pesquisa;
+- quando necessário, a busca global pode expandir um painel de pesquisa e refinamento;
+- filtros específicos de uma ferramenta/listagem ficam **no contexto da própria página**;
+- filtros de página não precisam ocupar permanentemente uma grande faixa da tela: podem ficar atrás de um botão **Filtros** junto da busca local;
+- exemplo: em Pedidos, o usuário pode buscar e abrir `Filtros` para exibir somente `REJEITADO`, um laboratório ou um período.
 
 ---
 
-## 🏛️ Arquitetura do Frontend
+## 🎯 Direção visual
 
-O SGL Frontend seguirá oficialmente o padrão:
+A referência institucional principal é o **Publica / Embrapa**, especialmente o contraste entre branco e azuis institucionais e a estrutura limpa do login.
+
+### Paleta base
+
+| Papel | Cor |
+|---|---|
+| Azul principal | `#1A4DA1` |
+| Azul escuro | `#0D2B5E` |
+| Azul claro | `#2D6BC4` |
+| Verde institucional | `#007A3D` |
+| Verde claro | `#4EA674` |
+| Verde suave | `#A5D6A7` |
+| Fundo | `#F5F7FA` |
+| Superfície | `#FFFFFF` |
+| Texto | `#1A1A2E` |
+| Texto secundário | `#64748B` |
+| Bordas | `#E2E8F0` |
+
+**Tipografia principal:** Inter.
+
+A aplicação deverá parecer:
+
+```text
+clean
++ institucional
++ administrativa/laboratorial
++ média-compacta
++ baixa carga decorativa
++ alta legibilidade
+```
+
+### Densidade e forma
+
+- grid conceitual baseado em 8 px;
+- padding de página desktop em torno de 24 px;
+- inputs em torno de 40–44 px;
+- botões em torno de 40 px;
+- linhas de tabela em torno de 44–48 px;
+- controles com arredondamento moderado;
+- cards geralmente em torno de 8 px de raio;
+- bordas discretas;
+- sombras mínimas e usadas apenas para hierarquia/elevamento.
+
+Regra de composição:
+
+```text
+card   → resumo, indicador ou agrupamento
+Tabela → operação e consulta repetitiva
+```
+
+---
+
+## ✨ Motion
+
+O SGL deverá transmitir sensação de **aplicação contínua**, não de várias páginas sendo fechadas e abertas.
+
+Referência principal: `PanJiaChen/vue-admin-template`.
+
+```text
+rota atual
+→ fade + pequeno deslocamento
+
+nova rota
+→ entra suavemente na mesma área
+
+sidebar/topbar
+→ permanecem
+```
+
+Referência inicial de protótipo:
+
+- deslocamento de aproximadamente 20–30 px;
+- duração percebida de aproximadamente 250–350 ms;
+- animações menores para hover/click;
+- suporte futuro a preferência de redução de movimento.
+
+---
+
+## 🧭 Shell e navegação
+
+### Sidebar
+
+Estrutura geral:
+
+```text
+[ LOGO SGL ]                           [ ‹ / › ]
+
+Aparência                         [ claro/escuro ]
+Alertas operacionais                    [N]   ← Gestão/Admin
+
+PRINCIPAL
+Dashboard
+
+OPERAÇÃO
+Pedidos
+Estoque
+Movimentações
+Relatórios
+
+ADMINISTRAÇÃO                              ← Admin
+Cadastros
+
+────────────────────────────────────────
+Avatar  Nome                    [PERFIL]
+        e-mail                      ⋮
+```
+
+A sidebar recolhida preserva:
+
+- logo/símbolo compacto;
+- controle de expansão;
+- ícones;
+- lâmpada de alertas para Gestão/Admin;
+- avatar;
+- tooltips e flyouts laterais quando necessários.
+
+Ela **não deve abrir inteira ao hover**. A expansão completa ocorre por ação explícita do usuário.
+
+### Alertas operacionais
+
+Disponíveis para Gestão/Administração.
+
+```text
+AZUL     → nenhuma pendência
+AMARELO  → existe algo que exige atenção
+VERMELHO → existe urgência/crítico
+```
+
+Categorias iniciais:
+
+- pedidos pendentes;
+- estoque baixo;
+- lotes próximos do vencimento;
+- lotes vencidos.
+
+Na sidebar aberta:
+
+- clicar na lâmpada expande as categorias;
+- passar o mouse em uma categoria mostra uma descrição curta e contextual;
+- clicar em uma categoria leva à tela correta já contextualizada/filtrada.
+
+Na sidebar recolhida:
+
+- hover na lâmpada abre um painel lateral resumido.
+
+Situação atual da API:
+
+- lotes vencidos: já suportados;
+- próximos do vencimento: previsto no design, mas ainda exige regra/endpoint de janela de validade.
+
+### Topbar
+
+A topbar foi deliberadamente mantida simples e conectada visualmente à sidebar:
+
+```text
+LOGO | SETA |                         PESQUISA | SAIR
+```
+
+Quando a sidebar está recolhida, a marca pode ganhar um pouco mais de presença visual. O foco do topo é apenas nas ações globais essenciais.
+
+---
+
+## 📄 Padrão da área principal
+
+Ordem de leitura preferida:
+
+```text
+breadcrumb quando necessário
+↓
+título + descrição curta opcional              ação principal
+↓
+busca/filtros contextuais quando necessários
+↓
+conteúdo
+```
+
+Breadcrumbs são usados principalmente em profundidade/contexto, por exemplo:
+
+```text
+Estoque / Produto / Detalhe
+Cadastros / Produtos
+Pedidos / Detalhe
+```
+
+Não é obrigatório exibir breadcrumb em toda página de primeiro nível.
+
+Botões de voltar possuem destino funcional explícito, por exemplo:
+
+```text
+pedido do solicitante → Meus pedidos
+pedido da gestão      → Pedidos
+estoque detalhado     → Estoque
+```
+
+A área principal é fluida para aproveitar telas grandes e tabelas extensas.
+
+---
+
+## 👥 Experiência por responsabilidade
+
+### Solicitante
+
+```text
+Dashboard
+└── Pedidos
+    ├── Novo pedido
+    └── Meus pedidos
+        └── Detalhe
+```
+
+Foco: pedir materiais e acompanhar solicitações próprias.
+
+### Gestão
+
+```text
+Dashboard
+├── Pedidos
+├── Estoque
+│   └── Detalhe
+│       ├── Lotes
+│       ├── Entrada
+│       ├── Descarte
+│       └── Documentos
+├── Movimentações
+└── Relatórios
+```
+
+Foco: decisão operacional, estoque, validade e rastreabilidade.
+
+### Administração
+
+Reutiliza tudo da Gestão e acrescenta:
+
+```text
+Cadastros
+├── Produtos
+├── Unidades
+├── Laboratórios
+├── Projetos
+├── Usuários
+└── Estagiários
+```
+
+Não haverá três aplicações separadas. A arquitetura e os componentes são compartilhados; navegação, prioridade das informações e ações mudam conforme a responsabilidade.
+
+---
+
+## 🏛️ Arquitetura oficial do frontend
 
 ```text
 SPA (Single Page Application)
@@ -271,41 +371,44 @@ SPA (Single Page Application)
 + camadas com responsabilidades claras
 ```
 
-A aplicação **não** será organizada como uma landing page tradicional baseada em `index.html + style.css + script.js`, nem tentará reproduzir MVC clássico do backend no navegador.
-
-### Visão de dependências
+Fluxo preferencial:
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                        Views / Pages                        │
-│          Dashboard · Pedidos · Estoque · Relatórios        │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                         Components                          │
-│      Tabelas · Formulários · Cards · Dialogs · Feedback     │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│             Services / Stores / Composables                 │
-│ HTTP por domínio · estado compartilhado · lógica reutilizável│
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       Axios / HTTP                          │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    SGL Backend REST API                     │
-│                   OpenAPI / Swagger                        │
-└─────────────────────────────────────────────────────────────┘
+View
+→ Components
+→ Service / Store quando necessário
+→ Axios
+→ Backend REST
 ```
 
-### Estrutura física adotada
+Responsabilidades:
+
+| Camada | Papel |
+|---|---|
+| View | tela/rota completa |
+| Component | bloco reutilizável de UI |
+| Layout | shell comum |
+| Module | funcionalidade/domínio |
+| Service | comunicação HTTP por domínio |
+| Type | contrato TypeScript |
+| Store | estado global real |
+| Composable | comportamento Vue reutilizável |
+| Router | rotas, metadata e guards de UX |
+| Assets | imagens/logos/ícones |
+| Styles | tokens e estilos globais |
+| Utils | helpers puros |
+
+Regra importante:
+
+```text
+não espalhar Axios em Views/Components
+não criar Store para todo dado
+não duplicar módulos por perfil
+não recriar regra de negócio do backend no frontend
+não criar página para cada endpoint
+```
+
+### Estrutura física preparada
 
 ```text
 src/
@@ -326,12 +429,6 @@ src/
 │   ├── documentos/
 │   ├── relatorios/
 │   └── cadastros/
-│       ├── produtos/
-│       ├── unidades/
-│       ├── laboratorios/
-│       ├── projetos/
-│       ├── usuarios/
-│       └── estagiarios/
 ├── router/
 ├── services/
 ├── stores/
@@ -341,68 +438,46 @@ src/
 └── styles/
 ```
 
-A organização é **por funcionalidades/domínios**. Tudo que for específico de Pedidos fica próximo de `modules/pedidos`; o mesmo vale para Estoque, Relatórios e Cadastros. Infraestrutura realmente compartilhada fica nas pastas globais.
+---
 
-### Regra de responsabilidade
+## 🔌 Integração com o backend
 
-| Elemento | Responsabilidade |
-|---|---|
-| **View** | Tela/rota completa; coordena componentes e estado local da página |
-| **Component** | Bloco reutilizável de interface |
-| **Layout** | Estrutura comum das páginas, como sidebar/topbar/conteúdo |
-| **Module** | Agrupa uma funcionalidade/domínio do SGL |
-| **Service** | Comunicação com a API por meio de Axios |
-| **Type** | Contratos TypeScript consumidos/produzidos pelo frontend |
-| **Store** | Estado realmente compartilhado entre telas/módulos |
-| **Composable** | Comportamento Vue reutilizável quando houver repetição real |
-| **Router** | URL, rotas, metadados e guards de UX |
-| **Assets** | Imagens, logo, ícones e outros recursos estáticos |
-| **Styles** | Tokens e estilos globais; estilos locais ficam próximos do componente quando adequado |
-| **Utils** | Funções puras auxiliares |
+O Swagger/OpenAPI do backend é o contrato de referência.
 
-Regra mental para desenvolvimento:
+Regras:
 
-```text
-Tela inteira?                    → View
-Parte reutilizável da interface? → Component
-Comunicação com backend?         → Service
-Contrato de dados?               → Type
-Estado global real?              → Store
-Estrutura comum de páginas?       → Layout
-Comportamento Vue reutilizável?   → Composable
-Imagem/ícone?                     → Assets
-Estilo global?                    → Styles
-```
+- `Long` é interno do backend;
+- somente UUID público atravessa a fronteira;
+- `VITE_API_BASE_URL` será usada para configuração do endereço da API;
+- Axios será centralizado;
+- erros `400`, `404`, `409`, `500` e `fieldErrors` terão tratamento consistente;
+- telas remotas devem prever `loading`, `empty`, `error`, `success` e `retry` quando aplicável.
 
-### Relação com o backend Spring
+### Lacunas conhecidas que não devem ser inventadas pelo frontend
 
-Para facilitar a leitura de quem vem do backend:
+- upload real de arquivos/documentos ainda não possui contrato completo;
+- janela oficial para **lotes próximos do vencimento** ainda precisa ser definida no backend;
+- alguns filtros agregados de relatórios ainda não existem;
+- autenticação/autorização/auditoria definitiva vem após a primeira fase funcional do frontend.
 
-| Backend Spring | Frontend Vue |
-|---|---|
-| Controller | View / rota |
-| Service | Service frontend e, quando necessário, Store |
-| DTO | Type/interface TypeScript |
-| Endpoint REST | Método do Service usando Axios |
-| Config | app/router/configuração do frontend |
-| Regra de negócio | Continua no backend; o frontend representa a UX |
+---
 
-Não existe um equivalente direto de `Repository` no frontend: persistência e consultas acontecem através da API.
+## 🔄 Método oficial para implementar uma tela
 
-### Fluxo padrão para criar uma tela
+Quando a etapa técnica começar, cada tela seguirá aproximadamente:
 
 ```text
-1. entender a função da tela e seu usuário
+1. entender função e usuário
 2. validar wireframe/padrão visual
 3. identificar componentes
 4. identificar dados necessários
 5. conferir Swagger/OpenAPI
-6. criar/reutilizar Types
-7. criar/reutilizar Service
-8. implementar View e componentes
-9. integrar a API
-10. tratar loading / empty / error / success
-11. validar o fluxo completo
+6. definir/reutilizar Types
+7. definir/reutilizar Services
+8. implementar View/components
+9. integrar API
+10. tratar loading/empty/error/success
+11. validar fluxo completo
 ```
 
 Exemplo:
@@ -412,277 +487,119 @@ MeusPedidosView.vue
 → PedidoTable.vue
 → StatusChip.vue
 → pedidoService.listarPorUsuario()
-→ PedidoResponse (TypeScript)
+→ PedidoResponse
 → GET /api/v1/pedidos/por-usuario
 ```
 
-### Regras arquiteturais importantes
-
-- não espalhar chamadas `axios.get/post/...` diretamente pelas Views ou componentes visuais;
-- não criar Store para todo dado carregado — Pinia é para estado compartilhado real;
-- não criar Composable antes de existir comportamento reutilizável;
-- não duplicar módulos para Solicitante, Gestão e Administração;
-- separar views por responsabilidade apenas quando a experiência realmente mudar;
-- Administração reutiliza Gestão e adiciona Cadastros;
-- não criar página somente porque existe um endpoint;
-- não recriar no frontend regras de domínio que pertencem ao backend;
-- evitar arquiteturas excessivamente complexas sem necessidade concreta.
-
-A meta é uma arquitetura **modular, compreensível e evolutiva**: mais organizada que uma landing page, mas sem introduzir complexidade de DDD/Clean Architecture frontend onde ela não traz benefício real.
-
-Para detalhes adicionais da árvore física, consulte [`docs/ESTRUTURA_FRONTEND.md`](docs/ESTRUTURA_FRONTEND.md). As decisões históricas e o ponto de continuidade permanecem em [`CONTINUIDADE.md`](CONTINUIDADE.md).
-
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
-
 ---
 
-## 🔄 Fluxos Principais
+## 🛠️ Stack planejada
 
-### 👤 Fluxo do Solicitante
+A confirmação formal ocorrerá na **Etapa 1.4**.
 
-```text
-Dashboard
-   ↓
-Pedidos
-   ├── Novo Pedido
-   │      ↓
-   │   Contexto / Materiais / Revisão
-   │      ↓
-   │    Enviar
-   │      ↓
-   │   Detalhe
-   │
-   └── Meus Pedidos
-          ↓
-        Detalhe
-```
+- Vue 3;
+- Vite;
+- TypeScript;
+- Vue Router;
+- Pinia;
+- Axios;
+- Vuetify 3.
 
-### 🧑‍💼 Fluxo de Gestão
+Posteriormente:
 
-```text
-Dashboard
-├── Pedidos
-├── Estoque
-│   └── Detalhe
-│       ├── Lotes
-│       ├── Entrada
-│       ├── Descarte
-│       └── Documentos
-├── Movimentações
-└── Relatórios
-```
-
-### 🛠️ Fluxo de Administração
-
-```text
-Tudo da Gestão
-└── Cadastros
-    ├── Produtos
-    ├── Unidades
-    ├── Laboratórios
-    ├── Projetos
-    ├── Usuários
-    └── Estagiários
-```
-
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
-
----
-
-## 🔌 Integração com a API
-
-O frontend utiliza o backend como **fonte oficial das regras de negócio**.
-
-```text
-Frontend
-   ↓
-consome identificadores públicos UUID
-   ↓
-centraliza requisições HTTP
-   ↓
-segue contratos do Swagger / OpenAPI
-   ↓
-interpreta respostas e erros padronizados
-   ↓
-renderiza o estado correto da interface
-```
-
-### Princípios obrigatórios
-
-- consumir apenas os **identificadores públicos expostos pela API**;
-- não depender de IDs `Long` internos do backend;
-- utilizar Swagger/OpenAPI como contrato vivo para endpoints e DTOs;
-- centralizar a configuração do Axios e a URL base da API;
-- evitar chamadas HTTP diretamente espalhadas pelos componentes;
-- não duplicar regras de domínio como FEFO/FIFO, aprovação ou estorno no frontend;
-- permitir validações de UX no formulário sem substituir a validação do backend;
-- tratar erros HTTP de forma previsível e reutilizável.
-
-### Ambiente local previsto
-
-Backend em execução:
-
-```text
-http://localhost:8080
-```
-
-Swagger UI:
-
-```text
-http://localhost:8080/swagger-ui/index.html
-```
-
-> [!TIP]
-> Durante o desenvolvimento das telas, sempre valide o contrato atual no Swagger antes de criar ou alterar services, types e formulários no frontend.
-
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
-
----
-
-## ⚠️ Estados de Interface e Erros
-
-O projeto deve possuir tratamento visual consistente para os estados mais comuns:
-
-| Estado | Comportamento esperado |
-|---|---|
-| **Loading** | Skeleton, spinner ou estado equivalente sem travar a interface |
-| **Empty** | Mensagem clara e ação contextual quando aplicável |
-| **Success** | Feedback curto confirmando a operação |
-| **Validation Error** | Erros próximos aos campos relacionados |
-| **400 / Regra de negócio** | Exibir mensagem retornada pela API de forma compreensível |
-| **401 / 403** | Fluxo integrado à autenticação/autorização quando implementado |
-| **404 de recurso** | Estado contextual dentro da página |
-| **404 de rota** | Página própria do frontend |
-| **500 / indisponibilidade** | Feedback de erro com possibilidade de nova tentativa quando adequada |
-
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
-
----
-
-## 🚀 Começando
-
-O repositório encontra-se atualmente na etapa de planejamento/estruturação do frontend. O scaffold físico das pastas já foi criado; a aplicação Vue/Vite será inicializada na etapa de bootstrap técnico.
-
-### Pré-requisitos planejados
-
-- **Node.js** em versão LTS compatível com a stack definida;
-- **npm**;
-- **Git**;
-- backend do SGL disponível para integração;
-- acesso ao Swagger/OpenAPI do backend.
-
-### Instalação
-
-Após a criação da base Vue/Vite, o fluxo padrão será documentado nesta seção, incluindo:
-
-```bash
-git clone https://github.com/gbsalermo/SGL-FRONTEND.git
-cd SGL-FRONTEND
-npm install
-npm run dev
-```
-
-> [!WARNING]
-> Os comandos acima representam o fluxo planejado. A configuração definitiva de scripts e versões será registrada após o bootstrap oficial do projeto.
-
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
+- Vitest;
+- Vue Test Utils;
+- ESLint;
+- Prettier.
 
 ---
 
 ## 🗺️ Roadmap
 
-- [x] **Fase 0: Planejamento do Frontend**
-  - [x] definição inicial dos fluxos de solicitante, gestão e administração;
-  - [x] definição das referências visuais;
-  - [x] definição preliminar da stack;
-  - [x] definição do Swagger/OpenAPI como contrato de integração;
-  - [x] definição de página 404 e tratamento consistente de estados da interface;
-  - [x] definição da arquitetura SPA + feature-based + component-based;
-  - [x] criação do scaffold físico inicial do frontend.
+### Etapa 0 — Handoff ✅
+Backend → frontend, Swagger como contrato e UUID público.
 
-- [ ] **Fase 1: Fundação Técnica**
-  - [ ] bootstrap Vue 3 + Vite + TypeScript;
-  - [ ] configuração do Vuetify;
-  - [ ] Vue Router;
-  - [ ] Pinia;
-  - [ ] Axios e service base;
-  - [ ] variáveis de ambiente;
-  - [ ] validar build local.
+### Etapa 1 — Fundação visual e técnica 🟡
 
-- [ ] **Fase 2: Design System e Estrutura Global**
-  - [ ] identidade visual do SGL;
-  - [ ] layout principal;
-  - [ ] login baseado na familiaridade visual do Publica;
-  - [ ] componentes reutilizáveis;
-  - [ ] padrões de tabela, filtros, formulários e dialogs;
-  - [ ] loading, empty states, feedback e página 404.
+- [x] 1.1 Inventário de telas;
+- [x] 1.2 Fluxos e navegação;
+- [ ] 1.3 Figma e padrões visuais;
+- [ ] 1.4 Confirmar stack.
 
-- [ ] **Fase 3: Experiência do Solicitante**
-  - [ ] dashboard;
-  - [ ] criação de pedidos;
-  - [ ] seleção de laboratório/projeto;
-  - [ ] acompanhamento de status;
-  - [ ] histórico e materiais recebidos.
+#### 1.3 — concluído até aqui
 
-- [ ] **Fase 4: Experiência de Gestão**
-  - [ ] dashboard administrativo;
-  - [ ] fila de pedidos;
-  - [ ] análise, aprovação e rejeição;
-  - [ ] entrega e cancelamento;
-  - [ ] consultas operacionais.
+- [x] identidade visual;
+- [x] cores e tipografia;
+- [x] espaçamento/densidade;
+- [x] bordas/arredondamentos/sombras;
+- [x] motion;
+- [x] iconografia;
+- [x] sidebar aberta/recolhida;
+- [x] central de alertas;
+- [x] topbar;
+- [x] área principal;
+- [x] títulos/breadcrumbs;
+- [x] busca e filtros.
 
-- [ ] **Fase 5: Estoque e Cadastros**
-  - [ ] produtos;
-  - [ ] estoque central;
-  - [ ] lotes;
-  - [ ] movimentações;
-  - [ ] unidades, laboratórios e projetos;
-  - [ ] usuários e estagiários.
+#### 1.3 — próximo
 
-- [ ] **Fase 6: Relatórios e Arquivos**
-  - [ ] relatórios por laboratório/projeto;
-  - [ ] fiscalização/auditoria regulatória;
-  - [ ] geração/exportação quando suportada pela API;
-  - [ ] fluxos de upload e consulta de documentos quando aplicáveis.
+- [ ] componentes reutilizáveis;
+- [ ] estados padrão de interface;
+- [ ] Login;
+- [ ] Dashboards;
+- [ ] fluxo visual do Solicitante;
+- [ ] fluxo visual da Gestão;
+- [ ] Estoque/Lotes/Movimentações;
+- [ ] Relatórios/Cadastros/Documentos;
+- [ ] 404 e responsividade;
+- [ ] mini Design System e revisão final.
 
-- [ ] **Fase 7: Autenticação, Autorização e Auditoria Final**
-  - [ ] integração com o mecanismo definitivo de autenticação;
-  - [ ] aplicação real das permissões por perfil;
-  - [ ] associação automática do usuário autenticado às operações auditáveis.
+### Etapa 2 — Bootstrap
+Vue/Vite/TS, Router, Pinia, Axios, UI framework, env, aliases, lint/format e build.
 
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
+### Etapa 3 — Design System mínimo + shell
+Tokens, componentes básicos, estados e implementação real do shell.
+
+### Etapas 4–11
+Contratos/API → Solicitante → Gestão → Estoque → Administração → Relatórios → Dashboards → robustez/fechamento.
+
+### Etapa 12
+Autenticação, autorização, auditoria e futura integração corporativa.
 
 ---
 
-## 📚 Backend e Documentação
+## 📚 Documentação
 
-### Backend oficial
+| Documento | Finalidade |
+|---|---|
+| [`CONTINUIDADE.md`](CONTINUIDADE.md) | fonte principal para retomar o desenvolvimento |
+| [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) | inventário funcional de telas e cobertura da API |
+| [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) | jornadas, rotas e regras de navegação |
+| [`docs/ESTRUTURA_FRONTEND.md`](docs/ESTRUTURA_FRONTEND.md) | estrutura física e responsabilidades das pastas |
+| [`docs/IDENTIDADE_VISUAL.md`](docs/IDENTIDADE_VISUAL.md) | identidade, paleta, densidade e motion |
+| [`docs/ICONOGRAFIA.md`](docs/ICONOGRAFIA.md) | padrão conceitual de ícones e microinterações |
+| [`docs/SIDEBAR_ALERTAS.md`](docs/SIDEBAR_ALERTAS.md) | sidebar e alertas operacionais |
+| [`docs/SHELL_VISUAL.md`](docs/SHELL_VISUAL.md) | sidebar/topbar e comportamento do shell |
+| [`docs/PADROES_PAGINA.md`](docs/PADROES_PAGINA.md) | área de conteúdo, cabeçalhos, busca e filtros |
 
-📦 [`gbsalermo/Sistema-SGL`](https://github.com/gbsalermo/Sistema-SGL)
-
-O backend utiliza **Java, Spring Boot, PostgreSQL, Flyway e OpenAPI/Swagger** e deve ser tratado como a autoridade para regras de domínio e contratos HTTP.
-
-### Swagger
-
-Com o backend rodando localmente:
-
-👉 [`http://localhost:8080/swagger-ui/index.html`](http://localhost:8080/swagger-ui/index.html)
-
-### Documentos de referência
-
-- [`CONTINUIDADE.md`](CONTINUIDADE.md) — decisões, etapas, pendências e próxima ação;
-- [`docs/ESTRUTURA_FRONTEND.md`](docs/ESTRUTURA_FRONTEND.md) — árvore física e responsabilidade das pastas;
-- [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) — inventário funcional das telas;
-- [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) — jornadas e navegação do sistema.
-
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
+> Para continuar o projeto em outra sessão, por outra pessoa ou por outra IA, começar pelo **`CONTINUIDADE.md`**.
 
 ---
 
-## 👨‍💻 Autor
+## ▶️ Próximo passo exato
 
-Desenvolvido por **Gabriel Salermo**.
+```text
+Etapa 1.3
+→ componentes reutilizáveis
+→ botões, inputs/selects, cards, tabelas, chips, dialogs e filtros
+→ depois estados de interface
+```
 
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/gbsalermo)
+Nenhum componente deve ser implementado em Vue antes de a decisão conceitual correspondente ser validada nesta etapa.
 
-<p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
+---
+
+<div align="center">
+  <strong>SGL — Sistema de Gestão de Laboratórios</strong><br/>
+  Frontend em planejamento visual e arquitetural.
+</div>
