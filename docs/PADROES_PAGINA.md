@@ -252,20 +252,16 @@ Não transformar cada registro operacional em um card grande quando tabela for m
 
 ## 12. Referência visual
 
-Arquivo no repositório:
+A imagem-exemplo de busca/filtros será adicionada manualmente ao README pelo mantenedor.
 
-```text
-docs/images/exemplo-busca-filtros.webp
-```
-
-A imagem demonstra o conceito:
+Ela deve demonstrar:
 
 - cabeçalho simples;
-- ação principal;
+- ação principal à direita quando existir;
 - busca local;
-- botão de filtros expansível;
-- filtros aplicados;
+- botão `Filtros` expansível;
+- filtros aplicados no contexto da própria página;
 - tabela operacional;
-- topbar com busca global.
+- busca global separada na topbar.
 
-Não considerar dados, nomes ou logo aproximada do mockup como contrato funcional.
+O mockup é apenas guia visual. Campos e filtros só entram na implementação quando fizerem sentido para o fluxo e forem suportados pelo contrato real da API.
