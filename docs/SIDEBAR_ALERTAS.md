@@ -1,322 +1,20 @@
 # Sidebar e Alertas Operacionais — SGL Frontend
 
 **Etapa:** 1.3 — Figma e padrões visuais  
-**Status:** decisão conceitual aprovada; implementação futura
+**Status:** decisão conceitual aprovada; implementação futura  
+**Bloco:** fechado
 
-Este documento registra o comportamento conceitual da sidebar e da central de alertas operacionais. Não representa implementação Vue, CSS, Vuetify ou integração de API nesta etapa.
-
----
-
-# 1. Posição da central de alertas
-
-A central de alertas será exibida somente para responsabilidades de **Gestão** e **Administração**.
-
-Posição conceitual na sidebar aberta:
-
-```text
-[ LOGO SGL ]                       [ ‹ ]
-
-Aparência                    [ ☀ | 🌙 ]
-
-💡 Alertas                         [N]
-
-PRINCIPAL
-Dashboard
-Pedidos
-Estoque
-Movimentações
-Relatórios
-...
-```
-
-A central deve funcionar como indicador de atenção operacional, e não como uma área genérica de notificações sociais.
+Este documento registra o comportamento conceitual da sidebar e da central de alertas operacionais do SGL. Não representa implementação Vue/CSS/Vuetify nesta etapa.
 
 ---
 
-# 2. Estado visual da lâmpada
+# 1. Estrutura da sidebar
 
-A lâmpada representa o maior nível de severidade atualmente existente entre os alertas.
-
-```text
-AZUL
-→ nenhuma pendência
-→ lâmpada visualmente "desligada"
-→ badge de quantidade pode ser omitida quando total = 0
-
-AMARELO
-→ existem pendências que exigem atenção
-→ exemplo: pedidos pendentes, estoque baixo, lotes próximos do vencimento
-
-VERMELHO
-→ existe ao menos uma pendência urgente/crítica
-→ exemplo: produto/lote vencido
-```
-
-Regra de prioridade:
-
-```text
-se houver alerta vermelho
-→ lâmpada vermelha
-
-senão, se houver alerta amarelo
-→ lâmpada amarela
-
-senão
-→ lâmpada azul
-```
-
-O número ao lado da lâmpada representa a quantidade total de pendências consolidadas.
-
----
-
-# 3. Sidebar aberta — clique e hover
-
-Na sidebar aberta, o comportamento é dividido em duas interações distintas.
-
-## Clique na lâmpada
-
-O clique expande/recolhe a lista de categorias de alerta:
-
-```text
-💡 Alertas                         [6]
-│
-├─ Pedidos pendentes               [2]
-├─ Estoque baixo                   [2]
-├─ Próximos do vencimento          [1]
-└─ Vencidos                        [1]
-```
-
-A expansão deve ser suave e curta, seguindo o padrão de motion aprovado para submenus.
-
-## Hover sobre uma categoria
-
-O hover **não abre a central inteira**. Ele mostra apenas uma breve descrição contextual referente à categoria apontada.
-
-Exemplo:
-
-```text
-Pedidos pendentes [2]
-        ───────────────►
-        2 pedidos aguardando análise.
-        Laboratórios: Química Orgânica e Biologia.
-```
-
-Outro exemplo:
-
-```text
-Estoque baixo [2]
-        ───────────────►
-        2 itens estão abaixo do estoque mínimo.
-        Clique para visualizar os itens.
-```
-
-Outro exemplo:
-
-```text
-Próximos do vencimento [2]
-        ───────────────►
-        2 lotes estão próximos do vencimento.
-        Clique para visualizar os lotes.
-```
-
-A descrição deve ser curta. Quando houver informação extra útil, pode incluir um pequeno resumo, como laboratório, unidade ou quantidade crítica, sem transformar o hover em uma tabela completa.
-
----
-
-# 4. Clique nas categorias
-
-Cada categoria deve levar o usuário ao contexto operacional correto, preferencialmente já filtrado.
-
-```text
-Pedidos pendentes
-→ Pedidos
-→ filtro/status = PENDENTE
-
-Estoque baixo
-→ Estoque
-→ modo/filtro = Estoque baixo
-
-Próximos do vencimento
-→ Estoque / Lotes
-→ filtro de validade futura
-
-Vencidos
-→ Estoque / Lotes
-→ filtro = Vencidos
-```
-
-A central de alertas não deve duplicar a tela de operação. Ela serve como ponto de entrada rápido para pendências.
-
----
-
-# 5. Sidebar recolhida
-
-Quando a sidebar estiver recolhida, permanece apenas o ícone da lâmpada com seu estado semântico.
-
-```text
-┌────┐
-│ 💡 │
-└────┘
-```
-
-Ao passar o mouse sobre a lâmpada recolhida, abre um pequeno painel lateral resumido:
-
-```text
-       ┌──────────────────────────────┐
-💡 ───►│ Alertas                  6   │
-       │ Pedidos pendentes        2   │
-       │ Estoque baixo            2   │
-       │ Próximos do vencimento   1   │
-       │ Vencidos                 1   │
-       └──────────────────────────────┘
-```
-
-Esse painel deve ser leve, temporário e permitir acesso rápido às mesmas categorias.
-
-O clique continua podendo abrir a central completa/contextual conforme o padrão definitivo do shell.
-
----
-
-# 6. Categorias iniciais
-
-Categorias previstas para Gestão/Administração:
-
-| Categoria | Severidade padrão | Objetivo |
-|---|---|---|
-| Pedidos pendentes | Amarelo | pedidos aguardando análise |
-| Estoque baixo | Amarelo | itens abaixo do mínimo configurado |
-| Próximos do vencimento | Amarelo | lotes que se aproximam da validade |
-| Vencidos | Vermelho | lotes cuja validade já foi ultrapassada |
-
-Outras categorias poderão ser adicionadas somente quando houver necessidade funcional real.
-
----
-
-# 7. Validade — situação atual do backend
-
-O backend já possui suporte para consultar **lotes vencidos**.
-
-Contrato atual:
-
-```text
-GET /api/v1/lotes/vencidos
-```
-
-Por outro lado, **lotes próximos do vencimento** já fazem parte do planejamento funcional do frontend, mas ainda não possuem endpoint específico por janela de dias no backend.
-
-Portanto:
-
-```text
-Vencidos
-→ suportado atualmente pelo backend
-
-Próximos do vencimento
-→ manter no design e na UX
-→ implementar quando existir regra/consulta oficial de janela de validade
-→ não inventar cálculo definitivo no frontend como regra de domínio
-```
-
-A futura regra deverá definir, por exemplo, o que significa "próximo do vencimento" (7, 15, 30 dias ou configuração própria) antes da implementação.
-
----
-
-# 8. Regra de informação no hover
-
-O hover deve responder rapidamente à pergunta:
-
-> "Por que este alerta está aparecendo?"
-
-Estrutura preferida:
-
-```text
-quantidade + situação
-+ uma informação contextual útil, quando disponível
-+ indicação de que o clique leva ao detalhe
-```
-
-Evitar:
-
-- listas longas dentro do hover;
-- excesso de dados;
-- operações destrutivas dentro do tooltip;
-- informações que exijam rolagem;
-- duplicação completa da tela de destino.
-
----
-
-# 9. Integração com a linguagem visual dos ícones
-
-A lâmpada segue o padrão de ícones aprovado:
-
-```text
-estado neutro
-→ ícone visível, monocromático
-
-hover
-→ microanimação curta
-
-click
-→ pequeno efeito de pressão
-
-estado semântico
-→ cor comunica severidade
-```
-
-As categorias internas também seguem a paleta semântica do SGL.
-
-Regra principal:
-
-```text
-azul = normal / sem pendência
-amarelo = atenção / pendência
-vermelho = crítico / urgente
-```
-
-O verde permanece reservado a sucesso/confirmação, e não deve ser usado para indicar ausência de alertas na lâmpada.
-
----
-
-# 10. Resumo aprovado dos alertas
-
-```text
-Gestor/Admin
-→ possuem central de alertas na sidebar
-
-Lâmpada azul
-→ nada pendente
-
-Lâmpada amarela
-→ existem pendências
-
-Lâmpada vermelha
-→ existe pendência urgente
-
-Sidebar aberta
-→ clique expande categorias
-→ hover na categoria mostra breve descrição contextual
-
-Sidebar recolhida
-→ hover na lâmpada abre painel lateral resumido
-
-Clique em categoria
-→ leva ao contexto/tela correta já filtrada
-
-Categorias iniciais
-→ pedidos pendentes
-→ estoque baixo
-→ próximos do vencimento
-→ vencidos
-```
-
----
-
-# 11. Estrutura definitiva da sidebar
-
-A sidebar será uma estrutura fixa do shell após o login e terá quatro regiões conceituais:
+A sidebar possui quatro regiões estáveis:
 
 ```text
 1. CABEÇALHO
-→ marca SGL
+→ logo oficial SGL
 → controle abrir/recolher
 
 2. UTILIDADES
@@ -324,111 +22,60 @@ A sidebar será uma estrutura fixa do shell após o login e terá quatro regiõe
 → alertas operacionais quando aplicável
 
 3. NAVEGAÇÃO
-→ opções do sistema conforme responsabilidade
+→ opções conforme responsabilidade
 
 4. RODAPÉ
-→ identidade do usuário
-→ perfil/responsabilidade
+→ usuário
+→ perfil
 → menu de conta
 ```
 
-A ordem visual deve ser estável em todas as responsabilidades. O que muda é somente o conteúdo disponível na navegação e a presença de alertas operacionais.
+A estrutura física é única. O conteúdo muda conforme responsabilidade.
 
 ---
 
-# 12. Sidebar aberta
-
-Largura conceitual: **240–248 px**.
-
-Composição:
+# 2. Dimensões
 
 ```text
-┌──────────────────────────────┐
-│ [LOGO SGL]               [‹] │
-│                              │
-│ Aparência          [☀ | 🌙] │
-│ 💡 Alertas              [N]  │
-│                              │
-│ PRINCIPAL                    │
-│ ▦ Dashboard                  │
-│ ▤ Pedidos                  › │
-│ ▣ Estoque                    │
-│ ⇄ Movimentações              │
-│ ▥ Relatórios                 │
-│                              │
-│ ADMINISTRAÇÃO                │
-│ ◇ Cadastros                › │
-│                              │
-│              conteúdo        │
-│              rolável         │
-│                              │
-│ ───────────────────────────  │
-│ (avatar) Nome       [GESTOR] │
-│          email            ⋮  │
-└──────────────────────────────┘
+Aberta      → ~240–248 px
+Recolhida   → ~64–72 px
 ```
 
-A navegação pode rolar quando necessário, mas cabeçalho e rodapé devem permanecer previsíveis. O usuário não deve precisar procurar seu perfil ou o controle de recolhimento depois de navegar em listas longas.
+No mobile, a sidebar vira drawer/overlay em vez de permanecer como mini-sidebar.
 
 ---
 
-# 13. Sidebar recolhida
-
-Largura conceitual: **64–72 px**.
-
-Regras:
-
-- usar marca compacta do SGL;
-- ocultar textos de navegação;
-- manter ícones centralizados;
-- ocultar títulos de grupos;
-- manter aparência por ícone;
-- manter alertas por lâmpada quando aplicável;
-- manter avatar do usuário;
-- tooltips identificam funções no hover;
-- o conteúdo principal ganha espaço de forma progressiva, sem salto visual.
-
-Representação:
+# 3. Cabeçalho
 
 ```text
-┌────────┐
-│  SGL › │
-│        │
-│   ◐    │
-│   💡   │
-│        │
-│   ▦    │
-│   ▤    │
-│   ▣    │
-│   ⇄    │
-│   ▥    │
-│        │
-│   ◇    │
-│        │
-│        │
-│  avatar│
-└────────┘
+[ LOGO SGL ]                         [ ‹ / › ]
 ```
 
-A sidebar **não deve expandir inteira automaticamente no hover**. O hover serve para tooltip e painéis contextuais. Abrir/recolher a estrutura inteira exige ação explícita no controle de seta.
+Aberta:
+
+```text
+‹ → recolher
+```
+
+Recolhida:
+
+```text
+› → expandir
+```
+
+A marca usada na implementação é sempre a logo oficial do SGL. Mockups gerados servem somente para composição.
 
 ---
 
-# 14. Controle de abrir/recolher
+# 4. Movimento de abrir/recolher
 
-O controle fica no cabeçalho, ao lado da marca.
+A mudança deve ser contínua e suave.
+
+Referência perceptiva:
 
 ```text
-sidebar aberta
-→ ‹
-→ ação: recolher para a esquerda
-
-sidebar recolhida
-→ ›
-→ ação: expandir para a direita
+~250–350 ms
 ```
-
-A mudança deve ser contínua e suave, seguindo o padrão de motion já aprovado.
 
 Durante a transição:
 
@@ -437,55 +84,47 @@ largura
 → reduz/aumenta progressivamente
 
 rótulos
-→ perdem/ganham opacidade
-→ pequeno deslocamento horizontal
+→ fade + pequeno deslocamento
 
 ícones
 → reposicionam suavemente
 
-área principal
+conteúdo principal
 → acompanha a nova largura
 ```
 
-A referência perceptiva permanece na faixa de **250–350 ms**, sujeita a validação no protótipo.
+A sidebar **não expande inteira automaticamente no hover**.
 
 ---
 
-# 15. Aparência claro/escuro
+# 5. Aparência
 
-A sidebar terá controle de aparência, mas o tema será da **aplicação inteira**, não apenas do menu lateral.
-
-Estados conceituais:
+Controle conceitual:
 
 ```text
-Claro
-→ fundo principal claro
-→ superfícies brancas
-→ sidebar institucional azul escuro
-
-Escuro
-→ fundo grafite azulado
-→ superfícies elevadas em grafite mais claro
-→ sidebar em azul/preto profundo
-→ texto em branco suave
-→ azul institucional continua como destaque
+Aparência                         [ ☀ | 🌙 ]
 ```
 
-Na sidebar aberta, usar controle compacto semelhante a:
+O tema é da aplicação inteira.
 
-```text
-Aparência                 [☀ | 🌙]
-```
+Claro:
 
-Na recolhida, permanecer somente o ícone correspondente.
+- fundo geral claro;
+- superfícies brancas;
+- sidebar institucional em azul escuro.
 
-A possibilidade futura de acompanhar automaticamente o tema do sistema operacional pode ser considerada na implementação, sem ser requisito obrigatório do primeiro protótipo.
+Escuro:
+
+- grafites/azuis profundos;
+- superfícies um pouco mais claras;
+- texto branco suave;
+- azul institucional continua como destaque.
+
+Possível evolução futura: `Sistema` como terceira opção.
 
 ---
 
-# 16. Navegação por responsabilidade
-
-A estrutura da sidebar é única. Os itens exibidos variam conforme a responsabilidade do usuário.
+# 6. Navegação por responsabilidade
 
 ## Solicitante
 
@@ -533,15 +172,19 @@ Cadastros
   Estagiários
 ```
 
-Administração reutiliza a navegação de Gestão e acrescenta o agrupamento administrativo. Não existem três componentes de sidebar distintos.
+Administração reutiliza Gestão. Não existem três sidebars independentes.
 
 ---
 
-# 17. Submenus
+# 7. Submenus
 
-Submenus devem ser usados somente quando o agrupamento melhora a leitura.
+Fechado:
 
-Comportamento aberto:
+```text
+▤ Pedidos                         ›
+```
+
+Aberto:
 
 ```text
 ▤ Pedidos                         ⌄
@@ -550,76 +193,275 @@ Comportamento aberto:
 └─ Meus pedidos
 ```
 
-Comportamento fechado:
-
-```text
-▤ Pedidos                         ›
-```
-
-Abertura/recolhimento:
+Abertura:
 
 - expansão vertical curta;
 - fade discreto;
 - seta acompanha o estado;
-- não abrir múltiplas árvores profundas sem necessidade;
-- evitar mais de dois níveis de navegação na sidebar.
+- evitar mais de dois níveis.
 
-No modo recolhido, itens com filhos podem abrir um **flyout lateral contextual**, sem expandir toda a sidebar.
+No modo recolhido, filhos podem aparecer em flyout lateral.
 
 ---
 
-# 18. Estado ativo
-
-A sidebar segue o padrão de ícones já aprovado:
+# 8. Estado visual dos itens
 
 ```text
 normal
-→ ícone outline
-→ texto de contraste regular
+→ outline
+→ contraste regular
 
 hover
 → microanimação
-→ realce leve de fundo/cor
+→ leve realce
 
 ativo
-→ ícone filled quando disponível
-→ maior contraste
-→ fundo azul de destaque
-→ texto claramente legível
+→ filled quando disponível
+→ contraste maior
+→ destaque azul
 ```
 
-O estado ativo deve ser percebido imediatamente, mas sem brilho, gradientes fortes ou animação contínua.
-
-Quando uma rota filha estiver ativa, o grupo pai permanece visualmente marcado para preservar contexto.
+Quando uma rota filha estiver ativa, o grupo pai continua marcado.
 
 ---
 
-# 19. Rodapé do usuário
+# 9. Central de Alertas Operacionais
 
-O usuário fica sempre no rodapé da sidebar aberta.
+Disponível somente para:
 
-Formato preferido:
+```text
+GESTÃO
+ADMINISTRAÇÃO
+```
+
+Ela não é uma central social/genérica de notificações. Seu papel é indicar **pendências operacionais que exigem atenção**.
+
+Posição:
+
+```text
+Logo
+↓
+Aparência
+↓
+💡 Alertas
+↓
+Navegação
+```
+
+---
+
+# 10. Semântica da lâmpada
+
+A lâmpada assume a cor da maior severidade existente.
+
+```text
+AZUL
+→ nenhuma pendência
+→ estado neutro/desligado
+→ badge pode ser omitida se total = 0
+
+AMARELO
+→ existem pendências
+→ atenção necessária
+
+VERMELHO
+→ existe ao menos uma urgência/crítico
+```
+
+Prioridade:
+
+```text
+vermelho > amarelo > azul
+```
+
+O badge mostra a soma das pendências quando > 0.
+
+---
+
+# 11. Categorias iniciais
+
+| Categoria | Severidade | Objetivo |
+|---|---|---|
+| Pedidos pendentes | amarelo | pedidos aguardando análise |
+| Estoque baixo | amarelo | itens abaixo do mínimo |
+| Próximos do vencimento | amarelo | lotes perto da validade |
+| Vencidos | vermelho | lotes cuja validade já passou |
+
+Outras categorias só entram quando houver necessidade funcional real.
+
+---
+
+# 12. Sidebar aberta — comportamento dos alertas
+
+Exemplo:
+
+```text
+💡 Alertas                         [6]
+│
+├─ Pedidos pendentes               [2]
+├─ Estoque baixo                   [2]
+├─ Próximos do vencimento          [1]
+└─ Vencidos                        [1]
+```
+
+## Clique na lâmpada
+
+```text
+expande/recolhe categorias
+```
+
+A expansão usa motion curto e suave.
+
+## Hover em uma categoria
+
+O hover **não abre a central inteira**. Ele mostra uma breve descrição apenas da categoria apontada.
+
+Exemplo:
+
+```text
+Pedidos pendentes [2]
+→ 2 pedidos aguardando análise
+→ Laboratórios: Química Orgânica e Biologia
+```
+
+Outro:
+
+```text
+Estoque baixo [2]
+→ 2 itens estão abaixo do estoque mínimo
+```
+
+Outro:
+
+```text
+Próximos do vencimento [2]
+→ 2 lotes estão próximos do vencimento
+```
+
+A descrição deve responder rapidamente:
+
+> Por que este alerta está aparecendo?
+
+Pode incluir uma informação contextual pequena, como laboratório/unidade, sem virar lista extensa.
+
+---
+
+# 13. Clique nas categorias
+
+Cada categoria leva à operação correspondente, preferencialmente já filtrada.
+
+```text
+Pedidos pendentes
+→ Pedidos
+→ Status = PENDENTE
+
+Estoque baixo
+→ Estoque
+→ modo/filtro = Estoque baixo
+
+Próximos do vencimento
+→ Estoque/Lotes
+→ filtro de validade futura
+
+Vencidos
+→ Estoque/Lotes
+→ filtro = Vencidos
+```
+
+A central não duplica a tela operacional; ela é um atalho contextual.
+
+---
+
+# 14. Sidebar recolhida — alertas
+
+Quando recolhida, permanece apenas a lâmpada.
+
+Hover:
+
+```text
+       ┌──────────────────────────────┐
+💡 ───►│ Alertas                  6   │
+       │ Pedidos pendentes        2   │
+       │ Estoque baixo            2   │
+       │ Próximos do vencimento   1   │
+       │ Vencidos                 1   │
+       └──────────────────────────────┘
+```
+
+O painel é leve, temporário e permite acesso às categorias.
+
+---
+
+# 15. Situação de validade no backend
+
+Já existe:
+
+```text
+GET /api/v1/lotes/vencidos
+```
+
+Portanto:
+
+```text
+Vencidos
+→ suportado pelo backend
+```
+
+Ainda falta contrato específico para:
+
+```text
+Próximos do vencimento
+```
+
+Regra:
+
+- manter no design;
+- não inventar cálculo definitivo no frontend;
+- backend deverá definir a janela oficial;
+- pode futuramente ser 7/15/30 dias ou configurável, mas nada disso está congelado.
+
+---
+
+# 16. Relação com iconografia
+
+A lâmpada segue o padrão oficial de ícones:
+
+```text
+normal
+→ visível e monocromática
+
+hover
+→ microanimação curta
+
+click
+→ pequeno press
+
+estado
+→ cor comunica severidade
+```
+
+O verde não significa “sem alerta”; permanece reservado a sucesso/confirmação.
+
+---
+
+# 17. Rodapé do usuário
+
+Formato aberto:
 
 ```text
 (avatar) Nome do usuário     [GESTOR]
-         email institucional       ⋮
+         e-mail                   ⋮
 ```
 
 Exibir:
 
 - avatar ou iniciais;
 - nome;
-- email institucional;
-- responsabilidade/perfil em badge discreta;
+- e-mail institucional;
+- perfil/responsabilidade em badge discreta;
 - menu de três pontos.
 
-A badge de perfil deve informar, não competir visualmente com os alertas e estados do sistema.
-
----
-
-# 20. Menu da conta
-
-O menu de três pontos pode oferecer conceitualmente:
+Menu conceitual:
 
 ```text
 Minha conta
@@ -629,31 +471,32 @@ Aparência
 Sair
 ```
 
-A tela de Minha conta só permitirá alteração dos campos autorizados pelo contrato futuro.
-
 Não assumir que o próprio usuário poderá alterar:
 
-- login/usuário;
-- email institucional;
+- login;
+- e-mail institucional;
 - perfil;
 - unidade;
 - laboratório;
 - senha;
-- demais dados administrados externamente ou por autorização administrativa.
+- dados controlados administrativamente.
 
-A UX pode reservar esses campos como informação somente leitura, mas a permissão real será definida com autenticação/autorização.
+Isso será confirmado na etapa de autenticação/autorização.
 
-Na sidebar recolhida, permanece apenas o avatar. Hover identifica nome/perfil; clique abre o menu completo da conta.
+No modo recolhido, avatar permanece; hover identifica e clique abre menu.
 
 ---
 
-# 21. Scroll e permanência visual
+# 18. Scroll
 
-A sidebar deve preservar três pontos fixos de referência:
+Pontos estáveis:
 
 ```text
 cabeçalho
 → logo + toggler
+
+utilidades
+→ aparência + alertas
 
 navegação
 → região flexível/rolável
@@ -662,77 +505,51 @@ rodapé
 → usuário
 ```
 
-Aparência e alertas ficam acima da navegação e devem permanecer facilmente acessíveis. Se a altura da viewport exigir, a região central absorve a rolagem em vez de empurrar o usuário para fora da tela.
+A rolagem deve acontecer preferencialmente na região central.
 
 ---
 
-# 22. Mobile e telas pequenas
-
-Em telas pequenas, a sidebar deixa de disputar largura com o conteúdo e passa a funcionar como **drawer/overlay**.
-
-Conceito:
+# 19. Mobile
 
 ```text
 fechada
 → conteúdo ocupa a tela
 
 abrir menu
-→ sidebar desliza da esquerda
-→ overlay discreto cobre o conteúdo
+→ drawer desliza da esquerda
+→ overlay cobre conteúdo
 
 selecionar rota
 → drawer fecha
-→ conteúdo assume a nova tela
+→ conteúdo troca de página
 ```
 
-No mobile, não existe utilidade em manter permanentemente o modo mini de 64–72 px. O padrão é drawer fechado/aberto.
-
-Alertas continuam acessíveis dentro do drawer e podem posteriormente ganhar atalho adicional na topbar, caso os testes de uso indiquem necessidade.
+Alertas permanecem dentro do drawer. Um atalho adicional na topbar só deve ser adicionado se testes de uso mostrarem necessidade.
 
 ---
 
-# 23. Resumo final da sidebar
+# 20. Resumo final
 
 ```text
-Estrutura
-→ uma sidebar única para todo o SGL
-
-Aberta
-→ 240–248 px
-
-Recolhida
-→ 64–72 px
-
-Cabeçalho
-→ logo + seta ‹/›
-
-Utilidades
-→ aparência
-→ alertas para Gestão/Admin
-
-Navegação
-→ varia conforme responsabilidade
-
-Submenus
-→ expansão vertical suave
-→ flyout no modo recolhido
-
-Estado ativo
-→ outline → filled
-→ destaque azul
-
-Rodapé
-→ avatar + nome + email + perfil + menu ⋮
-
-Tema
-→ claro/escuro da aplicação inteira
-
-Movimento
-→ 250–350 ms como referência
-→ sem expansão automática da sidebar no hover
-
-Mobile
-→ drawer/overlay
+sidebar única                       ✅
+240–248 px aberta                   ✅
+64–72 px recolhida                  ✅
+logo + seta                         ✅
+aparência                           ✅
+alertas Gestão/Admin                ✅
+navegação por responsabilidade      ✅
+submenus suaves                     ✅
+outline → filled                    ✅
+usuário no rodapé                   ✅
+claro/escuro                        ✅
+mobile como drawer                  ✅
+sem expansão inteira no hover       ✅
 ```
 
-Com estas decisões, o bloco **Sidebar aberta/recolhida** fica conceitualmente fechado para a Etapa 1.3. A próxima definição do shell é a **Topbar + área principal de conteúdo + títulos/breadcrumbs**.
+Este bloco está **conceitualmente fechado**.
+
+O shell e a área principal também já foram fechados. O próximo passo geral da Etapa 1.3 é:
+
+```text
+COMPONENTES REUTILIZÁVEIS
+```
