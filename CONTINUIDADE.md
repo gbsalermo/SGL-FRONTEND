@@ -280,11 +280,28 @@ A stack será confirmada formalmente na Etapa 1.4 antes do bootstrap definitivo.
 
 # 6. Arquitetura frontend planejada
 
+O padrão oficial do SGL Frontend será:
+
+```text
+SPA (Single Page Application)
++ arquitetura por funcionalidades/domínios (feature-based)
++ interface baseada em componentes
++ camadas com responsabilidades explícitas
+```
+
+Não será adotado MVC clássico no navegador nem uma estrutura de landing page baseada em `index.html + style.css + script.js` com responsabilidades misturadas.
+
+Estrutura física:
+
 ```text
 src/
 ├── app/
 ├── assets/
+│   ├── icons/
+│   └── images/
 ├── components/
+│   ├── common/
+│   └── feedback/
 ├── layouts/
 ├── modules/
 │   ├── dashboard/
@@ -292,14 +309,15 @@ src/
 │   ├── estoque/
 │   ├── lotes/
 │   ├── movimentacoes/
-│   ├── produtos/
 │   ├── documentos/
 │   ├── relatorios/
-│   ├── laboratorios/
-│   ├── unidades/
-│   ├── projetos/
-│   ├── usuarios/
-│   └── estagiarios/
+│   └── cadastros/
+│       ├── produtos/
+│       ├── unidades/
+│       ├── laboratorios/
+│       ├── projetos/
+│       ├── usuarios/
+│       └── estagiarios/
 ├── router/
 ├── services/
 ├── stores/
@@ -309,29 +327,168 @@ src/
 └── styles/
 ```
 
-Regras:
+## 6.1 Responsabilidade de cada camada
 
 ```text
-componente compartilhado
-→ components
+View
+→ tela/rota completa
+→ coordena componentes e o estado local da página
 
-estrutura de página
-→ layouts
+Component
+→ bloco reutilizável da interface
+→ tabela, filtro, formulário, card, dialog, chip, feedback etc.
 
-regra/tela específica de domínio
-→ modules
+Layout
+→ estrutura comum entre páginas
+→ sidebar, topbar, área de conteúdo e shells de autenticação
 
-HTTP
-→ services
+Module
+→ agrupa tudo que pertence a uma funcionalidade/domínio do SGL
+→ Pedidos, Estoque, Relatórios, Cadastros etc.
 
-estado global real
-→ stores
+Service
+→ comunicação com backend
+→ concentra chamadas Axios e contratos HTTP por domínio
 
-tipos de contratos consumidos
-→ types ou módulo responsável
+Type
+→ representa contratos consumidos/produzidos pelo frontend
+→ equivalente conceitual aos DTOs da fronteira da API
+
+Store
+→ somente estado realmente compartilhado entre áreas/telas
+→ sessão, usuário atual, responsabilidade/permissões e outros estados globais reais
+
+Composable
+→ comportamento Vue reutilizável
+→ criado somente quando houver repetição real
+
+Router
+→ rotas, metadados, guards de UX e ligação URL → View
+
+Assets
+→ imagens, logo, ícones e recursos estáticos importados pela aplicação
+
+Styles
+→ tokens e regras globais de CSS
+→ estilos específicos permanecem próximos dos componentes quando fizer sentido
+
+Utils
+→ funções puras auxiliares sem responsabilidade de domínio ou estado Vue
 ```
 
-Evitar store global e abstrações antes de existir necessidade real.
+Regra mental oficial:
+
+```text
+Tela inteira?                    → View
+Parte reutilizável da interface? → Component
+Comunicação com backend?         → Service
+Contrato de dados?               → Type
+Estado global real?              → Store
+Estrutura comum de páginas?       → Layout
+Comportamento Vue reutilizável?   → Composable
+Imagem/ícone?                     → Assets
+Estilo global?                    → Styles
+```
+
+## 6.2 Fluxo de dependência preferencial
+
+O fluxo normal de uma tela será:
+
+```text
+View
+→ Components
+→ Service / Store quando necessário
+→ Axios
+→ API Spring Boot
+```
+
+Uma View pode consumir um Service diretamente quando o dado pertence somente àquela tela. Não transformar toda lista ou formulário em estado global.
+
+Chamadas HTTP não devem ficar espalhadas em componentes visuais:
+
+```text
+ERRADO
+PedidoTable.vue → axios.get(...)
+
+CERTO
+PedidoTable/PedidoView → pedidoService.listar(...)
+```
+
+## 6.3 Relação mental com o backend
+
+A equivalência não é literal, mas serve como referência para quem vem de Spring Boot:
+
+| Backend Spring | Frontend Vue |
+|---|---|
+| Controller | View / rota |
+| Service | Service frontend e, quando necessário, Store |
+| DTO | Type/interface TypeScript |
+| Endpoint REST | método do Service usando Axios |
+| Configuração | app/router/configuração do frontend |
+| Regra de domínio | continua no backend; frontend apenas representa a UX |
+
+`Repository` não possui equivalente direto no frontend, porque o acesso persistente acontece através da API.
+
+## 6.4 Organização feature-based
+
+O sistema será organizado por funcionalidades reais, e não por uma pasta global gigante de telas.
+
+Exemplo:
+
+```text
+modules/pedidos/
+├── components/
+└── views/
+    ├── solicitante/
+    └── gestao/
+```
+
+A separação Solicitante/Gestão só existe quando a experiência muda. Administração reutiliza os módulos de Gestão e acrescenta os Cadastros; não haverá cópia da aplicação para cada perfil.
+
+## 6.5 Processo padrão para implementar uma tela
+
+Toda tela deve seguir, de forma adaptável, este fluxo:
+
+```text
+1. entender a função e o usuário da tela
+2. validar wireframe/padrão visual
+3. identificar componentes reutilizáveis
+4. identificar dados necessários
+5. conferir Swagger/OpenAPI
+6. definir/reutilizar Types
+7. definir/reutilizar Service
+8. implementar a View e componentes
+9. integrar a API
+10. tratar loading / empty / error / success
+11. validar o fluxo completo
+```
+
+Exemplo conceitual:
+
+```text
+MeusPedidosView.vue
+→ PedidoTable.vue
+→ StatusChip.vue
+→ pedidoService.listarPorUsuario()
+→ PedidoResponse (TypeScript)
+→ GET /api/v1/pedidos/por-usuario
+```
+
+## 6.6 O que evitar
+
+```text
+não usar MVC clássico apenas por familiaridade com backend
+não criar uma pasta js/ separada se a lógica está em TypeScript
+não espalhar axios.get/post diretamente pelas Views/Components
+não criar Store para todo dado carregado
+não criar Composable sem reutilização real
+não duplicar módulos por perfil
+não criar página para todo endpoint
+não misturar regra de domínio do backend com regra visual do frontend
+não aplicar arquiteturas excessivamente complexas sem necessidade real
+```
+
+A meta é manter uma arquitetura **modular, compreensível e evolutiva**, sem cair nem em uma estrutura simplista de landing page nem em excesso de camadas como DDD/Clean Architecture frontend sem necessidade concreta.
 
 ---
 
@@ -1061,11 +1218,23 @@ Filtros/apresentação no frontend; regra oficial permanece na API.
 
 A identificação de produto fiscalizado pode ser uma entidade/associação própria, mas quantidade, risco, armazenamento, localização, lotes e movimentações continuam vindo das fontes oficiais já existentes no domínio.
 
-## 9. Não criar página por endpoint
+## 9. Arquitetura por funcionalidade
+
+Telas e componentes específicos devem permanecer próximos ao módulo de negócio correspondente. Infraestrutura compartilhada fica nas pastas globais apropriadas.
+
+## 10. HTTP centralizado em Services
+
+Não espalhar Axios pelas Views/Components. A camada visual consome Services e contratos tipados.
+
+## 11. Store somente para estado global real
+
+Dados locais de uma tela não devem virar Pinia automaticamente.
+
+## 12. Não criar página por endpoint
 
 Endpoint de consulta pode alimentar modal, drawer, aba, selector ou detalhe existente.
 
-## 10. Atualizar continuidade ao fechar etapas
+## 13. Atualizar continuidade ao fechar etapas
 
 Registrar:
 
@@ -1084,22 +1253,20 @@ próxima ação exata
 - [`README.md`](README.md)
 - [`CONTINUIDADE.md`](CONTINUIDADE.md)
 - [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md)
+- [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md)
+- [`docs/ESTRUTURA_FRONTEND.md`](docs/ESTRUTURA_FRONTEND.md)
 
 ---
 
 # Próxima ação exata
 
 ```text
-ETAPA 1.2 — FLUXOS E NAVEGAÇÃO
+ETAPA 1.2 — FLUXOS E NAVEGAÇÃO / ESTRUTURA
 
-1. detalhar fluxo do solicitante
-2. detalhar fluxo de gestão de pedidos
-3. detalhar fluxo estoque → lotes → operações
-4. detalhar entrada em relatórios/cadastros
-5. incluir Fiscalização/Auditoria como categoria da central de relatórios
-6. definir comportamento da navegação por responsabilidade
-7. fechar origem/destino das ações principais
-8. preparar mapa pronto para virar wireframe/Figma
+1. integrar o scaffold físico do frontend
+2. manter arquitetura SPA + feature-based como padrão oficial
+3. avançar para a Etapa 1.3 — Figma e padrões visuais
+4. começar pelo shell: sidebar + topbar + conteúdo + breadcrumbs
 
 REQUISITO REGULATÓRIO — PENDENTE DE DESCOBERTA
 

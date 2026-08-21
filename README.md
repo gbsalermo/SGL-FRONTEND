@@ -136,7 +136,7 @@ Componentes reutilizáveis
 
 ## 👥 Experiência por Perfil
 
-A interface será organizada principalmente em duas experiências operacionais.
+A interface será organizada em três níveis de responsabilidade de uso.
 
 ### 👤 Solicitante
 
@@ -153,7 +153,7 @@ Principais necessidades:
 
 ### 🧑‍💼 Gestão
 
-Voltada aos usuários responsáveis por estoque, aprovação e administração do sistema.
+Voltada aos usuários responsáveis por estoque, aprovação e operação do sistema.
 
 Principais necessidades:
 
@@ -162,11 +162,21 @@ Principais necessidades:
 - aprovar, rejeitar, entregar ou cancelar pedidos conforme as regras disponíveis;
 - consultar estoque consolidado e lotes físicos;
 - acompanhar validade, disponibilidade e movimentações;
-- administrar cadastros permitidos pelo perfil;
 - acessar relatórios e documentos relacionados às operações.
 
+### 🛠️ Administração
+
+Reutiliza a experiência e os módulos da Gestão e acrescenta os cadastros administrativos:
+
+- produtos;
+- unidades;
+- laboratórios;
+- projetos;
+- usuários;
+- estagiários.
+
 > [!IMPORTANT]
-> A separação de experiência não significa duplicar o sistema. O objetivo é compartilhar componentes e infraestrutura, alterando navegação, ações disponíveis e prioridade das informações conforme o perfil do usuário.
+> A separação de experiência não significa duplicar o sistema. O objetivo é compartilhar componentes e infraestrutura, alterando navegação, ações disponíveis e prioridade das informações conforme a responsabilidade do usuário.
 
 <p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
 
@@ -196,7 +206,7 @@ A configuração definitiva será consolidada na etapa inicial de implementaçã
 ### Estrutura e navegação
 
 - [ ] Layout base da aplicação;
-- [ ] navegação lateral/superior de acordo com o perfil;
+- [ ] navegação lateral/superior de acordo com a responsabilidade;
 - [ ] breadcrumbs quando úteis ao fluxo;
 - [ ] sistema consistente de títulos, ações e filtros;
 - [ ] página 404 customizada;
@@ -242,6 +252,7 @@ A configuração definitiva será consolidada na etapa inicial de implementaçã
 
 - [ ] relatórios por laboratório e projeto;
 - [ ] consulta de materiais efetivamente recebidos;
+- [ ] fiscalização/auditoria regulatória para produtos sujeitos ao controle;
 - [ ] exportação/geração de relatórios quando prevista pelo contrato da API;
 - [ ] suporte visual para envio, consulta e download de arquivos vinculados a produtos, lotes ou pedidos quando aplicável.
 
@@ -251,30 +262,40 @@ A configuração definitiva será consolidada na etapa inicial de implementaçã
 
 ## 🏛️ Arquitetura do Frontend
 
-A proposta é manter a aplicação organizada por responsabilidades, com componentes reutilizáveis e acesso à API centralizado.
+O SGL Frontend seguirá oficialmente o padrão:
+
+```text
+SPA (Single Page Application)
++ Feature-based Architecture
++ Component-based UI
++ camadas com responsabilidades claras
+```
+
+A aplicação **não** será organizada como uma landing page tradicional baseada em `index.html + style.css + script.js`, nem tentará reproduzir MVC clássico do backend no navegador.
+
+### Visão de dependências
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
 │                        Views / Pages                        │
-│         Dashboard · Pedidos · Estoque · Cadastros          │
+│          Dashboard · Pedidos · Estoque · Relatórios        │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Components / Design UI                    │
+│                         Components                          │
 │      Tabelas · Formulários · Cards · Dialogs · Feedback     │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                 Stores / Composables / Router               │
-│          Estado compartilhado e regras de interface         │
+│             Services / Stores / Composables                 │
+│ HTTP por domínio · estado compartilhado · lógica reutilizável│
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    Services / HTTP Client                   │
-│              Axios + tratamento padronizado                 │
+│                       Axios / HTTP                          │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
@@ -284,23 +305,132 @@ A proposta é manter a aplicação organizada por responsabilidades, com compone
 └─────────────────────────────────────────────────────────────┘
 ```
 
-Estrutura inicial esperada:
+### Estrutura física adotada
 
 ```text
 src/
+├── app/
 ├── assets/
+│   ├── icons/
+│   └── images/
 ├── components/
+│   ├── common/
+│   └── feedback/
 ├── layouts/
-├── views/
+├── modules/
+│   ├── dashboard/
+│   ├── pedidos/
+│   ├── estoque/
+│   ├── lotes/
+│   ├── movimentacoes/
+│   ├── documentos/
+│   ├── relatorios/
+│   └── cadastros/
+│       ├── produtos/
+│       ├── unidades/
+│       ├── laboratorios/
+│       ├── projetos/
+│       ├── usuarios/
+│       └── estagiarios/
 ├── router/
-├── stores/
 ├── services/
-├── composables/
+├── stores/
 ├── types/
-└── utils/
+├── composables/
+├── utils/
+└── styles/
 ```
 
-A organização poderá evoluir conforme os primeiros módulos forem implementados e o padrão real de reutilização ficar claro.
+A organização é **por funcionalidades/domínios**. Tudo que for específico de Pedidos fica próximo de `modules/pedidos`; o mesmo vale para Estoque, Relatórios e Cadastros. Infraestrutura realmente compartilhada fica nas pastas globais.
+
+### Regra de responsabilidade
+
+| Elemento | Responsabilidade |
+|---|---|
+| **View** | Tela/rota completa; coordena componentes e estado local da página |
+| **Component** | Bloco reutilizável de interface |
+| **Layout** | Estrutura comum das páginas, como sidebar/topbar/conteúdo |
+| **Module** | Agrupa uma funcionalidade/domínio do SGL |
+| **Service** | Comunicação com a API por meio de Axios |
+| **Type** | Contratos TypeScript consumidos/produzidos pelo frontend |
+| **Store** | Estado realmente compartilhado entre telas/módulos |
+| **Composable** | Comportamento Vue reutilizável quando houver repetição real |
+| **Router** | URL, rotas, metadados e guards de UX |
+| **Assets** | Imagens, logo, ícones e outros recursos estáticos |
+| **Styles** | Tokens e estilos globais; estilos locais ficam próximos do componente quando adequado |
+| **Utils** | Funções puras auxiliares |
+
+Regra mental para desenvolvimento:
+
+```text
+Tela inteira?                    → View
+Parte reutilizável da interface? → Component
+Comunicação com backend?         → Service
+Contrato de dados?               → Type
+Estado global real?              → Store
+Estrutura comum de páginas?       → Layout
+Comportamento Vue reutilizável?   → Composable
+Imagem/ícone?                     → Assets
+Estilo global?                    → Styles
+```
+
+### Relação com o backend Spring
+
+Para facilitar a leitura de quem vem do backend:
+
+| Backend Spring | Frontend Vue |
+|---|---|
+| Controller | View / rota |
+| Service | Service frontend e, quando necessário, Store |
+| DTO | Type/interface TypeScript |
+| Endpoint REST | Método do Service usando Axios |
+| Config | app/router/configuração do frontend |
+| Regra de negócio | Continua no backend; o frontend representa a UX |
+
+Não existe um equivalente direto de `Repository` no frontend: persistência e consultas acontecem através da API.
+
+### Fluxo padrão para criar uma tela
+
+```text
+1. entender a função da tela e seu usuário
+2. validar wireframe/padrão visual
+3. identificar componentes
+4. identificar dados necessários
+5. conferir Swagger/OpenAPI
+6. criar/reutilizar Types
+7. criar/reutilizar Service
+8. implementar View e componentes
+9. integrar a API
+10. tratar loading / empty / error / success
+11. validar o fluxo completo
+```
+
+Exemplo:
+
+```text
+MeusPedidosView.vue
+→ PedidoTable.vue
+→ StatusChip.vue
+→ pedidoService.listarPorUsuario()
+→ PedidoResponse (TypeScript)
+→ GET /api/v1/pedidos/por-usuario
+```
+
+### Regras arquiteturais importantes
+
+- não espalhar chamadas `axios.get/post/...` diretamente pelas Views ou componentes visuais;
+- não criar Store para todo dado carregado — Pinia é para estado compartilhado real;
+- não criar Composable antes de existir comportamento reutilizável;
+- não duplicar módulos para Solicitante, Gestão e Administração;
+- separar views por responsabilidade apenas quando a experiência realmente mudar;
+- Administração reutiliza Gestão e adiciona Cadastros;
+- não criar página somente porque existe um endpoint;
+- não recriar no frontend regras de domínio que pertencem ao backend;
+- evitar arquiteturas excessivamente complexas sem necessidade concreta.
+
+A meta é uma arquitetura **modular, compreensível e evolutiva**: mais organizada que uma landing page, mas sem introduzir complexidade de DDD/Clean Architecture frontend onde ela não traz benefício real.
+
+Para detalhes adicionais da árvore física, consulte [`docs/ESTRUTURA_FRONTEND.md`](docs/ESTRUTURA_FRONTEND.md). As decisões históricas e o ponto de continuidade permanecem em [`CONTINUIDADE.md`](CONTINUIDADE.md).
 
 <p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
 
@@ -313,40 +443,47 @@ A organização poderá evoluir conforme os primeiros módulos forem implementad
 ```text
 Dashboard
    ↓
-Criar Pedido
-   ↓
-Selecionar Laboratório / Projeto
-   ↓
-Adicionar Materiais
-   ↓
-Revisar Solicitação
-   ↓
-Enviar Pedido
-   ↓
-Acompanhar Status
-   ↓
-Consultar Histórico / Recebimentos
+Pedidos
+   ├── Novo Pedido
+   │      ↓
+   │   Contexto / Materiais / Revisão
+   │      ↓
+   │    Enviar
+   │      ↓
+   │   Detalhe
+   │
+   └── Meus Pedidos
+          ↓
+        Detalhe
 ```
 
 ### 🧑‍💼 Fluxo de Gestão
 
 ```text
 Dashboard
-   ↓
-Visualizar Pendências
-   ↓
-Analisar Pedido
-   ↓
-Aprovar ──────┬────── Rejeitar
-   ↓           │
-Separação      │
-   ↓           │
-Entregar       │
-   ↓           │
-Histórico      └────── Encerramento do fluxo
+├── Pedidos
+├── Estoque
+│   └── Detalhe
+│       ├── Lotes
+│       ├── Entrada
+│       ├── Descarte
+│       └── Documentos
+├── Movimentações
+└── Relatórios
 ```
 
-Além dos pedidos, a gestão terá acesso aos módulos administrativos e de estoque conforme o perfil configurado no sistema.
+### 🛠️ Fluxo de Administração
+
+```text
+Tudo da Gestão
+└── Cadastros
+    ├── Produtos
+    ├── Unidades
+    ├── Laboratórios
+    ├── Projetos
+    ├── Usuários
+    └── Estagiários
+```
 
 <p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
 
@@ -424,7 +561,7 @@ O projeto deve possuir tratamento visual consistente para os estados mais comuns
 
 ## 🚀 Começando
 
-O repositório encontra-se atualmente na etapa de planejamento do frontend. A estrutura Vue será criada na primeira fase de implementação.
+O repositório encontra-se atualmente na etapa de planejamento/estruturação do frontend. O scaffold físico das pastas já foi criado; a aplicação Vue/Vite será inicializada na etapa de bootstrap técnico.
 
 ### Pré-requisitos planejados
 
@@ -455,11 +592,13 @@ npm run dev
 ## 🗺️ Roadmap
 
 - [x] **Fase 0: Planejamento do Frontend**
-  - [x] definição inicial dos fluxos de solicitante e gestão;
+  - [x] definição inicial dos fluxos de solicitante, gestão e administração;
   - [x] definição das referências visuais;
   - [x] definição preliminar da stack;
   - [x] definição do Swagger/OpenAPI como contrato de integração;
-  - [x] definição de página 404 e tratamento consistente de estados da interface.
+  - [x] definição de página 404 e tratamento consistente de estados da interface;
+  - [x] definição da arquitetura SPA + feature-based + component-based;
+  - [x] criação do scaffold físico inicial do frontend.
 
 - [ ] **Fase 1: Fundação Técnica**
   - [ ] bootstrap Vue 3 + Vite + TypeScript;
@@ -467,8 +606,8 @@ npm run dev
   - [ ] Vue Router;
   - [ ] Pinia;
   - [ ] Axios e service base;
-  - [ ] organização inicial de pastas;
-  - [ ] variáveis de ambiente.
+  - [ ] variáveis de ambiente;
+  - [ ] validar build local.
 
 - [ ] **Fase 2: Design System e Estrutura Global**
   - [ ] identidade visual do SGL;
@@ -497,10 +636,12 @@ npm run dev
   - [ ] estoque central;
   - [ ] lotes;
   - [ ] movimentações;
-  - [ ] unidades, laboratórios e projetos.
+  - [ ] unidades, laboratórios e projetos;
+  - [ ] usuários e estagiários.
 
 - [ ] **Fase 6: Relatórios e Arquivos**
   - [ ] relatórios por laboratório/projeto;
+  - [ ] fiscalização/auditoria regulatória;
   - [ ] geração/exportação quando suportada pela API;
   - [ ] fluxos de upload e consulta de documentos quando aplicáveis.
 
@@ -527,9 +668,12 @@ Com o backend rodando localmente:
 
 👉 [`http://localhost:8080/swagger-ui/index.html`](http://localhost:8080/swagger-ui/index.html)
 
-### Continuidade do desenvolvimento
+### Documentos de referência
 
-O ponto exato de continuidade, decisões tomadas e alterações de planejamento deverão permanecer documentados no arquivo `CONTINUIDADE.md` do frontend assim que ele estiver versionado neste repositório.
+- [`CONTINUIDADE.md`](CONTINUIDADE.md) — decisões, etapas, pendências e próxima ação;
+- [`docs/ESTRUTURA_FRONTEND.md`](docs/ESTRUTURA_FRONTEND.md) — árvore física e responsabilidade das pastas;
+- [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) — inventário funcional das telas;
+- [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) — jornadas e navegação do sistema.
 
 <p align="right">(<a href="#readme-top">voltar ao topo ⬆</a>)</p>
 
