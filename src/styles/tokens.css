@@ -1,3 +1,24 @@
 :root {
-  /* Tokens visuais serão definidos na Etapa 1.3. */
+  --sgl-primary: #1A4DA1;
+  --sgl-primary-dark: #0D2B5E;
+  --sgl-primary-light: #2D6BC4;
+
+  --sgl-green: #007A3D;
+  --sgl-green-light: #4EA674;
+  --sgl-green-soft: #A5D6A7;
+
+  --sgl-background: #F5F7FA;
+  --sgl-surface: #FFFFFF;
+  --sgl-text: #1A1A2E;
+  --sgl-text-muted: #64748B;
+  --sgl-border: #E2E8F0;
+
+  --sgl-warning: #F59E0B;
+  --sgl-error: #DC2626;
+
+  --sgl-radius-control: 6px;
+  --sgl-radius-surface: 8px;
+  --sgl-page-padding: 24px;
+  --sgl-transition-fast: 180ms;
+  --sgl-transition-route: 300ms;
 }
