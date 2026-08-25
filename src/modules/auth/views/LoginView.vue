@@ -32,19 +32,19 @@ function entrar() {
         />
 
         <div class="login-brand__identity">
-          <div class="sgl-mark">
+          <div class="sgl-lockup">
             <img
               :src="simboloSgl"
               alt=""
               aria-hidden="true"
-              class="sgl-mark__symbol"
+              class="sgl-lockup__symbol"
             />
 
-            <div class="sgl-mark__logo-surface">
+            <div class="sgl-lockup__logo-crop">
               <img
                 :src="logoSgl"
                 alt="SGL — Sistema de Gestão de Laboratórios"
-                class="sgl-mark__logo"
+                class="sgl-lockup__logo"
               />
             </div>
           </div>
@@ -68,11 +68,7 @@ function entrar() {
             <label for="usuario">Usuário de colaborador</label>
 
             <div class="login-field__control">
-              <svg
-                class="login-field__icon"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
+              <svg class="login-field__icon" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="8" r="4" />
                 <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
               </svg>
@@ -92,11 +88,7 @@ function entrar() {
             <label for="senha">Senha</label>
 
             <div class="login-field__control">
-              <svg
-                class="login-field__icon"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
+              <svg class="login-field__icon" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="5" y="10" width="14" height="11" rx="2" />
                 <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" />
               </svg>
@@ -116,20 +108,12 @@ function entrar() {
                 :aria-label="mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'"
                 @click="mostrarSenha = !mostrarSenha"
               >
-                <svg
-                  v-if="!mostrarSenha"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
+                <svg v-if="!mostrarSenha" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
                   <circle cx="12" cy="12" r="2.5" />
                 </svg>
 
-                <svg
-                  v-else
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
+                <svg v-else viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m3 3 18 18M10.7 6.1A9 9 0 0 1 12 6c6 0 9.5 6 9.5 6a15 15 0 0 1-2.1 2.8M6.2 6.2C3.8 8 2.5 12 2.5 12S6 18 12 18c1.5 0 2.8-.4 4-1" />
                 </svg>
               </button>
@@ -169,10 +153,10 @@ function entrar() {
   inset: 0;
   background:
     linear-gradient(
-      180deg,
-      rgb(13 43 94 / 78%) 0%,
-      rgb(26 77 161 / 74%) 48%,
-      rgb(13 43 94 / 84%) 100%
+      135deg,
+      rgb(13 43 94 / 91%) 0%,
+      rgb(13 43 94 / 87%) 46%,
+      rgb(26 77 161 / 82%) 100%
     );
 }
 
@@ -182,22 +166,22 @@ function entrar() {
   position: absolute;
   z-index: 1;
   border-radius: 50%;
-  background: rgb(255 255 255 / 7%);
+  background: rgb(255 255 255 / 5%);
   pointer-events: none;
 }
 
 .login-brand::before {
   width: 280px;
   height: 280px;
-  top: -150px;
-  left: -120px;
+  top: -160px;
+  left: -130px;
 }
 
 .login-brand::after {
-  width: 330px;
-  height: 330px;
-  right: -160px;
-  bottom: -170px;
+  width: 360px;
+  height: 360px;
+  right: -195px;
+  bottom: -185px;
 }
 
 .login-brand__content {
@@ -207,20 +191,20 @@ function entrar() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: clamp(38px, 5vw, 72px);
+  padding: clamp(36px, 4.5vw, 68px);
   color: #fff;
 }
 
 .login-brand__embrapa {
-  width: clamp(126px, 11vw, 178px);
+  width: clamp(118px, 10vw, 158px);
   height: auto;
-  margin: clamp(18px, 4vh, 52px) 0 0;
+  margin-top: clamp(10px, 3.5vh, 42px);
   object-fit: contain;
-  filter: drop-shadow(0 3px 8px rgb(0 0 0 / 16%));
+  filter: drop-shadow(0 3px 10px rgb(0 0 0 / 16%));
 }
 
 .login-brand__identity {
-  width: min(100%, 660px);
+  width: min(100%, 620px);
   margin: auto 0;
   display: flex;
   flex-direction: column;
@@ -228,47 +212,47 @@ function entrar() {
   text-align: center;
 }
 
-.sgl-mark {
+.sgl-lockup {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(16px, 2vw, 26px);
+  gap: clamp(14px, 2vw, 24px);
 }
 
-.sgl-mark__symbol {
-  width: clamp(104px, 9vw, 142px);
-  aspect-ratio: 420 / 323;
+.sgl-lockup__symbol {
+  width: clamp(82px, 7.4vw, 116px);
+  height: clamp(82px, 7.4vw, 116px);
   flex: 0 0 auto;
+  border-radius: 20px;
   object-fit: cover;
-  border-radius: 18px;
-  box-shadow: 0 10px 28px rgb(0 0 0 / 20%);
+  box-shadow: 0 10px 26px rgb(0 0 0 / 20%);
 }
 
-.sgl-mark__logo-surface {
-  width: min(72%, 440px);
-  padding: 12px 16px;
-  border: 1px solid rgb(255 255 255 / 36%);
-  border-radius: 12px;
-  background: rgb(255 255 255 / 92%);
-  box-shadow: 0 10px 30px rgb(0 0 0 / 14%);
-  backdrop-filter: blur(4px);
+.sgl-lockup__logo-crop {
+  width: min(72%, 430px);
+  aspect-ratio: 3.55 / 1;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
 }
 
-.sgl-mark__logo {
-  display: block;
+.sgl-lockup__logo {
   width: 100%;
   height: auto;
-  object-fit: contain;
+  display: block;
+  transform: translateY(-1%);
+  mix-blend-mode: multiply;
+  filter: drop-shadow(0 5px 14px rgb(0 0 0 / 10%));
 }
 
 .login-brand__message {
   margin: 38px 0 0;
+  max-width: 520px;
   color: rgb(255 255 255 / 94%);
   font-size: clamp(15px, 1.2vw, 18px);
-  font-weight: 400;
   line-height: 1.6;
-  text-shadow: 0 2px 7px rgb(0 0 0 / 16%);
+  text-shadow: 0 1px 6px rgb(0 0 0 / 14%);
 }
 
 .login-access {
@@ -409,23 +393,19 @@ function entrar() {
   margin-top: 8px;
   border: 0;
   border-radius: var(--sgl-radius-control, 6px);
-  background: linear-gradient(
-    135deg,
-    var(--sgl-primary, #1a4da1),
-    var(--sgl-primary-dark, #0d2b5e)
-  );
+  background: var(--sgl-primary, #1a4da1);
   color: #fff;
   font-size: 17px;
   font-weight: 750;
   cursor: pointer;
   transition:
+    background var(--sgl-transition-fast, 180ms) ease,
     box-shadow var(--sgl-transition-fast, 180ms) ease,
-    filter var(--sgl-transition-fast, 180ms) ease,
     transform 100ms ease;
 }
 
 .login-submit:hover {
-  filter: brightness(0.96);
+  background: var(--sgl-primary-dark, #0d2b5e);
   box-shadow: 0 8px 20px rgb(26 77 161 / 18%);
 }
 
@@ -447,16 +427,8 @@ function entrar() {
     padding: 38px;
   }
 
-  .sgl-mark {
-    gap: 13px;
-  }
-
-  .sgl-mark__symbol {
-    width: 92px;
-  }
-
-  .sgl-mark__logo-surface {
-    width: min(72%, 360px);
+  .sgl-lockup {
+    gap: 12px;
   }
 
   .login-access {
@@ -471,7 +443,7 @@ function entrar() {
 
   .login-brand,
   .login-brand__content {
-    min-height: 350px;
+    min-height: 330px;
   }
 
   .login-brand {
@@ -483,7 +455,7 @@ function entrar() {
   }
 
   .login-brand__embrapa {
-    width: 118px;
+    width: 110px;
     margin-top: 0;
   }
 
@@ -491,18 +463,18 @@ function entrar() {
     margin-top: 28px;
   }
 
-  .sgl-mark__symbol {
-    width: 78px;
-    border-radius: 14px;
+  .sgl-lockup__symbol {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
   }
 
-  .sgl-mark__logo-surface {
-    width: min(70%, 310px);
-    padding: 8px 10px;
+  .sgl-lockup__logo-crop {
+    width: min(72%, 300px);
   }
 
   .login-brand__message {
-    margin-top: 20px;
+    margin-top: 22px;
     font-size: 14px;
   }
 
@@ -519,25 +491,22 @@ function entrar() {
 @media (max-width: 480px) {
   .login-brand,
   .login-brand__content {
-    min-height: 300px;
+    min-height: 285px;
   }
 
-  .sgl-mark {
-    gap: 9px;
+  .sgl-lockup__symbol {
+    width: 58px;
+    height: 58px;
+    border-radius: 13px;
   }
 
-  .sgl-mark__symbol {
-    width: 62px;
-    border-radius: 10px;
-  }
-
-  .sgl-mark__logo-surface {
-    width: min(72%, 245px);
-    padding: 7px 9px;
+  .sgl-lockup__logo-crop {
+    width: min(74%, 240px);
   }
 
   .login-brand__message {
     max-width: 300px;
+    margin-top: 18px;
   }
 
   .login-header h1 {
