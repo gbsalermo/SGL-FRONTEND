@@ -126,6 +126,7 @@ import logoPrincipal from '@/assets/images/auth/sgl-logo.png'
   gap: clamp(46px, 6vh, 70px);
   padding: clamp(34px, 4vw, 60px);
   color: #fff;
+  transform: translateY(-18px);
 }
 
 .login-brand__embrapa {
