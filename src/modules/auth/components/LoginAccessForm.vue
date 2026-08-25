@@ -1,12 +1,30 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+import { useSessionStore } from '@/stores/session'
+
+const router = useRouter()
+const session = useSessionStore()
 
 const usuario = ref('')
 const senha = ref('')
 const mostrarSenha = ref(false)
+const carregando = ref(false)
+const erro = ref('')
 
-function entrar() {
-  // A autenticação real será integrada em uma etapa posterior.
+async function entrar() {
+  erro.value = ''
+  carregando.value = true
+
+  try {
+    await session.entrarDesenvolvimento(usuario.value, senha.value)
+    await router.replace('/meus-pedidos')
+  } catch (error) {
+    erro.value = error instanceof Error ? error.message : 'Não foi possível acessar o sistema.'
+  } finally {
+    carregando.value = false
+  }
 }
 </script>
 
@@ -75,8 +93,10 @@ function entrar() {
           </div>
         </div>
 
-        <button class="login-submit" type="submit">
-          Entrar
+        <p v-if="erro" class="login-error" role="alert">{{ erro }}</p>
+
+        <button class="login-submit" type="submit" :disabled="carregando">
+          {{ carregando ? 'Entrando...' : 'Entrar' }}
         </button>
       </form>
     </div>
@@ -217,6 +237,16 @@ function entrar() {
   stroke-linejoin: round;
 }
 
+.login-error {
+  margin: -10px 0 -5px;
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fff1f1;
+  color: #b42318;
+  font-size: 12px;
+}
+
 .login-submit {
   min-height: 62px;
   margin-top: 8px;
@@ -233,9 +263,14 @@ function entrar() {
     transform 100ms ease;
 }
 
-.login-submit:hover {
+.login-submit:hover:not(:disabled) {
   background: var(--sgl-primary-dark, #0d2b5e);
   box-shadow: 0 8px 20px rgb(26 77 161 / 18%);
+}
+
+.login-submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .login-submit:active {
