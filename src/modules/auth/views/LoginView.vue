@@ -5,6 +5,13 @@ const usuario = ref('')
 const senha = ref('')
 const mostrarSenha = ref(false)
 
+const assets = {
+  logoSgl: '/images/sgl-logo.png',
+  logoEmbrapa: '/images/embrapa-white.png',
+  simboloSgl: '/images/sgl-symbol.png',
+  laboratorio: '/images/login-laboratorio.jpg',
+}
+
 function entrar() {
   // A autenticação real será integrada em uma etapa posterior.
 }
@@ -12,50 +19,32 @@ function entrar() {
 
 <template>
   <main class="login-page">
-    <section class="login-brand" aria-label="Apresentação do SGL">
+    <section
+      class="login-brand"
+      aria-label="Apresentação do SGL"
+      :style="{ backgroundImage: `linear-gradient(180deg, rgb(13 43 94 / 76%), rgb(26 77 161 / 82%)), url(${assets.laboratorio})` }"
+    >
       <div class="login-brand__content">
-        <p class="login-brand__embrapa" aria-label="Embrapa">Embrapa</p>
+        <img
+          :src="assets.logoEmbrapa"
+          alt="Embrapa"
+          class="login-brand__embrapa"
+        />
 
         <div class="login-brand__identity">
-          <div class="sgl-mark" aria-label="SGL — Sistema de Gestão de Laboratórios">
-            <div class="sgl-mark__symbol" aria-hidden="true">
-              <svg viewBox="0 0 90 90" role="img">
-                <path d="M35 12h20M39 12v20L24 65c-3 8 2 13 11 13h20c9 0 14-5 11-13L51 32V12" />
-                <path d="M29 59c11 5 22-7 34-2l4 13c1 4-2 7-7 7H31c-5 0-8-3-7-7l5-11Z" class="sgl-mark__liquid" />
-                <circle cx="65" cy="28" r="5" class="sgl-mark__accent" />
-                <path d="M57 36c12 2 19 11 20 22" class="sgl-mark__accent-line" />
-              </svg>
-            </div>
+          <div class="sgl-mark">
+            <img
+              :src="assets.simboloSgl"
+              alt=""
+              aria-hidden="true"
+              class="sgl-mark__symbol"
+            />
 
-            <div class="sgl-mark__wording">
-              <strong>SGL</strong>
-              <span>Sistema de Gestão de Laboratórios</span>
-            </div>
-          </div>
-
-          <div class="login-brand__modules" aria-hidden="true">
-            <span>
-              <svg viewBox="0 0 24 24">
-                <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z" />
-                <path d="m4 7.5 8 4.5 8-4.5M12 12v9" />
-              </svg>
-            </span>
-            <span>
-              <svg viewBox="0 0 24 24">
-                <path d="M4 4h16v16H4zM4 10h16M9 4v6M15 4v6M8 15h3M14 15h3" />
-              </svg>
-            </span>
-            <span>
-              <svg viewBox="0 0 24 24">
-                <path d="M7 4h10v3H7zM5 6h14v15H5z" />
-                <path d="m8 11 1.5 1.5L12 10M8 16l1.5 1.5L12 15M14 11h2M14 16h2" />
-              </svg>
-            </span>
-            <span>
-              <svg viewBox="0 0 24 24">
-                <path d="M3 7h7l2 2h9v10H3zM3 7V5h7l2 2" />
-              </svg>
-            </span>
+            <img
+              :src="assets.logoSgl"
+              alt="SGL — Sistema de Gestão de Laboratórios"
+              class="sgl-mark__logo"
+            />
           </div>
 
           <p class="login-brand__message">
@@ -68,7 +57,7 @@ function entrar() {
     <section class="login-access" aria-labelledby="login-title">
       <div class="login-access__content">
         <header class="login-header">
-          <h1 id="login-title">Bem-vindo de volta!</h1>
+          <h1 id="login-title">Bem-vindo!</h1>
           <p>Acesse o sistema para continuar</p>
         </header>
 
@@ -138,17 +127,15 @@ function entrar() {
   min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  background: var(--sgl-surface);
-  color: var(--sgl-text);
+  background: var(--sgl-surface, #ffffff);
+  color: var(--sgl-text, #1a1a2e);
 }
 
 .login-brand {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  background-image:
-    linear-gradient(180deg, rgb(13 43 94 / 76%), rgb(26 77 161 / 82%)),
-    url('https://images.unsplash.com/photo-1631556759511-6ce895fbf0ad?auto=format&fit=crop&w=1800&q=85');
+  background-color: var(--sgl-primary-dark, #0d2b5e);
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -189,16 +176,14 @@ function entrar() {
 }
 
 .login-brand__embrapa {
+  width: clamp(122px, 11vw, 176px);
+  height: auto;
   margin: clamp(18px, 4vh, 52px) 0 0;
-  font-size: clamp(25px, 2.2vw, 34px);
-  font-weight: 800;
-  font-style: italic;
-  line-height: 1;
-  letter-spacing: -0.045em;
+  object-fit: contain;
 }
 
 .login-brand__identity {
-  width: min(100%, 590px);
+  width: min(100%, 630px);
   margin: auto 0;
   display: flex;
   flex-direction: column;
@@ -207,104 +192,32 @@ function entrar() {
 }
 
 .sgl-mark {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 22px;
+  gap: clamp(18px, 2vw, 28px);
 }
 
 .sgl-mark__symbol {
-  width: clamp(88px, 8vw, 126px);
-  height: clamp(88px, 8vw, 126px);
-  display: grid;
-  place-items: center;
-  border-radius: 24px;
-  background: linear-gradient(145deg, rgb(45 107 196 / 60%), rgb(13 43 94 / 80%));
-  border: 1px solid rgb(255 255 255 / 22%);
-  box-shadow: inset 0 0 28px rgb(255 255 255 / 8%);
+  width: clamp(105px, 9vw, 145px);
+  height: auto;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgb(0 0 0 / 18%));
 }
 
-.sgl-mark__symbol svg {
-  width: 78%;
-  height: 78%;
-  fill: none;
-  stroke: #fff;
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.sgl-mark__symbol .sgl-mark__liquid {
-  fill: rgb(0 122 61 / 88%);
-  stroke: #78c696;
-}
-
-.sgl-mark__symbol .sgl-mark__accent {
-  fill: #58b47f;
-  stroke: #a5d6a7;
-}
-
-.sgl-mark__symbol .sgl-mark__accent-line {
-  stroke: #74c694;
-}
-
-.sgl-mark__wording {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-}
-
-.sgl-mark__wording strong {
-  font-size: clamp(76px, 8.2vw, 132px);
-  font-weight: 800;
-  line-height: 0.82;
-  letter-spacing: 0.04em;
-  text-shadow: 0 4px 18px rgb(0 0 0 / 18%);
-}
-
-.sgl-mark__wording span {
-  margin-top: 15px;
-  font-size: clamp(10px, 0.85vw, 13px);
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.login-brand__modules {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(22px, 2.7vw, 38px);
-  margin-top: 38px;
-}
-
-.login-brand__modules span {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-}
-
-.login-brand__modules span:nth-child(odd) {
-  color: #8bd0a6;
-}
-
-.login-brand__modules svg {
-  width: 34px;
-  height: 34px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.55;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.sgl-mark__logo {
+  width: min(72%, 430px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 14px rgb(0 0 0 / 12%));
 }
 
 .login-brand__message {
-  margin: 42px 0 0;
-  color: rgb(255 255 255 / 92%);
-  font-size: clamp(15px, 1.25vw, 19px);
+  margin: 36px 0 0;
+  color: rgb(255 255 255 / 94%);
+  font-size: clamp(15px, 1.2vw, 18px);
   line-height: 1.6;
 }
 
@@ -313,7 +226,7 @@ function entrar() {
   display: grid;
   place-items: center;
   padding: 48px clamp(36px, 7vw, 112px);
-  background: #fff;
+  background: var(--sgl-surface, #ffffff);
 }
 
 .login-access__content {
@@ -327,7 +240,7 @@ function entrar() {
 
 .login-header h1 {
   margin: 0;
-  color: var(--sgl-text);
+  color: var(--sgl-text, #1a1a2e);
   font-size: clamp(30px, 2.5vw, 40px);
   font-weight: 750;
   line-height: 1.15;
@@ -336,7 +249,7 @@ function entrar() {
 
 .login-header p {
   margin: 13px 0 0;
-  color: var(--sgl-text-muted);
+  color: var(--sgl-text-muted, #64748b);
   font-size: 17px;
   line-height: 1.5;
 }
@@ -354,7 +267,7 @@ function entrar() {
 }
 
 .login-field label {
-  color: var(--sgl-text);
+  color: var(--sgl-text, #1a1a2e);
   font-size: 15px;
   font-weight: 700;
 }
@@ -365,16 +278,16 @@ function entrar() {
   align-items: center;
   gap: 14px;
   padding: 0 18px;
-  border: 1px solid #cbd5e1;
-  border-radius: var(--sgl-radius-control);
+  border: 1px solid var(--sgl-border, #e2e8f0);
+  border-radius: var(--sgl-radius-control, 6px);
   background: #fff;
   transition:
-    border-color var(--sgl-transition-fast) ease,
-    box-shadow var(--sgl-transition-fast) ease;
+    border-color var(--sgl-transition-fast, 180ms) ease,
+    box-shadow var(--sgl-transition-fast, 180ms) ease;
 }
 
 .login-field__control:focus-within {
-  border-color: var(--sgl-primary);
+  border-color: var(--sgl-primary, #1a4da1);
   box-shadow: 0 0 0 3px rgb(26 77 161 / 11%);
 }
 
@@ -383,7 +296,7 @@ function entrar() {
   height: 25px;
   flex: 0 0 auto;
   fill: none;
-  stroke: #64748b;
+  stroke: var(--sgl-text-muted, #64748b);
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -395,7 +308,7 @@ function entrar() {
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--sgl-text);
+  color: var(--sgl-text, #1a1a2e);
   font-size: 16px;
 }
 
@@ -414,20 +327,20 @@ function entrar() {
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: #64748b;
+  color: var(--sgl-text-muted, #64748b);
   cursor: pointer;
   transition:
-    color var(--sgl-transition-fast) ease,
-    background var(--sgl-transition-fast) ease;
+    color var(--sgl-transition-fast, 180ms) ease,
+    background var(--sgl-transition-fast, 180ms) ease;
 }
 
 .login-field__visibility:hover {
-  color: var(--sgl-primary);
+  color: var(--sgl-primary, #1a4da1);
   background: rgb(26 77 161 / 7%);
 }
 
 .login-field__visibility:focus-visible {
-  outline: 2px solid var(--sgl-primary);
+  outline: 2px solid var(--sgl-primary, #1a4da1);
   outline-offset: 2px;
 }
 
@@ -445,15 +358,15 @@ function entrar() {
   min-height: 62px;
   margin-top: 8px;
   border: 0;
-  border-radius: var(--sgl-radius-control);
-  background: linear-gradient(135deg, #1a4da1, #244fb2);
+  border-radius: var(--sgl-radius-control, 6px);
+  background: linear-gradient(135deg, var(--sgl-primary, #1a4da1), #244fb2);
   color: #fff;
   font-size: 17px;
   font-weight: 750;
   cursor: pointer;
   transition:
-    background var(--sgl-transition-fast) ease,
-    box-shadow var(--sgl-transition-fast) ease,
+    background var(--sgl-transition-fast, 180ms) ease,
+    box-shadow var(--sgl-transition-fast, 180ms) ease,
     transform 100ms ease;
 }
 
@@ -481,7 +394,7 @@ function entrar() {
   }
 
   .sgl-mark {
-    gap: 15px;
+    gap: 14px;
   }
 
   .login-access {
@@ -496,7 +409,7 @@ function entrar() {
 
   .login-brand,
   .login-brand__content {
-    min-height: 320px;
+    min-height: 330px;
   }
 
   .login-brand__content {
@@ -504,46 +417,24 @@ function entrar() {
   }
 
   .login-brand__embrapa {
+    width: 118px;
     margin-top: 0;
-    font-size: 22px;
   }
 
   .login-brand__identity {
-    margin-top: 32px;
+    margin-top: 26px;
   }
 
   .sgl-mark__symbol {
-    width: 78px;
-    height: 78px;
-    border-radius: 17px;
+    width: 82px;
   }
 
-  .sgl-mark__wording strong {
-    font-size: 68px;
-  }
-
-  .sgl-mark__wording span {
-    margin-top: 10px;
-    font-size: 8px;
-  }
-
-  .login-brand__modules {
-    margin-top: 22px;
-    gap: 20px;
-  }
-
-  .login-brand__modules span {
-    width: 30px;
-    height: 30px;
-  }
-
-  .login-brand__modules svg {
-    width: 27px;
-    height: 27px;
+  .sgl-mark__logo {
+    width: min(70%, 315px);
   }
 
   .login-brand__message {
-    margin-top: 19px;
+    margin-top: 18px;
     font-size: 14px;
   }
 
@@ -560,26 +451,19 @@ function entrar() {
 @media (max-width: 480px) {
   .login-brand,
   .login-brand__content {
-    min-height: 270px;
+    min-height: 280px;
+  }
+
+  .sgl-mark {
+    gap: 10px;
   }
 
   .sgl-mark__symbol {
     width: 64px;
-    height: 64px;
   }
 
-  .sgl-mark__wording strong {
-    font-size: 53px;
-  }
-
-  .sgl-mark__wording span {
-    max-width: 210px;
-    font-size: 7px;
-    letter-spacing: 0.13em;
-  }
-
-  .login-brand__modules {
-    display: none;
+  .sgl-mark__logo {
+    width: min(72%, 250px);
   }
 
   .login-brand__message {
