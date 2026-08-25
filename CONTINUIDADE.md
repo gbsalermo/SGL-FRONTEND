@@ -4,8 +4,9 @@
 **Repositório frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend de referência:** `gbsalermo/Sistema-SGL`  
 **Última atualização:** 25/08/2026  
-**Fase atual:** Etapa 3 — primeira interface real  
-**Próximo bloco exato:** implementar a interface de Login
+**Fase atual:** Etapa 3 — Interfaces reais  
+**Última etapa concluída:** 3.1 — Login  
+**Próximo bloco exato:** 3.2 — Pedidos do Solicitante
 
 Este arquivo é a fonte principal de retomada do frontend.
 
@@ -17,20 +18,20 @@ Ao abrir uma nova sessão:
 
 ```text
 1. ler este CONTINUIDADE.md
-2. ler docs/ETAPA_2_BOOTSTRAP.md
-3. conferir README.md quando precisar de visão geral
-4. usar Swagger/OpenAPI como contrato do backend
-5. respeitar identidade visual e decisões já fechadas
+2. ler docs/ETAPA_2_BOOTSTRAP.md quando precisar da base técnica
+3. conferir README.md para visão geral e apresentação visual
+4. usar Swagger/OpenAPI como fonte de verdade dos contratos do backend
+5. respeitar as decisões visuais e arquiteturais já aprovadas
 6. continuar do bloco PRÓXIMO PASSO
 ```
 
 Regra de processo atual:
 
-> Não vamos concluir um Figma completo antes de codar. O frontend será desenvolvido diretamente a partir dos protótipos e decisões visuais já aprovados, extraindo componentes reutilizáveis durante a implementação real.
+> Não vamos concluir um Figma completo antes de codar. O frontend é desenvolvido no fluxo `protótipo aprovado → implementação real → extração de componentes quando houver responsabilidade/repetição real → validação → próxima tela`.
 
 ---
 
-# 1. Estado do projeto
+# 1. Estado geral do projeto
 
 ## Backend
 
@@ -66,7 +67,40 @@ Nunca reconstruir regras de domínio no frontend quando elas já pertencem ao ba
 
 ---
 
-# 2. Arquitetura frontend oficial
+# 2. Stack oficial
+
+```text
+Vue 3
+Vite
+TypeScript 5.9
+Vue Router
+Pinia
+Axios
+Vuetify 3
+```
+
+Base validada:
+
+```text
+npm install                              ✅
+npm run type-check                      ✅
+npm run dev                             ✅
+/ redireciona para /login               ✅
+Vuetify carregado                       ✅
+Pinia registrado                        ✅
+Router funcionando                      ✅
+```
+
+Decisões de compatibilidade:
+
+- TypeScript oficial: `~5.9.3`;
+- `vue-tsc` 3.3.x;
+- `@types/node` instalado;
+- aliases via `@` configurados no Vite/TypeScript.
+
+---
+
+# 3. Arquitetura frontend oficial
 
 ```text
 SPA
@@ -79,7 +113,7 @@ Fluxo preferencial:
 
 ```text
 View
-→ Component
+→ Components
 → Service / Store quando necessário
 → Axios
 → API Spring Boot
@@ -105,140 +139,47 @@ src/
 
 Regras:
 
-- não espalhar Axios diretamente pelas Views/Components;
+- não espalhar Axios diretamente por Views/Components;
 - Store somente para estado realmente compartilhado;
 - Composable somente quando houver repetição real;
 - não duplicar módulos por perfil;
 - Admin reutiliza Gestão + Cadastros;
-- regras de negócio permanecem no backend.
+- regras de negócio permanecem no backend;
+- Views devem representar composição de tela, não concentrar toda a implementação quando já existem responsabilidades claras separáveis.
 
 ---
 
-# 3. Stack oficial — DEFINIDA
+# 4. Estratégia de implementação
 
-```text
-Vue 3
-Vite
-TypeScript
-Vue Router
-Pinia
-Axios
-Vuetify 3
-```
+A antiga etapa de Figma completo foi abandonada de propósito.
 
-Base atual:
-
-```text
-Vue                 3.5.x
-Vite                8.2.x
-TypeScript          5.9.x
-Vue Router          5.2.x
-Pinia               4.0.x
-Axios               1.19.x
-Vuetify             3.13.x
-vue-tsc             3.3.x
-@types/node         instalado
-```
-
-Decisões de compatibilidade:
-
-- TypeScript 7.0.x foi descartado no bootstrap por incompatibilidade com `vue-tsc 3.3.x`;
-- TypeScript oficial do projeto ficou em `~5.9.3`;
-- `@types/node` foi adicionado porque `vite.config.ts` usa `node:url`;
-- `tsconfig.json` inclui os tipos `vite/client` e `node`.
-
----
-
-# 4. Bootstrap técnico — CONCLUÍDO
-
-Branch utilizada:
-
-```text
-feat/bootstrap-etapa-2
-```
-
-Base implementada:
-
-```text
-package.json
-index.html
-vite.config.ts
-tsconfig.json
-.env.example
-src/main.ts
-src/App.vue
-src/app/vuetify.ts
-src/router/index.ts
-src/services/http.ts
-src/modules/auth/views/LoginView.vue
-src/styles/tokens.css
-```
-
-Validação local concluída em 25/08/2026:
-
-```text
-npm install                              ✅
-npm run type-check                      ✅
-npm run dev                             ✅
-Vite iniciou                            ✅
-/ redirecionou para /login             ✅
-/login renderizou placeholder          ✅
-Vuetify carregado                       ✅
-Pinia registrado                        ✅
-Router funcionando                      ✅
-```
-
-O placeholder exibido dizia que o bootstrap técnico estava ativo. Ele deve ser substituído agora pela tela real de Login.
-
----
-
-# 5. Estratégia de implementação
-
-A antiga subetapa 1.3 de Figma completo foi interrompida de propósito.
-
-O projeto já possui decisões suficientes para começar código real:
-
-```text
-identidade visual                         ✅
-paleta                                    ✅
-tipografia                                ✅
-densidade/spacing                         ✅
-motion                                    ✅
-iconografia                               ✅
-sidebar aberta/recolhida                  ✅
-alertas operacionais                      ✅
-topbar                                    ✅
-área principal                            ✅
-títulos/breadcrumbs                       ✅
-busca/filtros                             ✅
-protótipos de referência                  ✅
-```
-
-A partir daqui:
+Fluxo oficial:
 
 ```text
 protótipo aprovado
 → implementação real
-→ identificar repetição
-→ extrair componente reutilizável
-→ validar
+→ identificar responsabilidades/repetição
+→ extrair componentes quando fizer sentido
+→ validar visual e tecnicamente
 → próxima tela
 ```
 
 Ordem de trabalho:
 
 ```text
-LOGIN
-→ PEDIDOS DO SOLICITANTE
+LOGIN                                  ✅
+→ PEDIDOS DO SOLICITANTE              ⏳ PRÓXIMO
 → GESTÃO
 → ESTOQUE / LOTES / MOVIMENTAÇÕES
 → ADMINISTRAÇÃO
 → RELATÓRIOS / DOCUMENTOS
+→ DASHBOARDS / ROBUSTEZ / 404
+→ AUTENTICAÇÃO / AUTORIZAÇÃO / AUDITORIA
 ```
 
 ---
 
-# 6. Identidade visual aprovada
+# 5. Identidade visual aprovada
 
 Referência principal:
 
@@ -299,79 +240,135 @@ shell permanece estável
 
 ---
 
-# 7. Login — PRÓXIMA IMPLEMENTAÇÃO
+# 6. Etapa 3.1 — Login — CONCLUÍDA
 
-A tela de Login será o primeiro fluxo real do SGL.
-
-Referência estrutural:
+Branch de implementação:
 
 ```text
-Publica / Embrapa
+feat/login-interface
 ```
 
-Direção visual aprovada:
+## Resultado visual aprovado
+
+Layout:
 
 ```text
-layout dividido aproximadamente 50/50
+aproximadamente 50/50
+lado esquerdo institucional
+lado direito branco e limpo
+sem card grande
+sem repetição da marca SGL no formulário
 ```
 
-## Lado esquerdo
+### Lado esquerdo
+
+Composição final:
 
 ```text
-imagem de laboratório em tela cheia dentro da coluna
-+ overlay azul escuro para contraste
-+ identidade institucional
+imagem de laboratório com profissional/tablet
+→ tratada como contexto/textura
+→ overlay azul institucional forte
+
+Embrapa
+↓
+marca oficial SGL
+↓
+Gestão integrada para pedidos, estoque, lotes e relatórios.
+↓
+quatro ícones auxiliares do domínio
 ```
 
-Composição aprovada:
+Decisões finais:
+
+- fundo enfatiza o azul institucional e apaga parcialmente a fotografia;
+- Embrapa branca em destaque, sem competir com a marca SGL;
+- logo SGL oficial centralizada;
+- ícones ficam abaixo da frase institucional;
+- azul e verde funcionam como identidade/apoio;
+- conjunto principal foi refinado verticalmente; o ajuste local final aprovado ficou em torno de `translateY(-18px)` — manter essa referência ao sincronizar a última alteração local.
+
+### Lado direito
+
+Conteúdo final:
 
 ```text
-logo/identidade Embrapa quando aplicável
-marca oficial SGL em destaque
-símbolos do projeto abaixo da marca
-frase curta institucional
-```
-
-Imagem de referência escolhida durante o planejamento:
-
-- laboratório com profissional usando tablet;
-- transmite laboratório + tecnologia + gestão;
-- overlay sugerido `#0D2B5E` em aproximadamente 72–78%, ajustado visualmente durante implementação.
-
-## Lado direito
-
-```text
-fundo branco
-sem card grande desnecessário
-sem repetir a logo SGL
-formulário limpo
-```
-
-Conteúdo previsto:
-
-```text
-Bem-vindo de volta!
+Bem-vindo
 Acesse o sistema para continuar
 
-Usuário / identificação do colaborador
+Usuário de colaborador
 Senha
 Entrar
 ```
 
-Diretrizes:
+Características:
 
-- seguir o padrão Publica, sem modernização excessiva;
-- não repetir a marca SGL nos dois lados;
-- evitar visual de landing page;
-- responsividade deve preservar legibilidade;
-- estados de loading/erro serão definidos na implementação;
-- autenticação real ainda é posterior, então não inventar contrato definitivo.
+- fundo branco;
+- formulário sem card grande;
+- campos discretos;
+- botão em azul institucional;
+- controle de mostrar/ocultar senha;
+- linguagem institucional simples.
 
-No momento, `/login` existe e renderiza apenas o placeholder técnico.
+## Estrutura implementada
+
+O Login foi reorganizado para não concentrar toda a tela em um único arquivo:
+
+```text
+src/modules/auth/
+├── components/
+│   ├── LoginBrandPanel.vue
+│   └── LoginAccessForm.vue
+└── views/
+    └── LoginView.vue
+
+src/assets/images/auth/
+├── embrapa-white.png
+├── login-laboratorio.jpg
+└── sgl-logo.png
+```
+
+Responsabilidades:
+
+```text
+LoginView.vue
+→ composição da tela/rota
+
+LoginBrandPanel.vue
+→ identidade institucional do lado esquerdo
+
+LoginAccessForm.vue
+→ formulário e interação visual do acesso
+```
+
+Isso passa a ser uma referência prática para as próximas telas: componentes devem nascer de responsabilidades reais, sem transformar toda View em um arquivo monolítico.
+
+## Escopo deliberadamente não implementado ainda
+
+```text
+autenticação real
+JWT/sessão
+store de autenticação
+service definitivo de login
+redirecionamento por perfil
+Embrapa ID / integração corporativa
+recuperação de senha
+```
+
+Não inventar contrato de autenticação antes da etapa específica.
+
+## Apresentação visual
+
+O README possui uma seção para apresentar o Login final usando o caminho:
+
+```text
+docs/screenshots/login-final.png
+```
+
+Ao atualizar o screenshot aprovado, manter esse nome para que o README continue renderizando sem alterações.
 
 ---
 
-# 8. Navegação funcional aprovada
+# 7. Navegação funcional aprovada
 
 ## Solicitante
 
@@ -435,7 +432,7 @@ Rotas planejadas:
 
 ---
 
-# 9. Regras importantes do domínio para o frontend
+# 8. Regras importantes do domínio para o frontend
 
 Pedidos:
 
@@ -470,7 +467,7 @@ Fiscalização:
 
 ---
 
-# 10. Padrões de shell já aprovados
+# 9. Padrões de shell já aprovados
 
 Sidebar:
 
@@ -515,7 +512,7 @@ Vencidos
 
 ---
 
-# 11. Método para implementar cada tela
+# 10. Método para implementar cada tela
 
 ```text
 1. entender função e usuário
@@ -531,18 +528,20 @@ Vencidos
 11. validar fluxo completo
 ```
 
-Para mudanças pequenas de configuração/código, preferência do fluxo de trabalho:
+Fluxo de trabalho preferido:
 
 ```text
-assistente explica exatamente a alteração
-→ alteração é feita localmente
-```
+mudança pequena
+→ assistente explica exatamente a alteração
+→ alteração pode ser feita localmente
 
-Mudanças maiores/estruturais podem ser feitas diretamente na branch/repositório quando solicitado.
+mudança estrutural
+→ pode ser feita diretamente na branch/repositório quando solicitado
+```
 
 ---
 
-# 12. Roadmap atualizado
+# 11. Roadmap atualizado
 
 ```text
 Etapa 0 — Handoff backend → frontend                    ✅
@@ -555,8 +554,8 @@ Etapa 1 — Fundação visual/técnica essencial             ✅
 Etapa 2 — Bootstrap técnico                             ✅
 
 Etapa 3 — Interfaces reais                              🟡 ATUAL
-  3.1 Login                                             ⏳ PRÓXIMO
-  3.2 Pedidos do Solicitante                            ⏳
+  3.1 Login                                             ✅ CONCLUÍDO
+  3.2 Pedidos do Solicitante                            ⏳ PRÓXIMO
   3.3 Gestão                                            ⏳
 
 Etapa 4 — Estoque / Lotes / Movimentações              ⏳
@@ -566,15 +565,16 @@ Etapa 7 — Dashboards finais / robustez / 404             ⏳
 Etapa 8 — Autenticação / autorização / auditoria        ⏳
 ```
 
-A numeração prática pode ser refinada conforme o desenvolvimento, mas a ordem funcional acima é a referência.
-
 ---
 
-# 13. Documentos importantes
+# 12. Documentos importantes
 
 ```text
 CONTINUIDADE.md
 → fonte principal de retomada
+
+README.md
+→ visão geral, apresentação e screenshot do estado visual aprovado
 
 docs/ETAPA_2_BOOTSTRAP.md
 → stack, bootstrap, correções de compatibilidade e validação
@@ -600,33 +600,31 @@ docs/ESTRUTURA_FRONTEND.md
 
 ---
 
-# 14. Próximo passo exato
+# 13. Próximo passo exato
 
-Abrir uma sessão focada exclusivamente em:
-
-```text
-INTERFACE DE LOGIN
-```
-
-Primeiro objetivo dessa sessão:
+Abrir uma sessão focada em:
 
 ```text
-substituir o placeholder de src/modules/auth/views/LoginView.vue
-pela tela real de Login aprovada
+ETAPA 3.2 — PEDIDOS DO SOLICITANTE
 ```
 
-Não avançar para pedidos antes de:
+Primeiro fluxo a detalhar/implementar:
 
 ```text
-layout do login validado
-responsividade mínima validada
-type-check passando
-npm run dev funcionando
-rota /login correta
+Pedidos
+├── Novo pedido
+└── Meus pedidos
+    └── Detalhe
 ```
 
-Depois do Login:
+Antes de codar cada parte:
 
 ```text
-INTERFACE DE PEDIDOS DO SOLICITANTE
+conferir Swagger/OpenAPI
+→ identificar contratos reais
+→ definir a experiência do solicitante
+→ implementar diretamente
+→ extrair componentes quando a responsabilidade/repetição aparecer
 ```
+
+A tela de Login está oficialmente encerrada como referência visual e arquitetural da primeira interface real do SGL.

@@ -1,31 +1,33 @@
+<script setup lang="ts">
+import LoginAccessForm from '../components/LoginAccessForm.vue'
+import LoginBrandPanel from '../components/LoginBrandPanel.vue'
+</script>
+
 <template>
-  <main class="bootstrap-ready">
-    <section>
-      <p class="bootstrap-ready__eyebrow">SGL Frontend</p>
-      <h1>Bootstrap técnico ativo</h1>
-      <p>A próxima implementação real será a tela de login aprovada no planejamento.</p>
-    </section>
+  <main class="login-page">
+    <LoginBrandPanel />
+    <LoginAccessForm />
   </main>
 </template>
 
 <style scoped>
-.bootstrap-ready {
+.login-page {
   min-height: 100vh;
   display: grid;
-  place-items: center;
-  padding: 24px;
-  background: var(--sgl-background, #f5f7fa);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  background: var(--sgl-surface, #ffffff);
   color: var(--sgl-text, #1a1a2e);
 }
 
-.bootstrap-ready section {
-  max-width: 560px;
+@media (max-width: 1100px) {
+  .login-page {
+    grid-template-columns: 46% 54%;
+  }
 }
 
-.bootstrap-ready__eyebrow {
-  color: var(--sgl-primary, #1a4da1);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+@media (max-width: 840px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
