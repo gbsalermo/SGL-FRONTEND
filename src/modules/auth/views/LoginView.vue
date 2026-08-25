@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+import logoEmbrapa from '@/assets/images/embrapa-white.png'
+import laboratorio from '@/assets/images/login-laboratorio.jpg.jpg'
+import logoSgl from '@/assets/images/sgl-logo.png.png'
+import simboloSgl from '@/assets/images/sgl-modules.png'
+
 const usuario = ref('')
 const senha = ref('')
 const mostrarSenha = ref(false)
-
-const assets = {
-  logoSgl: '/images/sgl-logo.png',
-  logoEmbrapa: '/images/embrapa-white.png',
-  simboloSgl: '/images/sgl-symbol.png',
-  laboratorio: '/images/login-laboratorio.jpg',
-}
 
 function entrar() {
   // A autenticação real será integrada em uma etapa posterior.
@@ -22,11 +20,13 @@ function entrar() {
     <section
       class="login-brand"
       aria-label="Apresentação do SGL"
-      :style="{ backgroundImage: `linear-gradient(180deg, rgb(13 43 94 / 76%), rgb(26 77 161 / 82%)), url(${assets.laboratorio})` }"
+      :style="{ backgroundImage: `url(${laboratorio})` }"
     >
+      <div class="login-brand__overlay" />
+
       <div class="login-brand__content">
         <img
-          :src="assets.logoEmbrapa"
+          :src="logoEmbrapa"
           alt="Embrapa"
           class="login-brand__embrapa"
         />
@@ -34,17 +34,19 @@ function entrar() {
         <div class="login-brand__identity">
           <div class="sgl-mark">
             <img
-              :src="assets.simboloSgl"
+              :src="simboloSgl"
               alt=""
               aria-hidden="true"
               class="sgl-mark__symbol"
             />
 
-            <img
-              :src="assets.logoSgl"
-              alt="SGL — Sistema de Gestão de Laboratórios"
-              class="sgl-mark__logo"
-            />
+            <div class="sgl-mark__logo-surface">
+              <img
+                :src="logoSgl"
+                alt="SGL — Sistema de Gestão de Laboratórios"
+                class="sgl-mark__logo"
+              />
+            </div>
           </div>
 
           <p class="login-brand__message">
@@ -57,15 +59,20 @@ function entrar() {
     <section class="login-access" aria-labelledby="login-title">
       <div class="login-access__content">
         <header class="login-header">
-          <h1 id="login-title">Bem-vindo!</h1>
+          <h1 id="login-title">Bem-vindo</h1>
           <p>Acesse o sistema para continuar</p>
         </header>
 
         <form class="login-form" @submit.prevent="entrar">
           <div class="login-field">
             <label for="usuario">Usuário de colaborador</label>
+
             <div class="login-field__control">
-              <svg class="login-field__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                class="login-field__icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <circle cx="12" cy="8" r="4" />
                 <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
               </svg>
@@ -83,8 +90,13 @@ function entrar() {
 
           <div class="login-field">
             <label for="senha">Senha</label>
+
             <div class="login-field__control">
-              <svg class="login-field__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                class="login-field__icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <rect x="5" y="10" width="14" height="11" rx="2" />
                 <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" />
               </svg>
@@ -104,18 +116,29 @@ function entrar() {
                 :aria-label="mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'"
                 @click="mostrarSenha = !mostrarSenha"
               >
-                <svg v-if="!mostrarSenha" viewBox="0 0 24 24" aria-hidden="true">
+                <svg
+                  v-if="!mostrarSenha"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
                   <circle cx="12" cy="12" r="2.5" />
                 </svg>
-                <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+
+                <svg
+                  v-else
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <path d="m3 3 18 18M10.7 6.1A9 9 0 0 1 12 6c6 0 9.5 6 9.5 6a15 15 0 0 1-2.1 2.8M6.2 6.2C3.8 8 2.5 12 2.5 12S6 18 12 18c1.5 0 2.8-.4 4-1" />
                 </svg>
               </button>
             </div>
           </div>
 
-          <button class="login-submit" type="submit">Entrar</button>
+          <button class="login-submit" type="submit">
+            Entrar
+          </button>
         </form>
       </div>
     </section>
@@ -141,12 +164,25 @@ function entrar() {
   background-repeat: no-repeat;
 }
 
+.login-brand__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(13 43 94 / 78%) 0%,
+      rgb(26 77 161 / 74%) 48%,
+      rgb(13 43 94 / 84%) 100%
+    );
+}
+
 .login-brand::before,
 .login-brand::after {
   content: '';
   position: absolute;
+  z-index: 1;
   border-radius: 50%;
-  background: rgb(255 255 255 / 8%);
+  background: rgb(255 255 255 / 7%);
   pointer-events: none;
 }
 
@@ -166,7 +202,7 @@ function entrar() {
 
 .login-brand__content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -176,14 +212,15 @@ function entrar() {
 }
 
 .login-brand__embrapa {
-  width: clamp(122px, 11vw, 176px);
+  width: clamp(126px, 11vw, 178px);
   height: auto;
   margin: clamp(18px, 4vh, 52px) 0 0;
   object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgb(0 0 0 / 16%));
 }
 
 .login-brand__identity {
-  width: min(100%, 630px);
+  width: min(100%, 660px);
   margin: auto 0;
   display: flex;
   flex-direction: column;
@@ -196,29 +233,42 @@ function entrar() {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(18px, 2vw, 28px);
+  gap: clamp(16px, 2vw, 26px);
 }
 
 .sgl-mark__symbol {
-  width: clamp(105px, 9vw, 145px);
-  height: auto;
+  width: clamp(104px, 9vw, 142px);
+  aspect-ratio: 420 / 323;
   flex: 0 0 auto;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 18px rgb(0 0 0 / 18%));
+  object-fit: cover;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 20%);
+}
+
+.sgl-mark__logo-surface {
+  width: min(72%, 440px);
+  padding: 12px 16px;
+  border: 1px solid rgb(255 255 255 / 36%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 14%);
+  backdrop-filter: blur(4px);
 }
 
 .sgl-mark__logo {
-  width: min(72%, 430px);
+  display: block;
+  width: 100%;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 5px 14px rgb(0 0 0 / 12%));
 }
 
 .login-brand__message {
-  margin: 36px 0 0;
+  margin: 38px 0 0;
   color: rgb(255 255 255 / 94%);
   font-size: clamp(15px, 1.2vw, 18px);
+  font-weight: 400;
   line-height: 1.6;
+  text-shadow: 0 2px 7px rgb(0 0 0 / 16%);
 }
 
 .login-access {
@@ -359,19 +409,23 @@ function entrar() {
   margin-top: 8px;
   border: 0;
   border-radius: var(--sgl-radius-control, 6px);
-  background: linear-gradient(135deg, var(--sgl-primary, #1a4da1), #244fb2);
+  background: linear-gradient(
+    135deg,
+    var(--sgl-primary, #1a4da1),
+    var(--sgl-primary-dark, #0d2b5e)
+  );
   color: #fff;
   font-size: 17px;
   font-weight: 750;
   cursor: pointer;
   transition:
-    background var(--sgl-transition-fast, 180ms) ease,
     box-shadow var(--sgl-transition-fast, 180ms) ease,
+    filter var(--sgl-transition-fast, 180ms) ease,
     transform 100ms ease;
 }
 
 .login-submit:hover {
-  background: linear-gradient(135deg, #163f87, #1f469e);
+  filter: brightness(0.96);
   box-shadow: 0 8px 20px rgb(26 77 161 / 18%);
 }
 
@@ -394,7 +448,15 @@ function entrar() {
   }
 
   .sgl-mark {
-    gap: 14px;
+    gap: 13px;
+  }
+
+  .sgl-mark__symbol {
+    width: 92px;
+  }
+
+  .sgl-mark__logo-surface {
+    width: min(72%, 360px);
   }
 
   .login-access {
@@ -409,7 +471,11 @@ function entrar() {
 
   .login-brand,
   .login-brand__content {
-    min-height: 330px;
+    min-height: 350px;
+  }
+
+  .login-brand {
+    background-position: center 55%;
   }
 
   .login-brand__content {
@@ -422,19 +488,21 @@ function entrar() {
   }
 
   .login-brand__identity {
-    margin-top: 26px;
+    margin-top: 28px;
   }
 
   .sgl-mark__symbol {
-    width: 82px;
+    width: 78px;
+    border-radius: 14px;
   }
 
-  .sgl-mark__logo {
-    width: min(70%, 315px);
+  .sgl-mark__logo-surface {
+    width: min(70%, 310px);
+    padding: 8px 10px;
   }
 
   .login-brand__message {
-    margin-top: 18px;
+    margin-top: 20px;
     font-size: 14px;
   }
 
@@ -451,19 +519,21 @@ function entrar() {
 @media (max-width: 480px) {
   .login-brand,
   .login-brand__content {
-    min-height: 280px;
+    min-height: 300px;
   }
 
   .sgl-mark {
-    gap: 10px;
+    gap: 9px;
   }
 
   .sgl-mark__symbol {
-    width: 64px;
+    width: 62px;
+    border-radius: 10px;
   }
 
-  .sgl-mark__logo {
-    width: min(72%, 250px);
+  .sgl-mark__logo-surface {
+    width: min(72%, 245px);
+    padding: 7px 9px;
   }
 
   .login-brand__message {
