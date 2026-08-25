@@ -51,14 +51,7 @@ feat/login-interface
 
 ### Apresentação
 
-O README está preparado para exibir o screenshot final a partir deste caminho:
-
-```text
-docs/screenshots/login-final.png
-```
-
-Para atualizar a apresentação, basta salvar/substituir o screenshot aprovado nesse arquivo e fazer commit/push.
-
+### Interface Login
 <p align="center">
   <img src="docs/screenshots/login-final.png" alt="Tela final de Login do SGL" width="100%">
 </p>
