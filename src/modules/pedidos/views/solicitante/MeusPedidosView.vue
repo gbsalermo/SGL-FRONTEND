@@ -489,7 +489,7 @@ tbody tr:hover {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 5px;
+  gap: 6px;
 }
 
 .status-chip {
@@ -510,10 +510,27 @@ tbody tr:hover {
 .status-chip--cancelado { background: #eef1f5; color: #586579; }
 
 .urgent-status {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 25px;
+  padding: 0 9px;
+  border: 1px solid #fecaca;
+  border-radius: 999px;
+  background: #feecec;
   color: #b42318;
   font-size: 10px;
   font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.urgent-status:hover {
+  border-color: #f4a6a6;
+  background: #ffdede;
 }
 
 .actions-column {
@@ -636,9 +653,8 @@ tbody tr:hover {
 }
 
 .detail-meta .urgent-status {
-  color: #b42318;
-  font-size: 10px;
-  font-weight: 800;
+  width: fit-content;
+  margin-top: 3px;
 }
 
 .detail-items,
