@@ -279,7 +279,7 @@ function sair() {
   width: 178px;
   max-height: 74px;
   object-fit: contain;
-  transform: translateX(10px);
+  transform: none;
   filter: drop-shadow(0 4px 14px rgb(0 0 0 / 22%));
 }
 
