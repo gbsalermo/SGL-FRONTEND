@@ -8,76 +8,124 @@ import type {
   StatusPedido,
 } from '@/modules/pedidos/types/pedido'
 
-function aplicarUrgenciaOperacional(pedido: PedidoResponse): PedidoResponse {
+function rotuloEnum(valor: string | null | undefined) {
+  if (!valor || valor === 'NENHUM') return null
+
+  const rotulos: Record<string, string> = {
+    MEDIO: 'Médio',
+    INFLAMAVEL: 'Inflamável',
+    RADIOATIVO: 'Radioativo',
+    TOXICO: 'Tóxico',
+    CORROSIVO: 'Corrosivo',
+    BIOLOGICO: 'Biológico',
+    VALIDADE: 'Validade',
+  }
+
+  return rotulos[valor] ?? valor
+    .toLowerCase()
+    .replaceAll('_', ' ')
+    .replace(/^./, (letra) => letra.toUpperCase())
+}
+
+function descricaoOperacionalProduto(item: PedidoResponse['itens'][number]) {
+  const partes = [item.produtoUnidadeArmazenamento]
+
+  if (item.produtoPerecivel) {
+    const tipoPerecivel = rotuloEnum(item.produtoTipoPerecivel)
+    partes.push(tipoPerecivel ? `Perecível (${tipoPerecivel})` : 'Perecível')
+  }
+
+  if (item.produtoRisco && item.produtoRisco !== 'NENHUM') {
+    const nivel = rotuloEnum(item.produtoRisco)
+    const tipo = rotuloEnum(item.produtoTipoRisco)
+    partes.push(`Risco ${nivel}${tipo ? ` — ${tipo}` : ''}`)
+  }
+
+  if (item.produtoDescricaoRisco?.trim()) {
+    partes.push(item.produtoDescricaoRisco.trim())
+  }
+
+  if (item.produtoCondicoesArmazenamento?.trim()) {
+    partes.push(`Armazenamento: ${item.produtoCondicoesArmazenamento.trim()}`)
+  }
+
+  return partes.filter(Boolean).join(' • ')
+}
+
+function aplicarContextoOperacional(pedido: PedidoResponse): PedidoResponse {
   return {
     ...pedido,
     urgente: pedido.urgente && pedido.status === 'PENDENTE',
+    itens: pedido.itens.map((item) => ({
+      ...item,
+      produtoUnidadeArmazenamento: descricaoOperacionalProduto(item),
+    })),
   }
 }
 
-function aplicarUrgenciaOperacionalLista(pedidos: PedidoResponse[]) {
-  return pedidos.map(aplicarUrgenciaOperacional)
+function aplicarContextoOperacionalLista(pedidos: PedidoResponse[]) {
+  return pedidos.map(aplicarContextoOperacional)
 }
 
 export const pedidoService = {
   async listarTodos() {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos')
-    return aplicarUrgenciaOperacionalLista(data)
+    return aplicarContextoOperacionalLista(data)
   },
 
   async listarPorStatus(status: StatusPedido) {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-status', {
       params: { status },
     })
-    return aplicarUrgenciaOperacionalLista(data)
+    return aplicarContextoOperacionalLista(data)
   },
 
   async listarPorUrgencia(urgente: boolean) {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-urgencia', {
       params: { urgente },
     })
-    return aplicarUrgenciaOperacionalLista(data)
+    return aplicarContextoOperacionalLista(data)
   },
 
   async buscarPorId(id: string) {
     const { data } = await http.get<PedidoResponse>(`/v1/pedidos/${id}`)
-    return aplicarUrgenciaOperacional(data)
+    return aplicarContextoOperacional(data)
   },
 
   async aprovar(id: string, payload: AprovarPedidoRequest) {
     const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/aprovar`, payload)
-    return aplicarUrgenciaOperacional(data)
+    return aplicarContextoOperacional(data)
   },
 
   async rejeitar(id: string, observacao: string) {
     const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/rejeitar`, null, {
       params: { observacao },
     })
-    return aplicarUrgenciaOperacional(data)
+    return aplicarContextoOperacional(data)
   },
 
   async entregar(id: string) {
     const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/entregar`)
-    return aplicarUrgenciaOperacional(data)
+    return aplicarContextoOperacional(data)
   },
 
   async cancelar(id: string, observacao: string) {
     const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/cancelar`, null, {
       params: { observacao },
     })
-    return aplicarUrgenciaOperacional(data)
+    return aplicarContextoOperacional(data)
   },
 
   async listarPorUsuario(usuarioId: string) {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-usuario', {
       params: { usuarioId },
     })
-    return aplicarUrgenciaOperacionalLista(data)
+    return aplicarContextoOperacionalLista(data)
   },
 
   async criar(payload: PedidoRequest) {
     const { data } = await http.post<PedidoResponse>('/v1/pedidos', payload)
-    return aplicarUrgenciaOperacional(data)
+    return aplicarContextoOperacional(data)
   },
 
   async listarProjetosPorLaboratorio(laboratorioId: string) {
