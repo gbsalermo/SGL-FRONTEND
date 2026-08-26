@@ -10,6 +10,12 @@ export interface ItemPedidoResponse {
   produtoId: string
   produtoNome: string
   produtoUnidadeArmazenamento: string
+  produtoRisco: string | null
+  produtoTipoRisco: string | null
+  produtoDescricaoRisco: string | null
+  produtoPerecivel: boolean
+  produtoTipoPerecivel: string | null
+  produtoCondicoesArmazenamento: string | null
   quantidadeSolicitada: number
   quantidadeAprovada: number | null
 }
