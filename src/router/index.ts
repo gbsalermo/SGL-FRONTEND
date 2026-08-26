@@ -2,6 +2,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import { useSessionStore } from '@/stores/session'
 
+function rotaInicial() {
+  const session = useSessionStore()
+  const perfil = session.usuario?.perfil
+
+  return perfil === 'GESTOR' || perfil === 'ADMINISTRADOR'
+    ? '/pedidos'
+    : '/meus-pedidos'
+}
+
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -9,7 +18,7 @@ export const router = createRouter({
       path: '/',
       redirect: () => {
         const session = useSessionStore()
-        return session.autenticado ? '/meus-pedidos' : '/login'
+        return session.autenticado ? rotaInicial() : '/login'
       },
     },
     {
@@ -40,6 +49,20 @@ export const router = createRouter({
       ],
     },
     {
+      path: '/',
+      component: () => import('@/layouts/GestaoLayout.vue'),
+      meta: {
+        requiresSession: true,
+      },
+      children: [
+        {
+          path: 'pedidos',
+          name: 'gestao-pedidos',
+          component: () => import('@/modules/pedidos/views/gestao/PedidosGestaoView.vue'),
+        },
+      ],
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/',
     },
@@ -57,7 +80,7 @@ router.beforeEach((to) => {
   }
 
   if (to.path === '/login' && session.autenticado) {
-    return '/meus-pedidos'
+    return rotaInicial()
   }
 
   return true
