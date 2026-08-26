@@ -16,7 +16,7 @@ const carregando = ref(false)
 const erro = ref('')
 const busca = ref('')
 const status = ref<StatusPedido | 'TODOS'>('TODOS')
-const selecionado = ref<PedidoResponse | null>(null)
+const pedidoExpandidoId = ref<string | null>(null)
 
 const criadoAgora = computed(() => route.query.criado === '1')
 
@@ -95,6 +95,10 @@ function produtosVisiveis(pedido: PedidoResponse) {
 
 function produtosRestantes(pedido: PedidoResponse) {
   return Math.max(0, pedido.itens.length - 2)
+}
+
+function alternarDetalhes(pedidoId: string) {
+  pedidoExpandidoId.value = pedidoExpandidoId.value === pedidoId ? null : pedidoId
 }
 
 onMounted(carregarPedidos)
@@ -183,100 +187,129 @@ onMounted(carregarPedidos)
               <th>Itens</th>
               <th>Status</th>
               <th>Laboratório</th>
-              <th class="actions-column">Ações</th>
+              <th class="actions-column">Detalhes</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="pedido in pedidosFiltrados" :key="pedido.id">
-              <td>
-                <strong class="table-primary">{{ formatarData(pedido.dataSolicitacao) }}</strong>
-                <span class="table-secondary">{{ pedido.id.slice(0, 8).toUpperCase() }}</span>
-              </td>
+            <template v-for="pedido in pedidosFiltrados" :key="pedido.id">
+              <tr class="order-row" :class="{ 'order-row--expanded': pedidoExpandidoId === pedido.id }">
+                <td>
+                  <strong class="table-primary">{{ formatarData(pedido.dataSolicitacao) }}</strong>
+                  <span class="table-secondary">{{ pedido.id.slice(0, 8).toUpperCase() }}</span>
+                </td>
 
-              <td class="products-column">
-                <div class="product-summary">
-                  <strong v-for="item in produtosVisiveis(pedido)" :key="item.id">
-                    {{ item.produtoNome }}
-                  </strong>
-                  <span v-if="produtosRestantes(pedido) > 0" class="more-products">
-                    + {{ produtosRestantes(pedido) }} outro(s)
-                  </span>
-                  <small>Projeto: {{ pedido.projetoNome ?? 'Sem projeto' }}</small>
-                </div>
-              </td>
+                <td class="products-column">
+                  <div class="product-summary">
+                    <strong v-for="item in produtosVisiveis(pedido)" :key="item.id">
+                      {{ item.produtoNome }}
+                    </strong>
+                    <span v-if="produtosRestantes(pedido) > 0" class="more-products">
+                      + {{ produtosRestantes(pedido) }} outro(s)
+                    </span>
+                    <small>Projeto: {{ pedido.projetoNome ?? 'Sem projeto' }}</small>
+                  </div>
+                </td>
 
-              <td>
-                <strong class="table-primary">{{ pedido.itens.length }}</strong>
-                <span class="table-secondary">produto(s)</span>
-              </td>
+                <td>
+                  <strong class="table-primary">{{ pedido.itens.length }}</strong>
+                  <span class="table-secondary">produto(s)</span>
+                </td>
 
-              <td>
-                <div class="status-cell">
-                  <span class="status-chip" :class="`status-chip--${pedido.status.toLowerCase()}`">
-                    {{ statusLabel(pedido.status) }}
-                  </span>
-                  <span v-if="pedido.urgente" class="urgent-status">Pedido urgente</span>
-                </div>
-              </td>
+                <td>
+                  <div class="status-cell">
+                    <span class="status-chip" :class="`status-chip--${pedido.status.toLowerCase()}`">
+                      {{ statusLabel(pedido.status) }}
+                    </span>
+                    <span v-if="pedido.urgente" class="urgent-status">Pedido urgente</span>
+                  </div>
+                </td>
 
-              <td>{{ pedido.laboratorioNome }}</td>
+                <td>{{ pedido.laboratorioNome }}</td>
 
-              <td class="actions-column">
-                <button class="details-button" type="button" @click="selecionado = pedido">
-                  Ver detalhes
-                </button>
-              </td>
-            </tr>
+                <td class="actions-column">
+                  <button
+                    class="expand-button"
+                    :class="{ 'expand-button--open': pedidoExpandidoId === pedido.id }"
+                    type="button"
+                    :aria-expanded="pedidoExpandidoId === pedido.id"
+                    :aria-label="pedidoExpandidoId === pedido.id ? 'Recolher detalhes do pedido' : 'Expandir detalhes do pedido'"
+                    @click="alternarDetalhes(pedido.id)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m8 10 4 4 4-4" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+
+              <tr v-if="pedidoExpandidoId === pedido.id" class="expanded-row">
+                <td colspan="6">
+                  <div class="expanded-panel">
+                    <div class="expanded-heading">
+                      <div>
+                        <span>Pedido {{ pedido.id.slice(0, 8).toUpperCase() }}</span>
+                        <strong>Detalhes da solicitação</strong>
+                      </div>
+                      <span class="expanded-date">Solicitado em {{ formatarData(pedido.dataSolicitacao) }}</span>
+                    </div>
+
+                    <div class="expanded-grid">
+                      <section class="expanded-section expanded-section--materials">
+                        <h3>Materiais solicitados</h3>
+                        <div class="material-list">
+                          <div v-for="item in pedido.itens" :key="item.id" class="material-item">
+                            <div>
+                              <strong>{{ item.produtoNome }}</strong>
+                              <span>{{ item.produtoUnidadeArmazenamento }}</span>
+                            </div>
+                            <div class="material-quantity">
+                              <span>Solicitado</span>
+                              <strong>{{ item.quantidadeSolicitada }}</strong>
+                              <small v-if="item.quantidadeAprovada != null">
+                                Aprovado: {{ item.quantidadeAprovada }}
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section class="expanded-section">
+                        <h3>Informações do pedido</h3>
+                        <dl class="info-list">
+                          <div>
+                            <dt>Status</dt>
+                            <dd>{{ statusLabel(pedido.status) }}</dd>
+                          </div>
+                          <div>
+                            <dt>Projeto</dt>
+                            <dd>{{ pedido.projetoNome ?? 'Sem projeto' }}</dd>
+                          </div>
+                          <div>
+                            <dt>Laboratório</dt>
+                            <dd>{{ pedido.laboratorioNome }}</dd>
+                          </div>
+                        </dl>
+                      </section>
+
+                      <section v-if="pedido.urgente" class="expanded-section expanded-section--urgent">
+                        <h3>Urgência</h3>
+                        <span class="urgent-status">Pedido urgente</span>
+                        <p>{{ pedido.motivoUrgencia || 'Motivo de urgência não informado.' }}</p>
+                      </section>
+
+                      <section class="expanded-section">
+                        <h3>Observação / descrição</h3>
+                        <p>{{ pedido.observacao || 'Nenhuma observação informada neste pedido.' }}</p>
+                      </section>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
     </section>
-
-    <div v-if="selecionado" class="dialog-backdrop" @click.self="selecionado = null">
-      <section class="detail-dialog" role="dialog" aria-modal="true" aria-label="Detalhes do pedido">
-        <header>
-          <div>
-            <span class="dialog-eyebrow">Pedido {{ selecionado.id.slice(0, 8).toUpperCase() }}</span>
-            <h2>Detalhes da solicitação</h2>
-          </div>
-          <button type="button" aria-label="Fechar" @click="selecionado = null">×</button>
-        </header>
-
-        <div class="detail-meta">
-          <div>
-            <span>Status</span>
-            <strong>{{ statusLabel(selecionado.status) }}</strong>
-            <small v-if="selecionado.urgente" class="urgent-status">Pedido urgente</small>
-          </div>
-          <div><span>Projeto</span><strong>{{ selecionado.projetoNome ?? 'Sem projeto' }}</strong></div>
-          <div><span>Solicitado em</span><strong>{{ formatarData(selecionado.dataSolicitacao) }}</strong></div>
-        </div>
-
-        <div v-if="selecionado.urgente && selecionado.motivoUrgencia" class="detail-note detail-note--urgent">
-          <span>Motivo da urgência</span>
-          <p>{{ selecionado.motivoUrgencia }}</p>
-        </div>
-
-        <div class="detail-items">
-          <h3>Materiais</h3>
-          <div v-for="item in selecionado.itens" :key="item.id" class="detail-item">
-            <div>
-              <strong>{{ item.produtoNome }}</strong>
-              <span>{{ item.produtoUnidadeArmazenamento }}</span>
-            </div>
-            <div class="detail-quantity">
-              <span>Solicitado: {{ item.quantidadeSolicitada }}</span>
-              <span v-if="item.quantidadeAprovada != null">Aprovado: {{ item.quantidadeAprovada }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="selecionado.observacao" class="detail-note">
-          <span>Observação</span>
-          <p>{{ selecionado.observacao }}</p>
-        </div>
-      </section>
-    </div>
   </section>
 </template>
 
@@ -326,8 +359,8 @@ onMounted(carregarPedidos)
 table { width: 100%; min-width: 980px; border-collapse: collapse; font-size: 13px; }
 th, td { padding: 14px 16px; border-bottom: 1px solid #edf1f6; text-align: left; vertical-align: middle; }
 th { color: #35415a; background: #fbfcfe; font-size: 11px; text-transform: uppercase; letter-spacing: 0.035em; }
-tbody tr:last-child td { border-bottom: 0; }
-tbody tr:hover { background: #fbfdff; }
+.order-row:hover { background: #fbfdff; }
+.order-row--expanded { background: #f8fbff; }
 .table-primary, .table-secondary { display: block; }
 .table-primary { color: var(--sgl-text); font-weight: 650; }
 .table-secondary { margin-top: 3px; color: var(--sgl-text-muted); font-size: 11px; }
@@ -348,39 +381,68 @@ tbody tr:hover { background: #fbfdff; }
 .urgent-status { border: 1px solid #fecaca; background: #feecec; color: #b42318; letter-spacing: 0.025em; transition: background-color 160ms ease, border-color 160ms ease; }
 .urgent-status:hover { border-color: #f4a6a6; background: #ffdede; }
 
-.actions-column { text-align: right; }
-.details-button { border: 0; background: transparent; color: var(--sgl-primary); font-size: 12px; font-weight: 750; cursor: pointer; }
+.actions-column { width: 74px; text-align: center; }
+.expand-button {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid #d9e2ee;
+  border-radius: 7px;
+  background: #fff;
+  color: var(--sgl-primary);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+.expand-button:hover { border-color: #b8c8dc; background: #f3f7fc; }
+.expand-button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 180ms ease; }
+.expand-button--open { border-color: #b8cbee; background: #eef4ff; }
+.expand-button--open svg { transform: rotate(180deg); }
+
+.expanded-row > td { padding: 0; background: #f8fafc; }
+.expanded-panel { padding: 22px 24px 24px; border-bottom: 1px solid #dce5f0; box-shadow: inset 0 6px 12px rgb(15 37 71 / 3%); }
+.expanded-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.expanded-heading > div { display: flex; flex-direction: column; gap: 3px; }
+.expanded-heading > div > span { color: var(--sgl-primary); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.035em; }
+.expanded-heading > div > strong { font-size: 16px; }
+.expanded-date { color: var(--sgl-text-muted); font-size: 11px; }
+
+.expanded-grid { display: grid; grid-template-columns: 1.45fr 1fr; gap: 14px; }
+.expanded-section { min-width: 0; padding: 16px; border: 1px solid #e1e8f1; border-radius: 8px; background: #fff; }
+.expanded-section h3 { margin: 0 0 12px; color: #26344b; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+.expanded-section p { margin: 9px 0 0; color: #4d5a70; font-size: 12px; line-height: 1.55; }
+.expanded-section--materials { grid-row: span 2; }
+.expanded-section--urgent { border-color: #fecaca; background: #fffafa; }
+.expanded-section--urgent h3, .expanded-section--urgent p { color: #b42318; }
+
+.material-list { display: flex; flex-direction: column; }
+.material-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 11px 0; border-top: 1px solid #edf1f6; }
+.material-item:first-child { border-top: 0; padding-top: 0; }
+.material-item:last-child { padding-bottom: 0; }
+.material-item > div:first-child { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.material-item > div:first-child strong { color: var(--sgl-text); font-size: 12px; }
+.material-item > div:first-child span { color: var(--sgl-text-muted); font-size: 10px; }
+.material-quantity { flex: 0 0 auto; display: grid; grid-template-columns: auto auto; gap: 2px 8px; text-align: right; }
+.material-quantity span { color: var(--sgl-text-muted); font-size: 9px; text-transform: uppercase; }
+.material-quantity strong { font-size: 13px; }
+.material-quantity small { grid-column: 1 / -1; color: #187443; font-size: 9px; }
+
+.info-list { display: grid; gap: 10px; margin: 0; }
+.info-list div { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; }
+.info-list dt { color: var(--sgl-text-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.info-list dd { margin: 0; color: var(--sgl-text); font-size: 11px; font-weight: 650; }
+
 .state-box { min-height: 230px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 28px; color: var(--sgl-text-muted); text-align: center; }
 .state-box strong { color: var(--sgl-text); }
 .state-box button { margin-top: 6px; border: 0; background: transparent; color: var(--sgl-primary); font-weight: 700; cursor: pointer; }
 .state-box--error strong { color: var(--sgl-error); }
 
-.dialog-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgb(5 16 37 / 45%); backdrop-filter: blur(2px); }
-.detail-dialog { width: min(100%, 680px); max-height: 86vh; overflow-y: auto; border-radius: 10px; background: #fff; box-shadow: 0 24px 60px rgb(5 16 37 / 25%); }
-.detail-dialog > header { display: flex; justify-content: space-between; gap: 20px; padding: 20px 22px; border-bottom: 1px solid var(--sgl-border); }
-.dialog-eyebrow { color: var(--sgl-primary); font-size: 11px; font-weight: 800; text-transform: uppercase; }
-.detail-dialog h2 { margin: 4px 0 0; font-size: 21px; }
-.detail-dialog > header button { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #f4f6f9; color: var(--sgl-text); font-size: 22px; cursor: pointer; }
-.detail-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 18px 22px; background: #f8fafc; }
-.detail-meta div { display: flex; flex-direction: column; gap: 4px; }
-.detail-meta span, .detail-note > span { color: var(--sgl-text-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; }
-.detail-meta strong { font-size: 12px; }
-.detail-meta .urgent-status { margin-top: 3px; }
-.detail-items, .detail-note { padding: 20px 22px; }
-.detail-items h3 { margin: 0 0 12px; font-size: 14px; }
-.detail-item { display: flex; justify-content: space-between; gap: 18px; padding: 13px 0; border-top: 1px solid #edf1f6; }
-.detail-item > div:first-child, .detail-quantity { display: flex; flex-direction: column; gap: 3px; }
-.detail-item span { color: var(--sgl-text-muted); font-size: 11px; }
-.detail-quantity { text-align: right; }
-.detail-note { border-top: 1px solid var(--sgl-border); }
-.detail-note--urgent { border-top-color: #fecaca; background: #fffafa; }
-.detail-note--urgent > span, .detail-note--urgent p { color: #b42318; }
-.detail-note p { margin: 8px 0 0; color: #46536a; font-size: 13px; line-height: 1.55; }
-
 @media (max-width: 760px) {
   .page-heading { align-items: stretch; flex-direction: column; }
   .primary-action { align-self: flex-start; }
-  .summary-grid, .filter-surface, .detail-meta { grid-template-columns: 1fr; }
+  .summary-grid, .filter-surface, .expanded-grid { grid-template-columns: 1fr; }
   .status-filter { grid-template-columns: 70px 1fr; }
+  .expanded-section--materials { grid-row: auto; }
+  .expanded-heading { flex-direction: column; }
 }
 </style>
