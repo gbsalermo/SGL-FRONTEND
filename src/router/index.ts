@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { useSessionStore } from '@/stores/session'
 import type { PerfilUsuario } from '@/modules/auth/types/session'
+import { useSessionStore } from '@/stores/session'
 
 const PERFIS_GESTAO: PerfilUsuario[] = ['GESTOR', 'ADMINISTRADOR']
 const PERFIS_SOLICITANTE: PerfilUsuario[] = ['TECNICO', 'ANALISTA', 'PESQUISADOR', 'ESTAGIARIO']
+const PERFIS_ADMIN: PerfilUsuario[] = ['ADMINISTRADOR']
 
 function ehPerfilGestao(perfil?: PerfilUsuario) {
   return Boolean(perfil && PERFIS_GESTAO.includes(perfil))
@@ -65,6 +66,24 @@ export const router = createRouter({
           path: 'pedidos',
           name: 'gestao-pedidos',
           component: () => import('@/modules/pedidos/views/gestao/PedidosGestaoView.vue'),
+        },
+        {
+          path: 'solicitacoes/novo',
+          name: 'gestao-novo-pedido',
+          component: () => import('@/modules/pedidos/views/solicitante/NovoPedidoView.vue'),
+        },
+        {
+          path: 'solicitacoes/meus-pedidos',
+          name: 'gestao-meus-pedidos',
+          component: () => import('@/modules/pedidos/views/solicitante/MeusPedidosView.vue'),
+        },
+        {
+          path: 'cadastros',
+          name: 'gestao-cadastros',
+          redirect: '/cadastros/produtos',
+          meta: {
+            perfis: PERFIS_ADMIN,
+          },
         },
       ],
     },
