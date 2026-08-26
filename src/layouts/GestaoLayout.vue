@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
@@ -9,6 +9,7 @@ const router = useRouter()
 const route = useRoute()
 const session = useSessionStore()
 const recolhida = ref(false)
+const pedidosAbertos = ref(route.path === '/pedidos')
 
 const ehAdministrador = computed(() => session.usuario?.perfil === 'ADMINISTRADOR')
 
@@ -22,6 +23,18 @@ const iniciais = computed(() =>
 )
 
 const podeVoltar = computed(() => route.path !== '/pedidos')
+
+watch(
+  () => route.path,
+  (path) => {
+    if (path === '/pedidos') pedidosAbertos.value = true
+  },
+)
+
+function abrirTodosPedidos() {
+  pedidosAbertos.value = true
+  router.push('/pedidos')
+}
 
 function voltar() {
   if (window.history.length > 1) {
@@ -74,13 +87,35 @@ function sair() {
         </router-link>
 
         <p v-if="!recolhida" class="gestao-nav__group">OPERAÇÃO</p>
-        <router-link to="/pedidos" title="Pedidos">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="5" y="4" width="14" height="16" rx="1" />
-            <path d="M8 8h8M8 12h8M8 16h5" />
-          </svg>
-          <span v-if="!recolhida">Pedidos</span>
-        </router-link>
+
+        <div class="gestao-nav-parent" :class="{ 'gestao-nav-parent--active': route.path === '/pedidos' }">
+          <button class="gestao-nav-parent__main" type="button" title="Pedidos" @click="abrirTodosPedidos">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="5" y="4" width="14" height="16" rx="1" />
+              <path d="M8 8h8M8 12h8M8 16h5" />
+            </svg>
+            <span v-if="!recolhida">Pedidos</span>
+          </button>
+          <button
+            v-if="!recolhida"
+            class="gestao-nav-parent__toggle"
+            type="button"
+            :aria-label="pedidosAbertos ? 'Recolher filtros de pedidos' : 'Expandir filtros de pedidos'"
+            @click.stop="pedidosAbertos = !pedidosAbertos"
+          >
+            {{ pedidosAbertos ? '⌄' : '›' }}
+          </button>
+        </div>
+
+        <div v-if="pedidosAbertos && !recolhida" class="gestao-subnav">
+          <router-link :to="{ path: '/pedidos' }" :class="{ 'gestao-subnav--active': !route.query.status }">Todos os pedidos</router-link>
+          <router-link :to="{ path: '/pedidos', query: { status: 'PENDENTE' } }">Pendentes</router-link>
+          <router-link :to="{ path: '/pedidos', query: { status: 'APROVADO' } }">Aprovados</router-link>
+          <router-link :to="{ path: '/pedidos', query: { status: 'ENTREGUE' } }">Entregues</router-link>
+          <router-link :to="{ path: '/pedidos', query: { status: 'REJEITADO' } }">Rejeitados</router-link>
+          <router-link :to="{ path: '/pedidos', query: { status: 'CANCELADO' } }">Cancelados</router-link>
+        </div>
+
         <router-link to="/estoque" title="Estoque">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9" />
@@ -102,15 +137,11 @@ function sair() {
 
         <p v-if="!recolhida" class="gestao-nav__group">SOLICITAÇÕES</p>
         <router-link to="/solicitacoes/novo" title="Novo pedido">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
           <span v-if="!recolhida">Novo pedido</span>
         </router-link>
         <router-link to="/solicitacoes/meus-pedidos" title="Meus pedidos">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" />
-          </svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" /></svg>
           <span v-if="!recolhida">Meus pedidos</span>
         </router-link>
 
@@ -141,331 +172,79 @@ function sair() {
 
     <div class="gestao-workspace">
       <header class="gestao-topbar">
-        <button
-          class="gestao-topbar__collapse"
-          type="button"
-          :aria-label="recolhida ? 'Expandir menu' : 'Recolher menu'"
-          @click="recolhida = !recolhida"
-        >
+        <button class="gestao-topbar__collapse" type="button" :aria-label="recolhida ? 'Expandir menu' : 'Recolher menu'" @click="recolhida = !recolhida">
           {{ recolhida ? '›' : '‹' }}
         </button>
 
-        <button
-          v-if="podeVoltar"
-          class="gestao-topbar__back"
-          type="button"
-          aria-label="Voltar"
-          @click="voltar"
-        >
-          ←
-        </button>
+        <button v-if="podeVoltar" class="gestao-topbar__back" type="button" aria-label="Voltar" @click="voltar">←</button>
 
         <div class="gestao-topbar__spacer" />
 
         <button class="gestao-topbar__search" type="button" title="Busca global — será ativada quando os contratos estiverem completos">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m16.5 16.5 4 4" />
-          </svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m16.5 16.5 4 4" /></svg>
         </button>
 
         <button class="gestao-topbar__logout" type="button" @click="sair">
           <span>Sair</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9" />
-          </svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9" /></svg>
         </button>
       </header>
 
-      <main class="gestao-main">
-        <router-view />
-      </main>
+      <main class="gestao-main"><router-view /></main>
     </div>
   </div>
 </template>
 
 <style scoped>
-.gestao-shell {
-  --sidebar-width: 264px;
-  min-height: 100vh;
-  background: var(--sgl-background, #f5f7fa);
-  color: var(--sgl-text, #1a1a2e);
-}
-
+.gestao-shell { --sidebar-width: 264px; min-height: 100vh; background: var(--sgl-background, #f5f7fa); color: var(--sgl-text, #1a1a2e); }
 .gestao-shell--collapsed { --sidebar-width: 72px; }
-
-.gestao-sidebar {
-  position: fixed;
-  inset: 0 auto 0 0;
-  z-index: 30;
-  width: var(--sidebar-width);
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  padding: 18px 14px 16px;
-  background: linear-gradient(180deg, #07142f 0%, #0b1b3a 55%, #0d2147 100%);
-  color: #fff;
-  transition: width 300ms ease;
-}
-
-.gestao-brand {
-  min-height: 92px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid rgb(255 255 255 / 10%);
-}
-
-.gestao-brand img {
-  width: 178px;
-  max-height: 72px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 14px rgb(0 0 0 / 18%));
-  transition: width 300ms ease;
-}
-
-.gestao-shell--collapsed .gestao-brand img {
-  width: 42px;
-  object-fit: cover;
-  object-position: left;
-}
-
+.gestao-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; width: var(--sidebar-width); height: 100vh; display: flex; flex-direction: column; padding: 18px 14px 16px; background: linear-gradient(180deg, #07142f 0%, #0b1b3a 55%, #0d2147 100%); color: #fff; transition: width 300ms ease; }
+.gestao-brand { min-height: 92px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgb(255 255 255 / 10%); }
+.gestao-brand img { width: 178px; max-height: 72px; object-fit: contain; filter: drop-shadow(0 4px 14px rgb(0 0 0 / 18%)); transition: width 300ms ease; }
+.gestao-shell--collapsed .gestao-brand img { width: 42px; object-fit: cover; object-position: left; }
 .gestao-tools { padding: 16px 0 6px; }
-
-.gestao-tool,
-.gestao-nav a,
-.gestao-nav__future {
-  width: 100%;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: #eef4ff;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
+.gestao-tool, .gestao-nav a, .gestao-nav__future, .gestao-nav-parent { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 12px; border: 0; border-radius: 8px; background: transparent; color: #eef4ff; font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; }
+.gestao-tool, .gestao-nav a, .gestao-nav__future { padding: 0 12px; }
 .gestao-tool { cursor: pointer; }
-.gestao-tool:hover,
-.gestao-nav a:hover { background: rgb(255 255 255 / 7%); }
-
-.gestao-tool svg,
-.gestao-nav svg,
-.gestao-nav__future svg,
-.gestao-topbar svg {
-  width: 21px;
-  height: 21px;
-  flex: 0 0 auto;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.gestao-tool__switch {
-  margin-left: auto;
-  padding: 4px 7px;
-  border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 7px;
-  color: #b9c9e2;
-  font-size: 11px;
-}
-
-.gestao-alert-badge {
-  margin-left: auto;
-  min-width: 24px;
-  height: 24px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: #f6c343;
-  color: #17213a;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.gestao-nav {
-  min-height: 0;
-  flex: 1;
-  overflow-y: auto;
-  padding-top: 6px;
-  scrollbar-width: thin;
-}
-
-.gestao-nav p {
-  margin: 18px 10px 8px;
-  color: #8298ba;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .1em;
-}
-
+.gestao-tool:hover, .gestao-nav a:hover, .gestao-nav-parent:hover { background: rgb(255 255 255 / 7%); }
+.gestao-tool svg, .gestao-nav svg, .gestao-nav__future svg, .gestao-topbar svg, .gestao-nav-parent svg { width: 21px; height: 21px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.gestao-tool__switch { margin-left: auto; padding: 4px 7px; border: 1px solid rgb(255 255 255 / 14%); border-radius: 7px; color: #b9c9e2; font-size: 11px; }
+.gestao-alert-badge { margin-left: auto; min-width: 24px; height: 24px; display: grid; place-items: center; border-radius: 999px; background: #f6c343; color: #17213a; font-size: 11px; font-weight: 800; }
+.gestao-nav { min-height: 0; flex: 1; overflow-y: auto; padding-top: 6px; scrollbar-width: thin; }
+.gestao-nav p { margin: 18px 10px 8px; color: #8298ba; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
 .gestao-nav__group { margin-top: 22px !important; }
 .gestao-nav a + a { margin-top: 3px; }
-.gestao-nav a.router-link-active {
-  background: linear-gradient(135deg, #1a4da1 0%, #2456c4 100%);
-  box-shadow: 0 8px 18px rgb(16 63 150 / 22%);
-}
-
-.gestao-nav__future {
-  position: relative;
-  color: #a6b6cf;
-  cursor: default;
-}
-
-.gestao-nav__future small {
-  margin-left: auto;
-  color: #6f86aa;
-  font-size: 9px;
-  font-weight: 700;
-}
-
-.gestao-shell--collapsed .gestao-nav a,
-.gestao-shell--collapsed .gestao-tool,
-.gestao-shell--collapsed .gestao-nav__future {
-  justify-content: center;
-  padding-inline: 0;
-}
-
-.gestao-user {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 16px 4px 2px;
-  border-top: 1px solid rgb(255 255 255 / 10%);
-}
-
-.gestao-avatar {
-  width: 42px;
-  height: 42px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #2d6bc4;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.gestao-user__copy {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.gestao-user__line {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.gestao-user__copy strong,
-.gestao-user__copy span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
+.gestao-nav a.router-link-active { background: linear-gradient(135deg, #1a4da1 0%, #2456c4 100%); box-shadow: 0 8px 18px rgb(16 63 150 / 22%); }
+.gestao-nav-parent { position: relative; padding: 0; }
+.gestao-nav-parent--active { background: rgb(26 77 161 / 22%); }
+.gestao-nav-parent__main { min-width: 0; flex: 1; min-height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-align: left; }
+.gestao-nav-parent__toggle { width: 34px; height: 34px; margin-right: 5px; border: 0; border-radius: 6px; background: transparent; color: #aebed7; cursor: pointer; }
+.gestao-nav-parent__toggle:hover { background: rgb(255 255 255 / 7%); color: #fff; }
+.gestao-subnav { position: relative; margin: 2px 0 8px 20px; padding-left: 15px; border-left: 1px solid rgb(143 163 196 / 24%); }
+.gestao-subnav a { min-height: 34px; padding: 0 10px; border-radius: 6px; color: #aebed7; font-size: 11px; font-weight: 600; box-shadow: none !important; }
+.gestao-subnav a.router-link-active, .gestao-subnav a.gestao-subnav--active { background: rgb(45 107 196 / 18%); color: #fff; }
+.gestao-nav__future { position: relative; color: #a6b6cf; cursor: default; }
+.gestao-nav__future small { margin-left: auto; color: #6f86aa; font-size: 9px; font-weight: 700; }
+.gestao-shell--collapsed .gestao-nav a, .gestao-shell--collapsed .gestao-tool, .gestao-shell--collapsed .gestao-nav__future, .gestao-shell--collapsed .gestao-nav-parent { justify-content: center; padding-inline: 0; }
+.gestao-shell--collapsed .gestao-nav-parent__main { justify-content: center; padding-inline: 0; }
+.gestao-user { display: flex; align-items: center; gap: 11px; padding: 16px 4px 2px; border-top: 1px solid rgb(255 255 255 / 10%); }
+.gestao-avatar { width: 42px; height: 42px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #2d6bc4; font-size: 12px; font-weight: 800; }
+.gestao-user__copy { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.gestao-user__line { min-width: 0; display: flex; align-items: center; gap: 6px; }
+.gestao-user__copy strong, .gestao-user__copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gestao-user__copy strong { min-width: 0; font-size: 12px; }
 .gestao-user__copy span { margin-top: 3px; color: #aebed7; font-size: 10px; }
-.gestao-user__line small {
-  flex: 0 0 auto;
-  padding: 2px 5px;
-  border-radius: 4px;
-  background: #1f4eac;
-  color: #dce8ff;
-  font-size: 8px;
-  font-weight: 800;
-}
-
+.gestao-user__line small { flex: 0 0 auto; padding: 2px 5px; border-radius: 4px; background: #1f4eac; color: #dce8ff; font-size: 8px; font-weight: 800; }
 .gestao-shell--collapsed .gestao-user { justify-content: center; }
-
-.gestao-workspace {
-  min-width: 0;
-  margin-left: var(--sidebar-width);
-  transition: margin-left 300ms ease;
-}
-
-.gestao-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  min-height: 72px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 24px;
-  background: linear-gradient(90deg, #08162f 0%, #0b1934 100%);
-  color: #fff;
-  box-shadow: 0 1px 0 rgb(255 255 255 / 7%);
-}
-
-.gestao-topbar button {
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
-.gestao-topbar__collapse,
-.gestao-topbar__back,
-.gestao-topbar__search {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  font-size: 25px;
-}
-
-.gestao-topbar__collapse:hover,
-.gestao-topbar__back:hover,
-.gestao-topbar__search:hover,
-.gestao-topbar__logout:hover { background: rgb(255 255 255 / 8%); }
-
+.gestao-workspace { min-width: 0; margin-left: var(--sidebar-width); transition: margin-left 300ms ease; }
+.gestao-topbar { position: sticky; top: 0; z-index: 20; min-height: 72px; display: flex; align-items: center; gap: 10px; padding: 0 24px; background: linear-gradient(90deg, #08162f 0%, #0b1934 100%); color: #fff; box-shadow: 0 1px 0 rgb(255 255 255 / 7%); }
+.gestao-topbar button { border: 0; background: transparent; color: inherit; cursor: pointer; }
+.gestao-topbar__collapse, .gestao-topbar__back, .gestao-topbar__search { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; font-size: 25px; }
+.gestao-topbar__collapse:hover, .gestao-topbar__back:hover, .gestao-topbar__search:hover, .gestao-topbar__logout:hover { background: rgb(255 255 255 / 8%); }
 .gestao-topbar__spacer { flex: 1; }
-
-.gestao-topbar__search {
-  background: rgb(45 107 196 / 14%) !important;
-}
-
-.gestao-topbar__logout {
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 13px;
-  border: 1px solid rgb(255 255 255 / 18%) !important;
-  border-radius: 8px;
-  font-size: 13px;
-}
-
+.gestao-topbar__search { background: rgb(45 107 196 / 14%) !important; }
+.gestao-topbar__logout { min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid rgb(255 255 255 / 18%) !important; border-radius: 8px; font-size: 13px; }
 .gestao-topbar__logout svg { width: 18px; height: 18px; }
-
-.gestao-main {
-  min-height: calc(100vh - 72px);
-  padding: 28px 30px 40px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f2f5fa 100%);
-}
-
-@media (max-width: 900px) {
-  .gestao-sidebar { position: static; width: 100%; height: auto; }
-  .gestao-shell--collapsed .gestao-sidebar { width: 100%; }
-  .gestao-workspace { margin-left: 0; }
-  .gestao-brand img { width: 150px !important; object-fit: contain !important; }
-  .gestao-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .gestao-nav p { grid-column: 1 / -1; }
-  .gestao-user { display: none; }
-  .gestao-topbar__collapse { display: none; }
-  .gestao-main { padding: 18px 16px 30px; }
-}
+.gestao-main { min-height: calc(100vh - 72px); padding: 28px 30px 40px; background: linear-gradient(135deg, #f8fafc 0%, #f2f5fa 100%); }
+@media (max-width: 900px) { .gestao-sidebar { position: static; width: 100%; height: auto; } .gestao-shell--collapsed .gestao-sidebar { width: 100%; } .gestao-workspace { margin-left: 0; } .gestao-brand img { width: 150px !important; object-fit: contain !important; } .gestao-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .gestao-nav p { grid-column: 1 / -1; } .gestao-subnav { grid-column: 1 / -1; } .gestao-user { display: none; } .gestao-topbar__collapse { display: none; } .gestao-main { padding: 18px 16px 30px; } }
 </style>
