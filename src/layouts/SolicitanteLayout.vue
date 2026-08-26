@@ -267,15 +267,19 @@ function sair() {
 
 .solicitante-sidebar__brand {
   min-height: 92px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   border-bottom: 1px solid rgb(255 255 255 / 11%);
 }
 
 .solicitante-sidebar__brand img {
+  display: block;
   width: 178px;
   max-height: 74px;
   object-fit: contain;
+  transform: translateX(10px);
   filter: drop-shadow(0 4px 14px rgb(0 0 0 / 22%));
 }
 
@@ -556,7 +560,7 @@ function sair() {
   .solicitante-shell { grid-template-columns: 1fr; }
   .solicitante-sidebar { position: static; min-height: auto; padding: 14px 18px; }
   .solicitante-sidebar__brand { min-height: 58px; border-bottom: 0; }
-  .solicitante-sidebar__brand img { width: 145px; }
+  .solicitante-sidebar__brand img { width: 145px; transform: none; }
   .solicitante-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding-top: 12px; }
   .solicitante-nav__group,
   .solicitante-sidebar__user { display: none; }
