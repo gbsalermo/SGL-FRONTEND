@@ -45,6 +45,15 @@ export interface PedidoRequest {
   }>
 }
 
+export interface AprovarPedidoRequest {
+  observacao: string | null
+  usuarioAprovadorId: string
+  itens: Array<{
+    itemId: string
+    quantidadeAprovada: number
+  }>
+}
+
 export interface ProjetoResponse {
   id: string
   laboratorioId: string
