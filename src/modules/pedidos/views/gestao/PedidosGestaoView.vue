@@ -457,12 +457,14 @@ onMounted(carregar)
                         <strong>{{ item.produtoNome }}</strong>
                         <small>{{ item.produtoUnidadeArmazenamento }}</small>
                       </div>
-                      <div class="requested-quantity">
+
+                      <div class="quantity-card requested-quantity">
                         <strong>QUANTIDADE SOLICITADA</strong>
                         <span>{{ item.quantidadeSolicitada }}</span>
                       </div>
-                      <label v-if="pedido.status === 'PENDENTE'" class="approval-quantity">
-                        <span>Aprovar</span>
+
+                      <label v-if="pedido.status === 'PENDENTE'" class="quantity-card approval-quantity">
+                        <span>QUANTIDADE A APROVAR</span>
                         <input
                           v-model.number="quantidadesAprovadas[item.id]"
                           type="number"
@@ -470,7 +472,11 @@ onMounted(carregar)
                           :max="item.quantidadeSolicitada"
                         />
                       </label>
-                      <span v-else-if="item.quantidadeAprovada !== null">Aprovado: {{ item.quantidadeAprovada }}</span>
+
+                      <div v-else-if="item.quantidadeAprovada !== null" class="quantity-card approved-quantity">
+                        <strong>QUANTIDADE APROVADA</strong>
+                        <span>{{ item.quantidadeAprovada }}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -625,15 +631,20 @@ onMounted(carregar)
 .gestao-detail-row td { padding: 0; background: #f8fafc; }
 .gestao-detail { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, .8fr); gap: 18px; padding: 20px 22px; border-bottom: 1px solid #e2e8f0; }
 .gestao-detail h3 { margin: 0 0 10px; color: #0d2b5e; font-size: 12px; }
-.gestao-detail__item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 18px; padding: 10px 0; border-bottom: 1px dashed #dbe3ec; }
-.gestao-detail__item div { min-width: 0; }
-.gestao-detail__item span { color: #475569; font-size: 11px; }
-.requested-quantity { min-width: 150px; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 8px 11px; border-radius: 7px; background: #eef4ff; }
-.requested-quantity strong { color: #0d2b5e; font-size: 12px !important; font-weight: 850; letter-spacing: .035em; }
-.requested-quantity span { color: #1a4da1 !important; font-size: 19px !important; font-weight: 850; line-height: 1.1; }
-.approval-quantity { display: flex; align-items: center; gap: 7px; }
-.approval-quantity span { font-weight: 700; }
-.approval-quantity input { width: 72px; min-height: 32px; padding: 0 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+.gestao-detail__item { display: grid; grid-template-columns: minmax(0, 1fr) 132px 132px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #dbe3ec; }
+.gestao-detail__item > div:first-child { min-width: 0; }
+.gestao-detail__item > div:first-child strong { font-size: 12px; }
+.gestao-detail__item > div:first-child small { font-size: 10px; }
+.quantity-card { min-width: 0; min-height: 52px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; padding: 6px 8px; border-radius: 6px; }
+.quantity-card strong, .quantity-card > span, .quantity-card > label { margin: 0; }
+.quantity-card strong, .approval-quantity > span { color: #475569; font-size: 9px !important; font-weight: 800; letter-spacing: .025em; line-height: 1.2; }
+.quantity-card > span { color: #0d2b5e !important; font-size: 15px !important; font-weight: 800; line-height: 1.1; }
+.requested-quantity { background: #eef4ff; }
+.requested-quantity > span { color: #1a4da1 !important; }
+.approval-quantity { background: #f8fafc; border: 1px solid #dbe3ec; }
+.approval-quantity input { width: 100%; min-height: 27px; margin-top: 2px; padding: 0 7px; border: 1px solid #cbd5e1; border-radius: 5px; background: #fff; color: #0d2b5e; font-size: 13px; font-weight: 800; }
+.approved-quantity { background: #edf8f1; }
+.approved-quantity > span { color: #007a3d !important; }
 .gestao-detail__context p { display: flex; justify-content: space-between; gap: 12px; margin: 7px 0; }
 .gestao-detail__context p span { color: #64748b; font-size: 11px; }
 .gestao-detail__context p strong { font-size: 11px; text-align: right; }
@@ -684,5 +695,6 @@ onMounted(carregar)
   .gestao-search { grid-column: auto; }
   .gestao-detail { grid-template-columns: 1fr; }
   .gestao-detail__item { grid-template-columns: 1fr; gap: 6px; }
+  .quantity-card { width: 100%; }
 }
 </style>
