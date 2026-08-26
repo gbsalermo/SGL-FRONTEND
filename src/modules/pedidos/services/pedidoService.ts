@@ -4,9 +4,34 @@ import type {
   PedidoRequest,
   PedidoResponse,
   ProjetoResponse,
+  StatusPedido,
 } from '@/modules/pedidos/types/pedido'
 
 export const pedidoService = {
+  async listarTodos() {
+    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos')
+    return data
+  },
+
+  async listarPorStatus(status: StatusPedido) {
+    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-status', {
+      params: { status },
+    })
+    return data
+  },
+
+  async listarPorUrgencia(urgente: boolean) {
+    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-urgencia', {
+      params: { urgente },
+    })
+    return data
+  },
+
+  async buscarPorId(id: string) {
+    const { data } = await http.get<PedidoResponse>(`/v1/pedidos/${id}`)
+    return data
+  },
+
   async listarPorUsuario(usuarioId: string) {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-usuario', {
       params: { usuarioId },
