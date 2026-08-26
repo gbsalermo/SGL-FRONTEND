@@ -3,10 +3,10 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Repositório frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend de referência:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 25/08/2026  
+**Última atualização:** 26/08/2026  
 **Fase atual:** Etapa 3 — Interfaces reais  
-**Última etapa concluída:** 3.1 — Login  
-**Próximo bloco exato:** 3.2 — Pedidos do Solicitante
+**Última etapa concluída:** 3.2 — Pedidos do Solicitante  
+**Próximo bloco exato:** 3.3 — Interface do Sistema de Gestão
 
 Este arquivo é a fonte principal de retomada do frontend.
 
@@ -22,12 +22,12 @@ Ao abrir uma nova sessão:
 3. conferir README.md para visão geral e apresentação visual
 4. usar Swagger/OpenAPI como fonte de verdade dos contratos do backend
 5. respeitar as decisões visuais e arquiteturais já aprovadas
-6. continuar do bloco PRÓXIMO PASSO
+6. continuar do bloco PRÓXIMO PASSO EXATO
 ```
 
 Regra de processo atual:
 
-> Não vamos concluir um Figma completo antes de codar. O frontend é desenvolvido no fluxo `protótipo aprovado → implementação real → extração de componentes quando houver responsabilidade/repetição real → validação → próxima tela`.
+> Não vamos concluir um Figma completo antes de codar. O frontend segue o fluxo `protótipo aprovado → implementação real → extração de componentes quando houver responsabilidade/repetição real → validação → próxima tela`.
 
 ---
 
@@ -35,7 +35,7 @@ Regra de processo atual:
 
 ## Backend
 
-O backend estrutural está concluído.
+O backend estrutural está concluído e permanece como fonte de verdade do domínio.
 
 ```text
 API REST                                  ✅
@@ -45,6 +45,8 @@ Flyway                                    ✅
 UUID público na fronteira                 ✅
 DTOs request/response separados           ✅
 testes principais                         ✅
+CORS para frontend local                  ✅
+urgência informativa em pedidos           ✅
 autenticação + auditoria local            ⏳ pós-frontend inicial
 integração corporativa                    ⏳ futura
 ```
@@ -63,7 +65,23 @@ UUID publicId
 → estado da interface
 ```
 
-Nunca reconstruir regras de domínio no frontend quando elas já pertencem ao backend.
+Nunca reconstruir no frontend regras de negócio que já pertencem ao backend.
+
+### Ajuste recente importante no backend
+
+A urgência do pedido continua sendo apenas informativa e não altera automaticamente fluxo, estoque ou prioridade transacional.
+
+O contrato ainda mantém:
+
+```text
+urgente
+motivoUrgencia
+observacao
+```
+
+Por compatibilidade com pedidos antigos, `motivoUrgencia` permanece no modelo/banco, mas no fluxo novo ele não é mais obrigatório. A experiência atual concentra o texto livre em `observacao`.
+
+Pedidos antigos que já possuam `motivoUrgencia` devem continuar exibindo essa informação quando necessário.
 
 ---
 
@@ -145,13 +163,11 @@ Regras:
 - não duplicar módulos por perfil;
 - Admin reutiliza Gestão + Cadastros;
 - regras de negócio permanecem no backend;
-- Views devem representar composição de tela, não concentrar toda a implementação quando já existem responsabilidades claras separáveis.
+- Views representam composição de tela e não devem virar arquivos monolíticos quando houver responsabilidades reais separáveis.
 
 ---
 
 # 4. Estratégia de implementação
-
-A antiga etapa de Figma completo foi abandonada de propósito.
 
 Fluxo oficial:
 
@@ -164,17 +180,17 @@ protótipo aprovado
 → próxima tela
 ```
 
-Ordem de trabalho:
+Ordem de trabalho atualizada:
 
 ```text
 LOGIN                                  ✅
-→ PEDIDOS DO SOLICITANTE              ⏳ PRÓXIMO
-→ GESTÃO
-→ ESTOQUE / LOTES / MOVIMENTAÇÕES
-→ ADMINISTRAÇÃO
-→ RELATÓRIOS / DOCUMENTOS
-→ DASHBOARDS / ROBUSTEZ / 404
-→ AUTENTICAÇÃO / AUTORIZAÇÃO / AUDITORIA
+→ PEDIDOS DO SOLICITANTE              ✅
+→ GESTÃO                              ⏳ PRÓXIMO
+→ ESTOQUE / LOTES / MOVIMENTAÇÕES     ⏳
+→ ADMINISTRAÇÃO                       ⏳
+→ RELATÓRIOS / DOCUMENTOS             ⏳
+→ DASHBOARDS / ROBUSTEZ / 404         ⏳
+→ AUTENTICAÇÃO / AUTORIZAÇÃO / AUDITORIA ⏳
 ```
 
 ---
@@ -242,76 +258,28 @@ shell permanece estável
 
 # 6. Etapa 3.1 — Login — CONCLUÍDA
 
-Branch de implementação:
+## Resultado final
+
+Layout institucional aproximadamente 50/50:
 
 ```text
-feat/login-interface
+lado esquerdo
+→ laboratório/tablet como contexto
+→ overlay azul institucional
+→ Embrapa
+→ logo SGL
+→ frase institucional
+→ ícones do domínio
+
+lado direito
+→ Bem-vindo
+→ Acesse o sistema para continuar
+→ usuário
+→ senha
+→ Entrar
 ```
 
-## Resultado visual aprovado
-
-Layout:
-
-```text
-aproximadamente 50/50
-lado esquerdo institucional
-lado direito branco e limpo
-sem card grande
-sem repetição da marca SGL no formulário
-```
-
-### Lado esquerdo
-
-Composição final:
-
-```text
-imagem de laboratório com profissional/tablet
-→ tratada como contexto/textura
-→ overlay azul institucional forte
-
-Embrapa
-↓
-marca oficial SGL
-↓
-Gestão integrada para pedidos, estoque, lotes e relatórios.
-↓
-quatro ícones auxiliares do domínio
-```
-
-Decisões finais:
-
-- fundo enfatiza o azul institucional e apaga parcialmente a fotografia;
-- Embrapa branca em destaque, sem competir com a marca SGL;
-- logo SGL oficial centralizada;
-- ícones ficam abaixo da frase institucional;
-- azul e verde funcionam como identidade/apoio;
-- conjunto principal foi refinado verticalmente; o ajuste local final aprovado ficou em torno de `translateY(-18px)` — manter essa referência ao sincronizar a última alteração local.
-
-### Lado direito
-
-Conteúdo final:
-
-```text
-Bem-vindo
-Acesse o sistema para continuar
-
-Usuário de colaborador
-Senha
-Entrar
-```
-
-Características:
-
-- fundo branco;
-- formulário sem card grande;
-- campos discretos;
-- botão em azul institucional;
-- controle de mostrar/ocultar senha;
-- linguagem institucional simples.
-
-## Estrutura implementada
-
-O Login foi reorganizado para não concentrar toda a tela em um único arquivo:
+Estrutura principal:
 
 ```text
 src/modules/auth/
@@ -320,67 +288,278 @@ src/modules/auth/
 │   └── LoginAccessForm.vue
 └── views/
     └── LoginView.vue
-
-src/assets/images/auth/
-├── embrapa-white.png
-├── login-laboratorio.jpg
-└── sgl-logo.png
 ```
 
-Responsabilidades:
+### Acesso atual
 
-```text
-LoginView.vue
-→ composição da tela/rota
+A autenticação definitiva ainda não existe no backend.
 
-LoginBrandPanel.vue
-→ identidade institucional do lado esquerdo
+Para permitir o desenvolvimento das interfaces, o frontend possui um acesso de desenvolvimento que consulta usuários reais da API e cria sessão local somente em ambiente `DEV`.
 
-LoginAccessForm.vue
-→ formulário e interação visual do acesso
-```
+Não tratar isso como autenticação de produção.
 
-Isso passa a ser uma referência prática para as próximas telas: componentes devem nascer de responsabilidades reais, sem transformar toda View em um arquivo monolítico.
-
-## Escopo deliberadamente não implementado ainda
-
-```text
-autenticação real
-JWT/sessão
-store de autenticação
-service definitivo de login
-redirecionamento por perfil
-Embrapa ID / integração corporativa
-recuperação de senha
-```
-
-Não inventar contrato de autenticação antes da etapa específica.
-
-## Apresentação visual
-
-O README possui uma seção para apresentar o Login final usando o caminho:
-
-```text
-docs/screenshots/login-final.png
-```
-
-Ao atualizar o screenshot aprovado, manter esse nome para que o README continue renderizando sem alterações.
+A etapa futura de autenticação deve substituir esse comportamento sem refazer as telas já aprovadas.
 
 ---
 
-# 7. Navegação funcional aprovada
+# 7. Etapa 3.2 — Pedidos do Solicitante — CONCLUÍDA
 
-## Solicitante
+Esta etapa foi implementada, validada visualmente e integrada à `main`.
+
+## Fluxo funcional atual
 
 ```text
-Dashboard
-└── Pedidos
-    ├── Novo pedido
-    └── Meus pedidos
-        └── Detalhe
+/login
+→ sessão de desenvolvimento
+→ /meus-pedidos
+→ /pedidos/novo
+→ POST /pedidos
+→ retorno para /meus-pedidos
 ```
 
-## Gestão
+## Shell do solicitante
+
+Arquivo principal:
+
+```text
+src/layouts/SolicitanteLayout.vue
+```
+
+Características aprovadas:
+
+```text
+sidebar azul escura
+logo SGL centralizada
+Meus pedidos
+Novo pedido
+bloco do usuário no rodapé
+engrenagem de perfil
+topbar com laboratório/unidade
+botão Sair
+```
+
+### Sidebar
+
+A sidebar desktop agora é realmente fixa na viewport:
+
+```text
+largura: 258px
+position: fixed
+height: 100vh
+conteúdo principal compensa com margin-left
+```
+
+Ao rolar a página, sidebar, navegação e bloco do usuário permanecem estáveis.
+
+No mobile o comportamento volta a ser fluxo normal da página.
+
+## Perfil do solicitante
+
+A engrenagem no bloco do usuário permite personalizar apenas informações visuais:
+
+```text
+foto
+apelido / nome de exibição
+descrição curta
+```
+
+Dados institucionais são somente leitura:
+
+```text
+nome verdadeiro
+e-mail
+perfil
+```
+
+Estado atual:
+
+- preferências são persistidas localmente no navegador por usuário;
+- ainda não existe contrato backend definitivo para avatar/perfil visual;
+- não alterar nome verdadeiro, e-mail ou perfil por este fluxo.
+
+Store:
+
+```text
+src/stores/profilePreferences.ts
+```
+
+## Novo pedido
+
+Arquivo:
+
+```text
+src/modules/pedidos/views/solicitante/NovoPedidoView.vue
+```
+
+Comportamentos validados:
+
+- laboratório e unidade vêm da sessão;
+- projeto é opcional;
+- produtos disponíveis vêm do estoque da unidade;
+- usuário pode adicionar múltiplos produtos;
+- o mesmo produto não pode aparecer duas vezes no mesmo pedido;
+- ao selecionar um produto ele desaparece das demais opções;
+- ao remover o item o produto volta para a lista;
+- quantidade é ajustada na própria linha;
+- urgência é informativa;
+- texto livre foi unificado em uma única caixa `Observação / descrição`;
+- ao marcar urgência aparece apenas um aviso pedindo, se possível, que o motivo seja explicado nessa caixa;
+- pedido continua sendo criado como `PENDENTE`.
+
+Mensagem aprovada no rodapé:
+
+```text
+O pedido ficará pendente até análise da gestão.
+Marque o pedido como urgente apenas quando necessário.
+```
+
+## Meus pedidos
+
+Arquivo:
+
+```text
+src/modules/pedidos/views/solicitante/MeusPedidosView.vue
+```
+
+Características aprovadas:
+
+```text
+cards de resumo
+→ Pendentes
+→ Aprovados
+→ Entregues
+
+busca local
+filtro por status
+tabela de pedidos
+```
+
+A tabela prioriza o que interessa ao solicitante:
+
+```text
+Data
+Produtos
+Itens
+Status
+Laboratório
+Detalhes
+```
+
+Produtos são informação principal. Projeto aparece como informação secundária.
+
+A busca considera, entre outros:
+
+```text
+produto
+projeto
+laboratório
+status
+urgência
+observação
+```
+
+### Urgência
+
+Status visual:
+
+```text
+PENDENTE       → chip amarelo
+PEDIDO URGENTE → chip vermelho
+```
+
+Pedidos antigos criados antes da migration de urgência naturalmente não possuem `urgente = true`.
+
+### Detalhes do pedido
+
+O antigo modal foi removido.
+
+Agora existe uma seta na própria linha da tabela:
+
+```text
+clicar
+→ expande a linha
+→ mostra detalhes abaixo do pedido
+clicar novamente
+→ recolhe
+```
+
+Detalhes exibidos:
+
+```text
+materiais e quantidades
+status
+projeto
+laboratório
+indicação de urgência
+observação / descrição
+```
+
+Pedidos antigos que possuam `motivoUrgencia` separado têm esse conteúdo preservado na área textual do detalhe.
+
+---
+
+# 8. Regras importantes do domínio para o frontend
+
+## Pedidos
+
+```text
+PENDENTE
+→ APROVADO
+   → ENTREGUE
+   → CANCELADO
+
+PENDENTE
+→ REJEITADO
+```
+
+Regras críticas:
+
+- aprovação pode ajustar quantidade aprovada;
+- backend executa FEFO/FIFO e baixa de estoque;
+- entrega não baixa estoque novamente;
+- cancelamento restaura os lotes exatos;
+- produto duplicado no mesmo pedido é proibido também no backend;
+- usuário inativo não pode criar pedido;
+- laboratório/projeto inativos também são validados pelo backend;
+- frontend deve antecipar erros de UX, mas não substituir validação de domínio.
+
+### Estagiário inativo
+
+A proteção já existe:
+
+```text
+PedidoService.criar
+→ usuario.validateActive()
+```
+
+O login temporário do frontend também não deve permitir trabalhar com usuário inativo.
+
+Atenção futura: `dataFimEstagio` sozinha não é a regra final de bloqueio; o domínio atualmente depende do estado `ativo` do usuário/estagiário.
+
+## Documentos
+
+- backend ainda não possui upload multipart completo;
+- não criar persistência fake no frontend.
+
+## Fiscalização
+
+- deve ficar dentro de Relatórios → Fiscalização/Auditoria;
+- não duplicar dados operacionais;
+- modelagem definitiva aguarda requisito oficial.
+
+---
+
+# 9. Navegação funcional aprovada
+
+## Solicitante — implementado
+
+```text
+Meus pedidos
+├── detalhes expansíveis
+└── Novo pedido
+```
+
+## Gestão — próximo foco
 
 ```text
 Dashboard
@@ -408,13 +587,13 @@ Tudo da Gestão
     └── Estagiários
 ```
 
-Rotas planejadas:
+Rotas planejadas/atuais:
 
 ```text
 /login
-/dashboard
-/pedidos/novo
 /meus-pedidos
+/pedidos/novo
+/dashboard
 /pedidos
 /pedidos/:id
 /estoque
@@ -432,47 +611,71 @@ Rotas planejadas:
 
 ---
 
-# 8. Regras importantes do domínio para o frontend
+# 10. Modelo visual aprovado para o Sistema de Gestão
 
-Pedidos:
+A próxima interface NÃO deve reutilizar cegamente o shell simplificado do solicitante.
+
+Usar o modelo de gestão já aprovado anteriormente como referência estrutural:
 
 ```text
-PENDENTE
-→ APROVADO
-   → ENTREGUE
-   → CANCELADO
+sidebar escura institucional
+logo SGL no topo
+navegação mais completa
+bloco de usuário no rodapé
 
-PENDENTE
-→ REJEITADO
+topbar escura
+contexto / ações globais
+sair
+
+conteúdo branco/cinza muito claro
+breadcrumbs
+título + subtítulo
+botão de ação principal
+cards quando fizerem sentido
+busca local
+filtros expansíveis
+tabelas densidade média-compacta
+status em chips
+linhas/detalhes expansíveis quando ajudar a leitura
 ```
 
-Regras críticas:
+Referência funcional do menu de Gestão:
 
-- aprovação pode ajustar quantidade aprovada;
-- backend executa FEFO/FIFO e baixa de estoque;
-- entrega não baixa estoque novamente;
-- cancelamento restaura os lotes exatos;
-- frontend não reproduz essas regras.
+```text
+PRINCIPAL
+Dashboard
+Pedidos
+Estoque
+Movimentações
+Relatórios
+```
 
-Documentos:
+Administração acrescenta:
 
-- backend ainda não possui upload multipart completo;
-- não criar persistência fake no frontend.
+```text
+ADMINISTRAÇÃO
+Cadastros
+```
 
-Fiscalização:
+Alertas operacionais previstos para Gestão/Admin:
 
-- deve ficar dentro de Relatórios → Fiscalização/Auditoria;
-- não duplicar dados operacionais;
-- modelagem definitiva aguarda requisito oficial.
+```text
+Pedidos pendentes
+Estoque baixo
+Próximos do vencimento
+Vencidos
+```
+
+Sem transformar a tela em dashboard excessivamente moderno. Manter linguagem institucional e funcional.
 
 ---
 
-# 9. Padrões de shell já aprovados
+# 11. Padrões de shell para Gestão/Admin
 
-Sidebar:
+Sidebar de gestão:
 
 ```text
-aberta ~240–248 px
+aberta ~240–258 px
 recolhida ~64–72 px
 clique para recolher/expandir
 não expandir sidebar inteira por hover
@@ -482,18 +685,18 @@ mobile → drawer/overlay
 Topbar:
 
 ```text
-logo | toggle | espaço | pesquisa | sair
+contexto | espaço | pesquisa global futura | sair
 ```
 
 Busca/filtros:
 
 ```text
-busca global → topbar
+busca global → topbar quando implementada
 busca local → página
 filtros locais → botão Filtros / área expansível
 ```
 
-Alertas operacionais Gestão/Admin:
+Alertas:
 
 ```text
 azul      nenhuma pendência
@@ -501,18 +704,9 @@ amarelo   atenção
 vermelho  urgência
 ```
 
-Categorias previstas:
-
-```text
-Pedidos pendentes
-Estoque baixo
-Próximos do vencimento
-Vencidos
-```
-
 ---
 
-# 10. Método para implementar cada tela
+# 12. Método para implementar cada tela
 
 ```text
 1. entender função e usuário
@@ -541,7 +735,7 @@ mudança estrutural
 
 ---
 
-# 11. Roadmap atualizado
+# 13. Roadmap atualizado
 
 ```text
 Etapa 0 — Handoff backend → frontend                    ✅
@@ -555,8 +749,8 @@ Etapa 2 — Bootstrap técnico                             ✅
 
 Etapa 3 — Interfaces reais                              🟡 ATUAL
   3.1 Login                                             ✅ CONCLUÍDO
-  3.2 Pedidos do Solicitante                            ⏳ PRÓXIMO
-  3.3 Gestão                                            ⏳
+  3.2 Pedidos do Solicitante                            ✅ CONCLUÍDO
+  3.3 Interface do Sistema de Gestão                    ⏳ PRÓXIMO
 
 Etapa 4 — Estoque / Lotes / Movimentações              ⏳
 Etapa 5 — Administração                                 ⏳
@@ -567,17 +761,17 @@ Etapa 8 — Autenticação / autorização / auditoria        ⏳
 
 ---
 
-# 12. Documentos importantes
+# 14. Documentos importantes
 
 ```text
 CONTINUIDADE.md
 → fonte principal de retomada
 
 README.md
-→ visão geral, apresentação e screenshot do estado visual aprovado
+→ visão geral e apresentação visual
 
 docs/ETAPA_2_BOOTSTRAP.md
-→ stack, bootstrap, correções de compatibilidade e validação
+→ stack, bootstrap, compatibilidade e validação
 
 docs/IDENTIDADE_VISUAL.md
 → identidade, paleta, densidade e motion
@@ -600,31 +794,113 @@ docs/ESTRUTURA_FRONTEND.md
 
 ---
 
-# 13. Próximo passo exato
+# 15. PRÓXIMO PASSO EXATO — PARA O PRÓXIMO CHAT
 
-Abrir uma sessão focada em:
+Não refazer Login nem Pedidos do Solicitante.
+
+Ambos estão encerrados e integrados à `main`.
+
+O próximo chat deve começar por:
 
 ```text
-ETAPA 3.2 — PEDIDOS DO SOLICITANTE
+ETAPA 3.3 — INTERFACE DO SISTEMA DE GESTÃO
 ```
 
-Primeiro fluxo a detalhar/implementar:
+## Primeiro objetivo
+
+Criar a base visual/estrutural da Gestão usando o modelo já aprovado anteriormente.
+
+Começar pelo shell da Gestão e pela tela de Pedidos da Gestão — NÃO pela gestão de estoque ainda.
+
+Sequência recomendada:
 
 ```text
+1. criar branch a partir da main
+   sugestão: feat/gestao-interface
+
+2. ler:
+   CONTINUIDADE.md
+   docs/SHELL_VISUAL.md
+   docs/SIDEBAR_ALERTAS.md
+   docs/PADROES_PAGINA.md
+
+3. conferir no Swagger os endpoints reais de pedidos usados pela gestão
+
+4. implementar primeiro:
+   GestaoLayout.vue
+   ↓
+   sidebar completa de Gestão
+   ↓
+   topbar
+   ↓
+   PedidosGestaoView.vue
+
+5. Pedidos da Gestão deve permitir visualizar/filtrar pedidos do sistema
+   e preparar as ações de análise previstas pelo backend
+
+6. somente depois avançar para Estoque / Lotes / Movimentações
+```
+
+## Direção visual da primeira tela de Gestão
+
+Usar como base o modelo aprovado já discutido:
+
+```text
+sidebar escura
+logo SGL
+Dashboard
 Pedidos
-├── Novo pedido
-└── Meus pedidos
-    └── Detalhe
+Estoque
+Movimentações
+Relatórios
+
+área principal clara
+breadcrumb
+Título: Pedidos
+subtítulo operacional
+botão de ação apenas quando fizer sentido
+busca
+filtros
+lista/tabela de pedidos
+chips de status
+urgência destacada
+linhas/detalhes expansíveis ou painel contextual conforme a tela exigir
 ```
 
-Antes de codar cada parte:
+O foco da Gestão é diferente do Solicitante:
 
 ```text
-conferir Swagger/OpenAPI
-→ identificar contratos reais
-→ definir a experiência do solicitante
-→ implementar diretamente
-→ extrair componentes quando a responsabilidade/repetição aparecer
+Solicitante
+→ criar e acompanhar o próprio pedido
+
+Gestão
+→ enxergar pedidos do sistema
+→ filtrar/priorizar
+→ analisar
+→ aprovar/rejeitar conforme contrato real
+→ posteriormente conectar estoque/movimentações
 ```
 
-A tela de Login está oficialmente encerrada como referência visual e arquitetural da primeira interface real do SGL.
+Não inventar ações ou campos. Antes de implementar aprovação/rejeição, confirmar exatamente os DTOs e endpoints no Swagger/backend.
+
+---
+
+# 16. Estado dos branches após encerramento deste bloco
+
+As alterações aprovadas foram integradas à `main`.
+
+Frontend:
+
+```text
+feat/perfil-solicitante
+→ merge/fast-forward para main concluído
+```
+
+Backend:
+
+```text
+feat/urgencia-observacao-unificada
+→ merge/fast-forward para main concluído
+```
+
+A `main` de ambos os repositórios é agora a base oficial para continuar o desenvolvimento.
