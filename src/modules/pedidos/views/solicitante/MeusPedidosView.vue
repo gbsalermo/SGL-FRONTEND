@@ -101,6 +101,17 @@ function alternarDetalhes(pedidoId: string) {
   pedidoExpandidoId.value = pedidoExpandidoId.value === pedidoId ? null : pedidoId
 }
 
+function textoObservacao(pedido: PedidoResponse) {
+  const observacao = pedido.observacao?.trim()
+  const motivoLegado = pedido.motivoUrgencia?.trim()
+
+  if (observacao && motivoLegado && observacao !== motivoLegado) {
+    return `${observacao}\n\nContexto de urgência informado anteriormente: ${motivoLegado}`
+  }
+
+  return observacao || motivoLegado || 'Nenhuma observação informada neste pedido.'
+}
+
 onMounted(carregarPedidos)
 </script>
 
@@ -289,17 +300,14 @@ onMounted(carregarPedidos)
                             <dd>{{ pedido.laboratorioNome }}</dd>
                           </div>
                         </dl>
+                        <div v-if="pedido.urgente" class="expanded-urgency">
+                          <span class="urgent-status">Pedido urgente</span>
+                        </div>
                       </section>
 
-                      <section v-if="pedido.urgente" class="expanded-section expanded-section--urgent">
-                        <h3>Urgência</h3>
-                        <span class="urgent-status">Pedido urgente</span>
-                        <p>{{ pedido.motivoUrgencia || 'Motivo de urgência não informado.' }}</p>
-                      </section>
-
-                      <section class="expanded-section">
+                      <section class="expanded-section expanded-section--observation">
                         <h3>Observação / descrição</h3>
-                        <p>{{ pedido.observacao || 'Nenhuma observação informada neste pedido.' }}</p>
+                        <p>{{ textoObservacao(pedido) }}</p>
                       </section>
                     </div>
                   </div>
@@ -410,10 +418,10 @@ th { color: #35415a; background: #fbfcfe; font-size: 11px; text-transform: upper
 .expanded-grid { display: grid; grid-template-columns: 1.45fr 1fr; gap: 14px; }
 .expanded-section { min-width: 0; padding: 16px; border: 1px solid #e1e8f1; border-radius: 8px; background: #fff; }
 .expanded-section h3 { margin: 0 0 12px; color: #26344b; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
-.expanded-section p { margin: 9px 0 0; color: #4d5a70; font-size: 12px; line-height: 1.55; }
+.expanded-section p { margin: 9px 0 0; color: #4d5a70; font-size: 12px; line-height: 1.55; white-space: pre-line; }
 .expanded-section--materials { grid-row: span 2; }
-.expanded-section--urgent { border-color: #fecaca; background: #fffafa; }
-.expanded-section--urgent h3, .expanded-section--urgent p { color: #b42318; }
+.expanded-section--observation { align-self: stretch; }
+.expanded-urgency { margin-top: 14px; padding-top: 12px; border-top: 1px solid #edf1f6; }
 
 .material-list { display: flex; flex-direction: column; }
 .material-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 11px 0; border-top: 1px solid #edf1f6; }
