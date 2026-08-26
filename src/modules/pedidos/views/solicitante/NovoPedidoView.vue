@@ -24,7 +24,6 @@ const projetos = ref<ProjetoResponse[]>([])
 const estoques = ref<EstoqueCentralResponse[]>([])
 const projetoId = ref('')
 const urgente = ref(false)
-const motivoUrgencia = ref('')
 const observacao = ref('')
 const itens = ref<ItemForm[]>([{ produtoId: '', quantidadeSolicitada: 1 }])
 const carregandoDados = ref(false)
@@ -104,10 +103,6 @@ function produtoSelecionado(produtoId: string) {
 
 function alternarUrgencia() {
   urgente.value = !urgente.value
-
-  if (!urgente.value) {
-    motivoUrgencia.value = ''
-  }
 }
 
 function validarFormulario() {
@@ -123,10 +118,6 @@ function validarFormulario() {
   if (new Set(produtos).size !== produtos.length) {
     throw new Error('O mesmo produto não pode ser adicionado mais de uma vez.')
   }
-
-  if (urgente.value && !motivoUrgencia.value.trim()) {
-    throw new Error('Informe o motivo da urgência.')
-  }
 }
 
 async function enviarPedido() {
@@ -140,7 +131,7 @@ async function enviarPedido() {
       laboratorioId: usuario.value!.laboratorioId!,
       projetoId: projetoId.value || null,
       urgente: urgente.value,
-      motivoUrgencia: urgente.value ? motivoUrgencia.value.trim() : null,
+      motivoUrgencia: null,
       observacao: observacao.value.trim() || null,
       arquivoDocumento: null,
       itens: itens.value.map((item) => ({
@@ -228,24 +219,20 @@ onMounted(carregarDados)
           </button>
         </div>
 
-        <label v-if="urgente" class="field urgency-reason">
-          <span>Motivo da urgência</span>
-          <textarea
-            v-model="motivoUrgencia"
-            rows="3"
-            maxlength="500"
-            required
-            placeholder="Explique por que este pedido precisa de atenção da gestão..."
-          />
-          <small>{{ motivoUrgencia.length }}/500 caracteres</small>
-        </label>
+        <div v-if="urgente" class="urgency-guidance">
+          Se possível, informe no campo abaixo o motivo da urgência para ajudar a gestão a compreender a prioridade do pedido.
+        </div>
 
-        <label class="field">
-          <span>Observação <small>(opcional)</small></span>
+        <label class="field observation-field">
+          <span>Observação / descrição <small>(opcional)</small></span>
           <textarea
             v-model="observacao"
             rows="3"
-            placeholder="Informe finalidade, contexto do uso ou alguma orientação para a gestão..."
+            :placeholder="
+              urgente
+                ? 'Informe, se possível, o motivo da urgência, finalidade ou contexto do pedido...'
+                : 'Informe finalidade, contexto do uso ou alguma orientação para a gestão...'
+            "
           />
         </label>
       </section>
@@ -476,7 +463,8 @@ onMounted(carregarDados)
 
 .field + .field,
 .urgency-field + .field,
-.field + .urgency-field {
+.field + .urgency-field,
+.urgency-guidance + .field {
   margin-top: 16px;
 }
 
@@ -582,9 +570,19 @@ onMounted(carregarDados)
   background: currentColor;
 }
 
-.urgency-reason textarea {
-  border-color: #f2b8b5;
-  background: #fffafa;
+.urgency-guidance {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid #dc2626;
+  border-radius: 4px;
+  background: #fff7f7;
+  color: #8f2d24;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.observation-field textarea {
+  min-height: 96px;
 }
 
 .items-list {
