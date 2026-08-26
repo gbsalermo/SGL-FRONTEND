@@ -14,6 +14,7 @@ const pedidos = ref<PedidoResponse[]>([])
 const carregando = ref(true)
 const erro = ref('')
 const busca = ref('')
+const filtrosAbertos = ref(false)
 const status = ref<StatusPedido | 'TODOS'>('TODOS')
 const urgencia = ref<'TODOS' | 'URGENTE' | 'NORMAL'>('TODOS')
 const laboratorio = ref('TODOS')
@@ -308,7 +309,6 @@ onMounted(carregar)
       </div>
       <div class="gestao-pedidos__header-actions">
         <button class="secondary-action" type="button" @click="carregar">Atualizar</button>
-        <router-link class="primary-action" to="/solicitacoes/novo">+ Novo pedido</router-link>
       </div>
     </header>
 
@@ -336,12 +336,19 @@ onMounted(carregar)
     </div>
 
     <section class="gestao-filter-card" aria-label="Busca, filtros e ordenação">
-      <div class="gestao-filter-grid">
+      <div class="gestao-filter-top">
         <label class="gestao-search">
           <span>Buscar</span>
           <input v-model="busca" type="search" placeholder="Produto, solicitante, laboratório, projeto, urgência..." />
         </label>
 
+        <button class="filter-toggle" type="button" :aria-expanded="filtrosAbertos" @click="filtrosAbertos = !filtrosAbertos">
+          <span>Filtros</span>
+          <strong>{{ filtrosAbertos ? '⌃' : '⌄' }}</strong>
+        </button>
+      </div>
+
+      <div v-if="filtrosAbertos" class="gestao-filter-grid gestao-filter-grid--advanced">
         <label>
           <span>Status</span>
           <select v-model="status">
@@ -589,9 +596,7 @@ onMounted(carregar)
 .gestao-pedidos__header h1 { margin: 0; color: #1a1a2e; font-size: 30px; }
 .gestao-pedidos__header p { margin: 7px 0 0; color: #64748b; font-size: 14px; }
 .gestao-pedidos__header-actions { display: flex; gap: 9px; }
-.primary-action, .secondary-action { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; }
-.primary-action { border: 0; background: #1a4da1; color: #fff; box-shadow: 0 7px 18px rgb(26 77 161 / 16%); }
-.secondary-action { border: 1px solid #cbd5e1; background: #fff; color: #334155; }
+.secondary-action { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #334155; font-size: 13px; font-weight: 700; cursor: pointer; }
 
 .gestao-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 22px 0 18px; }
 .gestao-summary article { padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; box-shadow: 0 5px 18px rgb(15 23 42 / 4%); }
@@ -602,11 +607,17 @@ onMounted(carregar)
 .gestao-summary__urgent strong { color: #b42318; }
 
 .gestao-filter-card { margin-bottom: 16px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 11px; background: #fff; box-shadow: 0 5px 18px rgb(15 23 42 / 4%); }
-.gestao-filter-grid { display: grid; grid-template-columns: minmax(270px, 1.6fr) repeat(3, minmax(150px, .7fr)); gap: 12px; }
+.gestao-filter-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+.gestao-search { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.gestao-search > span, .gestao-filter-grid label > span { color: #475569; font-size: 11px; font-weight: 700; }
+.gestao-search input, .gestao-filter-grid input, .gestao-filter-grid select { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1a1a2e; outline: none; }
+.gestao-search input:focus, .gestao-filter-grid input:focus, .gestao-filter-grid select:focus { border-color: #2d6bc4; box-shadow: 0 0 0 3px rgb(45 107 196 / 10%); }
+.filter-toggle { min-width: 108px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 13px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #334155; font-size: 12px; font-weight: 700; cursor: pointer; }
+.filter-toggle:hover { background: #f8fafc; }
+.filter-toggle strong { color: #1a4da1; font-size: 14px; }
+.gestao-filter-grid { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 12px; }
+.gestao-filter-grid--advanced { margin-top: 14px; padding-top: 14px; border-top: 1px solid #eef2f7; }
 .gestao-filter-grid label { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.gestao-filter-grid label > span { color: #475569; font-size: 11px; font-weight: 700; }
-.gestao-filter-grid input, .gestao-filter-grid select { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1a1a2e; outline: none; }
-.gestao-filter-grid input:focus, .gestao-filter-grid select:focus { border-color: #2d6bc4; box-shadow: 0 0 0 3px rgb(45 107 196 / 10%); }
 .gestao-filter-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef2f7; color: #64748b; font-size: 11px; }
 .gestao-filter-footer button { border: 0; background: transparent; color: #1a4da1; font-weight: 700; cursor: pointer; }
 
@@ -678,21 +689,19 @@ onMounted(carregar)
 
 @media (max-width: 1180px) {
   .gestao-filter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .gestao-search { grid-column: span 2; }
 }
 
 @media (max-width: 900px) {
   .gestao-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .gestao-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .gestao-search { grid-column: 1 / -1; }
 }
 
 @media (max-width: 640px) {
   .gestao-pedidos__header { flex-direction: column; }
   .gestao-pedidos__header-actions { width: 100%; }
   .gestao-pedidos__header-actions > * { flex: 1; }
-  .gestao-summary, .gestao-filter-grid { grid-template-columns: 1fr; }
-  .gestao-search { grid-column: auto; }
+  .gestao-summary, .gestao-filter-grid, .gestao-filter-top { grid-template-columns: 1fr; }
+  .filter-toggle { width: 100%; }
   .gestao-detail { grid-template-columns: 1fr; }
   .gestao-detail__item { grid-template-columns: 1fr; gap: 6px; }
   .quantity-card { width: 100%; }
