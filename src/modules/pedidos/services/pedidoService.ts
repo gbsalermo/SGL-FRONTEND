@@ -1,5 +1,6 @@
 import { http } from '@/services/http'
 import type {
+  AprovarPedidoRequest,
   EstoqueCentralResponse,
   PedidoRequest,
   PedidoResponse,
@@ -29,6 +30,30 @@ export const pedidoService = {
 
   async buscarPorId(id: string) {
     const { data } = await http.get<PedidoResponse>(`/v1/pedidos/${id}`)
+    return data
+  },
+
+  async aprovar(id: string, payload: AprovarPedidoRequest) {
+    const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/aprovar`, payload)
+    return data
+  },
+
+  async rejeitar(id: string, observacao: string) {
+    const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/rejeitar`, null, {
+      params: { observacao },
+    })
+    return data
+  },
+
+  async entregar(id: string) {
+    const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/entregar`)
+    return data
+  },
+
+  async cancelar(id: string, observacao: string) {
+    const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/cancelar`, null, {
+      params: { observacao },
+    })
     return data
   },
 
