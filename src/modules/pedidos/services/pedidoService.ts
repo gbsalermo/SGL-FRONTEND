@@ -8,17 +8,31 @@ import type {
   StatusPedido,
 } from '@/modules/pedidos/types/pedido'
 
+type ProdutoDetalhe = {
+  id: string
+  risco: string | null
+  tipoRisco: string | null
+  descricaoRisco: string | null
+  perecivel: boolean
+  tipoPerecivel: string | null
+  condicoesArmazenamento: string | null
+}
+
 function rotuloEnum(valor: string | null | undefined) {
   if (!valor || valor === 'NENHUM') return null
 
   const rotulos: Record<string, string> = {
+    BAIXO: 'Baixo',
     MEDIO: 'Médio',
+    ALTO: 'Alto',
     INFLAMAVEL: 'Inflamável',
     RADIOATIVO: 'Radioativo',
     TOXICO: 'Tóxico',
     CORROSIVO: 'Corrosivo',
     BIOLOGICO: 'Biológico',
     VALIDADE: 'Validade',
+    MICROBIANO: 'Microbiano',
+    QUIMICO: 'Químico',
   }
 
   return rotulos[valor] ?? valor
@@ -52,19 +66,69 @@ function descricaoOperacionalProduto(item: PedidoResponse['itens'][number]) {
   return partes.filter(Boolean).join(' • ')
 }
 
-function aplicarContextoOperacional(pedido: PedidoResponse): PedidoResponse {
+function itemSemContextoProduto(item: PedidoResponse['itens'][number]) {
+  return item.produtoRisco === undefined
+    || item.produtoPerecivel === undefined
+    || item.produtoTipoRisco === undefined
+}
+
+async function enriquecerItensComProduto(pedido: PedidoResponse): Promise<PedidoResponse> {
+  const ids = [...new Set(
+    pedido.itens
+      .filter(itemSemContextoProduto)
+      .map((item) => item.produtoId),
+  )]
+
+  if (ids.length === 0) return pedido
+
+  const resultados = await Promise.allSettled(
+    ids.map(async (produtoId) => {
+      const { data } = await http.get<ProdutoDetalhe>(`/v1/produtos/${produtoId}`)
+      return data
+    }),
+  )
+
+  const produtos = new Map<string, ProdutoDetalhe>()
+  for (const resultado of resultados) {
+    if (resultado.status === 'fulfilled') {
+      produtos.set(resultado.value.id, resultado.value)
+    }
+  }
+
   return {
     ...pedido,
-    urgente: pedido.urgente && pedido.status === 'PENDENTE',
-    itens: pedido.itens.map((item) => ({
+    itens: pedido.itens.map((item) => {
+      const produto = produtos.get(item.produtoId)
+      if (!produto) return item
+
+      return {
+        ...item,
+        produtoRisco: produto.risco,
+        produtoTipoRisco: produto.tipoRisco,
+        produtoDescricaoRisco: produto.descricaoRisco,
+        produtoPerecivel: produto.perecivel,
+        produtoTipoPerecivel: produto.tipoPerecivel,
+        produtoCondicoesArmazenamento: produto.condicoesArmazenamento,
+      }
+    }),
+  }
+}
+
+async function aplicarContextoOperacional(pedido: PedidoResponse): Promise<PedidoResponse> {
+  const enriquecido = await enriquecerItensComProduto(pedido)
+
+  return {
+    ...enriquecido,
+    urgente: enriquecido.urgente && enriquecido.status === 'PENDENTE',
+    itens: enriquecido.itens.map((item) => ({
       ...item,
       produtoUnidadeArmazenamento: descricaoOperacionalProduto(item),
     })),
   }
 }
 
-function aplicarContextoOperacionalLista(pedidos: PedidoResponse[]) {
-  return pedidos.map(aplicarContextoOperacional)
+async function aplicarContextoOperacionalLista(pedidos: PedidoResponse[]) {
+  return Promise.all(pedidos.map(aplicarContextoOperacional))
 }
 
 export const pedidoService = {
