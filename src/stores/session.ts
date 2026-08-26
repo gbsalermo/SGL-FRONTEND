@@ -38,6 +38,12 @@ export const useSessionStore = defineStore('session', {
 
       const { data } = await http.get<UsuarioSessao[]>('/v1/usuarios')
 
+      if (!Array.isArray(data)) {
+        throw new Error(
+          'O backend não retornou uma lista de usuários. Verifique se a API está rodando em http://localhost:8080 e se VITE_API_BASE_URL aponta para http://localhost:8080/api.',
+        )
+      }
+
       const usuario = data.find((item) => {
         if (!item.ativo) return false
 
