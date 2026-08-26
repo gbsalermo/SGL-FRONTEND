@@ -312,8 +312,8 @@ onMounted(carregarDados)
 
       <footer class="form-footer">
         <p>
-          O pedido será criado como <strong>PENDENTE</strong> e ficará disponível para análise da gestão.
-          <span v-if="urgente" class="urgent-footer-note">A urgência ficará destacada apenas como informação.</span>
+          O pedido ficará pendente até análise da gestão.
+          <span class="urgent-footer-note">Marque o pedido como urgente apenas quando necessário.</span>
         </p>
         <button class="primary-action" type="submit" :disabled="enviando || carregandoDados">
           {{ enviando ? 'Enviando...' : 'Enviar pedido' }}
