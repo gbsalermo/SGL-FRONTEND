@@ -1,6 +1,12 @@
 @import './tokens.css';
 @import './base.css';
 
+/* A sidebar da gestão deve rolar apenas no eixo vertical. */
+.gestao-sidebar,
+.gestao-nav {
+  overflow-x: hidden !important;
+}
+
 /* Ajuste fino da comparação de quantidades no detalhe de pedidos da gestão.
    Mantém os dois blocos visualmente equivalentes, inclusive quando o valor
    aprovado ainda é editável. */
