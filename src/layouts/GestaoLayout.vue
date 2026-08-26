@@ -203,26 +203,27 @@ function sair() {
 .gestao-brand img { width: 178px; max-height: 72px; object-fit: contain; filter: drop-shadow(0 4px 14px rgb(0 0 0 / 18%)); transition: width 300ms ease; }
 .gestao-shell--collapsed .gestao-brand img { width: 42px; object-fit: cover; object-position: left; }
 .gestao-tools { padding: 16px 0 6px; }
-.gestao-tool, .gestao-nav a, .gestao-nav__future, .gestao-nav-parent { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 12px; border: 0; border-radius: 8px; background: transparent; color: #eef4ff; font: inherit; font-size: 13px; font-weight: 600; text-decoration: none; }
-.gestao-tool, .gestao-nav a, .gestao-nav__future { padding: 0 12px; }
+.gestao-tool, .gestao-nav a, .gestao-nav__future, .gestao-nav-parent { width: 100%; min-height: 42px; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; background: transparent; color: #eef4ff; font: inherit; font-size: 12px; font-weight: 600; text-decoration: none; }
+.gestao-tool, .gestao-nav a, .gestao-nav__future { padding: 0 11px; }
 .gestao-tool { cursor: pointer; }
-.gestao-tool:hover, .gestao-nav a:hover, .gestao-nav-parent:hover { background: rgb(255 255 255 / 7%); }
-.gestao-tool svg, .gestao-nav svg, .gestao-nav__future svg, .gestao-topbar svg, .gestao-nav-parent svg { width: 21px; height: 21px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.gestao-tool:hover, .gestao-nav a:hover, .gestao-nav-parent:hover { background: rgb(255 255 255 / 6%); }
+.gestao-tool svg, .gestao-nav svg, .gestao-nav__future svg, .gestao-topbar svg, .gestao-nav-parent svg { width: 20px; height: 20px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .gestao-tool__switch { margin-left: auto; padding: 4px 7px; border: 1px solid rgb(255 255 255 / 14%); border-radius: 7px; color: #b9c9e2; font-size: 11px; }
 .gestao-alert-badge { margin-left: auto; min-width: 24px; height: 24px; display: grid; place-items: center; border-radius: 999px; background: #f6c343; color: #17213a; font-size: 11px; font-weight: 800; }
-.gestao-nav { min-height: 0; flex: 1; overflow-y: auto; padding-top: 6px; scrollbar-width: thin; }
+.gestao-nav { min-height: 0; flex: 1; overflow-y: auto; padding: 6px 4px 0 0; scrollbar-width: thin; }
 .gestao-nav p { margin: 18px 10px 8px; color: #8298ba; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
 .gestao-nav__group { margin-top: 22px !important; }
 .gestao-nav a + a { margin-top: 3px; }
-.gestao-nav a.router-link-active { background: linear-gradient(135deg, #1a4da1 0%, #2456c4 100%); box-shadow: 0 8px 18px rgb(16 63 150 / 22%); }
-.gestao-nav-parent { position: relative; padding: 0; }
-.gestao-nav-parent--active { background: rgb(26 77 161 / 22%); }
-.gestao-nav-parent__main { min-width: 0; flex: 1; min-height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-align: left; }
-.gestao-nav-parent__toggle { width: 34px; height: 34px; margin-right: 5px; border: 0; border-radius: 6px; background: transparent; color: #aebed7; cursor: pointer; }
-.gestao-nav-parent__toggle:hover { background: rgb(255 255 255 / 7%); color: #fff; }
-.gestao-subnav { position: relative; margin: 2px 0 8px 20px; padding-left: 15px; border-left: 1px solid rgb(143 163 196 / 24%); }
-.gestao-subnav a { min-height: 34px; padding: 0 10px; border-radius: 6px; color: #aebed7; font-size: 11px; font-weight: 600; box-shadow: none !important; }
-.gestao-subnav a.router-link-active, .gestao-subnav a.gestao-subnav--active { background: rgb(45 107 196 / 18%); color: #fff; }
+.gestao-nav a.router-link-active { background: linear-gradient(135deg, #1a4da1 0%, #2456c4 100%); box-shadow: 0 6px 14px rgb(16 63 150 / 18%); }
+.gestao-nav-parent { position: relative; margin-right: 4px; padding: 0; }
+.gestao-nav-parent--active { background: rgb(26 77 161 / 18%); }
+.gestao-nav-parent__main { min-width: 0; flex: 1; min-height: 42px; display: flex; align-items: center; gap: 11px; padding: 0 11px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; text-align: left; }
+.gestao-nav-parent__toggle { width: 30px; height: 30px; margin-right: 4px; border: 0; border-radius: 6px; background: transparent; color: #aebed7; cursor: pointer; }
+.gestao-nav-parent__toggle:hover { background: rgb(255 255 255 / 6%); color: #fff; }
+.gestao-subnav { position: relative; margin: 5px 10px 10px 14px; padding: 2px 0 2px 13px; border-left: 1px solid rgb(143 163 196 / 22%); }
+.gestao-subnav a { min-height: 30px; margin: 2px 0; padding: 0 9px; border-radius: 5px; color: #aebed7; font-size: 10px; font-weight: 600; box-shadow: none !important; }
+.gestao-subnav a:hover { background: rgb(255 255 255 / 5%); }
+.gestao-subnav a.router-link-active, .gestao-subnav a.gestao-subnav--active { background: rgb(45 107 196 / 15%); color: #fff; }
 .gestao-nav__future { position: relative; color: #a6b6cf; cursor: default; }
 .gestao-nav__future small { margin-left: auto; color: #6f86aa; font-size: 9px; font-weight: 700; }
 .gestao-shell--collapsed .gestao-nav a, .gestao-shell--collapsed .gestao-tool, .gestao-shell--collapsed .gestao-nav__future, .gestao-shell--collapsed .gestao-nav-parent { justify-content: center; padding-inline: 0; }
