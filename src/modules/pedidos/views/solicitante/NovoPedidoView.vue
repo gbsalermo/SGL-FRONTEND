@@ -23,6 +23,8 @@ const session = useSessionStore()
 const projetos = ref<ProjetoResponse[]>([])
 const estoques = ref<EstoqueCentralResponse[]>([])
 const projetoId = ref('')
+const urgente = ref(false)
+const motivoUrgencia = ref('')
 const observacao = ref('')
 const itens = ref<ItemForm[]>([{ produtoId: '', quantidadeSolicitada: 1 }])
 const carregandoDados = ref(false)
@@ -30,6 +32,12 @@ const enviando = ref(false)
 const erro = ref('')
 
 const usuario = computed(() => session.usuario)
+
+const podeAdicionarItem = computed(() => {
+  const todosSelecionados = itens.value.every((item) => Boolean(item.produtoId))
+  const produtosDisponiveis = new Set(estoques.value.map((estoque) => estoque.produtoId)).size
+  return todosSelecionados && itens.value.length < produtosDisponiveis
+})
 
 function mensagemErro(error: unknown) {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
@@ -57,7 +65,7 @@ async function carregarDados() {
     ])
 
     projetos.value = projetosData
-    estoques.value = estoqueData
+    estoques.value = estoqueData.filter((estoque) => estoque.ativo)
   } catch (error) {
     erro.value = mensagemErro(error)
   } finally {
@@ -66,6 +74,7 @@ async function carregarDados() {
 }
 
 function adicionarItem() {
+  if (!podeAdicionarItem.value) return
   itens.value.push({ produtoId: '', quantidadeSolicitada: 1 })
 }
 
@@ -74,8 +83,31 @@ function removerItem(index: number) {
   itens.value.splice(index, 1)
 }
 
+function opcoesProduto(index: number) {
+  const selecionadosEmOutrasLinhas = new Set(
+    itens.value
+      .filter((_, itemIndex) => itemIndex !== index)
+      .map((item) => item.produtoId)
+      .filter(Boolean),
+  )
+
+  return estoques.value.filter(
+    (estoque) =>
+      estoque.produtoId === itens.value[index]?.produtoId ||
+      !selecionadosEmOutrasLinhas.has(estoque.produtoId),
+  )
+}
+
 function produtoSelecionado(produtoId: string) {
   return estoques.value.find((estoque) => estoque.produtoId === produtoId)
+}
+
+function alternarUrgencia() {
+  urgente.value = !urgente.value
+
+  if (!urgente.value) {
+    motivoUrgencia.value = ''
+  }
 }
 
 function validarFormulario() {
@@ -91,6 +123,10 @@ function validarFormulario() {
   if (new Set(produtos).size !== produtos.length) {
     throw new Error('O mesmo produto não pode ser adicionado mais de uma vez.')
   }
+
+  if (urgente.value && !motivoUrgencia.value.trim()) {
+    throw new Error('Informe o motivo da urgência.')
+  }
 }
 
 async function enviarPedido() {
@@ -103,6 +139,8 @@ async function enviarPedido() {
       usuarioId: usuario.value!.id,
       laboratorioId: usuario.value!.laboratorioId!,
       projetoId: projetoId.value || null,
+      urgente: urgente.value,
+      motivoUrgencia: urgente.value ? motivoUrgencia.value.trim() : null,
       observacao: observacao.value.trim() || null,
       arquivoDocumento: null,
       itens: itens.value.map((item) => ({
@@ -157,7 +195,7 @@ onMounted(carregarDados)
             <span>1</span>
             <div>
               <h2>Contexto da solicitação</h2>
-              <p>Vincule um projeto quando o pedido estiver relacionado a uma atividade específica.</p>
+              <p>Vincule um projeto e informe dados que ajudem a gestão a compreender o pedido.</p>
             </div>
           </div>
         </div>
@@ -172,12 +210,42 @@ onMounted(carregarDados)
           </select>
         </label>
 
+        <div class="urgency-field">
+          <div>
+            <span class="field-label">Urgência <small>(opcional)</small></span>
+            <p>A marcação apenas informa a gestão e não altera automaticamente o fluxo do pedido.</p>
+          </div>
+
+          <button
+            class="urgency-toggle"
+            :class="{ 'urgency-toggle--active': urgente }"
+            type="button"
+            :aria-pressed="urgente"
+            @click="alternarUrgencia"
+          >
+            <span class="urgency-toggle__indicator" aria-hidden="true" />
+            {{ urgente ? 'Pedido urgente' : 'Marcar como urgente' }}
+          </button>
+        </div>
+
+        <label v-if="urgente" class="field urgency-reason">
+          <span>Motivo da urgência</span>
+          <textarea
+            v-model="motivoUrgencia"
+            rows="3"
+            maxlength="500"
+            required
+            placeholder="Explique por que este pedido precisa de atenção da gestão..."
+          />
+          <small>{{ motivoUrgencia.length }}/500 caracteres</small>
+        </label>
+
         <label class="field">
           <span>Observação <small>(opcional)</small></span>
           <textarea
             v-model="observacao"
             rows="3"
-            placeholder="Informe finalidade, urgência ou alguma orientação para a gestão..."
+            placeholder="Informe finalidade, contexto do uso ou alguma orientação para a gestão..."
           />
         </label>
       </section>
@@ -188,10 +256,17 @@ onMounted(carregarDados)
             <span>2</span>
             <div>
               <h2>Materiais solicitados</h2>
-              <p>Adicione um ou mais produtos e informe a quantidade desejada.</p>
+              <p>Cada produto pode aparecer apenas uma vez. Para pedir mais, ajuste a quantidade.</p>
             </div>
           </div>
-          <button type="button" @click="adicionarItem">+ Adicionar item</button>
+          <button
+            type="button"
+            :disabled="!podeAdicionarItem"
+            :title="podeAdicionarItem ? 'Adicionar outro produto' : 'Selecione o produto atual ou todos os produtos já foram adicionados'"
+            @click="adicionarItem"
+          >
+            + Adicionar item
+          </button>
         </div>
 
         <div v-if="carregandoDados" class="state-box">Carregando produtos disponíveis...</div>
@@ -202,7 +277,11 @@ onMounted(carregarDados)
               <span>Produto</span>
               <select v-model="item.produtoId" required>
                 <option value="" disabled>Selecione um produto</option>
-                <option v-for="estoque in estoques" :key="estoque.id" :value="estoque.produtoId">
+                <option
+                  v-for="estoque in opcoesProduto(index)"
+                  :key="estoque.id"
+                  :value="estoque.produtoId"
+                >
                   {{ estoque.produtoNome }} — {{ estoque.produtoUnidadeArmazenamento }}
                 </option>
               </select>
@@ -234,6 +313,7 @@ onMounted(carregarDados)
       <footer class="form-footer">
         <p>
           O pedido será criado como <strong>PENDENTE</strong> e ficará disponível para análise da gestão.
+          <span v-if="urgente" class="urgent-footer-note">A urgência ficará destacada apenas como informação.</span>
         </p>
         <button class="primary-action" type="submit" :disabled="enviando || carregandoDados">
           {{ enviando ? 'Enviando...' : 'Enviar pedido' }}
@@ -288,9 +368,14 @@ onMounted(carregarDados)
 }
 
 .secondary-action:hover,
-.section-title--action button:hover {
+.section-title--action button:hover:not(:disabled) {
   border-color: var(--sgl-primary);
   color: var(--sgl-primary);
+}
+
+.section-title--action button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .context-grid {
@@ -389,17 +474,21 @@ onMounted(carregarDados)
   gap: 7px;
 }
 
-.field + .field {
+.field + .field,
+.urgency-field + .field,
+.field + .urgency-field {
   margin-top: 16px;
 }
 
-.field > span {
+.field > span,
+.field-label {
   color: #2b374c;
   font-size: 12px;
   font-weight: 750;
 }
 
-.field > span small {
+.field > span small,
+.field-label small {
   color: var(--sgl-text-muted);
   font-weight: 500;
 }
@@ -437,6 +526,65 @@ onMounted(carregarDados)
 .field > small {
   color: var(--sgl-text-muted);
   font-size: 10px;
+}
+
+.urgency-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px;
+  border: 1px solid #e5eaf1;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.urgency-field p {
+  margin: 4px 0 0;
+  color: var(--sgl-text-muted);
+  font-size: 11px;
+}
+
+.urgency-toggle {
+  min-height: 40px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  color: #344258;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.urgency-toggle:hover {
+  border-color: #dc2626;
+  color: #b42318;
+}
+
+.urgency-toggle--active {
+  border-color: #fecaca;
+  background: #fff1f1;
+  color: #b42318;
+}
+
+.urgency-toggle__indicator {
+  width: 9px;
+  height: 9px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.urgency-toggle--active .urgency-toggle__indicator {
+  background: currentColor;
+}
+
+.urgency-reason textarea {
+  border-color: #f2b8b5;
+  background: #fffafa;
 }
 
 .items-list {
@@ -507,6 +655,13 @@ onMounted(carregarDados)
   font-size: 12px;
 }
 
+.urgent-footer-note {
+  display: block;
+  margin-top: 4px;
+  color: #b42318;
+  font-weight: 700;
+}
+
 .primary-action {
   min-height: 44px;
   padding: 0 20px;
@@ -530,14 +685,16 @@ onMounted(carregarDados)
 @media (max-width: 720px) {
   .page-heading,
   .form-footer,
-  .section-title--action {
+  .section-title--action,
+  .urgency-field {
     align-items: stretch;
     flex-direction: column;
   }
 
   .secondary-action,
   .primary-action,
-  .section-title--action button {
+  .section-title--action button,
+  .urgency-toggle {
     align-self: flex-start;
   }
 
