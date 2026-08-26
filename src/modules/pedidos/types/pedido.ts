@@ -24,6 +24,8 @@ export interface PedidoResponse {
   projetoNome: string | null
   dataSolicitacao: string
   status: StatusPedido
+  urgente: boolean
+  motivoUrgencia: string | null
   observacao: string | null
   arquivoDocumento: string | null
   itens: ItemPedidoResponse[]
@@ -33,6 +35,8 @@ export interface PedidoRequest {
   usuarioId: string
   laboratorioId: string
   projetoId: string | null
+  urgente: boolean
+  motivoUrgencia: string | null
   observacao: string | null
   arquivoDocumento: string | null
   itens: Array<{
