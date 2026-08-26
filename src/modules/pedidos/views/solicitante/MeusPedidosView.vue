@@ -32,6 +32,8 @@ const pedidosFiltrados = computed(() => {
       pedido.projetoNome,
       pedido.laboratorioNome,
       pedido.status,
+      pedido.urgente ? 'urgente' : null,
+      pedido.motivoUrgencia,
       pedido.observacao,
       ...pedido.itens.map((item) => item.produtoNome),
     ]
@@ -188,9 +190,12 @@ onMounted(carregarPedidos)
                 <span class="table-secondary">produto(s)</span>
               </td>
               <td>
-                <span class="status-chip" :class="`status-chip--${pedido.status.toLowerCase()}`">
-                  {{ statusLabel(pedido.status) }}
-                </span>
+                <div class="status-cell">
+                  <span class="status-chip" :class="`status-chip--${pedido.status.toLowerCase()}`">
+                    {{ statusLabel(pedido.status) }}
+                  </span>
+                  <span v-if="pedido.urgente" class="urgent-status">Pedido urgente</span>
+                </div>
               </td>
               <td>{{ pedido.laboratorioNome }}</td>
               <td class="actions-column">
@@ -215,9 +220,18 @@ onMounted(carregarPedidos)
         </header>
 
         <div class="detail-meta">
-          <div><span>Status</span><strong>{{ statusLabel(selecionado.status) }}</strong></div>
+          <div>
+            <span>Status</span>
+            <strong>{{ statusLabel(selecionado.status) }}</strong>
+            <small v-if="selecionado.urgente" class="urgent-status">Pedido urgente</small>
+          </div>
           <div><span>Projeto</span><strong>{{ selecionado.projetoNome ?? 'Sem projeto' }}</strong></div>
           <div><span>Solicitado em</span><strong>{{ formatarData(selecionado.dataSolicitacao) }}</strong></div>
+        </div>
+
+        <div v-if="selecionado.urgente && selecionado.motivoUrgencia" class="detail-note detail-note--urgent">
+          <span>Motivo da urgência</span>
+          <p>{{ selecionado.motivoUrgencia }}</p>
         </div>
 
         <div class="detail-items">
@@ -471,6 +485,13 @@ tbody tr:hover {
   font-size: 11px;
 }
 
+.status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
 .status-chip {
   display: inline-flex;
   align-items: center;
@@ -487,6 +508,13 @@ tbody tr:hover {
 .status-chip--rejeitado { background: #feecec; color: #c62828; }
 .status-chip--entregue { background: #e9f1ff; color: #1a4da1; }
 .status-chip--cancelado { background: #eef1f5; color: #586579; }
+
+.urgent-status {
+  display: block;
+  color: #b42318;
+  font-size: 10px;
+  font-weight: 800;
+}
 
 .actions-column {
   text-align: right;
@@ -607,6 +635,12 @@ tbody tr:hover {
   font-size: 12px;
 }
 
+.detail-meta .urgent-status {
+  color: #b42318;
+  font-size: 10px;
+  font-weight: 800;
+}
+
 .detail-items,
 .detail-note {
   padding: 20px 22px;
@@ -643,6 +677,16 @@ tbody tr:hover {
 
 .detail-note {
   border-top: 1px solid var(--sgl-border);
+}
+
+.detail-note--urgent {
+  border-top-color: #fecaca;
+  background: #fffafa;
+}
+
+.detail-note--urgent > span,
+.detail-note--urgent p {
+  color: #b42318;
 }
 
 .detail-note p {
