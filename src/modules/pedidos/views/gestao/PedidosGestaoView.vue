@@ -457,7 +457,10 @@ onMounted(carregar)
                         <strong>{{ item.produtoNome }}</strong>
                         <small>{{ item.produtoUnidadeArmazenamento }}</small>
                       </div>
-                      <span>Solicitado: {{ item.quantidadeSolicitada }}</span>
+                      <div class="requested-quantity">
+                        <strong>QUANTIDADE SOLICITADA</strong>
+                        <span>{{ item.quantidadeSolicitada }}</span>
+                      </div>
                       <label v-if="pedido.status === 'PENDENTE'" class="approval-quantity">
                         <span>Aprovar</span>
                         <input
@@ -625,6 +628,9 @@ onMounted(carregar)
 .gestao-detail__item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 18px; padding: 10px 0; border-bottom: 1px dashed #dbe3ec; }
 .gestao-detail__item div { min-width: 0; }
 .gestao-detail__item span { color: #475569; font-size: 11px; }
+.requested-quantity { min-width: 150px; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 8px 11px; border-radius: 7px; background: #eef4ff; }
+.requested-quantity strong { color: #0d2b5e; font-size: 12px !important; font-weight: 850; letter-spacing: .035em; }
+.requested-quantity span { color: #1a4da1 !important; font-size: 19px !important; font-weight: 850; line-height: 1.1; }
 .approval-quantity { display: flex; align-items: center; gap: 7px; }
 .approval-quantity span { font-weight: 700; }
 .approval-quantity input { width: 72px; min-height: 32px; padding: 0 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
