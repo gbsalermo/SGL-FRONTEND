@@ -248,18 +248,19 @@ function sair() {
 <style scoped>
 .solicitante-shell {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 258px minmax(0, 1fr);
   background: var(--sgl-background);
   color: var(--sgl-text);
 }
 
 .solicitante-sidebar {
-  position: sticky;
-  top: 0;
-  min-height: 100vh;
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 20;
+  width: 258px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
   padding: 24px 18px 20px;
   background: linear-gradient(180deg, #07142f 0%, #0d2147 100%);
   color: #fff;
@@ -385,7 +386,10 @@ function sair() {
 .solicitante-user-settings:hover { background: rgb(255 255 255 / 8%); color: #fff; }
 .solicitante-user-settings svg { width: 19px; height: 19px; }
 
-.solicitante-workspace { min-width: 0; }
+.solicitante-workspace {
+  min-width: 0;
+  margin-left: 258px;
+}
 
 .solicitante-topbar {
   position: sticky;
@@ -557,8 +561,16 @@ function sair() {
 .profile-save:hover { background: var(--sgl-primary-dark); }
 
 @media (max-width: 900px) {
-  .solicitante-shell { grid-template-columns: 1fr; }
-  .solicitante-sidebar { position: static; min-height: auto; padding: 14px 18px; }
+  .solicitante-sidebar {
+    position: static;
+    width: auto;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+    padding: 14px 18px;
+  }
+
+  .solicitante-workspace { margin-left: 0; }
   .solicitante-sidebar__brand { min-height: 58px; border-bottom: 0; }
   .solicitante-sidebar__brand img { width: 145px; transform: none; }
   .solicitante-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding-top: 12px; }
