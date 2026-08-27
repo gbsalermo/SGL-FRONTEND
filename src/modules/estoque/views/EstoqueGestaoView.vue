@@ -3,19 +3,20 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { estoqueService } from '@/modules/estoque/services/estoqueService'
-import type { EstoqueCentralResponse } from '@/modules/estoque/types/estoque'
+import type { EstoqueCentralResponse, LoteResponse } from '@/modules/estoque/types/estoque'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
 const session = useSessionStore()
 
 const estoques = ref<EstoqueCentralResponse[]>([])
+const lotesVencidos = ref<LoteResponse[]>([])
 const carregando = ref(true)
 const erro = ref('')
 const busca = ref('')
 const filtrosAbertos = ref(false)
-const situacao = ref<'TODOS' | 'BAIXO' | 'NORMAL' | 'ZERADO'>('TODOS')
-const ordenarPor = ref<'PRODUTO' | 'QUANTIDADE' | 'MINIMO'>('PRODUTO')
+const situacao = ref<'TODOS' | 'BAIXO' | 'NORMAL' | 'ZERADO' | 'VENCIDO'>('TODOS')
+const ordenarPor = ref<'PRODUTO' | 'QUANTIDADE' | 'MINIMO' | 'LOCALIZACAO'>('PRODUTO')
 const direcao = ref<'ASC' | 'DESC'>('ASC')
 
 const unidadeId = computed(() => session.usuario?.unidadeId)
@@ -28,11 +29,21 @@ function estoqueZerado(item: EstoqueCentralResponse) {
   return item.quantidadeAtual <= 0
 }
 
+const produtosComLoteVencido = computed(() => new Set(
+  lotesVencidos.value
+    .filter((lote) => lote.ativo && lote.unidadeId === unidadeId.value)
+    .map((lote) => lote.produtoId),
+))
+
+function possuiLoteVencido(item: EstoqueCentralResponse) {
+  return produtosComLoteVencido.value.has(item.produtoId)
+}
+
 const resumo = computed(() => ({
   produtos: estoques.value.filter((item) => item.ativo).length,
   baixo: estoques.value.filter((item) => item.ativo && estoqueBaixo(item)).length,
   zerados: estoques.value.filter((item) => item.ativo && estoqueZerado(item)).length,
-  unidades: estoques.value.reduce((total, item) => total + Math.max(0, item.quantidadeAtual), 0),
+  vencidos: produtosComLoteVencido.value.size,
 }))
 
 const estoquesFiltrados = computed(() => {
@@ -42,14 +53,17 @@ const estoquesFiltrados = computed(() => {
     if (!item.ativo) return false
 
     if (situacao.value === 'BAIXO' && !estoqueBaixo(item)) return false
-    if (situacao.value === 'NORMAL' && estoqueBaixo(item)) return false
+    if (situacao.value === 'NORMAL' && (estoqueBaixo(item) || estoqueZerado(item))) return false
     if (situacao.value === 'ZERADO' && !estoqueZerado(item)) return false
+    if (situacao.value === 'VENCIDO' && !possuiLoteVencido(item)) return false
 
     if (!termo) return true
 
     return [
       item.produtoNome,
+      item.produtoCodigoReferencia,
       item.produtoUnidadeArmazenamento,
+      item.produtoLocalizacaoFisica,
       item.unidadeNome,
       item.unidadeSigla,
     ]
@@ -64,7 +78,9 @@ const estoquesFiltrados = computed(() => {
 
     if (ordenarPor.value === 'QUANTIDADE') comparacao = a.quantidadeAtual - b.quantidadeAtual
     else if (ordenarPor.value === 'MINIMO') comparacao = a.quantidadeMinima - b.quantidadeMinima
-    else comparacao = a.produtoNome.localeCompare(b.produtoNome, 'pt-BR', { sensitivity: 'base' })
+    else if (ordenarPor.value === 'LOCALIZACAO') {
+      comparacao = (a.produtoLocalizacaoFisica ?? '').localeCompare(b.produtoLocalizacaoFisica ?? '', 'pt-BR', { sensitivity: 'base' })
+    } else comparacao = a.produtoNome.localeCompare(b.produtoNome, 'pt-BR', { sensitivity: 'base' })
 
     return direcao.value === 'ASC' ? comparacao : -comparacao
   })
@@ -88,7 +104,12 @@ async function carregar() {
   erro.value = ''
 
   try {
-    estoques.value = await estoqueService.listarPorUnidade(unidadeId.value)
+    const [estoquesData, vencidosData] = await Promise.all([
+      estoqueService.listarPorUnidade(unidadeId.value),
+      estoqueService.listarLotesVencidos(),
+    ])
+    estoques.value = estoquesData
+    lotesVencidos.value = vencidosData
   } catch {
     erro.value = 'Não foi possível carregar o estoque da unidade.'
   } finally {
@@ -110,7 +131,7 @@ onMounted(carregar)
     <header class="estoque-page__header">
       <div>
         <h1>Estoque</h1>
-        <p>Acompanhe saldos, níveis mínimos e lotes dos materiais da sua unidade.</p>
+        <p>Acompanhe saldos, níveis mínimos, localização e situação dos lotes da sua unidade.</p>
       </div>
       <button class="secondary-action" type="button" @click="carregar">Atualizar</button>
     </header>
@@ -131,10 +152,10 @@ onMounted(carregar)
         <strong>{{ resumo.zerados }}</strong>
         <small>Sem saldo disponível</small>
       </article>
-      <article>
-        <span>Quantidade consolidada</span>
-        <strong>{{ resumo.unidades }}</strong>
-        <small>Somatório dos saldos</small>
+      <article :class="{ 'estoque-summary--danger': resumo.vencidos > 0 }">
+        <span>Produtos com lote vencido</span>
+        <strong>{{ resumo.vencidos }}</strong>
+        <small>Produtos distintos que exigem atenção</small>
       </article>
     </div>
 
@@ -142,7 +163,7 @@ onMounted(carregar)
       <div class="estoque-filter-top">
         <label class="estoque-search">
           <span>Buscar</span>
-          <input v-model="busca" type="search" placeholder="Produto, unidade de armazenamento..." />
+          <input v-model="busca" type="search" placeholder="Produto, código, apresentação ou localização..." />
         </label>
 
         <button class="filter-toggle" type="button" :aria-expanded="filtrosAbertos" @click="filtrosAbertos = !filtrosAbertos">
@@ -158,7 +179,8 @@ onMounted(carregar)
             <option value="TODOS">Todos</option>
             <option value="BAIXO">Estoque baixo</option>
             <option value="ZERADO">Zerados</option>
-            <option value="NORMAL">Acima do mínimo</option>
+            <option value="VENCIDO">Com lote vencido</option>
+            <option value="NORMAL">Normal</option>
           </select>
         </label>
 
@@ -166,6 +188,7 @@ onMounted(carregar)
           <span>Organizar por</span>
           <select v-model="ordenarPor">
             <option value="PRODUTO">Produto</option>
+            <option value="LOCALIZACAO">Localização</option>
             <option value="QUANTIDADE">Quantidade atual</option>
             <option value="MINIMO">Quantidade mínima</option>
           </select>
@@ -195,7 +218,8 @@ onMounted(carregar)
         <thead>
           <tr>
             <th>Produto</th>
-            <th>Armazenamento</th>
+            <th>Apresentação</th>
+            <th>Localização</th>
             <th>Quantidade atual</th>
             <th>Mínimo</th>
             <th>Situação</th>
@@ -204,12 +228,19 @@ onMounted(carregar)
         </thead>
         <tbody>
           <tr v-for="item in estoquesFiltrados" :key="item.id" @click="abrirDetalhe(item)">
-            <td><strong>{{ item.produtoNome }}</strong></td>
-            <td>{{ item.produtoUnidadeArmazenamento }}</td>
+            <td>
+              <strong>{{ item.produtoNome }}</strong>
+              <small v-if="item.produtoCodigoReferencia">{{ item.produtoCodigoReferencia }}</small>
+            </td>
+            <td>{{ item.produtoUnidadeArmazenamento || 'Não informada' }}</td>
+            <td>
+              <span class="location-copy">{{ item.produtoLocalizacaoFisica || 'Não informada' }}</span>
+            </td>
             <td><strong class="quantidade-atual">{{ item.quantidadeAtual }}</strong></td>
             <td>{{ item.quantidadeMinima }}</td>
             <td>
               <span v-if="estoqueZerado(item)" class="stock-chip stock-chip--danger">ZERADO</span>
+              <span v-else-if="possuiLoteVencido(item)" class="stock-chip stock-chip--danger">LOTE VENCIDO</span>
               <span v-else-if="estoqueBaixo(item)" class="stock-chip stock-chip--warning">ESTOQUE BAIXO</span>
               <span v-else class="stock-chip stock-chip--ok">NORMAL</span>
             </td>
@@ -233,7 +264,7 @@ onMounted(carregar)
 .estoque-summary article { padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; box-shadow: 0 5px 18px rgb(15 23 42 / 4%); }
 .estoque-summary span { display: block; color: #64748b; font-size: 12px; font-weight: 700; }
 .estoque-summary strong { display: block; margin-top: 8px; color: #0d2b5e; font-size: 26px; }
-.estoque-summary small { display: block; margin-top: 3px; color: #94a3b8; font-size: 11px; }
+.estoque-summary small { display: block; margin-top: 3px; color: #94a3b8; font-size: 11px; line-height: 1.35; }
 .estoque-summary--warning { border-color: #fde68a !important; background: #fffdf5 !important; }
 .estoque-summary--warning strong { color: #946200; }
 .estoque-summary--danger { border-color: #fecaca !important; background: #fffafa !important; }
@@ -250,12 +281,14 @@ onMounted(carregar)
 .estoque-filter-footer button { border: 0; background: transparent; color: #1a4da1; font-weight: 700; cursor: pointer; }
 
 .estoque-table-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; box-shadow: 0 5px 18px rgb(15 23 42 / 4%); }
-.estoque-table { width: 100%; border-collapse: collapse; min-width: 920px; }
+.estoque-table { width: 100%; border-collapse: collapse; min-width: 1080px; }
 .estoque-table th { padding: 12px 13px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 800; letter-spacing: .04em; text-align: left; text-transform: uppercase; }
-.estoque-table td { padding: 13px; border-bottom: 1px solid #eef2f7; color: #334155; font-size: 12px; }
+.estoque-table td { padding: 13px; border-bottom: 1px solid #eef2f7; color: #334155; font-size: 12px; vertical-align: middle; }
 .estoque-table tbody tr { cursor: pointer; }
 .estoque-table tbody tr:hover { background: #fbfdff; }
 .estoque-table td strong { color: #1e293b; font-size: 12px; }
+.estoque-table td small { display: block; margin-top: 3px; color: #94a3b8; font-size: 10px; }
+.location-copy { color: #334155; font-weight: 650; }
 .quantidade-atual { color: #0d2b5e !important; font-size: 15px !important; }
 .stock-chip { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; font-size: 9px; font-weight: 800; }
 .stock-chip--ok { background: #e7f7ed; color: #007a3d; }
