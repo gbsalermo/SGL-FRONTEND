@@ -3,7 +3,7 @@
 **Atualização:** 27/08/2026  
 **Fonte principal de retomada:** `CONTINUIDADE.md`
 
-Este documento registra a sequência operacional aprovada para a interface de Gestão/Admin. Ele complementa o `CONTINUIDADE.md`; em caso de conflito, a decisão mais recente registrada na continuidade prevalece.
+Este documento registra a sequência operacional aprovada para a interface de Gestão/Admin. Em caso de conflito, a decisão mais recente registrada na continuidade prevalece.
 
 ## Sequência atual
 
@@ -11,8 +11,12 @@ Este documento registra a sequência operacional aprovada para a interface de Ge
 Pedidos da Gestão                         ✅ concluído
 ↓
 Estoque / Lotes                           🟡 atual
+  ├── visão geral                         ✅
+  ├── detalhe/lotes                       🟡
+  ├── entrada com apresentação            🟡 validar
+  └── descarte por vencimento             ⏳ próximo
 ↓
-Produtos + Rotulagem                      ⏳ próximo
+Produtos + Rotulagem                      ⏳
 ↓
 Movimentações                             ⏳
 ↓
@@ -28,7 +32,54 @@ Autenticação / autorização / auditoria    ⏳
 
 ## 1. Estoque / Lotes — etapa atual
 
-Objetivo: representar a situação física dos materiais da unidade e permitir as operações físicas previstas pelo backend.
+Objetivo: representar a situação física dos materiais da unidade sem misturar apresentações incompatíveis.
+
+### Regra estrutural obrigatória
+
+O sistema separa:
+
+```text
+PRODUTO
+→ unidade-base de controle estável
+
+LOTE
+→ apresentação física variável
+→ quantidade de apresentações
+→ conteúdo por apresentação
+→ fracionável ou não
+
+ESTOQUE CENTRAL
+→ saldo consolidado na unidade-base
+```
+
+Não criar uma rede global de conversões entre `kit`, `frasco`, `caixa`, `bombona`, `unidade` etc. Cada lote informa apenas quanto sua apresentação representa na unidade-base do produto.
+
+Exemplos:
+
+```text
+2 kits × 50 reações = 100 reações
+10 avulsas × 1 reação = 10 reações
+4 frascos × 500 mL = 2000 mL
+1 bombona × 5000 mL = 5000 mL
+```
+
+Apresentações diferentes podem coexistir no mesmo produto porque o saldo final usa a mesma unidade-base.
+
+### Fracionamento
+
+```text
+fracionável
+→ permite retirada parcial da apresentação
+→ ex.: retirar 100 mL de um frasco de 500 mL
+
+não fracionável
+→ saída somente em apresentação completa
+→ ex.: kit fechado de 50 não pode baixar apenas 10
+```
+
+O backend deve impedir que um lote não fracionável termine com saldo que não seja múltiplo de seu conteúdo por apresentação.
+
+A futura saída deve permitir trabalhar em unidade-base ou em apresentação completa, mas nunca confundir `10 unidades-base` com `10 kits`.
 
 ### Visão geral `/estoque`
 
@@ -41,14 +92,12 @@ Zerados
 Produtos com lote vencido
 ```
 
-A métrica `Quantidade consolidada` não deve existir, pois soma unidades/apresentações incompatíveis e não possui significado operacional confiável.
-
 Tabela principal:
 
 ```text
 Produto
 Código do produto
-Apresentação
+Unidade
 Localização física
 Quantidade atual
 Mínimo
@@ -56,17 +105,7 @@ Situação
 Detalhes
 ```
 
-Terminologia:
-
-```text
-Apresentação
-→ antiga "unidade de armazenamento"
-→ exemplo: frasco de 500 mL, kit com 50 reações
-
-Localização física
-→ onde o material é encontrado
-→ exemplo: AMX2, Geladeira 1, Armário Q3
-```
+A quantidade de cada produto é interpretada em sua unidade-base.
 
 ### Detalhe `/estoque/:id`
 
@@ -75,18 +114,50 @@ Deve reunir:
 ```text
 produto
 código de referência
-apresentação
+unidade-base
+apresentação padrão
 localização
 saldo atual
 mínimo
 lotes
+apresentação real de cada lote
 validade
-quantidade inicial/disponível
+quantidade inicial/disponível na unidade-base
 entrada de lote
 descarte por vencimento
 ```
 
-Entrada e descarte permanecem no contexto do Estoque porque são operações físicas.
+### Entrada de lote
+
+Implementada com:
+
+```text
+código do lote
+apresentação recebida
+quantidade de apresentações
+conteúdo por apresentação
+fracionável
+validade
+origem
+observação
+```
+
+A tela deve mostrar antes da confirmação:
+
+```text
+quantidade × conteúdo por apresentação = total incorporado ao estoque
+```
+
+O backend persiste a apresentação do lote e consolida `quantidadeInicial` e `quantidadeDisponivel` na unidade-base.
+
+### Próximo subbloco
+
+```text
+1. validar o novo modelo de entrada
+2. implementar descarte por vencimento
+3. validar saldo/lotes
+4. encerrar Estoque
+```
 
 ## 2. Produtos + Rotulagem — próxima etapa
 
@@ -94,35 +165,31 @@ Produto terá duas portas de entrada, mas uma única entidade/fonte de dados.
 
 ### Operação → Produtos
 
-Rota planejada:
+Rotas:
 
 ```text
 /produtos
 /produtos/:id
 ```
 
-Função: ambiente operacional para consultar e trabalhar com um produto sem precisar entrar em Cadastros.
-
-Deve permitir, conforme permissão:
+Função:
 
 ```text
 buscar produto
-abrir produto
 consultar código
-consultar/editar informações permitidas
-consultar risco e perecibilidade
-consultar apresentação
+consultar unidade-base
+consultar apresentação padrão
+consultar risco/perecibilidade
 consultar localização
-consultar quantidade atual em estoque
+consultar quantidade atual
 consultar estoque mínimo
-consultar lotes
+consultar lotes e apresentações
 consultar última entrada
+editar informações permitidas
 imprimir identificação/rótulo
 ```
 
 ### Administração → Cadastros → Produtos
-
-Função administrativa:
 
 ```text
 criar produto
@@ -140,48 +207,44 @@ Não duplicar entidade nem regras entre a tela operacional e Cadastros.
         ↓
 2. Estoque → Nova entrada de lote
         ↓
-3. Backend registra o lote e atualiza o estoque
+3. Informa apresentação física + quantidade + conteúdo + fracionamento
         ↓
-4. Usuário acessa Operação → Produtos
+4. Backend converte para unidade-base e atualiza saldo
         ↓
-5. Abre o produto
+5. Usuário acessa Operação → Produtos
         ↓
-6. Confere:
-   - informações do produto
-   - risco/perecibilidade
-   - apresentação
-   - localização
-   - quantidade atual
-   - última entrada
-   - lote/validade
+6. Abre o produto
         ↓
-7. Edita somente os campos permitidos, quando necessário
+7. Confere produto + estoque + última entrada + apresentação/lote
         ↓
-8. Imprime rótulo usando um lote de referência
+8. Edita somente campos permitidos
+        ↓
+9. Imprime rótulo usando lote de referência
 ```
 
-A última entrada deve ser pré-selecionada como lote de referência para impressão, mas o usuário poderá escolher outro lote ativo quando necessário.
+A última entrada deve ser pré-selecionada para impressão, com possibilidade de escolher outro lote ativo.
 
-### Tipos de impressão previstos
+### Tipos de impressão
 
 ```text
 Identificação do produto
 → etiqueta genérica de prateleira/localização
-→ não representa um lote específico
 
 Rótulo de lote
 → produto + lote de referência
+→ inclui apresentação física real
 → rastreável
-→ usado no recipiente/material físico
 ```
 
-O rótulo de lote poderá incluir, conforme contrato final:
+O rótulo poderá incluir:
 
 ```text
-nome do produto
-código do produto
-código SGL do lote
-lote do fornecedor
+nome/código do produto
+unidade-base
+apresentação
+conteúdo por apresentação
+código interno SGL do lote
+código do lote informado externamente
 validade
 localização
 risco
@@ -189,19 +252,14 @@ perecibilidade
 condições de armazenamento
 ```
 
-Não gerar dados fictícios no frontend. A impressão definitiva só deve usar campos persistidos/retornados pela API.
-
 ## 3. Código interno do lote
 
-O backend atual possui `numeroLote`, que representa a identificação informada pelo fornecedor/responsável.
+Será criado futuramente um identificador interno gerado pelo SGL, separado de `numeroLote`.
 
-Será criado futuramente um segundo identificador interno, gerado pelo SGL, separado do lote do fornecedor.
-
-Formato-base aprovado para estudo/implementação:
+Formato-base:
 
 ```text
 L<sequência>-<abreviação do produto>-<ano>
-
 L01-EXTDNA-26
 L02-EXTDNA-26
 L01-FORM37-26
@@ -210,15 +268,12 @@ L01-FORM37-26
 Regras:
 
 ```text
-gerado pelo sistema
-não digitado livremente pelo usuário
-imutável após criação do lote
-único dentro do escopo definido pelo backend
-não substituir numeroLote do fornecedor
-usar no rótulo e na rastreabilidade
+gerado pelo backend
+imutável
+único no escopo definido
+protegido contra concorrência
+usado em rastreabilidade/rótulos
 ```
-
-A estratégia exata de sequência/concorrência deve ser implementada no backend antes da tela de impressão depender desse campo.
 
 ## 4. Movimentações
 
@@ -239,9 +294,9 @@ usuário
 pedido
 tipo
 período
+quantidade em unidade-base
+contexto de lote/apresentação
 ```
-
-Entrada e descarte continuam sendo iniciados pelo Estoque; Movimentações é principalmente consulta/auditoria.
 
 ## 5. Relatórios
 
@@ -251,7 +306,7 @@ Depois de Movimentações:
 /relatorios
 ```
 
-Categorias previstas:
+Categorias:
 
 ```text
 Estoque
@@ -264,7 +319,7 @@ Fiscalização / auditoria
 
 ## 6. Cadastros e Administração
 
-Cadastros administrativos previstos:
+Cadastros:
 
 ```text
 Produtos
@@ -276,60 +331,27 @@ Estagiários
 
 **Unidade não possui cadastro manual.**
 
-Regra futura da integração corporativa:
+### Interface de Estagiários — obrigatória
 
-```text
-login corporativo
-→ API corporativa devolve JSON institucional
-→ SGL identifica a unidade
-→ unidade já existe? associa usuário
-→ unidade não existe? cria unidade e associa usuário
-```
-
-O modo DEV atual não deve ser quebrado antes da implementação da autenticação corporativa.
-
-### 6.1 Interface de Estagiários — obrigatória na etapa de Administração
-
-`Estagiários` não deve ser tratado apenas como uma linha genérica dentro de Usuários. A Administração terá uma interface própria para consultar e acompanhar cada estagiário individualmente.
-
-Rotas planejadas:
+Rotas:
 
 ```text
 /cadastros/estagiarios
 /cadastros/estagiarios/:id
 ```
 
-A listagem deve permitir localizar o estagiário e abrir seu registro individual. O detalhe deverá puxar os dados reais do cadastro de Estagiário/Usuário e apresentar, conforme os contratos existentes no backend:
-
-```text
-nome
-email
-situação ativo/inativo
-unidade
-laboratório
-perfil
-data de início do estágio
-data de fim do estágio
-tipo de bolsa
-observação
-```
-
-Também deve deixar espaço para informações administrativas adicionais que existirem no contrato definitivo, sem inventar campos no frontend.
-
-Fluxo esperado:
+Fluxo:
 
 ```text
 Administração
 → Cadastros
 → Estagiários
 → buscar/listar
-→ selecionar estagiário
-→ abrir ficha individual
+→ selecionar
+→ ficha individual
 → consultar dados institucionais e do estágio
 → editar campos permitidos
-→ encerrar/inativar estágio conforme regra real do backend
+→ encerrar/inativar conforme regra do backend
 ```
 
-A ficha individual é o centro de consulta do estagiário. Não duplicar dados em páginas paralelas.
-
-A futura autorização deve definir quais perfis podem editar, encerrar ou apenas consultar. Até lá, não inferir permissões que o backend ainda não estabeleceu.
+A ficha individual deve centralizar nome, email, situação, unidade, laboratório, datas do estágio, tipo de bolsa e observação, conforme os contratos reais da API.
