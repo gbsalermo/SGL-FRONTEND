@@ -20,6 +20,8 @@ const ordenarPor = ref<'PRODUTO' | 'QUANTIDADE' | 'MINIMO' | 'LOCALIZACAO'>('PRO
 const direcao = ref<'ASC' | 'DESC'>('ASC')
 
 const unidadeId = computed(() => session.usuario?.unidadeId)
+const ordemQuantitativa = computed(() => ordenarPor.value === 'QUANTIDADE' || ordenarPor.value === 'MINIMO')
+const rotuloOrdem = computed(() => ordemQuantitativa.value ? 'Ordem por quantidade' : 'Ordem alfabética')
 
 function estoqueBaixo(item: EstoqueCentralResponse) {
   return item.quantidadeAtual < item.quantidadeMinima
@@ -163,12 +165,12 @@ onMounted(carregar)
       <div class="estoque-filter-top">
         <label class="estoque-search">
           <span>Buscar</span>
-          <input v-model="busca" type="search" placeholder="Produto, código, apresentação ou localização..." />
+          <input v-model="busca" type="search" placeholder="Produto, código, unidade ou localização..." />
         </label>
 
         <button class="filter-toggle" type="button" :aria-expanded="filtrosAbertos" @click="filtrosAbertos = !filtrosAbertos">
           <span>Filtros</span>
-          <strong>{{ filtrosAbertos ? '⌃' : '⌄' }}</strong>
+          <strong class="filter-toggle__arrow">{{ filtrosAbertos ? '⌃' : '⌄' }}</strong>
         </button>
       </div>
 
@@ -195,10 +197,12 @@ onMounted(carregar)
         </label>
 
         <label>
-          <span>Ordem</span>
+          <span>{{ rotuloOrdem }}</span>
           <select v-model="direcao">
-            <option value="ASC">Crescente</option>
-            <option value="DESC">Decrescente</option>
+            <option v-if="ordemQuantitativa" value="ASC">Menor → maior</option>
+            <option v-if="ordemQuantitativa" value="DESC">Maior → menor</option>
+            <option v-if="!ordemQuantitativa" value="ASC">A → Z</option>
+            <option v-if="!ordemQuantitativa" value="DESC">Z → A</option>
           </select>
         </label>
       </div>
@@ -218,7 +222,7 @@ onMounted(carregar)
         <thead>
           <tr>
             <th>Produto</th>
-            <th>Apresentação</th>
+            <th>Unidade</th>
             <th>Localização</th>
             <th>Quantidade atual</th>
             <th>Mínimo</th>
@@ -275,7 +279,8 @@ onMounted(carregar)
 .estoque-search, .estoque-filter-grid label { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .estoque-search > span, .estoque-filter-grid label > span { color: #475569; font-size: 11px; font-weight: 700; }
 .estoque-search input, .estoque-filter-grid select { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1a1a2e; outline: none; }
-.filter-toggle { min-width: 108px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 13px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #334155; font-size: 12px; font-weight: 700; cursor: pointer; }
+.filter-toggle { min-width: 108px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 13px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #334155; font-size: 12px; font-weight: 700; cursor: pointer; }
+.filter-toggle__arrow { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; margin-top: -2px; color: #0d2b5e; font-size: 20px; line-height: 1; font-weight: 800; }
 .estoque-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #eef2f7; }
 .estoque-filter-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef2f7; color: #64748b; font-size: 11px; }
 .estoque-filter-footer button { border: 0; background: transparent; color: #1a4da1; font-weight: 700; cursor: pointer; }
