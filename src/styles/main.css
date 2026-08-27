@@ -104,3 +104,16 @@
   font-weight: 500 !important;
   line-height: 1.55 !important;
 }
+
+/* O formulário de Novo pedido é reutilizado dentro do ambiente de Gestão.
+   Nesse contexto, o retorno correto é a fila geral de Pedidos, não a área
+   "Meus pedidos" do solicitante. Mantemos o rótulo original fora da gestão. */
+.gestao-shell .novo-pedido-page .page-heading > .secondary-action {
+  font-size: 0 !important;
+}
+
+.gestao-shell .novo-pedido-page .page-heading > .secondary-action::after {
+  content: 'Voltar para pedidos';
+  font-size: 14px;
+  font-weight: 700;
+}
