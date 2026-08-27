@@ -76,7 +76,7 @@ onMounted(carregar)
 
       <section class="product-context" aria-label="Identificação e localização do produto">
         <div>
-          <span>Apresentação</span>
+          <span>Unidade</span>
           <strong>{{ estoque.produtoUnidadeArmazenamento || 'Não informada' }}</strong>
         </div>
         <div>
@@ -116,7 +116,7 @@ onMounted(carregar)
         <div class="lot-card__heading">
           <div>
             <h2>Lotes</h2>
-            <p>Acompanhe identificação do fornecedor, quantidade disponível, entrada e validade de cada lote.</p>
+            <p>Acompanhe código, quantidade disponível, entrada e validade de cada lote.</p>
           </div>
         </div>
 
@@ -126,7 +126,7 @@ onMounted(carregar)
           <table>
             <thead>
               <tr>
-                <th>Lote fornecedor</th>
+                <th>Código do lote</th>
                 <th>Entrada</th>
                 <th>Validade</th>
                 <th>Quantidade inicial</th>
