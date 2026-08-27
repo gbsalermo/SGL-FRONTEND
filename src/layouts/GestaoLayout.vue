@@ -22,7 +22,9 @@ const iniciais = computed(() =>
     .join(''),
 )
 
-const podeVoltar = computed(() => route.path !== '/pedidos')
+// O retorno no topbar é reservado a telas realmente aninhadas/detalhadas.
+// Seções principais acessadas pela sidebar não exibem uma seta de retorno.
+const podeVoltar = computed(() => /^\/estoque\/[^/]+$/.test(route.path) || /^\/produtos\/[^/]+$/.test(route.path))
 
 watch(
   () => route.path,
@@ -37,6 +39,16 @@ function abrirTodosPedidos() {
 }
 
 function voltar() {
+  if (route.path.startsWith('/estoque/')) {
+    router.push('/estoque')
+    return
+  }
+
+  if (route.path.startsWith('/produtos/')) {
+    router.push('/produtos')
+    return
+  }
+
   if (window.history.length > 1) {
     router.back()
     return
@@ -173,7 +185,10 @@ function sair() {
     <div class="gestao-workspace">
       <header class="gestao-topbar">
         <button class="gestao-topbar__collapse" type="button" :aria-label="recolhida ? 'Expandir menu' : 'Recolher menu'" @click="recolhida = !recolhida">
-          {{ recolhida ? '›' : '‹' }}
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <path d="M9 4v16" />
+          </svg>
         </button>
 
         <button v-if="podeVoltar" class="gestao-topbar__back" type="button" aria-label="Voltar" @click="voltar">←</button>
@@ -242,6 +257,7 @@ function sair() {
 .gestao-topbar button { border: 0; background: transparent; color: inherit; cursor: pointer; }
 .gestao-topbar__collapse, .gestao-topbar__back, .gestao-topbar__search { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; font-size: 25px; }
 .gestao-topbar__collapse:hover, .gestao-topbar__back:hover, .gestao-topbar__search:hover, .gestao-topbar__logout:hover { background: rgb(255 255 255 / 8%); }
+.gestao-topbar__collapse svg { width: 19px; height: 19px; }
 .gestao-topbar__spacer { flex: 1; }
 .gestao-topbar__search { background: rgb(45 107 196 / 14%) !important; }
 .gestao-topbar__logout { min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid rgb(255 255 255 / 18%) !important; border-radius: 8px; font-size: 13px; }
