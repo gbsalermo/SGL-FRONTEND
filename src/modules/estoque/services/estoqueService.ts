@@ -33,6 +33,11 @@ export const estoqueService = {
     return data
   },
 
+  async listarLotesVencidos() {
+    const { data } = await http.get<LoteResponse[]>('/v1/lotes/vencidos')
+    return data
+  },
+
   async registrarEntradaLote(estoqueId: string, usuarioId: string, payload: EntradaLoteRequest) {
     const { data } = await http.post<LoteResponse>(`/v1/movimentacoes/estoques/${estoqueId}/lotes`, payload, {
       params: { usuarioId },
