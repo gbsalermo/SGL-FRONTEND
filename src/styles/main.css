@@ -31,14 +31,24 @@
   margin: 0 !important;
 }
 
-.gestao-detail__item .quantity-card strong,
-.gestao-detail__item .approval-quantity > span {
+.gestao-detail__item .quantity-card strong {
   overflow: hidden !important;
   color: #475569 !important;
   font-size: 7.5px !important;
   font-weight: 800 !important;
   line-height: 1 !important;
   letter-spacing: 0.01em !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+}
+
+.gestao-detail__item .approval-quantity > span {
+  overflow: hidden !important;
+  color: #475569 !important;
+  font-size: 6.5px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
   white-space: nowrap !important;
   text-overflow: clip !important;
 }
