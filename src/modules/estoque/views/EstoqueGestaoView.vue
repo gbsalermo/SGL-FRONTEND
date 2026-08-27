@@ -23,7 +23,6 @@ const direcao = ref<'ASC' | 'DESC'>('ASC')
 const unidadeId = computed(() => session.usuario?.unidadeId)
 const ordemQuantitativa = computed(() => ordenarPor.value === 'QUANTIDADE' || ordenarPor.value === 'MINIMO')
 const rotuloOrdem = computed(() => ordemQuantitativa.value ? 'Ordem por quantidade' : 'Ordem alfabética')
-const buscaConcluida = computed(() => busca.value.trim().length > 0 && !buscaEmFoco.value && !filtrosAbertos.value)
 const filtroAtivo = computed(() => buscaEmFoco.value || filtrosAbertos.value)
 
 function estoqueBaixo(item: EstoqueCentralResponse) {
@@ -179,10 +178,7 @@ onMounted(carregar)
 
         <button
           class="filter-toggle"
-          :class="{
-            'filter-toggle--active': filtroAtivo,
-            'filter-toggle--done': buscaConcluida,
-          }"
+          :class="{ 'filter-toggle--active': filtroAtivo }"
           type="button"
           :aria-expanded="filtrosAbertos"
           aria-label="Abrir ou recolher filtros avançados"
@@ -303,9 +299,8 @@ onMounted(carregar)
 .estoque-search input:focus { border-color: #1a4da1; box-shadow: 0 0 0 2px rgb(26 77 161 / 10%); }
 .filter-toggle { width: 44px; height: 44px; display: inline-grid; place-items: center; padding: 0; border: 2px solid #1a1a2e; border-radius: 50%; background: #fff; color: #1a1a2e; cursor: pointer; transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease; }
 .filter-toggle:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgb(15 23 42 / 12%); }
-.filter-toggle svg { width: 23px; height: 23px; fill: currentColor; stroke: none; }
+.filter-toggle svg { width: 19px; height: 19px; fill: currentColor; stroke: none; }
 .filter-toggle--active { border-color: #1a4da1; background: #1a4da1; color: #fff; box-shadow: 0 5px 14px rgb(26 77 161 / 20%); }
-.filter-toggle--done { border-color: #007a3d; background: #007a3d; color: #fff; box-shadow: 0 5px 14px rgb(0 122 61 / 18%); }
 .estoque-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #eef2f7; }
 .estoque-filter-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef2f7; color: #64748b; font-size: 11px; }
 .estoque-filter-footer button { border: 0; background: transparent; color: #1a4da1; font-weight: 700; cursor: pointer; }
