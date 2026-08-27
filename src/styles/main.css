@@ -95,3 +95,12 @@
 .gestao-detail__item .approved-quantity > span {
   color: #007a3d !important;
 }
+
+/* Informações operacionais do produto precisam ter contraste suficiente para
+   leitura rápida durante a análise/aprovação do pedido. */
+.gestao-detail__item > div:first-child small {
+  color: #111827 !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.55 !important;
+}
