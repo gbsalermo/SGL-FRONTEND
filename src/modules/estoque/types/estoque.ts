@@ -14,9 +14,13 @@ export interface EstoqueCentralResponse {
 export interface LoteResponse {
   id: string
   estoqueCentralId: string
+  produtoId: string
+  produtoNome: string
+  unidadeId: string
+  unidadeNome: string
   numeroLote: string
   quantidadeInicial: number
-  quantidadeAtual: number
+  quantidadeDisponivel: number
   dataEntrada: string
   dataValidade: string | null
   ativo: boolean
