@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 import { estoqueService } from '@/modules/estoque/services/estoqueService'
 import type { EstoqueCentralResponse, LoteResponse } from '@/modules/estoque/types/estoque'
 
 const route = useRoute()
-const router = useRouter()
 
 const estoque = ref<EstoqueCentralResponse | null>(null)
 const lotes = ref<LoteResponse[]>([])
@@ -63,8 +62,6 @@ onMounted(carregar)
 
 <template>
   <section class="estoque-detalhe">
-    <button class="back-button" type="button" @click="router.push('/estoque')">← Voltar para estoque</button>
-
     <div v-if="carregando" class="state-box">Carregando detalhes...</div>
     <div v-else-if="erro" class="state-box state-box--error">{{ erro }}</div>
 
@@ -73,13 +70,28 @@ onMounted(carregar)
       <header class="page-header">
         <div>
           <h1>{{ estoque.produtoNome }}</h1>
-          <p>{{ estoque.produtoUnidadeArmazenamento }} · {{ estoque.unidadeNome }}</p>
+          <p>{{ estoque.produtoCodigoReferencia || 'Sem código de referência' }} · {{ estoque.unidadeNome }}</p>
         </div>
       </header>
 
+      <section class="product-context" aria-label="Identificação e localização do produto">
+        <div>
+          <span>Apresentação</span>
+          <strong>{{ estoque.produtoUnidadeArmazenamento || 'Não informada' }}</strong>
+        </div>
+        <div>
+          <span>Localização</span>
+          <strong>{{ estoque.produtoLocalizacaoFisica || 'Não informada' }}</strong>
+        </div>
+        <div>
+          <span>Estoque mínimo</span>
+          <strong>{{ estoque.quantidadeMinima }}</strong>
+        </div>
+      </section>
+
       <div class="summary-grid">
         <article>
-          <span>Saldo consolidado</span>
+          <span>Saldo atual</span>
           <strong>{{ estoque.quantidadeAtual }}</strong>
           <small>Quantidade no estoque central</small>
         </article>
@@ -94,7 +106,7 @@ onMounted(carregar)
           <small>Até 30 dias</small>
         </article>
         <article :class="{ danger: vencidos > 0 }">
-          <span>Vencidos</span>
+          <span>Lotes vencidos</span>
           <strong>{{ vencidos }}</strong>
           <small>Exigem atenção</small>
         </article>
@@ -104,7 +116,7 @@ onMounted(carregar)
         <div class="lot-card__heading">
           <div>
             <h2>Lotes</h2>
-            <p>Acompanhe quantidade disponível, entrada e validade de cada lote.</p>
+            <p>Acompanhe identificação do fornecedor, quantidade disponível, entrada e validade de cada lote.</p>
           </div>
         </div>
 
@@ -114,7 +126,7 @@ onMounted(carregar)
           <table>
             <thead>
               <tr>
-                <th>Lote</th>
+                <th>Lote fornecedor</th>
                 <th>Entrada</th>
                 <th>Validade</th>
                 <th>Quantidade inicial</th>
@@ -145,11 +157,14 @@ onMounted(carregar)
 
 <style scoped>
 .estoque-detalhe { max-width: 1540px; margin: 0 auto; }
-.back-button { margin-bottom: 16px; padding: 0; border: 0; background: transparent; color: #1a4da1; font-size: 12px; font-weight: 700; cursor: pointer; }
 .breadcrumb { margin-bottom: 10px; color: #64748b; font-size: 12px; }
 .page-header h1 { margin: 0; color: #1a1a2e; font-size: 30px; }
 .page-header p { margin: 7px 0 0; color: #64748b; font-size: 14px; }
-.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 22px 0 18px; }
+.product-context { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
+.product-context div { min-width: 0; }
+.product-context span { display: block; margin-bottom: 4px; color: #64748b; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.product-context strong { color: #1e293b; font-size: 12px; }
+.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 18px 0; }
 .summary-grid article { padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
 .summary-grid span { display: block; color: #64748b; font-size: 12px; font-weight: 700; }
 .summary-grid strong { display: block; margin-top: 8px; color: #0d2b5e; font-size: 26px; }
@@ -171,6 +186,6 @@ td { padding: 12px; border-bottom: 1px solid #eef2f7; color: #334155; font-size:
 .lot-chip--danger { background: #fee2e2; color: #b42318; }
 .state-box { padding: 34px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #64748b; text-align: center; }
 .state-box--error { border-color: #fecaca; color: #b42318; background: #fffafa; }
-@media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .product-context { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } }
 </style>
