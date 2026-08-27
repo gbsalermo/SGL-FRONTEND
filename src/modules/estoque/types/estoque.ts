@@ -5,6 +5,8 @@ export interface EstoqueCentralResponse {
   unidadeSigla: string
   produtoId: string
   produtoNome: string
+  produtoCodigoReferencia: string | null
+  produtoLocalizacaoFisica: string | null
   produtoUnidadeArmazenamento: string
   quantidadeAtual: number
   quantidadeMinima: number
