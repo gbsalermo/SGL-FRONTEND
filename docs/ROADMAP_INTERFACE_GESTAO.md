@@ -19,6 +19,7 @@ Movimentações                             ⏳
 Relatórios / Documentos / Fiscalização    ⏳
 ↓
 Demais Cadastros / Administração          ⏳
+  └── Interface de Estagiários            ⏳ obrigatória
 ↓
 Dashboards finais / robustez / 404        ⏳
 ↓
@@ -261,7 +262,7 @@ Consumo
 Fiscalização / auditoria
 ```
 
-## 6. Cadastros e Unidade
+## 6. Cadastros e Administração
 
 Cadastros administrativos previstos:
 
@@ -286,3 +287,49 @@ login corporativo
 ```
 
 O modo DEV atual não deve ser quebrado antes da implementação da autenticação corporativa.
+
+### 6.1 Interface de Estagiários — obrigatória na etapa de Administração
+
+`Estagiários` não deve ser tratado apenas como uma linha genérica dentro de Usuários. A Administração terá uma interface própria para consultar e acompanhar cada estagiário individualmente.
+
+Rotas planejadas:
+
+```text
+/cadastros/estagiarios
+/cadastros/estagiarios/:id
+```
+
+A listagem deve permitir localizar o estagiário e abrir seu registro individual. O detalhe deverá puxar os dados reais do cadastro de Estagiário/Usuário e apresentar, conforme os contratos existentes no backend:
+
+```text
+nome
+email
+situação ativo/inativo
+unidade
+laboratório
+perfil
+data de início do estágio
+data de fim do estágio
+tipo de bolsa
+observação
+```
+
+Também deve deixar espaço para informações administrativas adicionais que existirem no contrato definitivo, sem inventar campos no frontend.
+
+Fluxo esperado:
+
+```text
+Administração
+→ Cadastros
+→ Estagiários
+→ buscar/listar
+→ selecionar estagiário
+→ abrir ficha individual
+→ consultar dados institucionais e do estágio
+→ editar campos permitidos
+→ encerrar/inativar estágio conforme regra real do backend
+```
+
+A ficha individual é o centro de consulta do estagiário. Não duplicar dados em páginas paralelas.
+
+A futura autorização deve definir quais perfis podem editar, encerrar ou apenas consultar. Até lá, não inferir permissões que o backend ainda não estabeleceu.
