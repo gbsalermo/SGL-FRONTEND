@@ -297,7 +297,7 @@ onMounted(carregar)
 .estoque-search > span, .estoque-filter-grid label > span { color: #475569; font-size: 11px; font-weight: 700; }
 .estoque-search input, .estoque-filter-grid select { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1a1a2e; outline: none; }
 .estoque-search input:focus { border-color: #1a4da1; box-shadow: 0 0 0 2px rgb(26 77 161 / 10%); }
-.filter-toggle { width: 36px; height: 36px; display: inline-grid; place-items: center; align-self: center; margin-bottom: 2px; padding: 0; border: 2px solid #1a1a2e; border-radius: 50%; background: #fff; color: #1a1a2e; cursor: pointer; transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease; }
+.filter-toggle { width: 36px; height: 36px; display: inline-grid; place-items: center; align-self: end; margin-bottom: 2px; padding: 0; border: 2px solid #1a1a2e; border-radius: 50%; background: #fff; color: #1a1a2e; cursor: pointer; transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease; }
 .filter-toggle:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgb(15 23 42 / 12%); }
 .filter-toggle svg { width: 19px; height: 19px; fill: currentColor; stroke: none; }
 .filter-toggle--active { border-color: #1a4da1; background: #1a4da1; color: #fff; box-shadow: 0 4px 12px rgb(26 77 161 / 20%); }
