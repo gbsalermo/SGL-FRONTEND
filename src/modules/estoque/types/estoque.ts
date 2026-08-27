@@ -8,6 +8,7 @@ export interface EstoqueCentralResponse {
   produtoCodigoReferencia: string | null
   produtoLocalizacaoFisica: string | null
   produtoUnidadeArmazenamento: string
+  produtoUnidadeMedida: string
   quantidadeAtual: number
   quantidadeMinima: number
   ativo: boolean
@@ -21,6 +22,11 @@ export interface LoteResponse {
   unidadeId: string
   unidadeNome: string
   numeroLote: string
+  apresentacao: string | null
+  quantidadeApresentacoes: number | null
+  conteudoPorApresentacao: number | null
+  fracionavel: boolean | null
+  unidadeBase: string
   quantidadeInicial: number
   quantidadeDisponivel: number
   dataEntrada: string
@@ -30,7 +36,10 @@ export interface LoteResponse {
 
 export interface EntradaLoteRequest {
   numeroLote: string
+  apresentacao: string | null
   quantidade: number
+  conteudoPorApresentacao: number
+  fracionavel: boolean
   dataValidade: string | null
   origem: string
   observacao: string | null
