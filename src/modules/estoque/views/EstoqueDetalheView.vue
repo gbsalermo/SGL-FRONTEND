@@ -20,7 +20,10 @@ const sucessoEntrada = ref('')
 
 const formularioEntrada = ref<EntradaLoteRequest>({
   numeroLote: '',
+  apresentacao: '',
   quantidade: 1,
+  conteudoPorApresentacao: 1,
+  fracionavel: true,
   dataValidade: null,
   origem: 'COMPRA',
   observacao: null,
@@ -28,6 +31,16 @@ const formularioEntrada = ref<EntradaLoteRequest>({
 
 const estoqueId = computed(() => String(route.params.id ?? ''))
 const usuarioId = computed(() => session.usuario?.id ?? '')
+const quantidadeBaseEntrada = computed(() => {
+  const quantidade = Number(formularioEntrada.value.quantidade) || 0
+  const conteudo = Number(formularioEntrada.value.conteudoPorApresentacao) || 0
+  return quantidade * conteudo
+})
+
+function rotuloUnidade(unidade?: string | null) {
+  if (!unidade) return 'unidade-base'
+  return unidade.toLowerCase().replaceAll('_', ' ')
+}
 
 function dataFormatada(data: string | null) {
   if (!data) return 'Não informada'
@@ -77,7 +90,10 @@ function abrirEntrada() {
   sucessoEntrada.value = ''
   formularioEntrada.value = {
     numeroLote: '',
+    apresentacao: estoque.value?.produtoUnidadeArmazenamento || '',
     quantidade: 1,
+    conteudoPorApresentacao: 1,
+    fracionavel: true,
     dataValidade: null,
     origem: 'COMPRA',
     observacao: null,
@@ -105,13 +121,25 @@ async function registrarEntrada() {
   }
 
   const codigo = formularioEntrada.value.numeroLote.trim()
+  const apresentacao = formularioEntrada.value.apresentacao?.trim() || ''
+
   if (!codigo) {
     erroEntrada.value = 'Informe o código do lote.'
     return
   }
 
+  if (!apresentacao) {
+    erroEntrada.value = 'Informe a apresentação física recebida.'
+    return
+  }
+
   if (!Number.isInteger(Number(formularioEntrada.value.quantidade)) || Number(formularioEntrada.value.quantidade) <= 0) {
-    erroEntrada.value = 'A quantidade deve ser um número inteiro maior que zero.'
+    erroEntrada.value = 'A quantidade de apresentações deve ser um número inteiro maior que zero.'
+    return
+  }
+
+  if (!Number.isInteger(Number(formularioEntrada.value.conteudoPorApresentacao)) || Number(formularioEntrada.value.conteudoPorApresentacao) <= 0) {
+    erroEntrada.value = 'O conteúdo por apresentação deve ser um número inteiro maior que zero.'
     return
   }
 
@@ -121,7 +149,10 @@ async function registrarEntrada() {
   try {
     await estoqueService.registrarEntradaLote(estoqueId.value, usuarioId.value, {
       numeroLote: codigo,
+      apresentacao,
       quantidade: Number(formularioEntrada.value.quantidade),
+      conteudoPorApresentacao: Number(formularioEntrada.value.conteudoPorApresentacao),
+      fracionavel: formularioEntrada.value.fracionavel,
       dataValidade: formularioEntrada.value.dataValidade || null,
       origem: formularioEntrada.value.origem,
       observacao: formularioEntrada.value.observacao?.trim() || null,
@@ -156,7 +187,11 @@ onMounted(carregar)
 
       <section class="product-context" aria-label="Identificação e localização do produto">
         <div>
-          <span>Unidade</span>
+          <span>Unidade-base</span>
+          <strong>{{ rotuloUnidade(estoque.produtoUnidadeMedida) }}</strong>
+        </div>
+        <div>
+          <span>Apresentação padrão</span>
           <strong>{{ estoque.produtoUnidadeArmazenamento || 'Não informada' }}</strong>
         </div>
         <div>
@@ -165,7 +200,7 @@ onMounted(carregar)
         </div>
         <div>
           <span>Estoque mínimo</span>
-          <strong>{{ estoque.quantidadeMinima }}</strong>
+          <strong>{{ estoque.quantidadeMinima }} {{ rotuloUnidade(estoque.produtoUnidadeMedida) }}</strong>
         </div>
       </section>
 
@@ -173,12 +208,12 @@ onMounted(carregar)
         <article>
           <span>Saldo atual</span>
           <strong>{{ estoque.quantidadeAtual }}</strong>
-          <small>Quantidade no estoque central</small>
+          <small>{{ rotuloUnidade(estoque.produtoUnidadeMedida) }} no estoque central</small>
         </article>
         <article>
           <span>Disponível nos lotes</span>
           <strong>{{ totalDisponivel }}</strong>
-          <small>Somatório dos lotes ativos</small>
+          <small>{{ rotuloUnidade(estoque.produtoUnidadeMedida) }} nos lotes ativos</small>
         </article>
         <article :class="{ warning: proximos > 0 }">
           <span>Próximos do vencimento</span>
@@ -198,7 +233,7 @@ onMounted(carregar)
         <div class="lot-card__heading">
           <div>
             <h2>Lotes</h2>
-            <p>Acompanhe código, quantidade disponível, entrada e validade de cada lote.</p>
+            <p>Acompanhe apresentação física, saldo em unidade-base, entrada e validade.</p>
           </div>
           <button class="primary-action" type="button" @click="abrirEntrada">+ Nova entrada de lote</button>
         </div>
@@ -210,9 +245,10 @@ onMounted(carregar)
             <thead>
               <tr>
                 <th>Código do lote</th>
+                <th>Apresentação</th>
                 <th>Entrada</th>
                 <th>Validade</th>
-                <th>Quantidade inicial</th>
+                <th>Inicial</th>
                 <th>Disponível</th>
                 <th>Situação</th>
               </tr>
@@ -220,10 +256,17 @@ onMounted(carregar)
             <tbody>
               <tr v-for="lote in lotesAtivos" :key="lote.id">
                 <td><strong>{{ lote.numeroLote }}</strong></td>
+                <td>
+                  <strong>{{ lote.apresentacao || 'Legado' }}</strong>
+                  <small v-if="lote.quantidadeApresentacoes && lote.conteudoPorApresentacao">
+                    {{ lote.quantidadeApresentacoes }} × {{ lote.conteudoPorApresentacao }} {{ rotuloUnidade(lote.unidadeBase) }}
+                    · {{ lote.fracionavel === false ? 'não fracionável' : 'fracionável' }}
+                  </small>
+                </td>
                 <td>{{ dataFormatada(lote.dataEntrada) }}</td>
                 <td>{{ dataFormatada(lote.dataValidade) }}</td>
-                <td>{{ lote.quantidadeInicial }}</td>
-                <td><strong>{{ lote.quantidadeDisponivel }}</strong></td>
+                <td>{{ lote.quantidadeInicial }} {{ rotuloUnidade(lote.unidadeBase) }}</td>
+                <td><strong>{{ lote.quantidadeDisponivel }}</strong> {{ rotuloUnidade(lote.unidadeBase) }}</td>
                 <td>
                   <span v-if="loteVencido(lote)" class="lot-chip lot-chip--danger">VENCIDO</span>
                   <span v-else-if="loteProximoVencimento(lote)" class="lot-chip lot-chip--warning">PRÓXIMO DO VENCIMENTO</span>
@@ -242,7 +285,7 @@ onMounted(carregar)
           <div>
             <span>Estoque / Entrada</span>
             <h2 id="entrada-lote-title">Nova entrada de lote</h2>
-            <p v-if="estoque">{{ estoque.produtoNome }} · {{ estoque.produtoUnidadeArmazenamento }}</p>
+            <p v-if="estoque">{{ estoque.produtoNome }} · saldo controlado em {{ rotuloUnidade(estoque.produtoUnidadeMedida) }}</p>
           </div>
           <button type="button" class="modal-close" aria-label="Fechar" @click="fecharEntrada">×</button>
         </header>
@@ -255,8 +298,20 @@ onMounted(carregar)
             </label>
 
             <label>
-              <span>Quantidade recebida *</span>
+              <span>Apresentação recebida *</span>
+              <input v-model="formularioEntrada.apresentacao" type="text" maxlength="120" placeholder="Ex.: kit, frasco, caixa, unidade avulsa" />
+            </label>
+
+            <label>
+              <span>Quantidade de apresentações *</span>
               <input v-model.number="formularioEntrada.quantidade" type="number" min="1" step="1" />
+              <small>Ex.: 2 kits, 4 frascos ou 10 unidades avulsas.</small>
+            </label>
+
+            <label>
+              <span>Conteúdo por apresentação *</span>
+              <input v-model.number="formularioEntrada.conteudoPorApresentacao" type="number" min="1" step="1" />
+              <small v-if="estoque">Em {{ rotuloUnidade(estoque.produtoUnidadeMedida) }}. Ex.: 50 por kit ou 500 por frasco.</small>
             </label>
 
             <label>
@@ -276,14 +331,26 @@ onMounted(carregar)
             </label>
           </div>
 
+          <label class="fraction-option">
+            <input v-model="formularioEntrada.fracionavel" type="checkbox" />
+            <span>
+              <strong>Permitir saída fracionada</strong>
+              <small>Desmarque quando o material só puder sair em apresentações completas. Ex.: kit fechado de 50.</small>
+            </span>
+          </label>
+
           <label class="entry-observation">
             <span>Observação</span>
             <textarea v-model="formularioEntrada.observacao" rows="3" maxlength="500" placeholder="Ex.: Material recebido conforme nota fiscal."></textarea>
           </label>
 
           <div class="entry-preview">
-            <strong>Após confirmar</strong>
-            <span>O lote será criado, o saldo do estoque será atualizado e a movimentação de entrada ficará registrada.</span>
+            <strong>Total incorporado ao estoque</strong>
+            <span v-if="estoque">
+              {{ formularioEntrada.quantidade || 0 }} × {{ formularioEntrada.conteudoPorApresentacao || 0 }} =
+              <b>{{ quantidadeBaseEntrada }} {{ rotuloUnidade(estoque.produtoUnidadeMedida) }}</b>
+            </span>
+            <small>O saldo consolidado sempre usa a unidade-base; a apresentação física continua registrada no lote.</small>
           </div>
 
           <div v-if="erroEntrada" class="form-error">{{ erroEntrada }}</div>
@@ -305,7 +372,7 @@ onMounted(carregar)
 .breadcrumb { margin-bottom: 10px; color: #64748b; font-size: 12px; }
 .page-header h1 { margin: 0; color: #1a1a2e; font-size: 30px; }
 .page-header p { margin: 7px 0 0; color: #64748b; font-size: 14px; }
-.product-context { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
+.product-context { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 18px; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }
 .product-context div { min-width: 0; }
 .product-context span { display: block; margin-bottom: 4px; color: #64748b; font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .product-context strong { color: #1e293b; font-size: 12px; }
@@ -328,9 +395,10 @@ onMounted(carregar)
 .secondary-action { border: 1px solid #cbd5e1; background: #fff; color: #334155; }
 .primary-action:disabled, .secondary-action:disabled { opacity: .55; cursor: not-allowed; }
 .table-wrap { overflow-x: auto; }
-table { width: 100%; min-width: 850px; border-collapse: collapse; }
+table { width: 100%; min-width: 1050px; border-collapse: collapse; }
 th { padding: 11px 12px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 800; text-align: left; text-transform: uppercase; }
 td { padding: 12px; border-bottom: 1px solid #eef2f7; color: #334155; font-size: 12px; }
+td small { display: block; margin-top: 4px; color: #64748b; font-size: 10px; }
 .lot-chip { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; font-size: 9px; font-weight: 800; }
 .lot-chip--ok { background: #e7f7ed; color: #007a3d; }
 .lot-chip--warning { background: #fff7d6; color: #946200; }
@@ -338,7 +406,7 @@ td { padding: 12px; border-bottom: 1px solid #eef2f7; color: #334155; font-size:
 .state-box { padding: 34px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #64748b; text-align: center; }
 .state-box--error { border-color: #fecaca; color: #b42318; background: #fffafa; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 24px; background: rgb(9 22 48 / 58%); backdrop-filter: blur(2px); }
-.modal-card { width: min(720px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; border: 1px solid #dbe4f0; border-radius: 13px; background: #fff; box-shadow: 0 24px 70px rgb(9 22 48 / 28%); }
+.modal-card { width: min(760px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; border: 1px solid #dbe4f0; border-radius: 13px; background: #fff; box-shadow: 0 24px 70px rgb(9 22 48 / 28%); }
 .modal-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 22px 16px; border-bottom: 1px solid #eef2f7; }
 .modal-card__header span { color: #1a4da1; font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .modal-card__header h2 { margin: 4px 0 0; color: #0d2b5e; font-size: 21px; }
@@ -354,10 +422,17 @@ td { padding: 12px; border-bottom: 1px solid #eef2f7; color: #334155; font-size:
 .entry-observation textarea { resize: vertical; min-height: 86px; padding: 10px; }
 .entry-grid input:focus, .entry-grid select:focus, .entry-observation textarea:focus { border-color: #1a4da1; box-shadow: 0 0 0 2px rgb(26 77 161 / 10%); }
 .entry-grid small { color: #94a3b8; font-size: 10px; }
-.entry-preview { display: flex; flex-direction: column; gap: 3px; margin-top: 14px; padding: 11px 13px; border: 1px solid #dbe7f8; border-radius: 8px; background: #f7faff; color: #475569; font-size: 11px; }
-.entry-preview strong { color: #0d2b5e; }
+.fraction-option { display: flex; align-items: flex-start; gap: 10px; margin-top: 15px; padding: 12px 13px; border: 1px solid #dbe7f8; border-radius: 8px; background: #f8fbff; cursor: pointer; }
+.fraction-option input { margin-top: 2px; }
+.fraction-option span { display: flex; flex-direction: column; gap: 3px; }
+.fraction-option strong { color: #1e293b; font-size: 11px; }
+.fraction-option small { color: #64748b; font-size: 10px; }
+.entry-preview { display: flex; flex-direction: column; gap: 4px; margin-top: 14px; padding: 12px 13px; border: 1px solid #dbe7f8; border-radius: 8px; background: #f7faff; color: #475569; font-size: 11px; }
+.entry-preview strong, .entry-preview b { color: #0d2b5e; }
+.entry-preview small { color: #64748b; }
 .form-error { margin-top: 12px; padding: 10px 12px; border: 1px solid #fecaca; border-radius: 7px; background: #fff5f5; color: #b42318; font-size: 11px; font-weight: 700; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; padding-top: 15px; border-top: 1px solid #eef2f7; }
-@media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .product-context { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .summary-grid, .entry-grid { grid-template-columns: 1fr; } .lot-card__heading { flex-direction: column; } .primary-action { width: 100%; } .modal-actions { flex-direction: column-reverse; } }
+@media (max-width: 1050px) { .product-context { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .summary-grid, .entry-grid, .product-context { grid-template-columns: 1fr; } .lot-card__heading { flex-direction: column; } .primary-action { width: 100%; } .modal-actions { flex-direction: column-reverse; } }
 </style>
