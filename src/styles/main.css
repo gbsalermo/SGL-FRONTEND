@@ -99,7 +99,7 @@
 
 .gestao-detail__item .approved-quantity {
   background: #edf8f1 !important;
-  border: 1px solid transparent !important;
+  border: 4px solid transparent !important;
 }
 
 .gestao-detail__item .approved-quantity > span {

@@ -466,7 +466,7 @@ onMounted(carregar)
                       </div>
 
                       <div class="quantity-card requested-quantity">
-                        <strong>QUANTIDADE SOLICITADA</strong>
+                        <strong>QUANT. SOLICITADA</strong>
                         <span>{{ item.quantidadeSolicitada }}</span>
                       </div>
 
@@ -646,7 +646,7 @@ onMounted(carregar)
 .gestao-detail__item > div:first-child { min-width: 0; }
 .gestao-detail__item > div:first-child strong { font-size: 12px; }
 .gestao-detail__item > div:first-child small { font-size: 10px; }
-.quantity-card { min-width: 0; min-height: 52px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; padding: 6px 8px; border-radius: 6px; }
+.quantity-card { min-width: 0; min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; padding: 6px 8px; border-radius: 6px; }
 .quantity-card strong, .quantity-card > span, .quantity-card > label { margin: 0; }
 .quantity-card strong, .approval-quantity > span { color: #475569; font-size: 9px !important; font-weight: 800; letter-spacing: .025em; line-height: 1.2; }
 .quantity-card > span { color: #0d2b5e !important; font-size: 15px !important; font-weight: 800; line-height: 1.1; }
