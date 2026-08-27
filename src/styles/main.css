@@ -127,3 +127,14 @@
   font-size: 14px;
   font-weight: 700;
 }
+
+/* O estilo scoped de PedidosGestaoView adiciona atributos aos seletores e pode
+   vencer regras globais de mesma especificidade. Esta regra é propositalmente
+   mais específica para manter o título editável no mesmo peso visual do card
+   de quantidade solicitada. */
+.gestao-shell .gestao-pedidos .gestao-detail__item .quantity-card.approval-quantity > span {
+  font-size: 6px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.015em !important;
+  font-weight: 800 !important;
+}
