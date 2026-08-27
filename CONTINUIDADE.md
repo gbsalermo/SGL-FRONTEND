@@ -105,7 +105,8 @@ Descarte por vencimento                   ⏳
 Produtos operacional + rótulos            ⏳ próximo após Estoque
 Movimentações                             ⏳
 Relatórios                                ⏳
-Demais Cadastros/Administração            ⏳
+Administração / Cadastros                 ⏳
+Interface individual de Estagiários       ⏳ obrigatória na Administração
 Dashboard final / robustez / 404           ⏳
 Autenticação/autorização/auditoria        ⏳
 ```
@@ -653,7 +654,75 @@ O backend ainda não possui upload multipart completo; não criar persistência 
 
 ---
 
-# 13. Roadmap oficial atualizado
+# 13. Administração / Cadastros — futura
+
+Cadastros administrativos previstos:
+
+```text
+Produtos
+Laboratórios
+Projetos
+Usuários
+Estagiários
+```
+
+**Estagiários terá uma interface própria dentro da etapa de Administração.** Não deve ser tratado apenas como um filtro ou subtipo escondido em Usuários.
+
+Rotas planejadas:
+
+```text
+/cadastros/estagiarios
+/cadastros/estagiarios/:id
+```
+
+Objetivo da interface:
+
+```text
+listar estagiários
+buscar/filtrar
+abrir cadastro individual
+consultar os dados completos do estagiário
+editar campos permitidos
+acompanhar situação do estágio
+encerrar/inativar conforme regra real do backend
+```
+
+A ficha individual deverá puxar os dados reais do Estagiário/Usuário e, conforme os contratos atuais/futuros, apresentar:
+
+```text
+nome
+email
+perfil
+ativo/inativo
+unidade
+laboratório
+data de início do estágio
+data de fim do estágio
+tipo de bolsa
+observação
+```
+
+Fluxo oficial:
+
+```text
+Administração
+→ Cadastros
+→ Estagiários
+→ listagem
+→ selecionar estagiário
+→ ficha individual
+→ consultar dados institucionais e do estágio
+→ editar somente conforme permissão
+→ encerrar/inativar quando permitido
+```
+
+A ficha individual é a fonte central de consulta daquele estagiário. Não criar páginas paralelas com cópias dos mesmos dados.
+
+`Encerrar estágio` deve continuar sendo uma ação de domínio própria, não sinônimo visual de excluir usuário. Permissões definitivas serão fechadas junto com autorização/autenticação.
+
+---
+
+# 14. Roadmap oficial atualizado
 
 ```text
 Etapa 0 — Handoff backend → frontend                       ✅
@@ -682,7 +751,13 @@ Etapa 5 — Produtos operacional + Rotulagem                 ⏳ PRÓXIMO
 
 Etapa 6 — Movimentações                                    ⏳
 Etapa 7 — Relatórios / Documentos / Fiscalização           ⏳
-Etapa 8 — Demais Cadastros / Administração                 ⏳
+Etapa 8 — Administração / Cadastros                        ⏳
+  8.1 Produtos — cadastro administrativo                   ⏳
+  8.2 Laboratórios                                         ⏳
+  8.3 Projetos                                             ⏳
+  8.4 Usuários                                             ⏳
+  8.5 Estagiários — listagem + ficha individual            ⏳ OBRIGATÓRIO
+
 Etapa 9 — Dashboards finais / robustez / 404               ⏳
 Etapa 10 — Autenticação / autorização / auditoria          ⏳
 ```
@@ -696,9 +771,11 @@ FINALIZAR ESTOQUE
 → RELATÓRIOS
 ```
 
+A etapa de Administração vem depois e deve incluir a interface individual de Estagiários descrita acima.
+
 ---
 
-# 14. Rotas planejadas/atuais
+# 15. Rotas planejadas/atuais
 
 ```text
 /login
@@ -716,6 +793,7 @@ FINALIZAR ESTOQUE
 /cadastros/projetos       ⏳
 /cadastros/usuarios       ⏳
 /cadastros/estagiarios    ⏳
+/cadastros/estagiarios/:id ⏳ ficha individual
 /:pathMatch(.*)*          ⏳ 404 customizada futura
 ```
 
@@ -723,14 +801,14 @@ Não criar `/cadastros/unidades`.
 
 ---
 
-# 15. Documentos importantes
+# 16. Documentos importantes
 
 ```text
 CONTINUIDADE.md
 → fonte principal de retomada
 
 docs/ROADMAP_INTERFACE_GESTAO.md
-→ sequência Gestão/Estoque/Produtos/Rotulagem
+→ sequência Gestão/Estoque/Produtos/Rotulagem/Administração
 
 docs/DECISAO_UNIDADES_CORPORATIVAS.md
 → regra futura de criação automática de Unidade
@@ -750,7 +828,7 @@ docs/ESTRUTURA_FRONTEND.md
 
 ---
 
-# 16. PRÓXIMO PASSO EXATO
+# 17. PRÓXIMO PASSO EXATO
 
 Não voltar para Pedidos neste momento, salvo correção de bug.
 
@@ -774,9 +852,11 @@ Próxima sequência:
 
 Na etapa de Produtos, o fluxo de impressão descrito na seção 9.3 é obrigatório e não deve ser simplificado para um rótulo genérico sem lote quando a intenção for rastreabilidade física.
 
+Na futura etapa 8, `Estagiários` deverá obrigatoriamente possuir listagem e ficha individual própria.
+
 ---
 
-# 17. Estado atual de branches
+# 18. Estado atual de branches
 
 Frontend em desenvolvimento:
 
