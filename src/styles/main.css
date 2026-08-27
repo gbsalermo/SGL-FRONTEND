@@ -133,7 +133,7 @@
    mais específica para manter o título editável no mesmo peso visual do card
    de quantidade solicitada. */
 .gestao-shell .gestao-pedidos .gestao-detail__item .quantity-card.approval-quantity > span {
-  font-size: 6px !important;
+  font-size: 7.5px !important;
   line-height: 1 !important;
   letter-spacing: -0.015em !important;
   font-weight: 800 !important;
