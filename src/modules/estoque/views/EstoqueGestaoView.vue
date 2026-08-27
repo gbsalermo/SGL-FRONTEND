@@ -299,7 +299,7 @@ onMounted(carregar)
 .estoque-search input:focus { border-color: #1a4da1; box-shadow: 0 0 0 2px rgb(26 77 161 / 10%); }
 .filter-toggle { width: 44px; height: 44px; display: inline-grid; place-items: center; padding: 0; border: 2px solid #1a1a2e; border-radius: 50%; background: #fff; color: #1a1a2e; cursor: pointer; transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease; }
 .filter-toggle:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgb(15 23 42 / 12%); }
-.filter-toggle svg { width: 19px; height: 19px; fill: currentColor; stroke: none; }
+.filter-toggle svg { width: 15px; height: 15px; fill: currentColor; stroke: none; }
 .filter-toggle--active { border-color: #1a4da1; background: #1a4da1; color: #fff; box-shadow: 0 5px 14px rgb(26 77 161 / 20%); }
 .estoque-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #eef2f7; }
 .estoque-filter-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef2f7; color: #64748b; font-size: 11px; }
