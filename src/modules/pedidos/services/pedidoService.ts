@@ -42,28 +42,32 @@ function rotuloEnum(valor: string | null | undefined) {
 }
 
 function descricaoOperacionalProduto(item: PedidoResponse['itens'][number]) {
-  const partes = [item.produtoUnidadeArmazenamento]
+  const partes: string[] = []
+
+  if (item.produtoUnidadeArmazenamento?.trim()) {
+    partes.push(item.produtoUnidadeArmazenamento.trim())
+  }
 
   if (item.produtoPerecivel) {
     const tipoPerecivel = rotuloEnum(item.produtoTipoPerecivel)
-    partes.push(tipoPerecivel ? `Perecível (${tipoPerecivel})` : 'Perecível')
+    partes.push(tipoPerecivel ? `PERECÍVEL · ${tipoPerecivel}` : 'PERECÍVEL')
   }
 
   if (item.produtoRisco && item.produtoRisco !== 'NENHUM') {
     const nivel = rotuloEnum(item.produtoRisco)
     const tipo = rotuloEnum(item.produtoTipoRisco)
-    partes.push(`Risco ${nivel}${tipo ? ` — ${tipo}` : ''}`)
+    partes.push(`⚠ RISCO ${nivel?.toUpperCase()}${tipo ? ` · ${tipo.toUpperCase()}` : ''}`)
   }
 
   if (item.produtoDescricaoRisco?.trim()) {
-    partes.push(item.produtoDescricaoRisco.trim())
+    partes.push(`Atenção: ${item.produtoDescricaoRisco.trim()}`)
   }
 
   if (item.produtoCondicoesArmazenamento?.trim()) {
     partes.push(`Armazenamento: ${item.produtoCondicoesArmazenamento.trim()}`)
   }
 
-  return partes.filter(Boolean).join(' • ')
+  return partes.filter(Boolean).join('   |   ')
 }
 
 function itemSemContextoProduto(item: PedidoResponse['itens'][number]) {
