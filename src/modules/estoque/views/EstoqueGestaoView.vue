@@ -25,6 +25,10 @@ const ordemQuantitativa = computed(() => ordenarPor.value === 'QUANTIDADE' || or
 const rotuloOrdem = computed(() => ordemQuantitativa.value ? 'Ordem por quantidade' : 'Ordem alfabética')
 const filtroAtivo = computed(() => buscaEmFoco.value || filtrosAbertos.value)
 
+function rotuloUnidade(unidade?: string | null) {
+  return unidade ? unidade.toLowerCase().replaceAll('_', ' ') : 'Não informada'
+}
+
 function estoqueBaixo(item: EstoqueCentralResponse) {
   return item.quantidadeAtual < item.quantidadeMinima
 }
@@ -66,6 +70,7 @@ const estoquesFiltrados = computed(() => {
     return [
       item.produtoNome,
       item.produtoCodigoReferencia,
+      item.produtoUnidadeMedida,
       item.produtoUnidadeArmazenamento,
       item.produtoLocalizacaoFisica,
       item.unidadeNome,
@@ -253,12 +258,15 @@ onMounted(carregar)
               <strong>{{ item.produtoNome }}</strong>
               <small v-if="item.produtoCodigoReferencia">{{ item.produtoCodigoReferencia }}</small>
             </td>
-            <td>{{ item.produtoUnidadeArmazenamento || 'Não informada' }}</td>
+            <td>
+              <strong>{{ rotuloUnidade(item.produtoUnidadeMedida) }}</strong>
+              <small v-if="item.produtoUnidadeArmazenamento">Padrão: {{ item.produtoUnidadeArmazenamento }}</small>
+            </td>
             <td>
               <span class="location-copy">{{ item.produtoLocalizacaoFisica || 'Não informada' }}</span>
             </td>
-            <td><strong class="quantidade-atual">{{ item.quantidadeAtual }}</strong></td>
-            <td>{{ item.quantidadeMinima }}</td>
+            <td><strong class="quantidade-atual">{{ item.quantidadeAtual }}</strong> {{ rotuloUnidade(item.produtoUnidadeMedida) }}</td>
+            <td>{{ item.quantidadeMinima }} {{ rotuloUnidade(item.produtoUnidadeMedida) }}</td>
             <td>
               <span v-if="estoqueZerado(item)" class="stock-chip stock-chip--danger">ZERADO</span>
               <span v-else-if="possuiLoteVencido(item)" class="stock-chip stock-chip--danger">LOTE VENCIDO</span>
@@ -280,7 +288,6 @@ onMounted(carregar)
 .estoque-page__header h1 { margin: 0; color: #1a1a2e; font-size: 30px; }
 .estoque-page__header p { margin: 7px 0 0; color: #64748b; font-size: 14px; }
 .secondary-action { min-height: 42px; padding: 0 16px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #334155; font-size: 13px; font-weight: 700; cursor: pointer; }
-
 .estoque-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 22px 0 18px; }
 .estoque-summary article { padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; box-shadow: 0 5px 18px rgb(15 23 42 / 4%); }
 .estoque-summary span { display: block; color: #64748b; font-size: 12px; font-weight: 700; }
@@ -290,7 +297,6 @@ onMounted(carregar)
 .estoque-summary--warning strong { color: #946200; }
 .estoque-summary--danger { border-color: #fecaca !important; background: #fffafa !important; }
 .estoque-summary--danger strong { color: #b42318; }
-
 .estoque-filter-card { margin-bottom: 16px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 11px; background: #fff; box-shadow: 0 5px 18px rgb(15 23 42 / 4%); }
 .estoque-filter-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; }
 .estoque-search, .estoque-filter-grid label { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -304,7 +310,6 @@ onMounted(carregar)
 .estoque-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #eef2f7; }
 .estoque-filter-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef2f7; color: #64748b; font-size: 11px; }
 .estoque-filter-footer button { border: 0; background: transparent; color: #1a4da1; font-weight: 700; cursor: pointer; }
-
 .estoque-table-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; box-shadow: 0 5px 18px rgb(15 23 42 / 4%); }
 .estoque-table { width: 100%; border-collapse: collapse; min-width: 1080px; }
 .estoque-table th { padding: 12px 13px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 800; letter-spacing: .04em; text-align: left; text-transform: uppercase; }
@@ -322,14 +327,6 @@ onMounted(carregar)
 .detail-button { width: 30px; height: 30px; border: 0; border-radius: 7px; background: #f1f5f9; color: #0d2b5e; font-size: 18px; cursor: pointer; }
 .estoque-state { padding: 34px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #64748b; text-align: center; }
 .estoque-state--error { border-color: #fecaca; color: #b42318; background: #fffafa; }
-
-@media (max-width: 900px) {
-  .estoque-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 640px) {
-  .estoque-page__header { flex-direction: column; }
-  .estoque-summary, .estoque-filter-top, .estoque-filter-grid { grid-template-columns: 1fr; }
-  .filter-toggle { justify-self: end; }
-}
+@media (max-width: 900px) { .estoque-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .estoque-page__header { flex-direction: column; } .estoque-summary, .estoque-filter-top, .estoque-filter-grid { grid-template-columns: 1fr; } .filter-toggle { justify-self: end; } }
 </style>
