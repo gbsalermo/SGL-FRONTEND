@@ -27,12 +27,12 @@ export type TipoRelatorioExportavel =
 
 export interface UltimaConsultaRelatorio {
   tipo: TipoRelatorioExportavel
-  filtros: Record<string, unknown>
+  filtros: object
 }
 
 export const ultimaConsultaRelatorio = ref<UltimaConsultaRelatorio | null>(null)
 
-function registrarConsulta(tipo: TipoRelatorioExportavel, filtros: Record<string, unknown>) {
+function registrarConsulta(tipo: TipoRelatorioExportavel, filtros: object) {
   ultimaConsultaRelatorio.value = { tipo, filtros: { ...filtros } }
 }
 
@@ -87,7 +87,7 @@ export const relatorioService = {
   async exportar(
     tipo: TipoRelatorioExportavel,
     formato: FormatoExportacaoRelatorio,
-    filtros: Record<string, unknown> = {},
+    filtros: object = {},
   ) {
     const response = await http.get<Blob>(`/v1/relatorios/${tipo}/exportar`, {
       params: { ...filtros, formato },
