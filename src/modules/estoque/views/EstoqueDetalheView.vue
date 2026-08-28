@@ -8,6 +8,7 @@ import type {
   EntradaLoteRequest,
   EstoqueCentralResponse,
   LoteResponse,
+  TipoEmbalagem,
 } from '@/modules/estoque/types/estoque'
 import { useSessionStore } from '@/stores/session'
 
@@ -32,8 +33,17 @@ const salvandoLote = ref(false)
 const erroLote = ref('')
 const sucessoLote = ref('')
 
+const tiposEmbalagem: Array<{ value: TipoEmbalagem; label: string }> = [
+  { value: 'UNITARIO', label: 'Unitário' },
+  { value: 'KIT', label: 'Kit' },
+  { value: 'CAIXA', label: 'Caixa' },
+  { value: 'GARRAFA', label: 'Garrafa' },
+  { value: 'GALAO', label: 'Galão' },
+]
+
 const formularioEntrada = ref<EntradaLoteRequest>({
   numeroLote: '',
+  tipoEmbalagem: 'UNITARIO',
   apresentacao: '',
   quantidade: 1,
   conteudoPorApresentacao: 1,
@@ -45,6 +55,7 @@ const formularioEntrada = ref<EntradaLoteRequest>({
 
 const formularioLote = ref<AtualizarLoteRequest>({
   numeroLote: '',
+  tipoEmbalagem: 'UNITARIO',
   apresentacao: '',
   fracionavel: true,
   observacao: null,
@@ -58,51 +69,49 @@ const lotesAtivos = computed(() => lotes.value.filter((lote) => lote.ativo))
 const vencidos = computed(() => lotesAtivos.value.filter(loteVencido).length)
 const proximos = computed(() => lotesAtivos.value.filter(loteProximoVencimento).length)
 
-function normalizarApresentacao(valor?: string | null) {
-  return String(valor || '').trim().toLowerCase()
-}
-
-function pluralApresentacao(apresentacao: string | null, quantidade: number) {
-  const texto = (apresentacao || 'unidade').trim()
-  if (quantidade === 1) return texto
-
-  const conhecidos: Record<string, string> = {
-    kit: 'kits',
-    frasco: 'frascos',
-    caixa: 'caixas',
-    bombona: 'bombonas',
-    pacote: 'pacotes',
-    ampola: 'ampolas',
-    barril: 'barris',
-    'unidade avulsa': 'unidades avulsas',
-    unidade: 'unidades',
+function rotuloTipoEmbalagem(tipo?: TipoEmbalagem | null, quantidade = 1) {
+  const singular: Record<TipoEmbalagem, string> = {
+    UNITARIO: 'unit.',
+    KIT: 'kit',
+    CAIXA: 'caixa',
+    GARRAFA: 'garrafa',
+    GALAO: 'galão',
   }
-
-  const chave = texto.toLowerCase()
-  if (conhecidos[chave]) return conhecidos[chave]
-  if (chave.endsWith('s')) return texto
-  return `${texto}s`
+  const plural: Record<TipoEmbalagem, string> = {
+    UNITARIO: 'unit.',
+    KIT: 'kits',
+    CAIXA: 'caixas',
+    GARRAFA: 'garrafas',
+    GALAO: 'galões',
+  }
+  const chave = tipo || 'UNITARIO'
+  return quantidade === 1 ? singular[chave] : plural[chave]
 }
 
 function chaveEmbalagem(lote: LoteResponse) {
-  const apresentacao = normalizarApresentacao(lote.apresentacao)
-  const conteudo = Number(lote.conteudoPorApresentacao) || 1
-  return `${apresentacao}::${conteudo}`
+  const tipo = lote.tipoEmbalagem || 'UNITARIO'
+  const multiplicador = Number(lote.conteudoPorApresentacao) || 1
+  return `${tipo}::${multiplicador}`
 }
 
 const opcoesEmbalagem = computed(() => {
-  const mapa = new Map<string, { chave: string; apresentacao: string; conteudo: number }>()
+  const mapa = new Map<string, { chave: string; tipo: TipoEmbalagem; multiplicador: number; especificacao: string }>()
 
   lotesAtivos.value.forEach((lote) => {
-    const apresentacao = String(lote.apresentacao || '').trim()
-    const conteudo = Number(lote.conteudoPorApresentacao) || 0
-    if (!apresentacao || apresentacao.toUpperCase() === 'LEGADO' || conteudo <= 0) return
-
+    const tipo = lote.tipoEmbalagem || 'UNITARIO'
+    const multiplicador = Number(lote.conteudoPorApresentacao) || 1
     const chave = chaveEmbalagem(lote)
-    if (!mapa.has(chave)) mapa.set(chave, { chave, apresentacao, conteudo })
+    if (!mapa.has(chave)) {
+      mapa.set(chave, {
+        chave,
+        tipo,
+        multiplicador,
+        especificacao: lote.apresentacao?.trim() || rotuloTipoEmbalagem(tipo),
+      })
+    }
   })
 
-  return [...mapa.values()].sort((a, b) => a.apresentacao.localeCompare(b.apresentacao, 'pt-BR'))
+  return [...mapa.values()].sort((a, b) => a.tipo.localeCompare(b.tipo, 'pt-BR'))
 })
 
 const embalagemSelecionada = computed(() =>
@@ -116,29 +125,29 @@ const quantidadeExibida = computed(() => {
   return lotesAtivos.value
     .filter((lote) => chaveEmbalagem(lote) === visualizacaoQuantidade.value)
     .reduce((total, lote) => {
-      const conteudo = Number(lote.conteudoPorApresentacao) || 1
-      return total + Math.floor(lote.quantidadeDisponivel / conteudo)
+      const multiplicador = Number(lote.conteudoPorApresentacao) || 1
+      return total + Math.floor(lote.quantidadeDisponivel / multiplicador)
     }, 0)
 })
 
 const rotuloQuantidadeExibida = computed(() => {
   if (visualizacaoQuantidade.value === 'UNITARIA') {
-    return `${quantidadeExibida.value} ${quantidadeExibida.value === 1 ? 'unidade' : 'unidades'}`
+    return `${quantidadeExibida.value} unit.`
   }
 
   const opcao = embalagemSelecionada.value
   if (!opcao) return '0 embalagens'
-  return `${quantidadeExibida.value} ${pluralApresentacao(opcao.apresentacao, quantidadeExibida.value)}`
+  return `${quantidadeExibida.value} ${rotuloTipoEmbalagem(opcao.tipo, quantidadeExibida.value)}`
 })
 
 const legendaQuantidade = computed(() => {
   if (visualizacaoQuantidade.value === 'UNITARIA') {
-    return 'Total geral em unidades individuais, independentemente de como o material está embalado.'
+    return 'Total geral convertido para unidades individuais.'
   }
 
   const opcao = embalagemSelecionada.value
   if (!opcao) return ''
-  return `${opcao.conteudo} ${opcao.conteudo === 1 ? 'unidade' : 'unidades'} por ${opcao.apresentacao}. Unidades avulsas e outras embalagens não entram nesta visualização.`
+  return `${opcao.multiplicador} unit. por ${rotuloTipoEmbalagem(opcao.tipo)}. Outras embalagens e unidades avulsas não entram neste filtro.`
 })
 
 function dataFormatada(data: string | null) {
@@ -158,33 +167,20 @@ function loteProximoVencimento(lote: LoteResponse) {
   return dias <= 30
 }
 
+function quantidadeFisica(lote: LoteResponse) {
+  const recebida = Number(lote.quantidadeApresentacoes)
+  if (recebida > 0) return recebida
+  if ((lote.tipoEmbalagem || 'UNITARIO') === 'UNITARIO') return lote.quantidadeInicial
+  return 0
+}
+
 function resumoRecebido(lote: LoteResponse) {
-  const quantidade = Number(lote.quantidadeApresentacoes) || 0
-  const conteudo = Number(lote.conteudoPorApresentacao) || 0
-
-  if (!quantidade || !conteudo || !lote.apresentacao || lote.apresentacao.toUpperCase() === 'LEGADO') {
-    return `${lote.quantidadeInicial} ${lote.quantidadeInicial === 1 ? 'unidade' : 'unidades'}`
-  }
-
-  return `${quantidade} ${pluralApresentacao(lote.apresentacao, quantidade)} de ${conteudo} ${conteudo === 1 ? 'unidade' : 'unidades'}`
+  const quantidade = quantidadeFisica(lote)
+  return `${quantidade} ${rotuloTipoEmbalagem(lote.tipoEmbalagem, quantidade)}`
 }
 
 function resumoDisponivel(lote: LoteResponse) {
-  if (lote.quantidadeDisponivel <= 0) return 'Sem unidades disponíveis'
-
-  const conteudo = Number(lote.conteudoPorApresentacao) || 0
-  if (!conteudo || !lote.apresentacao || lote.apresentacao.toUpperCase() === 'LEGADO') {
-    return `${lote.quantidadeDisponivel} ${lote.quantidadeDisponivel === 1 ? 'unidade' : 'unidades'}`
-  }
-
-  const completas = Math.floor(lote.quantidadeDisponivel / conteudo)
-  const avulsas = lote.quantidadeDisponivel % conteudo
-  const partes: string[] = []
-
-  if (completas > 0) partes.push(`${completas} ${pluralApresentacao(lote.apresentacao, completas)}`)
-  if (avulsas > 0) partes.push(`${avulsas} ${avulsas === 1 ? 'unidade avulsa' : 'unidades avulsas'}`)
-
-  return partes.join(' + ') || `${lote.quantidadeDisponivel} unidades`
+  return `${Math.max(0, lote.quantidadeDisponivel)} unit.`
 }
 
 function mensagemErro(error: unknown, fallback: string) {
@@ -225,7 +221,8 @@ function abrirEntrada() {
   sucessoEntrada.value = ''
   formularioEntrada.value = {
     numeroLote: '',
-    apresentacao: estoque.value?.produtoUnidadeArmazenamento || '',
+    tipoEmbalagem: 'UNITARIO',
+    apresentacao: '',
     quantidade: 1,
     conteudoPorApresentacao: 1,
     fracionavel: true,
@@ -247,15 +244,15 @@ async function registrarEntrada() {
   }
 
   const loteFornecedor = formularioEntrada.value.numeroLote.trim()
-  const apresentacao = formularioEntrada.value.apresentacao?.trim() || ''
+  const especificacao = formularioEntrada.value.apresentacao?.trim() || ''
 
   if (!loteFornecedor) return void (erroEntrada.value = 'Informe o lote ou referência do fornecedor.')
-  if (!apresentacao) return void (erroEntrada.value = 'Informe como o material chegou.')
+  if (!especificacao) return void (erroEntrada.value = 'Especifique a embalagem recebida.')
   if (!Number.isInteger(Number(formularioEntrada.value.quantidade)) || Number(formularioEntrada.value.quantidade) <= 0) {
-    return void (erroEntrada.value = 'Informe quantas embalagens ou unidades foram recebidas.')
+    return void (erroEntrada.value = 'Informe quantas unidades ou embalagens foram recebidas.')
   }
   if (!Number.isInteger(Number(formularioEntrada.value.conteudoPorApresentacao)) || Number(formularioEntrada.value.conteudoPorApresentacao) <= 0) {
-    return void (erroEntrada.value = 'Informe quantas unidades existem em cada embalagem.')
+    return void (erroEntrada.value = 'Informe um multiplicador válido.')
   }
 
   salvandoEntrada.value = true
@@ -264,7 +261,8 @@ async function registrarEntrada() {
   try {
     const criado = await estoqueService.registrarEntradaLote(estoqueId.value, usuarioId.value, {
       numeroLote: loteFornecedor,
-      apresentacao,
+      tipoEmbalagem: formularioEntrada.value.tipoEmbalagem,
+      apresentacao: especificacao,
       quantidade: Number(formularioEntrada.value.quantidade),
       conteudoPorApresentacao: Number(formularioEntrada.value.conteudoPorApresentacao),
       fracionavel: formularioEntrada.value.fracionavel,
@@ -304,6 +302,7 @@ function iniciarEdicaoLote() {
   if (!loteSelecionado.value) return
   formularioLote.value = {
     numeroLote: loteSelecionado.value.numeroLote,
+    tipoEmbalagem: loteSelecionado.value.tipoEmbalagem || 'UNITARIO',
     apresentacao: loteSelecionado.value.apresentacao || '',
     fracionavel: loteSelecionado.value.fracionavel !== false,
     observacao: loteSelecionado.value.observacao,
@@ -361,7 +360,7 @@ onMounted(carregar)
         <div><span>Contagem padrão</span><strong>Unidades individuais</strong></div>
         <div><span>Embalagem mais comum</span><strong>{{ estoque.produtoUnidadeArmazenamento || 'Não informada' }}</strong></div>
         <div><span>Localização</span><strong>{{ estoque.produtoLocalizacaoFisica || 'Não informada' }}</strong></div>
-        <div><span>Avisar quando restarem</span><strong>{{ estoque.quantidadeMinima }} unidades</strong></div>
+        <div><span>Avisar quando restarem</span><strong>{{ estoque.quantidadeMinima }} unit.</strong></div>
       </section>
 
       <div class="summary-grid">
@@ -372,14 +371,14 @@ onMounted(carregar)
         </article>
 
         <article class="view-card">
-          <label for="quantity-view">Visualizar quantidade em</label>
+          <label for="quantity-view">Visualizar por embalagem</label>
           <select id="quantity-view" v-model="visualizacaoQuantidade">
             <option value="UNITARIA">Unidades individuais</option>
             <option v-for="opcao in opcoesEmbalagem" :key="opcao.chave" :value="opcao.chave">
-              {{ pluralApresentacao(opcao.apresentacao, 2) }} — {{ opcao.conteudo }} un. por embalagem
+              {{ rotuloTipoEmbalagem(opcao.tipo, 2) }} — {{ opcao.multiplicador }} unit. por embalagem
             </option>
           </select>
-          <small>Troque a visualização sem alterar o saldo real do estoque.</small>
+          <small>O filtro muda apenas a forma de visualizar o mesmo saldo.</small>
         </article>
 
         <article :class="{ warning: proximos > 0 }">
@@ -401,7 +400,7 @@ onMounted(carregar)
         <div class="lot-card__heading">
           <div>
             <h2>Lotes</h2>
-            <p>O saldo é controlado em unidades. As embalagens servem para organizar entrada, consulta e retirada.</p>
+            <p>O saldo disponível é sempre mostrado em unidades individuais. A embalagem descreve como o material entrou.</p>
           </div>
           <button class="primary-action" type="button" @click="abrirEntrada">+ Nova entrada de lote</button>
         </div>
@@ -413,7 +412,7 @@ onMounted(carregar)
             <thead>
               <tr>
                 <th>Código SGL</th>
-                <th>O que foi recebido</th>
+                <th>Unidade</th>
                 <th>Disponível agora</th>
                 <th>Entrada</th>
                 <th>Validade</th>
@@ -427,7 +426,10 @@ onMounted(carregar)
                   <strong>{{ lote.codigoInterno || 'Código não carregado' }}</strong>
                   <small>Fornecedor: {{ lote.numeroLote }}</small>
                 </td>
-                <td>{{ resumoRecebido(lote) }}</td>
+                <td>
+                  <strong>{{ resumoRecebido(lote) }}</strong>
+                  <small>{{ lote.apresentacao || 'Sem especificação de embalagem' }}</small>
+                </td>
                 <td><strong>{{ resumoDisponivel(lote) }}</strong></td>
                 <td>{{ dataFormatada(lote.dataEntrada) }}</td>
                 <td>{{ dataFormatada(lote.dataValidade) }}</td>
@@ -462,21 +464,28 @@ onMounted(carregar)
               <input v-model="formularioEntrada.numeroLote" type="text" maxlength="120" placeholder="Ex.: FAB-2026-8841" autofocus />
             </label>
             <label>
-              <span>Como o material chegou? *</span>
-              <input v-model="formularioEntrada.apresentacao" type="text" maxlength="120" placeholder="Ex.: kit, caixa, pacote, unidade avulsa" />
+              <span>Tipo de unidade *</span>
+              <select v-model="formularioEntrada.tipoEmbalagem">
+                <option v-for="tipo in tiposEmbalagem" :key="tipo.value" :value="tipo.value">{{ tipo.label }}</option>
+              </select>
+            </label>
+            <label>
+              <span>Especificar embalagem *</span>
+              <input v-model="formularioEntrada.apresentacao" type="text" maxlength="120" placeholder="Ex.: kit com 50 unidades, garrafa de 1 L" />
+              <small>Descreva a forma física recebida.</small>
             </label>
             <label>
               <span>Quantos chegaram? *</span>
               <input v-model.number="formularioEntrada.quantidade" type="number" min="1" step="1" />
-              <small>Ex.: 4 kits, 2 caixas ou 10 unidades avulsas.</small>
+              <small>Ex.: 4 kits, 2 caixas, 10 garrafas ou 10 unidades.</small>
             </label>
             <label>
-              <span>Quantas unidades vêm em cada um? *</span>
+              <span>Multiplicador de unidades *</span>
               <div class="input-with-unit">
                 <input v-model.number="formularioEntrada.conteudoPorApresentacao" type="number" min="1" step="1" />
-                <b>unidades</b>
+                <b>unit.</b>
               </div>
-              <small>Ex.: um kit com 50 unidades ou uma caixa com 10 unidades.</small>
+              <small>Quantas unidades individuais essa embalagem representa. Kit com 50 → 50; unitário → 1.</small>
             </label>
             <label>
               <span>Data de validade</span>
@@ -497,7 +506,7 @@ onMounted(carregar)
             <input v-model="formularioEntrada.fracionavel" type="checkbox" />
             <span>
               <strong>Pode retirar unidades separadamente?</strong>
-              <small>Desmarque quando a embalagem precisar sair sempre completa, como um kit fechado.</small>
+              <small>Desmarque quando a embalagem precisar sair sempre completa. Ex.: um kit fechado com 50 unidades.</small>
             </span>
           </label>
 
@@ -507,9 +516,9 @@ onMounted(carregar)
           </label>
 
           <div class="entry-preview">
-            <strong>Você está registrando</strong>
-            <span>{{ formularioEntrada.quantidade || 0 }} {{ pluralApresentacao(formularioEntrada.apresentacao, Number(formularioEntrada.quantidade) || 0) }}, com {{ formularioEntrada.conteudoPorApresentacao || 0 }} unidades em cada um.</span>
-            <small>O sistema atualizará o total de unidades automaticamente.</small>
+            <strong>Entrada física</strong>
+            <span>{{ formularioEntrada.quantidade || 0 }} {{ rotuloTipoEmbalagem(formularioEntrada.tipoEmbalagem, Number(formularioEntrada.quantidade) || 0) }} · {{ formularioEntrada.apresentacao || 'sem especificação' }}</span>
+            <small>O multiplicador será usado internamente para atualizar o saldo em unidades.</small>
           </div>
 
           <div v-if="erroEntrada" class="form-error">{{ erroEntrada }}</div>
@@ -536,13 +545,15 @@ onMounted(carregar)
         <div v-if="!editandoLote" class="lot-detail-body">
           <div v-if="sucessoLote" class="success-box">{{ sucessoLote }}</div>
           <div class="lot-detail-highlight">
-            <div><span>Recebido</span><strong>{{ resumoRecebido(loteSelecionado) }}</strong></div>
+            <div><span>Unidade recebida</span><strong>{{ resumoRecebido(loteSelecionado) }}</strong><small>{{ loteSelecionado.apresentacao }}</small></div>
             <div><span>Disponível agora</span><strong>{{ resumoDisponivel(loteSelecionado) }}</strong></div>
           </div>
           <div class="lot-detail-grid">
             <div><span>Código SGL</span><strong>{{ loteSelecionado.codigoInterno || 'Não carregado' }}</strong></div>
             <div><span>Lote do fornecedor</span><strong>{{ loteSelecionado.numeroLote }}</strong></div>
-            <div><span>Como chegou</span><strong>{{ loteSelecionado.apresentacao || 'Não informado' }}</strong></div>
+            <div><span>Tipo de unidade</span><strong>{{ rotuloTipoEmbalagem(loteSelecionado.tipoEmbalagem) }}</strong></div>
+            <div><span>Especificação</span><strong>{{ loteSelecionado.apresentacao || 'Não informada' }}</strong></div>
+            <div><span>Multiplicador</span><strong>{{ loteSelecionado.conteudoPorApresentacao || 1 }} unit. por embalagem</strong></div>
             <div><span>Entrada</span><strong>{{ dataFormatada(loteSelecionado.dataEntrada) }}</strong></div>
             <div><span>Validade</span><strong>{{ dataFormatada(loteSelecionado.dataValidade) }}</strong></div>
             <div><span>Pode retirar unidades separadamente?</span><strong>{{ loteSelecionado.fracionavel === false ? 'Não, somente embalagem completa' : 'Sim' }}</strong></div>
@@ -566,7 +577,13 @@ onMounted(carregar)
               <input v-model="formularioLote.numeroLote" type="text" maxlength="120" />
             </label>
             <label>
-              <span>Como chegou</span>
+              <span>Tipo de unidade</span>
+              <select v-model="formularioLote.tipoEmbalagem">
+                <option v-for="tipo in tiposEmbalagem" :key="tipo.value" :value="tipo.value">{{ tipo.label }}</option>
+              </select>
+            </label>
+            <label>
+              <span>Especificar embalagem</span>
               <input v-model="formularioLote.apresentacao" type="text" maxlength="120" />
             </label>
             <label>
@@ -576,16 +593,16 @@ onMounted(carregar)
           </div>
           <label class="fraction-option">
             <input v-model="formularioLote.fracionavel" type="checkbox" />
-            <span><strong>Pode retirar unidades separadamente?</strong><small>Se houver saldo parcial incompatível, o backend poderá impedir a alteração.</small></span>
+            <span><strong>Pode retirar unidades separadamente?</strong><small>O multiplicador original não pode ser alterado depois da entrada.</small></span>
           </label>
           <label class="entry-observation">
             <span>Observação</span>
             <textarea v-model="formularioLote.observacao" rows="3" maxlength="500"></textarea>
           </label>
           <div class="locked-info">
-            <strong>Quantidade recebida</strong>
-            <span>{{ resumoRecebido(loteSelecionado) }}</span>
-            <small>Esse dado fica bloqueado para preservar o histórico.</small>
+            <strong>Quantidade e multiplicador originais</strong>
+            <span>{{ resumoRecebido(loteSelecionado) }} · {{ loteSelecionado.conteudoPorApresentacao || 1 }} unit. por embalagem</span>
+            <small>Esses valores ficam bloqueados para preservar o histórico.</small>
           </div>
           <div v-if="erroLote" class="form-error">{{ erroLote }}</div>
           <footer class="modal-actions">
@@ -670,6 +687,7 @@ td small { display: block; margin-top: 4px; color: #94a3b8; font-size: 10px; }
 .lot-detail-highlight div { padding: 14px; border: 1px solid #dbe7f8; border-radius: 9px; background: #f8fbff; }
 .lot-detail-highlight span, .lot-detail-grid span { display: block; margin-bottom: 5px; color: #64748b; font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .lot-detail-highlight strong { color: #0d2b5e; font-size: 14px; }
+.lot-detail-highlight small { display: block; margin-top: 4px; color: #64748b; font-size: 10px; }
 .lot-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin-top: 14px; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 9px; background: #e2e8f0; }
 .lot-detail-grid > div { padding: 13px 14px; background: #fff; }
 .lot-detail-grid strong { color: #334155; font-size: 12px; }
