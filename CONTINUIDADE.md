@@ -7,7 +7,7 @@
 **Branch atual:** `feat/gestao-interface`  
 **Fase atual:** Estoque / Lotes  
 **Último bloco concluído:** Pedidos da Gestão  
-**Próximo passo exato:** validar a nova UX do detalhe de estoque + geração automática do código SGL do lote; depois implementar Descarte por vencimento; finalizar Estoque; depois Produtos → Movimentações → Relatórios
+**Próximo passo exato:** validar a nova contagem em unidades + filtro por embalagem no detalhe de estoque; depois ajustar os próximos pontos de Estoque um por um e só então seguir para Descarte por vencimento.
 
 Este arquivo é a fonte principal de retomada do frontend.
 
@@ -78,7 +78,7 @@ Flyway                                        ✅
 UUID público                                  ✅
 testes principais                             ✅
 CORS local                                    ✅
-unidade de controle + apresentação por lote   🟡 implementada / validar fluxo
+apresentação por lote                         🟡 implementada / validar fluxo
 observação persistida no lote                 ✅
 edição cadastral segura do lote               ✅
 código SGL automático e imutável do lote      ✅ implementar/validar V7
@@ -94,11 +94,12 @@ Login                                         ✅
 Pedidos do Solicitante                        ✅
 Shell Gestão/Admin                            ✅
 Pedidos da Gestão                             ✅
-Estoque — visão geral                         ✅ base aprovada
+Estoque — visão geral                         🟡 ajustado para unidades / validar
 Estoque — detalhe/lotes                       🟡 nova UX para validar
-Entrada de lote                               🟡 implementada / validar código automático
+Entrada de lote                               🟡 implementada / validar
+Filtro de visualização por embalagem          🟡 implementado / validar
 Modal de detalhe/edição de lote               🟡 implementado / validar
-Descarte por vencimento                       ⏳ próximo
+Descarte por vencimento                       ⏳ depois da validação atual
 Produtos operacional + rótulos                ⏳ próximo após Estoque
 Movimentações                                 ⏳
 Relatórios                                    ⏳
@@ -149,55 +150,42 @@ chips de status
 
 Login visual aprovado e sessão DEV funcionando.
 
-A autenticação de desenvolvimento não é autenticação de produção.
-
 A futura integração corporativa deve substituir o login DEV sem exigir reconstrução das telas.
 
 ---
 
-# 5. Pedidos do Solicitante — concluído por agora
+# 5. Pedidos — concluído por agora
 
-Rotas:
+Rotas do solicitante:
 
 ```text
 /meus-pedidos
 /pedidos/novo
 ```
 
-A forma de pedir/retirar quantidade deverá ser adaptada ao modelo de embalagem/unidade de controle quando retomarmos a integração de saída.
-
-Nunca interpretar quantidade solicitada como quantidade de kits automaticamente.
-
----
-
-# 6. Pedidos da Gestão — concluído por agora
-
-Rota:
+Rota da gestão:
 
 ```text
 /pedidos
 ```
 
-Implementado:
+A forma de pedir/retirar quantidade ainda deverá ser adaptada ao modelo definitivo de **unidades + embalagem**.
+
+Regra já definida:
 
 ```text
-listagem
-busca/filtros/ordenação
-submenu por status
-detalhe expansível
-quantidade solicitada/aprovada
-aprovação
-rejeição/cancelamento com justificativa
-entrega
-urgência
-risco/perecibilidade
-```
+se pedir 1 kit de 50
+→ o estoque perde 50 unidades
 
-Urgência operacional somente enquanto `status = PENDENTE`.
+se pedir 10 unidades
+→ o estoque perde 10 unidades
+
+nunca interpretar 10 unidades como 10 kits
+```
 
 ---
 
-# 7. Unidade institucional — decisão definitiva
+# 6. Unidade institucional — decisão definitiva
 
 **Unidade institucional não terá cadastro manual na interface.**
 
@@ -208,16 +196,6 @@ Cadastros → Unidades
 /cadastros/unidades
 ```
 
-Fluxo futuro:
-
-```text
-login corporativo
-→ API corporativa devolve unidade
-→ backend procura por identificador corporativo estável
-→ encontrou? associa
-→ não encontrou? cria e associa
-```
-
 Documento relacionado:
 
 ```text
@@ -226,201 +204,331 @@ docs/DECISAO_UNIDADES_CORPORATIVAS.md
 
 ---
 
-# 8. Estoque / Lotes — ETAPA ATUAL
+# 7. Estoque / Lotes — ETAPA ATUAL
 
-## 8.1 Responsabilidade
+## 7.1 Regra principal de quantidade — DECISÃO ATUAL
 
-```text
-Produto
-→ especificação do material
-→ define a unidade interna usada para consolidar saldo
+A quantidade operacional do estoque deve ser entendida pelo usuário **sempre em unidades individuais daquele produto**.
 
-Estoque Central
-→ saldo/configuração do produto na unidade
-
-Lote
-→ entrada física/rastreabilidade
-→ registra como o material chegou
-→ recebe um código interno SGL imutável
-
-Movimentação
-→ histórico da operação física
-```
-
-Não criar produto dentro da tela de Estoque.
-
-## 8.2 Visão geral `/estoque`
-
-Mostra:
+Exemplo:
 
 ```text
-Produtos em estoque
-Estoque baixo
-Zerados
-Produtos com lote vencido
+Produto: Extrato de DNA
+1 kit = 50 unidades
+
+4 kits disponíveis
+→ saldo geral = 200 unidades
+
+retirada de 1 kit
+→ baixa de 50 unidades
+→ novo saldo geral = 150 unidades
 ```
 
-Tabela:
+O saldo principal não muda de significado conforme a embalagem escolhida.
+
+### Estoque mínimo
+
+O estoque mínimo também é configurado e exibido em unidades.
+
+Exemplo:
+
+```text
+mínimo = 100 unidades
+
+se 1 kit = 50 unidades
+→ equivale a 2 kits
+```
+
+A comparação de estoque baixo continua simples:
+
+```text
+quantidadeAtual < quantidadeMinima
+```
+
+sempre considerando a quantidade total em unidades.
+
+## 7.2 Embalagem é uma forma de visualização/agrupamento
+
+Kit, caixa, pacote, barril etc. não substituem o saldo em unidades.
+
+São agrupamentos de unidades registrados no lote.
+
+Exemplos:
+
+```text
+Kit
+→ 50 unidades por kit
+
+Caixa
+→ 10 unidades por caixa
+
+Pacote
+→ 25 unidades por pacote
+```
+
+O usuário pode visualizar o saldo por um agrupamento específico, mas isso não altera o saldo real.
+
+### Filtro no detalhe do estoque
+
+Em `/estoque/:id`, o cartão `Como está armazenado` foi substituído por:
+
+```text
+Visualizar quantidade em
+[ Unidades individuais ▼ ]
+```
+
+Opções são obtidas das apresentações registradas nos lotes.
+
+Exemplo:
+
+```text
+Unidades individuais
+Kits — 50 un. por embalagem
+Caixas — 10 un. por embalagem
+```
+
+Com `Unidades individuais` selecionado:
+
+```text
+Quantidade disponível
+200 unidades
+```
+
+Com `Kit` selecionado:
+
+```text
+Quantidade disponível
+4 kits
+
+50 unidades por kit.
+Unidades avulsas e outras embalagens não entram nesta visualização.
+```
+
+### Regra importante do filtro
+
+Ao selecionar uma embalagem específica:
+
+```text
+somar apenas lotes daquela apresentação + daquele conteúdo por embalagem
+```
+
+Exemplo:
+
+```text
+3 kits de 50
++ 20 unidades avulsas
++ 2 caixas de 10
+
+saldo geral = 190 unidades
+
+filtro Kit 50
+→ 3 kits
+
+filtro Caixa 10
+→ 2 caixas
+
+filtro Unidades
+→ 190 unidades
+```
+
+As 20 unidades avulsas não entram no filtro Kit ou Caixa.
+
+## 7.3 Produtos com tamanhos diferentes
+
+Quando o próprio item físico é diferente, ele deve ser tratado como uma variante/produto de estoque diferente, e não como simples conversão de embalagem.
+
+Exemplo aprovado:
+
+```text
+Água 1 L
+Água 500 mL
+Água 250 mL
+```
+
+Cada um possui sua própria quantidade em unidades.
+
+Para `Água 1 L`:
+
+```text
+entrada: 1 caixa
+conteúdo da caixa: 10 unidades
+
+estoque Água 1 L
+→ +10 unidades
+```
+
+O volume `1 L` faz parte da definição/apresentação do item físico. O estoque operacional continua respondendo:
+
+```text
+10 unidades de Água 1 L
+```
+
+Isso evita misturar:
+
+```text
+10 garrafas de 1 L
+com
+10 garrafas de 500 mL
+```
+
+como se fossem o mesmo saldo.
+
+**Observação:** esse princípio deve ser refletido com cuidado na futura etapa de Produtos. Não alterar todos os modelos técnicos do backend nesta subetapa sem validação do fluxo atual.
+
+## 7.4 Visão geral `/estoque`
+
+A listagem principal passa a mostrar:
 
 ```text
 Produto
 Código
-Unidade/forma de contagem
+Embalagem padrão
 Localização
 Quantidade atual
 Mínimo
 Situação
-Detalhe
 ```
 
-Não existe métrica global de quantidade consolidada entre produtos diferentes.
-
-## 8.3 REGRA DE UX — NÃO EXPOR A MATEMÁTICA INTERNA
-
-O backend pode trabalhar com:
+Quantidade e mínimo aparecem sempre como:
 
 ```text
-unidade de controle
-quantidadeApresentacoes
-conteudoPorApresentacao
-conversão para saldo interno
+200 unidades
+100 unidades
 ```
 
-Mas a interface operacional não deve ensinar esses conceitos nem mostrar contas como `2 × 50 = 100`.
+A coluna antiga baseada em `unidadeMedida` não deve induzir o usuário a pensar que o saldo muda entre frasco/kit/mL/etc.
 
-A tela deve responder de forma simples:
+A embalagem padrão continua sendo uma referência informativa do produto.
+
+## 7.5 Não mostrar lote antigo/novo na operação
+
+Remover da interface operacional textos como:
 
 ```text
-quanto há no estoque?
-quantos kits/frascos/caixas/barris existem?
-quanto há em cada embalagem?
-existe material avulso ou embalagem aberta?
-qual lote vence primeiro?
+registro antigo
+entrada feita antes do novo controle
+lote legado
 ```
 
-Exemplos corretos:
+Esses detalhes de migração não ajudam o usuário a controlar estoque.
+
+Se um lote não possui dados detalhados de embalagem, mostrar apenas o que é seguro afirmar:
 
 ```text
-2 kits de 50 reações
-10 reações avulsas
-4 frascos de 500 mL
-1 barril de 20 L
-1 frasco de 1 L + 250 mL em embalagem aberta
+10 unidades
 ```
 
-Evitar na interface:
+sem classificar visualmente como antigo ou novo.
+
+## 7.6 Entrada de lote
+
+Endpoint:
 
 ```text
-unidade-base
-quantidade base
-fator de conversão
-saldo convertido
-2 × 50 = 100
+POST /api/v1/movimentacoes/estoques/{estoqueId}/lotes?usuarioId={uuid}
 ```
 
-A matemática é responsabilidade do sistema.
-
-## 8.4 Detalhe `/estoque/:id`
-
-A tela deve mostrar:
+Interface atual:
 
 ```text
-Estoque contado em
-Embalagem mais comum
-Localização
-Avisar quando restarem
-
-Quantidade disponível
-Como está armazenado
-Vencem em até 30 dias
-Lotes vencidos
-```
-
-Exemplo esperado:
-
-```text
-Quantidade disponível
-110 reações
-
-Como está armazenado
-2 kits de 50 reações + 10 reações avulsas
-```
-
-Tabela de lotes:
-
-```text
-Código SGL
-O que foi recebido
-Disponível agora
-Entrada
+Lote / referência do fornecedor
+Como o material chegou?
+Quantos chegaram?
+Quantas unidades vêm em cada um?
+Pode retirar unidades separadamente?
 Validade
-Situação
-Ver detalhes
+Origem
+Observação
 ```
 
-O lote/referência do fornecedor aparece como informação secundária.
+Exemplo:
 
-## 8.5 CÓDIGO INTERNO SGL DO LOTE — DECISÃO DEFINITIVA
+```text
+Como chegou? Kit
+Quantos chegaram? 4
+Quantas unidades vêm em cada um? 50
 
-A partir de 28/08/2026, cada lote possui dois identificadores distintos:
+Sistema incorpora 200 unidades ao saldo.
+```
+
+O cálculo é interno; não precisa aparecer como multiplicação para o usuário.
+
+Outro exemplo:
+
+```text
+Produto: Água 1 L
+Como chegou? Caixa
+Quantos chegaram? 1
+Quantas unidades vêm em cada um? 10
+
+Saldo aumenta 10 unidades de Água 1 L.
+```
+
+## 7.7 Fracionamento
+
+`fracionavel` passa a ser entendido na interface como:
+
+```text
+Pode retirar unidades separadamente?
+```
+
+Exemplo:
+
+```text
+Kit com 50 unidades
+fracionável = false
+→ só pode sair kit completo
+→ saída de 1 kit = 50 unidades
+
+Caixa com 10 garrafas
+fracionável = true
+→ pode sair 1, 2, 3... unidades
+```
+
+A quantidade principal continua sempre em unidades.
+
+## 7.8 Código interno SGL do lote — decisão definitiva
+
+Cada lote possui:
 
 ```text
 codigoInterno
 → identidade interna do SGL
-→ gerada automaticamente
+→ gerado automaticamente
 → imutável
-→ usada em rastreabilidade, tela, relatórios e rótulos
 
 numeroLote
-→ referência/lote informado pelo fornecedor ou responsável
-→ dado externo separado do código SGL
+→ lote/referência do fornecedor
+→ dado externo
 ```
 
-Formato atual aprovado:
+Padrão atual:
 
 ```text
-LOT-<CÓDIGO/SIGLA DO PRODUTO>-<SEQUÊNCIA>
+LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
 
 LOT-EXT-DNA-PL-001
 LOT-EXT-DNA-PL-002
 LOT-EXT-DNA-PL-003
-LOT-FOR-37-500-001
 ```
 
-A sigla/código visual é derivada de `Produto.codigoReferencia`. Quando o produto não possuir código de referência, o backend utiliza fallback técnico `PRD-<id>`.
-
-A sequência é **por produto**, não por usuário nem digitada manualmente.
-
-Regras obrigatórias:
+O Código SGL:
 
 ```text
-gerado exclusivamente pelo backend
-não aparece como campo de entrada
-não pertence ao DTO de atualização
-não possui setter público livre na entidade
-coluna updatable = false
-único no banco
-sequência protegida por bloqueio pessimista do produto
-nunca reutilizar número de lote apagado/inativado
+não é digitado na entrada
+não pode ser alterado no modal
+é usado para rastreabilidade/rótulo
 ```
 
-A geração ocorre durante `registrarEntradaLote`.
-
-O backend bloqueia o produto antes de consultar/incrementar o maior `sequencialInterno`, evitando dois lotes simultâneos receberem o mesmo número.
-
-Flyway:
+Flyway relacionado:
 
 ```text
 V7__add_codigo_interno_lote.sql
 ```
 
-A V7 também gera código SGL para lotes já existentes, preservando os dados históricos.
+## 7.9 Modal de lote
 
-## 8.6 Modal de lote — detalhe + edição
-
-Cada linha abre um modal.
-
-O modal mostra:
+Cada linha abre um modal com:
 
 ```text
 Código SGL
@@ -430,21 +538,19 @@ Disponível agora
 Como chegou
 Entrada
 Validade
-Pode retirar uma parte?
+Pode retirar unidades separadamente?
 Observação
 ```
 
-O **Código SGL é somente leitura**.
+Código SGL é somente leitura.
 
-O botão deve ser entendido como `Editar dados do lote`, não `Editar identidade do lote`.
-
-Campos que podem ser corrigidos conforme contrato atual:
+Campos editáveis conforme contrato atual:
 
 ```text
 lote/referência do fornecedor
 nome da apresentação
 data de validade
-fracionável ou não
+fracionável
 observação
 ```
 
@@ -453,18 +559,13 @@ Campos bloqueados:
 ```text
 codigoInterno
 sequencialInterno
-quantidade de apresentações recebidas
-conteúdo por apresentação
-quantidade inicial calculada
+quantidade recebida
+conteúdo por embalagem
 ```
 
-Motivo: identidade, quantidade histórica e rastreabilidade não podem mudar retroativamente.
+## 7.10 Observação do lote
 
-## 8.7 Observação do lote
-
-A observação informada na entrada é persistida no próprio `Lote`, além da movimentação.
-
-Backend:
+Persistência:
 
 ```text
 Lote.observacao
@@ -473,150 +574,48 @@ LoteResponseDTO.observacao
 V6__add_lote_observacao.sql
 ```
 
-## 8.8 Entrada de lote — implementada
+## 7.11 Mensagem de sucesso
 
-Endpoint:
-
-```text
-POST /api/v1/movimentacoes/estoques/{estoqueId}/lotes?usuarioId={uuid}
-```
-
-Contrato técnico recebido do usuário:
+Não mostrar:
 
 ```text
-numeroLote                  ← lote/referência do fornecedor
-apresentacao
-quantidade
-conteudoPorApresentacao
-fracionavel
-dataValidade
-origem
-observacao
+Entrada undefined registrada com sucesso.
 ```
 
-`codigoInterno` NÃO é recebido no request. É gerado pelo backend.
-
-Na interface:
+Se `codigoInterno` ainda não vier na resposta, usar fallback:
 
 ```text
-Lote / referência do fornecedor
-Como o material chegou?
-Quantos chegaram?
-Quanto vem em cada um?
-Pode retirar apenas uma parte?
-Validade
-Origem
-Observação
+Entrada registrada com sucesso.
 ```
 
-A própria tela informa que o código SGL será criado automaticamente.
+## 7.12 Saída futura / Pedidos
 
-Prévia:
-
-```text
-Você está registrando:
-2 kits, com 50 reações em cada um.
-
-O sistema fará os cálculos e criará automaticamente o código interno do lote.
-```
-
-## 8.9 REGRA ESTRUTURAL — unidade de controle, apresentação e fracionamento
-
-Internamente o produto possui uma unidade estável usada para saldo.
-
-Exemplos:
-
-```text
-Formaldeído → mL
-Microplaca → unidade
-Extrato de DNA → reação
-```
-
-Cada lote pode chegar como:
-
-```text
-kit
-frasco
-caixa
-bombona
-barril
-unidade avulsa
-```
-
-Campos técnicos:
-
-```text
-apresentacao
-quantidadeApresentacoes
-conteudoPorApresentacao
-fracionavel
-quantidadeInicial
-quantidadeDisponivel
-```
-
-`fracionavel = true` permite retirar parte do conteúdo. `fracionavel = false` exige embalagem completa.
-
-### Lotes legados
-
-A interface não inventa quantos kits/frascos existiam quando o dado antigo não possuía essa informação.
-
-Mostrar:
-
-```text
-Entrada feita antes do novo controle de embalagens.
-```
-
-## 8.10 Saída futura / Pedidos
-
-A saída deve seguir a mesma lógica física:
-
-```text
-retirar quantidade avulsa/medida
-OU
-retirar embalagem completa
-```
+A saída deverá reutilizar exatamente a mesma regra de unidades.
 
 Exemplo:
 
 ```text
-Disponível:
-2 kits de 50 + 10 reações avulsas
+Saldo geral = 200 unidades
+1 kit = 50 unidades
 
-Saída:
-10 reações
-OU
-1 kit
+Pedido/saída de 1 kit
+→ -50 unidades
+→ 150 unidades
+
+Pedido/saída de 10 unidades
+→ -10 unidades
+→ 190 unidades
 ```
 
-Nunca interpretar `10 reações` como `10 kits`.
+Quando o usuário escolher saída por embalagem, o sistema converte a embalagem em unidades internamente.
 
-## 8.11 Próximos subblocos para concluir Estoque
+Não duplicar saldos separados de `kits` e `unidades`.
 
-```text
-1. atualizar/reiniciar backend e aplicar V6 + V7
-2. atualizar frontend feat/gestao-interface
-3. abrir /estoque/:id
-4. criar um lote novo
-5. verificar geração automática LOT-<produto>-001/002/003...
-6. confirmar que Código SGL não pode ser alterado no modal
-7. validar leitura de kits/frascos/avulsos
-8. validar edição dos demais dados permitidos
-9. implementar Descarte por vencimento
-10. validar saldo/lotes
-11. encerrar Estoque
-```
-
-Descarte real:
-
-```text
-POST /api/v1/movimentacoes/estoques/{estoqueId}/descarte-vencimento?usuarioId={uuid}
-```
-
-Não alterar saldo manualmente no frontend.
+Existe um único saldo total em unidades e diferentes formas de consultá-lo/retirá-lo.
 
 ---
 
-# 9. Produtos — PRÓXIMA ETAPA APÓS ESTOQUE
+# 8. Produtos — próxima etapa após Estoque
 
 Produto é módulo operacional de primeira classe e também existe em Cadastros.
 
@@ -627,60 +626,37 @@ Rotas planejadas:
 /produtos/:id
 ```
 
-Função operacional:
+A etapa de Produtos precisará consolidar a decisão atual de **item físico / variante**.
+
+Exemplos que precisam ser tratados de forma clara:
 
 ```text
-consultar produto/estoque
-consultar forma física dos lotes
-consultar mínimo/localização
-consultar risco/perecibilidade
-consultar última entrada
-consultar lotes
-editar informações permitidas
-imprimir identificação/rótulo
+Água 1 L
+Água 500 mL
+Água 250 mL
 ```
 
-Fluxo de rótulo:
+Não transformar isso automaticamente em uma rede global de conversão entre litros/mL.
+
+O item físico cadastrado deve ser claro para que a quantidade do estoque possa continuar sendo uma contagem simples de unidades.
+
+Também continuam previstos:
 
 ```text
-Produto
-→ Estoque
-→ Nova entrada
-→ backend gera Código SGL do lote
-→ Operação → Produtos
-→ escolher lote
-→ imprimir rótulo usando codigoInterno
+risco
+perecibilidade
+localização
+condições de armazenamento
+última entrada
+lotes
+identificação/rótulo
 ```
 
-O rótulo deve usar o `codigoInterno` como identidade principal do lote e pode mostrar o lote do fornecedor como informação secundária.
+O rótulo usa `codigoInterno` como identidade principal do lote.
 
 ---
 
-# 10. Código interno do lote
-
-A antiga decisão planejada foi promovida para **decisão implementada** e está detalhada na seção 8.5.
-
-Padrão oficial atual:
-
-```text
-LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
-```
-
-Exemplo:
-
-```text
-Produto.codigoReferencia = EXT-DNA-PL
-
-1ª entrada → LOT-EXT-DNA-PL-001
-2ª entrada → LOT-EXT-DNA-PL-002
-3ª entrada → LOT-EXT-DNA-PL-003
-```
-
-Não adicionar ano ao código neste momento. A sequência não reinicia a cada ano; isso evita reutilização de identidade e simplifica rastreabilidade.
-
----
-
-# 11. Movimentações
+# 9. Movimentações
 
 Rota futura:
 
@@ -702,9 +678,11 @@ tipo
 período
 ```
 
+A quantidade operacional exibida deve respeitar a regra unitária definida no Estoque.
+
 ---
 
-# 12. Relatórios
+# 10. Relatórios
 
 Rota futura:
 
@@ -723,11 +701,9 @@ Consumo
 Fiscalização / auditoria
 ```
 
-Código SGL deve ser a referência estável para relatórios de lote.
-
 ---
 
-# 13. Administração / Cadastros
+# 11. Administração / Cadastros
 
 Previstos:
 
@@ -750,7 +726,7 @@ Estagiários terá interface própria:
 
 ---
 
-# 14. Roadmap oficial atualizado
+# 12. Roadmap oficial atualizado
 
 ```text
 Etapa 0 — Handoff backend → frontend                       ✅
@@ -763,13 +739,14 @@ Etapa 3 — Interfaces iniciais                              ✅
   3.3 Shell Gestão/Admin + Pedidos da Gestão               ✅
 
 Etapa 4 — Operação de estoque                              🟡 ATUAL
-  4.1 Visão geral do Estoque                               ✅
+  4.1 Visão geral do Estoque                               🟡 validar contagem em unidades
   4.2 Detalhe / Lotes                                      🟡 validar UX
   4.3 Entrada de lote                                      🟡 validar
-  4.4 Modal detalhe/edição do lote                         🟡 validar
-  4.5 Código SGL automático/imutável                        🟡 validar V7
-  4.6 Descarte por vencimento                              ⏳ PRÓXIMO
-  4.7 Integração da mesma lógica nas saídas                 ⏳
+  4.4 Filtro por embalagem                                 🟡 validar
+  4.5 Modal detalhe/edição do lote                         🟡 validar
+  4.6 Código SGL automático/imutável                        🟡 validar V7
+  4.7 Descarte por vencimento                              ⏳ depois da validação atual
+  4.8 Integração da mesma lógica nas saídas                 ⏳
 
 Etapa 5 — Produtos operacional + Rotulagem                 ⏳
 Etapa 6 — Movimentações                                    ⏳
@@ -787,7 +764,9 @@ Etapa 10 — Autenticação / autorização / auditoria          ⏳
 Sequência atual:
 
 ```text
-VALIDAR UX + CÓDIGO SGL DOS LOTES
+VALIDAR CONTAGEM UNITÁRIA
+→ VALIDAR FILTRO POR EMBALAGEM
+→ CORRIGIR PRÓXIMO PONTO DO ESTOQUE
 → DESCARTE
 → FINALIZAR ESTOQUE
 → PRODUTOS
@@ -797,7 +776,7 @@ VALIDAR UX + CÓDIGO SGL DOS LOTES
 
 ---
 
-# 15. Rotas
+# 13. Rotas
 
 ```text
 /login
@@ -821,7 +800,7 @@ VALIDAR UX + CÓDIGO SGL DOS LOTES
 
 ---
 
-# 16. Documentos importantes
+# 14. Documentos importantes
 
 ```text
 CONTINUIDADE.md
@@ -836,26 +815,30 @@ docs/DECISAO_UNIDADES_CORPORATIVAS.md
 
 ---
 
-# 17. PRÓXIMO PASSO EXATO
+# 15. PRÓXIMO PASSO EXATO
 
-Executar:
+Estamos corrigindo Estoque **um ponto por vez**.
+
+Validar agora:
 
 ```text
-1. git pull backend main
-2. reiniciar backend e confirmar Flyway V6 + V7
-3. git pull frontend feat/gestao-interface
+1. git pull frontend feat/gestao-interface
+2. abrir /estoque
+3. confirmar Quantidade atual e Mínimo em unidades
 4. abrir /estoque/:id
-5. criar duas entradas do mesmo produto
-6. confirmar códigos sequenciais, ex. LOT-EXT-DNA-PL-005 e 006
-7. abrir modal
-8. confirmar Código SGL somente leitura
-9. validar lote do fornecedor + apresentação + observação
-10. somente depois implementar Descarte por vencimento
+5. confirmar que Quantidade disponível inicia em unidades
+6. testar seletor "Visualizar quantidade em"
+7. selecionar Kit/Caixa/etc. e conferir se só aquela embalagem entra na contagem
+8. confirmar que não aparece "registro antigo", "lote legado" ou equivalente
+9. criar uma entrada e confirmar que não aparece "undefined" na mensagem de sucesso
+10. enviar captura/resultado antes de mexer no próximo ponto
 ```
+
+Não avançar para Descarte antes dessa validação.
 
 ---
 
-# 18. Estado das branches e alterações recentes
+# 16. Estado das branches e alterações recentes
 
 Frontend:
 
@@ -869,30 +852,22 @@ Backend:
 main
 ```
 
-Backend recente:
-
-```text
-Lote.codigoInterno            → imutável/único
-Lote.sequencialInterno        → sequência por produto
-ProdutoRepository             → bloqueio pessimista para geração
-LoteRepository                → maior sequência por produto
-MovimentacaoEstoqueService    → gera LOT-<produto>-<sequência>
-LoteResponseDTO               → expõe codigoInterno
-V6                            → observação do lote
-V7                            → código interno + sequência + backfill
-```
-
 Frontend recente:
 
 ```text
+EstoqueGestaoView
+→ saldo e mínimo exibidos em unidades
+→ embalagem padrão separada da quantidade
+
 EstoqueDetalheView
-→ linguagem simples de estoque físico
-→ Código SGL como identidade principal
-→ lote do fornecedor como referência secundária
-→ código interno nunca editável
-→ modal de detalhe/edição segura
+→ saldo principal em unidades
+→ filtro por embalagem
+→ embalagem não altera saldo real
+→ remove textos de lote antigo/novo
+→ fallback para mensagem de entrada sem codigoInterno
+→ mantém modal de lote e Código SGL imutável
 ```
 
-Regra central:
+Regra central atual:
 
-**O sistema faz contas e gera identidades internamente; o usuário enxerga materiais físicos de forma simples e um Código SGL estável para rastreabilidade.**
+**Existe um único saldo operacional em unidades individuais. Kit, caixa, pacote e outras embalagens são agrupamentos usados para entrada, visualização e saída; não são saldos independentes.**
