@@ -4,11 +4,11 @@
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
 **Última atualização:** 28/08/2026  
-**Branch frontend atual:** `feat/gestao-interface`  
-**Backend atual:** `main`  
-**Fase atual:** Etapa 5 — Produtos + Rotulagem  
-**Última etapa concluída:** Etapa 4 — Estoque / Lotes  
-**Próximo passo exato:** validar a integração final Pedidos ↔ Lotes/Embalagens; depois iniciar a interface operacional de Produtos, estoque mínimo e Rotulagem.
+**Branch de fechamento deste ciclo:** `feat/relatorios-exportacao-interface`  
+**Backend de fechamento:** `feat/relatorios-exportacao`  
+**Fase atual:** interfaces operacionais principais de Gestão + central de Relatórios concluídas; próximo grande bloco é Administração/Cadastros.  
+**Último bloco validado:** Relatórios + Fiscalização + exportação PDF/XLSX.  
+**Próximo passo exato:** iniciar Administração/Cadastros pelo cadastro real de Produtos, incluindo a classificação de fiscalização; depois Laboratórios, Projetos, Usuários e Estagiários.
 
 Este arquivo é a fonte principal de retomada do frontend.
 
@@ -18,11 +18,12 @@ Este arquivo é a fonte principal de retomada do frontend.
 
 ```text
 1. ler CONTINUIDADE.md
-2. ler docs/ROADMAP_INTERFACE_GESTAO.md
-3. usar backend/Swagger como fonte de verdade
+2. usar backend/Swagger como fonte de verdade dos contratos
+3. conferir docs/ROADMAP_INTERFACE_GESTAO.md quando necessário
 4. não duplicar regra de negócio no frontend
-5. manter linguagem simples para o usuário
-6. validar o bloco atual antes de avançar
+5. implementar por bloco funcional
+6. validar visualmente e funcionalmente antes do merge
+7. atualizar este arquivo ao encerrar o bloco
 ```
 
 Fluxo:
@@ -33,13 +34,14 @@ entender domínio
 → implementar
 → validar visualmente
 → refinar
-→ concluir etapa
+→ validar integração
+→ merge
 → próxima etapa
 ```
 
 ---
 
-# 1. Stack
+# 1. Stack oficial
 
 ```text
 Vue 3
@@ -51,341 +53,115 @@ Axios
 Vuetify 3
 ```
 
-Regras gerais:
+Regras:
 
 - UUID público nas fronteiras;
 - Axios concentrado em services;
 - Admin reutiliza a Gestão;
-- complexidade técnica pode existir internamente sem aparecer como linguagem técnica ao usuário;
-- identificadores internos são gerados pelo backend;
-- dados históricos de estoque não devem ser reescritos de forma que altere rastreabilidade.
+- não espalhar regra de negócio pelos componentes;
+- dados históricos não devem ser reescritos de forma que quebre rastreabilidade;
+- linguagem da interface deve ser simples, mesmo quando o backend executa regras complexas.
 
 ---
 
-# 2. Estado geral
+# 2. Estado geral em 28/08/2026
 
 ```text
-Login                                         ✅
-Pedidos do Solicitante                        ✅
-Pedidos — forma de retirada por embalagem     ✅ implementar/validar
-Pedidos Gestão                                ✅
-Pedidos Entregues — lotes utilizados          ✅ implementar/validar
-Shell Gestão/Admin                            ✅
-Estoque — visão geral                         ✅
-Estoque — detalhe                             ✅
-Lotes — entrada                               ✅
-Lotes — código SGL                            ✅
-Lotes — embalagem/multiplicador               ✅
-Lotes — modal detalhe/edição                  ✅
-Lotes — histórico de saídas                   ✅ implementar/validar
-Lotes — fracionamento irreversível            ✅ validado
-Lotes — FIFO/FEFO com embalagem               ✅ backend
-Lotes — descarte por vencimento               ✅ validado
-Lotes — busca/filtro de situação              ✅
-Lotes — status visual ESGOTADO                ✅
-Produtos operacional + rótulos                ⏳ ETAPA ATUAL
-Movimentações                                 ⏳
-Relatórios                                    ⏳
-Administração / Cadastros                     ⏳
-Estagiários                                   ⏳ obrigatório
-Tipos de unidade/embalagem                    ⏳ previsto em Administração
-Dashboard final / robustez / 404              ⏳
-Autenticação definitiva / auditoria           ⏳
-```
-
----
-
-# 3. Unidade institucional
-
-**Unidade institucional não terá CRUD manual no SGL.**
-
-Fluxo futuro:
-
-```text
-login corporativo
-→ API corporativa informa unidade
-→ SGL associa pelo identificador institucional
-```
-
-Não criar `/cadastros/unidades`.
-
-Documento relacionado:
-
-```text
-docs/DECISAO_UNIDADES_CORPORATIVAS.md
-```
-
-Unidade institucional e tipo de unidade/embalagem de estoque são conceitos diferentes.
-
----
-
-# 4. Pedidos — integração definitiva com Lotes/Embalagens
-
-A regra de quantidade do Estoque passou a fazer parte do contrato de Pedido.
-
-## 4.1 Novo pedido — forma de retirada
-
-O solicitante não informa apenas uma quantidade abstrata. Para cada produto, ele escolhe uma **forma de retirada realmente disponível nos lotes utilizáveis**.
-
-Exemplos:
-
-```text
-UNITÁRIO
-KIT — 50 unit. por kit
-CAIXA — 10 unit. por caixa
-GARRAFA
-GALÃO
-```
-
-A interface consulta os lotes ativos com saldo daquele estoque.
-
-Lote vencido não participa da disponibilidade do Novo Pedido, mesmo que ainda tenha saldo aguardando descarte.
-
-### UNITÁRIO
-
-A opção `UNITÁRIO` fica disponível quando existir:
-
-```text
-lote UNITARIO
-OU
-lote com fracionavel = true
-```
-
-Exemplo:
-
-```text
-pedido = 10 unidades
-→ quantidadeSolicitada interna = 10
-```
-
-### KIT / CAIXA / GARRAFA / GALÃO
-
-Para retirada por embalagem, devem existir lotes compatíveis com:
-
-```text
-mesmo tipoEmbalagem
-+
-mesmo multiplicador
-```
-
-Exemplo:
-
-```text
-KIT
-multiplicador = 50
-pedido = 2 kits
-→ quantidadeSolicitada interna = 100 unit.
-```
-
-**Nunca atender 1 KIT usando 50 unidades de outro tipo de embalagem apenas porque a matemática coincide.**
-
-A forma escolhida é persistida em `ItemPedido`:
-
-```text
-tipoEmbalagemSolicitada
-quantidadeEmbalagensSolicitada
-multiplicadorSolicitado
-quantidadeSolicitada = total em unidades
-```
-
-Migration:
-
-```text
-V9__add_forma_retirada_item_pedido.sql
-```
-
-Pedidos anteriores à V9 são migrados como `UNITARIO`, multiplicador `1`.
-
-## 4.2 Orientação quando não existir kit
-
-Se não houver lote com KIT disponível, a interface não oferece KIT como opção e informa:
-
-```text
-Não há kits disponíveis.
-Solicite por unidade ou por outra embalagem disponível.
-```
-
-Não mostrar ao usuário opções impossíveis de atender.
-
-## 4.3 Aprovação pela Gestão
-
-A quantidade aprovada continua sendo registrada em unidades, porém precisa respeitar a forma solicitada.
-
-Exemplo:
-
-```text
-solicitado = KIT de 50
-
-válido:
-50
-100
-150
-
-inválido:
-25
-75
-```
-
-Para `UNITARIO`, a aprovação pode ocorrer unidade a unidade.
-
-## 4.4 FIFO / FEFO + forma solicitada
-
-Fluxo de saída:
-
-```text
-pedido informa forma de retirada
-→ localizar lotes compatíveis
-→ ordenar por FEFO/FIFO
-→ respeitar fracionamento
-→ baixar os lotes realmente utilizados
-→ registrar MovimentacaoEstoque por lote
-```
-
-Compatibilidade:
-
-```text
-UNITARIO
-→ lote UNITARIO ou lote fracionável
-
-KIT/CAIXA/GARRAFA/GALAO
-→ mesmo tipo + mesmo multiplicador
-```
-
-## 4.5 Pedidos Entregues — rastreabilidade por lote
-
-Em `Gestão → Pedidos → Entregues`, ao abrir o pedido, cada item deve mostrar os **lotes realmente utilizados na saída**:
-
-```text
-Código SGL
-quantidade retirada daquele lote
-data/hora da saída
-```
-
-Exemplo:
-
-```text
-LOT-EXT-DNA-PL-007
-50 unit. · saída em 28/08/2026 10:30
-```
-
-O Código SGL exibido vem de `MovimentacaoEstoque.lote`, e não de inferência do frontend.
-
-Endpoint usado:
-
-```text
-GET /api/v1/movimentacoes/pedido?pedidoId={uuid}
+Login                                             ✅
+Pedidos do Solicitante                            ✅
+Pedidos — forma de retirada por embalagem         ✅
+Pedidos Gestão                                    ✅
+Urgência de pedido                                ✅
+Pedidos entregues — lotes utilizados              ✅
+Shell Gestão/Admin                                ✅
+Perfil/configurações do usuário                   ✅
+Estoque — visão geral                             ✅
+Estoque — detalhe                                 ✅
+Lotes — entrada                                   ✅
+Lotes — Código SGL                                ✅
+Lotes — embalagem/multiplicador                   ✅
+Lotes — modal detalhe/edição                      ✅
+Lotes — histórico de saídas                       ✅
+Lotes — fracionamento irreversível                ✅
+Lotes — FIFO/FEFO com embalagem                   ✅ integração backend
+Lotes — descarte por vencimento                   ✅
+Lotes — busca/filtros/status                      ✅
+Movimentações                                     ✅
+Relatórios — central visual                       ✅
+Relatório de Estagiários                          ✅
+Relatório de Produtos                             ✅
+Relatório de Movimentações                        ✅
+Resumo Operacional                                ✅
+Relatório de Estoque e Lotes                      ✅
+Relatório de Fiscalização                         ✅
+Exportação PDF                                    ✅ validada
+Exportação Excel/XLSX                             ✅ validada
+Resíduos — opção na central                       ✅ placeholder
+Resíduos — módulo operacional                     🟡 branch própria; integrar
+Resíduos — relatório/exportação                   ⏳ após integração
+Administração / Cadastros                         ⏳ PRÓXIMA ETAPA
+Documentos / upload real                          ⏳
+Dashboard final / robustez / 404                  ⏳
+Autenticação definitiva / auditoria               ⏳ pós-frontend
 ```
 
 ---
 
-# 5. Estoque — ETAPA 4 CONCLUÍDA
+# 3. Decisão sobre Produtos
 
-O saldo operacional é sempre consolidado em **unidades individuais do item cadastrado**.
+A antiga ideia de uma área operacional independente `/produtos` não deve gerar duplicação com Administração.
 
-```text
-4 kits de 50
-→ 200 unit.
-
-saída de 1 kit
-→ -50
-→ 150 unit.
-```
-
-O estoque mínimo usa o mesmo saldo.
-
-## Estoque mínimo
-
-O estoque mínimo pertence à configuração operacional do **Produto** e será editado principalmente em:
+Decisão atual:
 
 ```text
-/produtos/:id
+Gestão operacional
+→ Estoque
+→ Lotes
+→ Movimentações
+→ Relatórios
+
+Administração
+→ Cadastros
+   └── Produtos
 ```
 
-A tela de Estoque apenas exibe/compara o valor para gerar alertas.
-
-## Resumo superior
-
-Foi removido do topo:
+O **CRUD real de Produto** pertence a:
 
 ```text
-Embalagem mais comum
+Administração → Cadastros → Produtos
 ```
 
-Permanecem:
+Relatórios possuem uma visão de Produtos, mas **não substituem cadastro/edição**.
+
+No cadastro de Produto devem existir, além dos dados já previstos:
 
 ```text
-Contagem padrão
-Localização
-Avisar quando restarem
+Fiscalizado?              toggle
+Órgãos fiscalizadores    seleção múltipla
+Observação fiscalização  opcional
 ```
+
+Se `Fiscalizado = Sim`, ao menos um órgão é obrigatório.
+
+Órgãos iniciais:
+
+```text
+Polícia Federal
+Vigilância Sanitária
+ANVISA
+Exército
+Outro
+```
+
+Não inferir fiscalização por risco ou perecibilidade.
 
 ---
 
-# 6. Produto x embalagem
+# 4. Pedidos ↔ Estoque/Lotes — consolidado
 
-Produtos com tamanho/volume físico diferente são itens distintos quando isso muda o material estocado.
+O saldo operacional permanece em unidades individuais.
 
-```text
-Água 1 L
-Água 500 mL
-Água 250 mL
-```
-
-Exemplo de entrada:
-
-```text
-Produto: Água 1 L
-Tipo: CAIXA
-Especificação: caixa com 10 garrafas de 1 L
-Multiplicador: 10
-Quantidade recebida: 1 caixa
-Saldo incorporado: 10 unit.
-```
-
-A matemática fica interna.
-
----
-
-# 7. Estrutura atual do Lote
-
-```text
-codigoInterno
-numeroLote
-tipoEmbalagem
-apresentacao
-quantidadeApresentacoes
-conteudoPorApresentacao
-fracionavel
-observacao
-quantidadeInicial
-quantidadeDisponivel
-dataEntrada
-dataValidade
-ativo
-```
-
-Código SGL:
-
-```text
-LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
-```
-
-Regras:
-
-```text
-gerado pelo backend
-sequencial por produto
-único
-imutável
-não digitado
-não editável
-```
-
----
-
-# 8. Tipo e especificação de embalagem
-
-Tipos atuais:
+Forma de retirada:
 
 ```text
 UNITARIO
@@ -395,296 +171,561 @@ GARRAFA
 GALAO
 ```
 
-Especificação livre:
+Compatibilidade:
 
 ```text
-kit com 50 unidades
-garrafa de 1 L
-caixa com 10 garrafas de 1 L
+UNITARIO
+→ lote UNITARIO ou lote fracionável
+
+KIT/CAIXA/GARRAFA/GALAO
+→ mesmo tipo
+→ mesmo multiplicador
 ```
 
-O tipo original da embalagem é histórico e não pode ser trocado depois da criação.
-
----
-
-# 9. Multiplicador
-
-`conteudoPorApresentacao` aparece na interface como **Multiplicador de unidades**.
+Fluxo:
 
 ```text
-UNITARIO → 1
-KIT com 50 → 50
-CAIXA com 10 → 10
-```
-
-Depois da entrada ficam bloqueados:
-
-```text
-quantidade recebida
-multiplicador
-Código SGL
-tipo original da embalagem
+solicitante escolhe forma realmente disponível
+→ backend valida
+→ gestão aprova
+→ FEFO/FIFO seleciona os lotes compatíveis
+→ movimentações registram cada lote utilizado
+→ pedido entregue pode mostrar os lotes usados
+→ lote pode mostrar histórico de saídas
 ```
 
 ---
 
-# 10. Fracionamento — decisão definitiva
+# 5. Estoque e Lotes — concluído
+
+Principais entregas:
 
 ```text
-false → embalagem precisa sair completa
-true  → unidades podem sair separadamente
+✅ saldo consolidado em unidades
+✅ entrada com embalagem/multiplicador
+✅ Código SGL automático e imutável
+✅ modal do lote
+✅ edição segura
+✅ fracionamento false → true, sem retorno
+✅ FIFO/FEFO
+✅ descarte por vencimento
+✅ busca e filtros
+✅ status VÁLIDO / PRÓXIMO / VENCIDO / ESGOTADO
+✅ histórico de saída por lote
+✅ rastreabilidade com pedido/solicitante
 ```
 
-Transição:
+Código SGL:
 
 ```text
-false → true ✅
-true → false ❌
+LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
 ```
-
-O backend bloqueia a volta para não fracionável.
 
 ---
 
-# 11. FIFO / FEFO
-
-```text
-perecível → FEFO
-não perecível → FIFO
-```
-
-A seleção também precisa respeitar:
-
-```text
-forma solicitada
-multiplicador
-fracionamento
-```
-
-Se não houver combinação válida, a transação inteira é recusada.
-
----
-
-# 12. Detalhe de Estoque
+# 6. Movimentações — concluído
 
 Rota:
 
 ```text
-/estoque/:id
+/movimentacoes
+```
+
+A interface possui:
+
+```text
+breadcrumb
+resumos de movimentação
+busca
+filtros
+atualização
+Tabela com detalhes expansíveis
+```
+
+Campos principais:
+
+```text
+Data
+Produto
+Tipo
+Quantidade
+Lote
+Origem
+Responsável
+Saldo
+Laboratório
+Pedido
+Solicitante
+Observação
+```
+
+Cores semânticas aprovadas:
+
+```text
+ENTRADA   → azul
+SAÍDA     → vermelho
+DESCARTE  → amarelo
+```
+
+Pedidos entregues **não possuem relatório exclusivo**. A visão equivalente deve ser feita pelo relatório de Movimentações usando, quando aplicável:
+
+```text
+Origem = PEDIDO
+Tipo = SAÍDA
+```
+
+---
+
+# 7. Central de Relatórios — concluída
+
+Rota:
+
+```text
+/relatorios
+```
+
+UX aprovada:
+
+```text
+1. escolher relatório
+2. definir filtros
+3. visualizar prévia
+4. exportar PDF ou Excel
+```
+
+Relatórios atuais:
+
+```text
+Estagiários             ✅
+Produtos                ✅
+Movimentações           ✅
+Resumo operacional      ✅
+Estoque e lotes         ✅
+Resíduos                🟡 reservado; aguarda integração do módulo
+Fiscalização            ✅
+```
+
+Foi removido:
+
+```text
+Pedidos entregues como relatório próprio
+```
+
+---
+
+# 8. Relatório de Estagiários
+
+Permite consultar:
+
+```text
+todos
+ativos
+inativos
+por laboratório
+por período de vínculo
+```
+
+Prévia apresenta:
+
+```text
+nome/email
+laboratório
+unidade
+bolsa
+início
+fim
+situação
+```
+
+Filtros auxiliares de bolsa/busca fazem parte da UX; ao evoluir exportações/filtros no futuro, garantir sempre que qualquer filtro utilizado na exportação esteja refletido no backend.
+
+---
+
+# 9. Relatório de Produtos
+
+Objetivo: visão geral do catálogo.
+
+Filtros:
+
+```text
+situação
+fiscalizado
+perecível
+risco
+órgão fiscalizador
 ```
 
 Resumo:
 
 ```text
-Quantidade disponível
-Visualizar por embalagem
-Vencem em até 30 dias
-Lotes vencidos
+Produtos
+Ativos
+Inativos
+Fiscalizados
+Perecíveis
+Com risco
 ```
 
-Filtro por embalagem muda apenas a visualização, nunca o saldo real.
-
-O indicador `Vencem em até 30 dias` considera somente lotes com `quantidadeDisponivel > 0`. Lote esgotado não gera mais alerta de vencimento.
+A existência deste relatório não elimina a necessidade do CRUD em Administração.
 
 ---
 
-# 13. Tabela de Lotes
+# 10. Relatório de Movimentações
 
-Colunas:
-
-```text
-Código SGL
-Unidade
-Disponível agora
-Entrada
-Validade
-Situação
-Detalhes
-```
-
-Busca:
+Filtros:
 
 ```text
-Código SGL
-lote do fornecedor
-especificação
-tipo de embalagem
-```
-
-Filtro:
-
-```text
-Todos
-Válidos
-Próximos do vencimento
-Vencidos
-Esgotados
-Descartados por vencimento
-```
-
-Regra visual atual:
-
-```text
-saldo > 0 + válido                 → VÁLIDO
-saldo > 0 + vence em até 30 dias  → PRÓXIMO DO VENCIMENTO
-saldo > 0 + vencido                → VENCIDO
-saldo = 0 + ainda não vencido      → ESGOTADO
-saldo = 0 + vencido                → DESCARTADO POR VENCIMENTO
-```
-
-`ESGOTADO` é preferido a `ENTREGUE` porque o lote pode ter sido consumido por uma ou várias saídas/pedidos; o termo descreve o estado operacional sem atribuir uma única entrega.
-
-Observação: `DESCARTADO POR VENCIMENTO` ainda é uma nomenclatura visual baseada em `vencido + saldo zero`. Caso no futuro seja necessário distinguir com precisão a causa final de qualquer lote zerado, o backend deverá expor explicitamente a causa/status final a partir das movimentações.
-
----
-
-# 14. Modal do Lote — dados + histórico de saída
-
-Dados cadastrais mostrados:
-
-```text
-Código SGL
-lote do fornecedor
 tipo
-especificação
-multiplicador
-entrada
+origem
+período
+produto
+laboratório
+responsável
+lote
+```
+
+Resumo:
+
+```text
+Movimentações
+Entradas
+Saídas
+Devoluções
+Descartes
+Ajustes
+```
+
+A tabela mantém rastreabilidade por lote, solicitante e pedido quando disponíveis.
+
+---
+
+# 11. Resumo Operacional
+
+Objetivo: leitura gerencial rápida.
+
+Apresenta:
+
+```text
+total de movimentações
+entradas
+saídas
+descartes
+produtos movimentados
+lotes movimentados
+principais entradas
+principais saídas
+lotes mais movimentados
+```
+
+Filtros:
+
+```text
+produto
+período
+Top 5 / Top 10 / Top 20
+```
+
+---
+
+# 12. Relatório de Estoque e Lotes
+
+Filtros:
+
+```text
+unidade
+produto
+situação do estoque
+nível do estoque
+situação do lote
+janela de vencimento
+```
+
+Situações:
+
+```text
+VALIDO
+PROXIMO_VENCIMENTO
+VENCIDO
+SEM_VALIDADE
+ESGOTADO
+INATIVO
+```
+
+Prévia dividida em:
+
+```text
+Posição de estoque
+Lotes
+```
+
+Destaques visuais:
+
+```text
+válido/normal        → verde
+próximo vencimento   → amarelo
+vencido/abaixo mínimo→ vermelho
+neutro/inativo       → cinza
+```
+
+---
+
+# 13. Fiscalização — concluída
+
+O relatório utiliza somente produtos explicitamente classificados como fiscalizados no backend.
+
+Filtros:
+
+```text
+produto fiscalizado
+órgão fiscalizador
+unidade
+período das movimentações
+janela de vencimento
+```
+
+Resumo:
+
+```text
+Produtos fiscalizados
+Saldo atual
+Lotes ativos
+Lotes vencidos
+Próximos do vencimento
+Entradas
+Saídas
+```
+
+Seções:
+
+```text
+Produtos controlados
+Rastreabilidade de movimentações
+```
+
+Rastreabilidade pode apresentar:
+
+```text
+produto
+órgão
+saldo
+lote
 validade
-retirada unitária
-observação
-```
-
-O modal também possui **Saídas deste lote**, consultando:
-
-```text
-GET /api/v1/movimentacoes/lote?loteId={uuid}
-```
-
-Para cada `SAIDA`, mostrar pelo menos:
-
-```text
-data/hora da saída
+tipo de movimentação
 quantidade
-nome do usuário solicitante do pedido
-```
-
-Exemplo:
-
-```text
-Maria Oliveira
-28/08/2026 10:30
-50 unit.
-```
-
-`pedidoSolicitanteNome` identifica quem fez o pedido. `usuarioNome` da movimentação continua representando quem executou/registrou a operação, como o gestor aprovador.
-
-Isso cria rastreabilidade nos dois sentidos:
-
-```text
-Pedido entregue → quais lotes saíram
-Lote → para quais pedidos/solicitantes houve saída
+laboratório
+projeto
+solicitante
+pedido
+responsável
+saldo após operação
 ```
 
 ---
 
-# 15. Descarte por vencimento
+# 14. Exportação PDF / Excel — concluída e validada
 
-Implementado e validado.
+Branches de desenvolvimento:
 
 ```text
-somente produto perecível
-somente lotes vencidos com saldo
-justificativa obrigatória
-baixa em unit.
-movimentação por lote
-mais antigos primeiro
-respeita embalagem fechada
+backend  → feat/relatorios-exportacao
+frontend → feat/relatorios-exportacao-interface
+```
+
+Regra central:
+
+```text
+um relatório selecionado
+→ uma prévia
+→ um PDF ou XLSX daquele relatório
+```
+
+Não existe exportação de vários relatórios em lote.
+
+A exportação utiliza a **última prévia concluída**, evitando que o usuário altere filtros e baixe um resultado diferente sem visualizar novamente.
+
+Trocar de relatório ou limpar filtros invalida a exportação anterior.
+
+## PDF
+
+Foco em impressão:
+
+```text
+logo SGL no canto superior esquerdo
+A4
+orientação adaptada ao conteúdo
+paisagem para tabelas largas
+margens compactas
+quebra de texto
+cabeçalhos repetidos
+resumo + filtros
+paginação
+```
+
+## Excel/XLSX
+
+```text
+logo SGL no canto superior esquerdo
+título + filtros
+resumo
+cabeçalho congelado
+autofiltro
+quebra de texto
+colunas dimensionadas
+A4
+ajuste para uma página de largura
+paisagem quando necessário
+```
+
+Relatórios compostos permanecem um único arquivo, com abas internas quando útil:
+
+```text
+Estoque e Lotes.xlsx
+├── Posição de estoque
+└── Lotes
+
+Fiscalização.xlsx
+├── Produtos controlados
+└── Rastreabilidade
+```
+
+Validação manual em 28/08/2026:
+
+```text
+PDF     ✅
+Excel   ✅
+logo    ✅
+fluxo de exportação ✅
 ```
 
 ---
 
-# 16. Migrations relacionadas
+# 15. Resíduos
+
+Há dois pontos distintos:
 
 ```text
-V5 → apresentação/fracionamento do lote
-V6 → observação do lote
-V7 → Código SGL + sequência
-V8 → tipo de embalagem do lote
-V9 → forma de retirada persistida no ItemPedido
+Gestão → Resíduos
+Solicitante → Informar resíduos
+```
+
+Não renomear Gestão para “Informar resíduos”.
+
+Decisão de domínio:
+
+```text
+Produto = catálogo/estoque
+Resíduo = material gerado pelo laboratório
+```
+
+O resíduo pode ser composto por um ou vários produtos/reagentes sem alterar automaticamente o estoque desses produtos.
+
+Fluxo:
+
+```text
+laboratório gera
+→ informa conteúdo/uso/recipiente/riscos
+→ gestor recebe e ficha
+→ confirma riscos e rotula
+→ armazena temporariamente
+→ despacha/destina
+```
+
+Branch atual do módulo:
+
+```text
+feat/gestao-residuos
+```
+
+Depois da integração:
+
+```text
+ativar tela operacional
+→ ativar relatório Resíduos
+→ adicionar PDF/XLSX de Resíduos
 ```
 
 ---
 
-# 17. Etapa 4 — Estoque/Lotes encerrada
+# 16. Administração / Cadastros — PRÓXIMA ETAPA
+
+Cadastros previstos:
 
 ```text
-✅ saldo em unidades
-✅ entrada com embalagem/multiplicador
-✅ Código SGL automático
-✅ modal de lote
-✅ edição segura
-✅ fracionamento irreversível
-✅ FIFO/FEFO compatível
-✅ descarte por vencimento
-✅ busca/filtro de lotes
-✅ status visual de descarte
-✅ status visual ESGOTADO para saldo zero
-✅ lote esgotado não gera alerta de próximo vencimento
-✅ resumo superior simplificado
-✅ histórico de saída por lote implementado para validação
+Produtos
+Laboratórios
+Projetos
+Usuários
+Estagiários
+Tipos de unidade/embalagem
 ```
 
----
+**Unidade institucional não terá CRUD manual**; futuramente vem da integração corporativa.
 
-# 18. Etapa 5 — Produtos + Rotulagem — ATUAL
-
-Rotas planejadas:
+## Ordem recomendada
 
 ```text
-/produtos
-/produtos/:id
+1. Produtos
+2. Laboratórios
+3. Projetos
+4. Usuários
+5. Estagiários
+6. Tipos de unidade/embalagem, quando o backend estiver preparado
 ```
 
-Produto deve consolidar:
+### Produtos
+
+O formulário deve contemplar:
 
 ```text
 nome
 código de referência
 descrição
-item físico / unidade
+unidade de medida
 localização
-estoque mínimo
 risco
 perecibilidade
-condições de armazenamento
-saldo atual
-lotes ativos
-última entrada
+armazenamento
+fiscalizado
+órgãos fiscalizadores
+observação de fiscalização
+ativo
 ```
 
-A edição do estoque mínimo ocorrerá em Produto.
+### Estagiários
 
-## Rotulagem
+Previsto como cadastro obrigatório.
 
-Rótulo de lote usa `codigoInterno` como identidade principal.
-
-Candidatos:
+Mostrar pelo menos:
 
 ```text
-produto
-Código SGL
-lote do fornecedor
-validade
-especificação
-quantidade
-localização
-risco
-condições de armazenamento
+nome
+identidade corporativa
+unidade read-only
+laboratório
+vínculo
+situação
+período
+bolsa
+observações
+```
+
+### Tipos de embalagem
+
+Hoje o backend ainda usa enum rígido.
+
+Futuro desejado:
+
+```text
+cadastrar
+editar
+inativar
+reativar
+não excluir fisicamente se já houver histórico
 ```
 
 ---
 
-# 19. Roadmap oficial
+# 17. Roadmap oficial atualizado
 
 ```text
 Etapa 0 — Handoff backend → frontend                       ✅
@@ -695,110 +736,140 @@ Etapa 3 — Interfaces iniciais                              ✅
   Pedidos Solicitante                                      ✅
   Shell Gestão/Admin + Pedidos Gestão                      ✅
 
-Refino transversal Pedidos ↔ Estoque/Lotes                🟡 VALIDAR
-  forma de retirada no novo pedido                         ✅
-  disponibilidade baseada em lotes                         ✅
-  aprovação respeita embalagem                             ✅
-  saída respeita tipo + multiplicador                      ✅
-  lotes em pedidos entregues                               ✅
-  histórico de saída dentro do lote                        ✅
-
-Etapa 4 — Estoque / Lotes                                  ✅ CONCLUÍDA
-Etapa 5 — Produtos operacional + Rotulagem                 🟡 ATUAL
-Etapa 6 — Movimentações                                    ⏳
-Etapa 7 — Relatórios / Documentos / Fiscalização           ⏳
-Etapa 8 — Administração / Cadastros                        ⏳
+Refino Pedidos ↔ Estoque/Lotes                             ✅
+Etapa 4 — Estoque / Lotes                                  ✅
+Etapa 5 — Produtos operacional                             ↪ consolidado em Estoque + futuro Cadastro de Produtos
+          Rotulagem                                        ⏳ manter como necessidade futura de Produto/Lote
+Etapa 6 — Movimentações                                    ✅
+Etapa 7 — Relatórios / Fiscalização                        ✅
+          Exportação PDF/XLSX                              ✅
+          Documentos/upload                                ⏳
+          Resíduos em Relatórios                           ⏳ após integração
+Etapa 8 — Administração / Cadastros                        🟡 PRÓXIMA
   Produtos                                                  ⏳
   Laboratórios                                              ⏳
   Projetos                                                  ⏳
   Usuários                                                  ⏳
   Estagiários                                               ⏳ obrigatório
-  Tipos de unidade / embalagem                             ⏳ planejar CRUD
+  Tipos de unidade / embalagem                             ⏳ backend futuro
+Etapa complementar — Resíduos operacional                  🟡 integrar branch existente
 Etapa 9 — Dashboards finais / robustez / 404               ⏳
 Etapa 10 — Autenticação / autorização / auditoria          ⏳
 ```
 
 ---
 
-# 20. Administração futura — Cadastros
-
-Previstos:
+# 18. Rotas atuais e previstas
 
 ```text
-Produtos
-Laboratórios
-Projetos
-Usuários
-Estagiários
-Tipos de unidade / embalagem
-```
+/login                         ✅
+/meus-pedidos                  ✅
+/pedidos/novo                  ✅
+/pedidos                       ✅
+/estoque                       ✅
+/estoque/:id                   ✅
+/movimentacoes                 ✅
+/relatorios                    ✅
 
-## Tipos de unidade / embalagem
+/cadastros/produtos            ⏳
+/cadastros/laboratorios        ⏳
+/cadastros/projetos            ⏳
+/cadastros/usuarios            ⏳
+/cadastros/estagiarios         ⏳
+/cadastros/estagiarios/:id     ⏳
+/cadastros/tipos-unidade       ⏳ futuro
 
-Deve permitir:
+/residuos                      ⏳ integrar
+/informar-residuo              ⏳ integrar conforme fluxo solicitante
 
-```text
-cadastrar
-editar
-inativar/remover da seleção
-reativar
-```
-
-Exemplos:
-
-```text
-UNITÁRIO
-KIT
-CAIXA
-GARRAFA
-GALÃO
-PACOTE
-BOMBONA
-BARRIL
-```
-
-Se já estiver usado em lote histórico, não excluir fisicamente. Remover significa inativar para novos registros.
-
-A implementação futura deverá substituir o enum rígido `TipoEmbalagem` por catálogo persistido ou mecanismo equivalente.
-
-## Estagiários
-
-Interface própria prevista:
-
-```text
-/cadastros/estagiarios
-/cadastros/estagiarios/:id
-```
-
-Mostrar nome, identidade corporativa, unidade read-only, laboratório, supervisor/professor, vínculo, situação, período e observações.
-
----
-
-# 21. Rotas
-
-```text
-/login
-/meus-pedidos
-/pedidos/novo
-/pedidos
-/estoque
-/estoque/:id
-/produtos                  ⏳
-/produtos/:id              ⏳
-/movimentacoes             ⏳
-/relatorios                ⏳
-/cadastros/produtos        ⏳
-/cadastros/laboratorios    ⏳
-/cadastros/projetos        ⏳
-/cadastros/usuarios        ⏳
-/cadastros/estagiarios     ⏳
-/cadastros/estagiarios/:id ⏳
-/cadastros/tipos-unidade   ⏳
-/:pathMatch(.*)*           ⏳
+/:pathMatch(.*)*               ⏳ página 404 customizada
 ```
 
 ---
 
-# 22. Regra central
+# 19. Alertas e robustez futura
 
-**O usuário enxerga unidades e embalagens físicas de forma simples; o backend preserva matemática, FIFO/FEFO, forma solicitada, fracionamento e rastreabilidade por lote.**
+Ainda previstos:
+
+```text
+Dashboard final
+alertas operacionais consolidados
+estoque baixo
+lotes próximos do vencimento
+lotes vencidos
+pedidos pendentes/urgentes
+página 404 customizada
+estados de erro mais robustos
+acessibilidade/motion final
+```
+
+---
+
+# 20. Autenticação / autorização / auditoria
+
+Decisão preservada:
+
+```text
+frontend funcional principal
+→ concluir Administração/Resíduos/robustez
+→ autenticação/autorização/auditoria local definitiva
+→ integração corporativa futura
+```
+
+---
+
+# 21. Checkpoint de 28/08/2026
+
+Trabalho concluído e validado no dia:
+
+```text
+✅ Movimentações já consolidada e utilizada como base de rastreabilidade
+✅ Central visual de Relatórios aprovada
+✅ Relatório de Estagiários
+✅ Relatório de Produtos
+✅ Relatório de Movimentações
+✅ Resumo Operacional
+✅ Relatório de Estoque e Lotes
+✅ Fiscalização de produtos controlados
+✅ Produtos fiscalizados diferenciados de risco/perecibilidade
+✅ Pedidos entregues removido como relatório próprio
+✅ Pedidos tratados como recorte de Movimentações
+✅ Resíduos adicionado como categoria futura de relatório
+✅ PDF individual por relatório
+✅ Excel individual por relatório
+✅ arquivos preparados para impressão
+✅ logo SGL no canto superior esquerdo dos arquivos
+✅ exportação vinculada à última prévia
+✅ testes manuais do fluxo aprovados pelo usuário
+```
+
+PRs do bloco de Relatórios já integrados antes do fechamento de exportação:
+
+```text
+Backend  → PR #8  — feat/relatorios
+Frontend → PR #13 — feat/relatorios-interface
+```
+
+---
+
+# 22. Próximo passo exato
+
+Após o merge das branches de exportação:
+
+```text
+1. iniciar Administração / Cadastros
+2. começar por Produtos
+   └── incluir fiscalização desde criação/edição
+3. seguir Laboratórios → Projetos → Usuários → Estagiários
+4. integrar feat/gestao-residuos
+5. ativar relatório/exportação de Resíduos
+6. voltar para Documentos/Rotulagem que ainda estiverem pendentes
+7. Dashboard final / robustez / 404
+8. autenticação/autorização/auditoria
+```
+
+---
+
+# 23. Regra central
+
+**O frontend simplifica a operação para o usuário; o backend continua responsável por integridade, FIFO/FEFO, concorrência, rastreabilidade, regras de fiscalização, composição de relatórios e geração oficial dos arquivos.**

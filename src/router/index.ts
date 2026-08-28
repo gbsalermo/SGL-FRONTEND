@@ -29,17 +29,12 @@ export const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/modules/auth/views/LoginView.vue'),
-      meta: {
-        public: true,
-      },
+      meta: { public: true },
     },
     {
       path: '/',
       component: () => import('@/layouts/SolicitanteLayout.vue'),
-      meta: {
-        requiresSession: true,
-        perfis: PERFIS_SOLICITANTE,
-      },
+      meta: { requiresSession: true, perfis: PERFIS_SOLICITANTE },
       children: [
         {
           path: 'meus-pedidos',
@@ -56,10 +51,7 @@ export const router = createRouter({
     {
       path: '/',
       component: () => import('@/layouts/GestaoLayout.vue'),
-      meta: {
-        requiresSession: true,
-        perfis: PERFIS_GESTAO,
-      },
+      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
       children: [
         {
           path: 'pedidos',
@@ -84,7 +76,7 @@ export const router = createRouter({
         {
           path: 'relatorios',
           name: 'gestao-relatorios',
-          component: () => import('@/modules/relatorios/views/RelatoriosGestaoView.vue'),
+          component: () => import('@/modules/relatorios/views/RelatoriosExportacaoView.vue'),
         },
         {
           path: 'solicitacoes/novo',
@@ -109,10 +101,7 @@ router.beforeEach((to) => {
   const session = useSessionStore()
 
   if (to.meta.requiresSession && !session.autenticado) {
-    return {
-      path: '/login',
-      query: { redirect: to.fullPath },
-    }
+    return { path: '/login', query: { redirect: to.fullPath } }
   }
 
   if (to.path === '/login' && session.autenticado) {
