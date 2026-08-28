@@ -124,11 +124,11 @@ function sair() {
           <span>Novo pedido</span>
         </router-link>
 
-        <div class="solicitante-nav__item solicitante-nav__item--future" title="Adicionar resíduos — seção reservada para etapa futura">
+        <div class="solicitante-nav__item solicitante-nav__item--future" title="Informar resíduos — seção reservada para etapa futura">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 5h10l-1 16H8L7 5ZM5 5h14M9 5V3h6v2M10 9v8M14 9v8" />
           </svg>
-          <span>Adicionar resíduos</span>
+          <span>Informar resíduos</span>
           <small>em breve</small>
         </div>
       </nav>
@@ -322,7 +322,6 @@ function sair() {
 .solicitante-nav__item:hover { background: rgb(45 107 196 / 19%); }
 .solicitante-nav__item.router-link-active { background: linear-gradient(135deg, #1a4da1, #214fb8); }
 .solicitante-nav__item--future { color: #9fb0ca; cursor: default; }
-.solicitante-nav__item--future:hover { background: transparent; }
 .solicitante-nav__item--future small { margin-left: auto; color: #6f86aa; font-size: 9px; font-weight: 700; }
 
 .solicitante-nav__item svg,
