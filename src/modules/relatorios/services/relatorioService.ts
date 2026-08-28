@@ -1,3 +1,5 @@
+import { ref } from 'vue'
+
 import { http } from '@/services/http'
 import type {
   RelatorioEstagiariosFiltros,
@@ -23,6 +25,17 @@ export type TipoRelatorioExportavel =
   | 'estoque-lotes'
   | 'fiscalizacao'
 
+export interface UltimaConsultaRelatorio {
+  tipo: TipoRelatorioExportavel
+  filtros: Record<string, unknown>
+}
+
+export const ultimaConsultaRelatorio = ref<UltimaConsultaRelatorio | null>(null)
+
+function registrarConsulta(tipo: TipoRelatorioExportavel, filtros: Record<string, unknown>) {
+  ultimaConsultaRelatorio.value = { tipo, filtros: { ...filtros } }
+}
+
 function extrairNomeArquivo(contentDisposition: string | undefined, formato: FormatoExportacaoRelatorio) {
   if (contentDisposition) {
     const utf8 = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i)
@@ -36,44 +49,38 @@ function extrairNomeArquivo(contentDisposition: string | undefined, formato: For
 
 export const relatorioService = {
   async listarEstagiarios(filtros: RelatorioEstagiariosFiltros = {}) {
-    const { data } = await http.get<RelatorioEstagiariosResponse>('/v1/relatorios/estagiarios', {
-      params: filtros,
-    })
+    const { data } = await http.get<RelatorioEstagiariosResponse>('/v1/relatorios/estagiarios', { params: filtros })
+    registrarConsulta('estagiarios', filtros)
     return data
   },
 
   async listarMovimentacoes(filtros: RelatorioMovimentacoesFiltros = {}) {
-    const { data } = await http.get<RelatorioMovimentacoesResponse>('/v1/relatorios/movimentacoes', {
-      params: filtros,
-    })
+    const { data } = await http.get<RelatorioMovimentacoesResponse>('/v1/relatorios/movimentacoes', { params: filtros })
+    registrarConsulta('movimentacoes', filtros)
     return data
   },
 
   async obterResumoOperacional(filtros: RelatorioResumoOperacionalFiltros = {}) {
-    const { data } = await http.get<RelatorioResumoOperacionalResponse>('/v1/relatorios/resumo-operacional', {
-      params: filtros,
-    })
+    const { data } = await http.get<RelatorioResumoOperacionalResponse>('/v1/relatorios/resumo-operacional', { params: filtros })
+    registrarConsulta('resumo-operacional', filtros)
     return data
   },
 
   async listarProdutos(filtros: RelatorioProdutosFiltros = {}) {
-    const { data } = await http.get<RelatorioProdutosResponse>('/v1/relatorios/produtos', {
-      params: filtros,
-    })
+    const { data } = await http.get<RelatorioProdutosResponse>('/v1/relatorios/produtos', { params: filtros })
+    registrarConsulta('produtos', filtros)
     return data
   },
 
   async listarEstoqueLotes(filtros: RelatorioEstoqueLotesFiltros = {}) {
-    const { data } = await http.get<RelatorioEstoqueLotesResponse>('/v1/relatorios/estoque-lotes', {
-      params: filtros,
-    })
+    const { data } = await http.get<RelatorioEstoqueLotesResponse>('/v1/relatorios/estoque-lotes', { params: filtros })
+    registrarConsulta('estoque-lotes', filtros)
     return data
   },
 
   async listarFiscalizacao(filtros: RelatorioFiscalizacaoFiltros = {}) {
-    const { data } = await http.get<RelatorioFiscalizacaoResponse>('/v1/relatorios/fiscalizacao', {
-      params: filtros,
-    })
+    const { data } = await http.get<RelatorioFiscalizacaoResponse>('/v1/relatorios/fiscalizacao', { params: filtros })
+    registrarConsulta('fiscalizacao', filtros)
     return data
   },
 
