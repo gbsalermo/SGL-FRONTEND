@@ -3,9 +3,12 @@ import { computed, onMounted, ref } from 'vue'
 
 import { relatorioService } from '@/modules/relatorios/services/relatorioService'
 import type {
+  NivelRiscoRelatorio,
   OrigemMovimentacaoRelatorio,
+  OrgaoFiscalizadorRelatorio,
   RelatorioEstagiariosResponse,
   RelatorioMovimentacoesResponse,
+  RelatorioProdutosResponse,
   RelatorioResumoOperacionalResponse,
   TipoMovimentacaoRelatorio,
 } from '@/modules/relatorios/types/relatorio'
@@ -13,13 +16,16 @@ import { http } from '@/services/http'
 
 type TipoRelatorio =
   | 'estagiarios'
+  | 'produtos'
   | 'movimentacoes'
   | 'resumo-operacional'
   | 'pedidos-entregues'
   | 'estoque-lotes'
+  | 'residuos'
   | 'fiscalizacao'
 
 type SituacaoFiltro = '' | 'ativo' | 'inativo'
+type SimNaoFiltro = '' | 'sim' | 'nao'
 
 interface LaboratorioResumo {
   id: string
@@ -46,15 +52,17 @@ interface RelatorioOpcao {
   id: TipoRelatorio
   titulo: string
   descricao: string
-  icone: 'documento' | 'troca' | 'resumo' | 'pedidos' | 'estoque' | 'escudo'
+  icone: 'documento' | 'produto' | 'troca' | 'resumo' | 'pedidos' | 'estoque' | 'residuo' | 'escudo'
 }
 
 const relatorios: RelatorioOpcao[] = [
   { id: 'estagiarios', titulo: 'Estagiários', descricao: 'Ativos, inativos ou todos, por laboratório', icone: 'documento' },
+  { id: 'produtos', titulo: 'Produtos', descricao: 'Catálogo, riscos, perecibilidade e fiscalização', icone: 'produto' },
   { id: 'movimentacoes', titulo: 'Movimentações', descricao: 'Entradas, saídas, ajustes, devoluções e descartes', icone: 'troca' },
   { id: 'resumo-operacional', titulo: 'Resumo operacional', descricao: 'Principais entradas, saídas e lotes', icone: 'resumo' },
   { id: 'pedidos-entregues', titulo: 'Pedidos entregues', descricao: 'Total de pedidos e itens entregues', icone: 'pedidos' },
   { id: 'estoque-lotes', titulo: 'Estoque e lotes', descricao: 'Posição de estoque, lotes, vencimentos e mínimos', icone: 'estoque' },
+  { id: 'residuos', titulo: 'Resíduos', descricao: 'Geração, riscos, armazenamento e despacho', icone: 'residuo' },
   { id: 'fiscalizacao', titulo: 'Fiscalização', descricao: 'Produtos fiscalizados e sua rastreabilidade', icone: 'escudo' },
 ]
 
@@ -66,6 +74,12 @@ const dataInicio = ref('')
 const dataFim = ref('')
 const tipoBolsa = ref('')
 const busca = ref('')
+
+const produtoSituacao = ref<SituacaoFiltro>('')
+const produtoFiscalizado = ref<SimNaoFiltro>('')
+const produtoPerecivel = ref<SimNaoFiltro>('')
+const produtoRisco = ref<'' | NivelRiscoRelatorio>('')
+const produtoOrgao = ref<'' | OrgaoFiscalizadorRelatorio>('')
 
 const movimentoTipo = ref<'' | TipoMovimentacaoRelatorio>('')
 const movimentoOrigem = ref<'' | OrigemMovimentacaoRelatorio>('')
@@ -82,6 +96,7 @@ const usuarios = ref<UsuarioResumo[]>([])
 const lotes = ref<LoteResumo[]>([])
 
 const resultadoEstagiarios = ref<RelatorioEstagiariosResponse | null>(null)
+const resultadoProdutos = ref<RelatorioProdutosResponse | null>(null)
 const resultadoMovimentacoes = ref<RelatorioMovimentacoesResponse | null>(null)
 const resultadoResumoOperacional = ref<RelatorioResumoOperacionalResponse | null>(null)
 const carregando = ref(false)
@@ -92,11 +107,14 @@ const opcaoSelecionada = computed(
 )
 
 const relatorioEstagiariosSelecionado = computed(() => relatorioSelecionado.value === 'estagiarios')
+const relatorioProdutosSelecionado = computed(() => relatorioSelecionado.value === 'produtos')
 const relatorioMovimentacoesSelecionado = computed(() => relatorioSelecionado.value === 'movimentacoes')
 const relatorioResumoSelecionado = computed(() => relatorioSelecionado.value === 'resumo-operacional')
+const relatorioResiduosSelecionado = computed(() => relatorioSelecionado.value === 'residuos')
 
 const possuiResultado = computed(() => {
   if (relatorioEstagiariosSelecionado.value) return Boolean(resultadoEstagiarios.value)
+  if (relatorioProdutosSelecionado.value) return Boolean(resultadoProdutos.value)
   if (relatorioMovimentacoesSelecionado.value) return Boolean(resultadoMovimentacoes.value)
   if (relatorioResumoSelecionado.value) return Boolean(resultadoResumoOperacional.value)
   return false
@@ -104,6 +122,7 @@ const possuiResultado = computed(() => {
 
 const geradoEm = computed(() => {
   if (relatorioEstagiariosSelecionado.value) return resultadoEstagiarios.value?.geradoEm
+  if (relatorioProdutosSelecionado.value) return resultadoProdutos.value?.geradoEm
   if (relatorioMovimentacoesSelecionado.value) return resultadoMovimentacoes.value?.geradoEm
   if (relatorioResumoSelecionado.value) return resultadoResumoOperacional.value?.geradoEm
   return undefined
@@ -138,6 +157,7 @@ const resumoEstagiarios = computed(() => ({
 
 function limparResultados() {
   resultadoEstagiarios.value = null
+  resultadoProdutos.value = null
   resultadoMovimentacoes.value = null
   resultadoResumoOperacional.value = null
 }
@@ -155,6 +175,11 @@ function limparFiltros() {
   dataFim.value = ''
   tipoBolsa.value = ''
   busca.value = ''
+  produtoSituacao.value = ''
+  produtoFiscalizado.value = ''
+  produtoPerecivel.value = ''
+  produtoRisco.value = ''
+  produtoOrgao.value = ''
   movimentoTipo.value = ''
   movimentoOrigem.value = ''
   movimentoProdutoId.value = ''
@@ -166,21 +191,33 @@ function limparFiltros() {
   erro.value = ''
 }
 
+function validarPeriodo() {
+  if (dataInicio.value && dataFim.value && dataInicio.value > dataFim.value) {
+    erro.value = 'A data inicial não pode ser posterior à data final.'
+    return false
+  }
+  if ((dataInicio.value && !dataFim.value) || (!dataInicio.value && dataFim.value)) {
+    erro.value = 'Para filtrar por período, informe a data inicial e a data final.'
+    return false
+  }
+  return true
+}
+
 async function visualizarRelatorio() {
   erro.value = ''
 
-  if (dataInicio.value && dataFim.value && dataInicio.value > dataFim.value) {
-    erro.value = 'A data inicial não pode ser posterior à data final.'
-    return
-  }
+  const usaPeriodo = relatorioEstagiariosSelecionado.value || relatorioMovimentacoesSelecionado.value || relatorioResumoSelecionado.value
+  if (usaPeriodo && !validarPeriodo()) return
 
-  if ((dataInicio.value && !dataFim.value) || (!dataInicio.value && dataFim.value)) {
-    erro.value = 'Para filtrar por período, informe a data inicial e a data final.'
-    return
-  }
-
-  if (!relatorioEstagiariosSelecionado.value && !relatorioMovimentacoesSelecionado.value && !relatorioResumoSelecionado.value) {
-    erro.value = 'Este relatório já está previsto na central e será conectado quando o endpoint correspondente for implementado.'
+  if (
+    !relatorioEstagiariosSelecionado.value &&
+    !relatorioProdutosSelecionado.value &&
+    !relatorioMovimentacoesSelecionado.value &&
+    !relatorioResumoSelecionado.value
+  ) {
+    erro.value = relatorioResiduosSelecionado.value
+      ? 'O relatório de Resíduos já faz parte da central e será ativado quando a branch do módulo de resíduos for integrada à base de Relatórios.'
+      : 'Este relatório já está previsto na central e será conectado quando o endpoint correspondente for implementado.'
     return
   }
 
@@ -193,6 +230,18 @@ async function visualizarRelatorio() {
         laboratorioId: laboratorioId.value || undefined,
         dataInicio: dataInicio.value || undefined,
         dataFim: dataFim.value || undefined,
+      })
+      return
+    }
+
+    if (relatorioProdutosSelecionado.value) {
+      limparResultados()
+      resultadoProdutos.value = await relatorioService.listarProdutos({
+        ativo: produtoSituacao.value === '' ? undefined : produtoSituacao.value === 'ativo',
+        fiscalizado: produtoFiscalizado.value === '' ? undefined : produtoFiscalizado.value === 'sim',
+        perecivel: produtoPerecivel.value === '' ? undefined : produtoPerecivel.value === 'sim',
+        risco: produtoRisco.value || undefined,
+        orgaoFiscalizador: produtoOrgao.value || undefined,
       })
       return
     }
@@ -248,6 +297,11 @@ function formatarRotulo(valor: string | null) {
     .replace(/(^|\s)\S/g, (letra) => letra.toLocaleUpperCase('pt-BR'))
 }
 
+function formatarOrgaos(valores: string[]) {
+  if (!valores.length) return '—'
+  return valores.map((item) => formatarRotulo(item)).join(', ')
+}
+
 function sinalQuantidade(tipo: TipoMovimentacaoRelatorio) {
   if (tipo === 'ENTRADA' || tipo === 'DEVOLUCAO') return '+'
   if (tipo === 'SAIDA' || tipo === 'DESCARTE_VENCIMENTO') return '−'
@@ -280,6 +334,7 @@ onMounted(async () => {
     <div class="relatorios-grid">
       <aside class="relatorios-selector card">
         <h2>1. Escolha o relatório</h2>
+
         <div class="relatorios-lista">
           <button
             v-for="item in relatorios"
@@ -291,18 +346,27 @@ onMounted(async () => {
           >
             <span class="relatorio-opcao__icone" aria-hidden="true">
               <svg v-if="item.icone === 'documento'" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h5M9 12h6M9 16h6" /></svg>
+              <svg v-else-if="item.icone === 'produto'" viewBox="0 0 24 24"><path d="M5 7 12 3l7 4v10l-7 4-7-4zM5 7l7 4 7-4M12 11v10" /></svg>
               <svg v-else-if="item.icone === 'troca'" viewBox="0 0 24 24"><path d="M4 8h14M15 5l3 3-3 3M20 16H6M9 13l-3 3 3 3" /></svg>
               <svg v-else-if="item.icone === 'resumo'" viewBox="0 0 24 24"><path d="M5 3h11v14H5zM8 7h5M8 10h5M8 13h3M17 13h3v8h-8v-3M16 17h1M16 15v4" /></svg>
               <svg v-else-if="item.icone === 'pedidos'" viewBox="0 0 24 24"><path d="M6 3h10l3 3v15H6zM9 9h6M9 13h6M9 17h4" /></svg>
               <svg v-else-if="item.icone === 'estoque'" viewBox="0 0 24 24"><path d="M4 7h16v13H4zM7 7V4h10v3M4 12h16M9 12v3h6v-3" /></svg>
+              <svg v-else-if="item.icone === 'residuo'" viewBox="0 0 24 24"><path d="M9 3h6M10 3v5l-5 9a3 3 0 0 0 3 4h8a3 3 0 0 0 3-4l-5-9V3M8 15h8" /></svg>
               <svg v-else viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 5-3 8-7 10-4-2-7-5-7-10V6zM12 8v8M9 12h6" /></svg>
             </span>
-            <span class="relatorio-opcao__texto"><strong>{{ item.titulo }}</strong><small>{{ item.descricao }}</small></span>
+            <span class="relatorio-opcao__texto">
+              <strong>{{ item.titulo }}</strong>
+              <small>{{ item.descricao }}</small>
+            </span>
           </button>
         </div>
+
         <div class="exportacao-info">
           <span class="exportacao-info__icone">i</span>
-          <div><strong>Exportação</strong><p>Todos os relatórios poderão ser exportados em <b>PDF</b> ou <b>Excel</b>.</p></div>
+          <div>
+            <strong>Exportação</strong>
+            <p>Todos os relatórios poderão ser exportados em <b>PDF</b> ou <b>Excel</b>.</p>
+          </div>
         </div>
       </aside>
 
@@ -316,6 +380,14 @@ onMounted(async () => {
             <div class="campo campo--periodo"><label>Período do estágio</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
             <div class="campo"><label for="tipoBolsa">Tipo de bolsa</label><select id="tipoBolsa" v-model="tipoBolsa"><option value="">Todos</option><option v-for="tipo in tiposBolsa" :key="tipo" :value="tipo">{{ formatarRotulo(tipo) }}</option></select></div>
             <div class="campo campo--busca"><label for="busca">Buscar por nome ou email</label><input id="busca" v-model="busca" type="search" placeholder="Digite o nome ou email do estagiário" /></div>
+          </div>
+
+          <div v-else-if="relatorioProdutosSelecionado" class="filtros-body filtros-body--produtos">
+            <div class="campo"><label for="produto-situacao">Situação</label><select id="produto-situacao" v-model="produtoSituacao"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select></div>
+            <div class="campo"><label for="produto-fiscalizado">Fiscalizado</label><select id="produto-fiscalizado" v-model="produtoFiscalizado"><option value="">Todos</option><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+            <div class="campo"><label for="produto-perecivel">Perecível</label><select id="produto-perecivel" v-model="produtoPerecivel"><option value="">Todos</option><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+            <div class="campo"><label for="produto-risco">Nível de risco</label><select id="produto-risco" v-model="produtoRisco"><option value="">Todos</option><option value="NENHUM">Nenhum</option><option value="BAIXO">Baixo</option><option value="MEDIO">Médio</option><option value="ALTO">Alto</option></select></div>
+            <div class="campo campo--busca"><label for="produto-orgao">Órgão fiscalizador</label><select id="produto-orgao" v-model="produtoOrgao"><option value="">Todos os órgãos</option><option value="POLICIA_FEDERAL">Polícia Federal</option><option value="VIGILANCIA_SANITARIA">Vigilância Sanitária</option><option value="ANVISA">ANVISA</option><option value="EXERCITO">Exército</option><option value="OUTRO">Outro</option></select></div>
           </div>
 
           <div v-else-if="relatorioMovimentacoesSelecionado" class="filtros-body filtros-body--movimentacoes">
@@ -334,7 +406,11 @@ onMounted(async () => {
             <div class="campo"><label for="resumo-limite">Posições do ranking</label><select id="resumo-limite" v-model.number="resumoLimite"><option :value="5">Top 5</option><option :value="10">Top 10</option><option :value="20">Top 20</option></select></div>
           </div>
 
-          <div v-else class="filtros-indisponiveis"><strong>{{ opcaoSelecionada.titulo }}</strong><span>Os filtros deste relatório serão ativados junto ao endpoint correspondente.</span></div>
+          <div v-else class="filtros-indisponiveis">
+            <strong>{{ opcaoSelecionada.titulo }}</strong>
+            <span v-if="relatorioResiduosSelecionado">A opção já está reservada. A consulta será ativada após a integração do módulo de Resíduos à base de Relatórios.</span>
+            <span v-else>Os filtros deste relatório serão ativados junto ao endpoint correspondente.</span>
+          </div>
 
           <div class="filtros-actions">
             <button class="btn btn--primary" type="button" :disabled="carregando" @click="visualizarRelatorio"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>{{ carregando ? 'Carregando...' : 'Visualizar relatório' }}</button>
@@ -353,6 +429,18 @@ onMounted(async () => {
             <div class="table-wrap"><table><thead><tr><th>Estagiário</th><th>Laboratório</th><th>Unidade</th><th>Bolsa</th><th>Início</th><th>Fim</th><th>Situação</th></tr></thead><tbody><tr v-for="item in itensEstagiariosFiltrados" :key="item.id"><td><strong>{{ item.nome }}</strong><small>{{ item.email }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ item.unidadeNome || '—' }}</td><td>{{ formatarRotulo(item.tipoBolsa) }}</td><td>{{ formatarData(item.dataInicioEstagio) }}</td><td>{{ formatarData(item.dataFimEstagio) }}</td><td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td></tr><tr v-if="itensEstagiariosFiltrados.length === 0"><td colspan="7" class="table-empty">Nenhum estagiário encontrado com os filtros informados.</td></tr></tbody></table></div>
           </div>
 
+          <div v-else-if="relatorioProdutosSelecionado && resultadoProdutos" class="preview-result">
+            <div class="resumo-cards resumo-cards--produtos">
+              <article><span>Produtos</span><strong>{{ resultadoProdutos.total }}</strong></article>
+              <article><span>Ativos</span><strong>{{ resultadoProdutos.ativos }}</strong></article>
+              <article><span>Inativos</span><strong>{{ resultadoProdutos.inativos }}</strong></article>
+              <article><span>Fiscalizados</span><strong>{{ resultadoProdutos.fiscalizados }}</strong></article>
+              <article><span>Perecíveis</span><strong>{{ resultadoProdutos.pereciveis }}</strong></article>
+              <article><span>Com risco</span><strong>{{ resultadoProdutos.comRisco }}</strong></article>
+            </div>
+            <div class="table-wrap"><table class="produtos-table"><thead><tr><th>Produto</th><th>Código</th><th>Unidade</th><th>Risco</th><th>Perecível</th><th>Fiscalização</th><th>Situação</th></tr></thead><tbody><tr v-for="item in resultadoProdutos.itens" :key="item.id"><td><strong>{{ item.nome }}</strong><small>{{ item.localizacaoFisica || item.descricao || 'Sem informação complementar' }}</small></td><td>{{ item.codigoReferencia || '—' }}</td><td>{{ formatarRotulo(item.unidadeMedida) }}</td><td><span class="status" :class="item.risco === 'ALTO' ? 'status--risco-alto' : item.risco === 'MEDIO' ? 'status--risco-medio' : 'status--neutro'">{{ formatarRotulo(item.risco) }}</span></td><td>{{ item.perecivel ? 'Sim' : 'Não' }}</td><td><span v-if="item.fiscalizado" class="status status--fiscalizado">{{ formatarOrgaos(item.orgaosFiscalizadores) }}</span><span v-else>Não</span></td><td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td></tr><tr v-if="resultadoProdutos.itens.length === 0"><td colspan="7" class="table-empty">Nenhum produto encontrado com os filtros informados.</td></tr></tbody></table></div>
+          </div>
+
           <div v-else-if="relatorioMovimentacoesSelecionado && resultadoMovimentacoes" class="preview-result">
             <div class="resumo-cards resumo-cards--movimentacoes">
               <article><span>Movimentações</span><strong>{{ resultadoMovimentacoes.totalMovimentacoes }}</strong></article>
@@ -366,68 +454,36 @@ onMounted(async () => {
           </div>
 
           <div v-else-if="relatorioResumoSelecionado && resultadoResumoOperacional" class="preview-result">
-            <div class="resumo-cards resumo-cards--operacional">
+            <div class="resumo-cards resumo-cards--movimentacoes resumo-cards--operacional">
               <article><span>Movimentações</span><strong>{{ resultadoResumoOperacional.totalMovimentacoes }}</strong></article>
-              <article class="card-kpi--entrada"><span>Entradas</span><strong>{{ resultadoResumoOperacional.quantidadeEntradas }} un.</strong></article>
-              <article class="card-kpi--saida"><span>Saídas</span><strong>{{ resultadoResumoOperacional.quantidadeSaidas }} un.</strong></article>
-              <article class="card-kpi--descarte"><span>Descartes</span><strong>{{ resultadoResumoOperacional.quantidadeDescartes }} un.</strong></article>
-              <article><span>Produtos movimentados</span><strong>{{ resultadoResumoOperacional.produtosMovimentados }}</strong></article>
-              <article><span>Lotes movimentados</span><strong>{{ resultadoResumoOperacional.lotesMovimentados }}</strong></article>
+              <article><span>Entradas</span><strong>{{ resultadoResumoOperacional.quantidadeEntradas }} un.</strong></article>
+              <article><span>Saídas</span><strong>{{ resultadoResumoOperacional.quantidadeSaidas }} un.</strong></article>
+              <article><span>Descartes</span><strong>{{ resultadoResumoOperacional.quantidadeDescartes }} un.</strong></article>
+              <article><span>Produtos</span><strong>{{ resultadoResumoOperacional.produtosMovimentados }}</strong></article>
+              <article><span>Lotes</span><strong>{{ resultadoResumoOperacional.lotesMovimentados }}</strong></article>
             </div>
 
-            <div class="ranking-grid">
+            <div class="rankings-grid">
               <section class="ranking-card ranking-card--entrada">
-                <header><div><span>Ranking</span><h3>Principais entradas</h3></div><strong>Quantidade</strong></header>
-                <ol>
-                  <li v-for="(item, index) in resultadoResumoOperacional.principaisEntradas" :key="item.produtoId">
-                    <span class="ranking-posicao">{{ index + 1 }}</span>
-                    <div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div>
-                    <b>+{{ item.quantidade }} un.</b>
-                  </li>
-                  <li v-if="resultadoResumoOperacional.principaisEntradas.length === 0" class="ranking-empty">Nenhuma entrada encontrada.</li>
-                </ol>
+                <h3>Principais entradas</h3>
+                <ol><li v-for="item in resultadoResumoOperacional.principaisEntradas" :key="item.produtoId"><div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div><b>+{{ item.quantidade }} un.</b></li></ol>
+                <p v-if="resultadoResumoOperacional.principaisEntradas.length === 0" class="ranking-empty">Sem entradas no período.</p>
               </section>
-
               <section class="ranking-card ranking-card--saida">
-                <header><div><span>Ranking</span><h3>Principais saídas</h3></div><strong>Quantidade</strong></header>
-                <ol>
-                  <li v-for="(item, index) in resultadoResumoOperacional.principaisSaidas" :key="item.produtoId">
-                    <span class="ranking-posicao">{{ index + 1 }}</span>
-                    <div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div>
-                    <b>−{{ item.quantidade }} un.</b>
-                  </li>
-                  <li v-if="resultadoResumoOperacional.principaisSaidas.length === 0" class="ranking-empty">Nenhuma saída encontrada.</li>
-                </ol>
+                <h3>Principais saídas</h3>
+                <ol><li v-for="item in resultadoResumoOperacional.principaisSaidas" :key="item.produtoId"><div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div><b>−{{ item.quantidade }} un.</b></li></ol>
+                <p v-if="resultadoResumoOperacional.principaisSaidas.length === 0" class="ranking-empty">Sem saídas no período.</p>
               </section>
             </div>
 
-            <section class="lotes-ranking">
-              <div class="section-heading"><div><span>Rastreabilidade</span><h3>Lotes mais movimentados</h3></div><small>Movimentação acumulada no período selecionado</small></div>
-              <div class="table-wrap">
-                <table>
-                  <thead><tr><th>#</th><th>Lote</th><th>Produto</th><th>Movimentado</th><th>Entradas</th><th>Saídas</th><th>Saldo atual</th><th>Validade</th></tr></thead>
-                  <tbody>
-                    <tr v-for="(item, index) in resultadoResumoOperacional.lotesMaisMovimentados" :key="item.loteId">
-                      <td><span class="ranking-posicao ranking-posicao--table">{{ index + 1 }}</span></td>
-                      <td><strong>{{ item.codigoInterno || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td>
-                      <td>{{ item.produtoNome || '—' }}</td>
-                      <td><strong>{{ item.quantidadeMovimentada }} un.</strong><small>{{ item.movimentacoes }} operação(ões)</small></td>
-                      <td class="quantidade quantidade--entrada">+{{ item.quantidadeEntradas }} un.</td>
-                      <td class="quantidade quantidade--saida">−{{ item.quantidadeSaidas }} un.</td>
-                      <td>{{ item.saldoAtual }} un.</td>
-                      <td>{{ formatarData(item.dataValidade) }}</td>
-                    </tr>
-                    <tr v-if="resultadoResumoOperacional.lotesMaisMovimentados.length === 0"><td colspan="8" class="table-empty">Nenhum lote movimentado com os filtros informados.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
+            <div class="section-heading"><h3>Lotes mais movimentados</h3><span>Ranking por quantidade total movimentada</span></div>
+            <div class="table-wrap"><table><thead><tr><th>#</th><th>Lote</th><th>Produto</th><th>Movimentado</th><th>Entradas</th><th>Saídas</th><th>Saldo atual</th><th>Validade</th></tr></thead><tbody><tr v-for="(item, index) in resultadoResumoOperacional.lotesMaisMovimentados" :key="item.loteId"><td><strong>{{ index + 1 }}º</strong></td><td><strong>{{ item.codigoInterno || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.produtoNome || '—' }}</td><td>{{ item.quantidadeMovimentada }} un.<small>{{ item.movimentacoes }} operação(ões)</small></td><td class="quantidade quantidade--entrada">+{{ item.quantidadeEntradas }} un.</td><td class="quantidade quantidade--saida">−{{ item.quantidadeSaidas }} un.</td><td>{{ item.saldoAtual }} un.</td><td>{{ formatarData(item.dataValidade) }}</td></tr><tr v-if="resultadoResumoOperacional.lotesMaisMovimentados.length === 0"><td colspan="8" class="table-empty">Nenhum lote movimentado com os filtros informados.</td></tr></tbody></table></div>
           </div>
         </section>
       </div>
     </div>
 
-    <footer class="exportacao-footer"><span>Após visualizar o relatório, você poderá exportá-lo nos formatos:</span><button type="button" disabled title="Exportação PDF será conectada ao backend na próxima etapa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM15 3v5h5" /></svg>PDF</button><button type="button" disabled title="Exportação Excel será conectada ao backend na próxima etapa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM9 4v16M9 9h10M9 14h10" /></svg>Excel</button></footer>
+    <footer class="exportacao-footer"><span>Após visualizar o relatório, você poderá exportá-lo nos formatos:</span><button type="button" disabled title="Exportação PDF será conectada ao backend na etapa de exportação"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM15 3v5h5" /></svg>PDF</button><button type="button" disabled title="Exportação Excel será conectada ao backend na etapa de exportação"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM9 4v16M9 9h10M9 14h10" /></svg>Excel</button></footer>
   </section>
 </template>
 
@@ -459,8 +515,8 @@ onMounted(async () => {
 .card-title { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 20px; border-bottom: 1px solid #e5eaf1; }
 .preview-gerado { color: #8290a5; font-size: 11px; }
 .filtros-body { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(280px, 1.2fr); gap: 16px 18px; padding: 18px 20px; }
-.filtros-body--movimentacoes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.filtros-body--resumo { grid-template-columns: minmax(220px, .9fr) minmax(360px, 1.5fr) minmax(180px, .7fr); }
+.filtros-body--movimentacoes, .filtros-body--produtos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.filtros-body--resumo { grid-template-columns: minmax(190px, .9fr) minmax(330px, 1.4fr) minmax(170px, .7fr); }
 .campo { min-width: 0; display: grid; gap: 7px; }
 .campo label { color: #33425c; font-size: 12px; font-weight: 700; }
 .campo select, .campo input { width: 100%; height: 39px; padding: 0 11px; border: 1px solid #cfd8e5; border-radius: 6px; background: #fff; color: #26364f; font: inherit; font-size: 12.5px; outline: none; transition: border-color 150ms ease, box-shadow 150ms ease; }
@@ -471,7 +527,7 @@ onMounted(async () => {
 .periodo-inputs span { color: #7d8999; font-size: 12px; }
 .filtros-indisponiveis { min-height: 126px; display: grid; place-items: center; align-content: center; gap: 5px; padding: 22px; color: #5e6f89; text-align: center; }
 .filtros-indisponiveis strong { color: #243651; }
-.filtros-indisponiveis span { font-size: 12px; }
+.filtros-indisponiveis span { max-width: 620px; font-size: 12px; line-height: 1.5; }
 .filtros-actions { display: flex; gap: 10px; padding: 15px 20px; border-top: 1px solid #e8edf3; }
 .btn { min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; border-radius: 6px; font: inherit; font-size: 12.5px; font-weight: 800; cursor: pointer; }
 .btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -490,42 +546,14 @@ onMounted(async () => {
 .preview-message--warning { color: #8a6414; background: #fffdf7; }
 .preview-result { padding: 18px 20px 20px; }
 .resumo-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
-.resumo-cards article { padding: 13px 15px; border: 1px solid #e0e6ef; border-radius: 7px; background: #f9fbfd; transition: border-color 150ms ease, background 150ms ease, transform 150ms ease; }
+.resumo-cards article { padding: 13px 15px; border: 1px solid #e0e6ef; border-radius: 7px; background: #f9fbfd; }
 .resumo-cards span { display: block; color: #74829a; font-size: 11.5px; font-weight: 700; }
 .resumo-cards strong { display: block; margin-top: 4px; color: #1d3150; font-size: 21px; }
-.resumo-cards--movimentacoes strong, .resumo-cards--operacional strong { font-size: 18px; }
-.card-kpi--entrada:hover { border-color: #7fb0ef; background: #eef6ff; transform: translateY(-1px); }
-.card-kpi--entrada:hover strong { color: #1a4da1; }
-.card-kpi--saida:hover { border-color: #e29a94; background: #fff1f0; transform: translateY(-1px); }
-.card-kpi--saida:hover strong { color: #b42318; }
-.card-kpi--descarte:hover { border-color: #e5c365; background: #fff9df; transform: translateY(-1px); }
-.card-kpi--descarte:hover strong { color: #8a6500; }
-.ranking-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
-.ranking-card { overflow: hidden; border: 1px solid #e0e6ef; border-radius: 8px; background: #fff; }
-.ranking-card header { min-height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 15px; border-bottom: 1px solid #e8edf3; }
-.ranking-card header span, .section-heading span { color: #8290a5; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
-.ranking-card header h3, .section-heading h3 { margin: 3px 0 0; color: #20314d; font-size: 14px; }
-.ranking-card header > strong { color: #74829a; font-size: 10.5px; text-transform: uppercase; }
-.ranking-card--entrada header { background: #f6faff; }
-.ranking-card--saida header { background: #fff7f6; }
-.ranking-card ol { margin: 0; padding: 0; list-style: none; }
-.ranking-card li { min-height: 58px; display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 14px; border-bottom: 1px solid #eef2f6; }
-.ranking-card li:last-child { border-bottom: 0; }
-.ranking-card li > div { min-width: 0; }
-.ranking-card li strong { display: block; overflow: hidden; color: #2a3a54; font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
-.ranking-card li small { display: block; margin-top: 3px; color: #8b98aa; font-size: 10.5px; }
-.ranking-card li b { font-size: 12.5px; white-space: nowrap; }
-.ranking-card--entrada li b { color: #1a4da1; }
-.ranking-card--saida li b { color: #b42318; }
-.ranking-posicao { width: 24px; height: 24px; display: inline-grid; place-items: center; border-radius: 999px; background: #eef2f7; color: #64748b; font-size: 10px; font-weight: 900; }
-.ranking-posicao--table { width: 22px; height: 22px; }
-.ranking-empty { display: block !important; padding: 20px 14px !important; color: #8995a7; text-align: center; font-size: 11.5px; }
-.lotes-ranking { margin-top: 4px; }
-.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
-.section-heading small { color: #8995a7; font-size: 10.5px; }
+.resumo-cards--movimentacoes strong, .resumo-cards--produtos strong { font-size: 18px; }
 .table-wrap { overflow-x: auto; border: 1px solid #e0e6ee; border-radius: 7px; }
 table { width: 100%; min-width: 900px; border-collapse: collapse; }
 .movimentacoes-table { min-width: 1240px; }
+.produtos-table { min-width: 1080px; }
 th { padding: 10px 12px; background: #f5f7fa; border-bottom: 1px solid #dde4ec; color: #617089; font-size: 10.5px; font-weight: 800; letter-spacing: .02em; text-align: left; text-transform: uppercase; }
 td { padding: 11px 12px; border-bottom: 1px solid #edf1f5; color: #35445d; font-size: 12px; vertical-align: middle; }
 tbody tr:last-child td { border-bottom: 0; }
@@ -535,17 +563,38 @@ td small { display: block; margin-top: 3px; color: #8491a4; font-size: 10.5px; }
 .status--ativo { background: #e8f7ee; color: #18713d; }
 .status--inativo { background: #f0f2f5; color: #687488; }
 .status--mov { background: #eef4ff; color: #295ea9; white-space: nowrap; }
+.status--fiscalizado { max-width: 230px; background: #eef4ff; color: #1a4da1; white-space: normal; text-align: center; }
+.status--risco-alto { background: #feecec; color: #a52222; }
+.status--risco-medio { background: #fff4d6; color: #8a6500; }
+.status--neutro { background: #f0f2f5; color: #58657a; }
 .quantidade { font-weight: 800; white-space: nowrap; }
 .quantidade--entrada { color: #1a4da1; }
 .quantidade--saida { color: #b42318; }
 .table-empty { padding: 28px; color: #7e8a9e; text-align: center; }
+.rankings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+.ranking-card { padding: 16px; border: 1px solid #e0e6ee; border-radius: 8px; background: #fbfcfe; }
+.ranking-card h3 { margin: 0 0 12px; color: #263853; font-size: 13px; }
+.ranking-card ol { display: grid; gap: 8px; margin: 0; padding: 0; list-style-position: inside; }
+.ranking-card li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 10px; border-radius: 6px; background: #fff; color: #46566f; font-size: 11.5px; }
+.ranking-card li div { min-width: 0; display: inline-grid; gap: 2px; }
+.ranking-card li strong { color: #273952; font-size: 12px; }
+.ranking-card li small { color: #8995a7; font-size: 10px; }
+.ranking-card li b { white-space: nowrap; font-size: 12px; }
+.ranking-card--entrada { border-top: 3px solid #2d6bc4; }
+.ranking-card--entrada li b { color: #1a4da1; }
+.ranking-card--saida { border-top: 3px solid #d9534f; }
+.ranking-card--saida li b { color: #b42318; }
+.ranking-empty { margin: 0; color: #8a96a8; font-size: 11px; }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin: 0 0 9px; }
+.section-heading h3 { margin: 0; color: #273952; font-size: 13px; }
+.section-heading span { color: #8a96a8; font-size: 10.5px; }
 .exportacao-footer { margin-top: 22px; min-height: 58px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 18px; border: 1px solid #a9d7b8; border-radius: 7px; background: #f4fbf6; color: #52645b; font-size: 12px; }
 .exportacao-footer button { height: 31px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid #d4dce4; border-radius: 5px; background: #fff; color: #5e6978; font: inherit; font-size: 11.5px; font-weight: 800; }
 .exportacao-footer button:first-of-type { color: #d14235; }
 .exportacao-footer button:last-of-type { color: #277845; }
 .exportacao-footer button:disabled { opacity: .72; cursor: not-allowed; }
 .exportacao-footer svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-@media (max-width: 1180px) { .relatorios-grid { grid-template-columns: 290px minmax(0, 1fr); } .filtros-body, .filtros-body--movimentacoes, .filtros-body--resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); } .campo--periodo { grid-column: span 2; } }
-@media (max-width: 900px) { .relatorios-page { padding: 22px 18px 30px; } .relatorios-grid { grid-template-columns: 1fr; } .relatorios-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } .exportacao-info { grid-column: 1 / -1; } .ranking-grid { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .relatorios-page { padding: 18px 12px 24px; } .relatorios-header h1 { font-size: 25px; } .relatorios-lista, .filtros-body, .filtros-body--movimentacoes, .filtros-body--resumo, .resumo-cards { grid-template-columns: 1fr; } .campo--periodo, .campo--busca { grid-column: auto; } .periodo-inputs { grid-template-columns: 1fr; } .periodo-inputs span { text-align: center; } .filtros-actions, .exportacao-footer, .section-heading { align-items: stretch; flex-direction: column; } .btn { width: 100%; } .exportacao-footer button { justify-content: center; } }
+@media (max-width: 1180px) { .relatorios-grid { grid-template-columns: 290px minmax(0, 1fr); } .filtros-body, .filtros-body--movimentacoes, .filtros-body--produtos, .filtros-body--resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); } .campo--periodo { grid-column: span 2; } }
+@media (max-width: 900px) { .relatorios-page { padding: 22px 18px 30px; } .relatorios-grid { grid-template-columns: 1fr; } .relatorios-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } .exportacao-info { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .relatorios-page { padding: 18px 12px 24px; } .relatorios-header h1 { font-size: 25px; } .relatorios-lista, .filtros-body, .filtros-body--movimentacoes, .filtros-body--produtos, .filtros-body--resumo, .resumo-cards, .rankings-grid { grid-template-columns: 1fr; } .campo--periodo, .campo--busca { grid-column: auto; } .periodo-inputs { grid-template-columns: 1fr; } .periodo-inputs span { text-align: center; } .filtros-actions, .exportacao-footer { align-items: stretch; flex-direction: column; } .btn { width: 100%; } .exportacao-footer button { justify-content: center; } .section-heading { align-items: flex-start; flex-direction: column; } }
 </style>
