@@ -39,6 +39,19 @@ export interface LoteResponse {
   ativo: boolean
 }
 
+export interface MovimentacaoLoteResponse {
+  id: string
+  pedidoId: string | null
+  pedidoSolicitanteNome: string | null
+  usuarioNome: string
+  loteId: string | null
+  codigoInternoLote: string | null
+  tipoMovimentacao: string
+  quantidadeMovimentada: number
+  dataMovimentacao: string
+  observacao: string | null
+}
+
 export interface EntradaLoteRequest {
   numeroLote: string
   tipoEmbalagem: TipoEmbalagem
