@@ -6,8 +6,9 @@
 **Última atualização:** 28/08/2026  
 **Branch frontend atual:** `feat/gestao-interface`  
 **Backend atual:** `main`  
-**Fase atual:** Estoque — validação final  
-**Próximo passo exato:** validar fracionamento irreversível + descarte por vencimento; se aprovados, encerrar Estoque e seguir para Produtos.
+**Fase atual:** Etapa 5 — Produtos + Rotulagem  
+**Última etapa concluída:** Etapa 4 — Estoque / Lotes  
+**Próximo passo exato:** iniciar interface operacional de Produtos, consolidando dados do produto, lotes e futura geração de rótulo.
 
 Este arquivo é a fonte principal de retomada do frontend.
 
@@ -22,7 +23,8 @@ Ao abrir uma nova sessão:
 2. ler docs/ROADMAP_INTERFACE_GESTAO.md
 3. usar backend/Swagger como fonte de verdade
 4. não duplicar regra de negócio no frontend
-5. validar a etapa atual antes de avançar
+5. manter a linguagem da interface simples para o usuário
+6. continuar da etapa indicada em PRÓXIMO PASSO EXATO
 ```
 
 Fluxo:
@@ -69,15 +71,17 @@ Login                                         ✅
 Pedidos do Solicitante                        ✅
 Shell Gestão/Admin                            ✅
 Pedidos da Gestão                             ✅
-Estoque — visão geral                         ✅ implementado
-Estoque — detalhe                             ✅ implementado
-Lotes — entrada                               ✅ implementado
-Lotes — código SGL                            ✅ implementado
-Lotes — embalagem/multiplicador               ✅ implementado
-Lotes — modal detalhe/edição                  ✅ implementado
-Lotes — fracionamento irreversível            ✅ implementado / validar
-Lotes — descarte por vencimento               ✅ implementado / validar
-Produtos operacional + rótulos                ⏳ próxima etapa
+Estoque — visão geral                         ✅
+Estoque — detalhe                             ✅
+Lotes — entrada                               ✅
+Lotes — código SGL                            ✅
+Lotes — embalagem/multiplicador               ✅
+Lotes — modal detalhe/edição                  ✅
+Lotes — fracionamento irreversível            ✅ validado
+Lotes — FIFO/FEFO com embalagem               ✅ backend
+Lotes — descarte por vencimento               ✅ validado
+Lotes — busca/filtro de situação              ✅
+Produtos operacional + rótulos                ⏳ ETAPA ATUAL
 Movimentações                                 ⏳
 Relatórios                                    ⏳
 Administração / Cadastros                     ⏳
@@ -118,7 +122,7 @@ docs/DECISAO_UNIDADES_CORPORATIVAS.md
 
 # 4. Pedidos
 
-Pedidos já funcionam, mas a futura integração final de saída deve respeitar a regra de embalagem do estoque.
+Pedidos já funcionam, mas a integração final da saída deverá usar a regra consolidada de embalagem/lote.
 
 Exemplo:
 
@@ -135,9 +139,13 @@ pedido de 10 unit.
 
 Nunca interpretar quantidade unitária como quantidade de kits.
 
+Quando a interface de pedido for revisitada, deve oferecer apenas formas de retirada realmente disponíveis nos lotes utilizáveis.
+
 ---
 
-# 5. Estoque — regra principal
+# 5. Estoque — ETAPA 4 CONCLUÍDA
+
+## 5.1 Regra principal
 
 O saldo operacional é sempre consolidado em **unidades individuais do item cadastrado**.
 
@@ -167,7 +175,7 @@ Não existem saldos independentes de `kit` e `unidade`.
 
 O item físico é definido pelo Produto.
 
-Exemplos de produtos diferentes:
+Exemplos de produtos distintos:
 
 ```text
 Água 1 L
@@ -192,9 +200,7 @@ A matemática fica interna.
 
 ---
 
-# 7. Lote — estrutura definitiva atual
-
-Cada lote possui:
+# 7. Estrutura definitiva atual do Lote
 
 ```text
 codigoInterno
@@ -212,7 +218,7 @@ dataValidade
 ativo
 ```
 
-## 7.1 Código SGL
+## Código SGL
 
 Formato:
 
@@ -280,7 +286,7 @@ caixa com 10 garrafas de 1 L
 unidade de 10 kg
 ```
 
-O tipo original da embalagem passa a ser tratado como **histórico do lote** e não pode ser trocado depois da criação.
+O tipo original da embalagem é histórico e não pode ser trocado depois da criação.
 
 A descrição textual pode ser corrigida sem mudar o multiplicador original.
 
@@ -315,7 +321,7 @@ Motivo: preservar a rastreabilidade física e matemática da entrada.
 
 ---
 
-# 10. Fracionamento — decisão definitiva
+# 10. Fracionamento — decisão definitiva e validada
 
 Na interface:
 
@@ -327,7 +333,7 @@ Significado:
 
 ```text
 false
-→ a embalagem precisa sair completa
+→ embalagem precisa sair completa
 
 true
 → podem sair unidades individuais
@@ -347,48 +353,46 @@ saídas válidas:
 ...
 ```
 
-## Transição permitida
+Transição permitida:
 
 ```text
 não fracionável
 → fracionável
 ```
 
-Permitido porque o gestor pode decidir abrir/liberar a embalagem.
-
-## Transição proibida
+Transição proibida:
 
 ```text
 fracionável
 → não fracionável
 ```
 
-Bloqueada permanentemente pelo backend.
+A segunda é bloqueada permanentemente pelo backend. Após liberar retirada unitária não é possível garantir que a embalagem continua completa/lacrada.
 
-Motivo: após liberar retiradas unitárias não é possível garantir que a embalagem física continua completa/lacrada.
+O lote continua historicamente KIT/CAIXA/etc.; apenas sua permissão operacional muda.
 
-O lote continua sendo historicamente KIT/CAIXA/etc.; apenas sua permissão operacional muda.
+Fluxo validado no frontend e backend em 28/08/2026.
 
 ---
 
 # 11. FIFO / FEFO com fracionamento
 
-A ordenação continua:
+Ordenação:
 
 ```text
 perecível → FEFO
 não perecível → FIFO
 ```
 
-Mas o lote também precisa ser compatível com a quantidade solicitada.
+O lote também precisa ser compatível com a quantidade solicitada.
 
 Fluxo do backend:
 
 ```text
 ordenar lotes por FEFO/FIFO
-→ analisar primeiro lote
+→ analisar lote
 → se fracionável, pode consumir a quantidade necessária
-→ se não fracionável, consumir somente múltiplos completos do multiplicador
+→ se não fracionável, consumir somente múltiplos completos
 → se não servir, seguir para o próximo lote
 → repetir até completar a saída
 ```
@@ -409,9 +413,9 @@ pedido = 10 unit.
 → B atende 10
 ```
 
-Se nenhuma combinação de lotes conseguir atender sem quebrar uma embalagem fechada, a transação inteira é recusada.
+Se nenhuma combinação conseguir atender sem quebrar embalagem fechada, a transação inteira é recusada.
 
-Essa regra foi aplicada em `MovimentacaoEstoqueService.registrarSaida`.
+Regra aplicada em `MovimentacaoEstoqueService.registrarSaida`.
 
 ---
 
@@ -446,7 +450,7 @@ Kits — 50 unit. por embalagem
 Caixas — 10 unit. por embalagem
 ```
 
-Selecionar uma embalagem não altera o saldo real; muda apenas a visualização.
+Selecionar embalagem não altera o saldo real; muda somente a visualização.
 
 ---
 
@@ -483,6 +487,47 @@ registro antigo
 lote legado
 fator de conversão
 ```
+
+## Busca e filtro
+
+A lista possui busca por:
+
+```text
+Código SGL
+lote/referência do fornecedor
+especificação da embalagem
+tipo de embalagem
+```
+
+Filtro de situação:
+
+```text
+Todos
+Válidos
+Próximos do vencimento
+Vencidos
+Descartados por vencimento
+```
+
+A filtragem é local sobre os lotes carregados do estoque atual.
+
+## Status visual de descarte
+
+Não foi criado novo status persistido no backend nesta etapa.
+
+Regra visual atual:
+
+```text
+lote vencido + quantidadeDisponivel > 0
+→ VENCIDO
+
+lote vencido + quantidadeDisponivel = 0
+→ DESCARTADO POR VENCIMENTO
+```
+
+Isso evita manter um lote já tratado visualmente como apenas `VENCIDO`.
+
+Observação de domínio: se futuramente for necessário distinguir com precisão `zerado por consumo` de `zerado por descarte`, o backend deverá expor explicitamente a causa/status final do lote através do histórico de movimentações. Por enquanto, a nomenclatura é um refinamento visual desta interface.
 
 ---
 
@@ -524,7 +569,7 @@ fracionável=true → false
 
 ---
 
-# 15. Descarte por vencimento — implementado
+# 15. Descarte por vencimento — implementado e validado
 
 Endpoint:
 
@@ -567,9 +612,11 @@ lotes vencidos mais antigos primeiro
 embalagem não fracionável deve ser descartada em múltiplos completos
 ```
 
-Se a quantidade solicitada exigir quebrar uma embalagem fechada e não houver outra combinação válida, a transação inteira é recusada.
+Se a quantidade exigir quebrar uma embalagem fechada e não houver combinação válida, a transação inteira é recusada.
 
-Após descarte completo, lote vencido com saldo zero não entra mais no indicador operacional de `Produtos com lote vencido`.
+Após descarte completo, lote vencido com saldo zero não entra mais no indicador operacional `Produtos com lote vencido`.
+
+Fluxo validado em 28/08/2026.
 
 ---
 
@@ -582,39 +629,94 @@ V7 → Código SGL + sequência
 V8 → tipo de embalagem
 ```
 
-Ao atualizar o backend, executar/reiniciar para o Flyway aplicar as migrations pendentes.
+---
+
+# 17. Etapa 4 — encerramento
+
+Validações realizadas:
+
+```text
+✅ saldo em unidades
+✅ entrada com embalagem/multiplicador
+✅ Código SGL automático
+✅ modal de lote
+✅ edição segura
+✅ fracionamento false → true
+✅ bloqueio true → false
+✅ tipo de embalagem preservado
+✅ descarte por vencimento
+✅ baixa de saldo após descarte
+✅ indicador de vencimento considera somente saldo > 0
+✅ busca e filtro de lotes implementados
+✅ nomenclatura visual DESCARTADO POR VENCIMENTO
+```
+
+**Etapa 4 — Estoque / Lotes encerrada.**
 
 ---
 
-# 17. Próxima validação para encerrar Estoque
+# 18. Etapa 5 — Produtos + Rotulagem — PRÓXIMA
 
-Validar:
+Produto é módulo operacional de primeira classe.
 
-```text
-1. lote KIT não fracionável
-2. abrir modal de edição
-3. liberar retirada unitária
-4. salvar
-5. confirmar que não é mais possível desmarcar
-6. confirmar tipo KIT preservado
-7. criar/usar lote vencido com saldo
-8. abrir Descartar vencidos
-9. informar quantidade + justificativa
-10. confirmar baixa do saldo
-11. confirmar movimentação por lote
-12. confirmar indicador de vencido some quando o saldo vencido chegar a zero
-```
-
-Se aprovado:
+Rotas planejadas:
 
 ```text
-Etapa 4 — Estoque ✅ ENCERRADA
-→ iniciar Etapa 5 — Produtos + Rotulagem
+/produtos
+/produtos/:id
 ```
+
+A interface deve consolidar informações como:
+
+```text
+nome
+código de referência
+descrição
+item físico / unidade
+embalagem padrão
+localização
+estoque mínimo
+risco
+perecibilidade
+condições de armazenamento
+saldo atual
+lotes ativos
+última entrada
+```
+
+Também deve preparar o fluxo de rotulagem.
+
+Rótulo de lote deve usar como identidade principal:
+
+```text
+codigoInterno
+```
+
+Exemplo:
+
+```text
+LOT-EXT-DNA-PL-001
+```
+
+Informações candidatas ao rótulo:
+
+```text
+produto
+Código SGL
+lote do fornecedor
+validade
+especificação da embalagem
+quantidade
+localização
+risco
+condições de armazenamento
+```
+
+Definir o layout e os tipos de rótulo durante esta etapa antes de implementar geração/impressão definitiva.
 
 ---
 
-# 18. Roadmap oficial
+# 19. Roadmap oficial
 
 ```text
 Etapa 0 — Handoff backend → frontend                       ✅
@@ -625,18 +727,19 @@ Etapa 3 — Interfaces iniciais                              ✅
   Pedidos Solicitante                                      ✅
   Shell Gestão/Admin + Pedidos Gestão                      ✅
 
-Etapa 4 — Estoque                                          🟡 VALIDAÇÃO FINAL
+Etapa 4 — Estoque / Lotes                                  ✅ CONCLUÍDA
   visão geral                                               ✅
   detalhe                                                   ✅
   entrada de lote                                           ✅
   Código SGL                                                ✅
   embalagem + multiplicador                                ✅
   modal lote                                                ✅
-  fracionamento irreversível                               ✅ validar
-  FIFO/FEFO compatível com embalagem                       ✅ backend
-  descarte por vencimento                                  ✅ validar
+  fracionamento irreversível                               ✅
+  FIFO/FEFO compatível com embalagem                       ✅
+  descarte por vencimento                                  ✅
+  busca/filtro/status visual                               ✅
 
-Etapa 5 — Produtos operacional + Rotulagem                 ⏳ PRÓXIMA
+Etapa 5 — Produtos operacional + Rotulagem                 🟡 ATUAL
 Etapa 6 — Movimentações                                    ⏳
 Etapa 7 — Relatórios / Documentos / Fiscalização           ⏳
 Etapa 8 — Administração / Cadastros                        ⏳
@@ -651,7 +754,7 @@ Etapa 10 — Autenticação / autorização / auditoria          ⏳
 
 ---
 
-# 19. Administração futura — Estagiários
+# 20. Administração futura — Estagiários
 
 Interface própria prevista:
 
@@ -678,7 +781,7 @@ Não duplicar senha/identidade corporativa localmente.
 
 ---
 
-# 20. Rotas
+# 21. Rotas
 
 ```text
 /login
@@ -687,8 +790,8 @@ Não duplicar senha/identidade corporativa localmente.
 /pedidos
 /estoque
 /estoque/:id
-/produtos                  ⏳
-/produtos/:id              ⏳
+/produtos                  ⏳ próxima implementação
+/produtos/:id              ⏳ próxima implementação
 /movimentacoes             ⏳
 /relatorios                ⏳
 /cadastros/produtos        ⏳
@@ -702,6 +805,10 @@ Não duplicar senha/identidade corporativa localmente.
 
 ---
 
-# 21. Regra central atual
+# 22. Regra central atual
 
-**O usuário enxerga unidades e embalagens físicas de forma simples; o backend preserva a matemática, FIFO/FEFO, fracionamento e rastreabilidade.**
+**O usuário enxerga unidades e embalagens físicas de forma simples; o backend preserva matemática, FIFO/FEFO, fracionamento e rastreabilidade.**
+
+Próxima direção:
+
+**Produtos deve organizar o catálogo operacional e preparar a geração de rótulos sem duplicar as responsabilidades do Estoque/Lote.**
