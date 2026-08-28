@@ -244,3 +244,63 @@ export interface RelatorioEstoqueLotesFiltros {
   validade?: SituacaoLoteRelatorio
   diasVencimento?: number
 }
+
+export interface RelatorioFiscalizacaoProduto {
+  produtoId: string
+  produtoNome: string
+  codigoReferencia: string | null
+  orgaosFiscalizadores: OrgaoFiscalizadorRelatorio[]
+  observacaoFiscalizacao: string | null
+  saldoAtual: number
+  lotesAtivos: number
+  lotesVencidos: number
+  lotesProximosVencimento: number
+  proximoVencimento: string | null
+  quantidadeEntradas: number
+  quantidadeSaidas: number
+}
+
+export interface RelatorioFiscalizacaoMovimentacao {
+  movimentacaoId: string
+  dataMovimentacao: string
+  produtoId: string
+  produtoNome: string
+  tipoMovimentacao: TipoMovimentacaoRelatorio
+  quantidadeMovimentada: number
+  loteId: string | null
+  codigoInternoLote: string | null
+  numeroLote: string | null
+  dataValidadeLote: string | null
+  laboratorioId: string | null
+  laboratorioNome: string | null
+  projetoId: string | null
+  projetoNome: string | null
+  solicitanteId: string | null
+  solicitanteNome: string | null
+  pedidoId: string | null
+  responsavelId: string
+  responsavelNome: string
+  saldoAposMovimentacao: number
+}
+
+export interface RelatorioFiscalizacaoResponse {
+  geradoEm: string
+  totalProdutosFiscalizados: number
+  saldoAtualTotal: number
+  lotesAtivos: number
+  lotesVencidos: number
+  lotesProximosVencimento: number
+  quantidadeEntradas: number
+  quantidadeSaidas: number
+  produtos: RelatorioFiscalizacaoProduto[]
+  movimentacoes: RelatorioFiscalizacaoMovimentacao[]
+}
+
+export interface RelatorioFiscalizacaoFiltros {
+  produtoId?: string
+  orgaoFiscalizador?: OrgaoFiscalizadorRelatorio
+  unidadeId?: string
+  dataInicio?: string
+  dataFim?: string
+  diasVencimento?: number
+}
