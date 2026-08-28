@@ -8,7 +8,7 @@
 **Backend atual:** `main`  
 **Fase atual:** Etapa 5 — Produtos + Rotulagem  
 **Última etapa concluída:** Etapa 4 — Estoque / Lotes  
-**Próximo passo exato:** iniciar interface operacional de Produtos, consolidando dados do produto, lotes e futura geração de rótulo.
+**Próximo passo exato:** iniciar interface operacional de Produtos, consolidando dados do produto, estoque mínimo, lotes e futura geração de rótulo.
 
 Este arquivo é a fonte principal de retomada do frontend.
 
@@ -86,6 +86,7 @@ Movimentações                                 ⏳
 Relatórios                                    ⏳
 Administração / Cadastros                     ⏳
 Estagiários                                   ⏳ obrigatório em Administração
+Tipos de unidade/embalagem                    ⏳ previsto em Administração
 Dashboard final / robustez / 404              ⏳
 Autenticação definitiva / auditoria           ⏳
 ```
@@ -117,6 +118,8 @@ Documento:
 ```text
 docs/DECISAO_UNIDADES_CORPORATIVAS.md
 ```
+
+Importante: **Unidade institucional** e **tipo de unidade/embalagem de estoque** são conceitos diferentes. O primeiro vem da integração corporativa; o segundo poderá ser administrado localmente pelo SGL.
 
 ---
 
@@ -168,6 +171,48 @@ mínimo = 100 unit.
 ```
 
 Não existem saldos independentes de `kit` e `unidade`.
+
+## 5.2 Estoque mínimo — decisão de interface
+
+O **estoque mínimo pertence à configuração operacional do Produto**.
+
+Portanto, sua edição principal deve ocorrer em:
+
+```text
+/produtos/:id
+```
+
+junto de informações como:
+
+```text
+localização
+risco
+perecibilidade
+condições de armazenamento
+estoque mínimo
+```
+
+A Administração pode reutilizar o mesmo cadastro de Produto e, por consequência, também ter permissão para alterar o mínimo, mas não deve existir uma regra/cadastro separado apenas para estoque mínimo.
+
+O detalhe de Estoque apenas exibe o valor e usa-o para alertas; não é a tela principal de configuração desse dado.
+
+## 5.3 Resumo superior do detalhe
+
+Foi removida da área superior a informação:
+
+```text
+Embalagem mais comum
+```
+
+Motivo: a embalagem já possui contexto suficiente na lista de lotes e no filtro `Visualizar por embalagem`, tornando essa informação redundante no topo.
+
+Permanecem no contexto superior:
+
+```text
+Contagem padrão
+Localização
+Avisar quando restarem
+```
 
 ---
 
@@ -254,7 +299,7 @@ V7__add_codigo_interno_lote.sql
 
 # 8. Tipo e especificação de embalagem
 
-Tipo controlado:
+Tipo controlado atualmente:
 
 ```text
 UNITARIO
@@ -264,7 +309,7 @@ GARRAFA
 GALAO
 ```
 
-Backend:
+Backend atual:
 
 ```text
 TipoEmbalagem
@@ -289,6 +334,8 @@ unidade de 10 kg
 O tipo original da embalagem é histórico e não pode ser trocado depois da criação.
 
 A descrição textual pode ser corrigida sem mudar o multiplicador original.
+
+Observação futura: a Administração deverá permitir gerenciar os tipos disponíveis, substituindo o enum rígido por um catálogo configurável quando essa etapa for implementada.
 
 ---
 
@@ -649,13 +696,14 @@ Validações realizadas:
 ✅ indicador de vencimento considera somente saldo > 0
 ✅ busca e filtro de lotes implementados
 ✅ nomenclatura visual DESCARTADO POR VENCIMENTO
+✅ resumo superior simplificado sem Embalagem mais comum
 ```
 
 **Etapa 4 — Estoque / Lotes encerrada.**
 
 ---
 
-# 18. Etapa 5 — Produtos + Rotulagem — PRÓXIMA
+# 18. Etapa 5 — Produtos + Rotulagem — ATUAL
 
 Produto é módulo operacional de primeira classe.
 
@@ -683,6 +731,31 @@ saldo atual
 lotes ativos
 última entrada
 ```
+
+## Estoque mínimo no Produto
+
+A edição do estoque mínimo será responsabilidade da interface de **Produto**, porque é uma configuração operacional daquele item.
+
+Exemplo:
+
+```text
+Produto: Extrato de DNA
+Estoque mínimo: 100 unit.
+```
+
+A tela de Estoque continua responsável por:
+
+```text
+exibir saldo
+comparar saldo x mínimo
+avisar estoque baixo
+```
+
+mas não por manter a configuração principal do mínimo.
+
+Administração pode acessar/editar o mesmo Produto conforme permissões, sem criar uma segunda fonte para o mesmo valor.
+
+## Rotulagem
 
 Também deve preparar o fluxo de rotulagem.
 
@@ -748,13 +821,76 @@ Etapa 8 — Administração / Cadastros                        ⏳
   Projetos                                                  ⏳
   Usuários                                                  ⏳
   Estagiários                                               ⏳ obrigatório
+  Tipos de unidade / embalagem                             ⏳ obrigatório planejar CRUD
 Etapa 9 — Dashboards finais / robustez / 404               ⏳
 Etapa 10 — Autenticação / autorização / auditoria          ⏳
 ```
 
 ---
 
-# 20. Administração futura — Estagiários
+# 20. Administração futura — Cadastros
+
+A Administração deverá concentrar cadastros estruturais que não pertencem ao fluxo diário de movimentação.
+
+Previstos:
+
+```text
+Produtos
+Laboratórios
+Projetos
+Usuários
+Estagiários
+Tipos de unidade / embalagem
+```
+
+## 20.1 Tipos de unidade / embalagem
+
+Deve existir a possibilidade futura de:
+
+```text
+cadastrar
+editar
+inativar/remover da seleção
+reativar
+```
+
+tipos como:
+
+```text
+UNITÁRIO
+KIT
+CAIXA
+GARRAFA
+GALÃO
+PACOTE
+BOMBONA
+BARRIL
+outros necessários pela unidade
+```
+
+Rota candidata:
+
+```text
+/cadastros/tipos-unidade
+```
+
+### Regra de segurança histórica
+
+Se um tipo já estiver referenciado por lotes existentes, **não excluir fisicamente do banco**.
+
+Nesse caso:
+
+```text
+remover
+→ significa inativar para novos cadastros
+→ lotes históricos continuam exibindo o tipo original
+```
+
+Isso preserva rastreabilidade.
+
+A implementação dessa etapa provavelmente exigirá substituir o enum rígido `TipoEmbalagem` por entidade/catálogo persistido ou mecanismo equivalente. Não realizar essa refatoração durante Produtos sem necessidade; executar na etapa de Administração com migration e compatibilidade dos lotes existentes.
+
+## 20.2 Estagiários
 
 Interface própria prevista:
 
@@ -800,6 +936,7 @@ Não duplicar senha/identidade corporativa localmente.
 /cadastros/usuarios        ⏳
 /cadastros/estagiarios     ⏳
 /cadastros/estagiarios/:id ⏳
+/cadastros/tipos-unidade   ⏳
 /:pathMatch(.*)*           ⏳
 ```
 
@@ -811,4 +948,4 @@ Não duplicar senha/identidade corporativa localmente.
 
 Próxima direção:
 
-**Produtos deve organizar o catálogo operacional e preparar a geração de rótulos sem duplicar as responsabilidades do Estoque/Lote.**
+**Produtos deve organizar o catálogo operacional, permitir ajustar configurações do item como estoque mínimo e preparar a geração de rótulos sem duplicar as responsabilidades do Estoque/Lote.**
