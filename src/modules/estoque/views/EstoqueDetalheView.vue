@@ -225,11 +225,11 @@ async function registrarEntrada() {
     return
   }
 
-  const codigo = formularioEntrada.value.numeroLote.trim()
+  const loteFornecedor = formularioEntrada.value.numeroLote.trim()
   const apresentacao = formularioEntrada.value.apresentacao?.trim() || ''
 
-  if (!codigo) {
-    erroEntrada.value = 'Informe o código do lote.'
+  if (!loteFornecedor) {
+    erroEntrada.value = 'Informe o lote ou referência do fornecedor.'
     return
   }
   if (!apresentacao) {
@@ -249,8 +249,8 @@ async function registrarEntrada() {
   erroEntrada.value = ''
 
   try {
-    await estoqueService.registrarEntradaLote(estoqueId.value, usuarioId.value, {
-      numeroLote: codigo,
+    const criado = await estoqueService.registrarEntradaLote(estoqueId.value, usuarioId.value, {
+      numeroLote: loteFornecedor,
       apresentacao,
       quantidade: Number(formularioEntrada.value.quantidade),
       conteudoPorApresentacao: Number(formularioEntrada.value.conteudoPorApresentacao),
@@ -261,7 +261,7 @@ async function registrarEntrada() {
     })
 
     modalEntradaAberto.value = false
-    sucessoEntrada.value = `Entrada do lote ${codigo} registrada com sucesso.`
+    sucessoEntrada.value = `Entrada ${criado.codigoInterno} registrada com sucesso.`
     await carregar()
   } catch (error) {
     erroEntrada.value = mensagemErro(error, 'Não foi possível registrar a entrada do lote.')
@@ -303,9 +303,9 @@ function iniciarEdicaoLote() {
 
 async function salvarLote() {
   if (!loteSelecionado.value) return
-  const codigo = formularioLote.value.numeroLote.trim()
-  if (!codigo) {
-    erroLote.value = 'Informe o código do lote.'
+  const loteFornecedor = formularioLote.value.numeroLote.trim()
+  if (!loteFornecedor) {
+    erroLote.value = 'Informe o lote ou referência do fornecedor.'
     return
   }
 
@@ -315,7 +315,7 @@ async function salvarLote() {
   try {
     const atualizado = await estoqueService.atualizarLote(loteSelecionado.value.id, {
       ...formularioLote.value,
-      numeroLote: codigo,
+      numeroLote: loteFornecedor,
       apresentacao: formularioLote.value.apresentacao?.trim() || null,
       observacao: formularioLote.value.observacao?.trim() || null,
     })
@@ -396,7 +396,7 @@ onMounted(carregar)
         <div class="lot-card__heading">
           <div>
             <h2>Lotes</h2>
-            <p>Veja de forma simples o que há em cada lote. Clique em um lote para consultar ou editar seus detalhes.</p>
+            <p>O código SGL é gerado automaticamente e nunca muda. Clique em um lote para consultar os demais dados.</p>
           </div>
           <button class="primary-action" type="button" @click="abrirEntrada">+ Nova entrada de lote</button>
         </div>
@@ -407,7 +407,7 @@ onMounted(carregar)
           <table>
             <thead>
               <tr>
-                <th>Lote</th>
+                <th>Código SGL</th>
                 <th>O que foi recebido</th>
                 <th>Disponível agora</th>
                 <th>Entrada</th>
@@ -418,7 +418,10 @@ onMounted(carregar)
             </thead>
             <tbody>
               <tr v-for="lote in lotesAtivos" :key="lote.id" class="lot-row" @click="abrirLote(lote)">
-                <td><strong>{{ lote.numeroLote }}</strong></td>
+                <td>
+                  <strong>{{ lote.codigoInterno }}</strong>
+                  <small>Fornecedor: {{ lote.numeroLote }}</small>
+                </td>
                 <td>
                   <span>{{ resumoRecebido(lote) }}</span>
                   <small v-if="loteLegado(lote)">Entrada feita antes do novo controle de embalagens.</small>
@@ -445,7 +448,7 @@ onMounted(carregar)
           <div>
             <span>Estoque / Entrada</span>
             <h2 id="entrada-lote-title">Nova entrada de lote</h2>
-            <p v-if="estoque">{{ estoque.produtoNome }}</p>
+            <p v-if="estoque">{{ estoque.produtoNome }} · o código SGL será gerado automaticamente</p>
           </div>
           <button type="button" class="modal-close" aria-label="Fechar" @click="fecharEntrada">×</button>
         </header>
@@ -453,8 +456,9 @@ onMounted(carregar)
         <form class="entry-form" @submit.prevent="registrarEntrada">
           <div class="entry-grid">
             <label>
-              <span>Código do lote *</span>
-              <input v-model="formularioEntrada.numeroLote" type="text" maxlength="120" placeholder="Ex.: LOT-2026-001" autofocus />
+              <span>Lote / referência do fornecedor *</span>
+              <input v-model="formularioEntrada.numeroLote" type="text" maxlength="120" placeholder="Ex.: FAB-2026-8841" autofocus />
+              <small>Esse é o identificador informado externamente. O código interno do SGL é criado sozinho.</small>
             </label>
 
             <label>
@@ -513,7 +517,7 @@ onMounted(carregar)
               {{ formularioEntrada.quantidade || 0 }} {{ pluralApresentacao(formularioEntrada.apresentacao, Number(formularioEntrada.quantidade) || 0) }},
               com {{ formularioEntrada.conteudoPorApresentacao || 0 }} {{ unidadeTexto(unidadeProduto, formularioEntrada.conteudoPorApresentacao || 0) }} em cada um.
             </span>
-            <small>O sistema fará os cálculos de estoque automaticamente.</small>
+            <small>O sistema fará os cálculos e criará automaticamente o código interno do lote.</small>
           </div>
 
           <div v-if="erroEntrada" class="form-error">{{ erroEntrada }}</div>
@@ -533,7 +537,7 @@ onMounted(carregar)
         <header class="modal-card__header">
           <div>
             <span>Detalhes do lote</span>
-            <h2 id="lote-detail-title">{{ loteSelecionado.numeroLote }}</h2>
+            <h2 id="lote-detail-title">{{ loteSelecionado.codigoInterno }}</h2>
             <p>{{ estoque?.produtoNome }}</p>
           </div>
           <button type="button" class="modal-close" aria-label="Fechar" @click="fecharLote">×</button>
@@ -554,6 +558,14 @@ onMounted(carregar)
           </div>
 
           <div class="lot-detail-grid">
+            <div>
+              <span>Código SGL</span>
+              <strong>{{ loteSelecionado.codigoInterno }}</strong>
+            </div>
+            <div>
+              <span>Lote do fornecedor</span>
+              <strong>{{ loteSelecionado.numeroLote }}</strong>
+            </div>
             <div>
               <span>Como chegou</span>
               <strong>{{ loteSelecionado.apresentacao || 'Registro antigo' }}</strong>
@@ -582,15 +594,22 @@ onMounted(carregar)
 
           <footer class="modal-actions lot-detail-actions">
             <button type="button" class="secondary-action" @click="fecharLote">Fechar</button>
-            <button type="button" class="primary-action" @click="iniciarEdicaoLote">Editar lote</button>
+            <button type="button" class="primary-action" @click="iniciarEdicaoLote">Editar dados do lote</button>
           </footer>
         </div>
 
         <form v-else class="entry-form" @submit.prevent="salvarLote">
+          <div class="immutable-code-box">
+            <span>Código SGL</span>
+            <strong>{{ loteSelecionado.codigoInterno }}</strong>
+            <small>Gerado automaticamente. Este código identifica o lote no SGL e nunca pode ser alterado.</small>
+          </div>
+
           <div class="entry-grid">
             <label>
-              <span>Código do lote *</span>
+              <span>Lote / referência do fornecedor *</span>
               <input v-model="formularioLote.numeroLote" type="text" maxlength="120" />
+              <small>Permite corrigir apenas a referência externa informada pelo fornecedor.</small>
             </label>
             <label>
               <span>Como chegou</span>
@@ -702,9 +721,12 @@ td small { display: block; margin-top: 4px; color: #94a3b8; font-size: 10px; }
 .fraction-option span { display: flex; flex-direction: column; gap: 3px; }
 .fraction-option strong { color: #1e293b; font-size: 11px; }
 .fraction-option small { color: #64748b; font-size: 10px; }
-.entry-preview, .locked-info { display: flex; flex-direction: column; gap: 4px; margin-top: 14px; padding: 12px 13px; border: 1px solid #dbe7f8; border-radius: 8px; background: #f7faff; color: #475569; font-size: 11px; }
-.entry-preview strong, .locked-info strong { color: #0d2b5e; }
-.entry-preview small, .locked-info small { color: #64748b; }
+.entry-preview, .locked-info, .immutable-code-box { display: flex; flex-direction: column; gap: 4px; margin-top: 14px; padding: 12px 13px; border: 1px solid #dbe7f8; border-radius: 8px; background: #f7faff; color: #475569; font-size: 11px; }
+.entry-preview strong, .locked-info strong, .immutable-code-box strong { color: #0d2b5e; }
+.entry-preview small, .locked-info small, .immutable-code-box small { color: #64748b; }
+.immutable-code-box { margin-top: 0; margin-bottom: 14px; border-color: #cbd5e1; background: #f8fafc; }
+.immutable-code-box > span { color: #64748b; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.immutable-code-box strong { font-size: 16px; letter-spacing: .02em; }
 .form-error { margin-top: 12px; padding: 10px 12px; border: 1px solid #fecaca; border-radius: 7px; background: #fff5f5; color: #b42318; font-size: 11px; font-weight: 700; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; padding-top: 15px; border-top: 1px solid #eef2f7; }
 .lot-detail-body { padding: 18px 22px 22px; }
