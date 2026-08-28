@@ -21,6 +21,7 @@ export interface LoteResponse {
   produtoNome: string
   unidadeId: string
   unidadeNome: string
+  codigoInterno: string
   numeroLote: string
   apresentacao: string | null
   quantidadeApresentacoes: number | null
