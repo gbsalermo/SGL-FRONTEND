@@ -1,3 +1,5 @@
+export type TipoEmbalagem = 'UNITARIO' | 'KIT' | 'CAIXA' | 'GARRAFA' | 'GALAO'
+
 export interface EstoqueCentralResponse {
   id: string
   unidadeId: string
@@ -23,6 +25,7 @@ export interface LoteResponse {
   unidadeNome: string
   codigoInterno: string
   numeroLote: string
+  tipoEmbalagem: TipoEmbalagem
   apresentacao: string | null
   quantidadeApresentacoes: number | null
   conteudoPorApresentacao: number | null
@@ -38,6 +41,7 @@ export interface LoteResponse {
 
 export interface EntradaLoteRequest {
   numeroLote: string
+  tipoEmbalagem: TipoEmbalagem
   apresentacao: string | null
   quantidade: number
   conteudoPorApresentacao: number
@@ -49,6 +53,7 @@ export interface EntradaLoteRequest {
 
 export interface AtualizarLoteRequest {
   numeroLote: string
+  tipoEmbalagem: TipoEmbalagem
   apresentacao: string | null
   fracionavel: boolean
   observacao: string | null
