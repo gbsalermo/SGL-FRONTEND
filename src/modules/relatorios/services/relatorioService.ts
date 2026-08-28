@@ -2,6 +2,8 @@ import { http } from '@/services/http'
 import type {
   RelatorioEstagiariosFiltros,
   RelatorioEstagiariosResponse,
+  RelatorioEstoqueLotesFiltros,
+  RelatorioEstoqueLotesResponse,
   RelatorioMovimentacoesFiltros,
   RelatorioMovimentacoesResponse,
   RelatorioProdutosFiltros,
@@ -34,6 +36,13 @@ export const relatorioService = {
 
   async listarProdutos(filtros: RelatorioProdutosFiltros = {}) {
     const { data } = await http.get<RelatorioProdutosResponse>('/v1/relatorios/produtos', {
+      params: filtros,
+    })
+    return data
+  },
+
+  async listarEstoqueLotes(filtros: RelatorioEstoqueLotesFiltros = {}) {
+    const { data } = await http.get<RelatorioEstoqueLotesResponse>('/v1/relatorios/estoque-lotes', {
       params: filtros,
     })
     return data
