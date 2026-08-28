@@ -8,7 +8,7 @@
 **Backend atual:** `main`  
 **Fase atual:** Etapa 5 — Produtos + Rotulagem  
 **Última etapa concluída:** Etapa 4 — Estoque / Lotes  
-**Próximo passo exato:** iniciar interface operacional de Produtos, consolidando dados do produto, estoque mínimo, lotes e futura geração de rótulo.
+**Próximo passo exato:** validar a integração final Pedidos ↔ Lotes/Embalagens; depois iniciar a interface operacional de Produtos, estoque mínimo e Rotulagem.
 
 Este arquivo é a fonte principal de retomada do frontend.
 
@@ -16,15 +16,13 @@ Este arquivo é a fonte principal de retomada do frontend.
 
 # 0. Como continuar
 
-Ao abrir uma nova sessão:
-
 ```text
 1. ler CONTINUIDADE.md
 2. ler docs/ROADMAP_INTERFACE_GESTAO.md
 3. usar backend/Swagger como fonte de verdade
 4. não duplicar regra de negócio no frontend
-5. manter a linguagem da interface simples para o usuário
-6. continuar da etapa indicada em PRÓXIMO PASSO EXATO
+5. manter linguagem simples para o usuário
+6. validar o bloco atual antes de avançar
 ```
 
 Fluxo:
@@ -58,7 +56,7 @@ Regras gerais:
 - UUID público nas fronteiras;
 - Axios concentrado em services;
 - Admin reutiliza a Gestão;
-- complexidade técnica pode existir internamente sem aparecer como linguagem de interface;
+- complexidade técnica pode existir internamente sem aparecer como linguagem técnica ao usuário;
 - identificadores internos são gerados pelo backend;
 - dados históricos de estoque não devem ser reescritos de forma que altere rastreabilidade.
 
@@ -69,14 +67,17 @@ Regras gerais:
 ```text
 Login                                         ✅
 Pedidos do Solicitante                        ✅
+Pedidos — forma de retirada por embalagem     ✅ implementar/validar
+Pedidos Gestão                                ✅
+Pedidos Entregues — lotes utilizados          ✅ implementar/validar
 Shell Gestão/Admin                            ✅
-Pedidos da Gestão                             ✅
 Estoque — visão geral                         ✅
 Estoque — detalhe                             ✅
 Lotes — entrada                               ✅
 Lotes — código SGL                            ✅
 Lotes — embalagem/multiplicador               ✅
 Lotes — modal detalhe/edição                  ✅
+Lotes — histórico de saídas                   ✅ implementar/validar
 Lotes — fracionamento irreversível            ✅ validado
 Lotes — FIFO/FEFO com embalagem               ✅ backend
 Lotes — descarte por vencimento               ✅ validado
@@ -85,7 +86,7 @@ Produtos operacional + rótulos                ⏳ ETAPA ATUAL
 Movimentações                                 ⏳
 Relatórios                                    ⏳
 Administração / Cadastros                     ⏳
-Estagiários                                   ⏳ obrigatório em Administração
+Estagiários                                   ⏳ obrigatório
 Tipos de unidade/embalagem                    ⏳ previsto em Administração
 Dashboard final / robustez / 404              ⏳
 Autenticação definitiva / auditoria           ⏳
@@ -94,8 +95,6 @@ Autenticação definitiva / auditoria           ⏳
 ---
 
 # 3. Unidade institucional
-
-Decisão definitiva:
 
 **Unidade institucional não terá CRUD manual no SGL.**
 
@@ -107,55 +106,180 @@ login corporativo
 → SGL associa pelo identificador institucional
 ```
 
-Não criar:
+Não criar `/cadastros/unidades`.
 
-```text
-/cadastros/unidades
-```
-
-Documento:
+Documento relacionado:
 
 ```text
 docs/DECISAO_UNIDADES_CORPORATIVAS.md
 ```
 
-Importante: **Unidade institucional** e **tipo de unidade/embalagem de estoque** são conceitos diferentes. O primeiro vem da integração corporativa; o segundo poderá ser administrado localmente pelo SGL.
+Unidade institucional e tipo de unidade/embalagem de estoque são conceitos diferentes.
 
 ---
 
-# 4. Pedidos
+# 4. Pedidos — integração definitiva com Lotes/Embalagens
 
-Pedidos já funcionam, mas a integração final da saída deverá usar a regra consolidada de embalagem/lote.
+A regra de quantidade do Estoque passou a fazer parte do contrato de Pedido.
+
+## 4.1 Novo pedido — forma de retirada
+
+O solicitante não informa apenas uma quantidade abstrata. Para cada produto, ele escolhe uma **forma de retirada realmente disponível nos lotes utilizáveis**.
+
+Exemplos:
+
+```text
+UNITÁRIO
+KIT — 50 unit. por kit
+CAIXA — 10 unit. por caixa
+GARRAFA
+GALÃO
+```
+
+A interface consulta os lotes ativos com saldo daquele estoque.
+
+### UNITÁRIO
+
+A opção `UNITÁRIO` fica disponível quando existir:
+
+```text
+lote UNITARIO
+OU
+lote com fracionavel = true
+```
 
 Exemplo:
 
 ```text
-saldo = 200 unit.
-1 kit = 50 unit.
-
-pedido de 1 kit
-→ baixa 50 unit.
-
-pedido de 10 unit.
-→ baixa 10 unit. somente se existir lote compatível com retirada unitária
+pedido = 10 unidades
+→ quantidadeSolicitada interna = 10
 ```
 
-Nunca interpretar quantidade unitária como quantidade de kits.
+### KIT / CAIXA / GARRAFA / GALÃO
 
-Quando a interface de pedido for revisitada, deve oferecer apenas formas de retirada realmente disponíveis nos lotes utilizáveis.
+Para retirada por embalagem, devem existir lotes compatíveis com:
+
+```text
+mesmo tipoEmbalagem
++
+mesmo multiplicador
+```
+
+Exemplo:
+
+```text
+KIT
+multiplicador = 50
+pedido = 2 kits
+→ quantidadeSolicitada interna = 100 unit.
+```
+
+**Nunca atender 1 KIT usando 50 unidades de outro tipo de embalagem apenas porque a matemática coincide.**
+
+A forma escolhida é persistida em `ItemPedido`:
+
+```text
+tipoEmbalagemSolicitada
+quantidadeEmbalagensSolicitada
+multiplicadorSolicitado
+quantidadeSolicitada = total em unidades
+```
+
+Migration:
+
+```text
+V9__add_forma_retirada_item_pedido.sql
+```
+
+Pedidos anteriores à V9 são migrados como `UNITARIO`, multiplicador `1`.
+
+## 4.2 Orientação quando não existir kit
+
+Se não houver lote com KIT disponível, a interface não oferece KIT como opção e informa:
+
+```text
+Não há kits disponíveis.
+Solicite por unidade ou por outra embalagem disponível.
+```
+
+Não mostrar ao usuário opções impossíveis de atender.
+
+## 4.3 Aprovação pela Gestão
+
+A quantidade aprovada continua sendo registrada em unidades, porém precisa respeitar a forma solicitada.
+
+Exemplo:
+
+```text
+solicitado = KIT de 50
+
+válido:
+50
+100
+150
+
+inválido:
+25
+75
+```
+
+Para `UNITARIO`, a aprovação pode ocorrer unidade a unidade.
+
+## 4.4 FIFO / FEFO + forma solicitada
+
+Fluxo de saída:
+
+```text
+pedido informa forma de retirada
+→ localizar lotes compatíveis
+→ ordenar por FEFO/FIFO
+→ respeitar fracionamento
+→ baixar os lotes realmente utilizados
+→ registrar MovimentacaoEstoque por lote
+```
+
+Compatibilidade:
+
+```text
+UNITARIO
+→ lote UNITARIO ou lote fracionável
+
+KIT/CAIXA/GARRAFA/GALAO
+→ mesmo tipo + mesmo multiplicador
+```
+
+## 4.5 Pedidos Entregues — rastreabilidade por lote
+
+Em `Gestão → Pedidos → Entregues`, ao abrir o pedido, cada item deve mostrar os **lotes realmente utilizados na saída**:
+
+```text
+Código SGL
+quantidade retirada daquele lote
+data/hora da saída
+```
+
+Exemplo:
+
+```text
+LOT-EXT-DNA-PL-007
+50 unit. · saída em 28/08/2026 10:30
+```
+
+O Código SGL exibido vem de `MovimentacaoEstoque.lote`, e não de inferência do frontend.
+
+Endpoint usado:
+
+```text
+GET /api/v1/movimentacoes/pedido?pedidoId={uuid}
+```
 
 ---
 
 # 5. Estoque — ETAPA 4 CONCLUÍDA
 
-## 5.1 Regra principal
-
 O saldo operacional é sempre consolidado em **unidades individuais do item cadastrado**.
 
-Exemplo:
-
 ```text
-Extrato de DNA
 4 kits de 50
 → 200 unit.
 
@@ -164,49 +288,27 @@ saída de 1 kit
 → 150 unit.
 ```
 
-O estoque mínimo usa a mesma unidade:
+O estoque mínimo usa o mesmo saldo.
 
-```text
-mínimo = 100 unit.
-```
+## Estoque mínimo
 
-Não existem saldos independentes de `kit` e `unidade`.
-
-## 5.2 Estoque mínimo — decisão de interface
-
-O **estoque mínimo pertence à configuração operacional do Produto**.
-
-Portanto, sua edição principal deve ocorrer em:
+O estoque mínimo pertence à configuração operacional do **Produto** e será editado principalmente em:
 
 ```text
 /produtos/:id
 ```
 
-junto de informações como:
+A tela de Estoque apenas exibe/compara o valor para gerar alertas.
 
-```text
-localização
-risco
-perecibilidade
-condições de armazenamento
-estoque mínimo
-```
+## Resumo superior
 
-A Administração pode reutilizar o mesmo cadastro de Produto e, por consequência, também ter permissão para alterar o mínimo, mas não deve existir uma regra/cadastro separado apenas para estoque mínimo.
-
-O detalhe de Estoque apenas exibe o valor e usa-o para alertas; não é a tela principal de configuração desse dado.
-
-## 5.3 Resumo superior do detalhe
-
-Foi removida da área superior a informação:
+Foi removido do topo:
 
 ```text
 Embalagem mais comum
 ```
 
-Motivo: a embalagem já possui contexto suficiente na lista de lotes e no filtro `Visualizar por embalagem`, tornando essa informação redundante no topo.
-
-Permanecem no contexto superior:
+Permanecem:
 
 ```text
 Contagem padrão
@@ -218,9 +320,7 @@ Avisar quando restarem
 
 # 6. Produto x embalagem
 
-O item físico é definido pelo Produto.
-
-Exemplos de produtos distintos:
+Produtos com tamanho/volume físico diferente são itens distintos quando isso muda o material estocado.
 
 ```text
 Água 1 L
@@ -228,13 +328,11 @@ Exemplos de produtos distintos:
 Água 250 mL
 ```
 
-Não misturar esses saldos.
-
-Uma caixa com 10 garrafas de Água 1 L representa:
+Exemplo de entrada:
 
 ```text
 Produto: Água 1 L
-Tipo de embalagem: CAIXA
+Tipo: CAIXA
 Especificação: caixa com 10 garrafas de 1 L
 Multiplicador: 10
 Quantidade recebida: 1 caixa
@@ -245,7 +343,7 @@ A matemática fica interna.
 
 ---
 
-# 7. Estrutura definitiva atual do Lote
+# 7. Estrutura atual do Lote
 
 ```text
 codigoInterno
@@ -263,19 +361,10 @@ dataValidade
 ativo
 ```
 
-## Código SGL
-
-Formato:
+Código SGL:
 
 ```text
 LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
-```
-
-Exemplo:
-
-```text
-LOT-EXT-DNA-PL-001
-LOT-EXT-DNA-PL-002
 ```
 
 Regras:
@@ -285,21 +374,15 @@ gerado pelo backend
 sequencial por produto
 único
 imutável
-não digitado pelo usuário
+não digitado
 não editável
-```
-
-Flyway:
-
-```text
-V7__add_codigo_interno_lote.sql
 ```
 
 ---
 
 # 8. Tipo e especificação de embalagem
 
-Tipo controlado atualmente:
+Tipos atuais:
 
 ```text
 UNITARIO
@@ -309,50 +392,26 @@ GARRAFA
 GALAO
 ```
 
-Backend atual:
-
-```text
-TipoEmbalagem
-Lote.tipoEmbalagem
-```
-
-Flyway:
-
-```text
-V8__add_tipo_embalagem_lote.sql
-```
-
 Especificação livre:
 
 ```text
 kit com 50 unidades
 garrafa de 1 L
 caixa com 10 garrafas de 1 L
-unidade de 10 kg
 ```
 
 O tipo original da embalagem é histórico e não pode ser trocado depois da criação.
-
-A descrição textual pode ser corrigida sem mudar o multiplicador original.
-
-Observação futura: a Administração deverá permitir gerenciar os tipos disponíveis, substituindo o enum rígido por um catálogo configurável quando essa etapa for implementada.
 
 ---
 
 # 9. Multiplicador
 
-`conteudoPorApresentacao` é exibido como:
-
-```text
-Multiplicador de unidades
-```
-
-Exemplos:
+`conteudoPorApresentacao` aparece na interface como **Multiplicador de unidades**.
 
 ```text
 UNITARIO → 1
 KIT com 50 → 50
-CAIXA com 10 itens → 10
+CAIXA com 10 → 10
 ```
 
 Depois da entrada ficam bloqueados:
@@ -360,113 +419,50 @@ Depois da entrada ficam bloqueados:
 ```text
 quantidade recebida
 multiplicador
-código SGL
+Código SGL
 tipo original da embalagem
 ```
 
-Motivo: preservar a rastreabilidade física e matemática da entrada.
+---
+
+# 10. Fracionamento — decisão definitiva
+
+```text
+false → embalagem precisa sair completa
+true  → unidades podem sair separadamente
+```
+
+Transição:
+
+```text
+false → true ✅
+true → false ❌
+```
+
+O backend bloqueia a volta para não fracionável.
 
 ---
 
-# 10. Fracionamento — decisão definitiva e validada
-
-Na interface:
-
-```text
-Pode retirar unidades separadamente?
-```
-
-Significado:
-
-```text
-false
-→ embalagem precisa sair completa
-
-true
-→ podem sair unidades individuais
-```
-
-Exemplo:
-
-```text
-KIT
-multiplicador = 50
-fracionavel = false
-
-saídas válidas:
-50
-100
-150
-...
-```
-
-Transição permitida:
-
-```text
-não fracionável
-→ fracionável
-```
-
-Transição proibida:
-
-```text
-fracionável
-→ não fracionável
-```
-
-A segunda é bloqueada permanentemente pelo backend. Após liberar retirada unitária não é possível garantir que a embalagem continua completa/lacrada.
-
-O lote continua historicamente KIT/CAIXA/etc.; apenas sua permissão operacional muda.
-
-Fluxo validado no frontend e backend em 28/08/2026.
-
----
-
-# 11. FIFO / FEFO com fracionamento
-
-Ordenação:
+# 11. FIFO / FEFO
 
 ```text
 perecível → FEFO
 não perecível → FIFO
 ```
 
-O lote também precisa ser compatível com a quantidade solicitada.
-
-Fluxo do backend:
+A seleção também precisa respeitar:
 
 ```text
-ordenar lotes por FEFO/FIFO
-→ analisar lote
-→ se fracionável, pode consumir a quantidade necessária
-→ se não fracionável, consumir somente múltiplos completos
-→ se não servir, seguir para o próximo lote
-→ repetir até completar a saída
+forma solicitada
+multiplicador
+fracionamento
 ```
 
-Exemplo:
-
-```text
-Lote A vence primeiro
-KIT 50
-não fracionável
-
-Lote B vence depois
-KIT 50
-fracionável
-
-pedido = 10 unit.
-→ A é pulado
-→ B atende 10
-```
-
-Se nenhuma combinação conseguir atender sem quebrar embalagem fechada, a transação inteira é recusada.
-
-Regra aplicada em `MovimentacaoEstoqueService.registrarSaida`.
+Se não houver combinação válida, a transação inteira é recusada.
 
 ---
 
-# 12. Interface do detalhe de estoque
+# 12. Detalhe de Estoque
 
 Rota:
 
@@ -483,25 +479,11 @@ Vencem em até 30 dias
 Lotes vencidos
 ```
 
-Saldo principal:
-
-```text
-200 unit.
-```
-
-Filtro por embalagem:
-
-```text
-Unidades individuais
-Kits — 50 unit. por embalagem
-Caixas — 10 unit. por embalagem
-```
-
-Selecionar embalagem não altera o saldo real; muda somente a visualização.
+Filtro por embalagem muda apenas a visualização, nunca o saldo real.
 
 ---
 
-# 13. Tabela de lotes
+# 13. Tabela de Lotes
 
 Colunas:
 
@@ -515,38 +497,16 @@ Situação
 Detalhes
 ```
 
-Exemplo:
-
-```text
-Unidade
-2 kits
-kit com 50 unidades
-
-Disponível agora
-100 unit.
-```
-
-Não mostrar conceitos como:
-
-```text
-unidade-base
-registro antigo
-lote legado
-fator de conversão
-```
-
-## Busca e filtro
-
-A lista possui busca por:
+Busca:
 
 ```text
 Código SGL
-lote/referência do fornecedor
-especificação da embalagem
+lote do fornecedor
+especificação
 tipo de embalagem
 ```
 
-Filtro de situação:
+Filtro:
 
 ```text
 Todos
@@ -556,131 +516,93 @@ Vencidos
 Descartados por vencimento
 ```
 
-A filtragem é local sobre os lotes carregados do estoque atual.
-
-## Status visual de descarte
-
-Não foi criado novo status persistido no backend nesta etapa.
-
-Regra visual atual:
+Regra visual:
 
 ```text
-lote vencido + quantidadeDisponivel > 0
-→ VENCIDO
-
-lote vencido + quantidadeDisponivel = 0
-→ DESCARTADO POR VENCIMENTO
-```
-
-Isso evita manter um lote já tratado visualmente como apenas `VENCIDO`.
-
-Observação de domínio: se futuramente for necessário distinguir com precisão `zerado por consumo` de `zerado por descarte`, o backend deverá expor explicitamente a causa/status final do lote através do histórico de movimentações. Por enquanto, a nomenclatura é um refinamento visual desta interface.
-
----
-
-# 14. Modal de lote
-
-Mostra:
-
-```text
-Código SGL
-Lote do fornecedor
-Tipo de unidade
-Especificação
-Multiplicador
-Entrada
-Validade
-Retirada unitária
-Observação
-```
-
-Editáveis:
-
-```text
-referência do fornecedor
-especificação textual
-data de validade
-observação
-liberar fracionamento, caso ainda esteja bloqueado
-```
-
-Não editáveis:
-
-```text
-Código SGL
-tipo original da embalagem
-quantidade original
-multiplicador original
-fracionável=true → false
+vencido + saldo > 0 → VENCIDO
+vencido + saldo = 0 → DESCARTADO POR VENCIMENTO
 ```
 
 ---
 
-# 15. Descarte por vencimento — implementado e validado
+# 14. Modal do Lote — dados + histórico de saída
 
-Endpoint:
-
-```text
-POST /api/v1/movimentacoes/estoques/{estoqueId}/descarte-vencimento?usuarioId={uuid}
-```
-
-Body:
+Dados cadastrais mostrados:
 
 ```text
-quantidade
-justificativa
-```
-
-Na interface existe `Descartar vencidos` quando há lote vencido com saldo.
-
-O modal mostra:
-
-```text
-lotes vencidos com saldo
-total vencido
 Código SGL
+lote do fornecedor
+tipo
 especificação
+multiplicador
+entrada
 validade
-quantidade disponível
-regra de embalagem/fracionamento
-quantidade a descartar
-justificativa
+retirada unitária
+observação
 ```
 
-Regras:
+O modal também possui **Saídas deste lote**, consultando:
+
+```text
+GET /api/v1/movimentacoes/lote?loteId={uuid}
+```
+
+Para cada `SAIDA`, mostrar pelo menos:
+
+```text
+data/hora da saída
+quantidade
+nome do usuário solicitante do pedido
+```
+
+Exemplo:
+
+```text
+Maria Oliveira
+28/08/2026 10:30
+50 unit.
+```
+
+`pedidoSolicitanteNome` identifica quem fez o pedido. `usuarioNome` da movimentação continua representando quem executou/registrou a operação, como o gestor aprovador.
+
+Isso cria rastreabilidade nos dois sentidos:
+
+```text
+Pedido entregue → quais lotes saíram
+Lote → para quais pedidos/solicitantes houve saída
+```
+
+---
+
+# 15. Descarte por vencimento
+
+Implementado e validado.
 
 ```text
 somente produto perecível
-somente saldo de lotes vencidos
+somente lotes vencidos com saldo
 justificativa obrigatória
-baixa no estoque em unit.
-movimentação registrada por lote
-lotes vencidos mais antigos primeiro
-embalagem não fracionável deve ser descartada em múltiplos completos
+baixa em unit.
+movimentação por lote
+mais antigos primeiro
+respeita embalagem fechada
 ```
-
-Se a quantidade exigir quebrar uma embalagem fechada e não houver combinação válida, a transação inteira é recusada.
-
-Após descarte completo, lote vencido com saldo zero não entra mais no indicador operacional `Produtos com lote vencido`.
-
-Fluxo validado em 28/08/2026.
 
 ---
 
-# 16. Migrations relacionadas a Lotes
+# 16. Migrations relacionadas
 
 ```text
-V5 → apresentação/fracionamento
+V5 → apresentação/fracionamento do lote
 V6 → observação do lote
 V7 → Código SGL + sequência
-V8 → tipo de embalagem
+V8 → tipo de embalagem do lote
+V9 → forma de retirada persistida no ItemPedido
 ```
 
 ---
 
-# 17. Etapa 4 — encerramento
-
-Validações realizadas:
+# 17. Etapa 4 — Estoque/Lotes encerrada
 
 ```text
 ✅ saldo em unidades
@@ -688,24 +610,18 @@ Validações realizadas:
 ✅ Código SGL automático
 ✅ modal de lote
 ✅ edição segura
-✅ fracionamento false → true
-✅ bloqueio true → false
-✅ tipo de embalagem preservado
+✅ fracionamento irreversível
+✅ FIFO/FEFO compatível
 ✅ descarte por vencimento
-✅ baixa de saldo após descarte
-✅ indicador de vencimento considera somente saldo > 0
-✅ busca e filtro de lotes implementados
-✅ nomenclatura visual DESCARTADO POR VENCIMENTO
-✅ resumo superior simplificado sem Embalagem mais comum
+✅ busca/filtro de lotes
+✅ status visual de descarte
+✅ resumo superior simplificado
+✅ histórico de saída por lote implementado para validação
 ```
-
-**Etapa 4 — Estoque / Lotes encerrada.**
 
 ---
 
 # 18. Etapa 5 — Produtos + Rotulagem — ATUAL
-
-Produto é módulo operacional de primeira classe.
 
 Rotas planejadas:
 
@@ -714,14 +630,13 @@ Rotas planejadas:
 /produtos/:id
 ```
 
-A interface deve consolidar informações como:
+Produto deve consolidar:
 
 ```text
 nome
 código de referência
 descrição
 item físico / unidade
-embalagem padrão
 localização
 estoque mínimo
 risco
@@ -732,60 +647,25 @@ lotes ativos
 última entrada
 ```
 
-## Estoque mínimo no Produto
-
-A edição do estoque mínimo será responsabilidade da interface de **Produto**, porque é uma configuração operacional daquele item.
-
-Exemplo:
-
-```text
-Produto: Extrato de DNA
-Estoque mínimo: 100 unit.
-```
-
-A tela de Estoque continua responsável por:
-
-```text
-exibir saldo
-comparar saldo x mínimo
-avisar estoque baixo
-```
-
-mas não por manter a configuração principal do mínimo.
-
-Administração pode acessar/editar o mesmo Produto conforme permissões, sem criar uma segunda fonte para o mesmo valor.
+A edição do estoque mínimo ocorrerá em Produto.
 
 ## Rotulagem
 
-Também deve preparar o fluxo de rotulagem.
+Rótulo de lote usa `codigoInterno` como identidade principal.
 
-Rótulo de lote deve usar como identidade principal:
-
-```text
-codigoInterno
-```
-
-Exemplo:
-
-```text
-LOT-EXT-DNA-PL-001
-```
-
-Informações candidatas ao rótulo:
+Candidatos:
 
 ```text
 produto
 Código SGL
 lote do fornecedor
 validade
-especificação da embalagem
+especificação
 quantidade
 localização
 risco
 condições de armazenamento
 ```
-
-Definir o layout e os tipos de rótulo durante esta etapa antes de implementar geração/impressão definitiva.
 
 ---
 
@@ -800,18 +680,15 @@ Etapa 3 — Interfaces iniciais                              ✅
   Pedidos Solicitante                                      ✅
   Shell Gestão/Admin + Pedidos Gestão                      ✅
 
-Etapa 4 — Estoque / Lotes                                  ✅ CONCLUÍDA
-  visão geral                                               ✅
-  detalhe                                                   ✅
-  entrada de lote                                           ✅
-  Código SGL                                                ✅
-  embalagem + multiplicador                                ✅
-  modal lote                                                ✅
-  fracionamento irreversível                               ✅
-  FIFO/FEFO compatível com embalagem                       ✅
-  descarte por vencimento                                  ✅
-  busca/filtro/status visual                               ✅
+Refino transversal Pedidos ↔ Estoque/Lotes                🟡 VALIDAR
+  forma de retirada no novo pedido                         ✅
+  disponibilidade baseada em lotes                         ✅
+  aprovação respeita embalagem                             ✅
+  saída respeita tipo + multiplicador                      ✅
+  lotes em pedidos entregues                               ✅
+  histórico de saída dentro do lote                        ✅
 
+Etapa 4 — Estoque / Lotes                                  ✅ CONCLUÍDA
 Etapa 5 — Produtos operacional + Rotulagem                 🟡 ATUAL
 Etapa 6 — Movimentações                                    ⏳
 Etapa 7 — Relatórios / Documentos / Fiscalização           ⏳
@@ -821,7 +698,7 @@ Etapa 8 — Administração / Cadastros                        ⏳
   Projetos                                                  ⏳
   Usuários                                                  ⏳
   Estagiários                                               ⏳ obrigatório
-  Tipos de unidade / embalagem                             ⏳ obrigatório planejar CRUD
+  Tipos de unidade / embalagem                             ⏳ planejar CRUD
 Etapa 9 — Dashboards finais / robustez / 404               ⏳
 Etapa 10 — Autenticação / autorização / auditoria          ⏳
 ```
@@ -829,8 +706,6 @@ Etapa 10 — Autenticação / autorização / auditoria          ⏳
 ---
 
 # 20. Administração futura — Cadastros
-
-A Administração deverá concentrar cadastros estruturais que não pertencem ao fluxo diário de movimentação.
 
 Previstos:
 
@@ -843,9 +718,9 @@ Estagiários
 Tipos de unidade / embalagem
 ```
 
-## 20.1 Tipos de unidade / embalagem
+## Tipos de unidade / embalagem
 
-Deve existir a possibilidade futura de:
+Deve permitir:
 
 ```text
 cadastrar
@@ -854,7 +729,7 @@ inativar/remover da seleção
 reativar
 ```
 
-tipos como:
+Exemplos:
 
 ```text
 UNITÁRIO
@@ -865,32 +740,13 @@ GALÃO
 PACOTE
 BOMBONA
 BARRIL
-outros necessários pela unidade
 ```
 
-Rota candidata:
+Se já estiver usado em lote histórico, não excluir fisicamente. Remover significa inativar para novos registros.
 
-```text
-/cadastros/tipos-unidade
-```
+A implementação futura deverá substituir o enum rígido `TipoEmbalagem` por catálogo persistido ou mecanismo equivalente.
 
-### Regra de segurança histórica
-
-Se um tipo já estiver referenciado por lotes existentes, **não excluir fisicamente do banco**.
-
-Nesse caso:
-
-```text
-remover
-→ significa inativar para novos cadastros
-→ lotes históricos continuam exibindo o tipo original
-```
-
-Isso preserva rastreabilidade.
-
-A implementação dessa etapa provavelmente exigirá substituir o enum rígido `TipoEmbalagem` por entidade/catálogo persistido ou mecanismo equivalente. Não realizar essa refatoração durante Produtos sem necessidade; executar na etapa de Administração com migration e compatibilidade dos lotes existentes.
-
-## 20.2 Estagiários
+## Estagiários
 
 Interface própria prevista:
 
@@ -899,21 +755,7 @@ Interface própria prevista:
 /cadastros/estagiarios/:id
 ```
 
-Mostrar:
-
-```text
-nome
-email/identificador corporativo
-unidade corporativa read-only
-laboratório
-supervisor/professor responsável
-vínculo
-situação
-período
-observações
-```
-
-Não duplicar senha/identidade corporativa localmente.
+Mostrar nome, identidade corporativa, unidade read-only, laboratório, supervisor/professor, vínculo, situação, período e observações.
 
 ---
 
@@ -926,8 +768,8 @@ Não duplicar senha/identidade corporativa localmente.
 /pedidos
 /estoque
 /estoque/:id
-/produtos                  ⏳ próxima implementação
-/produtos/:id              ⏳ próxima implementação
+/produtos                  ⏳
+/produtos/:id              ⏳
 /movimentacoes             ⏳
 /relatorios                ⏳
 /cadastros/produtos        ⏳
@@ -942,10 +784,6 @@ Não duplicar senha/identidade corporativa localmente.
 
 ---
 
-# 22. Regra central atual
+# 22. Regra central
 
-**O usuário enxerga unidades e embalagens físicas de forma simples; o backend preserva matemática, FIFO/FEFO, fracionamento e rastreabilidade.**
-
-Próxima direção:
-
-**Produtos deve organizar o catálogo operacional, permitir ajustar configurações do item como estoque mínimo e preparar a geração de rótulos sem duplicar as responsabilidades do Estoque/Lote.**
+**O usuário enxerga unidades e embalagens físicas de forma simples; o backend preserva matemática, FIFO/FEFO, forma solicitada, fracionamento e rastreabilidade por lote.**
