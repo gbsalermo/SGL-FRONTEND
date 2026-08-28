@@ -18,8 +18,14 @@ async function entrar() {
   carregando.value = true
 
   try {
-    await session.entrarDesenvolvimento(usuario.value, senha.value)
-    await router.replace('/meus-pedidos')
+    const usuarioAutenticado = await session.entrarDesenvolvimento(usuario.value, senha.value)
+    const perfil = usuarioAutenticado.perfil
+
+    await router.replace(
+      perfil === 'GESTOR' || perfil === 'ADMINISTRADOR'
+        ? '/pedidos'
+        : '/meus-pedidos',
+    )
   } catch (error) {
     erro.value = error instanceof Error ? error.message : 'Não foi possível acessar o sistema.'
   } finally {

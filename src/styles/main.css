@@ -1,2 +1,163 @@
 @import './tokens.css';
 @import './base.css';
+
+/* A sidebar da gestão deve rolar apenas no eixo vertical. */
+.gestao-sidebar,
+.gestao-nav {
+  overflow-x: hidden !important;
+}
+
+/* Ajuste fino da comparação de quantidades no detalhe de pedidos da gestão.
+   Mantém os dois blocos visualmente equivalentes, inclusive quando o valor
+   aprovado ainda é editável. */
+.gestao-detail__item .quantity-card {
+  width: 132px !important;
+  min-width: 132px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  box-sizing: border-box !important;
+  display: grid !important;
+  grid-template-rows: 14px 20px !important;
+  align-content: center !important;
+  align-items: center !important;
+  gap: 1px !important;
+  padding: 4px 7px !important;
+  border-radius: 6px !important;
+}
+
+.gestao-detail__item .quantity-card strong,
+.gestao-detail__item .quantity-card > span,
+.gestao-detail__item .approval-quantity > span {
+  margin: 0 !important;
+}
+
+.gestao-detail__item .quantity-card strong {
+  overflow: hidden !important;
+  color: #475569 !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.01em !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+}
+
+.gestao-detail__item .approval-quantity > span {
+  overflow: hidden !important;
+  color: #475569 !important;
+  font-size: 6.5px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+}
+
+.gestao-detail__item .quantity-card > span {
+  align-self: center !important;
+  color: #0d2b5e !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+}
+
+.gestao-detail__item .requested-quantity {
+  background: #eef4ff !important;
+  border: 1px solid transparent !important;
+}
+
+.gestao-detail__item .requested-quantity > span {
+  color: #1a4da1 !important;
+}
+
+.gestao-detail__item .approval-quantity {
+  background: #f5f8ff !important;
+  border: 1px solid #dbe3ec !important;
+}
+
+.gestao-detail__item .approval-quantity input {
+  width: 100% !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 5px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 4px !important;
+  background: #fff !important;
+  color: #0d2b5e !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+}
+
+.gestao-detail__item .approval-quantity input:focus {
+  border-color: #2d6bc4 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgb(45 107 196 / 10%) !important;
+}
+
+.gestao-detail__item .approved-quantity {
+  background: #edf8f1 !important;
+  border: 4px solid transparent !important;
+}
+
+.gestao-detail__item .approved-quantity > span {
+  color: #007a3d !important;
+}
+
+/* Informações operacionais do produto precisam ter contraste suficiente para
+   leitura rápida durante a análise/aprovação do pedido. */
+.gestao-detail__item > div:first-child small {
+  color: #111827 !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.55 !important;
+}
+
+/* O formulário de Novo pedido é reutilizado dentro do ambiente de Gestão.
+   Nesse contexto, o retorno correto é a fila geral de Pedidos, não a área
+   "Meus pedidos" do solicitante. Mantemos o rótulo original fora da gestão. */
+.gestao-shell .novo-pedido-page .page-heading > .secondary-action {
+  font-size: 0 !important;
+}
+
+.gestao-shell .novo-pedido-page .page-heading > .secondary-action::after {
+  content: 'Voltar para pedidos';
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* O estilo scoped de PedidosGestaoView adiciona atributos aos seletores e pode
+   vencer regras globais de mesma especificidade. Esta regra é propositalmente
+   mais específica para manter o título editável no mesmo peso visual do card
+   de quantidade solicitada. */
+.gestao-shell .gestao-pedidos .gestao-detail__item .quantity-card.approval-quantity > span {
+  font-size: 7.5px !important;
+  line-height: 1 !important;
+  letter-spacing: -0.015em !important;
+  font-weight: 800 !important;
+}
+
+/* No detalhe do estoque, "Embalagem mais comum" não agrega informação
+   operacional suficiente no resumo superior. A embalagem continua disponível
+   nos lotes e no filtro específico, onde possui contexto real. */
+.gestao-shell .estoque-detalhe .product-context > div:nth-child(2) {
+  display: none !important;
+}
+
+.gestao-shell .estoque-detalhe .product-context {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 900px) {
+  .gestao-shell .estoque-detalhe .product-context {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .gestao-shell .estoque-detalhe .product-context {
+    grid-template-columns: 1fr !important;
+  }
+}

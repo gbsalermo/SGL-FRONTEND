@@ -1,12 +1,14 @@
 # Continuidade — SGL Frontend
 
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
-**Repositório frontend:** `gbsalermo/SGL-FRONTEND`  
-**Backend de referência:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 26/08/2026  
-**Fase atual:** Etapa 3 — Interfaces reais  
-**Última etapa concluída:** 3.2 — Pedidos do Solicitante  
-**Próximo bloco exato:** 3.3 — Interface do Sistema de Gestão
+**Frontend:** `gbsalermo/SGL-FRONTEND`  
+**Backend:** `gbsalermo/Sistema-SGL`  
+**Última atualização:** 28/08/2026  
+**Branch frontend atual:** `feat/gestao-interface`  
+**Backend atual:** `main`  
+**Fase atual:** Etapa 5 — Produtos + Rotulagem  
+**Última etapa concluída:** Etapa 4 — Estoque / Lotes  
+**Próximo passo exato:** validar a integração final Pedidos ↔ Lotes/Embalagens; depois iniciar a interface operacional de Produtos, estoque mínimo e Rotulagem.
 
 Este arquivo é a fonte principal de retomada do frontend.
 
@@ -14,78 +16,30 @@ Este arquivo é a fonte principal de retomada do frontend.
 
 # 0. Como continuar
 
-Ao abrir uma nova sessão:
-
 ```text
-1. ler este CONTINUIDADE.md
-2. ler docs/ETAPA_2_BOOTSTRAP.md quando precisar da base técnica
-3. conferir README.md para visão geral e apresentação visual
-4. usar Swagger/OpenAPI como fonte de verdade dos contratos do backend
-5. respeitar as decisões visuais e arquiteturais já aprovadas
-6. continuar do bloco PRÓXIMO PASSO EXATO
+1. ler CONTINUIDADE.md
+2. ler docs/ROADMAP_INTERFACE_GESTAO.md
+3. usar backend/Swagger como fonte de verdade
+4. não duplicar regra de negócio no frontend
+5. manter linguagem simples para o usuário
+6. validar o bloco atual antes de avançar
 ```
 
-Regra de processo atual:
+Fluxo:
 
-> Não vamos concluir um Figma completo antes de codar. O frontend segue o fluxo `protótipo aprovado → implementação real → extração de componentes quando houver responsabilidade/repetição real → validação → próxima tela`.
+```text
+entender domínio
+→ conferir contrato real
+→ implementar
+→ validar visualmente
+→ refinar
+→ concluir etapa
+→ próxima etapa
+```
 
 ---
 
-# 1. Estado geral do projeto
-
-## Backend
-
-O backend estrutural está concluído e permanece como fonte de verdade do domínio.
-
-```text
-API REST                                  ✅
-Swagger / OpenAPI                         ✅
-PostgreSQL                                ✅
-Flyway                                    ✅
-UUID público na fronteira                 ✅
-DTOs request/response separados           ✅
-testes principais                         ✅
-CORS para frontend local                  ✅
-urgência informativa em pedidos           ✅
-autenticação + auditoria local            ⏳ pós-frontend inicial
-integração corporativa                    ⏳ futura
-```
-
-Regra de identificadores:
-
-```text
-Long id
-→ somente interno ao backend
-
-UUID publicId
-→ identidade pública
-→ URLs
-→ requests
-→ responses
-→ estado da interface
-```
-
-Nunca reconstruir no frontend regras de negócio que já pertencem ao backend.
-
-### Ajuste recente importante no backend
-
-A urgência do pedido continua sendo apenas informativa e não altera automaticamente fluxo, estoque ou prioridade transacional.
-
-O contrato ainda mantém:
-
-```text
-urgente
-motivoUrgencia
-observacao
-```
-
-Por compatibilidade com pedidos antigos, `motivoUrgencia` permanece no modelo/banco, mas no fluxo novo ele não é mais obrigatório. A experiência atual concentra o texto livre em `observacao`.
-
-Pedidos antigos que já possuam `motivoUrgencia` devem continuar exibindo essa informação quando necessário.
-
----
-
-# 2. Stack oficial
+# 1. Stack
 
 ```text
 Vue 3
@@ -97,810 +51,754 @@ Axios
 Vuetify 3
 ```
 
-Base validada:
+Regras gerais:
 
-```text
-npm install                              ✅
-npm run type-check                      ✅
-npm run dev                             ✅
-/ redireciona para /login               ✅
-Vuetify carregado                       ✅
-Pinia registrado                        ✅
-Router funcionando                      ✅
-```
-
-Decisões de compatibilidade:
-
-- TypeScript oficial: `~5.9.3`;
-- `vue-tsc` 3.3.x;
-- `@types/node` instalado;
-- aliases via `@` configurados no Vite/TypeScript.
+- UUID público nas fronteiras;
+- Axios concentrado em services;
+- Admin reutiliza a Gestão;
+- complexidade técnica pode existir internamente sem aparecer como linguagem técnica ao usuário;
+- identificadores internos são gerados pelo backend;
+- dados históricos de estoque não devem ser reescritos de forma que altere rastreabilidade.
 
 ---
 
-# 3. Arquitetura frontend oficial
+# 2. Estado geral
 
 ```text
-SPA
-+ Feature-based Architecture
-+ Component-based UI
-+ responsabilidades claras
+Login                                         ✅
+Pedidos do Solicitante                        ✅
+Pedidos — forma de retirada por embalagem     ✅ implementar/validar
+Pedidos Gestão                                ✅
+Pedidos Entregues — lotes utilizados          ✅ implementar/validar
+Shell Gestão/Admin                            ✅
+Estoque — visão geral                         ✅
+Estoque — detalhe                             ✅
+Lotes — entrada                               ✅
+Lotes — código SGL                            ✅
+Lotes — embalagem/multiplicador               ✅
+Lotes — modal detalhe/edição                  ✅
+Lotes — histórico de saídas                   ✅ implementar/validar
+Lotes — fracionamento irreversível            ✅ validado
+Lotes — FIFO/FEFO com embalagem               ✅ backend
+Lotes — descarte por vencimento               ✅ validado
+Lotes — busca/filtro de situação              ✅
+Lotes — status visual ESGOTADO                ✅
+Produtos operacional + rótulos                ⏳ ETAPA ATUAL
+Movimentações                                 ⏳
+Relatórios                                    ⏳
+Administração / Cadastros                     ⏳
+Estagiários                                   ⏳ obrigatório
+Tipos de unidade/embalagem                    ⏳ previsto em Administração
+Dashboard final / robustez / 404              ⏳
+Autenticação definitiva / auditoria           ⏳
 ```
 
-Fluxo preferencial:
+---
+
+# 3. Unidade institucional
+
+**Unidade institucional não terá CRUD manual no SGL.**
+
+Fluxo futuro:
 
 ```text
-View
-→ Components
-→ Service / Store quando necessário
-→ Axios
-→ API Spring Boot
+login corporativo
+→ API corporativa informa unidade
+→ SGL associa pelo identificador institucional
 ```
 
-Estrutura base:
+Não criar `/cadastros/unidades`.
+
+Documento relacionado:
 
 ```text
-src/
-├── app/
-├── assets/
-├── components/
-├── layouts/
-├── modules/
-├── router/
-├── services/
-├── stores/
-├── types/
-├── composables/
-├── utils/
-└── styles/
+docs/DECISAO_UNIDADES_CORPORATIVAS.md
+```
+
+Unidade institucional e tipo de unidade/embalagem de estoque são conceitos diferentes.
+
+---
+
+# 4. Pedidos — integração definitiva com Lotes/Embalagens
+
+A regra de quantidade do Estoque passou a fazer parte do contrato de Pedido.
+
+## 4.1 Novo pedido — forma de retirada
+
+O solicitante não informa apenas uma quantidade abstrata. Para cada produto, ele escolhe uma **forma de retirada realmente disponível nos lotes utilizáveis**.
+
+Exemplos:
+
+```text
+UNITÁRIO
+KIT — 50 unit. por kit
+CAIXA — 10 unit. por caixa
+GARRAFA
+GALÃO
+```
+
+A interface consulta os lotes ativos com saldo daquele estoque.
+
+Lote vencido não participa da disponibilidade do Novo Pedido, mesmo que ainda tenha saldo aguardando descarte.
+
+### UNITÁRIO
+
+A opção `UNITÁRIO` fica disponível quando existir:
+
+```text
+lote UNITARIO
+OU
+lote com fracionavel = true
+```
+
+Exemplo:
+
+```text
+pedido = 10 unidades
+→ quantidadeSolicitada interna = 10
+```
+
+### KIT / CAIXA / GARRAFA / GALÃO
+
+Para retirada por embalagem, devem existir lotes compatíveis com:
+
+```text
+mesmo tipoEmbalagem
++
+mesmo multiplicador
+```
+
+Exemplo:
+
+```text
+KIT
+multiplicador = 50
+pedido = 2 kits
+→ quantidadeSolicitada interna = 100 unit.
+```
+
+**Nunca atender 1 KIT usando 50 unidades de outro tipo de embalagem apenas porque a matemática coincide.**
+
+A forma escolhida é persistida em `ItemPedido`:
+
+```text
+tipoEmbalagemSolicitada
+quantidadeEmbalagensSolicitada
+multiplicadorSolicitado
+quantidadeSolicitada = total em unidades
+```
+
+Migration:
+
+```text
+V9__add_forma_retirada_item_pedido.sql
+```
+
+Pedidos anteriores à V9 são migrados como `UNITARIO`, multiplicador `1`.
+
+## 4.2 Orientação quando não existir kit
+
+Se não houver lote com KIT disponível, a interface não oferece KIT como opção e informa:
+
+```text
+Não há kits disponíveis.
+Solicite por unidade ou por outra embalagem disponível.
+```
+
+Não mostrar ao usuário opções impossíveis de atender.
+
+## 4.3 Aprovação pela Gestão
+
+A quantidade aprovada continua sendo registrada em unidades, porém precisa respeitar a forma solicitada.
+
+Exemplo:
+
+```text
+solicitado = KIT de 50
+
+válido:
+50
+100
+150
+
+inválido:
+25
+75
+```
+
+Para `UNITARIO`, a aprovação pode ocorrer unidade a unidade.
+
+## 4.4 FIFO / FEFO + forma solicitada
+
+Fluxo de saída:
+
+```text
+pedido informa forma de retirada
+→ localizar lotes compatíveis
+→ ordenar por FEFO/FIFO
+→ respeitar fracionamento
+→ baixar os lotes realmente utilizados
+→ registrar MovimentacaoEstoque por lote
+```
+
+Compatibilidade:
+
+```text
+UNITARIO
+→ lote UNITARIO ou lote fracionável
+
+KIT/CAIXA/GARRAFA/GALAO
+→ mesmo tipo + mesmo multiplicador
+```
+
+## 4.5 Pedidos Entregues — rastreabilidade por lote
+
+Em `Gestão → Pedidos → Entregues`, ao abrir o pedido, cada item deve mostrar os **lotes realmente utilizados na saída**:
+
+```text
+Código SGL
+quantidade retirada daquele lote
+data/hora da saída
+```
+
+Exemplo:
+
+```text
+LOT-EXT-DNA-PL-007
+50 unit. · saída em 28/08/2026 10:30
+```
+
+O Código SGL exibido vem de `MovimentacaoEstoque.lote`, e não de inferência do frontend.
+
+Endpoint usado:
+
+```text
+GET /api/v1/movimentacoes/pedido?pedidoId={uuid}
+```
+
+---
+
+# 5. Estoque — ETAPA 4 CONCLUÍDA
+
+O saldo operacional é sempre consolidado em **unidades individuais do item cadastrado**.
+
+```text
+4 kits de 50
+→ 200 unit.
+
+saída de 1 kit
+→ -50
+→ 150 unit.
+```
+
+O estoque mínimo usa o mesmo saldo.
+
+## Estoque mínimo
+
+O estoque mínimo pertence à configuração operacional do **Produto** e será editado principalmente em:
+
+```text
+/produtos/:id
+```
+
+A tela de Estoque apenas exibe/compara o valor para gerar alertas.
+
+## Resumo superior
+
+Foi removido do topo:
+
+```text
+Embalagem mais comum
+```
+
+Permanecem:
+
+```text
+Contagem padrão
+Localização
+Avisar quando restarem
+```
+
+---
+
+# 6. Produto x embalagem
+
+Produtos com tamanho/volume físico diferente são itens distintos quando isso muda o material estocado.
+
+```text
+Água 1 L
+Água 500 mL
+Água 250 mL
+```
+
+Exemplo de entrada:
+
+```text
+Produto: Água 1 L
+Tipo: CAIXA
+Especificação: caixa com 10 garrafas de 1 L
+Multiplicador: 10
+Quantidade recebida: 1 caixa
+Saldo incorporado: 10 unit.
+```
+
+A matemática fica interna.
+
+---
+
+# 7. Estrutura atual do Lote
+
+```text
+codigoInterno
+numeroLote
+tipoEmbalagem
+apresentacao
+quantidadeApresentacoes
+conteudoPorApresentacao
+fracionavel
+observacao
+quantidadeInicial
+quantidadeDisponivel
+dataEntrada
+dataValidade
+ativo
+```
+
+Código SGL:
+
+```text
+LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
 ```
 
 Regras:
 
-- não espalhar Axios diretamente por Views/Components;
-- Store somente para estado realmente compartilhado;
-- Composable somente quando houver repetição real;
-- não duplicar módulos por perfil;
-- Admin reutiliza Gestão + Cadastros;
-- regras de negócio permanecem no backend;
-- Views representam composição de tela e não devem virar arquivos monolíticos quando houver responsabilidades reais separáveis.
-
----
-
-# 4. Estratégia de implementação
-
-Fluxo oficial:
-
 ```text
-protótipo aprovado
-→ implementação real
-→ identificar responsabilidades/repetição
-→ extrair componentes quando fizer sentido
-→ validar visual e tecnicamente
-→ próxima tela
-```
-
-Ordem de trabalho atualizada:
-
-```text
-LOGIN                                  ✅
-→ PEDIDOS DO SOLICITANTE              ✅
-→ GESTÃO                              ⏳ PRÓXIMO
-→ ESTOQUE / LOTES / MOVIMENTAÇÕES     ⏳
-→ ADMINISTRAÇÃO                       ⏳
-→ RELATÓRIOS / DOCUMENTOS             ⏳
-→ DASHBOARDS / ROBUSTEZ / 404         ⏳
-→ AUTENTICAÇÃO / AUTORIZAÇÃO / AUDITORIA ⏳
+gerado pelo backend
+sequencial por produto
+único
+imutável
+não digitado
+não editável
 ```
 
 ---
 
-# 5. Identidade visual aprovada
+# 8. Tipo e especificação de embalagem
 
-Referência principal:
+Tipos atuais:
 
 ```text
-Publica / Embrapa
+UNITARIO
+KIT
+CAIXA
+GARRAFA
+GALAO
 ```
 
-Objetivo:
+Especificação livre:
 
 ```text
-clean
-corporativo
-administrativo/laboratorial
-branco predominante
-azul institucional como identidade
-verde como apoio
+kit com 50 unidades
+garrafa de 1 L
+caixa com 10 garrafas de 1 L
 ```
 
-Paleta:
+O tipo original da embalagem é histórico e não pode ser trocado depois da criação.
+
+---
+
+# 9. Multiplicador
+
+`conteudoPorApresentacao` aparece na interface como **Multiplicador de unidades**.
 
 ```text
-#1A4DA1  azul principal
-#0D2B5E  azul escuro
-#2D6BC4  azul claro
-
-#007A3D  verde institucional
-#4EA674  verde claro
-#A5D6A7  verde suave
-
-#F5F7FA  fundo
-#FFFFFF  superfície
-#1A1A2E  texto principal
-#64748B  texto secundário
-#E2E8F0  borda
+UNITARIO → 1
+KIT com 50 → 50
+CAIXA com 10 → 10
 ```
 
-Tipografia:
+Depois da entrada ficam bloqueados:
 
 ```text
-Inter
-fallback Roboto / sans-serif
-```
-
-Densidade:
-
-```text
-média-compacta
-```
-
-Motion aprovado:
-
-```text
-fade + deslocamento horizontal curto
-~20–30 px
-~250–350 ms
-shell permanece estável
+quantidade recebida
+multiplicador
+Código SGL
+tipo original da embalagem
 ```
 
 ---
 
-# 6. Etapa 3.1 — Login — CONCLUÍDA
-
-## Resultado final
-
-Layout institucional aproximadamente 50/50:
+# 10. Fracionamento — decisão definitiva
 
 ```text
-lado esquerdo
-→ laboratório/tablet como contexto
-→ overlay azul institucional
-→ Embrapa
-→ logo SGL
-→ frase institucional
-→ ícones do domínio
-
-lado direito
-→ Bem-vindo
-→ Acesse o sistema para continuar
-→ usuário
-→ senha
-→ Entrar
+false → embalagem precisa sair completa
+true  → unidades podem sair separadamente
 ```
 
-Estrutura principal:
+Transição:
 
 ```text
-src/modules/auth/
-├── components/
-│   ├── LoginBrandPanel.vue
-│   └── LoginAccessForm.vue
-└── views/
-    └── LoginView.vue
+false → true ✅
+true → false ❌
 ```
 
-### Acesso atual
-
-A autenticação definitiva ainda não existe no backend.
-
-Para permitir o desenvolvimento das interfaces, o frontend possui um acesso de desenvolvimento que consulta usuários reais da API e cria sessão local somente em ambiente `DEV`.
-
-Não tratar isso como autenticação de produção.
-
-A etapa futura de autenticação deve substituir esse comportamento sem refazer as telas já aprovadas.
+O backend bloqueia a volta para não fracionável.
 
 ---
 
-# 7. Etapa 3.2 — Pedidos do Solicitante — CONCLUÍDA
-
-Esta etapa foi implementada, validada visualmente e integrada à `main`.
-
-## Fluxo funcional atual
+# 11. FIFO / FEFO
 
 ```text
-/login
-→ sessão de desenvolvimento
-→ /meus-pedidos
-→ /pedidos/novo
-→ POST /pedidos
-→ retorno para /meus-pedidos
+perecível → FEFO
+não perecível → FIFO
 ```
 
-## Shell do solicitante
-
-Arquivo principal:
+A seleção também precisa respeitar:
 
 ```text
-src/layouts/SolicitanteLayout.vue
+forma solicitada
+multiplicador
+fracionamento
 ```
 
-Características aprovadas:
+Se não houver combinação válida, a transação inteira é recusada.
+
+---
+
+# 12. Detalhe de Estoque
+
+Rota:
 
 ```text
-sidebar azul escura
-logo SGL centralizada
-Meus pedidos
-Novo pedido
-bloco do usuário no rodapé
-engrenagem de perfil
-topbar com laboratório/unidade
-botão Sair
+/estoque/:id
 ```
 
-### Sidebar
-
-A sidebar desktop agora é realmente fixa na viewport:
+Resumo:
 
 ```text
-largura: 258px
-position: fixed
-height: 100vh
-conteúdo principal compensa com margin-left
+Quantidade disponível
+Visualizar por embalagem
+Vencem em até 30 dias
+Lotes vencidos
 ```
 
-Ao rolar a página, sidebar, navegação e bloco do usuário permanecem estáveis.
+Filtro por embalagem muda apenas a visualização, nunca o saldo real.
 
-No mobile o comportamento volta a ser fluxo normal da página.
+O indicador `Vencem em até 30 dias` considera somente lotes com `quantidadeDisponivel > 0`. Lote esgotado não gera mais alerta de vencimento.
 
-## Perfil do solicitante
+---
 
-A engrenagem no bloco do usuário permite personalizar apenas informações visuais:
+# 13. Tabela de Lotes
 
-```text
-foto
-apelido / nome de exibição
-descrição curta
-```
-
-Dados institucionais são somente leitura:
+Colunas:
 
 ```text
-nome verdadeiro
-e-mail
-perfil
-```
-
-Estado atual:
-
-- preferências são persistidas localmente no navegador por usuário;
-- ainda não existe contrato backend definitivo para avatar/perfil visual;
-- não alterar nome verdadeiro, e-mail ou perfil por este fluxo.
-
-Store:
-
-```text
-src/stores/profilePreferences.ts
-```
-
-## Novo pedido
-
-Arquivo:
-
-```text
-src/modules/pedidos/views/solicitante/NovoPedidoView.vue
-```
-
-Comportamentos validados:
-
-- laboratório e unidade vêm da sessão;
-- projeto é opcional;
-- produtos disponíveis vêm do estoque da unidade;
-- usuário pode adicionar múltiplos produtos;
-- o mesmo produto não pode aparecer duas vezes no mesmo pedido;
-- ao selecionar um produto ele desaparece das demais opções;
-- ao remover o item o produto volta para a lista;
-- quantidade é ajustada na própria linha;
-- urgência é informativa;
-- texto livre foi unificado em uma única caixa `Observação / descrição`;
-- ao marcar urgência aparece apenas um aviso pedindo, se possível, que o motivo seja explicado nessa caixa;
-- pedido continua sendo criado como `PENDENTE`.
-
-Mensagem aprovada no rodapé:
-
-```text
-O pedido ficará pendente até análise da gestão.
-Marque o pedido como urgente apenas quando necessário.
-```
-
-## Meus pedidos
-
-Arquivo:
-
-```text
-src/modules/pedidos/views/solicitante/MeusPedidosView.vue
-```
-
-Características aprovadas:
-
-```text
-cards de resumo
-→ Pendentes
-→ Aprovados
-→ Entregues
-
-busca local
-filtro por status
-tabela de pedidos
-```
-
-A tabela prioriza o que interessa ao solicitante:
-
-```text
-Data
-Produtos
-Itens
-Status
-Laboratório
+Código SGL
+Unidade
+Disponível agora
+Entrada
+Validade
+Situação
 Detalhes
 ```
 
-Produtos são informação principal. Projeto aparece como informação secundária.
-
-A busca considera, entre outros:
+Busca:
 
 ```text
-produto
-projeto
-laboratório
-status
-urgência
+Código SGL
+lote do fornecedor
+especificação
+tipo de embalagem
+```
+
+Filtro:
+
+```text
+Todos
+Válidos
+Próximos do vencimento
+Vencidos
+Esgotados
+Descartados por vencimento
+```
+
+Regra visual atual:
+
+```text
+saldo > 0 + válido                 → VÁLIDO
+saldo > 0 + vence em até 30 dias  → PRÓXIMO DO VENCIMENTO
+saldo > 0 + vencido                → VENCIDO
+saldo = 0 + ainda não vencido      → ESGOTADO
+saldo = 0 + vencido                → DESCARTADO POR VENCIMENTO
+```
+
+`ESGOTADO` é preferido a `ENTREGUE` porque o lote pode ter sido consumido por uma ou várias saídas/pedidos; o termo descreve o estado operacional sem atribuir uma única entrega.
+
+Observação: `DESCARTADO POR VENCIMENTO` ainda é uma nomenclatura visual baseada em `vencido + saldo zero`. Caso no futuro seja necessário distinguir com precisão a causa final de qualquer lote zerado, o backend deverá expor explicitamente a causa/status final a partir das movimentações.
+
+---
+
+# 14. Modal do Lote — dados + histórico de saída
+
+Dados cadastrais mostrados:
+
+```text
+Código SGL
+lote do fornecedor
+tipo
+especificação
+multiplicador
+entrada
+validade
+retirada unitária
 observação
 ```
 
-### Urgência
-
-Status visual:
+O modal também possui **Saídas deste lote**, consultando:
 
 ```text
-PENDENTE       → chip amarelo
-PEDIDO URGENTE → chip vermelho
+GET /api/v1/movimentacoes/lote?loteId={uuid}
 ```
 
-Pedidos antigos criados antes da migration de urgência naturalmente não possuem `urgente = true`.
-
-### Detalhes do pedido
-
-O antigo modal foi removido.
-
-Agora existe uma seta na própria linha da tabela:
+Para cada `SAIDA`, mostrar pelo menos:
 
 ```text
-clicar
-→ expande a linha
-→ mostra detalhes abaixo do pedido
-clicar novamente
-→ recolhe
+data/hora da saída
+quantidade
+nome do usuário solicitante do pedido
 ```
 
-Detalhes exibidos:
+Exemplo:
 
 ```text
-materiais e quantidades
-status
-projeto
-laboratório
-indicação de urgência
-observação / descrição
+Maria Oliveira
+28/08/2026 10:30
+50 unit.
 ```
 
-Pedidos antigos que possuam `motivoUrgencia` separado têm esse conteúdo preservado na área textual do detalhe.
+`pedidoSolicitanteNome` identifica quem fez o pedido. `usuarioNome` da movimentação continua representando quem executou/registrou a operação, como o gestor aprovador.
+
+Isso cria rastreabilidade nos dois sentidos:
+
+```text
+Pedido entregue → quais lotes saíram
+Lote → para quais pedidos/solicitantes houve saída
+```
 
 ---
 
-# 8. Regras importantes do domínio para o frontend
+# 15. Descarte por vencimento
 
-## Pedidos
-
-```text
-PENDENTE
-→ APROVADO
-   → ENTREGUE
-   → CANCELADO
-
-PENDENTE
-→ REJEITADO
-```
-
-Regras críticas:
-
-- aprovação pode ajustar quantidade aprovada;
-- backend executa FEFO/FIFO e baixa de estoque;
-- entrega não baixa estoque novamente;
-- cancelamento restaura os lotes exatos;
-- produto duplicado no mesmo pedido é proibido também no backend;
-- usuário inativo não pode criar pedido;
-- laboratório/projeto inativos também são validados pelo backend;
-- frontend deve antecipar erros de UX, mas não substituir validação de domínio.
-
-### Estagiário inativo
-
-A proteção já existe:
+Implementado e validado.
 
 ```text
-PedidoService.criar
-→ usuario.validateActive()
+somente produto perecível
+somente lotes vencidos com saldo
+justificativa obrigatória
+baixa em unit.
+movimentação por lote
+mais antigos primeiro
+respeita embalagem fechada
 ```
-
-O login temporário do frontend também não deve permitir trabalhar com usuário inativo.
-
-Atenção futura: `dataFimEstagio` sozinha não é a regra final de bloqueio; o domínio atualmente depende do estado `ativo` do usuário/estagiário.
-
-## Documentos
-
-- backend ainda não possui upload multipart completo;
-- não criar persistência fake no frontend.
-
-## Fiscalização
-
-- deve ficar dentro de Relatórios → Fiscalização/Auditoria;
-- não duplicar dados operacionais;
-- modelagem definitiva aguarda requisito oficial.
 
 ---
 
-# 9. Navegação funcional aprovada
-
-## Solicitante — implementado
+# 16. Migrations relacionadas
 
 ```text
-Meus pedidos
-├── detalhes expansíveis
-└── Novo pedido
+V5 → apresentação/fracionamento do lote
+V6 → observação do lote
+V7 → Código SGL + sequência
+V8 → tipo de embalagem do lote
+V9 → forma de retirada persistida no ItemPedido
 ```
 
-## Gestão — próximo foco
+---
+
+# 17. Etapa 4 — Estoque/Lotes encerrada
 
 ```text
-Dashboard
-├── Pedidos
-├── Estoque
-│   └── Detalhe
-│       ├── Lotes
-│       ├── Entrada
-│       ├── Descarte
-│       └── Documentos
-├── Movimentações
-└── Relatórios
+✅ saldo em unidades
+✅ entrada com embalagem/multiplicador
+✅ Código SGL automático
+✅ modal de lote
+✅ edição segura
+✅ fracionamento irreversível
+✅ FIFO/FEFO compatível
+✅ descarte por vencimento
+✅ busca/filtro de lotes
+✅ status visual de descarte
+✅ status visual ESGOTADO para saldo zero
+✅ lote esgotado não gera alerta de próximo vencimento
+✅ resumo superior simplificado
+✅ histórico de saída por lote implementado para validação
 ```
 
-## Administração
+---
+
+# 18. Etapa 5 — Produtos + Rotulagem — ATUAL
+
+Rotas planejadas:
 
 ```text
-Tudo da Gestão
-└── Cadastros
-    ├── Produtos
-    ├── Unidades
-    ├── Laboratórios
-    ├── Projetos
-    ├── Usuários
-    └── Estagiários
+/produtos
+/produtos/:id
 ```
 
-Rotas planejadas/atuais:
+Produto deve consolidar:
+
+```text
+nome
+código de referência
+descrição
+item físico / unidade
+localização
+estoque mínimo
+risco
+perecibilidade
+condições de armazenamento
+saldo atual
+lotes ativos
+última entrada
+```
+
+A edição do estoque mínimo ocorrerá em Produto.
+
+## Rotulagem
+
+Rótulo de lote usa `codigoInterno` como identidade principal.
+
+Candidatos:
+
+```text
+produto
+Código SGL
+lote do fornecedor
+validade
+especificação
+quantidade
+localização
+risco
+condições de armazenamento
+```
+
+---
+
+# 19. Roadmap oficial
+
+```text
+Etapa 0 — Handoff backend → frontend                       ✅
+Etapa 1 — Fundação visual/técnica                          ✅
+Etapa 2 — Bootstrap técnico                                ✅
+Etapa 3 — Interfaces iniciais                              ✅
+  Login                                                     ✅
+  Pedidos Solicitante                                      ✅
+  Shell Gestão/Admin + Pedidos Gestão                      ✅
+
+Refino transversal Pedidos ↔ Estoque/Lotes                🟡 VALIDAR
+  forma de retirada no novo pedido                         ✅
+  disponibilidade baseada em lotes                         ✅
+  aprovação respeita embalagem                             ✅
+  saída respeita tipo + multiplicador                      ✅
+  lotes em pedidos entregues                               ✅
+  histórico de saída dentro do lote                        ✅
+
+Etapa 4 — Estoque / Lotes                                  ✅ CONCLUÍDA
+Etapa 5 — Produtos operacional + Rotulagem                 🟡 ATUAL
+Etapa 6 — Movimentações                                    ⏳
+Etapa 7 — Relatórios / Documentos / Fiscalização           ⏳
+Etapa 8 — Administração / Cadastros                        ⏳
+  Produtos                                                  ⏳
+  Laboratórios                                              ⏳
+  Projetos                                                  ⏳
+  Usuários                                                  ⏳
+  Estagiários                                               ⏳ obrigatório
+  Tipos de unidade / embalagem                             ⏳ planejar CRUD
+Etapa 9 — Dashboards finais / robustez / 404               ⏳
+Etapa 10 — Autenticação / autorização / auditoria          ⏳
+```
+
+---
+
+# 20. Administração futura — Cadastros
+
+Previstos:
+
+```text
+Produtos
+Laboratórios
+Projetos
+Usuários
+Estagiários
+Tipos de unidade / embalagem
+```
+
+## Tipos de unidade / embalagem
+
+Deve permitir:
+
+```text
+cadastrar
+editar
+inativar/remover da seleção
+reativar
+```
+
+Exemplos:
+
+```text
+UNITÁRIO
+KIT
+CAIXA
+GARRAFA
+GALÃO
+PACOTE
+BOMBONA
+BARRIL
+```
+
+Se já estiver usado em lote histórico, não excluir fisicamente. Remover significa inativar para novos registros.
+
+A implementação futura deverá substituir o enum rígido `TipoEmbalagem` por catálogo persistido ou mecanismo equivalente.
+
+## Estagiários
+
+Interface própria prevista:
+
+```text
+/cadastros/estagiarios
+/cadastros/estagiarios/:id
+```
+
+Mostrar nome, identidade corporativa, unidade read-only, laboratório, supervisor/professor, vínculo, situação, período e observações.
+
+---
+
+# 21. Rotas
 
 ```text
 /login
 /meus-pedidos
 /pedidos/novo
-/dashboard
 /pedidos
-/pedidos/:id
 /estoque
 /estoque/:id
-/movimentacoes
-/relatorios
-/cadastros/produtos
-/cadastros/unidades
-/cadastros/laboratorios
-/cadastros/projetos
-/cadastros/usuarios
-/cadastros/estagiarios
-/:pathMatch(.*)*
+/produtos                  ⏳
+/produtos/:id              ⏳
+/movimentacoes             ⏳
+/relatorios                ⏳
+/cadastros/produtos        ⏳
+/cadastros/laboratorios    ⏳
+/cadastros/projetos        ⏳
+/cadastros/usuarios        ⏳
+/cadastros/estagiarios     ⏳
+/cadastros/estagiarios/:id ⏳
+/cadastros/tipos-unidade   ⏳
+/:pathMatch(.*)*           ⏳
 ```
 
 ---
 
-# 10. Modelo visual aprovado para o Sistema de Gestão
+# 22. Regra central
 
-A próxima interface NÃO deve reutilizar cegamente o shell simplificado do solicitante.
-
-Usar o modelo de gestão já aprovado anteriormente como referência estrutural:
-
-```text
-sidebar escura institucional
-logo SGL no topo
-navegação mais completa
-bloco de usuário no rodapé
-
-topbar escura
-contexto / ações globais
-sair
-
-conteúdo branco/cinza muito claro
-breadcrumbs
-título + subtítulo
-botão de ação principal
-cards quando fizerem sentido
-busca local
-filtros expansíveis
-tabelas densidade média-compacta
-status em chips
-linhas/detalhes expansíveis quando ajudar a leitura
-```
-
-Referência funcional do menu de Gestão:
-
-```text
-PRINCIPAL
-Dashboard
-Pedidos
-Estoque
-Movimentações
-Relatórios
-```
-
-Administração acrescenta:
-
-```text
-ADMINISTRAÇÃO
-Cadastros
-```
-
-Alertas operacionais previstos para Gestão/Admin:
-
-```text
-Pedidos pendentes
-Estoque baixo
-Próximos do vencimento
-Vencidos
-```
-
-Sem transformar a tela em dashboard excessivamente moderno. Manter linguagem institucional e funcional.
-
----
-
-# 11. Padrões de shell para Gestão/Admin
-
-Sidebar de gestão:
-
-```text
-aberta ~240–258 px
-recolhida ~64–72 px
-clique para recolher/expandir
-não expandir sidebar inteira por hover
-mobile → drawer/overlay
-```
-
-Topbar:
-
-```text
-contexto | espaço | pesquisa global futura | sair
-```
-
-Busca/filtros:
-
-```text
-busca global → topbar quando implementada
-busca local → página
-filtros locais → botão Filtros / área expansível
-```
-
-Alertas:
-
-```text
-azul      nenhuma pendência
-amarelo   atenção
-vermelho  urgência
-```
-
----
-
-# 12. Método para implementar cada tela
-
-```text
-1. entender função e usuário
-2. conferir referência visual aprovada
-3. identificar componentes reais
-4. identificar dados necessários
-5. conferir Swagger/OpenAPI
-6. criar/reutilizar Types
-7. criar/reutilizar Services
-8. implementar View/Components
-9. integrar API quando aplicável
-10. tratar loading/empty/error/success
-11. validar fluxo completo
-```
-
-Fluxo de trabalho preferido:
-
-```text
-mudança pequena
-→ assistente explica exatamente a alteração
-→ alteração pode ser feita localmente
-
-mudança estrutural
-→ pode ser feita diretamente na branch/repositório quando solicitado
-```
-
----
-
-# 13. Roadmap atualizado
-
-```text
-Etapa 0 — Handoff backend → frontend                    ✅
-Etapa 1 — Fundação visual/técnica essencial             ✅
-  1.1 Inventário                                        ✅
-  1.2 Fluxos                                            ✅
-  1.3 Figma completo                                    ⏭️ substituído por implementação direta
-  1.4 Stack                                             ✅
-
-Etapa 2 — Bootstrap técnico                             ✅
-
-Etapa 3 — Interfaces reais                              🟡 ATUAL
-  3.1 Login                                             ✅ CONCLUÍDO
-  3.2 Pedidos do Solicitante                            ✅ CONCLUÍDO
-  3.3 Interface do Sistema de Gestão                    ⏳ PRÓXIMO
-
-Etapa 4 — Estoque / Lotes / Movimentações              ⏳
-Etapa 5 — Administração                                 ⏳
-Etapa 6 — Relatórios / Documentos / Fiscalização        ⏳
-Etapa 7 — Dashboards finais / robustez / 404             ⏳
-Etapa 8 — Autenticação / autorização / auditoria        ⏳
-```
-
----
-
-# 14. Documentos importantes
-
-```text
-CONTINUIDADE.md
-→ fonte principal de retomada
-
-README.md
-→ visão geral e apresentação visual
-
-docs/ETAPA_2_BOOTSTRAP.md
-→ stack, bootstrap, compatibilidade e validação
-
-docs/IDENTIDADE_VISUAL.md
-→ identidade, paleta, densidade e motion
-
-docs/ICONOGRAFIA.md
-→ ícones e microinterações
-
-docs/SIDEBAR_ALERTAS.md
-→ sidebar e alertas operacionais
-
-docs/SHELL_VISUAL.md
-→ shell, sidebar e topbar
-
-docs/PADROES_PAGINA.md
-→ conteúdo, breadcrumbs, busca e filtros
-
-docs/ESTRUTURA_FRONTEND.md
-→ arquitetura física
-```
-
----
-
-# 15. PRÓXIMO PASSO EXATO — PARA O PRÓXIMO CHAT
-
-Não refazer Login nem Pedidos do Solicitante.
-
-Ambos estão encerrados e integrados à `main`.
-
-O próximo chat deve começar por:
-
-```text
-ETAPA 3.3 — INTERFACE DO SISTEMA DE GESTÃO
-```
-
-## Primeiro objetivo
-
-Criar a base visual/estrutural da Gestão usando o modelo já aprovado anteriormente.
-
-Começar pelo shell da Gestão e pela tela de Pedidos da Gestão — NÃO pela gestão de estoque ainda.
-
-Sequência recomendada:
-
-```text
-1. criar branch a partir da main
-   sugestão: feat/gestao-interface
-
-2. ler:
-   CONTINUIDADE.md
-   docs/SHELL_VISUAL.md
-   docs/SIDEBAR_ALERTAS.md
-   docs/PADROES_PAGINA.md
-
-3. conferir no Swagger os endpoints reais de pedidos usados pela gestão
-
-4. implementar primeiro:
-   GestaoLayout.vue
-   ↓
-   sidebar completa de Gestão
-   ↓
-   topbar
-   ↓
-   PedidosGestaoView.vue
-
-5. Pedidos da Gestão deve permitir visualizar/filtrar pedidos do sistema
-   e preparar as ações de análise previstas pelo backend
-
-6. somente depois avançar para Estoque / Lotes / Movimentações
-```
-
-## Direção visual da primeira tela de Gestão
-
-Usar como base o modelo aprovado já discutido:
-
-```text
-sidebar escura
-logo SGL
-Dashboard
-Pedidos
-Estoque
-Movimentações
-Relatórios
-
-área principal clara
-breadcrumb
-Título: Pedidos
-subtítulo operacional
-botão de ação apenas quando fizer sentido
-busca
-filtros
-lista/tabela de pedidos
-chips de status
-urgência destacada
-linhas/detalhes expansíveis ou painel contextual conforme a tela exigir
-```
-
-O foco da Gestão é diferente do Solicitante:
-
-```text
-Solicitante
-→ criar e acompanhar o próprio pedido
-
-Gestão
-→ enxergar pedidos do sistema
-→ filtrar/priorizar
-→ analisar
-→ aprovar/rejeitar conforme contrato real
-→ posteriormente conectar estoque/movimentações
-```
-
-Não inventar ações ou campos. Antes de implementar aprovação/rejeição, confirmar exatamente os DTOs e endpoints no Swagger/backend.
-
----
-
-# 16. Estado dos branches após encerramento deste bloco
-
-As alterações aprovadas foram integradas à `main`.
-
-Frontend:
-
-```text
-feat/perfil-solicitante
-→ merge/fast-forward para main concluído
-```
-
-Backend:
-
-```text
-feat/urgencia-observacao-unificada
-→ merge/fast-forward para main concluído
-```
-
-A `main` de ambos os repositórios é agora a base oficial para continuar o desenvolvimento.
+**O usuário enxerga unidades e embalagens físicas de forma simples; o backend preserva matemática, FIFO/FEFO, forma solicitada, fracionamento e rastreabilidade por lote.**
