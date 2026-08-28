@@ -150,6 +150,45 @@
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
 
+/* Relatórios > Movimentações: diferencia os cards principais no hover para
+   reduzir confusão visual entre entrada, saída e descarte. */
+.gestao-shell .resumo-cards--movimentacoes article {
+  transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+.gestao-shell .resumo-cards--movimentacoes article:nth-child(2):hover {
+  border-color: #2d6bc4 !important;
+  background: #eef4ff !important;
+  box-shadow: 0 4px 12px rgb(45 107 196 / 12%) !important;
+}
+
+.gestao-shell .resumo-cards--movimentacoes article:nth-child(2):hover span,
+.gestao-shell .resumo-cards--movimentacoes article:nth-child(2):hover strong {
+  color: #1a4da1 !important;
+}
+
+.gestao-shell .resumo-cards--movimentacoes article:nth-child(3):hover {
+  border-color: #dc5a5a !important;
+  background: #fff1f1 !important;
+  box-shadow: 0 4px 12px rgb(220 90 90 / 12%) !important;
+}
+
+.gestao-shell .resumo-cards--movimentacoes article:nth-child(3):hover span,
+.gestao-shell .resumo-cards--movimentacoes article:nth-child(3):hover strong {
+  color: #b42318 !important;
+}
+
+.gestao-shell .resumo-cards--movimentacoes article:nth-child(5):hover {
+  border-color: #d7a900 !important;
+  background: #fff8d9 !important;
+  box-shadow: 0 4px 12px rgb(215 169 0 / 14%) !important;
+}
+
+.gestao-shell .resumo-cards--movimentacoes article:nth-child(5):hover span,
+.gestao-shell .resumo-cards--movimentacoes article:nth-child(5):hover strong {
+  color: #8a6500 !important;
+}
+
 @media (max-width: 900px) {
   .gestao-shell .estoque-detalhe .product-context {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
