@@ -175,3 +175,72 @@ export interface RelatorioProdutosFiltros {
   risco?: NivelRiscoRelatorio
   orgaoFiscalizador?: OrgaoFiscalizadorRelatorio
 }
+
+export type SituacaoLoteRelatorio =
+  | 'VALIDO'
+  | 'PROXIMO_VENCIMENTO'
+  | 'VENCIDO'
+  | 'SEM_VALIDADE'
+  | 'ESGOTADO'
+  | 'INATIVO'
+
+export interface RelatorioEstoqueItem {
+  estoqueId: string
+  unidadeId: string
+  unidadeNome: string
+  unidadeSigla: string | null
+  produtoId: string
+  produtoNome: string
+  codigoReferencia: string | null
+  unidadeMedida: string
+  quantidadeAtual: number
+  quantidadeMinima: number
+  abaixoMinimo: boolean
+  ativo: boolean
+  totalLotes: number
+  lotesAtivos: number
+  lotesVencidos: number
+  lotesProximosVencimento: number
+}
+
+export interface RelatorioLoteItem {
+  loteId: string
+  estoqueId: string
+  unidadeId: string
+  unidadeNome: string
+  produtoId: string
+  produtoNome: string
+  codigoInterno: string
+  numeroLote: string | null
+  quantidadeInicial: number
+  quantidadeDisponivel: number
+  dataEntrada: string
+  dataValidade: string | null
+  ativo: boolean
+  situacao: SituacaoLoteRelatorio
+}
+
+export interface RelatorioEstoqueLotesResponse {
+  geradoEm: string
+  totalEstoques: number
+  estoquesAtivos: number
+  estoquesAbaixoMinimo: number
+  quantidadeTotalEstoque: number
+  totalLotes: number
+  lotesAtivos: number
+  lotesVencidos: number
+  lotesProximosVencimento: number
+  lotesEsgotados: number
+  estoques: RelatorioEstoqueItem[]
+  lotes: RelatorioLoteItem[]
+}
+
+export interface RelatorioEstoqueLotesFiltros {
+  unidadeId?: string
+  produtoId?: string
+  ativoEstoque?: boolean
+  abaixoMinimo?: boolean
+  ativoLote?: boolean
+  validade?: SituacaoLoteRelatorio
+  diasVencimento?: number
+}
