@@ -2,6 +2,8 @@ import { http } from '@/services/http'
 import type {
   AprovarPedidoRequest,
   EstoqueCentralResponse,
+  LotePedidoResponse,
+  MovimentacaoPedidoResponse,
   PedidoRequest,
   PedidoResponse,
   ProjetoResponse,
@@ -44,9 +46,7 @@ function rotuloEnum(valor: string | null | undefined) {
 function descricaoOperacionalProduto(item: PedidoResponse['itens'][number]) {
   const partes: string[] = []
 
-  if (item.produtoUnidadeArmazenamento?.trim()) {
-    partes.push(item.produtoUnidadeArmazenamento.trim())
-  }
+  if (item.produtoUnidadeArmazenamento?.trim()) partes.push(item.produtoUnidadeArmazenamento.trim())
 
   if (item.produtoPerecivel) {
     const tipoPerecivel = rotuloEnum(item.produtoTipoPerecivel)
@@ -59,30 +59,18 @@ function descricaoOperacionalProduto(item: PedidoResponse['itens'][number]) {
     partes.push(`⚠ RISCO ${nivel?.toUpperCase()}${tipo ? ` · ${tipo.toUpperCase()}` : ''}`)
   }
 
-  if (item.produtoDescricaoRisco?.trim()) {
-    partes.push(`Atenção: ${item.produtoDescricaoRisco.trim()}`)
-  }
-
-  if (item.produtoCondicoesArmazenamento?.trim()) {
-    partes.push(`Armazenamento: ${item.produtoCondicoesArmazenamento.trim()}`)
-  }
+  if (item.produtoDescricaoRisco?.trim()) partes.push(`Atenção: ${item.produtoDescricaoRisco.trim()}`)
+  if (item.produtoCondicoesArmazenamento?.trim()) partes.push(`Armazenamento: ${item.produtoCondicoesArmazenamento.trim()}`)
 
   return partes.filter(Boolean).join('   |   ')
 }
 
 function itemSemContextoProduto(item: PedidoResponse['itens'][number]) {
-  return item.produtoRisco === undefined
-    || item.produtoPerecivel === undefined
-    || item.produtoTipoRisco === undefined
+  return item.produtoRisco === undefined || item.produtoPerecivel === undefined || item.produtoTipoRisco === undefined
 }
 
 async function enriquecerItensComProduto(pedido: PedidoResponse): Promise<PedidoResponse> {
-  const ids = [...new Set(
-    pedido.itens
-      .filter(itemSemContextoProduto)
-      .map((item) => item.produtoId),
-  )]
-
+  const ids = [...new Set(pedido.itens.filter(itemSemContextoProduto).map((item) => item.produtoId))]
   if (ids.length === 0) return pedido
 
   const resultados = await Promise.allSettled(
@@ -94,9 +82,7 @@ async function enriquecerItensComProduto(pedido: PedidoResponse): Promise<Pedido
 
   const produtos = new Map<string, ProdutoDetalhe>()
   for (const resultado of resultados) {
-    if (resultado.status === 'fulfilled') {
-      produtos.set(resultado.value.id, resultado.value)
-    }
+    if (resultado.status === 'fulfilled') produtos.set(resultado.value.id, resultado.value)
   }
 
   return {
@@ -104,7 +90,6 @@ async function enriquecerItensComProduto(pedido: PedidoResponse): Promise<Pedido
     itens: pedido.itens.map((item) => {
       const produto = produtos.get(item.produtoId)
       if (!produto) return item
-
       return {
         ...item,
         produtoRisco: produto.risco,
@@ -120,7 +105,6 @@ async function enriquecerItensComProduto(pedido: PedidoResponse): Promise<Pedido
 
 async function aplicarContextoOperacional(pedido: PedidoResponse): Promise<PedidoResponse> {
   const enriquecido = await enriquecerItensComProduto(pedido)
-
   return {
     ...enriquecido,
     urgente: enriquecido.urgente && enriquecido.status === 'PENDENTE',
@@ -142,16 +126,12 @@ export const pedidoService = {
   },
 
   async listarPorStatus(status: StatusPedido) {
-    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-status', {
-      params: { status },
-    })
+    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-status', { params: { status } })
     return aplicarContextoOperacionalLista(data)
   },
 
   async listarPorUrgencia(urgente: boolean) {
-    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-urgencia', {
-      params: { urgente },
-    })
+    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-urgencia', { params: { urgente } })
     return aplicarContextoOperacionalLista(data)
   },
 
@@ -166,9 +146,7 @@ export const pedidoService = {
   },
 
   async rejeitar(id: string, observacao: string) {
-    const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/rejeitar`, null, {
-      params: { observacao },
-    })
+    const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/rejeitar`, null, { params: { observacao } })
     return aplicarContextoOperacional(data)
   },
 
@@ -178,16 +156,12 @@ export const pedidoService = {
   },
 
   async cancelar(id: string, observacao: string) {
-    const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/cancelar`, null, {
-      params: { observacao },
-    })
+    const { data } = await http.put<PedidoResponse>(`/v1/pedidos/${id}/cancelar`, null, { params: { observacao } })
     return aplicarContextoOperacional(data)
   },
 
   async listarPorUsuario(usuarioId: string) {
-    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-usuario', {
-      params: { usuarioId },
-    })
+    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-usuario', { params: { usuarioId } })
     return aplicarContextoOperacionalLista(data)
   },
 
@@ -197,16 +171,22 @@ export const pedidoService = {
   },
 
   async listarProjetosPorLaboratorio(laboratorioId: string) {
-    const { data } = await http.get<ProjetoResponse[]>('/v1/projetos/por-laboratorio', {
-      params: { laboratorioId },
-    })
+    const { data } = await http.get<ProjetoResponse[]>('/v1/projetos/por-laboratorio', { params: { laboratorioId } })
     return data.filter((projeto) => projeto.ativo)
   },
 
   async listarEstoquePorUnidade(unidadeId: string) {
-    const { data } = await http.get<EstoqueCentralResponse[]>('/v1/estoque-central/por-unidade', {
-      params: { unidadeId },
-    })
+    const { data } = await http.get<EstoqueCentralResponse[]>('/v1/estoque-central/por-unidade', { params: { unidadeId } })
     return data.filter((estoque) => estoque.ativo)
+  },
+
+  async listarLotesPorEstoque(estoqueId: string) {
+    const { data } = await http.get<LotePedidoResponse[]>('/v1/lotes/por-estoque', { params: { estoqueId } })
+    return data.filter((lote) => lote.ativo && lote.quantidadeDisponivel > 0)
+  },
+
+  async listarMovimentacoesPorPedido(pedidoId: string) {
+    const { data } = await http.get<MovimentacaoPedidoResponse[]>('/v1/movimentacoes/pedido', { params: { pedidoId } })
+    return data.filter((movimentacao) => movimentacao.tipoMovimentacao === 'SAIDA')
   },
 }
