@@ -8,6 +8,7 @@ import { vuetify } from './app/vuetify'
 import './styles/tokens.css'
 import './styles/base.css'
 import './styles/main.css'
+import './styles/relatorios-responsive.css'
 
 createApp(App)
   .use(createPinia())
