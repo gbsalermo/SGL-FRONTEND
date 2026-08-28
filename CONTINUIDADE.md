@@ -7,7 +7,7 @@
 **Branch atual:** `feat/gestao-interface`  
 **Fase atual:** Estoque / Lotes  
 **Último bloco concluído:** Pedidos da Gestão  
-**Próximo passo exato:** validar a nova contagem em unidades + filtro por embalagem no detalhe de estoque; depois ajustar os próximos pontos de Estoque um por um e só então seguir para Descarte por vencimento.
+**Próximo passo exato:** validar a nova leitura de Unidade + Disponível em `unit.` e a entrada com tipo de embalagem + especificação + multiplicador; depois continuar os ajustes de Estoque um por vez.
 
 Este arquivo é a fonte principal de retomada do frontend.
 
@@ -78,10 +78,12 @@ Flyway                                        ✅
 UUID público                                  ✅
 testes principais                             ✅
 CORS local                                    ✅
-apresentação por lote                         🟡 implementada / validar fluxo
 observação persistida no lote                 ✅
+código SGL automático e imutável do lote      ✅
+tipo de embalagem do lote                     ✅ V8 implementada / validar
+especificação de embalagem                    ✅
+multiplicador por embalagem                   ✅
 edição cadastral segura do lote               ✅
-código SGL automático e imutável do lote      ✅ implementar/validar V7
 autenticação definitiva                       ⏳ futura
 auditoria                                     ⏳ futura
 integração corporativa                        ⏳ futura
@@ -96,7 +98,7 @@ Shell Gestão/Admin                            ✅
 Pedidos da Gestão                             ✅
 Estoque — visão geral                         🟡 ajustado para unidades / validar
 Estoque — detalhe/lotes                       🟡 nova UX para validar
-Entrada de lote                               🟡 implementada / validar
+Entrada de lote                               🟡 tipo + especificação + multiplicador
 Filtro de visualização por embalagem          🟡 implementado / validar
 Modal de detalhe/edição de lote               🟡 implementado / validar
 Descarte por vencimento                       ⏳ depois da validação atual
@@ -125,23 +127,6 @@ Autenticação/autorização/auditoria            ⏳
 #1A1A2E  texto principal
 #64748B  texto secundário
 #E2E8F0  borda
-```
-
-Direção:
-
-```text
-clean
-corporativo
-administrativo/laboratorial
-densidade média-compacta
-sidebar escura
-topbar escura
-área principal clara
-breadcrumbs
-busca local
-filtros expansíveis
-tabelas funcionais
-chips de status
 ```
 
 ---
@@ -206,9 +191,9 @@ docs/DECISAO_UNIDADES_CORPORATIVAS.md
 
 # 7. Estoque / Lotes — ETAPA ATUAL
 
-## 7.1 Regra principal de quantidade — DECISÃO ATUAL
+## 7.1 Regra principal de quantidade
 
-A quantidade operacional do estoque deve ser entendida pelo usuário **sempre em unidades individuais daquele produto**.
+O saldo operacional do estoque é sempre convertido para **unidades individuais daquele produto**.
 
 Exemplo:
 
@@ -216,128 +201,137 @@ Exemplo:
 Produto: Extrato de DNA
 1 kit = 50 unidades
 
-4 kits disponíveis
-→ saldo geral = 200 unidades
+4 kits
+→ saldo = 200 unidades
 
-retirada de 1 kit
-→ baixa de 50 unidades
-→ novo saldo geral = 150 unidades
+saída de 1 kit
+→ baixa = 50 unidades
+→ saldo = 150 unidades
 ```
 
-O saldo principal não muda de significado conforme a embalagem escolhida.
-
-### Estoque mínimo
-
-O estoque mínimo também é configurado e exibido em unidades.
-
-Exemplo:
+O estoque mínimo também usa esse mesmo saldo:
 
 ```text
 mínimo = 100 unidades
-
-se 1 kit = 50 unidades
-→ equivale a 2 kits
+1 kit = 50
+→ mínimo equivalente a 2 kits
 ```
 
-A comparação de estoque baixo continua simples:
+Não existem saldos independentes de kit e unidade.
+
+---
+
+## 7.2 Tipo de unidade/embalagem — DECISÃO ATUAL
+
+O lote passa a separar duas informações que antes estavam misturadas.
+
+### Tipo de unidade
+
+Campo controlado/preselecionado:
 
 ```text
-quantidadeAtual < quantidadeMinima
+UNITARIO
+KIT
+CAIXA
+GARRAFA
+GALAO
 ```
 
-sempre considerando a quantidade total em unidades.
+Backend:
 
-## 7.2 Embalagem é uma forma de visualização/agrupamento
+```text
+TipoEmbalagem
+Lote.tipoEmbalagem
+```
 
-Kit, caixa, pacote, barril etc. não substituem o saldo em unidades.
+Flyway:
 
-São agrupamentos de unidades registrados no lote.
+```text
+V8__add_tipo_embalagem_lote.sql
+```
+
+Esse tipo é usado para:
+
+```text
+organização visual
+filtro por embalagem
+entrada
+futura saída por embalagem
+```
+
+### Especificação da embalagem
+
+`Lote.apresentacao` passa a representar a descrição livre da embalagem.
 
 Exemplos:
 
 ```text
-Kit
-→ 50 unidades por kit
-
-Caixa
-→ 10 unidades por caixa
-
-Pacote
-→ 25 unidades por pacote
+kit com 50 unidades
+garrafa de 1 L
+unidade de 10 kg
+caixa com 10 garrafas de 1 L
+galão de 20 L
 ```
 
-O usuário pode visualizar o saldo por um agrupamento específico, mas isso não altera o saldo real.
-
-### Filtro no detalhe do estoque
-
-Em `/estoque/:id`, o cartão `Como está armazenado` foi substituído por:
+Na interface o campo se chama:
 
 ```text
-Visualizar quantidade em
-[ Unidades individuais ▼ ]
+Especificar embalagem
 ```
 
-Opções são obtidas das apresentações registradas nos lotes.
+Tipo e especificação não são a mesma coisa.
 
 Exemplo:
 
 ```text
-Unidades individuais
-Kits — 50 un. por embalagem
-Caixas — 10 un. por embalagem
+tipo = KIT
+especificação = kit com 50 unidades
 ```
 
-Com `Unidades individuais` selecionado:
+---
+
+## 7.3 Multiplicador de unidades
+
+O campo técnico existente `conteudoPorApresentacao` continua sendo usado, mas na interface passa a ser chamado de:
 
 ```text
-Quantidade disponível
-200 unidades
+Multiplicador de unidades
 ```
 
-Com `Kit` selecionado:
+Objetivo:
 
 ```text
-Quantidade disponível
-4 kits
-
-50 unidades por kit.
-Unidades avulsas e outras embalagens não entram nesta visualização.
+quantas unidades individuais uma embalagem representa no saldo
 ```
 
-### Regra importante do filtro
-
-Ao selecionar uma embalagem específica:
+Exemplos:
 
 ```text
-somar apenas lotes daquela apresentação + daquele conteúdo por embalagem
+UNITARIO
+multiplicador = 1
+
+KIT com 50 unidades
+multiplicador = 50
+
+CAIXA com 10 garrafas do produto Água 1 L
+multiplicador = 10
 ```
+
+O backend continua calculando internamente:
+
+```text
+quantidade recebida × multiplicador
+```
+
+A interface não precisa expor a multiplicação como regra matemática.
+
+---
+
+## 7.4 Produtos com tamanho/volume diferente
+
+O tamanho físico do produto continua fazendo parte da identidade do item quando ele muda o que está sendo estocado.
 
 Exemplo:
-
-```text
-3 kits de 50
-+ 20 unidades avulsas
-+ 2 caixas de 10
-
-saldo geral = 190 unidades
-
-filtro Kit 50
-→ 3 kits
-
-filtro Caixa 10
-→ 2 caixas
-
-filtro Unidades
-→ 190 unidades
-```
-
-As 20 unidades avulsas não entram no filtro Kit ou Caixa.
-
-## 7.3 Produtos com tamanhos diferentes
-
-Quando o próprio item físico é diferente, ele deve ser tratado como uma variante/produto de estoque diferente, e não como simples conversão de embalagem.
-
-Exemplo aprovado:
 
 ```text
 Água 1 L
@@ -345,82 +339,137 @@ Exemplo aprovado:
 Água 250 mL
 ```
 
-Cada um possui sua própria quantidade em unidades.
+São itens distintos no estoque.
 
 Para `Água 1 L`:
 
 ```text
-entrada: 1 caixa
-conteúdo da caixa: 10 unidades
+entrada = 1 CAIXA
+especificação = caixa com 10 garrafas de 1 L
+multiplicador = 10
 
-estoque Água 1 L
+saldo do produto Água 1 L
 → +10 unidades
 ```
 
-O volume `1 L` faz parte da definição/apresentação do item físico. O estoque operacional continua respondendo:
+Não somar garrafas de 1 L com garrafas de 500 mL como se fossem o mesmo produto.
+
+---
+
+## 7.5 Detalhe `/estoque/:id`
+
+Topo:
 
 ```text
-10 unidades de Água 1 L
-```
-
-Isso evita misturar:
-
-```text
-10 garrafas de 1 L
-com
-10 garrafas de 500 mL
-```
-
-como se fossem o mesmo saldo.
-
-**Observação:** esse princípio deve ser refletido com cuidado na futura etapa de Produtos. Não alterar todos os modelos técnicos do backend nesta subetapa sem validação do fluxo atual.
-
-## 7.4 Visão geral `/estoque`
-
-A listagem principal passa a mostrar:
-
-```text
-Produto
-Código
-Embalagem padrão
+Contagem padrão            Unidades individuais
+Embalagem mais comum       referência do produto
 Localização
-Quantidade atual
-Mínimo
-Situação
+Avisar quando restarem     N unit.
 ```
 
-Quantidade e mínimo aparecem sempre como:
+Quantidade principal:
 
 ```text
-200 unidades
-100 unidades
+Quantidade disponível
+200 unit.
 ```
 
-A coluna antiga baseada em `unidadeMedida` não deve induzir o usuário a pensar que o saldo muda entre frasco/kit/mL/etc.
+### Filtro por embalagem
 
-A embalagem padrão continua sendo uma referência informativa do produto.
+```text
+Visualizar por embalagem
+[ Unidades individuais ▼ ]
+```
 
-## 7.5 Não mostrar lote antigo/novo na operação
+Exemplos de opções:
 
-Remover da interface operacional textos como:
+```text
+Unidades individuais
+kits — 50 unit. por embalagem
+caixas — 10 unit. por embalagem
+```
+
+Se selecionar Kit 50:
+
+```text
+4 kits
+50 unit. por kit
+```
+
+Somar somente lotes com:
+
+```text
+mesmo tipoEmbalagem
++ mesmo multiplicador
+```
+
+Unidades de outros tipos não entram nessa visão específica.
+
+---
+
+## 7.6 Tabela de lotes
+
+Colunas atuais:
+
+```text
+Código SGL
+Unidade
+Disponível agora
+Entrada
+Validade
+Situação
+Ver detalhes
+```
+
+### Coluna Unidade
+
+Informação principal:
+
+```text
+1 kit
+4 caixas
+10 unit.
+```
+
+Texto secundário:
+
+```text
+kit com 50 unidades
+caixa com 10 garrafas de 1 L
+unidade de 10 kg
+```
+
+### Disponível agora
+
+Mostrar apenas:
+
+```text
+50 unit.
+10 unit.
+200 unit.
+```
+
+Não decompor essa coluna em kit + avulso.
+
+O detalhamento físico pertence à coluna Unidade, filtro e modal.
+
+---
+
+## 7.7 Não mostrar lote antigo/novo
+
+Removidos da interface operacional:
 
 ```text
 registro antigo
-entrada feita antes do novo controle
 lote legado
+entrada feita antes do novo controle
 ```
 
-Esses detalhes de migração não ajudam o usuário a controlar estoque.
+Migração é detalhe técnico e não deve aparecer para quem está usando o estoque.
 
-Se um lote não possui dados detalhados de embalagem, mostrar apenas o que é seguro afirmar:
+---
 
-```text
-10 unidades
-```
-
-sem classificar visualmente como antigo ou novo.
-
-## 7.6 Entrada de lote
+## 7.8 Entrada de lote
 
 Endpoint:
 
@@ -428,13 +477,14 @@ Endpoint:
 POST /api/v1/movimentacoes/estoques/{estoqueId}/lotes?usuarioId={uuid}
 ```
 
-Interface atual:
+Interface:
 
 ```text
 Lote / referência do fornecedor
-Como o material chegou?
+Tipo de unidade
+Especificar embalagem
 Quantos chegaram?
-Quantas unidades vêm em cada um?
+Multiplicador de unidades
 Pode retirar unidades separadamente?
 Validade
 Origem
@@ -444,29 +494,31 @@ Observação
 Exemplo:
 
 ```text
-Como chegou? Kit
-Quantos chegaram? 4
-Quantas unidades vêm em cada um? 50
+Tipo de unidade: KIT
+Especificar embalagem: kit com 50 unidades
+Quantos chegaram: 4
+Multiplicador: 50
 
-Sistema incorpora 200 unidades ao saldo.
+saldo incorporado internamente = 200 unidades
 ```
-
-O cálculo é interno; não precisa aparecer como multiplicação para o usuário.
 
 Outro exemplo:
 
 ```text
 Produto: Água 1 L
-Como chegou? Caixa
-Quantos chegaram? 1
-Quantas unidades vêm em cada um? 10
+Tipo: CAIXA
+Especificação: caixa com 10 garrafas de 1 L
+Quantidade: 1
+Multiplicador: 10
 
-Saldo aumenta 10 unidades de Água 1 L.
+saldo do produto aumenta 10 unidades
 ```
 
-## 7.7 Fracionamento
+---
 
-`fracionavel` passa a ser entendido na interface como:
+## 7.9 Fracionamento
+
+Interface:
 
 ```text
 Pode retirar unidades separadamente?
@@ -475,143 +527,94 @@ Pode retirar unidades separadamente?
 Exemplo:
 
 ```text
-Kit com 50 unidades
+KIT com 50
 fracionável = false
-→ só pode sair kit completo
-→ saída de 1 kit = 50 unidades
+→ saída deve respeitar 50 unidades por kit
 
-Caixa com 10 garrafas
+CAIXA com 10
 fracionável = true
-→ pode sair 1, 2, 3... unidades
+→ pode sair 1 unidade individual sem retirar a caixa inteira
 ```
 
-A quantidade principal continua sempre em unidades.
+O multiplicador continua sendo usado para validar uma embalagem não fracionável.
 
-## 7.8 Código interno SGL do lote — decisão definitiva
+---
+
+## 7.10 Código interno SGL do lote
 
 Cada lote possui:
 
 ```text
 codigoInterno
-→ identidade interna do SGL
 → gerado automaticamente
 → imutável
 
 numeroLote
-→ lote/referência do fornecedor
-→ dado externo
+→ referência externa do fornecedor
 ```
 
-Padrão atual:
+Padrão:
 
 ```text
 LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
-
-LOT-EXT-DNA-PL-001
-LOT-EXT-DNA-PL-002
-LOT-EXT-DNA-PL-003
 ```
 
-O Código SGL:
+Exemplo:
 
 ```text
-não é digitado na entrada
-não pode ser alterado no modal
-é usado para rastreabilidade/rótulo
+LOT-EXT-DNA-PL-001
+LOT-EXT-DNA-PL-002
 ```
 
-Flyway relacionado:
+Flyway:
 
 ```text
 V7__add_codigo_interno_lote.sql
 ```
 
-## 7.9 Modal de lote
+---
 
-Cada linha abre um modal com:
+## 7.11 Modal de lote
+
+Mostrar:
 
 ```text
 Código SGL
 Lote do fornecedor
-Recebido
-Disponível agora
-Como chegou
+Tipo de unidade
+Especificação da embalagem
+Multiplicador
+Quantidade recebida
+Disponível agora em unit.
 Entrada
 Validade
 Pode retirar unidades separadamente?
 Observação
 ```
 
-Código SGL é somente leitura.
+Código SGL, quantidade recebida e multiplicador ficam bloqueados após a entrada para preservar rastreabilidade.
 
-Campos editáveis conforme contrato atual:
+Tipo de unidade, especificação, validade, referência do fornecedor, fracionamento e observação podem ser corrigidos conforme contrato atual.
 
-```text
-lote/referência do fornecedor
-nome da apresentação
-data de validade
-fracionável
-observação
-```
-
-Campos bloqueados:
-
-```text
-codigoInterno
-sequencialInterno
-quantidade recebida
-conteúdo por embalagem
-```
-
-## 7.10 Observação do lote
-
-Persistência:
-
-```text
-Lote.observacao
-AtualizarLoteRequestDTO.observacao
-LoteResponseDTO.observacao
-V6__add_lote_observacao.sql
-```
-
-## 7.11 Mensagem de sucesso
-
-Não mostrar:
-
-```text
-Entrada undefined registrada com sucesso.
-```
-
-Se `codigoInterno` ainda não vier na resposta, usar fallback:
-
-```text
-Entrada registrada com sucesso.
-```
+---
 
 ## 7.12 Saída futura / Pedidos
 
-A saída deverá reutilizar exatamente a mesma regra de unidades.
-
-Exemplo:
+A saída deve reutilizar a mesma estrutura.
 
 ```text
-Saldo geral = 200 unidades
-1 kit = 50 unidades
+saldo = 200 unit.
+KIT = multiplicador 50
 
-Pedido/saída de 1 kit
-→ -50 unidades
-→ 150 unidades
+saída de 1 KIT
+→ -50 unit.
+→ saldo 150 unit.
 
-Pedido/saída de 10 unidades
-→ -10 unidades
-→ 190 unidades
+saída de 10 unit.
+→ -10 unit.
 ```
 
-Quando o usuário escolher saída por embalagem, o sistema converte a embalagem em unidades internamente.
-
-Não duplicar saldos separados de `kits` e `unidades`.
-
-Existe um único saldo total em unidades e diferentes formas de consultá-lo/retirá-lo.
+Se a embalagem não for fracionável, a saída deve respeitar múltiplos completos do multiplicador.
 
 ---
 
@@ -626,19 +629,21 @@ Rotas planejadas:
 /produtos/:id
 ```
 
-A etapa de Produtos precisará consolidar a decisão atual de **item físico / variante**.
-
-Exemplos que precisam ser tratados de forma clara:
+A etapa de Produtos deverá consolidar a diferença entre:
 
 ```text
-Água 1 L
-Água 500 mL
-Água 250 mL
+produto físico
+embalagem do lote
 ```
 
-Não transformar isso automaticamente em uma rede global de conversão entre litros/mL.
+Exemplo:
 
-O item físico cadastrado deve ser claro para que a quantidade do estoque possa continuar sendo uma contagem simples de unidades.
+```text
+Água 1 L      → produto
+CAIXA         → tipo de embalagem do lote
+caixa com 10 garrafas de 1 L → especificação
+10            → multiplicador
+```
 
 Também continuam previstos:
 
@@ -651,8 +656,6 @@ condições de armazenamento
 lotes
 identificação/rótulo
 ```
-
-O rótulo usa `codigoInterno` como identidade principal do lote.
 
 ---
 
@@ -677,8 +680,6 @@ pedido
 tipo
 período
 ```
-
-A quantidade operacional exibida deve respeitar a regra unitária definida no Estoque.
 
 ---
 
@@ -739,14 +740,15 @@ Etapa 3 — Interfaces iniciais                              ✅
   3.3 Shell Gestão/Admin + Pedidos da Gestão               ✅
 
 Etapa 4 — Operação de estoque                              🟡 ATUAL
-  4.1 Visão geral do Estoque                               🟡 validar contagem em unidades
+  4.1 Visão geral do Estoque                               🟡 validar contagem unitária
   4.2 Detalhe / Lotes                                      🟡 validar UX
-  4.3 Entrada de lote                                      🟡 validar
+  4.3 Entrada de lote                                      🟡 validar tipo/especificação/multiplicador
   4.4 Filtro por embalagem                                 🟡 validar
   4.5 Modal detalhe/edição do lote                         🟡 validar
-  4.6 Código SGL automático/imutável                        🟡 validar V7
-  4.7 Descarte por vencimento                              ⏳ depois da validação atual
-  4.8 Integração da mesma lógica nas saídas                 ⏳
+  4.6 Código SGL automático/imutável                        🟡 validar
+  4.7 Tipo de embalagem / Flyway V8                        🟡 validar
+  4.8 Descarte por vencimento                              ⏳ depois da validação atual
+  4.9 Integração da mesma lógica nas saídas                 ⏳
 
 Etapa 5 — Produtos operacional + Rotulagem                 ⏳
 Etapa 6 — Movimentações                                    ⏳
@@ -759,19 +761,6 @@ Etapa 8 — Administração / Cadastros                        ⏳
   8.5 Estagiários — listagem + ficha individual            ⏳ OBRIGATÓRIO
 Etapa 9 — Dashboards finais / robustez / 404               ⏳
 Etapa 10 — Autenticação / autorização / auditoria          ⏳
-```
-
-Sequência atual:
-
-```text
-VALIDAR CONTAGEM UNITÁRIA
-→ VALIDAR FILTRO POR EMBALAGEM
-→ CORRIGIR PRÓXIMO PONTO DO ESTOQUE
-→ DESCARTE
-→ FINALIZAR ESTOQUE
-→ PRODUTOS
-→ MOVIMENTAÇÕES
-→ RELATÓRIOS
 ```
 
 ---
@@ -822,16 +811,18 @@ Estamos corrigindo Estoque **um ponto por vez**.
 Validar agora:
 
 ```text
-1. git pull frontend feat/gestao-interface
-2. abrir /estoque
-3. confirmar Quantidade atual e Mínimo em unidades
+1. git pull backend main
+2. reiniciar backend e confirmar Flyway V8
+3. git pull frontend feat/gestao-interface
 4. abrir /estoque/:id
-5. confirmar que Quantidade disponível inicia em unidades
-6. testar seletor "Visualizar quantidade em"
-7. selecionar Kit/Caixa/etc. e conferir se só aquela embalagem entra na contagem
-8. confirmar que não aparece "registro antigo", "lote legado" ou equivalente
-9. criar uma entrada e confirmar que não aparece "undefined" na mensagem de sucesso
-10. enviar captura/resultado antes de mexer no próximo ponto
+5. confirmar coluna UNIDADE
+6. confirmar texto secundário com especificação da embalagem
+7. confirmar DISPONÍVEL AGORA apenas como "N unit."
+8. criar entrada escolhendo UNITARIO/KIT/CAIXA/GARRAFA/GALAO
+9. preencher Especificar embalagem
+10. testar Multiplicador de unidades
+11. testar filtro por embalagem
+12. enviar captura/resultado antes do próximo ajuste
 ```
 
 Não avançar para Descarte antes dessa validação.
@@ -852,22 +843,41 @@ Backend:
 main
 ```
 
+Backend recente:
+
+```text
+TipoEmbalagem
+→ UNITARIO / KIT / CAIXA / GARRAFA / GALAO
+
+Lote.tipoEmbalagem
+→ categoria controlada da embalagem
+
+Lote.apresentacao
+→ especificação livre
+
+conteudoPorApresentacao
+→ multiplicador de unidades
+
+V8__add_tipo_embalagem_lote.sql
+→ adiciona tipo_embalagem e classifica registros existentes quando possível
+```
+
 Frontend recente:
 
 ```text
-EstoqueGestaoView
-→ saldo e mínimo exibidos em unidades
-→ embalagem padrão separada da quantidade
+Tabela de lotes
+→ O que foi recebido virou UNIDADE
+→ tipo/quantidade em destaque
+→ especificação em texto menor
+→ Disponível agora = N unit.
 
-EstoqueDetalheView
-→ saldo principal em unidades
-→ filtro por embalagem
-→ embalagem não altera saldo real
-→ remove textos de lote antigo/novo
-→ fallback para mensagem de entrada sem codigoInterno
-→ mantém modal de lote e Código SGL imutável
+Entrada de lote
+→ Tipo de unidade preselecionado
+→ Especificar embalagem
+→ Multiplicador de unidades
+→ fracionamento preservado
 ```
 
 Regra central atual:
 
-**Existe um único saldo operacional em unidades individuais. Kit, caixa, pacote e outras embalagens são agrupamentos usados para entrada, visualização e saída; não são saldos independentes.**
+**Existe um único saldo operacional em unidades individuais. O tipo de embalagem organiza como essas unidades chegaram e o multiplicador informa quantas unidades uma embalagem representa.**
