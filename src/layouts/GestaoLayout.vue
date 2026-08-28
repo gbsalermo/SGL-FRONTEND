@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import GestaoUserProfile from '@/components/GestaoUserProfile.vue'
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { useSessionStore } from '@/stores/session'
 
@@ -12,15 +13,6 @@ const recolhida = ref(false)
 const pedidosAbertos = ref(route.path === '/pedidos')
 
 const ehAdministrador = computed(() => session.usuario?.perfil === 'ADMINISTRADOR')
-
-const iniciais = computed(() =>
-  (session.usuario?.nome ?? 'Usuário')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((parte) => parte[0]?.toUpperCase())
-    .join(''),
-)
 
 // O retorno no topbar é reservado a telas realmente aninhadas/detalhadas.
 // Seções principais acessadas pela sidebar não exibem uma seta de retorno.
@@ -147,6 +139,23 @@ function sair() {
           <span v-if="!recolhida">Relatórios</span>
         </router-link>
 
+        <div class="gestao-nav__future" title="Estagiários — seção reservada para etapa futura">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="9" cy="8" r="3" />
+            <path d="M3 20v-2a6 6 0 0 1 12 0v2M16 7h5M18.5 4.5v5" />
+          </svg>
+          <span v-if="!recolhida">Estagiários</span>
+          <small v-if="!recolhida">em breve</small>
+        </div>
+
+        <div class="gestao-nav__future" title="Resíduos — seção reservada para etapa futura">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 5h10l-1 16H8L7 5ZM5 5h14M9 5V3h6v2M10 9v8M14 9v8" />
+          </svg>
+          <span v-if="!recolhida">Resíduos</span>
+          <small v-if="!recolhida">em breve</small>
+        </div>
+
         <p v-if="!recolhida" class="gestao-nav__group">SOLICITAÇÕES</p>
         <router-link to="/solicitacoes/novo" title="Novo pedido">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
@@ -170,16 +179,7 @@ function sair() {
         </template>
       </nav>
 
-      <div class="gestao-user">
-        <div class="gestao-avatar">{{ iniciais }}</div>
-        <div v-if="!recolhida" class="gestao-user__copy">
-          <div class="gestao-user__line">
-            <strong>{{ session.usuario?.nome }}</strong>
-            <small>{{ session.usuario?.perfil }}</small>
-          </div>
-          <span>{{ session.usuario?.email }}</span>
-        </div>
-      </div>
+      <GestaoUserProfile :compact="recolhida" />
     </aside>
 
     <div class="gestao-workspace">
@@ -243,15 +243,6 @@ function sair() {
 .gestao-nav__future small { margin-left: auto; color: #6f86aa; font-size: 9px; font-weight: 700; }
 .gestao-shell--collapsed .gestao-nav a, .gestao-shell--collapsed .gestao-tool, .gestao-shell--collapsed .gestao-nav__future, .gestao-shell--collapsed .gestao-nav-parent { justify-content: center; padding-inline: 0; }
 .gestao-shell--collapsed .gestao-nav-parent__main { justify-content: center; padding-inline: 0; }
-.gestao-user { display: flex; align-items: center; gap: 11px; padding: 16px 4px 2px; border-top: 1px solid rgb(255 255 255 / 10%); }
-.gestao-avatar { width: 42px; height: 42px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #2d6bc4; font-size: 12px; font-weight: 800; }
-.gestao-user__copy { min-width: 0; flex: 1; display: flex; flex-direction: column; }
-.gestao-user__line { min-width: 0; display: flex; align-items: center; gap: 6px; }
-.gestao-user__copy strong, .gestao-user__copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.gestao-user__copy strong { min-width: 0; font-size: 12px; }
-.gestao-user__copy span { margin-top: 3px; color: #aebed7; font-size: 10px; }
-.gestao-user__line small { flex: 0 0 auto; padding: 2px 5px; border-radius: 4px; background: #1f4eac; color: #dce8ff; font-size: 8px; font-weight: 800; }
-.gestao-shell--collapsed .gestao-user { justify-content: center; }
 .gestao-workspace { min-width: 0; margin-left: var(--sidebar-width); transition: margin-left 300ms ease; }
 .gestao-topbar { position: sticky; top: 0; z-index: 20; min-height: 72px; display: flex; align-items: center; gap: 10px; padding: 0 24px; background: linear-gradient(90deg, #08162f 0%, #0b1934 100%); color: #fff; box-shadow: 0 1px 0 rgb(255 255 255 / 7%); }
 .gestao-topbar button { border: 0; background: transparent; color: inherit; cursor: pointer; }
@@ -263,5 +254,5 @@ function sair() {
 .gestao-topbar__logout { min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid rgb(255 255 255 / 18%) !important; border-radius: 8px; font-size: 13px; }
 .gestao-topbar__logout svg { width: 18px; height: 18px; }
 .gestao-main { min-height: calc(100vh - 72px); padding: 28px 30px 40px; background: linear-gradient(135deg, #f8fafc 0%, #f2f5fa 100%); }
-@media (max-width: 900px) { .gestao-sidebar { position: static; width: 100%; height: auto; } .gestao-shell--collapsed .gestao-sidebar { width: 100%; } .gestao-workspace { margin-left: 0; } .gestao-brand img { width: 150px !important; object-fit: contain !important; } .gestao-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .gestao-nav p { grid-column: 1 / -1; } .gestao-subnav { grid-column: 1 / -1; } .gestao-user { display: none; } .gestao-topbar__collapse { display: none; } .gestao-main { padding: 18px 16px 30px; } }
+@media (max-width: 900px) { .gestao-sidebar { position: static; width: 100%; height: auto; } .gestao-shell--collapsed .gestao-sidebar { width: 100%; } .gestao-workspace { margin-left: 0; } .gestao-brand img { width: 150px !important; object-fit: contain !important; } .gestao-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .gestao-nav p { grid-column: 1 / -1; } .gestao-subnav { grid-column: 1 / -1; } .gestao-topbar__collapse { display: none; } .gestao-main { padding: 18px 16px 30px; } }
 </style>
