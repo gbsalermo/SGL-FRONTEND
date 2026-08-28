@@ -3,17 +3,20 @@ import RelatorioExportacaoBar from '@/modules/relatorios/components/RelatorioExp
 import { ultimaConsultaRelatorio } from '@/modules/relatorios/services/relatorioService'
 import RelatoriosGestaoView from '@/modules/relatorios/views/RelatoriosGestaoView.vue'
 
-function limparExportacaoAoTrocarRelatorio(event: MouseEvent) {
+function invalidarExportacaoQuandoNecessario(event: MouseEvent) {
   const alvo = event.target
   if (!(alvo instanceof Element)) return
-  if (alvo.closest('.relatorio-opcao')) {
+
+  const trocouRelatorio = Boolean(alvo.closest('.relatorio-opcao'))
+  const limpouFiltros = Boolean(alvo.closest('.btn--ghost'))
+  if (trocouRelatorio || limpouFiltros) {
     ultimaConsultaRelatorio.value = null
   }
 }
 </script>
 
 <template>
-  <div class="relatorios-exportacao-view" @click.capture="limparExportacaoAoTrocarRelatorio">
+  <div class="relatorios-exportacao-view" @click.capture="invalidarExportacaoQuandoNecessario">
     <RelatoriosGestaoView />
     <RelatorioExportacaoBar />
   </div>
