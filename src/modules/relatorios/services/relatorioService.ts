@@ -4,6 +4,8 @@ import type {
   RelatorioEstagiariosResponse,
   RelatorioMovimentacoesFiltros,
   RelatorioMovimentacoesResponse,
+  RelatorioProdutosFiltros,
+  RelatorioProdutosResponse,
   RelatorioResumoOperacionalFiltros,
   RelatorioResumoOperacionalResponse,
 } from '@/modules/relatorios/types/relatorio'
@@ -25,6 +27,13 @@ export const relatorioService = {
 
   async obterResumoOperacional(filtros: RelatorioResumoOperacionalFiltros = {}) {
     const { data } = await http.get<RelatorioResumoOperacionalResponse>('/v1/relatorios/resumo-operacional', {
+      params: filtros,
+    })
+    return data
+  },
+
+  async listarProdutos(filtros: RelatorioProdutosFiltros = {}) {
+    const { data } = await http.get<RelatorioProdutosResponse>('/v1/relatorios/produtos', {
       params: filtros,
     })
     return data
