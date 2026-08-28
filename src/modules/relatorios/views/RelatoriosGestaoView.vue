@@ -6,6 +6,7 @@ import type {
   OrigemMovimentacaoRelatorio,
   RelatorioEstagiariosResponse,
   RelatorioMovimentacoesResponse,
+  RelatorioResumoOperacionalResponse,
   TipoMovimentacaoRelatorio,
 } from '@/modules/relatorios/types/relatorio'
 import { http } from '@/services/http'
@@ -72,6 +73,9 @@ const movimentoProdutoId = ref('')
 const movimentoUsuarioId = ref('')
 const movimentoLoteId = ref('')
 
+const resumoProdutoId = ref('')
+const resumoLimite = ref(5)
+
 const laboratorios = ref<LaboratorioResumo[]>([])
 const produtos = ref<ProdutoResumo[]>([])
 const usuarios = ref<UsuarioResumo[]>([])
@@ -79,6 +83,7 @@ const lotes = ref<LoteResumo[]>([])
 
 const resultadoEstagiarios = ref<RelatorioEstagiariosResponse | null>(null)
 const resultadoMovimentacoes = ref<RelatorioMovimentacoesResponse | null>(null)
+const resultadoResumoOperacional = ref<RelatorioResumoOperacionalResponse | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 
@@ -88,20 +93,21 @@ const opcaoSelecionada = computed(
 
 const relatorioEstagiariosSelecionado = computed(() => relatorioSelecionado.value === 'estagiarios')
 const relatorioMovimentacoesSelecionado = computed(() => relatorioSelecionado.value === 'movimentacoes')
-const possuiResultado = computed(() =>
-  relatorioEstagiariosSelecionado.value
-    ? Boolean(resultadoEstagiarios.value)
-    : relatorioMovimentacoesSelecionado.value
-      ? Boolean(resultadoMovimentacoes.value)
-      : false,
-)
-const geradoEm = computed(() =>
-  relatorioEstagiariosSelecionado.value
-    ? resultadoEstagiarios.value?.geradoEm
-    : relatorioMovimentacoesSelecionado.value
-      ? resultadoMovimentacoes.value?.geradoEm
-      : undefined,
-)
+const relatorioResumoSelecionado = computed(() => relatorioSelecionado.value === 'resumo-operacional')
+
+const possuiResultado = computed(() => {
+  if (relatorioEstagiariosSelecionado.value) return Boolean(resultadoEstagiarios.value)
+  if (relatorioMovimentacoesSelecionado.value) return Boolean(resultadoMovimentacoes.value)
+  if (relatorioResumoSelecionado.value) return Boolean(resultadoResumoOperacional.value)
+  return false
+})
+
+const geradoEm = computed(() => {
+  if (relatorioEstagiariosSelecionado.value) return resultadoEstagiarios.value?.geradoEm
+  if (relatorioMovimentacoesSelecionado.value) return resultadoMovimentacoes.value?.geradoEm
+  if (relatorioResumoSelecionado.value) return resultadoResumoOperacional.value?.geradoEm
+  return undefined
+})
 
 const tiposBolsa = computed(() => {
   const valores = new Set(
@@ -130,10 +136,15 @@ const resumoEstagiarios = computed(() => ({
   inativos: itensEstagiariosFiltrados.value.filter((item) => !item.ativo).length,
 }))
 
-function selecionarRelatorio(id: TipoRelatorio) {
-  relatorioSelecionado.value = id
+function limparResultados() {
   resultadoEstagiarios.value = null
   resultadoMovimentacoes.value = null
+  resultadoResumoOperacional.value = null
+}
+
+function selecionarRelatorio(id: TipoRelatorio) {
+  relatorioSelecionado.value = id
+  limparResultados()
   erro.value = ''
 }
 
@@ -149,8 +160,9 @@ function limparFiltros() {
   movimentoProdutoId.value = ''
   movimentoUsuarioId.value = ''
   movimentoLoteId.value = ''
-  resultadoEstagiarios.value = null
-  resultadoMovimentacoes.value = null
+  resumoProdutoId.value = ''
+  resumoLimite.value = 5
+  limparResultados()
   erro.value = ''
 }
 
@@ -167,7 +179,7 @@ async function visualizarRelatorio() {
     return
   }
 
-  if (!relatorioEstagiariosSelecionado.value && !relatorioMovimentacoesSelecionado.value) {
+  if (!relatorioEstagiariosSelecionado.value && !relatorioMovimentacoesSelecionado.value && !relatorioResumoSelecionado.value) {
     erro.value = 'Este relatório já está previsto na central e será conectado quando o endpoint correspondente for implementado.'
     return
   }
@@ -175,7 +187,7 @@ async function visualizarRelatorio() {
   carregando.value = true
   try {
     if (relatorioEstagiariosSelecionado.value) {
-      resultadoMovimentacoes.value = null
+      limparResultados()
       resultadoEstagiarios.value = await relatorioService.listarEstagiarios({
         ativo: situacao.value === '' ? undefined : situacao.value === 'ativo',
         laboratorioId: laboratorioId.value || undefined,
@@ -185,21 +197,31 @@ async function visualizarRelatorio() {
       return
     }
 
-    resultadoEstagiarios.value = null
-    resultadoMovimentacoes.value = await relatorioService.listarMovimentacoes({
-      tipo: movimentoTipo.value || undefined,
-      origem: movimentoOrigem.value || undefined,
-      produtoId: movimentoProdutoId.value || undefined,
-      laboratorioId: laboratorioId.value || undefined,
-      usuarioId: movimentoUsuarioId.value || undefined,
-      loteId: movimentoLoteId.value || undefined,
+    if (relatorioMovimentacoesSelecionado.value) {
+      limparResultados()
+      resultadoMovimentacoes.value = await relatorioService.listarMovimentacoes({
+        tipo: movimentoTipo.value || undefined,
+        origem: movimentoOrigem.value || undefined,
+        produtoId: movimentoProdutoId.value || undefined,
+        laboratorioId: laboratorioId.value || undefined,
+        usuarioId: movimentoUsuarioId.value || undefined,
+        loteId: movimentoLoteId.value || undefined,
+        dataInicio: dataInicio.value || undefined,
+        dataFim: dataFim.value || undefined,
+      })
+      return
+    }
+
+    limparResultados()
+    resultadoResumoOperacional.value = await relatorioService.obterResumoOperacional({
+      produtoId: resumoProdutoId.value || undefined,
       dataInicio: dataInicio.value || undefined,
       dataFim: dataFim.value || undefined,
+      limite: resumoLimite.value,
     })
   } catch (e) {
     console.error(e)
-    resultadoEstagiarios.value = null
-    resultadoMovimentacoes.value = null
+    limparResultados()
     erro.value = 'Não foi possível carregar o relatório. Verifique a API e tente novamente.'
   } finally {
     carregando.value = false
@@ -259,7 +281,14 @@ onMounted(async () => {
       <aside class="relatorios-selector card">
         <h2>1. Escolha o relatório</h2>
         <div class="relatorios-lista">
-          <button v-for="item in relatorios" :key="item.id" class="relatorio-opcao" :class="{ 'relatorio-opcao--ativo': relatorioSelecionado === item.id }" type="button" @click="selecionarRelatorio(item.id)">
+          <button
+            v-for="item in relatorios"
+            :key="item.id"
+            class="relatorio-opcao"
+            :class="{ 'relatorio-opcao--ativo': relatorioSelecionado === item.id }"
+            type="button"
+            @click="selecionarRelatorio(item.id)"
+          >
             <span class="relatorio-opcao__icone" aria-hidden="true">
               <svg v-if="item.icone === 'documento'" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h5M9 12h6M9 16h6" /></svg>
               <svg v-else-if="item.icone === 'troca'" viewBox="0 0 24 24"><path d="M4 8h14M15 5l3 3-3 3M20 16H6M9 13l-3 3 3 3" /></svg>
@@ -271,7 +300,10 @@ onMounted(async () => {
             <span class="relatorio-opcao__texto"><strong>{{ item.titulo }}</strong><small>{{ item.descricao }}</small></span>
           </button>
         </div>
-        <div class="exportacao-info"><span class="exportacao-info__icone">i</span><div><strong>Exportação</strong><p>Todos os relatórios poderão ser exportados em <b>PDF</b> ou <b>Excel</b>.</p></div></div>
+        <div class="exportacao-info">
+          <span class="exportacao-info__icone">i</span>
+          <div><strong>Exportação</strong><p>Todos os relatórios poderão ser exportados em <b>PDF</b> ou <b>Excel</b>.</p></div>
+        </div>
       </aside>
 
       <div class="relatorios-content">
@@ -294,6 +326,12 @@ onMounted(async () => {
             <div class="campo"><label for="mov-lab">Laboratório</label><select id="mov-lab" v-model="laboratorioId"><option value="">Todos os laboratórios</option><option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option></select></div>
             <div class="campo"><label for="mov-usuario">Responsável pela operação</label><select id="mov-usuario" v-model="movimentoUsuarioId"><option value="">Todos os responsáveis</option><option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">{{ usuario.nome }}</option></select></div>
             <div class="campo campo--busca"><label for="mov-lote">Lote</label><select id="mov-lote" v-model="movimentoLoteId"><option value="">Todos os lotes</option><option v-for="lote in lotes" :key="lote.id" :value="lote.id">{{ lote.codigoInterno || lote.numeroLote || lote.id }}</option></select></div>
+          </div>
+
+          <div v-else-if="relatorioResumoSelecionado" class="filtros-body filtros-body--resumo">
+            <div class="campo"><label for="resumo-produto">Produto</label><select id="resumo-produto" v-model="resumoProdutoId"><option value="">Todos os produtos</option><option v-for="produto in produtos" :key="produto.id" :value="produto.id">{{ produto.nome }}</option></select></div>
+            <div class="campo campo--periodo"><label>Período analisado</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
+            <div class="campo"><label for="resumo-limite">Posições do ranking</label><select id="resumo-limite" v-model.number="resumoLimite"><option :value="5">Top 5</option><option :value="10">Top 10</option><option :value="20">Top 20</option></select></div>
           </div>
 
           <div v-else class="filtros-indisponiveis"><strong>{{ opcaoSelecionada.titulo }}</strong><span>Os filtros deste relatório serão ativados junto ao endpoint correspondente.</span></div>
@@ -325,6 +363,65 @@ onMounted(async () => {
               <article><span>Ajustes</span><strong>{{ resultadoMovimentacoes.quantidadeAjustes }} un.</strong></article>
             </div>
             <div class="table-wrap"><table class="movimentacoes-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Lote</th><th>Laboratório</th><th>Origem</th><th>Responsável</th><th>Saldo</th></tr></thead><tbody><tr v-for="item in resultadoMovimentacoes.itens" :key="item.id"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong><small v-if="item.pedidoSolicitanteNome">Solicitante: {{ item.pedidoSolicitanteNome }}</small></td><td><span class="status status--mov">{{ formatarRotulo(item.tipoMovimentacao) }}</span></td><td class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ item.quantidadeMovimentada }} un.</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ formatarRotulo(item.origem) }}</td><td>{{ item.usuarioNome }}</td><td>{{ item.quantidadeAnterior }} → {{ item.quantidadeAtual }}</td></tr><tr v-if="resultadoMovimentacoes.itens.length === 0"><td colspan="9" class="table-empty">Nenhuma movimentação encontrada com os filtros informados.</td></tr></tbody></table></div>
+          </div>
+
+          <div v-else-if="relatorioResumoSelecionado && resultadoResumoOperacional" class="preview-result">
+            <div class="resumo-cards resumo-cards--operacional">
+              <article><span>Movimentações</span><strong>{{ resultadoResumoOperacional.totalMovimentacoes }}</strong></article>
+              <article class="card-kpi--entrada"><span>Entradas</span><strong>{{ resultadoResumoOperacional.quantidadeEntradas }} un.</strong></article>
+              <article class="card-kpi--saida"><span>Saídas</span><strong>{{ resultadoResumoOperacional.quantidadeSaidas }} un.</strong></article>
+              <article class="card-kpi--descarte"><span>Descartes</span><strong>{{ resultadoResumoOperacional.quantidadeDescartes }} un.</strong></article>
+              <article><span>Produtos movimentados</span><strong>{{ resultadoResumoOperacional.produtosMovimentados }}</strong></article>
+              <article><span>Lotes movimentados</span><strong>{{ resultadoResumoOperacional.lotesMovimentados }}</strong></article>
+            </div>
+
+            <div class="ranking-grid">
+              <section class="ranking-card ranking-card--entrada">
+                <header><div><span>Ranking</span><h3>Principais entradas</h3></div><strong>Quantidade</strong></header>
+                <ol>
+                  <li v-for="(item, index) in resultadoResumoOperacional.principaisEntradas" :key="item.produtoId">
+                    <span class="ranking-posicao">{{ index + 1 }}</span>
+                    <div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div>
+                    <b>+{{ item.quantidade }} un.</b>
+                  </li>
+                  <li v-if="resultadoResumoOperacional.principaisEntradas.length === 0" class="ranking-empty">Nenhuma entrada encontrada.</li>
+                </ol>
+              </section>
+
+              <section class="ranking-card ranking-card--saida">
+                <header><div><span>Ranking</span><h3>Principais saídas</h3></div><strong>Quantidade</strong></header>
+                <ol>
+                  <li v-for="(item, index) in resultadoResumoOperacional.principaisSaidas" :key="item.produtoId">
+                    <span class="ranking-posicao">{{ index + 1 }}</span>
+                    <div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div>
+                    <b>−{{ item.quantidade }} un.</b>
+                  </li>
+                  <li v-if="resultadoResumoOperacional.principaisSaidas.length === 0" class="ranking-empty">Nenhuma saída encontrada.</li>
+                </ol>
+              </section>
+            </div>
+
+            <section class="lotes-ranking">
+              <div class="section-heading"><div><span>Rastreabilidade</span><h3>Lotes mais movimentados</h3></div><small>Movimentação acumulada no período selecionado</small></div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>#</th><th>Lote</th><th>Produto</th><th>Movimentado</th><th>Entradas</th><th>Saídas</th><th>Saldo atual</th><th>Validade</th></tr></thead>
+                  <tbody>
+                    <tr v-for="(item, index) in resultadoResumoOperacional.lotesMaisMovimentados" :key="item.loteId">
+                      <td><span class="ranking-posicao ranking-posicao--table">{{ index + 1 }}</span></td>
+                      <td><strong>{{ item.codigoInterno || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td>
+                      <td>{{ item.produtoNome || '—' }}</td>
+                      <td><strong>{{ item.quantidadeMovimentada }} un.</strong><small>{{ item.movimentacoes }} operação(ões)</small></td>
+                      <td class="quantidade quantidade--entrada">+{{ item.quantidadeEntradas }} un.</td>
+                      <td class="quantidade quantidade--saida">−{{ item.quantidadeSaidas }} un.</td>
+                      <td>{{ item.saldoAtual }} un.</td>
+                      <td>{{ formatarData(item.dataValidade) }}</td>
+                    </tr>
+                    <tr v-if="resultadoResumoOperacional.lotesMaisMovimentados.length === 0"><td colspan="8" class="table-empty">Nenhum lote movimentado com os filtros informados.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
           </div>
         </section>
       </div>
@@ -363,6 +460,7 @@ onMounted(async () => {
 .preview-gerado { color: #8290a5; font-size: 11px; }
 .filtros-body { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(280px, 1.2fr); gap: 16px 18px; padding: 18px 20px; }
 .filtros-body--movimentacoes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.filtros-body--resumo { grid-template-columns: minmax(220px, .9fr) minmax(360px, 1.5fr) minmax(180px, .7fr); }
 .campo { min-width: 0; display: grid; gap: 7px; }
 .campo label { color: #33425c; font-size: 12px; font-weight: 700; }
 .campo select, .campo input { width: 100%; height: 39px; padding: 0 11px; border: 1px solid #cfd8e5; border-radius: 6px; background: #fff; color: #26364f; font: inherit; font-size: 12.5px; outline: none; transition: border-color 150ms ease, box-shadow 150ms ease; }
@@ -392,10 +490,39 @@ onMounted(async () => {
 .preview-message--warning { color: #8a6414; background: #fffdf7; }
 .preview-result { padding: 18px 20px 20px; }
 .resumo-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
-.resumo-cards article { padding: 13px 15px; border: 1px solid #e0e6ef; border-radius: 7px; background: #f9fbfd; }
+.resumo-cards article { padding: 13px 15px; border: 1px solid #e0e6ef; border-radius: 7px; background: #f9fbfd; transition: border-color 150ms ease, background 150ms ease, transform 150ms ease; }
 .resumo-cards span { display: block; color: #74829a; font-size: 11.5px; font-weight: 700; }
 .resumo-cards strong { display: block; margin-top: 4px; color: #1d3150; font-size: 21px; }
-.resumo-cards--movimentacoes strong { font-size: 18px; }
+.resumo-cards--movimentacoes strong, .resumo-cards--operacional strong { font-size: 18px; }
+.card-kpi--entrada:hover { border-color: #7fb0ef; background: #eef6ff; transform: translateY(-1px); }
+.card-kpi--entrada:hover strong { color: #1a4da1; }
+.card-kpi--saida:hover { border-color: #e29a94; background: #fff1f0; transform: translateY(-1px); }
+.card-kpi--saida:hover strong { color: #b42318; }
+.card-kpi--descarte:hover { border-color: #e5c365; background: #fff9df; transform: translateY(-1px); }
+.card-kpi--descarte:hover strong { color: #8a6500; }
+.ranking-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.ranking-card { overflow: hidden; border: 1px solid #e0e6ef; border-radius: 8px; background: #fff; }
+.ranking-card header { min-height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 15px; border-bottom: 1px solid #e8edf3; }
+.ranking-card header span, .section-heading span { color: #8290a5; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.ranking-card header h3, .section-heading h3 { margin: 3px 0 0; color: #20314d; font-size: 14px; }
+.ranking-card header > strong { color: #74829a; font-size: 10.5px; text-transform: uppercase; }
+.ranking-card--entrada header { background: #f6faff; }
+.ranking-card--saida header { background: #fff7f6; }
+.ranking-card ol { margin: 0; padding: 0; list-style: none; }
+.ranking-card li { min-height: 58px; display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 14px; border-bottom: 1px solid #eef2f6; }
+.ranking-card li:last-child { border-bottom: 0; }
+.ranking-card li > div { min-width: 0; }
+.ranking-card li strong { display: block; overflow: hidden; color: #2a3a54; font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+.ranking-card li small { display: block; margin-top: 3px; color: #8b98aa; font-size: 10.5px; }
+.ranking-card li b { font-size: 12.5px; white-space: nowrap; }
+.ranking-card--entrada li b { color: #1a4da1; }
+.ranking-card--saida li b { color: #b42318; }
+.ranking-posicao { width: 24px; height: 24px; display: inline-grid; place-items: center; border-radius: 999px; background: #eef2f7; color: #64748b; font-size: 10px; font-weight: 900; }
+.ranking-posicao--table { width: 22px; height: 22px; }
+.ranking-empty { display: block !important; padding: 20px 14px !important; color: #8995a7; text-align: center; font-size: 11.5px; }
+.lotes-ranking { margin-top: 4px; }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+.section-heading small { color: #8995a7; font-size: 10.5px; }
 .table-wrap { overflow-x: auto; border: 1px solid #e0e6ee; border-radius: 7px; }
 table { width: 100%; min-width: 900px; border-collapse: collapse; }
 .movimentacoes-table { min-width: 1240px; }
@@ -409,8 +536,8 @@ td small { display: block; margin-top: 3px; color: #8491a4; font-size: 10.5px; }
 .status--inativo { background: #f0f2f5; color: #687488; }
 .status--mov { background: #eef4ff; color: #295ea9; white-space: nowrap; }
 .quantidade { font-weight: 800; white-space: nowrap; }
-.quantidade--entrada { color: #177643; }
-.quantidade--saida { color: #b5473a; }
+.quantidade--entrada { color: #1a4da1; }
+.quantidade--saida { color: #b42318; }
 .table-empty { padding: 28px; color: #7e8a9e; text-align: center; }
 .exportacao-footer { margin-top: 22px; min-height: 58px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 18px; border: 1px solid #a9d7b8; border-radius: 7px; background: #f4fbf6; color: #52645b; font-size: 12px; }
 .exportacao-footer button { height: 31px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid #d4dce4; border-radius: 5px; background: #fff; color: #5e6978; font: inherit; font-size: 11.5px; font-weight: 800; }
@@ -418,7 +545,7 @@ td small { display: block; margin-top: 3px; color: #8491a4; font-size: 10.5px; }
 .exportacao-footer button:last-of-type { color: #277845; }
 .exportacao-footer button:disabled { opacity: .72; cursor: not-allowed; }
 .exportacao-footer svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-@media (max-width: 1180px) { .relatorios-grid { grid-template-columns: 290px minmax(0, 1fr); } .filtros-body, .filtros-body--movimentacoes { grid-template-columns: repeat(2, minmax(0, 1fr)); } .campo--periodo { grid-column: span 2; } }
-@media (max-width: 900px) { .relatorios-page { padding: 22px 18px 30px; } .relatorios-grid { grid-template-columns: 1fr; } .relatorios-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } .exportacao-info { grid-column: 1 / -1; } }
-@media (max-width: 640px) { .relatorios-page { padding: 18px 12px 24px; } .relatorios-header h1 { font-size: 25px; } .relatorios-lista, .filtros-body, .filtros-body--movimentacoes, .resumo-cards { grid-template-columns: 1fr; } .campo--periodo, .campo--busca { grid-column: auto; } .periodo-inputs { grid-template-columns: 1fr; } .periodo-inputs span { text-align: center; } .filtros-actions, .exportacao-footer { align-items: stretch; flex-direction: column; } .btn { width: 100%; } .exportacao-footer button { justify-content: center; } }
+@media (max-width: 1180px) { .relatorios-grid { grid-template-columns: 290px minmax(0, 1fr); } .filtros-body, .filtros-body--movimentacoes, .filtros-body--resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); } .campo--periodo { grid-column: span 2; } }
+@media (max-width: 900px) { .relatorios-page { padding: 22px 18px 30px; } .relatorios-grid { grid-template-columns: 1fr; } .relatorios-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } .exportacao-info { grid-column: 1 / -1; } .ranking-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .relatorios-page { padding: 18px 12px 24px; } .relatorios-header h1 { font-size: 25px; } .relatorios-lista, .filtros-body, .filtros-body--movimentacoes, .filtros-body--resumo, .resumo-cards { grid-template-columns: 1fr; } .campo--periodo, .campo--busca { grid-column: auto; } .periodo-inputs { grid-template-columns: 1fr; } .periodo-inputs span { text-align: center; } .filtros-actions, .exportacao-footer, .section-heading { align-items: stretch; flex-direction: column; } .btn { width: 100%; } .exportacao-footer button { justify-content: center; } }
 </style>
