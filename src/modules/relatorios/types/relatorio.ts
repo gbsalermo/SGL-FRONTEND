@@ -86,3 +86,44 @@ export interface RelatorioMovimentacoesFiltros {
   dataInicio?: string
   dataFim?: string
 }
+
+export interface RelatorioResumoProdutoRanking {
+  produtoId: string
+  produtoNome: string
+  quantidade: number
+  movimentacoes: number
+}
+
+export interface RelatorioResumoLoteRanking {
+  loteId: string
+  codigoInterno: string | null
+  numeroLote: string | null
+  produtoId: string | null
+  produtoNome: string | null
+  quantidadeMovimentada: number
+  movimentacoes: number
+  quantidadeEntradas: number
+  quantidadeSaidas: number
+  saldoAtual: number
+  dataValidade: string | null
+}
+
+export interface RelatorioResumoOperacionalResponse {
+  geradoEm: string
+  totalMovimentacoes: number
+  quantidadeEntradas: number
+  quantidadeSaidas: number
+  quantidadeDescartes: number
+  produtosMovimentados: number
+  lotesMovimentados: number
+  principaisEntradas: RelatorioResumoProdutoRanking[]
+  principaisSaidas: RelatorioResumoProdutoRanking[]
+  lotesMaisMovimentados: RelatorioResumoLoteRanking[]
+}
+
+export interface RelatorioResumoOperacionalFiltros {
+  produtoId?: string
+  dataInicio?: string
+  dataFim?: string
+  limite?: number
+}
