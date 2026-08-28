@@ -4,6 +4,8 @@ import type {
   RelatorioEstagiariosResponse,
   RelatorioEstoqueLotesFiltros,
   RelatorioEstoqueLotesResponse,
+  RelatorioFiscalizacaoFiltros,
+  RelatorioFiscalizacaoResponse,
   RelatorioMovimentacoesFiltros,
   RelatorioMovimentacoesResponse,
   RelatorioProdutosFiltros,
@@ -43,6 +45,13 @@ export const relatorioService = {
 
   async listarEstoqueLotes(filtros: RelatorioEstoqueLotesFiltros = {}) {
     const { data } = await http.get<RelatorioEstoqueLotesResponse>('/v1/relatorios/estoque-lotes', {
+      params: filtros,
+    })
+    return data
+  },
+
+  async listarFiscalizacao(filtros: RelatorioFiscalizacaoFiltros = {}) {
+    const { data } = await http.get<RelatorioFiscalizacaoResponse>('/v1/relatorios/fiscalizacao', {
       params: filtros,
     })
     return data
