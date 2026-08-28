@@ -5,6 +5,8 @@ export type StatusPedido =
   | 'ENTREGUE'
   | 'CANCELADO'
 
+export type TipoEmbalagemPedido = 'UNITARIO' | 'KIT' | 'CAIXA' | 'GARRAFA' | 'GALAO'
+
 export interface ItemPedidoResponse {
   id: string
   produtoId: string
@@ -18,6 +20,9 @@ export interface ItemPedidoResponse {
   produtoCondicoesArmazenamento: string | null
   quantidadeSolicitada: number
   quantidadeAprovada: number | null
+  tipoEmbalagemSolicitada: TipoEmbalagemPedido
+  quantidadeEmbalagensSolicitada: number
+  multiplicadorSolicitado: number
 }
 
 export interface PedidoResponse {
@@ -48,6 +53,9 @@ export interface PedidoRequest {
   itens: Array<{
     produtoId: string
     quantidadeSolicitada: number
+    tipoEmbalagemSolicitada: TipoEmbalagemPedido
+    quantidadeEmbalagensSolicitada: number
+    multiplicadorSolicitado: number
   }>
 }
 
@@ -83,6 +91,36 @@ export interface EstoqueCentralResponse {
   quantidadeAtual: number
   quantidadeMinima: number
   ativo: boolean
+}
+
+export interface LotePedidoResponse {
+  id: string
+  estoqueCentralId: string
+  codigoInterno: string
+  numeroLote: string
+  tipoEmbalagem: TipoEmbalagemPedido
+  apresentacao: string | null
+  quantidadeApresentacoes: number | null
+  conteudoPorApresentacao: number | null
+  fracionavel: boolean | null
+  quantidadeDisponivel: number
+  dataValidade: string | null
+  ativo: boolean
+}
+
+export interface MovimentacaoPedidoResponse {
+  id: string
+  produtoId: string
+  produtoNome: string
+  pedidoId: string | null
+  pedidoSolicitanteNome: string | null
+  loteId: string | null
+  codigoInternoLote: string | null
+  numeroLote: string | null
+  tipoMovimentacao: string
+  quantidadeMovimentada: number
+  dataMovimentacao: string
+  usuarioNome: string
 }
 
 export interface ApiErrorResponse {
