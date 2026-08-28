@@ -1,5 +1,6 @@
 import { http } from '@/services/http'
 import type {
+  AtualizarLoteRequest,
   DescarteProdutoRequest,
   EntradaLoteRequest,
   EstoqueCentralResponse,
@@ -42,6 +43,11 @@ export const estoqueService = {
     const { data } = await http.post<LoteResponse>(`/v1/movimentacoes/estoques/${estoqueId}/lotes`, payload, {
       params: { usuarioId },
     })
+    return data
+  },
+
+  async atualizarLote(loteId: string, payload: AtualizarLoteRequest) {
+    const { data } = await http.put<LoteResponse>(`/v1/lotes/${loteId}`, payload)
     return data
   },
 
