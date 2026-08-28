@@ -138,3 +138,26 @@
   letter-spacing: -0.015em !important;
   font-weight: 800 !important;
 }
+
+/* No detalhe do estoque, "Embalagem mais comum" não agrega informação
+   operacional suficiente no resumo superior. A embalagem continua disponível
+   nos lotes e no filtro específico, onde possui contexto real. */
+.gestao-shell .estoque-detalhe .product-context > div:nth-child(2) {
+  display: none !important;
+}
+
+.gestao-shell .estoque-detalhe .product-context {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+@media (max-width: 900px) {
+  .gestao-shell .estoque-detalhe .product-context {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .gestao-shell .estoque-detalhe .product-context {
+    grid-template-columns: 1fr !important;
+  }
+}
