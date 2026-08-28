@@ -14,6 +14,26 @@ import type {
   RelatorioResumoOperacionalResponse,
 } from '@/modules/relatorios/types/relatorio'
 
+export type FormatoExportacaoRelatorio = 'PDF' | 'XLSX'
+export type TipoRelatorioExportavel =
+  | 'estagiarios'
+  | 'produtos'
+  | 'movimentacoes'
+  | 'resumo-operacional'
+  | 'estoque-lotes'
+  | 'fiscalizacao'
+
+function extrairNomeArquivo(contentDisposition: string | undefined, formato: FormatoExportacaoRelatorio) {
+  if (contentDisposition) {
+    const utf8 = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i)
+    if (utf8?.[1]) return decodeURIComponent(utf8[1])
+
+    const simples = contentDisposition.match(/filename="?([^";]+)"?/i)
+    if (simples?.[1]) return simples[1]
+  }
+  return `relatorio-sgl.${formato === 'PDF' ? 'pdf' : 'xlsx'}`
+}
+
 export const relatorioService = {
   async listarEstagiarios(filtros: RelatorioEstagiariosFiltros = {}) {
     const { data } = await http.get<RelatorioEstagiariosResponse>('/v1/relatorios/estagiarios', {
@@ -55,5 +75,21 @@ export const relatorioService = {
       params: filtros,
     })
     return data
+  },
+
+  async exportar(
+    tipo: TipoRelatorioExportavel,
+    formato: FormatoExportacaoRelatorio,
+    filtros: Record<string, unknown> = {},
+  ) {
+    const response = await http.get<Blob>(`/v1/relatorios/${tipo}/exportar`, {
+      params: { ...filtros, formato },
+      responseType: 'blob',
+    })
+
+    return {
+      blob: response.data,
+      nomeArquivo: extrairNomeArquivo(response.headers['content-disposition'], formato),
+    }
   },
 }
