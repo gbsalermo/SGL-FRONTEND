@@ -12,6 +12,9 @@ import type {
 } from '@/modules/estoque/types/estoque'
 import { useSessionStore } from '@/stores/session'
 
+type SituacaoLoteFiltro = 'TODOS' | 'VALIDO' | 'PROXIMO' | 'VENCIDO' | 'DESCARTADO'
+type SituacaoLoteVisual = Exclude<SituacaoLoteFiltro, 'TODOS'>
+
 const route = useRoute()
 const session = useSessionStore()
 
@@ -20,6 +23,8 @@ const lotes = ref<LoteResponse[]>([])
 const carregando = ref(true)
 const erro = ref('')
 const visualizacaoQuantidade = ref('UNITARIA')
+const buscaLote = ref('')
+const situacaoLote = ref<SituacaoLoteFiltro>('TODOS')
 
 const modalEntradaAberto = ref(false)
 const salvandoEntrada = ref(false)
@@ -155,6 +160,39 @@ function loteProximoVencimento(lote: LoteResponse) {
   if (!lote.dataValidade || loteVencido(lote)) return false
   const validade = new Date(`${lote.dataValidade}T23:59:59`).getTime()
   return (validade - Date.now()) / 86_400_000 <= 30
+}
+
+function situacaoVisualLote(lote: LoteResponse): SituacaoLoteVisual {
+  if (loteVencido(lote) && lote.quantidadeDisponivel <= 0) return 'DESCARTADO'
+  if (loteVencido(lote)) return 'VENCIDO'
+  if (loteProximoVencimento(lote)) return 'PROXIMO'
+  return 'VALIDO'
+}
+
+const lotesFiltrados = computed(() => {
+  const termo = buscaLote.value.trim().toLowerCase()
+
+  return lotesAtivos.value.filter((lote) => {
+    const status = situacaoVisualLote(lote)
+    if (situacaoLote.value !== 'TODOS' && status !== situacaoLote.value) return false
+    if (!termo) return true
+
+    return [
+      lote.codigoInterno,
+      lote.numeroLote,
+      lote.apresentacao,
+      lote.tipoEmbalagem,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .includes(termo)
+  })
+})
+
+function limparFiltrosLote() {
+  buscaLote.value = ''
+  situacaoLote.value = 'TODOS'
 }
 
 function quantidadeFisica(lote: LoteResponse) {
@@ -333,10 +371,7 @@ function abrirDescarte() {
   erroDescarte.value = ''
   sucessoDescarte.value = ''
   sucessoEntrada.value = ''
-  formularioDescarte.value = {
-    quantidade: quantidadeVencida.value,
-    justificativa: '',
-  }
+  formularioDescarte.value = { quantidade: quantidadeVencida.value, justificativa: '' }
   modalDescarteAberto.value = true
 }
 
@@ -437,7 +472,30 @@ onMounted(carregar)
           </div>
         </div>
 
+        <div class="lot-filter-bar">
+          <label>
+            <span>Buscar lote</span>
+            <input v-model="buscaLote" type="search" placeholder="Código SGL, fornecedor ou embalagem..." />
+          </label>
+          <label>
+            <span>Situação</span>
+            <select v-model="situacaoLote">
+              <option value="TODOS">Todos</option>
+              <option value="VALIDO">Válidos</option>
+              <option value="PROXIMO">Próximos do vencimento</option>
+              <option value="VENCIDO">Vencidos</option>
+              <option value="DESCARTADO">Descartados por vencimento</option>
+            </select>
+          </label>
+          <div class="lot-filter-result">
+            <strong>{{ lotesFiltrados.length }}</strong>
+            <span>lote(s)</span>
+            <button v-if="buscaLote || situacaoLote !== 'TODOS'" type="button" @click="limparFiltrosLote">Limpar</button>
+          </div>
+        </div>
+
         <div v-if="lotesAtivos.length === 0" class="state-box">Nenhum lote ativo encontrado para este produto.</div>
+        <div v-else-if="lotesFiltrados.length === 0" class="state-box">Nenhum lote encontrado para os filtros atuais.</div>
 
         <div v-else class="table-wrap">
           <table>
@@ -453,7 +511,7 @@ onMounted(carregar)
               </tr>
             </thead>
             <tbody>
-              <tr v-for="lote in lotesAtivos" :key="lote.id" class="lot-row" @click="abrirLote(lote)">
+              <tr v-for="lote in lotesFiltrados" :key="lote.id" class="lot-row" @click="abrirLote(lote)">
                 <td>
                   <strong>{{ lote.codigoInterno }}</strong>
                   <small>Fornecedor: {{ lote.numeroLote }}</small>
@@ -466,8 +524,9 @@ onMounted(carregar)
                 <td>{{ dataFormatada(lote.dataEntrada) }}</td>
                 <td>{{ dataFormatada(lote.dataValidade) }}</td>
                 <td>
-                  <span v-if="loteVencido(lote)" class="lot-chip lot-chip--danger">VENCIDO</span>
-                  <span v-else-if="loteProximoVencimento(lote)" class="lot-chip lot-chip--warning">PRÓXIMO DO VENCIMENTO</span>
+                  <span v-if="situacaoVisualLote(lote) === 'DESCARTADO'" class="lot-chip lot-chip--discarded">DESCARTADO POR VENCIMENTO</span>
+                  <span v-else-if="situacaoVisualLote(lote) === 'VENCIDO'" class="lot-chip lot-chip--danger">VENCIDO</span>
+                  <span v-else-if="situacaoVisualLote(lote) === 'PROXIMO'" class="lot-chip lot-chip--warning">PRÓXIMO DO VENCIMENTO</span>
                   <span v-else class="lot-chip lot-chip--ok">VÁLIDO</span>
                 </td>
                 <td><button class="detail-button" type="button" @click.stop="abrirLote(lote)">Ver detalhes</button></td>
@@ -491,227 +550,73 @@ onMounted(carregar)
 
         <form class="entry-form" @submit.prevent="registrarEntrada">
           <div class="entry-grid">
-            <label>
-              <span>Lote / referência do fornecedor *</span>
-              <input v-model="formularioEntrada.numeroLote" type="text" maxlength="120" placeholder="Ex.: FAB-2026-8841" autofocus />
-            </label>
-            <label>
-              <span>Tipo de unidade *</span>
-              <select v-model="formularioEntrada.tipoEmbalagem">
-                <option v-for="tipo in tiposEmbalagem" :key="tipo.value" :value="tipo.value">{{ tipo.label }}</option>
-              </select>
-            </label>
-            <label>
-              <span>Especificar embalagem *</span>
-              <input v-model="formularioEntrada.apresentacao" type="text" maxlength="120" placeholder="Ex.: kit com 50 unidades, garrafa de 1 L" />
-            </label>
-            <label>
-              <span>Quantos chegaram? *</span>
-              <input v-model.number="formularioEntrada.quantidade" type="number" min="1" step="1" />
-            </label>
-            <label>
-              <span>Multiplicador de unidades *</span>
-              <div class="input-with-unit">
-                <input v-model.number="formularioEntrada.conteudoPorApresentacao" type="number" min="1" step="1" />
-                <b>unit.</b>
-              </div>
-              <small>Kit com 50 → 50; unitário → 1.</small>
-            </label>
-            <label>
-              <span>Data de validade</span>
-              <input v-model="formularioEntrada.dataValidade" type="date" />
-            </label>
-            <label>
-              <span>Origem da entrada *</span>
-              <select v-model="formularioEntrada.origem">
-                <option value="COMPRA">Compra</option>
-                <option value="DEVOLUCAO">Devolução</option>
-                <option value="AJUSTE">Ajuste</option>
-                <option value="INVENTARIO">Inventário</option>
-              </select>
-            </label>
+            <label><span>Lote / referência do fornecedor *</span><input v-model="formularioEntrada.numeroLote" type="text" maxlength="120" placeholder="Ex.: FAB-2026-8841" autofocus /></label>
+            <label><span>Tipo de unidade *</span><select v-model="formularioEntrada.tipoEmbalagem"><option v-for="tipo in tiposEmbalagem" :key="tipo.value" :value="tipo.value">{{ tipo.label }}</option></select></label>
+            <label><span>Especificar embalagem *</span><input v-model="formularioEntrada.apresentacao" type="text" maxlength="120" placeholder="Ex.: kit com 50 unidades, garrafa de 1 L" /></label>
+            <label><span>Quantos chegaram? *</span><input v-model.number="formularioEntrada.quantidade" type="number" min="1" step="1" /></label>
+            <label><span>Multiplicador de unidades *</span><div class="input-with-unit"><input v-model.number="formularioEntrada.conteudoPorApresentacao" type="number" min="1" step="1" /><b>unit.</b></div><small>Kit com 50 → 50; unitário → 1.</small></label>
+            <label><span>Data de validade</span><input v-model="formularioEntrada.dataValidade" type="date" /></label>
+            <label><span>Origem da entrada *</span><select v-model="formularioEntrada.origem"><option value="COMPRA">Compra</option><option value="DEVOLUCAO">Devolução</option><option value="AJUSTE">Ajuste</option><option value="INVENTARIO">Inventário</option></select></label>
           </div>
 
           <label class="fraction-option">
             <input v-model="formularioEntrada.fracionavel" type="checkbox" />
-            <span>
-              <strong>Pode retirar unidades separadamente?</strong>
-              <small>Desmarque quando a embalagem precisar sair sempre completa. Se liberar depois, essa decisão não poderá ser revertida.</small>
-            </span>
+            <span><strong>Pode retirar unidades separadamente?</strong><small>Desmarque quando a embalagem precisar sair sempre completa. Se liberar depois, essa decisão não poderá ser revertida.</small></span>
           </label>
 
-          <label class="entry-observation">
-            <span>Observação</span>
-            <textarea v-model="formularioEntrada.observacao" rows="3" maxlength="500"></textarea>
-          </label>
+          <label class="entry-observation"><span>Observação</span><textarea v-model="formularioEntrada.observacao" rows="3" maxlength="500"></textarea></label>
 
-          <div class="entry-preview">
-            <strong>Entrada física</strong>
-            <span>{{ formularioEntrada.quantidade || 0 }} {{ rotuloTipoEmbalagem(formularioEntrada.tipoEmbalagem, Number(formularioEntrada.quantidade) || 0) }} · {{ formularioEntrada.apresentacao || 'sem especificação' }}</span>
-            <small>O sistema atualiza o saldo em unidades automaticamente.</small>
-          </div>
+          <div class="entry-preview"><strong>Entrada física</strong><span>{{ formularioEntrada.quantidade || 0 }} {{ rotuloTipoEmbalagem(formularioEntrada.tipoEmbalagem, Number(formularioEntrada.quantidade) || 0) }} · {{ formularioEntrada.apresentacao || 'sem especificação' }}</span><small>O sistema atualiza o saldo em unidades automaticamente.</small></div>
 
           <div v-if="erroEntrada" class="form-error">{{ erroEntrada }}</div>
-          <footer class="modal-actions">
-            <button type="button" class="secondary-action" :disabled="salvandoEntrada" @click="fecharEntrada">Cancelar</button>
-            <button type="submit" class="primary-action" :disabled="salvandoEntrada">{{ salvandoEntrada ? 'Registrando...' : 'Confirmar entrada' }}</button>
-          </footer>
+          <footer class="modal-actions"><button type="button" class="secondary-action" :disabled="salvandoEntrada" @click="fecharEntrada">Cancelar</button><button type="submit" class="primary-action" :disabled="salvandoEntrada">{{ salvandoEntrada ? 'Registrando...' : 'Confirmar entrada' }}</button></footer>
         </form>
       </section>
     </div>
 
     <div v-if="modalLoteAberto && loteSelecionado" class="modal-backdrop" @click.self="fecharLote">
       <section class="modal-card lot-modal" role="dialog" aria-modal="true" aria-labelledby="lote-detail-title">
-        <header class="modal-card__header">
-          <div>
-            <span>Detalhes do lote</span>
-            <h2 id="lote-detail-title">{{ loteSelecionado.codigoInterno }}</h2>
-            <p>{{ estoque?.produtoNome }}</p>
-          </div>
-          <button type="button" class="modal-close" @click="fecharLote">×</button>
-        </header>
+        <header class="modal-card__header"><div><span>Detalhes do lote</span><h2 id="lote-detail-title">{{ loteSelecionado.codigoInterno }}</h2><p>{{ estoque?.produtoNome }}</p></div><button type="button" class="modal-close" @click="fecharLote">×</button></header>
 
         <div v-if="!editandoLote" class="lot-detail-body">
           <div v-if="sucessoLote" class="success-box">{{ sucessoLote }}</div>
-          <div class="lot-detail-highlight">
-            <div><span>Unidade recebida</span><strong>{{ resumoRecebido(loteSelecionado) }}</strong><small>{{ loteSelecionado.apresentacao }}</small></div>
-            <div><span>Disponível agora</span><strong>{{ resumoDisponivel(loteSelecionado) }}</strong></div>
-          </div>
+          <div class="lot-detail-highlight"><div><span>Unidade recebida</span><strong>{{ resumoRecebido(loteSelecionado) }}</strong><small>{{ loteSelecionado.apresentacao }}</small></div><div><span>Disponível agora</span><strong>{{ resumoDisponivel(loteSelecionado) }}</strong></div></div>
           <div class="lot-detail-grid">
-            <div><span>Código SGL</span><strong>{{ loteSelecionado.codigoInterno }}</strong></div>
-            <div><span>Lote do fornecedor</span><strong>{{ loteSelecionado.numeroLote }}</strong></div>
-            <div><span>Tipo de unidade</span><strong>{{ rotuloTipoEmbalagem(loteSelecionado.tipoEmbalagem) }}</strong></div>
-            <div><span>Especificação</span><strong>{{ loteSelecionado.apresentacao || 'Não informada' }}</strong></div>
-            <div><span>Multiplicador</span><strong>{{ loteSelecionado.conteudoPorApresentacao || 1 }} unit. por embalagem</strong></div>
-            <div><span>Entrada</span><strong>{{ dataFormatada(loteSelecionado.dataEntrada) }}</strong></div>
-            <div><span>Validade</span><strong>{{ dataFormatada(loteSelecionado.dataValidade) }}</strong></div>
-            <div><span>Retirada unitária</span><strong>{{ loteSelecionado.fracionavel === false ? 'Não — somente embalagem completa' : 'Sim — liberada definitivamente' }}</strong></div>
-            <div class="lot-detail-wide"><span>Observação</span><strong>{{ loteSelecionado.observacao || 'Nenhuma observação registrada.' }}</strong></div>
+            <div><span>Código SGL</span><strong>{{ loteSelecionado.codigoInterno }}</strong></div><div><span>Lote do fornecedor</span><strong>{{ loteSelecionado.numeroLote }}</strong></div><div><span>Tipo de unidade</span><strong>{{ rotuloTipoEmbalagem(loteSelecionado.tipoEmbalagem) }}</strong></div><div><span>Especificação</span><strong>{{ loteSelecionado.apresentacao || 'Não informada' }}</strong></div><div><span>Multiplicador</span><strong>{{ loteSelecionado.conteudoPorApresentacao || 1 }} unit. por embalagem</strong></div><div><span>Entrada</span><strong>{{ dataFormatada(loteSelecionado.dataEntrada) }}</strong></div><div><span>Validade</span><strong>{{ dataFormatada(loteSelecionado.dataValidade) }}</strong></div><div><span>Retirada unitária</span><strong>{{ loteSelecionado.fracionavel === false ? 'Não — somente embalagem completa' : 'Sim — liberada definitivamente' }}</strong></div><div class="lot-detail-wide"><span>Observação</span><strong>{{ loteSelecionado.observacao || 'Nenhuma observação registrada.' }}</strong></div>
           </div>
-          <footer class="modal-actions">
-            <button type="button" class="secondary-action" @click="fecharLote">Fechar</button>
-            <button type="button" class="primary-action" @click="iniciarEdicaoLote">Editar dados do lote</button>
-          </footer>
+          <footer class="modal-actions"><button type="button" class="secondary-action" @click="fecharLote">Fechar</button><button type="button" class="primary-action" @click="iniciarEdicaoLote">Editar dados do lote</button></footer>
         </div>
 
         <form v-else class="entry-form" @submit.prevent="salvarLote">
-          <div class="immutable-code-box">
-            <span>Código SGL</span>
-            <strong>{{ loteSelecionado.codigoInterno }}</strong>
-            <small>Gerado automaticamente e imutável.</small>
-          </div>
-
+          <div class="immutable-code-box"><span>Código SGL</span><strong>{{ loteSelecionado.codigoInterno }}</strong><small>Gerado automaticamente e imutável.</small></div>
           <div class="entry-grid">
-            <label>
-              <span>Lote / referência do fornecedor *</span>
-              <input v-model="formularioLote.numeroLote" type="text" maxlength="120" />
-            </label>
-            <div class="read-only-field">
-              <span>Tipo de unidade</span>
-              <strong>{{ rotuloTipoEmbalagem(loteSelecionado.tipoEmbalagem) }}</strong>
-              <small>O tipo original da embalagem não pode ser alterado.</small>
-            </div>
-            <label>
-              <span>Especificar embalagem</span>
-              <input v-model="formularioLote.apresentacao" type="text" maxlength="120" />
-            </label>
-            <label>
-              <span>Data de validade</span>
-              <input v-model="formularioLote.dataValidade" type="date" />
-            </label>
+            <label><span>Lote / referência do fornecedor *</span><input v-model="formularioLote.numeroLote" type="text" maxlength="120" /></label>
+            <div class="read-only-field"><span>Tipo de unidade</span><strong>{{ rotuloTipoEmbalagem(loteSelecionado.tipoEmbalagem) }}</strong><small>O tipo original da embalagem não pode ser alterado.</small></div>
+            <label><span>Especificar embalagem</span><input v-model="formularioLote.apresentacao" type="text" maxlength="120" /></label>
+            <label><span>Data de validade</span><input v-model="formularioLote.dataValidade" type="date" /></label>
           </div>
 
-          <label class="fraction-option" :class="{ 'fraction-option--locked': loteSelecionado.fracionavel !== false }">
-            <input v-model="formularioLote.fracionavel" type="checkbox" :disabled="loteSelecionado.fracionavel !== false" />
-            <span>
-              <strong>Pode retirar unidades separadamente?</strong>
-              <small v-if="loteSelecionado.fracionavel !== false">Retirada unitária já foi liberada e não pode voltar para embalagem obrigatoriamente fechada.</small>
-              <small v-else>Você pode liberar retirada unitária. Depois de salvar, essa mudança será definitiva.</small>
-            </span>
-          </label>
-
-          <label class="entry-observation">
-            <span>Observação</span>
-            <textarea v-model="formularioLote.observacao" rows="3" maxlength="500"></textarea>
-          </label>
-
-          <div class="locked-info">
-            <strong>Quantidade e multiplicador originais</strong>
-            <span>{{ resumoRecebido(loteSelecionado) }} · {{ loteSelecionado.conteudoPorApresentacao || 1 }} unit. por embalagem</span>
-            <small>Esses valores ficam bloqueados para preservar o histórico físico do lote.</small>
-          </div>
-
+          <label class="fraction-option" :class="{ 'fraction-option--locked': loteSelecionado.fracionavel !== false }"><input v-model="formularioLote.fracionavel" type="checkbox" :disabled="loteSelecionado.fracionavel !== false" /><span><strong>Pode retirar unidades separadamente?</strong><small v-if="loteSelecionado.fracionavel !== false">Retirada unitária já foi liberada e não pode voltar para embalagem obrigatoriamente fechada.</small><small v-else>Você pode liberar retirada unitária. Depois de salvar, essa mudança será definitiva.</small></span></label>
+          <label class="entry-observation"><span>Observação</span><textarea v-model="formularioLote.observacao" rows="3" maxlength="500"></textarea></label>
+          <div class="locked-info"><strong>Quantidade e multiplicador originais</strong><span>{{ resumoRecebido(loteSelecionado) }} · {{ loteSelecionado.conteudoPorApresentacao || 1 }} unit. por embalagem</span><small>Esses valores ficam bloqueados para preservar o histórico físico do lote.</small></div>
           <div v-if="erroLote" class="form-error">{{ erroLote }}</div>
-          <footer class="modal-actions">
-            <button type="button" class="secondary-action" :disabled="salvandoLote" @click="editandoLote = false">Cancelar</button>
-            <button type="submit" class="primary-action" :disabled="salvandoLote">{{ salvandoLote ? 'Salvando...' : 'Salvar alterações' }}</button>
-          </footer>
+          <footer class="modal-actions"><button type="button" class="secondary-action" :disabled="salvandoLote" @click="editandoLote = false">Cancelar</button><button type="submit" class="primary-action" :disabled="salvandoLote">{{ salvandoLote ? 'Salvando...' : 'Salvar alterações' }}</button></footer>
         </form>
       </section>
     </div>
 
     <div v-if="modalDescarteAberto" class="modal-backdrop" @click.self="fecharDescarte">
       <section class="modal-card discard-modal" role="dialog" aria-modal="true" aria-labelledby="descarte-title">
-        <header class="modal-card__header">
-          <div>
-            <span>Estoque / Descarte</span>
-            <h2 id="descarte-title">Descartar material vencido</h2>
-            <p>{{ estoque?.produtoNome }}</p>
-          </div>
-          <button type="button" class="modal-close" @click="fecharDescarte">×</button>
-        </header>
+        <header class="modal-card__header"><div><span>Estoque / Descarte</span><h2 id="descarte-title">Descartar material vencido</h2><p>{{ estoque?.produtoNome }}</p></div><button type="button" class="modal-close" @click="fecharDescarte">×</button></header>
 
         <form class="entry-form" @submit.prevent="registrarDescarte">
-          <div class="discard-summary">
-            <div>
-              <span>Lotes vencidos com saldo</span>
-              <strong>{{ vencidos }}</strong>
-            </div>
-            <div>
-              <span>Total vencido</span>
-              <strong>{{ quantidadeVencida }} unit.</strong>
-            </div>
-          </div>
-
-          <div class="expired-list">
-            <div v-for="lote in lotesVencidosComSaldo" :key="lote.id" class="expired-item">
-              <div>
-                <strong>{{ lote.codigoInterno }}</strong>
-                <small>{{ lote.apresentacao }} · validade {{ dataFormatada(lote.dataValidade) }}</small>
-              </div>
-              <div class="expired-item__qty">
-                <strong>{{ lote.quantidadeDisponivel }} unit.</strong>
-                <small v-if="lote.fracionavel === false">múltiplos de {{ lote.conteudoPorApresentacao || 1 }} unit.</small>
-                <small v-else>pode ser fracionado</small>
-              </div>
-            </div>
-          </div>
-
-          <div class="entry-grid discard-fields">
-            <label>
-              <span>Quantidade a descartar *</span>
-              <div class="input-with-unit">
-                <input v-model.number="formularioDescarte.quantidade" type="number" min="1" :max="quantidadeVencida" step="1" />
-                <b>unit.</b>
-              </div>
-              <small>Lotes não fracionáveis só permitem descarte compatível com a embalagem completa.</small>
-            </label>
-          </div>
-
-          <label class="entry-observation">
-            <span>Justificativa *</span>
-            <textarea v-model="formularioDescarte.justificativa" rows="4" maxlength="500" placeholder="Ex.: Material vencido identificado durante conferência mensal."></textarea>
-          </label>
-
-          <div class="discard-warning">
-            O sistema baixa primeiro os lotes vencidos mais antigos e registra cada movimentação separadamente. A operação é cancelada inteira se a quantidade exigir fracionar uma embalagem fechada.
-          </div>
-
+          <div class="discard-summary"><div><span>Lotes vencidos com saldo</span><strong>{{ vencidos }}</strong></div><div><span>Total vencido</span><strong>{{ quantidadeVencida }} unit.</strong></div></div>
+          <div class="expired-list"><div v-for="lote in lotesVencidosComSaldo" :key="lote.id" class="expired-item"><div><strong>{{ lote.codigoInterno }}</strong><small>{{ lote.apresentacao }} · validade {{ dataFormatada(lote.dataValidade) }}</small></div><div class="expired-item__qty"><strong>{{ lote.quantidadeDisponivel }} unit.</strong><small v-if="lote.fracionavel === false">múltiplos de {{ lote.conteudoPorApresentacao || 1 }} unit.</small><small v-else>pode ser fracionado</small></div></div></div>
+          <div class="entry-grid discard-fields"><label><span>Quantidade a descartar *</span><div class="input-with-unit"><input v-model.number="formularioDescarte.quantidade" type="number" min="1" :max="quantidadeVencida" step="1" /><b>unit.</b></div><small>Lotes não fracionáveis só permitem descarte compatível com a embalagem completa.</small></label></div>
+          <label class="entry-observation"><span>Justificativa *</span><textarea v-model="formularioDescarte.justificativa" rows="4" maxlength="500" placeholder="Ex.: Material vencido identificado durante conferência mensal."></textarea></label>
+          <div class="discard-warning">O sistema baixa primeiro os lotes vencidos mais antigos e registra cada movimentação separadamente. A operação é cancelada inteira se a quantidade exigir fracionar uma embalagem fechada.</div>
           <div v-if="erroDescarte" class="form-error">{{ erroDescarte }}</div>
-          <footer class="modal-actions">
-            <button type="button" class="secondary-action" :disabled="salvandoDescarte" @click="fecharDescarte">Cancelar</button>
-            <button type="submit" class="danger-action" :disabled="salvandoDescarte">{{ salvandoDescarte ? 'Descartando...' : 'Confirmar descarte' }}</button>
-          </footer>
+          <footer class="modal-actions"><button type="button" class="secondary-action" :disabled="salvandoDescarte" @click="fecharDescarte">Cancelar</button><button type="submit" class="danger-action" :disabled="salvandoDescarte">{{ salvandoDescarte ? 'Descartando...' : 'Confirmar descarte' }}</button></footer>
         </form>
       </section>
     </div>
@@ -742,6 +647,13 @@ onMounted(carregar)
 .lot-card__heading h2 { margin: 0; color: #0d2b5e; font-size: 16px; }
 .lot-card__heading p { margin: 5px 0 14px; color: #64748b; font-size: 12px; }
 .lot-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.lot-filter-bar { display: grid; grid-template-columns: minmax(260px, 1.5fr) minmax(190px, .7fr) auto; align-items: end; gap: 10px; margin: 2px 0 14px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 9px; background: #f8fafc; }
+.lot-filter-bar label { display: flex; min-width: 0; flex-direction: column; gap: 5px; }
+.lot-filter-bar label > span { color: #475569; font-size: 10px; font-weight: 800; }
+.lot-filter-bar input, .lot-filter-bar select { width: 100%; min-height: 38px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1e293b; box-sizing: border-box; }
+.lot-filter-result { display: flex; min-height: 38px; align-items: center; gap: 5px; white-space: nowrap; color: #64748b; font-size: 10px; }
+.lot-filter-result strong { color: #0d2b5e; font-size: 15px; }
+.lot-filter-result button { margin-left: 5px; border: 0; background: transparent; color: #1a4da1; font-size: 10px; font-weight: 800; cursor: pointer; }
 .primary-action, .secondary-action, .danger-action { min-height: 38px; padding: 0 14px; border-radius: 7px; font-size: 12px; font-weight: 800; cursor: pointer; }
 .primary-action { border: 1px solid #1a4da1; background: #1a4da1; color: #fff; }
 .secondary-action { border: 1px solid #cbd5e1; background: #fff; color: #334155; }
@@ -755,10 +667,11 @@ td small { display: block; margin-top: 4px; color: #94a3b8; font-size: 10px; }
 .lot-row { cursor: pointer; }
 .lot-row:hover { background: #fbfdff; }
 .detail-button { min-height: 30px; padding: 0 10px; border: 1px solid #dbe4f0; border-radius: 6px; background: #f8fafc; color: #1a4da1; font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; }
-.lot-chip { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; font-size: 9px; font-weight: 800; }
+.lot-chip { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }
 .lot-chip--ok { background: #e7f7ed; color: #007a3d; }
 .lot-chip--warning { background: #fff7d6; color: #946200; }
 .lot-chip--danger { background: #fee2e2; color: #b42318; }
+.lot-chip--discarded { background: #e2e8f0; color: #475569; }
 .state-box { padding: 34px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #64748b; text-align: center; }
 .state-box--error { border-color: #fecaca; color: #b42318; background: #fffafa; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 24px; background: rgb(9 22 48 / 58%); backdrop-filter: blur(2px); }
@@ -812,7 +725,7 @@ td small { display: block; margin-top: 4px; color: #94a3b8; font-size: 10px; }
 .expired-item__qty { text-align: right; }
 .discard-fields { grid-template-columns: minmax(0, 1fr); }
 .discard-warning { margin-top: 14px; padding: 11px 12px; border: 1px solid #fde68a; border-radius: 8px; background: #fffdf5; color: #7c5b00; font-size: 10px; line-height: 1.45; }
-@media (max-width: 1150px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1150px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lot-filter-bar { grid-template-columns: 1fr 1fr; } .lot-filter-result { grid-column: 1 / -1; } }
 @media (max-width: 900px) { .product-context { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .summary-grid, .entry-grid, .product-context, .lot-detail-highlight, .lot-detail-grid, .discard-summary { grid-template-columns: 1fr; } .lot-detail-wide { grid-column: auto; } .lot-card__heading { flex-direction: column; } .lot-actions, .primary-action, .danger-action { width: 100%; } .lot-actions { flex-direction: column; } .modal-actions { flex-direction: column-reverse; } .expired-item { align-items: flex-start; flex-direction: column; } .expired-item__qty { text-align: left; } }
+@media (max-width: 640px) { .summary-grid, .entry-grid, .product-context, .lot-detail-highlight, .lot-detail-grid, .discard-summary, .lot-filter-bar { grid-template-columns: 1fr; } .lot-filter-result { grid-column: auto; } .lot-detail-wide { grid-column: auto; } .lot-card__heading { flex-direction: column; } .lot-actions, .primary-action, .danger-action { width: 100%; } .lot-actions { flex-direction: column; } .modal-actions { flex-direction: column-reverse; } .expired-item { align-items: flex-start; flex-direction: column; } .expired-item__qty { text-align: left; } }
 </style>
