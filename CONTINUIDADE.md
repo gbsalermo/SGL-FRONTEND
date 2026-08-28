@@ -82,6 +82,7 @@ Lotes — fracionamento irreversível            ✅ validado
 Lotes — FIFO/FEFO com embalagem               ✅ backend
 Lotes — descarte por vencimento               ✅ validado
 Lotes — busca/filtro de situação              ✅
+Lotes — status visual ESGOTADO                ✅
 Produtos operacional + rótulos                ⏳ ETAPA ATUAL
 Movimentações                                 ⏳
 Relatórios                                    ⏳
@@ -137,6 +138,8 @@ GALÃO
 ```
 
 A interface consulta os lotes ativos com saldo daquele estoque.
+
+Lote vencido não participa da disponibilidade do Novo Pedido, mesmo que ainda tenha saldo aguardando descarte.
 
 ### UNITÁRIO
 
@@ -481,6 +484,8 @@ Lotes vencidos
 
 Filtro por embalagem muda apenas a visualização, nunca o saldo real.
 
+O indicador `Vencem em até 30 dias` considera somente lotes com `quantidadeDisponivel > 0`. Lote esgotado não gera mais alerta de vencimento.
+
 ---
 
 # 13. Tabela de Lotes
@@ -513,15 +518,23 @@ Todos
 Válidos
 Próximos do vencimento
 Vencidos
+Esgotados
 Descartados por vencimento
 ```
 
-Regra visual:
+Regra visual atual:
 
 ```text
-vencido + saldo > 0 → VENCIDO
-vencido + saldo = 0 → DESCARTADO POR VENCIMENTO
+saldo > 0 + válido                 → VÁLIDO
+saldo > 0 + vence em até 30 dias  → PRÓXIMO DO VENCIMENTO
+saldo > 0 + vencido                → VENCIDO
+saldo = 0 + ainda não vencido      → ESGOTADO
+saldo = 0 + vencido                → DESCARTADO POR VENCIMENTO
 ```
+
+`ESGOTADO` é preferido a `ENTREGUE` porque o lote pode ter sido consumido por uma ou várias saídas/pedidos; o termo descreve o estado operacional sem atribuir uma única entrega.
+
+Observação: `DESCARTADO POR VENCIMENTO` ainda é uma nomenclatura visual baseada em `vencido + saldo zero`. Caso no futuro seja necessário distinguir com precisão a causa final de qualquer lote zerado, o backend deverá expor explicitamente a causa/status final a partir das movimentações.
 
 ---
 
@@ -615,6 +628,8 @@ V9 → forma de retirada persistida no ItemPedido
 ✅ descarte por vencimento
 ✅ busca/filtro de lotes
 ✅ status visual de descarte
+✅ status visual ESGOTADO para saldo zero
+✅ lote esgotado não gera alerta de próximo vencimento
 ✅ resumo superior simplificado
 ✅ histórico de saída por lote implementado para validação
 ```
