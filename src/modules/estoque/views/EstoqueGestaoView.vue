@@ -25,10 +25,6 @@ const ordemQuantitativa = computed(() => ordenarPor.value === 'QUANTIDADE' || or
 const rotuloOrdem = computed(() => ordemQuantitativa.value ? 'Ordem por quantidade' : 'Ordem alfabética')
 const filtroAtivo = computed(() => buscaEmFoco.value || filtrosAbertos.value)
 
-function rotuloUnidade(unidade?: string | null) {
-  return unidade ? unidade.toLowerCase().replaceAll('_', ' ') : 'Não informada'
-}
-
 function estoqueBaixo(item: EstoqueCentralResponse) {
   return item.quantidadeAtual < item.quantidadeMinima
 }
@@ -59,18 +55,15 @@ const estoquesFiltrados = computed(() => {
 
   const filtrados = estoques.value.filter((item) => {
     if (!item.ativo) return false
-
     if (situacao.value === 'BAIXO' && !estoqueBaixo(item)) return false
     if (situacao.value === 'NORMAL' && (estoqueBaixo(item) || estoqueZerado(item))) return false
     if (situacao.value === 'ZERADO' && !estoqueZerado(item)) return false
     if (situacao.value === 'VENCIDO' && !possuiLoteVencido(item)) return false
-
     if (!termo) return true
 
     return [
       item.produtoNome,
       item.produtoCodigoReferencia,
-      item.produtoUnidadeMedida,
       item.produtoUnidadeArmazenamento,
       item.produtoLocalizacaoFisica,
       item.unidadeNome,
@@ -84,13 +77,11 @@ const estoquesFiltrados = computed(() => {
 
   return [...filtrados].sort((a, b) => {
     let comparacao = 0
-
     if (ordenarPor.value === 'QUANTIDADE') comparacao = a.quantidadeAtual - b.quantidadeAtual
     else if (ordenarPor.value === 'MINIMO') comparacao = a.quantidadeMinima - b.quantidadeMinima
     else if (ordenarPor.value === 'LOCALIZACAO') {
       comparacao = (a.produtoLocalizacaoFisica ?? '').localeCompare(b.produtoLocalizacaoFisica ?? '', 'pt-BR', { sensitivity: 'base' })
     } else comparacao = a.produtoNome.localeCompare(b.produtoNome, 'pt-BR', { sensitivity: 'base' })
-
     return direcao.value === 'ASC' ? comparacao : -comparacao
   })
 })
@@ -140,99 +131,36 @@ onMounted(carregar)
     <header class="estoque-page__header">
       <div>
         <h1>Estoque</h1>
-        <p>Acompanhe saldos, níveis mínimos, localização e situação dos lotes da sua unidade.</p>
+        <p>Acompanhe quantidades em unidades, níveis mínimos, localização e situação dos lotes.</p>
       </div>
       <button class="secondary-action" type="button" @click="carregar">Atualizar</button>
     </header>
 
     <div class="estoque-summary">
-      <article>
-        <span>Produtos em estoque</span>
-        <strong>{{ resumo.produtos }}</strong>
-        <small>Registros ativos</small>
-      </article>
-      <article :class="{ 'estoque-summary--warning': resumo.baixo > 0 }">
-        <span>Estoque baixo</span>
-        <strong>{{ resumo.baixo }}</strong>
-        <small>Abaixo do mínimo</small>
-      </article>
-      <article :class="{ 'estoque-summary--danger': resumo.zerados > 0 }">
-        <span>Zerados</span>
-        <strong>{{ resumo.zerados }}</strong>
-        <small>Sem saldo disponível</small>
-      </article>
-      <article :class="{ 'estoque-summary--danger': resumo.vencidos > 0 }">
-        <span>Produtos com lote vencido</span>
-        <strong>{{ resumo.vencidos }}</strong>
-        <small>Produtos distintos que exigem atenção</small>
-      </article>
+      <article><span>Produtos em estoque</span><strong>{{ resumo.produtos }}</strong><small>Registros ativos</small></article>
+      <article :class="{ 'estoque-summary--warning': resumo.baixo > 0 }"><span>Estoque baixo</span><strong>{{ resumo.baixo }}</strong><small>Abaixo do mínimo em unidades</small></article>
+      <article :class="{ 'estoque-summary--danger': resumo.zerados > 0 }"><span>Zerados</span><strong>{{ resumo.zerados }}</strong><small>Sem unidades disponíveis</small></article>
+      <article :class="{ 'estoque-summary--danger': resumo.vencidos > 0 }"><span>Produtos com lote vencido</span><strong>{{ resumo.vencidos }}</strong><small>Produtos distintos que exigem atenção</small></article>
     </div>
 
     <section class="estoque-filter-card">
       <div class="estoque-filter-top">
         <label class="estoque-search">
           <span>Buscar</span>
-          <input
-            v-model="busca"
-            type="search"
-            placeholder="Produto, código, unidade ou localização..."
-            @focus="buscaEmFoco = true"
-            @blur="buscaEmFoco = false"
-          />
+          <input v-model="busca" type="search" placeholder="Produto, código, embalagem ou localização..." @focus="buscaEmFoco = true" @blur="buscaEmFoco = false" />
         </label>
-
-        <button
-          class="filter-toggle"
-          :class="{ 'filter-toggle--active': filtroAtivo }"
-          type="button"
-          :aria-expanded="filtrosAbertos"
-          aria-label="Abrir ou recolher filtros avançados"
-          title="Filtros avançados"
-          @click="filtrosAbertos = !filtrosAbertos"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 5h16l-6.5 7.2v5.1L10.5 19v-6.8L4 5Z" />
-          </svg>
+        <button class="filter-toggle" :class="{ 'filter-toggle--active': filtroAtivo }" type="button" :aria-expanded="filtrosAbertos" aria-label="Abrir ou recolher filtros avançados" title="Filtros avançados" @click="filtrosAbertos = !filtrosAbertos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6.5 7.2v5.1L10.5 19v-6.8L4 5Z" /></svg>
         </button>
       </div>
 
       <div v-if="filtrosAbertos" class="estoque-filter-grid">
-        <label>
-          <span>Situação</span>
-          <select v-model="situacao">
-            <option value="TODOS">Todos</option>
-            <option value="BAIXO">Estoque baixo</option>
-            <option value="ZERADO">Zerados</option>
-            <option value="VENCIDO">Com lote vencido</option>
-            <option value="NORMAL">Normal</option>
-          </select>
-        </label>
-
-        <label>
-          <span>Organizar por</span>
-          <select v-model="ordenarPor">
-            <option value="PRODUTO">Produto</option>
-            <option value="LOCALIZACAO">Localização</option>
-            <option value="QUANTIDADE">Quantidade atual</option>
-            <option value="MINIMO">Quantidade mínima</option>
-          </select>
-        </label>
-
-        <label>
-          <span>{{ rotuloOrdem }}</span>
-          <select v-model="direcao">
-            <option v-if="ordemQuantitativa" value="ASC">Menor → maior</option>
-            <option v-if="ordemQuantitativa" value="DESC">Maior → menor</option>
-            <option v-if="!ordemQuantitativa" value="ASC">A → Z</option>
-            <option v-if="!ordemQuantitativa" value="DESC">Z → A</option>
-          </select>
-        </label>
+        <label><span>Situação</span><select v-model="situacao"><option value="TODOS">Todos</option><option value="BAIXO">Estoque baixo</option><option value="ZERADO">Zerados</option><option value="VENCIDO">Com lote vencido</option><option value="NORMAL">Normal</option></select></label>
+        <label><span>Organizar por</span><select v-model="ordenarPor"><option value="PRODUTO">Produto</option><option value="LOCALIZACAO">Localização</option><option value="QUANTIDADE">Quantidade atual</option><option value="MINIMO">Quantidade mínima</option></select></label>
+        <label><span>{{ rotuloOrdem }}</span><select v-model="direcao"><option v-if="ordemQuantitativa" value="ASC">Menor → maior</option><option v-if="ordemQuantitativa" value="DESC">Maior → menor</option><option v-if="!ordemQuantitativa" value="ASC">A → Z</option><option v-if="!ordemQuantitativa" value="DESC">Z → A</option></select></label>
       </div>
 
-      <div class="estoque-filter-footer">
-        <span>{{ estoquesFiltrados.length }} registro(s) encontrado(s)</span>
-        <button type="button" @click="limparFiltros">Limpar filtros</button>
-      </div>
+      <div class="estoque-filter-footer"><span>{{ estoquesFiltrados.length }} registro(s) encontrado(s)</span><button type="button" @click="limparFiltros">Limpar filtros</button></div>
     </section>
 
     <div v-if="carregando" class="estoque-state">Carregando estoque...</div>
@@ -241,32 +169,14 @@ onMounted(carregar)
 
     <div v-else class="estoque-table-wrap">
       <table class="estoque-table">
-        <thead>
-          <tr>
-            <th>Produto</th>
-            <th>Unidade</th>
-            <th>Localização</th>
-            <th>Quantidade atual</th>
-            <th>Mínimo</th>
-            <th>Situação</th>
-            <th aria-label="Abrir detalhe"></th>
-          </tr>
-        </thead>
+        <thead><tr><th>Produto</th><th>Embalagem padrão</th><th>Localização</th><th>Quantidade atual</th><th>Mínimo</th><th>Situação</th><th aria-label="Abrir detalhe"></th></tr></thead>
         <tbody>
           <tr v-for="item in estoquesFiltrados" :key="item.id" @click="abrirDetalhe(item)">
-            <td>
-              <strong>{{ item.produtoNome }}</strong>
-              <small v-if="item.produtoCodigoReferencia">{{ item.produtoCodigoReferencia }}</small>
-            </td>
-            <td>
-              <strong>{{ rotuloUnidade(item.produtoUnidadeMedida) }}</strong>
-              <small v-if="item.produtoUnidadeArmazenamento">Padrão: {{ item.produtoUnidadeArmazenamento }}</small>
-            </td>
-            <td>
-              <span class="location-copy">{{ item.produtoLocalizacaoFisica || 'Não informada' }}</span>
-            </td>
-            <td><strong class="quantidade-atual">{{ item.quantidadeAtual }}</strong> {{ rotuloUnidade(item.produtoUnidadeMedida) }}</td>
-            <td>{{ item.quantidadeMinima }} {{ rotuloUnidade(item.produtoUnidadeMedida) }}</td>
+            <td><strong>{{ item.produtoNome }}</strong><small v-if="item.produtoCodigoReferencia">{{ item.produtoCodigoReferencia }}</small></td>
+            <td><strong>{{ item.produtoUnidadeArmazenamento || 'Não informada' }}</strong><small>O saldo geral é contado em unidades</small></td>
+            <td><span class="location-copy">{{ item.produtoLocalizacaoFisica || 'Não informada' }}</span></td>
+            <td><strong class="quantidade-atual">{{ item.quantidadeAtual }}</strong> unidades</td>
+            <td>{{ item.quantidadeMinima }} unidades</td>
             <td>
               <span v-if="estoqueZerado(item)" class="stock-chip stock-chip--danger">ZERADO</span>
               <span v-else-if="possuiLoteVencido(item)" class="stock-chip stock-chip--danger">LOTE VENCIDO</span>
@@ -303,10 +213,10 @@ onMounted(carregar)
 .estoque-search > span, .estoque-filter-grid label > span { color: #475569; font-size: 11px; font-weight: 700; }
 .estoque-search input, .estoque-filter-grid select { width: 100%; min-height: 40px; padding: 0 11px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1a1a2e; outline: none; }
 .estoque-search input:focus { border-color: #1a4da1; box-shadow: 0 0 0 2px rgb(26 77 161 / 10%); }
-.filter-toggle { width: 36px; height: 36px; display: inline-grid; place-items: center; align-self: end; margin-bottom: 2px; padding: 0; border: 2px solid #1a1a2e; border-radius: 50%; background: #fff; color: #1a1a2e; cursor: pointer; transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease; }
+.filter-toggle { width: 36px; height: 36px; display: inline-grid; place-items: center; align-self: end; margin-bottom: 2px; padding: 0; border: 2px solid #1a1a2e; border-radius: 50%; background: #fff; color: #1a1a2e; cursor: pointer; transition: .18s ease; }
 .filter-toggle:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgb(15 23 42 / 12%); }
-.filter-toggle svg { width: 19px; height: 19px; fill: currentColor; stroke: none; }
-.filter-toggle--active { border-color: #1a4da1; background: #1a4da1; color: #fff; box-shadow: 0 4px 12px rgb(26 77 161 / 20%); }
+.filter-toggle svg { width: 19px; height: 19px; fill: currentColor; }
+.filter-toggle--active { border-color: #1a4da1; background: #1a4da1; color: #fff; }
 .estoque-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #eef2f7; }
 .estoque-filter-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef2f7; color: #64748b; font-size: 11px; }
 .estoque-filter-footer button { border: 0; background: transparent; color: #1a4da1; font-weight: 700; cursor: pointer; }
