@@ -26,6 +26,7 @@ export interface LoteResponse {
   quantidadeApresentacoes: number | null
   conteudoPorApresentacao: number | null
   fracionavel: boolean | null
+  observacao: string | null
   unidadeBase: string
   quantidadeInicial: number
   quantidadeDisponivel: number
@@ -43,6 +44,15 @@ export interface EntradaLoteRequest {
   dataValidade: string | null
   origem: string
   observacao: string | null
+}
+
+export interface AtualizarLoteRequest {
+  numeroLote: string
+  apresentacao: string | null
+  fracionavel: boolean
+  observacao: string | null
+  dataValidade: string | null
+  ativo: boolean
 }
 
 export interface DescarteProdutoRequest {
