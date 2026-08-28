@@ -8,6 +8,7 @@ import type {
   OrgaoFiscalizadorRelatorio,
   RelatorioEstagiariosResponse,
   RelatorioEstoqueLotesResponse,
+  RelatorioFiscalizacaoResponse,
   RelatorioMovimentacoesResponse,
   RelatorioProdutosResponse,
   RelatorioResumoOperacionalResponse,
@@ -42,6 +43,7 @@ interface UnidadeResumo {
 interface ProdutoResumo {
   id: string
   nome: string
+  fiscalizado?: boolean
 }
 
 interface UsuarioResumo {
@@ -103,6 +105,11 @@ const estoqueNivel = ref<SimNaoFiltro>('')
 const estoqueSituacaoLote = ref<'' | SituacaoLoteRelatorio>('')
 const estoqueDiasVencimento = ref(30)
 
+const fiscalProdutoId = ref('')
+const fiscalOrgao = ref<'' | OrgaoFiscalizadorRelatorio>('')
+const fiscalUnidadeId = ref('')
+const fiscalDiasVencimento = ref(30)
+
 const laboratorios = ref<LaboratorioResumo[]>([])
 const unidades = ref<UnidadeResumo[]>([])
 const produtos = ref<ProdutoResumo[]>([])
@@ -114,6 +121,7 @@ const resultadoProdutos = ref<RelatorioProdutosResponse | null>(null)
 const resultadoMovimentacoes = ref<RelatorioMovimentacoesResponse | null>(null)
 const resultadoResumoOperacional = ref<RelatorioResumoOperacionalResponse | null>(null)
 const resultadoEstoqueLotes = ref<RelatorioEstoqueLotesResponse | null>(null)
+const resultadoFiscalizacao = ref<RelatorioFiscalizacaoResponse | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 
@@ -127,6 +135,9 @@ const relatorioMovimentacoesSelecionado = computed(() => relatorioSelecionado.va
 const relatorioResumoSelecionado = computed(() => relatorioSelecionado.value === 'resumo-operacional')
 const relatorioEstoqueSelecionado = computed(() => relatorioSelecionado.value === 'estoque-lotes')
 const relatorioResiduosSelecionado = computed(() => relatorioSelecionado.value === 'residuos')
+const relatorioFiscalizacaoSelecionado = computed(() => relatorioSelecionado.value === 'fiscalizacao')
+
+const produtosFiscalizados = computed(() => produtos.value.filter((produto) => produto.fiscalizado))
 
 const possuiResultado = computed(() => {
   if (relatorioEstagiariosSelecionado.value) return Boolean(resultadoEstagiarios.value)
@@ -134,6 +145,7 @@ const possuiResultado = computed(() => {
   if (relatorioMovimentacoesSelecionado.value) return Boolean(resultadoMovimentacoes.value)
   if (relatorioResumoSelecionado.value) return Boolean(resultadoResumoOperacional.value)
   if (relatorioEstoqueSelecionado.value) return Boolean(resultadoEstoqueLotes.value)
+  if (relatorioFiscalizacaoSelecionado.value) return Boolean(resultadoFiscalizacao.value)
   return false
 })
 
@@ -143,6 +155,7 @@ const geradoEm = computed(() => {
   if (relatorioMovimentacoesSelecionado.value) return resultadoMovimentacoes.value?.geradoEm
   if (relatorioResumoSelecionado.value) return resultadoResumoOperacional.value?.geradoEm
   if (relatorioEstoqueSelecionado.value) return resultadoEstoqueLotes.value?.geradoEm
+  if (relatorioFiscalizacaoSelecionado.value) return resultadoFiscalizacao.value?.geradoEm
   return undefined
 })
 
@@ -179,6 +192,7 @@ function limparResultados() {
   resultadoMovimentacoes.value = null
   resultadoResumoOperacional.value = null
   resultadoEstoqueLotes.value = null
+  resultadoFiscalizacao.value = null
 }
 
 function selecionarRelatorio(id: TipoRelatorio) {
@@ -212,6 +226,10 @@ function limparFiltros() {
   estoqueNivel.value = ''
   estoqueSituacaoLote.value = ''
   estoqueDiasVencimento.value = 30
+  fiscalProdutoId.value = ''
+  fiscalOrgao.value = ''
+  fiscalUnidadeId.value = ''
+  fiscalDiasVencimento.value = 30
   limparResultados()
   erro.value = ''
 }
@@ -231,19 +249,15 @@ function validarPeriodo() {
 async function visualizarRelatorio() {
   erro.value = ''
 
-  const usaPeriodo = relatorioEstagiariosSelecionado.value || relatorioMovimentacoesSelecionado.value || relatorioResumoSelecionado.value
+  const usaPeriodo =
+    relatorioEstagiariosSelecionado.value ||
+    relatorioMovimentacoesSelecionado.value ||
+    relatorioResumoSelecionado.value ||
+    relatorioFiscalizacaoSelecionado.value
   if (usaPeriodo && !validarPeriodo()) return
 
-  if (
-    !relatorioEstagiariosSelecionado.value &&
-    !relatorioProdutosSelecionado.value &&
-    !relatorioMovimentacoesSelecionado.value &&
-    !relatorioResumoSelecionado.value &&
-    !relatorioEstoqueSelecionado.value
-  ) {
-    erro.value = relatorioResiduosSelecionado.value
-      ? 'O relatório de Resíduos já faz parte da central e será ativado quando a branch do módulo de resíduos for integrada à base de Relatórios.'
-      : 'Este relatório já está previsto na central e será conectado quando o endpoint correspondente for implementado.'
+  if (relatorioResiduosSelecionado.value) {
+    erro.value = 'O relatório de Resíduos já faz parte da central e será ativado quando a branch do módulo de resíduos for integrada à base de Relatórios.'
     return
   }
 
@@ -298,14 +312,27 @@ async function visualizarRelatorio() {
       return
     }
 
+    if (relatorioEstoqueSelecionado.value) {
+      limparResultados()
+      resultadoEstoqueLotes.value = await relatorioService.listarEstoqueLotes({
+        unidadeId: estoqueUnidadeId.value || undefined,
+        produtoId: estoqueProdutoId.value || undefined,
+        ativoEstoque: estoqueSituacao.value === '' ? undefined : estoqueSituacao.value === 'ativo',
+        abaixoMinimo: estoqueNivel.value === '' ? undefined : estoqueNivel.value === 'sim',
+        validade: estoqueSituacaoLote.value || undefined,
+        diasVencimento: estoqueDiasVencimento.value,
+      })
+      return
+    }
+
     limparResultados()
-    resultadoEstoqueLotes.value = await relatorioService.listarEstoqueLotes({
-      unidadeId: estoqueUnidadeId.value || undefined,
-      produtoId: estoqueProdutoId.value || undefined,
-      ativoEstoque: estoqueSituacao.value === '' ? undefined : estoqueSituacao.value === 'ativo',
-      abaixoMinimo: estoqueNivel.value === '' ? undefined : estoqueNivel.value === 'sim',
-      validade: estoqueSituacaoLote.value || undefined,
-      diasVencimento: estoqueDiasVencimento.value,
+    resultadoFiscalizacao.value = await relatorioService.listarFiscalizacao({
+      produtoId: fiscalProdutoId.value || undefined,
+      orgaoFiscalizador: fiscalOrgao.value || undefined,
+      unidadeId: fiscalUnidadeId.value || undefined,
+      dataInicio: dataInicio.value || undefined,
+      dataFim: dataFim.value || undefined,
+      diasVencimento: fiscalDiasVencimento.value,
     })
   } catch (e) {
     console.error(e)
@@ -444,7 +471,15 @@ onMounted(async () => {
             <div class="campo"><label for="estoque-dias">Janela de vencimento</label><select id="estoque-dias" v-model.number="estoqueDiasVencimento"><option :value="7">Próximos 7 dias</option><option :value="15">Próximos 15 dias</option><option :value="30">Próximos 30 dias</option><option :value="60">Próximos 60 dias</option><option :value="90">Próximos 90 dias</option></select></div>
           </div>
 
-          <div v-else class="filtros-indisponiveis"><strong>{{ opcaoSelecionada.titulo }}</strong><span v-if="relatorioResiduosSelecionado">A opção já está reservada. A consulta será ativada após a integração do módulo de Resíduos à base de Relatórios.</span><span v-else>Os filtros deste relatório serão ativados junto ao endpoint correspondente.</span></div>
+          <div v-else-if="relatorioFiscalizacaoSelecionado" class="filtros-body filtros-body--fiscalizacao">
+            <div class="campo"><label for="fiscal-produto">Produto fiscalizado</label><select id="fiscal-produto" v-model="fiscalProdutoId"><option value="">Todos os produtos fiscalizados</option><option v-for="produto in produtosFiscalizados" :key="produto.id" :value="produto.id">{{ produto.nome }}</option></select></div>
+            <div class="campo"><label for="fiscal-orgao">Órgão fiscalizador</label><select id="fiscal-orgao" v-model="fiscalOrgao"><option value="">Todos os órgãos</option><option value="POLICIA_FEDERAL">Polícia Federal</option><option value="VIGILANCIA_SANITARIA">Vigilância Sanitária</option><option value="ANVISA">ANVISA</option><option value="EXERCITO">Exército</option><option value="OUTRO">Outro</option></select></div>
+            <div class="campo"><label for="fiscal-unidade">Unidade</label><select id="fiscal-unidade" v-model="fiscalUnidadeId"><option value="">Todas as unidades</option><option v-for="unidade in unidades" :key="unidade.id" :value="unidade.id">{{ unidade.sigla ? `${unidade.sigla} — ${unidade.nome}` : unidade.nome }}</option></select></div>
+            <div class="campo campo--periodo"><label>Período das movimentações</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
+            <div class="campo"><label for="fiscal-dias">Janela de vencimento</label><select id="fiscal-dias" v-model.number="fiscalDiasVencimento"><option :value="7">Próximos 7 dias</option><option :value="15">Próximos 15 dias</option><option :value="30">Próximos 30 dias</option><option :value="60">Próximos 60 dias</option><option :value="90">Próximos 90 dias</option></select></div>
+          </div>
+
+          <div v-else class="filtros-indisponiveis"><strong>{{ opcaoSelecionada.titulo }}</strong><span>A opção já está reservada. A consulta será ativada após a integração do módulo de Resíduos à base de Relatórios.</span></div>
 
           <div class="filtros-actions">
             <button class="btn btn--primary" type="button" :disabled="carregando" @click="visualizarRelatorio"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>{{ carregando ? 'Carregando...' : 'Visualizar relatório' }}</button>
@@ -481,12 +516,28 @@ onMounted(async () => {
 
           <div v-else-if="relatorioEstoqueSelecionado && resultadoEstoqueLotes" class="preview-result">
             <div class="resumo-cards resumo-cards--estoque"><article><span>Estoques</span><strong>{{ resultadoEstoqueLotes.totalEstoques }}</strong></article><article><span>Abaixo do mínimo</span><strong>{{ resultadoEstoqueLotes.estoquesAbaixoMinimo }}</strong></article><article><span>Saldo total</span><strong>{{ resultadoEstoqueLotes.quantidadeTotalEstoque }} un.</strong></article><article><span>Lotes ativos</span><strong>{{ resultadoEstoqueLotes.lotesAtivos }}</strong></article><article><span>Vencidos</span><strong>{{ resultadoEstoqueLotes.lotesVencidos }}</strong></article><article><span>Próx. vencimento</span><strong>{{ resultadoEstoqueLotes.lotesProximosVencimento }}</strong></article></div>
-
             <div class="section-heading"><h3>Posição de estoque</h3><span>Saldo atual comparado ao mínimo configurado</span></div>
             <div class="table-wrap"><table class="estoques-table"><thead><tr><th>Produto</th><th>Unidade</th><th>Saldo atual</th><th>Mínimo</th><th>Nível</th><th>Lotes ativos</th><th>Vencidos</th><th>Próx. vencimento</th></tr></thead><tbody><tr v-for="item in resultadoEstoqueLotes.estoques" :key="item.estoqueId"><td><strong>{{ item.produtoNome }}</strong><small>{{ item.codigoReferencia || formatarRotulo(item.unidadeMedida) }}</small></td><td>{{ item.unidadeSigla || item.unidadeNome }}</td><td class="quantidade">{{ item.quantidadeAtual }} un.</td><td>{{ item.quantidadeMinima }} un.</td><td><span class="status" :class="item.abaixoMinimo ? 'status--critico' : 'status--ativo'">{{ item.abaixoMinimo ? 'Abaixo do mínimo' : 'Normal' }}</span></td><td>{{ item.lotesAtivos }}</td><td>{{ item.lotesVencidos }}</td><td>{{ item.lotesProximosVencimento }}</td></tr><tr v-if="resultadoEstoqueLotes.estoques.length === 0"><td colspan="8" class="table-empty">Nenhum estoque encontrado com os filtros informados.</td></tr></tbody></table></div>
-
             <div class="section-heading section-heading--lotes"><h3>Lotes</h3><span>{{ resultadoEstoqueLotes.totalLotes }} lote(s) na consulta</span></div>
             <div class="table-wrap"><table class="lotes-table"><thead><tr><th>Lote</th><th>Produto</th><th>Unidade</th><th>Entrada</th><th>Inicial</th><th>Disponível</th><th>Validade</th><th>Situação</th></tr></thead><tbody><tr v-for="item in resultadoEstoqueLotes.lotes" :key="item.loteId"><td><strong>{{ item.codigoInterno }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.produtoNome }}</td><td>{{ item.unidadeNome }}</td><td>{{ formatarData(item.dataEntrada) }}</td><td>{{ item.quantidadeInicial }} un.</td><td class="quantidade">{{ item.quantidadeDisponivel }} un.</td><td>{{ formatarData(item.dataValidade) }}</td><td><span class="status" :class="classeSituacaoLote(item.situacao)">{{ formatarRotulo(item.situacao) }}</span></td></tr><tr v-if="resultadoEstoqueLotes.lotes.length === 0"><td colspan="8" class="table-empty">Nenhum lote encontrado com os filtros informados.</td></tr></tbody></table></div>
+          </div>
+
+          <div v-else-if="relatorioFiscalizacaoSelecionado && resultadoFiscalizacao" class="preview-result">
+            <div class="resumo-cards resumo-cards--fiscalizacao">
+              <article><span>Produtos fiscalizados</span><strong>{{ resultadoFiscalizacao.totalProdutosFiscalizados }}</strong></article>
+              <article><span>Saldo atual</span><strong>{{ resultadoFiscalizacao.saldoAtualTotal }} un.</strong></article>
+              <article><span>Lotes ativos</span><strong>{{ resultadoFiscalizacao.lotesAtivos }}</strong></article>
+              <article><span>Lotes vencidos</span><strong>{{ resultadoFiscalizacao.lotesVencidos }}</strong></article>
+              <article><span>Próx. vencimento</span><strong>{{ resultadoFiscalizacao.lotesProximosVencimento }}</strong></article>
+              <article><span>Entradas no período</span><strong class="quantidade--entrada">+{{ resultadoFiscalizacao.quantidadeEntradas }} un.</strong></article>
+              <article><span>Saídas no período</span><strong class="quantidade--saida">−{{ resultadoFiscalizacao.quantidadeSaidas }} un.</strong></article>
+            </div>
+
+            <div class="section-heading"><h3>Produtos controlados</h3><span>Classificação, saldo e vencimentos</span></div>
+            <div class="table-wrap"><table class="fiscal-produtos-table"><thead><tr><th>Produto</th><th>Órgão(s)</th><th>Saldo</th><th>Lotes ativos</th><th>Vencidos</th><th>Próx. venc.</th><th>Entradas</th><th>Saídas</th></tr></thead><tbody><tr v-for="item in resultadoFiscalizacao.produtos" :key="item.produtoId"><td><strong>{{ item.produtoNome }}</strong><small>{{ item.codigoReferencia || item.observacaoFiscalizacao || '—' }}</small></td><td><span class="status status--fiscalizado">{{ formatarOrgaos(item.orgaosFiscalizadores) }}</span></td><td class="quantidade">{{ item.saldoAtual }} un.</td><td>{{ item.lotesAtivos }}</td><td><span :class="item.lotesVencidos ? 'quantidade quantidade--saida' : ''">{{ item.lotesVencidos }}</span></td><td><strong>{{ formatarData(item.proximoVencimento) }}</strong><small>{{ item.lotesProximosVencimento }} na janela</small></td><td class="quantidade quantidade--entrada">+{{ item.quantidadeEntradas }} un.</td><td class="quantidade quantidade--saida">−{{ item.quantidadeSaidas }} un.</td></tr><tr v-if="resultadoFiscalizacao.produtos.length === 0"><td colspan="8" class="table-empty">Nenhum produto fiscalizado encontrado com os filtros informados.</td></tr></tbody></table></div>
+
+            <div class="section-heading section-heading--lotes"><h3>Rastreabilidade de movimentações</h3><span>Destino e responsáveis das movimentações dos produtos controlados</span></div>
+            <div class="table-wrap"><table class="fiscalizacao-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Lote / validade</th><th>Laboratório</th><th>Projeto</th><th>Solicitante / pedido</th><th>Responsável</th><th>Saldo</th></tr></thead><tbody><tr v-for="item in resultadoFiscalizacao.movimentacoes" :key="item.movimentacaoId"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong></td><td><span class="status status--mov">{{ formatarRotulo(item.tipoMovimentacao) }}</span></td><td class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ item.quantidadeMovimentada }} un.</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small>{{ item.numeroLote || 'Sem lote fornecedor' }} · {{ formatarData(item.dataValidadeLote) }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ item.projetoNome || '—' }}</td><td><strong>{{ item.solicitanteNome || '—' }}</strong><small v-if="item.pedidoId">Pedido: {{ item.pedidoId }}</small></td><td>{{ item.responsavelNome }}</td><td>{{ item.saldoAposMovimentacao }} un.</td></tr><tr v-if="resultadoFiscalizacao.movimentacoes.length === 0"><td colspan="10" class="table-empty">Nenhuma movimentação de produto fiscalizado encontrada no período.</td></tr></tbody></table></div>
           </div>
         </section>
       </div>
@@ -524,7 +575,7 @@ onMounted(async () => {
 .card-title { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 20px; border-bottom: 1px solid #e5eaf1; }
 .preview-gerado { color: #8290a5; font-size: 11px; }
 .filtros-body { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(280px, 1.2fr); gap: 16px 18px; padding: 18px 20px; }
-.filtros-body--movimentacoes, .filtros-body--produtos, .filtros-body--estoque { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.filtros-body--movimentacoes, .filtros-body--produtos, .filtros-body--estoque, .filtros-body--fiscalizacao { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .filtros-body--resumo { grid-template-columns: minmax(190px, .9fr) minmax(330px, 1.4fr) minmax(170px, .7fr); }
 .campo { min-width: 0; display: grid; gap: 7px; }
 .campo label { color: #33425c; font-size: 12px; font-weight: 700; }
@@ -558,12 +609,13 @@ onMounted(async () => {
 .resumo-cards article { padding: 13px 15px; border: 1px solid #e0e6ef; border-radius: 7px; background: #f9fbfd; }
 .resumo-cards span { display: block; color: #74829a; font-size: 11.5px; font-weight: 700; }
 .resumo-cards strong { display: block; margin-top: 4px; color: #1d3150; font-size: 21px; }
-.resumo-cards--movimentacoes strong, .resumo-cards--produtos strong, .resumo-cards--estoque strong { font-size: 18px; }
+.resumo-cards--movimentacoes strong, .resumo-cards--produtos strong, .resumo-cards--estoque strong, .resumo-cards--fiscalizacao strong { font-size: 18px; }
 .table-wrap { overflow-x: auto; border: 1px solid #e0e6ee; border-radius: 7px; }
 table { width: 100%; min-width: 900px; border-collapse: collapse; }
 .movimentacoes-table { min-width: 1240px; }
 .produtos-table { min-width: 1080px; }
-.estoques-table, .lotes-table { min-width: 1050px; }
+.estoques-table, .lotes-table, .fiscal-produtos-table { min-width: 1050px; }
+.fiscalizacao-table { min-width: 1550px; }
 th { padding: 10px 12px; background: #f5f7fa; border-bottom: 1px solid #dde4ec; color: #617089; font-size: 10.5px; font-weight: 800; letter-spacing: .02em; text-align: left; text-transform: uppercase; }
 td { padding: 11px 12px; border-bottom: 1px solid #edf1f5; color: #35445d; font-size: 12px; vertical-align: middle; }
 tbody tr:last-child td { border-bottom: 0; }
@@ -580,8 +632,8 @@ td small { display: block; margin-top: 3px; color: #8491a4; font-size: 10.5px; }
 .status--risco-medio { background: #fff4d6; color: #8a6500; }
 .status--neutro { background: #f0f2f5; color: #58657a; }
 .quantidade { font-weight: 800; white-space: nowrap; }
-.quantidade--entrada { color: #1a4da1; }
-.quantidade--saida { color: #b42318; }
+.quantidade--entrada { color: #1a4da1 !important; }
+.quantidade--saida { color: #b42318 !important; }
 .table-empty { padding: 28px; color: #7e8a9e; text-align: center; }
 .rankings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
 .ranking-card { padding: 16px; border: 1px solid #e0e6ee; border-radius: 8px; background: #fbfcfe; }
@@ -607,7 +659,7 @@ td small { display: block; margin-top: 3px; color: #8491a4; font-size: 10.5px; }
 .exportacao-footer button:last-of-type { color: #277845; }
 .exportacao-footer button:disabled { opacity: .72; cursor: not-allowed; }
 .exportacao-footer svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-@media (max-width: 1180px) { .relatorios-grid { grid-template-columns: 290px minmax(0, 1fr); } .filtros-body, .filtros-body--movimentacoes, .filtros-body--produtos, .filtros-body--resumo, .filtros-body--estoque { grid-template-columns: repeat(2, minmax(0, 1fr)); } .campo--periodo { grid-column: span 2; } }
+@media (max-width: 1180px) { .relatorios-grid { grid-template-columns: 290px minmax(0, 1fr); } .filtros-body, .filtros-body--movimentacoes, .filtros-body--produtos, .filtros-body--resumo, .filtros-body--estoque, .filtros-body--fiscalizacao { grid-template-columns: repeat(2, minmax(0, 1fr)); } .campo--periodo { grid-column: span 2; } }
 @media (max-width: 900px) { .relatorios-page { padding: 22px 18px 30px; } .relatorios-grid { grid-template-columns: 1fr; } .relatorios-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } .exportacao-info { grid-column: 1 / -1; } }
-@media (max-width: 640px) { .relatorios-page { padding: 18px 12px 24px; } .relatorios-header h1 { font-size: 25px; } .relatorios-lista, .filtros-body, .filtros-body--movimentacoes, .filtros-body--produtos, .filtros-body--resumo, .filtros-body--estoque, .resumo-cards, .rankings-grid { grid-template-columns: 1fr; } .campo--periodo, .campo--busca { grid-column: auto; } .periodo-inputs { grid-template-columns: 1fr; } .periodo-inputs span { text-align: center; } .filtros-actions, .exportacao-footer { align-items: stretch; flex-direction: column; } .btn { width: 100%; } .exportacao-footer button { justify-content: center; } .section-heading { align-items: flex-start; flex-direction: column; } }
+@media (max-width: 640px) { .relatorios-page { padding: 18px 12px 24px; } .relatorios-header h1 { font-size: 25px; } .relatorios-lista, .filtros-body, .filtros-body--movimentacoes, .filtros-body--produtos, .filtros-body--resumo, .filtros-body--estoque, .filtros-body--fiscalizacao, .resumo-cards, .rankings-grid { grid-template-columns: 1fr; } .campo--periodo, .campo--busca { grid-column: auto; } .periodo-inputs { grid-template-columns: 1fr; } .periodo-inputs span { text-align: center; } .filtros-actions, .exportacao-footer { align-items: stretch; flex-direction: column; } .btn { width: 100%; } .exportacao-footer button { justify-content: center; } .section-heading { align-items: flex-start; flex-direction: column; } }
 </style>
