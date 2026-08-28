@@ -82,6 +82,11 @@ export const router = createRouter({
           component: () => import('@/modules/movimentacoes/views/MovimentacoesGestaoView.vue'),
         },
         {
+          path: 'relatorios',
+          name: 'gestao-relatorios',
+          component: () => import('@/modules/relatorios/views/RelatoriosGestaoView.vue'),
+        },
+        {
           path: 'solicitacoes/novo',
           name: 'gestao-novo-pedido',
           component: () => import('@/modules/pedidos/views/solicitante/NovoPedidoView.vue'),
