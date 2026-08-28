@@ -127,3 +127,51 @@ export interface RelatorioResumoOperacionalFiltros {
   dataFim?: string
   limite?: number
 }
+
+export type NivelRiscoRelatorio = 'NENHUM' | 'BAIXO' | 'MEDIO' | 'ALTO'
+
+export type OrgaoFiscalizadorRelatorio =
+  | 'POLICIA_FEDERAL'
+  | 'VIGILANCIA_SANITARIA'
+  | 'ANVISA'
+  | 'EXERCITO'
+  | 'OUTRO'
+
+export interface RelatorioProdutoItem {
+  id: string
+  nome: string
+  descricao: string | null
+  codigoReferencia: string | null
+  unidadeMedida: string
+  localizacaoFisica: string | null
+  risco: NivelRiscoRelatorio
+  tipoRisco: string | null
+  descricaoRisco: string | null
+  perecivel: boolean
+  tipoPerecivel: string | null
+  condicoesArmazenamento: string | null
+  unidadeArmazenamento: string | null
+  fiscalizado: boolean
+  orgaosFiscalizadores: OrgaoFiscalizadorRelatorio[]
+  observacaoFiscalizacao: string | null
+  ativo: boolean
+}
+
+export interface RelatorioProdutosResponse {
+  geradoEm: string
+  total: number
+  ativos: number
+  inativos: number
+  fiscalizados: number
+  pereciveis: number
+  comRisco: number
+  itens: RelatorioProdutoItem[]
+}
+
+export interface RelatorioProdutosFiltros {
+  ativo?: boolean
+  fiscalizado?: boolean
+  perecivel?: boolean
+  risco?: NivelRiscoRelatorio
+  orgaoFiscalizador?: OrgaoFiscalizadorRelatorio
+}
