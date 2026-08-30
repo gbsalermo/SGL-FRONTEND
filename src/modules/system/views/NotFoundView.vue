@@ -43,7 +43,7 @@ function voltarAoInicio() {
 
       <div class="not-found-copy">
         <p class="not-found-code">ERRO 404</p>
-        <h1 id="not-found-title">Página não encontrada</h1>
+        <h1 id="not-found-title">Page Not Found</h1>
         <p class="not-found-description">
           O endereço que você tentou acessar não existe ou não está mais disponível.
         </p>
