@@ -1,219 +1,250 @@
 # Estrutura Física — SGL Frontend
 
-**Momento:** scaffold anterior aos wireframes/telas  
-**Objetivo:** materializar no repositório a organização funcional aprovada sem antecipar implementação visual.
+**Atualizado em:** 31/08/2026  
+**Status:** referência estrutural atual.  
+**Checkpoint funcional:** `../CONTINUIDADE.md`
+
+Este documento nasceu no scaffold inicial, mas foi atualizado para refletir a arquitetura que de fato evoluiu no projeto. Para o inventário exato de arquivos, o código da `main` sempre prevalece.
 
 ---
 
-## 1. Mapa funcional que orienta a estrutura
+# 1. Organização funcional
 
 ```text
 SOLICITANTE
-Dashboard
-└── Pedidos
-    ├── Novo pedido
-    └── Meus pedidos
-        └── Detalhe
+Pedidos
+├── Novo pedido
+└── Meus pedidos
 
 GESTÃO
-Dashboard
-├── Pedidos
-├── Estoque
-│   └── Detalhe
-│       ├── Lotes
-│       ├── Entrada
-│       ├── Descarte
-│       └── Documentos
-├── Movimentações
-└── Relatórios
+Pedidos
+Estoque
+└── Detalhe
+    ├── Lotes
+    ├── Entrada
+    ├── Descarte
+    └── Rastreabilidade
+Movimentações
+Relatórios
 
-ADMINISTRAÇÃO
+ADMINISTRAÇÃO — próxima expansão
 Tudo da Gestão
 └── Cadastros
     ├── Produtos
-    ├── Unidades
     ├── Laboratórios
     ├── Projetos
     ├── Usuários
     └── Estagiários
 ```
 
-Administração **não duplica** os módulos de Gestão: reutiliza os mesmos módulos e adiciona o bloco `cadastros`.
+Administração não duplica módulos de Gestão.
+
+**Unidade não faz parte dos Cadastros do frontend.** Sua origem futura será a integração corporativa.
 
 ---
 
-## 2. Estrutura física aplicada
+# 2. Estrutura base
 
 ```text
-SGL-FRONTEND/
-├── public/
-├── src/
-│   ├── app/
-│   ├── assets/
-│   │   ├── icons/
-│   │   └── images/
-│   ├── components/
-│   │   ├── common/
-│   │   └── feedback/
-│   ├── layouts/
-│   ├── modules/
-│   │   ├── dashboard/
-│   │   │   └── views/
-│   │   │       ├── solicitante/
-│   │   │       └── gestao/
-│   │   ├── pedidos/
-│   │   │   ├── components/
-│   │   │   └── views/
-│   │   │       ├── solicitante/
-│   │   │       └── gestao/
-│   │   ├── estoque/
-│   │   │   ├── components/
-│   │   │   └── views/
-│   │   ├── lotes/
-│   │   ├── movimentacoes/
-│   │   │   └── views/
-│   │   ├── documentos/
-│   │   ├── relatorios/
-│   │   │   ├── views/
-│   │   │   └── fiscalizacao/
-│   │   └── cadastros/
-│   │       ├── produtos/
-│   │       ├── unidades/
-│   │       ├── laboratorios/
-│   │       ├── projetos/
-│   │       ├── usuarios/
-│   │       └── estagiarios/
-│   ├── router/
-│   ├── services/
-│   ├── stores/
-│   ├── types/
-│   ├── composables/
-│   ├── utils/
-│   └── styles/
-│       ├── tokens.css
-│       ├── base.css
-│       └── main.css
-├── .gitignore
-├── README.md
-└── CONTINUIDADE.md
+src/
+├── app/
+├── assets/
+│   ├── icons/
+│   └── images/
+├── components/
+├── layouts/
+├── modules/
+│   ├── auth/
+│   ├── cadastros/
+│   ├── dashboard/
+│   ├── documentos/
+│   ├── estoque/
+│   ├── lotes/
+│   ├── movimentacoes/
+│   ├── pedidos/
+│   ├── relatorios/
+│   └── system/
+├── router/
+├── services/
+├── stores/
+├── types/
+├── composables/
+├── utils/
+└── styles/
 ```
+
+Pastas vazias ou preparadas para módulos futuros não significam que a funcionalidade já está implementada. Conferir `src/router/index.ts` e o conteúdo real do módulo.
 
 ---
 
-## 3. Papel de cada área
+# 3. Papel das áreas
 
 ```text
 app
-→ inicialização/composição global da aplicação
+→ inicialização/composição global
 
 assets
-→ imagens, ícones e outros arquivos importados pela interface
+→ imagens, animações e ícones importados
 
 components
-→ componentes realmente compartilhados entre módulos
+→ componentes realmente compartilhados
 
 layouts
-→ sidebar, topbar, shell e estruturas de página
+→ shell por responsabilidade
 
 modules
-→ funcionalidades do domínio organizadas pelo uso real
+→ features/domínios da interface
 
 router
-→ definição das rotas, metadata e futuros guards
+→ rotas, metadata e guards
 
 services
-→ cliente HTTP e comunicação com backend
+→ comunicação HTTP
 
 stores
-→ somente estado global real
+→ estado global real
 
 types
-→ interfaces/types TypeScript compartilhados
+→ tipos compartilhados
 
 composables
 → lógica Vue reutilizável
 
 utils
-→ funções puras e utilitários
+→ funções puras/utilitários
 
 styles
-→ CSS global, tokens e regras base
+→ tokens e CSS global
 ```
 
 ---
 
-## 4. CSS e assets
+# 4. Padrão interno de módulo
 
-O CSS não será misturado dentro de uma pasta genérica `assets`.
+Quando a feature justificar:
+
+```text
+modules/<feature>/
+├── components/
+├── views/
+├── services/ ou service.ts
+├── types/
+├── composables/
+└── utils/ quando específico
+```
+
+Não criar todas essas pastas mecanicamente. A estrutura deve nascer da responsabilidade real.
+
+---
+
+# 5. Fluxo de dependência recomendado
+
+```text
+View
+→ Component
+→ Service / Store quando necessário
+→ Axios/http
+→ Backend
+```
+
+Evitar:
+
+```text
+View → axios direto espalhado
+Component visual → regra de negócio crítica
+Store → depósito de todo dado remoto
+```
+
+---
+
+# 6. CSS e assets
 
 ```text
 src/assets
-→ imagens/ícones
+→ imagens/ícones importados
+
+public
+→ arquivos servidos diretamente quando apropriado
 
 src/styles
-→ CSS global
+→ CSS/tokens globais
 ```
 
-Arquivos já criados:
+A página 404 utiliza:
 
 ```text
-tokens.css
-→ reservado para cores, tipografia, espaçamentos e demais tokens definidos na etapa visual
-
-base.css
-→ normalização estrutural mínima, sem identidade visual
-
-main.css
-→ ponto de entrada dos estilos globais
+public/animations/folder-not-found.lottie
 ```
 
-Nenhuma paleta, dimensão de componente ou estilo de tela foi congelado antes dos wireframes.
+Arquivos principais de estilo continuam organizados em tokens/base/main conforme a evolução do projeto.
 
 ---
 
-## 5. JavaScript / TypeScript
+# 7. Regras estruturais
 
-A stack planejada usa **TypeScript**, então não será criada uma pasta `js/` paralela apenas por convenção.
-
-Quando o bootstrap Vue/Vite começar:
-
-```text
-main.ts
-router/*.ts
-services/*.ts
-stores/*.ts
-types/*.ts
-composables/*.ts
-utils/*.ts
-```
-
-A ausência atual desses arquivos é intencional: o scaffold físico foi criado antes da confirmação formal/bootstrap da stack, evitando código fictício que ainda não compila.
+1. Solicitante e Gestão compartilham domínio, mas podem possuir Views diferentes quando a responsabilidade muda a experiência.
+2. Administração reutiliza Gestão e adiciona Cadastros.
+3. Lote continua contextual a Estoque mesmo que possua organização técnica própria.
+4. Documentos podem ter módulo técnico, mas aparecem no contexto de Pedido/Produto/Lote.
+5. Fiscalização é parte do cadastro de Produto e possui relatório especializado; não precisa de item isolado principal.
+6. Não criar componente compartilhado antes de existir reuso/responsabilidade real.
+7. Não criar service/store apenas para preencher pastas.
+8. Não criar módulo/rota de Unidade em Cadastros.
+9. Não criar área operacional `/produtos` duplicando o cadastro.
+10. UUID público é o identificador da fronteira.
 
 ---
 
-## 6. Regras estruturais
+# 8. Rotas x pastas
 
-1. Solicitante e Gestão compartilham domínio, mas podem possuir views diferentes quando a responsabilidade muda a experiência.
-2. Administração herda a experiência de Gestão e acrescenta Cadastros; não haverá cópia de módulos.
-3. Lote continua contextual ao Estoque, mesmo possuindo módulo próprio para organizar componentes/tipos/lógica específica.
-4. Documentos ficam em infraestrutura/módulo próprio, mas aparecem visualmente no contexto de Pedido, Produto ou Lote.
-5. Fiscalização fica inicialmente dentro de Relatórios, sem virar item isolado da navegação.
-6. Não criar componente compartilhado antes de existir reutilização real.
-7. Não criar `.vue`, services ou stores apenas para preencher pastas; eles surgem conforme as telas e contratos forem implementados.
+A existência de uma pasta não garante uma rota.
+
+Rotas realmente implementadas hoje:
+
+```text
+/login
+/meus-pedidos
+/pedidos/novo
+/pedidos
+/estoque
+/estoque/:id
+/movimentacoes
+/relatorios
+/solicitacoes/novo
+/solicitacoes/meus-pedidos
+/:pathMatch(.*)*
+```
+
+Exemplos de módulos/pastas preparados, mas cuja experiência final ainda está pendente:
+
+```text
+cadastros
+Dashboard final
+documentos
+```
 
 ---
 
-## 7. Próximo passo
+# 9. Próxima evolução estrutural
 
-Com a estrutura física pronta, a próxima etapa visual pode desenhar os wireframes sabendo exatamente onde cada responsabilidade será implementada:
+A próxima feature é `cadastros/produtos`.
+
+Criar apenas a estrutura necessária para:
 
 ```text
-shell/sidebar/topbar
-→ dashboard
-→ pedidos
-→ estoque/detalhe
-→ movimentações
-→ relatórios
-→ cadastros
-→ login/404/estados de feedback
+listagem/busca
+formulário novo/editar
+types
+service HTTP
+componentes específicos
+fiscalização
+feedback
 ```
+
+Depois repetir o padrão validado, com adaptação real, para Laboratórios, Projetos, Usuários e Estagiários.
+
+---
+
+# 10. Documento histórico
+
+O Git conserva versões anteriores deste arquivo que descrevem o scaffold “antes dos wireframes”. Essas versões são úteis para entender a origem da arquitetura, mas não devem ser usadas como estado atual ou roadmap.

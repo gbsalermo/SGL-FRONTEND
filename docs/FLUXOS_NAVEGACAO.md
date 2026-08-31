@@ -1,10 +1,10 @@
 # Fluxos e Navegação — SGL Frontend
 
-**Etapa:** 1.2 — Fundação visual e técnica  
-**Data:** 21/08/2026  
-**Base:** `docs/INVENTARIO_TELAS.md` + contratos atuais do backend
+**Atualizado em:** 31/08/2026  
+**Rotas reais:** `src/router/index.ts`  
+**Estado/planejamento:** `../CONTINUIDADE.md`
 
-Este documento define como o usuário percorre o SGL, quais áreas aparecem na navegação e em qual contexto cada ação deve acontecer. A intenção é evitar um frontend composto apenas por CRUDs isolados.
+Este documento descreve a navegação vigente e os fluxos já consolidados. Ele substitui como referência atual o snapshot inicial de 21/08.
 
 ---
 
@@ -12,609 +12,467 @@ Este documento define como o usuário percorre o SGL, quais áreas aparecem na n
 
 ```text
 fluxo principal → rota própria
-recurso contextual → seção, aba, drawer ou modal
-ação de domínio → executada no contexto do recurso
-ação relevante/destrutiva → confirmação explícita
-retorno após ação → previsível e seguro
+recurso contextual → seção/aba/modal
+ação de domínio → contexto do recurso
+ação destrutiva/relevante → confirmação
+retorno após ação → previsível
+regra de negócio crítica → backend
 ```
 
-Decisões:
+Decisões vigentes:
 
-1. Layout principal com **sidebar + topbar + área de conteúdo**.
-2. Sidebar organizada por responsabilidade, não por entidade do backend.
-3. `Pedido` e `Estoque` são os dois centros operacionais.
-4. `Lote` permanece contextual ao estoque.
-5. `Documentos` permanecem contextuais a Pedido, Produto ou Lote.
-6. `Relatórios` possuem central própria.
-7. `Cadastros` agrupa os módulos administrativos.
-8. Breadcrumbs aparecem em telas de detalhe e navegação profunda.
-9. O botão Voltar deve possuir destino funcional conhecido quando possível.
-10. Permissões definitivas serão fechadas com a autenticação; por enquanto a divisão representa responsabilidade de uso.
+1. Layout por responsabilidade: Solicitante e Gestão/Admin.
+2. Lotes permanecem contextuais a Estoque.
+3. Movimentações são trilha operacional independente.
+4. Relatórios usam central única.
+5. Produto tem CRUD em Administração, não rota operacional duplicada.
+6. Unidade não possui CRUD manual no frontend.
+7. Documentos ficam contextuais.
+8. 404 de rota e 404 de recurso são situações diferentes.
+9. Dashboard será implementado depois; não é rota atual.
 
 ---
 
-# 2. Navegação principal
-
-## Solicitante
+# 2. Rotas atuais
 
 ```text
-Dashboard
-Pedidos
-├── Novo pedido
-└── Meus pedidos
+/login
+
+SOLICITANTE
+/meus-pedidos
+/pedidos/novo
+
+GESTÃO / ADMIN
+/pedidos
+/estoque
+/estoque/:id
+/movimentacoes
+/relatorios
+/solicitacoes/novo
+/solicitacoes/meus-pedidos
+
+SISTEMA
+/:pathMatch(.*)*
 ```
 
-## Gestão
+Rotas futuras não devem aparecer como implementadas antes da etapa correspondente.
+
+---
+
+# 3. Entrada no sistema
+
+## Desenvolvimento atual
 
 ```text
-Dashboard
-Pedidos
-Estoque
-Movimentações
-Relatórios
+/login
+→ preencher identificador + senha
+→ frontend busca usuários ativos no backend
+→ sessão DEV
+→ perfil define rota inicial
 ```
 
-## Administração
+Rota inicial atual:
 
 ```text
-Dashboard
-Pedidos
-Estoque
+GESTOR / ADMINISTRADOR
+→ /pedidos
+
+TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO
+→ /meus-pedidos
+```
+
+A senha ainda não é validada por autenticação backend real.
+
+## Futuro
+
+```text
+autenticação real
+→ sessão segura
+→ autorização
+→ auditoria
+→ integração corporativa
+```
+
+---
+
+# 4. Fluxo do Solicitante
+
+## Novo pedido
+
+```text
+/pedidos/novo
+→ contexto do laboratório/projeto
+→ adicionar materiais
+→ definir quantidade e forma de retirada
+→ revisar
+→ enviar
+→ feedback
+```
+
+O backend valida:
+
+```text
+produto
+estoque disponível
+embalagem/forma de retirada
+FIFO/FEFO quando ocorrer aprovação
+regras de domínio
+```
+
+Erros de validação devem manter o contexto/formulário quando possível.
+
+## Meus pedidos
+
+```text
+/meus-pedidos
+→ listar solicitações do usuário
+→ acompanhar status
+→ visualizar informações relevantes
+```
+
+Ações administrativas não devem aparecer para perfis solicitantes.
+
+---
+
+# 5. Fluxo da Gestão — Pedidos
+
+Entrada:
+
+```text
+/pedidos
+```
+
+Fluxo:
+
+```text
+fila/listagem
+→ selecionar pedido
+→ revisar solicitante/laboratório/projeto/itens
+→ tomar ação permitida pelo estado
+```
+
+Aprovação:
+
+```text
+PENDENTE
+→ revisar quantidades
+→ Aprovar
+→ backend executa baixa + FIFO/FEFO
+→ APROVADO
+```
+
+Rejeição:
+
+```text
+PENDENTE
+→ Rejeitar
+→ motivo/observação quando aplicável
+→ REJEITADO
+```
+
+Entrega:
+
+```text
+APROVADO
+→ Registrar entrega
+→ ENTREGUE
+```
+
+Entrega **não faz segunda baixa de estoque**.
+
+Cancelamento:
+
+```text
+estado permitido
+→ Cancelar
+→ confirmação
+→ backend restaura lotes quando necessário
+→ CANCELADO
+```
+
+Urgência já faz parte da experiência e deve permanecer visualmente evidente quando aplicável.
+
+---
+
+# 6. Fluxo de Estoque
+
+## Visão geral
+
+```text
+/estoque
+→ buscar/filtrar
+→ visualizar saldo/situação
+→ abrir produto em uma unidade
+→ /estoque/:id
+```
+
+## Detalhe
+
+```text
+/estoque/:id
+→ produto + unidade
+→ saldo + mínimo
+→ lotes
+→ entrada
+→ edição segura
+→ descarte
+→ histórico/rastreabilidade
+```
+
+Lote permanece no contexto de Estoque.
+
+## Entrada de lote
+
+```text
+Detalhe de estoque
+→ Registrar entrada
+→ informar lote/apresentação/quantidade/multiplicador/fracionamento/validade
+→ confirmar total na unidade-base
+→ backend registra entrada
+→ atualizar saldo e lotes
+```
+
+## Fracionamento
+
+```text
+false → true  permitido
+true  → false não permitido
+```
+
+## Descarte
+
+```text
+lote vencido/elegível
+→ Descartar
+→ quantidade/justificativa conforme contrato
+→ confirmar
+→ backend registra movimentação
+→ atualizar tela
+```
+
+---
+
+# 7. Fluxo de Movimentações
+
+```text
+/movimentacoes
+→ histórico
+→ busca/filtros
+→ expandir contexto
+→ rastrear produto/lote/origem/responsável/pedido
+```
+
+A página é de consulta/auditoria. Entrada de lote e descarte continuam acionados no contexto de Estoque.
+
+Cores:
+
+```text
+ENTRADA   azul
+SAÍDA     vermelho
+DESCARTE  amarelo
+```
+
+Pedidos entregues são analisados como recorte dessa trilha, não em relatório exclusivo.
+
+---
+
+# 8. Fluxo de Relatórios
+
+```text
+/relatorios
+→ selecionar relatório
+→ mostrar filtros específicos
+→ consultar
+→ loading
+→ prévia
+→ exportar PDF ou XLSX
+```
+
+Relatórios atuais:
+
+```text
+Estagiários
+Produtos
 Movimentações
-Relatórios
+Resumo operacional
+Estoque e lotes
+Fiscalização
+```
+
+Resíduos será acrescentado após integração do módulo.
+
+A exportação usa a mesma consulta/filtros da prévia e é gerada no backend.
+
+O frontend rastreia a última prévia válida; trocar ou limpar o contexto invalida a exportação anterior.
+
+---
+
+# 9. Fluxo de Administração — PRÓXIMO
+
+Administração reutiliza as áreas de Gestão e acrescentará Cadastros.
+
+```text
 Cadastros
 ├── Produtos
-├── Unidades
 ├── Laboratórios
 ├── Projetos
 ├── Usuários
 └── Estagiários
 ```
 
-Não criar itens principais de sidebar para Lotes, Histórico de Laboratório ou Documentos no MVP.
+Não incluir Unidade.
 
----
-
-# 3. Topbar e breadcrumbs
-
-## Topbar
-
-Elementos previstos:
+## Padrão de cadastro
 
 ```text
-título/contexto da página
-identificação do usuário
-perfil/responsabilidade atual
-menu de conta/sessão
+/cadastros/<modulo>
+→ listagem/busca
+├── Novo → formulário → salvar
+├── Editar → salvar mantendo contexto quando possível
+└── inativar/encerrar/excluir conforme regra → confirmação
 ```
 
-Busca global só entra se uma necessidade real aparecer.
-
-Durante o desenvolvimento, o seletor temporário de usuário/perfil deve ser discreto e claramente identificado como recurso de desenvolvimento.
-
-## Breadcrumbs
-
-Exemplos:
-
-```text
-Pedidos > Pedido
-Estoque > Produto / Unidade
-Cadastros > Produtos
-Relatórios > categoria
-```
-
-Dashboard não precisa de breadcrumb.
-
----
-
-# 4. Rotas propostas
-
-## Comum
-
-| Tela | Rota |
-|---|---|
-| Login | `/login` |
-| Dashboard | `/dashboard` |
-| 404 | `/:pathMatch(.*)*` |
-
-## Pedidos
-
-| Tela | Rota |
-|---|---|
-| Novo pedido | `/pedidos/novo` |
-| Meus pedidos | `/meus-pedidos` |
-| Gestão de pedidos | `/pedidos` |
-| Detalhe do pedido | `/pedidos/:id` |
-
-## Estoque
-
-| Tela | Rota |
-|---|---|
-| Estoque central | `/estoque` |
-| Detalhe do estoque | `/estoque/:id` |
-
-Lotes ficam dentro do detalhe do estoque. Se futuramente houver necessidade de deep-link específico, pode-se adotar `/estoque/:estoqueId/lotes/:loteId` sem promovê-lo para a sidebar.
-
-## Operação e consulta
-
-| Tela | Rota |
-|---|---|
-| Movimentações | `/movimentacoes` |
-| Relatórios | `/relatorios` |
-
-Categorias de relatório podem usar query string, por exemplo `/relatorios?tipo=consumo`, evitando criar muitas rotas antes de existir necessidade real.
-
-## Cadastros
+### Produtos — primeiro
 
 ```text
 /cadastros/produtos
-/cadastros/unidades
-/cadastros/laboratorios
-/cadastros/projetos
-/cadastros/usuarios
-/cadastros/estagiarios
+→ listar/buscar
+→ Novo
+→ Editar
+→ fiscalização
 ```
+
+Fiscalização deve fazer parte do cadastro, não de Relatórios:
+
+```text
+Fiscalizado?
+Órgãos fiscalizadores
+Observação
+```
+
+### Estagiários
+
+`Encerrar estágio` deve ser ação própria e claramente separada de exclusão.
 
 ---
 
-# 5. Entrada no sistema
+# 10. Unidade institucional
 
-## Desenvolvimento
-
-```text
-abrir aplicação
-→ sessão temporária centralizada
-→ responsabilidade simulada
-→ dashboard correspondente
-```
-
-## Futuro
+Não existe fluxo de cadastro manual.
 
 ```text
-/login
-→ autenticação
-→ sessão válida
-→ permissões
-→ /dashboard
+API corporativa futura
+→ backend resolve/cria/reutiliza Unidade
+→ associa usuário
+→ frontend consome unidade da sessão
 ```
 
-Planejar desde já:
-
-```text
-sem sessão futura + rota protegida → /login
-autenticado em /login → /dashboard
-rota desconhecida → 404
-```
-
-Isso prepara o router sem fingir segurança antes do backend real de autenticação.
+A interface pode exibir Unidade em filtros, detalhes e relações, mas não oferecer “Nova Unidade”.
 
 ---
 
-# 6. Fluxo do solicitante
+# 11. Fluxo futuro de Resíduos
 
-## Dashboard
+Só iniciar após o backend reconciliar `feat/gestao-residuos` com a `main` e publicar contrato Swagger atualizado.
 
-Deve responder rapidamente:
+## Solicitante
 
-```text
-tenho pedidos pendentes?
-qual foi meu pedido mais recente?
-qual o status dos pedidos recentes?
-como faço um novo pedido?
-```
-
-Ações principais:
+Rota conceitual:
 
 ```text
-Novo pedido
-Ver meus pedidos
-Abrir pedido recente
+/informar-residuo
 ```
 
-## Novo pedido
-
-Fluxo:
+Fluxo esperado:
 
 ```text
-/pedidos/novo
-→ laboratório
-→ projeto opcional
-→ adicionar materiais
-→ informar quantidades
-→ informações adicionais
-→ documento futuro quando suportado
-→ revisão
-→ enviar
-→ confirmação
-→ /pedidos/{uuid}
+laboratório gera resíduo
+→ informar composição
+→ uso/processo
+→ recipiente
+→ quantidade
+→ riscos percebidos
+→ enviar para gestão
 ```
 
-Organização visual sugerida:
+## Gestão
+
+Rota conceitual:
 
 ```text
-1. Contexto
-2. Materiais
-3. Informações adicionais
-4. Revisão
+/residuos
 ```
 
-Não precisa ser um wizard rígido; a Etapa 1.3 definirá a melhor composição visual.
-
-### Erros
+Fluxo esperado:
 
 ```text
-fieldErrors → destacar campos e permanecer no formulário
-regra de negócio → mensagem contextual
-500 → preservar dados preenchidos quando possível + tentar novamente
+receber
+→ fichar/analisar
+→ confirmar riscos
+→ rotular/liberar
+→ armazenar temporariamente
+→ despachar/destinar
 ```
 
-## Meus pedidos
-
-```text
-/meus-pedidos
-→ listar pedidos do usuário atual
-→ abrir pedido
-→ /pedidos/:id
-```
-
-Priorizar status, data, laboratório, projeto e resumo dos materiais.
-
-Não mostrar ações administrativas para o solicitante.
-
-## Detalhe do pedido
-
-Para solicitante:
-
-```text
-status
-itens
-laboratório/projeto
-observações
-documentos futuros
-```
-
-Retorno funcional padrão: **Meus pedidos**.
-
-Não assumir que o solicitante pode cancelar somente porque existe endpoint de cancelamento; isso depende da futura autorização/regra explícita.
+Produto e Resíduo permanecem independentes; composição de resíduo não baixa estoque automaticamente.
 
 ---
 
-# 7. Fluxo de gestão de pedidos
+# 12. Documentos/anexos
 
-## Entrada
-
-```text
-Dashboard
-→ indicador de pendentes
-→ /pedidos?status=PENDENTE
-```
-
-ou
+Permanecem contextuais:
 
 ```text
-Sidebar → Pedidos → /pedidos
-```
+Pedido
+→ documento da solicitação
 
-## Análise
+Produto
+→ ficha técnica
 
-```text
-/pedidos
-→ selecionar pedido
-→ /pedidos/:id
-→ revisar solicitante
-→ laboratório/projeto
-→ materiais e quantidades
-→ tomar decisão
-```
-
-A tela de detalhe é compartilhada, mas a área de ações varia conforme responsabilidade e estado.
-
-## Aprovar
-
-```text
-PENDENTE
-→ Aprovar
-→ revisar/ajustar quantidades aprovadas
-→ confirmar
-→ backend executa FEFO/FIFO
-→ APROVADO
-```
-
-Se houver estoque insuficiente, permanecer na tela e exibir a mensagem real do backend. O frontend não reproduz FEFO/FIFO.
-
-## Rejeitar
-
-```text
-PENDENTE
-→ Rejeitar
-→ motivo/observação
-→ confirmar
-→ REJEITADO
-```
-
-## Entregar
-
-```text
-APROVADO
-→ Registrar entrega
-→ confirmar
-→ ENTREGUE
-```
-
-A tela deve deixar claro que a entrega não representa nova baixa de estoque.
-
-## Cancelar
-
-```text
-status permitido
-→ Cancelar
-→ confirmação forte
-→ observação quando aplicável
-→ CANCELADO
-```
-
-Restauração de lotes permanece responsabilidade do backend.
-
----
-
-# 8. Fluxo de estoque
-
-## Visão geral
-
-```text
-/estoque
-→ filtrar unidade
-→ buscar/identificar produto
-→ visualizar saldo
-→ destacar estoque baixo
-→ abrir detalhe
-→ /estoque/:id
-```
-
-Modos úteis:
-
-```text
-Todos
-Estoque baixo
-Lotes vencidos
-```
-
-Lotes vencidos entram como filtro/aba de Estoque, não como item principal.
-
-## Detalhe
-
-```text
-produto + unidade
-saldo atual + mínimo
-lotes
-movimentações relacionadas
-documentos futuros
-ações operacionais
-```
-
-Ações:
-
-```text
-Registrar entrada
-Descartar vencidos
-Editar configuração quando autorizado
-```
-
-## Entrada de lote
-
-```text
-Detalhe do estoque
-→ Registrar entrada
-→ formulário contextual
-→ quantidade/dados do lote
-→ documento futuro
-→ confirmar
-→ backend registra entrada
-→ atualizar saldo e lotes
-```
-
-Após sucesso, permanecer no detalhe do estoque.
-
-## Descarte
-
-```text
-Detalhe do estoque
-→ identificar vencidos
-→ Descartar
-→ quantidade + justificativa
-→ confirmação
-→ backend registra movimentação
-→ atualizar tela
-```
-
-## Lote
-
-Editar e inativar ficam no contexto da listagem de lotes. Inativação exige confirmação.
-
----
-
-# 9. Movimentações
-
-```text
-/movimentacoes
-→ listar histórico
-→ filtrar por produto/laboratório/usuário/pedido/tipo
-→ consultar rastreabilidade
-```
-
-A tela é focada em consulta/auditoria. Entrada e descarte permanecem no detalhe de Estoque.
-
-Referências úteis podem levar ao contexto relacionado, por exemplo:
-
-```text
-pedido → /pedidos/:id
-```
-
----
-
-# 10. Relatórios
-
-Fluxo padrão:
-
-```text
-/relatorios
-→ escolher categoria
-→ exibir filtros compatíveis
-→ consultar
-→ loading
-→ resultado
-→ exportar/imprimir quando suportado
-```
-
-Categorias iniciais:
-
-```text
-Estoque
-Lotes / validade
-Movimentações
-Pedidos
-Consumo / materiais recebidos
-```
-
-Filtros devem mudar conforme o relatório. Não criar um único formulário com todos os filtros possíveis.
-
-Exemplos:
-
-```text
-Consumo
-→ laboratório
-→ produto
-→ data inicial/final
-```
-
-```text
-Pedidos por projeto
-→ laboratório
-→ projeto
-→ período
-```
-
-Exportação:
-
-```text
-resultado simples já carregado → frontend pode exportar
-relatório grande/oficial/auditável → preferir backend
-```
-
-Não desenhar PDF/XLSX/CSV como funcionalidade pronta antes de fechar a estratégia de cada relatório.
-
----
-
-# 11. Documentos/anexos
-
-Documentos permanecem dentro do recurso relacionado.
-
-## Pedido
-
-```text
-/pedidos/:id
-→ seção Documentos
-```
-
-## Produto
-
-```text
-Cadastros > Produtos
-→ documento geral/ficha técnica
-```
-
-## Lote
-
-```text
-/estoque/:id
-→ lote
+Lote
 → nota fiscal / certificado / laudo / documento de entrada
 ```
 
-Fluxo futuro:
-
-```text
-selecionar arquivo
-→ validação inicial de UX
-→ upload
-→ backend valida/persiste
-→ feedback
-→ atualizar lista
-```
-
-O Figma pode prever esse espaço, mas a implementação definitiva depende dos endpoints de arquivo ainda ausentes.
-
----
-
-# 12. Cadastros
-
-Padrão geral:
-
-```text
-Cadastros
-→ módulo
-→ listagem
-├── Novo → formulário → salvar
-├── Editar → salvar sem perder filtros/contexto
-└── ação relevante → confirmação
-```
-
-Ações que exigem atenção:
-
-```text
-Excluir
-Inativar
-Encerrar estágio
-```
-
-`Encerrar estágio` deve ter linguagem e ação próprias, nunca ser tratado como sinônimo visual de exclusão.
-
-Não criar rota de detalhe para cada cadastro sem necessidade. GET por UUID pode alimentar edição/drawer/modal.
+Não existe ainda fluxo definitivo de upload/download. Não criar persistência fictícia no frontend.
 
 ---
 
 # 13. 404 e recurso não encontrado
 
-## Rota inexistente
+## Rota inexistente ✅
 
 ```text
 /caminho-invalido
-→ página 404 customizada
-→ Voltar ao Dashboard
+→ /:pathMatch(.*)*
+→ NotFoundView
+→ animação folder-not-found.lottie
 ```
 
 ## Recurso inexistente
 
 ```text
-/pedidos/{uuid-inexistente}
-→ API retorna 404
-→ estado contextual "Pedido não encontrado"
-→ voltar para lista adequada
+API retorna 404 para pedido/estoque/etc.
+→ estado contextual “recurso não encontrado”
+→ retorno funcional apropriado
 ```
 
-Nunca transformar automaticamente 404 da API em página 404 de rota.
+Nunca converter automaticamente 404 da API em página 404 de rota.
 
 ---
 
 # 14. Regras de retorno
 
-```text
-Pedido criado → detalhe do novo pedido
-Cadastro criado → listagem atualizada
-Entrada de lote → detalhe do estoque
-Edição → permanecer no contexto
-Exclusão/inativação → listagem + feedback
-```
-
-Botão Voltar:
+Padrões:
 
 ```text
-Pedido do solicitante → Meus pedidos
-Pedido da gestão → Pedidos
-Detalhe de estoque → Estoque
+pedido criado → contexto/lista correspondente
+entrada de lote → detalhe do estoque
+edição → permanecer no contexto
+cadastro criado → listagem atualizada
+inativação/encerramento → listagem + feedback
 ```
 
-Quando a mesma rota puder ser acessada de origens diferentes, usar origem segura no router com fallback funcional conhecido.
+Sempre preferir retorno funcional conhecido a `history.back()` quando a origem puder ser ambígua.
 
 ---
 
@@ -623,159 +481,84 @@ Quando a mesma rota puder ser acessada de origens diferentes, usar origem segura
 Sem confirmação adicional:
 
 ```text
-filtros
-buscas
-navegação
+buscar
+filtrar
+navegar
 abrir detalhe
 ```
 
 Com confirmação:
 
 ```text
-rejeitar pedido
-registrar entrega
-cancelar pedido
-descarte
-inativar usuário/lote
-excluir cadastro
+rejeitar
+entregar
+cancelar
+descartar
+inativar
+excluir quando existir essa regra
 encerrar estágio
 ```
-
-Na aprovação, a própria revisão das quantidades funciona como confirmação operacional.
 
 ---
 
 # 16. Alterações não salvas
 
-Formulários com trabalho relevante devem avisar quando o usuário tentar sair com mudanças não salvas:
+Formulários administrativos e operações com trabalho relevante devem avisar ao sair com alterações não salvas.
 
-```text
-Sair sem salvar
-Permanecer
-```
-
-Não aplicar esse bloqueio a filtros simples.
+Não aplicar essa proteção a filtros simples.
 
 ---
 
-# 17. Responsividade
+# 17. Responsividade e movimento
 
-Desktop:
-
-```text
-sidebar persistente/recolhível
-+ topbar
-```
-
-Telas menores:
+Direção vigente:
 
 ```text
-sidebar em drawer
-+ topbar compacta
+desktop → sidebar/topbar estáveis
+mobile → drawer/overlay
+conteúdo largo → scroll ou apresentação responsiva sem esconder dado crítico
 ```
 
-Tabelas podem usar scroll horizontal ou apresentação resumida, sem esconder informações críticas de operação.
+A transição entre rotas pode usar fade/deslocamento suave, respeitando futuramente `prefers-reduced-motion`.
 
 ---
 
 # 18. Fluxos consolidados
 
-## Solicitante
-
 ```text
-Dashboard
-→ Novo pedido
-→ Contexto
-→ Materiais
-→ Revisão
-→ Enviar
-→ Detalhe
-→ Acompanhar
-```
+SOLICITANTE
+Novo pedido → Meus pedidos → acompanhamento
 
-## Gestão
+GESTÃO
+Pedidos → analisar → aprovar/rejeitar → entregar/cancelar
+Estoque → detalhe → lotes/entrada/descarte
+Movimentações → auditoria
+Relatórios → filtros → prévia → PDF/XLSX
 
-```text
-Fila
-→ Pedido
-→ Analisar
-├── Aprovar → APROVADO
-└── Rejeitar → REJEITADO
+ADMINISTRAÇÃO — PRÓXIMO
+Produtos → Laboratórios → Projetos → Usuários → Estagiários
 
-APROVADO
-├── Entregar → ENTREGUE
-└── Cancelar → CANCELADO
-```
-
-## Estoque
-
-```text
-Estoque
-→ Produto/Unidade
-→ Detalhe
-├── Lotes
-├── Entrada
-├── Descarte
-├── Movimentações
-└── Documentos futuros
-```
-
-## Relatórios
-
-```text
-Relatórios
-→ Categoria
-→ Filtros
-→ Resultado
-→ Exportar/Imprimir quando suportado
-```
-
-## Cadastros
-
-```text
-Cadastros
-→ Módulo
-→ Listagem
-├── Novo
-├── Editar
-└── ação relevante + confirmação
+COMPLEMENTAR
+Resíduos → Documentos/Rotulagem → Dashboard/Robustez → Autenticação
 ```
 
 ---
 
-# 19. Fora do escopo da 1.2
-
-Ainda não são definidos aqui:
+# 19. Próximo fluxo a implementar
 
 ```text
-cores finais
-tipografia final
-medidas finais
-componentes Vuetify exatos
-logo aplicada ao layout
-wireframes finais
+/cadastros/produtos
 ```
 
-Esses itens pertencem à **Etapa 1.3 — Figma e padrões**.
-
----
-
-# 20. Resultado
-
-A Etapa 1.2 fecha:
+Sequência:
 
 ```text
-hierarquia da sidebar ✅
-rotas propostas ✅
-jornada do solicitante ✅
-jornada da gestão ✅
-fluxo de estoque ✅
-fluxo de movimentações ✅
-fluxo de relatórios ✅
-posicionamento dos documentos ✅
-padrão de cadastros ✅
-404 x recurso não encontrado ✅
-retornos e confirmações ✅
+Swagger
+→ listagem
+→ busca
+→ criar/editar
+→ fiscalização
+→ feedback
+→ validação
+→ merge
 ```
-
-Próxima etapa: **1.3 — Figma e padrões**, transformando esses fluxos em wireframes e direção visual antes do bootstrap do Vue.

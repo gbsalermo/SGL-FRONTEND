@@ -1,16 +1,18 @@
 # Etapa 2 — Bootstrap técnico do SGL Frontend
 
+> **Documento histórico.** Esta etapa foi concluída e este arquivo preserva as decisões técnicas do bootstrap. A seção “próximo passo” registrada na época **não representa o estado atual do projeto**. Para retomar o desenvolvimento em 31/08/2026, usar `../CONTINUIDADE.md` e `DOSSIE_PROJETO_SGL.md`.
+
 ## Status
 
 **CONCLUÍDA E VALIDADA LOCALMENTE em 25/08/2026.**
 
 A subetapa 1.3 não foi concluída no formato originalmente previsto de prototipar todas as telas e todos os componentes antes da implementação.
 
-O projeto já possui identidade visual, paleta, tipografia, shell, sidebar, topbar, motion, iconografia, padrões de página, busca/filtros e protótipos de referência suficientes para orientar o desenvolvimento.
+O projeto já possuía identidade visual, paleta, tipografia, shell, sidebar, topbar, motion, iconografia, padrões de página, busca/filtros e protótipos de referência suficientes para orientar o desenvolvimento.
 
-A partir daqui, componentes reutilizáveis e refinamentos visuais serão consolidados durante a implementação real dos módulos.
+A partir desse ponto, componentes reutilizáveis e refinamentos visuais passaram a ser consolidados durante a implementação real dos módulos.
 
-Fluxo prioritário de implementação:
+Fluxo prioritário registrado naquele momento:
 
 ```text
 LOGIN
@@ -21,9 +23,11 @@ LOGIN
 → RELATÓRIOS / DOCUMENTOS
 ```
 
+Esse fluxo é histórico. O roadmap atual já concluiu Login, Pedidos, Estoque/Lotes, Movimentações, Relatórios/Fiscalização, PDF/XLSX e 404; Administração/Cadastros é a próxima etapa vigente.
+
 ---
 
-## Stack oficial
+## Stack oficial definida no bootstrap
 
 ```text
 Vue 3
@@ -35,7 +39,7 @@ Axios
 Vuetify 3
 ```
 
-Versões base atuais:
+Versões da linha adotada:
 
 ```text
 Vue                 3.5.x
@@ -58,11 +62,11 @@ A correção adotada foi manter TypeScript na linha `~5.9.3`.
 
 Também foi necessário incluir `@types/node` e o tipo `node` no `tsconfig.json`, pois `vite.config.ts` utiliza `node:url`.
 
-Essas decisões passam a fazer parte da base oficial do frontend.
+Essas decisões fazem parte da origem da base atual.
 
 ---
 
-## Base técnica criada
+## Base técnica criada na etapa
 
 ```text
 package.json
@@ -79,50 +83,31 @@ src/modules/auth/views/LoginView.vue
 src/styles/tokens.css
 ```
 
-## Regras do bootstrap
+A árvore evoluiu significativamente depois disso; usar o repositório atual para inventário real de arquivos.
+
+---
+
+## Regras do bootstrap que continuam válidas
 
 ### API
-
-A URL do backend vem de:
 
 ```text
 VITE_API_BASE_URL
 ```
 
-O cliente Axios é centralizado em `src/services/http.ts`.
+Axios centralizado em `src/services/http.ts`.
 
-Não espalhar chamadas Axios diretamente por Views e Components.
+Não espalhar chamadas HTTP diretamente em Views e Components.
 
 ### Estado global
 
-Pinia será usado somente quando o estado for realmente compartilhado.
-
-Exemplos futuros:
-
-```text
-sessão/autenticação
-usuário atual
-responsabilidade/permissões
-preferência de aparência
-```
+Pinia somente para estado realmente compartilhado.
 
 Não criar Store para toda listagem ou formulário.
 
-### Router
-
-A primeira rota real do sistema é:
-
-```text
-/login
-```
-
-Durante o bootstrap, `/` redireciona para `/login`.
-
-As demais rotas serão adicionadas conforme cada fluxo for implementado e validado.
-
 ### Tema
 
-A base do Vuetify já recebe a identidade aprovada do SGL:
+Paleta base definida:
 
 ```text
 #1A4DA1 azul principal
@@ -136,13 +121,11 @@ A base do Vuetify já recebe a identidade aprovada do SGL:
 #E2E8F0 borda
 ```
 
-Os tokens permanecem em `src/styles/tokens.css`.
+Tokens em `src/styles/tokens.css`.
 
 ---
 
-## Validação executada
-
-Comandos utilizados:
+## Validação histórica executada
 
 ```bash
 npm install
@@ -150,7 +133,7 @@ npm run type-check
 npm run dev
 ```
 
-Resultado confirmado:
+Resultado no fechamento da etapa:
 
 ```text
 instalação concluída                         ✅
@@ -158,38 +141,23 @@ TypeScript / vue-tsc sem erros               ✅
 Vite iniciou normalmente                    ✅
 aplicação abriu no navegador                ✅
 / redirecionou para /login                  ✅
-/login renderizou o placeholder técnico     ✅
 Vuetify carregado                           ✅
 Pinia registrado                            ✅
 Router funcionando                          ✅
 ```
 
-O bootstrap está oficialmente validado.
-
 ---
 
-## Próximo passo
+## Próximo passo registrado em 25/08/2026 — HISTÓRICO
 
-A próxima sessão deve começar diretamente pela **interface real de Login do SGL**.
+Naquele momento, a próxima tarefa era a interface real de Login e depois Pedidos do Solicitante/Gestão.
 
-Direção aprovada:
+Essas etapas já foram concluídas.
 
-```text
-padrão visual inspirado no Publica / Embrapa
-layout dividido aproximadamente 50/50
-lado esquerdo com imagem de laboratório + overlay azul
-marca oficial do SGL em destaque
-símbolos institucionais abaixo
-lado direito branco e limpo
-formulário simples de acesso
-sem card excessivo
-sem repetição da marca SGL no lado direito
-```
-
-Ordem após concluir e validar o Login:
+**Próximo passo vigente em 31/08/2026:**
 
 ```text
-Login
-→ Pedidos do Solicitante
-→ Gestão
+Administração → Cadastros → Produtos
 ```
+
+Depois: Laboratórios → Projetos → Usuários → Estagiários.

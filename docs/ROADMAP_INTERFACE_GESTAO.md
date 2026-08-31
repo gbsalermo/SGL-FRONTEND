@@ -1,357 +1,381 @@
 # Roadmap da Interface de Gestão — SGL
 
-**Atualização:** 27/08/2026  
-**Fonte principal de retomada:** `CONTINUIDADE.md`
+**Atualização:** 31/08/2026  
+**Fonte principal de retomada:** `../CONTINUIDADE.md`  
+**Handoff completo:** `DOSSIE_PROJETO_SGL.md`
 
-Este documento registra a sequência operacional aprovada para a interface de Gestão/Admin. Em caso de conflito, a decisão mais recente registrada na continuidade prevalece.
+Este documento registra a sequência funcional aprovada para Gestão/Administração. Ele substitui o status antigo de 27/08 que ainda colocava Estoque, Movimentações e Relatórios como etapas futuras.
 
-## Sequência atual
+---
+
+# 1. Estado consolidado
 
 ```text
-Pedidos da Gestão                         ✅ concluído
-↓
-Estoque / Lotes                           🟡 atual
-  ├── visão geral                         ✅
-  ├── detalhe/lotes                       🟡
-  ├── entrada com apresentação            🟡 validar
-  └── descarte por vencimento             ⏳ próximo
-↓
-Produtos + Rotulagem                      ⏳
-↓
-Movimentações                             ⏳
-↓
-Relatórios / Documentos / Fiscalização    ⏳
-↓
-Demais Cadastros / Administração          ⏳
-  └── Interface de Estagiários            ⏳ obrigatória
-↓
-Dashboards finais / robustez / 404        ⏳
-↓
-Autenticação / autorização / auditoria    ⏳
+Pedidos da Gestão                              ✅
+Estoque / Lotes                                ✅
+Movimentações                                  ✅
+Relatórios / Fiscalização                      ✅
+Exportação PDF/XLSX                            ✅
+Página 404                                     ✅
+Administração / Cadastros                      🟡 PRÓXIMA
+Resíduos                                       ⏳ complementar após reconciliação backend
+Documentos / Rotulagem                         ⏳
+Dashboard / Alertas / Robustez                 ⏳
+Autenticação / Autorização / Auditoria         ⏳
 ```
 
-## 1. Estoque / Lotes — etapa atual
+---
 
-Objetivo: representar a situação física dos materiais da unidade sem misturar apresentações incompatíveis.
+# 2. Decisões que não devem ser reabertas sem necessidade
 
-### Regra estrutural obrigatória
+## Lotes
 
-O sistema separa:
+Lote continua contextual a Estoque; não precisa ser item principal isolado na sidebar.
+
+## Produto
+
+A proposta antiga de uma área operacional `/produtos` foi substituída.
+
+Decisão atual:
 
 ```text
-PRODUTO
-→ unidade-base de controle estável
+Gestão operacional
+├── Estoque
+├── Lotes no detalhe de Estoque
+├── Movimentações
+└── Relatórios
 
-LOTE
-→ apresentação física variável
-→ quantidade de apresentações
-→ conteúdo por apresentação
-→ fracionável ou não
-
-ESTOQUE CENTRAL
-→ saldo consolidado na unidade-base
+Administração
+└── Cadastros
+    └── Produtos
 ```
 
-Não criar uma rede global de conversões entre `kit`, `frasco`, `caixa`, `bombona`, `unidade` etc. Cada lote informa apenas quanto sua apresentação representa na unidade-base do produto.
+Consulta de saldo/lote fica em Estoque. Visão analítica fica em Relatórios. CRUD real fica em Cadastros.
 
-Exemplos:
+## Unidade
+
+Não possui CRUD manual no frontend.
 
 ```text
-2 kits × 50 reações = 100 reações
-10 avulsas × 1 reação = 10 reações
-4 frascos × 500 mL = 2000 mL
-1 bombona × 5000 mL = 5000 mL
+NÃO criar /cadastros/unidades
 ```
 
-Apresentações diferentes podem coexistir no mesmo produto porque o saldo final usa a mesma unidade-base.
+A origem futura será a integração corporativa. Ver `DECISAO_UNIDADES_CORPORATIVAS.md`.
 
-### Fracionamento
+## Pedidos entregues
+
+Não possuem relatório dedicado.
 
 ```text
-fracionável
-→ permite retirada parcial da apresentação
-→ ex.: retirar 100 mL de um frasco de 500 mL
-
-não fracionável
-→ saída somente em apresentação completa
-→ ex.: kit fechado de 50 não pode baixar apenas 10
+Relatório de Movimentações
+→ origem PEDIDO
+→ tipo SAIDA quando aplicável
 ```
 
-O backend deve impedir que um lote não fracionável termine com saldo que não seja múltiplo de seu conteúdo por apresentação.
+---
 
-A futura saída deve permitir trabalhar em unidade-base ou em apresentação completa, mas nunca confundir `10 unidades-base` com `10 kits`.
+# 3. Etapa 8 — Administração / Cadastros — PRÓXIMA
 
-### Visão geral `/estoque`
+Objetivo: fornecer manutenção administrativa dos dados que sustentam os fluxos operacionais já concluídos.
 
-Deve mostrar:
+Ordem aprovada:
 
 ```text
-Produtos em estoque
-Estoque baixo
-Zerados
-Produtos com lote vencido
+8.1 Produtos
+8.2 Laboratórios
+8.3 Projetos
+8.4 Usuários
+8.5 Estagiários
 ```
 
-Tabela principal:
+Cada subbloco deve seguir:
 
 ```text
-Produto
-Código do produto
-Unidade
-Localização física
-Quantidade atual
-Mínimo
-Situação
-Detalhes
+contrato Swagger
+→ types
+→ service
+→ listagem/busca
+→ novo/editar
+→ estados de feedback
+→ validação visual
+→ validação de integração
+→ merge
 ```
 
-A quantidade de cada produto é interpretada em sua unidade-base.
+Não avançar automaticamente para o próximo cadastro antes de validar o anterior.
 
-### Detalhe `/estoque/:id`
+---
 
-Deve reunir:
+# 4. Etapa 8.1 — Produtos
+
+Rota prevista:
 
 ```text
-produto
-código de referência
-unidade-base
-apresentação padrão
-localização
-saldo atual
-mínimo
-lotes
-apresentação real de cada lote
-validade
-quantidade inicial/disponível na unidade-base
-entrada de lote
-descarte por vencimento
+/cadastros/produtos
 ```
 
-### Entrada de lote
-
-Implementada com:
+Responsabilidades:
 
 ```text
-código do lote
-apresentação recebida
-quantidade de apresentações
-conteúdo por apresentação
-fracionável
-validade
-origem
-observação
-```
-
-A tela deve mostrar antes da confirmação:
-
-```text
-quantidade × conteúdo por apresentação = total incorporado ao estoque
-```
-
-O backend persiste a apresentação do lote e consolida `quantidadeInicial` e `quantidadeDisponivel` na unidade-base.
-
-### Próximo subbloco
-
-```text
-1. validar o novo modelo de entrada
-2. implementar descarte por vencimento
-3. validar saldo/lotes
-4. encerrar Estoque
-```
-
-## 2. Produtos + Rotulagem — próxima etapa
-
-Produto terá duas portas de entrada, mas uma única entidade/fonte de dados.
-
-### Operação → Produtos
-
-Rotas:
-
-```text
-/produtos
-/produtos/:id
-```
-
-Função:
-
-```text
-buscar produto
-consultar código
-consultar unidade-base
-consultar apresentação padrão
-consultar risco/perecibilidade
-consultar localização
-consultar quantidade atual
-consultar estoque mínimo
-consultar lotes e apresentações
-consultar última entrada
-editar informações permitidas
-imprimir identificação/rótulo
-```
-
-### Administração → Cadastros → Produtos
-
-```text
+listar/buscar catálogo
 criar produto
-inativar/excluir conforme regra
-alterar informações estruturais
-manter catálogo
+editar produto
+ativar/inativar conforme contrato
+manter dados estruturais
+manter classificação de fiscalização
 ```
 
-Não duplicar entidade nem regras entre a tela operacional e Cadastros.
-
-### Fluxo oficial produto → lote → rótulo
+O formulário deve ser construído a partir do contrato real do backend/Swagger. Entre os dados já decididos estão:
 
 ```text
-1. Produto existe no catálogo
-        ↓
-2. Estoque → Nova entrada de lote
-        ↓
-3. Informa apresentação física + quantidade + conteúdo + fracionamento
-        ↓
-4. Backend converte para unidade-base e atualiza saldo
-        ↓
-5. Usuário acessa Operação → Produtos
-        ↓
-6. Abre o produto
-        ↓
-7. Confere produto + estoque + última entrada + apresentação/lote
-        ↓
-8. Edita somente campos permitidos
-        ↓
-9. Imprime rótulo usando lote de referência
-```
-
-A última entrada deve ser pré-selecionada para impressão, com possibilidade de escolher outro lote ativo.
-
-### Tipos de impressão
-
-```text
-Identificação do produto
-→ etiqueta genérica de prateleira/localização
-
-Rótulo de lote
-→ produto + lote de referência
-→ inclui apresentação física real
-→ rastreável
-```
-
-O rótulo poderá incluir:
-
-```text
-nome/código do produto
-unidade-base
-apresentação
-conteúdo por apresentação
-código interno SGL do lote
-código do lote informado externamente
-validade
+nome
+código de referência
+descrição
+unidade de medida/base
 localização
 risco
 perecibilidade
-condições de armazenamento
+armazenamento
+ativo
+fiscalizado
+órgãos fiscalizadores
+observação de fiscalização
 ```
 
-## 3. Código interno do lote
-
-Será criado futuramente um identificador interno gerado pelo SGL, separado de `numeroLote`.
-
-Formato-base:
+### Fiscalização
 
 ```text
-L<sequência>-<abreviação do produto>-<ano>
-L01-EXTDNA-26
-L02-EXTDNA-26
-L01-FORM37-26
+Fiscalizado?              toggle
+Órgãos fiscalizadores     seleção múltipla
+Observação fiscalização   opcional
 ```
 
-Regras:
+Se `Fiscalizado = Sim`, ao menos um órgão deve ser informado.
+
+Órgãos iniciais:
 
 ```text
-gerado pelo backend
-imutável
-único no escopo definido
-protegido contra concorrência
-usado em rastreabilidade/rótulos
+Polícia Federal
+Vigilância Sanitária
+ANVISA
+Exército
+Outro
 ```
 
-## 4. Movimentações
+Não inferir fiscalização por risco ou perecibilidade.
 
-Depois de Produtos/Rotulagem:
+---
+
+# 5. Etapa 8.2 — Laboratórios
+
+Rota prevista:
 
 ```text
-/movimentacoes
+/cadastros/laboratorios
 ```
 
-Foco:
+Deve respeitar o vínculo com Unidade e responsável conforme contrato backend.
+
+Como Unidade não é cadastro manual, seletores/contextos devem usar unidades já existentes/sincronizadas no sistema; não adicionar botão “Nova Unidade”.
+
+---
+
+# 6. Etapa 8.3 — Projetos
+
+Rota prevista:
 
 ```text
-histórico
-rastreabilidade
-produto
+/cadastros/projetos
+```
+
+Priorizar:
+
+```text
 laboratório
-usuário
-pedido
-tipo
+nome/descrição
+responsável
 período
-quantidade em unidade-base
-contexto de lote/apresentação
+ativo
 ```
 
-## 5. Relatórios
+Usar o contrato real da API como autoridade.
 
-Depois de Movimentações:
+---
+
+# 7. Etapa 8.4 — Usuários
+
+Rota prevista:
 
 ```text
-/relatorios
+/cadastros/usuarios
 ```
 
-Categorias:
+O fluxo administrativo deve permitir manutenção/inativação prevista no backend, sem confundir isso com a futura autenticação corporativa.
 
-```text
-Estoque
-Lotes / validade
-Movimentações
-Pedidos
-Consumo
-Fiscalização / auditoria
-```
+A etapa de autenticação definitiva continuará separada.
 
-## 6. Cadastros e Administração
+---
 
-Cadastros:
+# 8. Etapa 8.5 — Estagiários
 
-```text
-Produtos
-Laboratórios
-Projetos
-Usuários
-Estagiários
-```
-
-**Unidade não possui cadastro manual.**
-
-### Interface de Estagiários — obrigatória
-
-Rotas:
+Rota prevista:
 
 ```text
 /cadastros/estagiarios
-/cadastros/estagiarios/:id
 ```
 
-Fluxo:
+Cadastro obrigatório.
+
+Mostrar/manter conforme contrato:
 
 ```text
-Administração
-→ Cadastros
-→ Estagiários
-→ buscar/listar
-→ selecionar
-→ ficha individual
-→ consultar dados institucionais e do estágio
-→ editar campos permitidos
-→ encerrar/inativar conforme regra do backend
+nome / identidade de usuário
+unidade read-only/contextual
+laboratório
+situação do vínculo
+início/fim
+bolsa
+observações
 ```
 
-A ficha individual deve centralizar nome, email, situação, unidade, laboratório, datas do estágio, tipo de bolsa e observação, conforme os contratos reais da API.
+`Encerrar estágio` deve ser ação de domínio própria, distinta de exclusão genérica.
+
+---
+
+# 9. Etapa complementar — Resíduos
+
+Não iniciar assumindo que a branch backend antiga está pronta.
+
+Estado em 31/08/2026:
+
+```text
+backend feat/gestao-residuos
+→ 2 commits próprios
+→ 91 commits atrás da main
+→ migration antiga incompatível com numeração atual
+```
+
+Fluxo correto:
+
+```text
+reconciliar/portar backend sobre main atual
+→ validar Swagger
+→ implementar fluxo Solicitante: Informar resíduo
+→ implementar fluxo Gestão: Resíduos
+→ ativar relatório Resíduos
+→ ativar PDF/XLSX Resíduos
+```
+
+Decisão de domínio:
+
+```text
+Produto ≠ Resíduo
+```
+
+Composição de resíduo não altera automaticamente o estoque dos produtos citados.
+
+---
+
+# 10. Documentos e Rotulagem
+
+Continuam como bloco complementar após os cadastros/resíduos conforme dependências.
+
+## Documentos
+
+Contextos previstos:
+
+```text
+Pedido
+Produto
+Lote
+```
+
+Não implementar persistência local/fictícia; aguardar/definir contrato backend real de upload/download.
+
+## Rotulagem
+
+Pode usar dados de Produto + Lote, inclusive Código SGL e apresentação física.
+
+Código vigente de lote:
+
+```text
+LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
+```
+
+Formatos experimentais registrados em documentos antigos não são o padrão atual.
+
+---
+
+# 11. Dashboard / Alertas / Robustez
+
+Depois dos blocos funcionais principais:
+
+```text
+Dashboard final
+alertas de estoque baixo
+alertas de vencimento
+pedidos pendentes/urgentes
+estados loading/empty/error/retry
+responsividade final
+acessibilidade
+prefers-reduced-motion
+```
+
+Página 404 já está concluída e não deve voltar para a lista de pendências.
+
+---
+
+# 12. Autenticação / Autorização / Auditoria
+
+Etapa final funcional prevista:
+
+```text
+frontend funcional fechado
+→ autenticação local definitiva
+→ autorização por perfil
+→ auditoria derivada da sessão segura
+→ integração corporativa
+```
+
+A sessão atual é DEV e não valida senha no backend.
+
+Unidade será sincronizada pela integração corporativa; não criar CRUD manual como preparação para essa etapa.
+
+---
+
+# 13. Pós-protótipo
+
+Refactor técnico para inglês:
+
+```text
+classes/métodos backend
+DTOs/services/repositories/controllers
+nomenclatura técnica frontend
+```
+
+Interface permanece em português.
+
+Não misturar o refactor com novas funcionalidades. Ver `Sistema-SGL/docs/PENDENCIAS_POS_PROTOTIPO.md`.
+
+---
+
+# 14. Sequência oficial resumida
+
+```text
+AGORA
+Administração / Cadastros
+  Produtos
+  → Laboratórios
+  → Projetos
+  → Usuários
+  → Estagiários
+
+DEPOIS
+Resíduos reconciliado
+→ Relatório/exportação Resíduos
+→ Documentos/Rotulagem
+→ Dashboard/Alertas/Robustez
+→ Autenticação/Autorização/Auditoria
+→ Integração corporativa
+→ Refactor inglês pós-protótipo
+```

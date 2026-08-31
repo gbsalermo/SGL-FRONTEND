@@ -1,102 +1,366 @@
 <a id="readme-top"></a>
 
 <div align="center">
-  <a href="https://github.com/gbsalermo/SGL-FRONTEND">
-    <img src="https://raw.githubusercontent.com/gbsalermo/Sistema-SGL/main/docs/LOGO.png" alt="SGL Logo" width="340" height="auto">
-  </a>
+  <img src="https://raw.githubusercontent.com/gbsalermo/Sistema-SGL/main/docs/LOGO.png" alt="SGL Logo" width="340" height="auto">
 
 # SGL — Sistema de Gestão de Laboratórios
 
-**Frontend corporativo para pedidos, estoque, lotes, movimentações, relatórios e administração laboratorial.**
+**Frontend corporativo para pedidos, estoque, lotes, movimentações, relatórios, fiscalização e administração laboratorial.**
 
-[Backend](https://github.com/gbsalermo/Sistema-SGL) · [Continuidade](CONTINUIDADE.md) · [Inventário de telas](docs/INVENTARIO_TELAS.md) · [Arquitetura](docs/ESTRUTURA_FRONTEND.md)
+`Vue 3` · `TypeScript` · `Vite` · `Pinia` · `Axios` · `Vuetify`
 
 </div>
 
 ---
 
-## 📍 Estado atual
+## 📍 Estado atual — 31/08/2026
 
-O backend estrutural do SGL está concluído e o frontend está na **Etapa 3 — Interfaces reais**.
+O frontend já passou da fase inicial de interfaces. Os fluxos operacionais principais estão implementados e a próxima grande etapa é **Administração/Cadastros**.
 
 ```text
-Etapa 0 — Handoff backend → frontend                    ✅
-Etapa 1 — Fundação visual/técnica essencial             ✅
-Etapa 2 — Bootstrap técnico                             ✅
-Etapa 3.1 — Login                                       ✅
-Etapa 3.2 — Pedidos do Solicitante                      ⏳ PRÓXIMO
+Login visual / sessão DEV              ✅
+Pedidos do solicitante                 ✅
+Pedidos da gestão                      ✅
+Estoque / lotes                        ✅
+Movimentações                          ✅
+Relatórios / fiscalização              ✅
+Exportação PDF/XLSX                    ✅
+Página 404 animada                     ✅
+Administração / Cadastros              ⏳ PRÓXIMA
+Resíduos                               ⏳ após reconciliação do backend
+Documentos / rotulagem                 ⏳
+Dashboard final / robustez             ⏳
+Autenticação definitiva                ⏳
 ```
 
-A estratégia atual abandonou a ideia de concluir todo o Figma antes do código.
+> Para retomar o projeto por outra IA ou pessoa, começar por [`CONTINUIDADE.md`](CONTINUIDADE.md) e [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md).
 
-Fluxo oficial:
+---
+
+## ▶️ Próximo passo
 
 ```text
-protótipo aprovado
-→ implementação real
-→ extração de componentes quando houver responsabilidade/repetição real
-→ validação
-→ próxima tela
+Administração
+→ Cadastros
+→ Produtos
+```
+
+O primeiro cadastro deve incluir desde o início:
+
+```text
+Fiscalizado?
+Órgãos fiscalizadores
+Observação de fiscalização
+```
+
+Depois seguir:
+
+```text
+Laboratórios → Projetos → Usuários → Estagiários
+```
+
+**Unidade não terá CRUD manual no frontend.** Sua origem futura será a integração corporativa.
+
+---
+
+## 🛠️ Stack
+
+```text
+Vue 3.5
+Vite 8
+TypeScript 5.9
+Vue Router 5
+Pinia 4
+Axios 1.19
+Vuetify 3.13
+Node >= 20.19
+```
+
+Comandos:
+
+```bash
+npm install
+npm run type-check
+npm run build
+npm run dev
+```
+
+API:
+
+```text
+VITE_API_BASE_URL
+```
+
+O Swagger/OpenAPI do backend é a fonte de verdade dos contratos HTTP.
+
+---
+
+## 🏛️ Arquitetura
+
+Direção:
+
+```text
+SPA
++ Feature-based Architecture
++ Component-based UI
+```
+
+Fluxo preferencial:
+
+```text
+View
+→ Component
+→ Service / Store quando necessário
+→ Axios
+→ Backend REST
+```
+
+Regras:
+
+- não espalhar Axios diretamente em Views/Components;
+- não criar Store para todo dado remoto;
+- não duplicar módulo por perfil quando o domínio é compartilhado;
+- não recriar FIFO/FEFO no frontend;
+- usar UUID público nas fronteiras;
+- extrair componente compartilhado por responsabilidade/reuso real;
+- manter a linguagem exibida ao usuário em português.
+
+---
+
+## 🔐 Login e sessão atual
+
+A interface de login está concluída, mas a autenticação definitiva ainda não existe.
+
+Hoje o frontend usa um modo de desenvolvimento:
+
+```text
+usuário + senha preenchidos
+→ GET /v1/usuarios
+→ procura usuário ativo
+→ senha NÃO é validada no backend
+→ sessão DEV no localStorage
+```
+
+O código explicita isso por meio de `entrarDesenvolvimento(...)` e da chave `sgl.dev-session`.
+
+Portanto:
+
+```text
+login visual / navegação DEV          ✅
+autenticação segura                   ⏳
+autorização definitiva                ⏳
+auditoria por sessão autenticada      ⏳
+SSO/API corporativa                   ⏳
 ```
 
 ---
 
-## 🔐 Login final
+## 🧭 Rotas existentes
 
-A primeira interface real do frontend foi concluída na branch:
-
-```text
-feat/login-interface
-```
-
-### Apresentação
-
-### Interface Login
-<p align="center">
-  <img src="docs/screenshots/login-final.png" alt="Tela final de Login do SGL" width="100%">
-</p>
-
-### Direção visual aprovada
+Em `src/router/index.ts`:
 
 ```text
-layout aproximadamente 50/50
+/login
 
-ESQUERDA
-→ fotografia de laboratório com tablet como contexto
-→ overlay azul institucional forte
-→ Embrapa
-→ marca oficial SGL
-→ frase institucional
-→ quatro ícones auxiliares
+/meus-pedidos
+/pedidos/novo
 
-DIREITA
-→ fundo branco
-→ Bem-vindo
-→ Acesse o sistema para continuar
-→ usuário de colaborador
-→ senha
-→ Entrar
+/pedidos
+/estoque
+/estoque/:id
+/movimentacoes
+/relatorios
+/solicitacoes/novo
+/solicitacoes/meus-pedidos
+
+/:pathMatch(.*)*
 ```
 
-O resultado segue a linguagem institucional do Publica/Embrapa, evitando card grande, excesso de decoração ou repetição da marca SGL no lado do formulário.
+As rotas de Cadastros ainda serão adicionadas na Etapa 8. `/dashboard` também não deve ser tratado como rota pronta apenas porque aparece em documentos históricos de concepção.
 
-### Estrutura do módulo de autenticação
+---
+
+## 👥 Experiência por responsabilidade
+
+### Solicitante
 
 ```text
-src/modules/auth/
-├── components/
-│   ├── LoginBrandPanel.vue
-│   └── LoginAccessForm.vue
-└── views/
-    └── LoginView.vue
-
-src/assets/images/auth/
-├── embrapa-white.png
-├── login-laboratorio.jpg
-└── sgl-logo.png
+Novo pedido
+Meus pedidos
+Acompanhamento de solicitações
 ```
 
-A View fica responsável pela composição da tela, enquanto os dois lados do Login possuem responsabilidades próprias.
+### Gestão
+
+```text
+Pedidos
+Estoque
+Lotes no contexto do estoque
+Movimentações
+Relatórios
+Solicitações próprias quando necessário
+```
+
+### Administração — próxima expansão
+
+Administração reutiliza Gestão e acrescentará:
+
+```text
+Cadastros
+├── Produtos
+├── Laboratórios
+├── Projetos
+├── Usuários
+└── Estagiários
+```
+
+Não criar `Cadastros → Unidades`.
+
+---
+
+## 📦 Estoque e lotes
+
+Já implementado:
+
+- visão geral e detalhe de estoque;
+- entrada de lote;
+- apresentação/embalagem e multiplicador;
+- fracionamento;
+- Código SGL;
+- edição segura;
+- descarte por vencimento;
+- FIFO/FEFO integrado ao backend;
+- busca/filtros/status;
+- histórico/rastreabilidade de saídas.
+
+Código SGL atual:
+
+```text
+LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
+```
+
+Saldo é mostrado na unidade-base; o lote preserva sua apresentação física.
+
+---
+
+## 🔄 Movimentações
+
+Rota:
+
+```text
+/movimentacoes
+```
+
+A interface funciona como trilha operacional/auditoria.
+
+Cores semânticas aprovadas:
+
+```text
+ENTRADA   → azul
+SAÍDA     → vermelho
+DESCARTE  → amarelo
+```
+
+Pedidos entregues são representados como recorte de Movimentações, não como relatório separado.
+
+---
+
+## 📊 Relatórios
+
+Rota:
+
+```text
+/relatorios
+```
+
+Fluxo:
+
+```text
+selecionar relatório
+→ aplicar filtros
+→ gerar prévia
+→ exportar PDF ou XLSX
+```
+
+Relatórios ativos:
+
+```text
+Estagiários
+Produtos
+Movimentações
+Resumo operacional
+Estoque e lotes
+Fiscalização
+```
+
+Resíduos está reservado para depois da integração do módulo.
+
+A geração oficial de PDF/XLSX acontece no backend e usa os mesmos filtros da prévia.
+
+---
+
+## ♻️ Resíduos
+
+Decisão:
+
+```text
+Produto ≠ Resíduo
+```
+
+Há dois fluxos planejados:
+
+```text
+Solicitante → Informar resíduo
+Gestão → receber/analisar/rotular/armazenar/despachar
+```
+
+O backend possui uma implementação antiga em `feat/gestao-residuos`, porém a branch está divergente da `main` e precisa ser reconciliada antes de o frontend assumir seu contrato.
+
+Sequência correta:
+
+```text
+backend reconciliado + Swagger
+→ frontend operacional
+→ relatório de Resíduos
+→ PDF/XLSX de Resíduos
+```
+
+---
+
+## 🚫 Unidade não é cadastro manual
+
+Decisão vigente em [`docs/DECISAO_UNIDADES_CORPORATIVAS.md`](docs/DECISAO_UNIDADES_CORPORATIVAS.md):
+
+```text
+Unidade vem futuramente da API corporativa
+→ backend resolve/cria de forma idempotente
+→ sessão chega ao frontend já vinculada
+```
+
+Não implementar:
+
+```text
+/cadastros/unidades
+```
+
+---
+
+## 🖼️ 404
+
+A página 404 customizada/animada já está implementada.
+
+```text
+/:pathMatch(.*)*
+→ NotFoundView.vue
+```
+
+Asset:
+
+```text
+public/animations/folder-not-found.lottie
+```
+
+Um HTTP 404 retornado pela API deve ser tratado como estado contextual da tela, não automaticamente como rota inexistente.
 
 ---
 
@@ -108,7 +372,7 @@ Referência institucional principal:
 Publica / Embrapa
 ```
 
-### Paleta base
+Paleta base:
 
 | Papel | Cor |
 |---|---|
@@ -124,9 +388,9 @@ Publica / Embrapa
 | Texto secundário | `#64748B` |
 | Bordas | `#E2E8F0` |
 
-**Tipografia principal:** Inter.
+Tipografia principal: **Inter**.
 
-A aplicação deve transmitir:
+Direção:
 
 ```text
 clean
@@ -139,192 +403,22 @@ clean
 
 ---
 
-## 🛠️ Stack oficial
-
-```text
-Vue 3
-Vite
-TypeScript 5.9
-Vue Router
-Pinia
-Axios
-Vuetify 3
-```
-
-Base validada localmente:
-
-```bash
-npm install
-npm run type-check
-npm run dev
-```
-
-Configuração da API:
-
-```text
-VITE_API_BASE_URL
-```
-
-O Swagger/OpenAPI do backend é a fonte de verdade para os contratos.
-
----
-
-## 🏛️ Arquitetura do frontend
-
-```text
-SPA
-+ Feature-based Architecture
-+ Component-based UI
-+ camadas com responsabilidades claras
-```
-
-Fluxo preferencial:
-
-```text
-View
-→ Components
-→ Service / Store quando necessário
-→ Axios
-→ Backend REST
-```
-
-Estrutura base:
-
-```text
-src/
-├── app/
-├── assets/
-├── components/
-├── layouts/
-├── modules/
-├── router/
-├── services/
-├── stores/
-├── types/
-├── composables/
-├── utils/
-└── styles/
-```
-
-Regras principais:
-
-- não espalhar Axios diretamente em Views/Components;
-- não criar Store para todo dado;
-- não duplicar módulos por perfil;
-- não recriar regra de negócio do backend no frontend;
-- não criar componentes compartilhados sem reutilização/responsabilidade real.
-
----
-
-## 👥 Experiência por responsabilidade
-
-### Solicitante
-
-```text
-Dashboard
-└── Pedidos
-    ├── Novo pedido
-    └── Meus pedidos
-        └── Detalhe
-```
-
-### Gestão
-
-```text
-Dashboard
-├── Pedidos
-├── Estoque
-│   └── Detalhe
-│       ├── Lotes
-│       ├── Entrada
-│       ├── Descarte
-│       └── Documentos
-├── Movimentações
-└── Relatórios
-```
-
-### Administração
-
-Reutiliza a experiência da Gestão e acrescenta:
-
-```text
-Cadastros
-├── Produtos
-├── Unidades
-├── Laboratórios
-├── Projetos
-├── Usuários
-└── Estagiários
-```
-
----
-
-## ✨ Motion e shell
-
-O SGL deve transmitir sensação de aplicação contínua.
-
-```text
-rota atual
-→ fade + pequeno deslocamento horizontal
-
-nova rota
-→ entra suavemente na mesma área
-
-sidebar/topbar
-→ permanecem estáveis
-```
-
-Referência inicial:
-
-- deslocamento de aproximadamente 20–30 px;
-- duração de aproximadamente 250–350 ms;
-- suporte futuro a `prefers-reduced-motion`.
-
-Sidebar planejada:
-
-```text
-aberta      ~240–248 px
-recolhida   ~64–72 px
-mobile      drawer/overlay
-```
-
----
-
-## 🔌 Integração com o backend
-
-Regras importantes:
-
-- `Long` permanece interno ao backend;
-- UUID público atravessa a fronteira;
-- Axios é centralizado;
-- erros `400`, `404`, `409`, `500` e `fieldErrors` devem ter tratamento consistente;
-- telas remotas devem considerar `loading`, `empty`, `error`, `success` e `retry` quando aplicável.
-
-Lacunas conhecidas que não devem ser inventadas pelo frontend:
-
-- upload real de documentos ainda não possui contrato multipart completo;
-- janela oficial de lotes próximos do vencimento ainda precisa ser definida;
-- autenticação/autorização/auditoria definitiva virá após a primeira fase funcional do frontend.
-
----
-
-## 🗺️ Roadmap
+## 🗺️ Roadmap atual
 
 ```text
 Etapa 0 — Handoff backend → frontend                    ✅
-Etapa 1 — Fundação visual/técnica essencial             ✅
+Etapa 1 — Fundação visual/técnica                       ✅
 Etapa 2 — Bootstrap técnico                             ✅
-
-Etapa 3 — Interfaces reais                              🟡 ATUAL
-  3.1 Login                                             ✅
-  3.2 Pedidos do Solicitante                            ⏳ PRÓXIMO
-  3.3 Gestão                                            ⏳
-
-Etapa 4 — Estoque / Lotes / Movimentações              ⏳
-Etapa 5 — Administração                                 ⏳
-Etapa 6 — Relatórios / Documentos / Fiscalização        ⏳
-Etapa 7 — Dashboards finais / robustez / 404             ⏳
-Etapa 8 — Autenticação / autorização / auditoria        ⏳
+Etapa 3 — Interfaces iniciais                           ✅
+Etapa 4 — Estoque / Lotes                               ✅
+Etapa 5 — Produto operacional                           ↪ consolidado em Estoque + Cadastro
+Etapa 6 — Movimentações                                 ✅
+Etapa 7 — Relatórios / Fiscalização / PDF-XLSX          ✅
+Etapa 8 — Administração / Cadastros                     🟡 PRÓXIMA
+Etapa complementar — Resíduos                           ⏳
+Etapa 9 — Dashboard / alertas / robustez                ⏳ (404 ✅)
+Etapa 10 — Autenticação / autorização / auditoria       ⏳
+Pós-protótipo — refactor técnico para inglês            ⏳
 ```
 
 ---
@@ -333,36 +427,21 @@ Etapa 8 — Autenticação / autorização / auditoria        ⏳
 
 | Documento | Finalidade |
 |---|---|
-| [`CONTINUIDADE.md`](CONTINUIDADE.md) | fonte principal para retomar o desenvolvimento |
-| [`docs/ETAPA_2_BOOTSTRAP.md`](docs/ETAPA_2_BOOTSTRAP.md) | bootstrap, stack e validações técnicas |
-| [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) | inventário funcional de telas e cobertura da API |
-| [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) | jornadas, rotas e regras de navegação |
-| [`docs/ESTRUTURA_FRONTEND.md`](docs/ESTRUTURA_FRONTEND.md) | estrutura física e responsabilidades das pastas |
-| [`docs/IDENTIDADE_VISUAL.md`](docs/IDENTIDADE_VISUAL.md) | identidade, paleta, densidade e motion |
-| [`docs/ICONOGRAFIA.md`](docs/ICONOGRAFIA.md) | padrão de ícones e microinterações |
-| [`docs/SIDEBAR_ALERTAS.md`](docs/SIDEBAR_ALERTAS.md) | sidebar e alertas operacionais |
-| [`docs/SHELL_VISUAL.md`](docs/SHELL_VISUAL.md) | sidebar/topbar e comportamento do shell |
-| [`docs/PADROES_PAGINA.md`](docs/PADROES_PAGINA.md) | área de conteúdo, cabeçalhos, busca e filtros |
+| [`CONTINUIDADE.md`](CONTINUIDADE.md) | checkpoint e próximo passo |
+| [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) | handoff completo para humano/IA |
+| [`docs/README.md`](docs/README.md) | índice e hierarquia documental |
+| [`docs/ROADMAP_INTERFACE_GESTAO.md`](docs/ROADMAP_INTERFACE_GESTAO.md) | sequência funcional atual |
+| [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) | rotas/telas atuais e futuras |
+| [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) | jornadas e regras de navegação |
+| [`docs/DECISAO_UNIDADES_CORPORATIVAS.md`](docs/DECISAO_UNIDADES_CORPORATIVAS.md) | governança de Unidade |
+| [`docs/IDENTIDADE_VISUAL.md`](docs/IDENTIDADE_VISUAL.md) | identidade e paleta |
+| [`docs/PADROES_PAGINA.md`](docs/PADROES_PAGINA.md) | composição das páginas |
 
-> Para retomar o projeto em outra sessão, por outra pessoa ou por outra IA, começar pelo **`CONTINUIDADE.md`**.
-
----
-
-## ▶️ Próximo passo
-
-```text
-Etapa 3.2 — Pedidos do Solicitante
-
-Novo pedido
-→ Meus pedidos
-→ Detalhe
-```
-
-Antes da implementação de cada fluxo, conferir o Swagger/OpenAPI e usar os contratos reais do backend.
+Documentos de bootstrap/etapas antigas são preservados como histórico; suas frases de “próxima etapa” não prevalecem sobre a continuidade atual.
 
 ---
 
 <div align="center">
   <strong>SGL — Sistema de Gestão de Laboratórios</strong><br/>
-  Frontend em implementação funcional.
+  Fluxos operacionais principais concluídos; Administração/Cadastros é o próximo bloco funcional.
 </div>
