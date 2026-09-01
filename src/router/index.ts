@@ -42,6 +42,11 @@ export const router = createRouter({
           component: () => import('@/modules/pedidos/views/solicitante/MeusPedidosView.vue'),
         },
         {
+          path: 'meus-residuos',
+          name: 'meus-residuos',
+          component: () => import('@/modules/residuos/views/solicitante/MeusResiduosView.vue'),
+        },
+        {
           path: 'pedidos/novo',
           name: 'novo-pedido',
           component: () => import('@/modules/pedidos/views/solicitante/NovoPedidoView.vue'),
