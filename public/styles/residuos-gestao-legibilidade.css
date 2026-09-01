@@ -1,0 +1,362 @@
+/* Ajuste de legibilidade da Central de Resíduos em zoom 100%.
+   Mantido isolado nesta etapa para não alterar a escala das demais áreas do SGL. */
+
+body .residuos-gestao-page .breadcrumb {
+  font-size: 11px;
+}
+
+body .residuos-gestao-page .page-heading > div > p:last-child {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+body .residuos-gestao-page .metrics-grid article {
+  padding: 19px 20px;
+}
+
+body .residuos-gestao-page .metrics-grid span {
+  font-size: 10px;
+}
+
+body .residuos-gestao-page .metrics-grid strong {
+  font-size: 29px;
+}
+
+body .residuos-gestao-page .metrics-grid small {
+  font-size: 10.5px;
+}
+
+body .residuos-gestao-page .feedback {
+  padding: 13px 16px;
+  font-size: 12px;
+}
+
+body .residuos-gestao-page .status-tabs button {
+  min-height: 58px;
+  padding-inline: 16px;
+  font-size: 12.5px;
+}
+
+body .residuos-gestao-page .status-tabs small {
+  min-width: 22px;
+  height: 22px;
+  font-size: 9.5px;
+}
+
+body .residuos-gestao-page .toolbar {
+  padding: 17px 20px;
+}
+
+body .residuos-gestao-page .toolbar label span {
+  font-size: 10px;
+}
+
+body .residuos-gestao-page .toolbar input {
+  min-height: 43px;
+  padding-inline: 13px;
+  font-size: 12.5px;
+}
+
+body .residuos-gestao-page .toolbar-note {
+  font-size: 10.5px;
+}
+
+body .residuos-gestao-page .state-box {
+  font-size: 12.5px;
+}
+
+body .residuos-gestao-page th {
+  padding: 13px 15px;
+  font-size: 9.5px;
+}
+
+body .residuos-gestao-page td {
+  padding: 16px 15px;
+  font-size: 11.5px;
+}
+
+body .residuos-gestao-page td strong {
+  font-size: 11.5px;
+}
+
+body .residuos-gestao-page td small {
+  margin-top: 5px;
+  font-size: 9.5px;
+  line-height: 1.45;
+}
+
+body .residuos-gestao-page .status-pill {
+  min-height: 26px;
+  padding-inline: 10px;
+  font-size: 9.5px;
+}
+
+body .residuos-gestao-page .primary-action,
+body .residuos-gestao-page .analysis-action,
+body .residuos-gestao-page .secondary-action,
+body .residuos-gestao-page .details-action {
+  min-height: 41px;
+  padding-inline: 15px;
+  font-size: 10.5px;
+}
+
+/* Drawer de detalhes */
+body .residuos-gestao-page .detail-drawer {
+  width: min(100%, 760px);
+}
+
+body .residuos-gestao-page .detail-drawer > header,
+body .residuos-gestao-page .modal-card > header,
+body .residuos-gestao-page .modal-card > footer {
+  gap: 20px;
+  padding: 24px 30px;
+}
+
+body .residuos-gestao-page .detail-drawer h2,
+body .residuos-gestao-page .modal-card h2 {
+  margin-top: 9px;
+  font-size: 23px;
+  line-height: 1.2;
+}
+
+body .residuos-gestao-page .detail-drawer header p {
+  margin-top: 5px;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+body .residuos-gestao-page .detail-drawer header button,
+body .residuos-gestao-page .modal-card header button {
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+}
+
+body .residuos-gestao-page .detail-content {
+  padding: 28px 30px 42px;
+}
+
+body .residuos-gestao-page .detail-content section + section {
+  margin-top: 27px;
+}
+
+body .residuos-gestao-page .origin-grid {
+  gap: 12px;
+}
+
+body .residuos-gestao-page .origin-grid article {
+  min-height: 68px;
+  padding: 14px 15px;
+}
+
+body .residuos-gestao-page .origin-grid span,
+body .residuos-gestao-page .risk-section span,
+body .residuos-gestao-page .declaration-reference span {
+  font-size: 9.5px;
+}
+
+body .residuos-gestao-page .origin-grid strong {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+body .residuos-gestao-page .detail-content h3 {
+  margin-bottom: 11px;
+  font-size: 11.5px;
+}
+
+body .residuos-gestao-page .body-copy {
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+body .residuos-gestao-page .components-list article {
+  gap: 7px 12px;
+  padding: 14px 15px;
+  border-radius: 9px;
+}
+
+body .residuos-gestao-page .components-list article + article {
+  margin-top: 9px;
+}
+
+body .residuos-gestao-page .components-list strong {
+  font-size: 12.5px;
+}
+
+body .residuos-gestao-page .components-list small {
+  font-size: 10px;
+}
+
+body .residuos-gestao-page .components-list article > span {
+  padding: 4px 8px;
+  font-size: 8.5px;
+}
+
+body .residuos-gestao-page .components-list p {
+  margin-top: 4px;
+  font-size: 10.5px;
+}
+
+body .residuos-gestao-page .risk-section {
+  gap: 12px;
+}
+
+body .residuos-gestao-page .risk-section > div {
+  padding: 18px;
+  border-radius: 9px;
+}
+
+body .residuos-gestao-page .risk-section h3 {
+  margin: 8px 0 7px;
+  font-size: 15px;
+}
+
+body .residuos-gestao-page .risk-section p {
+  margin-bottom: 9px;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+body .residuos-gestao-page .risk-section small {
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+body .residuos-gestao-page .next-stage-note {
+  padding: 16px 17px;
+}
+
+body .residuos-gestao-page .next-stage-note strong {
+  font-size: 12px;
+}
+
+body .residuos-gestao-page .next-stage-note p {
+  font-size: 10.5px;
+}
+
+body .residuos-gestao-page .drawer-actions {
+  gap: 10px;
+  margin-top: 28px;
+  padding-top: 22px;
+}
+
+/* Modais de recebimento/análise */
+body .residuos-gestao-page .modal-card {
+  width: min(100%, 620px);
+}
+
+body .residuos-gestao-page .modal-card--large {
+  width: min(100%, 920px);
+}
+
+body .residuos-gestao-page .modal-card > header span {
+  font-size: 9.5px;
+}
+
+body .residuos-gestao-page .modal-content {
+  padding: 26px 30px;
+}
+
+body .residuos-gestao-page .selected-summary {
+  gap: 5px;
+  padding: 16px;
+}
+
+body .residuos-gestao-page .selected-summary strong {
+  font-size: 13px;
+}
+
+body .residuos-gestao-page .selected-summary span {
+  font-size: 10.5px;
+}
+
+body .residuos-gestao-page .field {
+  gap: 8px;
+}
+
+body .residuos-gestao-page .field > span,
+body .residuos-gestao-page .risk-fieldset legend {
+  font-size: 10.5px;
+}
+
+body .residuos-gestao-page .field input,
+body .residuos-gestao-page .field select,
+body .residuos-gestao-page .field textarea {
+  font-size: 12.5px;
+}
+
+body .residuos-gestao-page .field input,
+body .residuos-gestao-page .field select {
+  min-height: 45px;
+  padding-inline: 12px;
+}
+
+body .residuos-gestao-page .field textarea {
+  padding: 12px;
+}
+
+body .residuos-gestao-page .guidance {
+  padding: 13px 14px;
+  font-size: 10.5px;
+}
+
+body .residuos-gestao-page .declaration-reference {
+  padding: 17px 18px;
+}
+
+body .residuos-gestao-page .declaration-reference strong {
+  font-size: 14px;
+}
+
+body .residuos-gestao-page .declaration-reference div p,
+body .residuos-gestao-page .declaration-reference > p {
+  font-size: 10.5px;
+}
+
+body .residuos-gestao-page .analysis-content {
+  gap: 21px;
+}
+
+body .residuos-gestao-page .analysis-grid {
+  gap: 15px;
+}
+
+body .residuos-gestao-page .risk-fieldset {
+  gap: 9px;
+  padding: 15px;
+}
+
+body .residuos-gestao-page .risk-fieldset button {
+  min-height: 35px;
+  gap: 7px;
+  padding-inline: 11px;
+  font-size: 9.5px;
+}
+
+body .residuos-gestao-page .checkmark {
+  width: 16px;
+  height: 16px;
+  font-size: 9px;
+}
+
+@media (max-width: 900px) {
+  body .residuos-gestao-page .detail-drawer {
+    width: min(100%, 680px);
+  }
+}
+
+@media (max-width: 600px) {
+  body .residuos-gestao-page .detail-drawer {
+    width: 100%;
+  }
+
+  body .residuos-gestao-page .detail-drawer > header,
+  body .residuos-gestao-page .modal-card > header,
+  body .residuos-gestao-page .modal-card > footer,
+  body .residuos-gestao-page .detail-content,
+  body .residuos-gestao-page .modal-content {
+    padding-inline: 20px;
+  }
+}
