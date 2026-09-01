@@ -84,6 +84,11 @@ export const router = createRouter({
           component: () => import('@/modules/movimentacoes/views/MovimentacoesGestaoView.vue'),
         },
         {
+          path: 'residuos',
+          name: 'gestao-residuos',
+          component: () => import('@/modules/residuos/views/gestao/ResiduosGestaoView.vue'),
+        },
+        {
           path: 'relatorios',
           name: 'gestao-relatorios',
           component: () => import('@/modules/relatorios/views/RelatoriosExportacaoView.vue'),
