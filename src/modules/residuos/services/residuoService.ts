@@ -6,6 +6,7 @@ import type {
   ProjetoResiduoResponse,
   ReceberResiduoRequest,
   ResiduoResponse,
+  RotuloResiduoResponse,
   StatusResiduo,
 } from '@/modules/residuos/types/residuo'
 
@@ -46,6 +47,11 @@ export const residuoService = {
 
   async analisarELiberar(id: string, payload: AnalisarResiduoRequest) {
     const { data } = await http.put<ResiduoResponse>(`/v1/residuos/${id}/analisar-liberar`, payload)
+    return data
+  },
+
+  async buscarDadosRotulo(id: string) {
+    const { data } = await http.get<RotuloResiduoResponse>(`/v1/residuos/${id}/rotulo`)
     return data
   },
 
