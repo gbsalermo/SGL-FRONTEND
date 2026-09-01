@@ -1,7 +1,10 @@
 import { http } from '@/services/http'
 import type {
   AnalisarResiduoRequest,
+  ArmazenarResiduoRequest,
   CriarResiduoRequest,
+  DespacharResiduoRequest,
+  HistoricoResiduoResponse,
   ProdutoResiduoResponse,
   ProjetoResiduoResponse,
   ReceberResiduoRequest,
@@ -47,6 +50,21 @@ export const residuoService = {
 
   async analisarELiberar(id: string, payload: AnalisarResiduoRequest) {
     const { data } = await http.put<ResiduoResponse>(`/v1/residuos/${id}/analisar-liberar`, payload)
+    return data
+  },
+
+  async armazenar(id: string, payload: ArmazenarResiduoRequest) {
+    const { data } = await http.put<ResiduoResponse>(`/v1/residuos/${id}/armazenar`, payload)
+    return data
+  },
+
+  async despachar(id: string, payload: DespacharResiduoRequest) {
+    const { data } = await http.put<ResiduoResponse>(`/v1/residuos/${id}/despachar`, payload)
+    return data
+  },
+
+  async buscarHistorico(id: string) {
+    const { data } = await http.get<HistoricoResiduoResponse[]>(`/v1/residuos/${id}/historico`)
     return data
   },
 
