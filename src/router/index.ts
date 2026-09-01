@@ -102,12 +102,19 @@ export const router = createRouter({
 router.beforeEach((to) => {
   const session = useSessionStore()
 
-  if (to.meta.requiresSession && !session.autenticado) {
-    return { path: '/login', query: { redirect: to.fullPath } }
+  // Rotas públicas devem ser resolvidas antes das regras de sessão/perfil.
+  // Isso garante que caminhos inexistentes sempre exibam a página 404,
+  // inclusive quando o usuário já está autenticado.
+  if (to.meta.public) {
+    if (to.path === '/login' && session.autenticado) {
+      return rotaInicial()
+    }
+
+    return true
   }
 
-  if (to.path === '/login' && session.autenticado) {
-    return rotaInicial()
+  if (to.meta.requiresSession && !session.autenticado) {
+    return { path: '/login', query: { redirect: to.fullPath } }
   }
 
   if (session.autenticado) {
