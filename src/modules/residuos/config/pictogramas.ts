@@ -9,17 +9,17 @@ const BASE_PATH = '/assets/residuos/pictogramas'
 
 export const PICTOGRAMAS_RESIDUO: Record<TipoRiscoResiduo, PictogramaResiduoConfig> = {
   NENHUM: { arquivo: null, rotulo: 'Nenhum' },
-  INFLAMAVEL: { arquivo: 'inflamavel.svg', rotulo: 'Inflamável' },
-  RADIOATIVO: { arquivo: 'radioativo.svg', rotulo: 'Radioativo' },
-  TOXICO: { arquivo: 'toxico.svg', rotulo: 'Tóxico' },
-  CORROSIVO: { arquivo: 'corrosivo.svg', rotulo: 'Corrosivo' },
-  BIOLOGICO: { arquivo: 'biologico.svg', rotulo: 'Biológico' },
-  IRRITANTE: { arquivo: 'irritante.svg', rotulo: 'Irritante' },
-  PERIGO_SAUDE: { arquivo: 'perigo-saude.svg', rotulo: 'Perigo à saúde' },
-  OXIDANTE: { arquivo: 'oxidante.svg', rotulo: 'Oxidante' },
-  EXPLOSIVO: { arquivo: 'explosivo.svg', rotulo: 'Explosivo' },
-  GAS_PRESSURIZADO: { arquivo: 'gas-pressurizado.svg', rotulo: 'Gás pressurizado' },
-  PERIGO_AMBIENTAL: { arquivo: 'perigo-ambiental.svg', rotulo: 'Perigo ambiental' },
+  INFLAMAVEL: { arquivo: 'inflamavel.png', rotulo: 'Inflamável' },
+  RADIOATIVO: { arquivo: 'radioativo.png', rotulo: 'Radioativo' },
+  TOXICO: { arquivo: 'toxico.png', rotulo: 'Tóxico' },
+  CORROSIVO: { arquivo: 'corrosivo.png', rotulo: 'Corrosivo' },
+  BIOLOGICO: { arquivo: 'biologico.png', rotulo: 'Biológico' },
+  IRRITANTE: { arquivo: 'irritante.png', rotulo: 'Irritante' },
+  PERIGO_SAUDE: { arquivo: 'perigo-saude.png', rotulo: 'Perigo à saúde' },
+  OXIDANTE: { arquivo: 'oxidante.png', rotulo: 'Oxidante' },
+  EXPLOSIVO: { arquivo: 'explosivo.png', rotulo: 'Explosivo' },
+  GAS_PRESSURIZADO: { arquivo: 'gas-pressurizado.png', rotulo: 'Gás pressurizado' },
+  PERIGO_AMBIENTAL: { arquivo: 'perigo-ambiental.png', rotulo: 'Perigo ambiental' },
 }
 
 export function caminhoPictogramaResiduo(risco: TipoRiscoResiduo) {
