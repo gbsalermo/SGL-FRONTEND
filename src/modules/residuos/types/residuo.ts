@@ -120,6 +120,26 @@ export interface ResiduoResponse {
   componentes: ComponenteResiduoResponse[]
 }
 
+export interface RotuloResiduoResponse {
+  residuoId: string
+  codigoRastreio: string
+  qrCodeConteudo: string | null
+  descricao: string
+  laboratorioNome: string
+  geradorNome: string
+  processoOrigem: string
+  recipiente: string
+  quantidade: number
+  unidadeMedida: UnidadeMedidaResiduo
+  nivelRisco: NivelRiscoResiduo
+  riscos: TipoRiscoResiduo[]
+  componentes: ComponenteResiduoResponse[]
+  localArmazenamentoTemporario: string | null
+  destinoFinalPrevisto: string | null
+  dataPrevistaDespacho: string | null
+  dataRotulagem: string | null
+}
+
 export interface ProjetoResiduoResponse {
   id: string
   nome: string
