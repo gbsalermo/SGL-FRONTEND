@@ -1,22 +1,33 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+
 import RelatorioExportacaoBar from '@/modules/relatorios/components/RelatorioExportacaoBar.vue'
 import { ultimaConsultaRelatorio } from '@/modules/relatorios/services/relatorioService'
 import RelatoriosGestaoView from '@/modules/relatorios/views/RelatoriosGestaoView.vue'
 
-function invalidarExportacaoQuandoNecessario(event: MouseEvent) {
+const router = useRouter()
+
+function tratarCliqueRelatorios(event: MouseEvent) {
   const alvo = event.target
   if (!(alvo instanceof Element)) return
 
-  const trocouRelatorio = Boolean(alvo.closest('.relatorio-opcao'))
+  const opcao = alvo.closest('.relatorio-opcao')
   const limpouFiltros = Boolean(alvo.closest('.btn--ghost'))
-  if (trocouRelatorio || limpouFiltros) {
+
+  if (opcao || limpouFiltros) {
     ultimaConsultaRelatorio.value = null
+  }
+
+  if (opcao && opcao.textContent?.includes('Resíduos')) {
+    event.preventDefault()
+    event.stopPropagation()
+    router.push('/relatorios/residuos')
   }
 }
 </script>
 
 <template>
-  <div class="relatorios-exportacao-view" @click.capture="invalidarExportacaoQuandoNecessario">
+  <div class="relatorios-exportacao-view" @click.capture="tratarCliqueRelatorios">
     <router-link class="residuos-report-access" to="/relatorios/residuos">
       <div>
         <span>RELATÓRIO ATIVO</span>
