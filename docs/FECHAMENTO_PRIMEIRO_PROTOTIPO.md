@@ -4,6 +4,24 @@
 **Base:** `main` após Relatórios, exportações e 404  
 **Objetivo:** concluir o frontend operacional e congelar o primeiro protótipo funcional antes da homologação completa.
 
+## Estado da branch `feat/residuos-interface` — 01/09/2026
+
+```text
+Backend de Resíduos — fluxo base validado                 ✅
+Frontend — Informar resíduo                               ✅ validado visual/funcionalmente
+Frontend — Meus resíduos                                  🟡 implementado; aguardando validação
+Frontend Gestão — Central de resíduos                     🟡 implementado; aguardando validação
+Frontend Gestão — Recebimento                             🟡 implementado; aguardando validação
+Frontend Gestão — Análise/classificação                   🟡 implementado; aguardando validação
+Rótulo / QR / impressão                                   ⏳ próximo bloco após validação
+Armazenamento temporário                                  ⏳
+Despacho / destinação                                     ⏳
+Histórico visual                                          ⏳
+Relatório / PDF / XLSX                                    ⏳
+```
+
+A análise usa o contrato real `PUT /api/v1/residuos/{id}/analisar-liberar`. Por isso, ao confirmar a classificação, o backend também muda o resíduo para `LIBERADO_PARA_ARMAZENAMENTO` e gera o código de rastreio. Nesta etapa o frontend **não** renderiza nem imprime rótulo/QR; essa experiência começa no bloco seguinte.
+
 ## Ordem oficial restante
 
 ```text
