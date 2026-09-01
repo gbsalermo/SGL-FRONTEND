@@ -74,6 +74,17 @@ export interface AnalisarResiduoRequest {
   observacaoGestor: string | null
 }
 
+export interface ArmazenarResiduoRequest {
+  usuarioGestorId: string
+  localArmazenamentoTemporario: string | null
+}
+
+export interface DespacharResiduoRequest {
+  usuarioGestorId: string
+  destinoFinalConfirmado: string
+  observacao: string | null
+}
+
 export interface ComponenteResiduoResponse {
   id: string
   produtoId: string | null
@@ -118,6 +129,16 @@ export interface ResiduoResponse {
   dataPrevistaDespacho: string | null
   dataDespacho: string | null
   componentes: ComponenteResiduoResponse[]
+}
+
+export interface HistoricoResiduoResponse {
+  id: string
+  status: StatusResiduo
+  acao: string
+  observacao: string | null
+  dataHora: string
+  usuarioId: string | null
+  usuarioNome: string | null
 }
 
 export interface RotuloResiduoResponse {
