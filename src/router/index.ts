@@ -100,6 +100,11 @@ export const router = createRouter({
           component: () => import('@/modules/relatorios/views/RelatoriosExportacaoView.vue'),
         },
         {
+          path: 'relatorios/residuos',
+          name: 'gestao-relatorio-residuos',
+          component: () => import('@/modules/relatorios/views/RelatorioResiduosView.vue'),
+        },
+        {
           path: 'solicitacoes/novo',
           name: 'gestao-novo-pedido',
           component: () => import('@/modules/pedidos/views/solicitante/NovoPedidoView.vue'),
