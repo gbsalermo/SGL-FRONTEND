@@ -29,6 +29,13 @@ export type UnidadeMedidaResiduo =
   | 'METRO'
   | 'OUTRO'
 
+export type StatusResiduo =
+  | 'INFORMADO'
+  | 'EM_ANALISE'
+  | 'LIBERADO_PARA_ARMAZENAMENTO'
+  | 'ARMAZENADO_TEMPORARIAMENTE'
+  | 'DESPACHADO'
+
 export interface ComponenteResiduoRequest {
   produtoId: string | null
   nomeComponente: string | null
@@ -52,6 +59,21 @@ export interface CriarResiduoRequest {
   componentes: ComponenteResiduoRequest[]
 }
 
+export interface ReceberResiduoRequest {
+  usuarioGestorId: string
+  observacao: string | null
+}
+
+export interface AnalisarResiduoRequest {
+  usuarioGestorId: string
+  nivelRiscoConfirmado: NivelRiscoResiduo
+  riscosConfirmados: TipoRiscoResiduo[]
+  localArmazenamentoTemporario: string
+  destinoFinalPrevisto: string
+  dataPrevistaDespacho: string | null
+  observacaoGestor: string | null
+}
+
 export interface ComponenteResiduoResponse {
   id: string
   produtoId: string | null
@@ -64,12 +86,16 @@ export interface ComponenteResiduoResponse {
 
 export interface ResiduoResponse {
   id: string
-  usuarioGeradorId: string
-  usuarioGeradorNome: string
+  codigoRastreio: string | null
+  status: StatusResiduo
   laboratorioId: string
   laboratorioNome: string
+  usuarioGeradorId: string
+  usuarioGeradorNome: string
   projetoId: string | null
   projetoNome: string | null
+  gestorResponsavelId: string | null
+  gestorResponsavelNome: string | null
   descricao: string
   processoOrigem: string
   recipiente: string
@@ -77,11 +103,20 @@ export interface ResiduoResponse {
   unidadeMedida: UnidadeMedidaResiduo
   nivelRiscoInformado: NivelRiscoResiduo
   riscosInformados: TipoRiscoResiduo[]
+  nivelRiscoConfirmado: NivelRiscoResiduo | null
+  riscosConfirmados: TipoRiscoResiduo[]
   observacaoGerador: string | null
-  status: 'INFORMADO' | 'EM_ANALISE' | 'LIBERADO_PARA_ARMAZENAMENTO' | 'ARMAZENADO_TEMPORARIAMENTE' | 'DESPACHADO'
-  dataInformacao: string
-  codigoRastreio: string | null
+  observacaoGestor: string | null
+  localArmazenamentoTemporario: string | null
+  destinoFinalPrevisto: string | null
+  destinoFinalConfirmado: string | null
   qrCodeConteudo: string | null
+  dataInformacao: string
+  dataRecebimento: string | null
+  dataLiberacao: string | null
+  dataArmazenamentoTemporario: string | null
+  dataPrevistaDespacho: string | null
+  dataDespacho: string | null
   componentes: ComponenteResiduoResponse[]
 }
 
