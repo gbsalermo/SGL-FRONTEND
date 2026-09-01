@@ -1,33 +1,34 @@
 # Pictogramas de risco — Resíduos
 
-Coloque nesta pasta os arquivos SVG usados no rótulo físico dos resíduos.
+Esta pasta contém os arquivos PNG usados no rótulo físico dos resíduos.
 
 ## Nomes esperados
 
 ```text
-inflamavel.svg
-radioativo.svg
-toxico.svg
-corrosivo.svg
-biologico.svg
-irritante.svg
-perigo-saude.svg
-oxidante.svg
-explosivo.svg
-gas-pressurizado.svg
-perigo-ambiental.svg
+inflamavel.png
+radioativo.png
+toxico.png
+corrosivo.png
+biologico.png
+irritante.png
+perigo-saude.png
+oxidante.png
+explosivo.png
+gas-pressurizado.png
+perigo-ambiental.png
 ```
 
 `NENHUM` não usa pictograma.
 
 O frontend faz o vínculo pelos valores do enum `TipoRisco` retornado pelo backend.
 
-## Recomendações para os SVGs
+## Recomendações para os PNGs
 
-- fundo transparente;
-- preservar o losango/borda e símbolo originais do pictograma;
-- preferir `viewBox` para manter qualidade na impressão;
+- formato quadrado;
+- boa resolução para impressão (preferencialmente 512x512 ou superior);
+- preservar o losango/borda e o símbolo originais do pictograma;
+- preferir fundo transparente quando disponível;
 - evitar textos incorporados na figura;
 - não alterar os nomes acima sem atualizar `src/modules/residuos/config/pictogramas.ts`.
 
-Durante a montagem do protótipo, caso algum SVG ainda não exista, o componente do rótulo mostra um fallback textual e o build continua funcionando.
+O componente possui fallback visual caso algum arquivo não possa ser carregado, evitando quebra do layout durante desenvolvimento.
