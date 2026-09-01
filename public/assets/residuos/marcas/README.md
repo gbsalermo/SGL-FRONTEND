@@ -1,17 +1,19 @@
 # Marcas usadas no rótulo de Resíduos
 
-Coloque nesta pasta a marca institucional usada na impressão do rótulo.
+Esta pasta contém a marca institucional usada na impressão do rótulo.
 
-Arquivo esperado:
-
-```text
-embrapa.svg
-```
-
-Caminho público esperado pelo componente:
+Arquivo principal:
 
 ```text
-/assets/residuos/marcas/embrapa.svg
+embrapa.png
 ```
 
-Preferir SVG com fundo transparente. O componente possui fallback textual enquanto o arquivo ainda não estiver presente.
+Caminho público:
+
+```text
+/assets/residuos/marcas/embrapa.png
+```
+
+Durante o scaffold existe também `embrapa.svg` como wrapper de compatibilidade para o componente inicial do rótulo. A imagem efetiva exibida é `embrapa.png`.
+
+Preferir imagem com boa resolução e fundo transparente quando disponível.
