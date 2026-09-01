@@ -115,6 +115,14 @@ function sair() {
           <span>Meus pedidos</span>
         </router-link>
 
+        <router-link class="solicitante-nav__item" to="/meus-residuos">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 5h10l-1 16H8L7 5ZM5 5h14M9 5V3h6v2" />
+            <path d="M10 9v8M14 9v8" />
+          </svg>
+          <span>Meus resíduos</span>
+        </router-link>
+
         <p class="solicitante-nav__group solicitante-nav__group--spaced">SOLICITAÇÕES</p>
 
         <router-link class="solicitante-nav__item" to="/pedidos/novo">
