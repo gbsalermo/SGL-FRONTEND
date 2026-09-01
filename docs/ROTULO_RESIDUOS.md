@@ -1,6 +1,6 @@
 # Rótulo físico de Resíduos — preparação
 
-**Status:** scaffold preparado; integração final e impressão aguardam os SVGs e validação das telas até Análise/Classificação.
+**Status:** scaffold preparado; pictogramas e marca já enviados em PNG; integração final e impressão aguardam a validação das telas até Análise/Classificação.
 
 ## Decisão de escopo
 
@@ -25,7 +25,7 @@ O modelo segue a organização do template fornecido para a etapa:
 │                │ NÍVEL DE RISCO CONFIRMADO                  │
 │ PICTOGRAMAS    │                                             │
 │                │ Advertências de perigo                     │
-│                │ Composição                                  │
+│                │ Composição                                 │
 │                │ Processo / recipiente                      │
 │                │ Armazenamento / destino                    │
 ├────────────────┴─────────────────────────────────────────────┤
@@ -49,20 +49,20 @@ Pasta:
 public/assets/residuos/pictogramas/
 ```
 
-Arquivos esperados:
+Arquivos usados:
 
 ```text
-inflamavel.svg
-radioativo.svg
-toxico.svg
-corrosivo.svg
-biologico.svg
-irritante.svg
-perigo-saude.svg
-oxidante.svg
-explosivo.svg
-gas-pressurizado.svg
-perigo-ambiental.svg
+inflamavel.png
+radioativo.png
+toxico.png
+corrosivo.png
+biologico.png
+irritante.png
+perigo-saude.png
+oxidante.png
+explosivo.png
+gas-pressurizado.png
+perigo-ambiental.png
 ```
 
 Mapeamento:
@@ -73,7 +73,7 @@ src/modules/residuos/config/pictogramas.ts
 
 `NENHUM` não usa pictograma.
 
-Enquanto um SVG estiver ausente, o modelo usa um fallback visual para que o build não dependa dos assets.
+O componente mantém fallback visual se algum arquivo falhar ao carregar, mas os onze riscos atuais já possuem asset correspondente.
 
 ## Logo Embrapa
 
@@ -83,13 +83,15 @@ Pasta:
 public/assets/residuos/marcas/
 ```
 
-Arquivo esperado:
+Arquivo principal:
 
 ```text
-embrapa.svg
+embrapa.png
 ```
 
-No rótulo a marca fica no canto inferior esquerdo. Enquanto o arquivo estiver ausente, aparece um fallback textual `EMBRAPA`.
+O scaffold mantém `embrapa.svg` apenas como wrapper de compatibilidade para o componente inicial. A imagem efetiva usada pelo wrapper é `embrapa.png`.
+
+No rótulo a marca fica no canto inferior esquerdo.
 
 ## Dados usados
 
@@ -124,7 +126,7 @@ Caso o projeto passe a exigir frases GHS oficiais, elas devem entrar como regra/
 
 ## Próximo passo
 
-Após colocar os SVGs e validar as interfaces já implementadas:
+Após validar as interfaces já implementadas:
 
 ```text
 GET /v1/residuos/{id}/rotulo
