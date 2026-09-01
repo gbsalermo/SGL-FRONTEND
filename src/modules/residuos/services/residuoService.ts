@@ -1,14 +1,51 @@
 import { http } from '@/services/http'
 import type {
+  AnalisarResiduoRequest,
   CriarResiduoRequest,
   ProdutoResiduoResponse,
   ProjetoResiduoResponse,
+  ReceberResiduoRequest,
   ResiduoResponse,
+  StatusResiduo,
 } from '@/modules/residuos/types/residuo'
 
 export const residuoService = {
   async criar(payload: CriarResiduoRequest) {
     const { data } = await http.post<ResiduoResponse>('/v1/residuos', payload)
+    return data
+  },
+
+  async listarTodos() {
+    const { data } = await http.get<ResiduoResponse[]>('/v1/residuos')
+    return data
+  },
+
+  async listarPorGerador(usuarioGeradorId: string) {
+    const { data } = await http.get<ResiduoResponse[]>('/v1/residuos/por-gerador', {
+      params: { usuarioGeradorId },
+    })
+    return data
+  },
+
+  async listarPorStatus(status: StatusResiduo) {
+    const { data } = await http.get<ResiduoResponse[]>('/v1/residuos/por-status', {
+      params: { status },
+    })
+    return data
+  },
+
+  async buscarPorId(id: string) {
+    const { data } = await http.get<ResiduoResponse>(`/v1/residuos/${id}`)
+    return data
+  },
+
+  async receber(id: string, payload: ReceberResiduoRequest) {
+    const { data } = await http.put<ResiduoResponse>(`/v1/residuos/${id}/receber`, payload)
+    return data
+  },
+
+  async analisarELiberar(id: string, payload: AnalisarResiduoRequest) {
+    const { data } = await http.put<ResiduoResponse>(`/v1/residuos/${id}/analisar-liberar`, payload)
     return data
   },
 
