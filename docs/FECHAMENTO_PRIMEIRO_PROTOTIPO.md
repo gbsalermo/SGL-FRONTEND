@@ -7,20 +7,39 @@
 ## Estado da branch `feat/residuos-interface` — 01/09/2026
 
 ```text
-Backend de Resíduos — fluxo base validado                 ✅
+Backend de Resíduos — fluxo base                          ✅ validado
 Frontend — Informar resíduo                               ✅ validado visual/funcionalmente
-Frontend — Meus resíduos                                  🟡 implementado; aguardando validação
-Frontend Gestão — Central de resíduos                     🟡 implementado; aguardando validação
-Frontend Gestão — Recebimento                             🟡 implementado; aguardando validação
-Frontend Gestão — Análise/classificação                   🟡 implementado; aguardando validação
-Rótulo / QR / impressão                                   ⏳ próximo bloco após validação
-Armazenamento temporário                                  ⏳
-Despacho / destinação                                     ⏳
-Histórico visual                                          ⏳
-Relatório / PDF / XLSX                                    ⏳
+Frontend — Meus resíduos                                  🟡 implementado; aguardando validação integrada
+Frontend Gestão — Central de resíduos                     🟡 implementado; aguardando validação integrada
+Frontend Gestão — Recebimento                             🟡 implementado; aguardando validação integrada
+Frontend Gestão — Análise/classificação                   ✅ validado pelo usuário
+Rótulo com código + pictogramas + impressão               🟡 implementado; aguardando validação
+Armazenamento temporário                                  🟡 implementado; aguardando validação
+Despacho / destinação                                     🟡 implementado; aguardando validação
+Histórico visual                                          🟡 implementado; aguardando validação
+Relatório de Resíduos                                     🟡 implementado; aguardando validação
+Exportação PDF / XLSX de Resíduos                         🟡 implementado; aguardando validação
 ```
 
-A análise usa o contrato real `PUT /api/v1/residuos/{id}/analisar-liberar`. Por isso, ao confirmar a classificação, o backend também muda o resíduo para `LIBERADO_PARA_ARMAZENAMENTO` e gera o código de rastreio. Nesta etapa o frontend **não** renderiza nem imprime rótulo/QR; essa experiência começa no bloco seguinte.
+### Decisão atual sobre o rótulo
+
+O QR Code foi retirado da experiência visual do protótipo atual por decisão de produto. O backend pode manter o campo técnico existente sem que ele seja exibido ou impresso.
+
+O rótulo físico usa:
+
+```text
+código SGL de rastreio
+pictogramas conforme riscos confirmados pela Gestão
+composição do resíduo
+nível de risco confirmado
+laboratório e gerador
+processo de origem e recipiente
+armazenamento e destino previstos
+quantidade
+logo da Embrapa
+```
+
+Os pictogramas são assets PNG locais em `public/assets/residuos/pictogramas/` e a marca da Embrapa fica em `public/assets/residuos/marcas/embrapa.png`.
 
 ## Ordem oficial restante
 
@@ -37,7 +56,7 @@ A análise usa o contrato real `PUT /api/v1/residuos/{id}/analisar-liberar`. Por
    │   ├── armazenar temporariamente
    │   └── despachar/destinar
    ├── histórico/rastreabilidade
-   ├── rótulo/QR/impressão
+   ├── rótulo + impressão
    └── relatório + PDF/XLSX
 
 2. Estagiários
@@ -114,6 +133,24 @@ laboratório gera → usuário informa → material chega à Gestão
 ```
 
 `Produto` e `Resíduo` são domínios diferentes. Um componente de resíduo pode referenciar um Produto apenas para rastreabilidade; isso não altera estoque automaticamente.
+
+## Validação integrada pendente do módulo de Resíduos
+
+Antes de considerar a etapa 1 encerrada, validar localmente:
+
+```text
+Meus resíduos e detalhe do usuário
+recebimento pela Gestão
+análise/classificação
+rótulo com código + pictogramas + logo Embrapa
+pré-visualização de impressão sem sidebar/topbar
+confirmação de armazenamento temporário
+confirmação de despacho
+histórico visual com todos os eventos
+relatório filtrável
+exportação PDF
+exportação XLSX
+```
 
 ## Diretrizes de permissões antes da implementação definitiva
 
