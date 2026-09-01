@@ -124,13 +124,12 @@ function sair() {
           <span>Novo pedido</span>
         </router-link>
 
-        <div class="solicitante-nav__item solicitante-nav__item--future" title="Informar resíduos — seção reservada para etapa futura">
+        <router-link class="solicitante-nav__item" to="/residuos/novo">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 5h10l-1 16H8L7 5ZM5 5h14M9 5V3h6v2M10 9v8M14 9v8" />
           </svg>
-          <span>Informar resíduos</span>
-          <small>em breve</small>
-        </div>
+          <span>Informar resíduo</span>
+        </router-link>
       </nav>
 
       <div class="solicitante-sidebar__user">
