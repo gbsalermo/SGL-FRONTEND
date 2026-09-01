@@ -1,6 +1,6 @@
-# Rótulo físico de Resíduos — preparação
+# Rótulo físico de Resíduos
 
-**Status:** scaffold preparado; pictogramas e marca já enviados em PNG; integração final e impressão aguardam a validação das telas até Análise/Classificação.
+**Status:** implementação concluída na branch `feat/residuos-interface`; aguardando validação visual e de impressão.
 
 ## Decisão de escopo
 
@@ -8,15 +8,29 @@
 QR Code                     fora do rótulo nesta etapa
 Código de rastreio          obrigatório
 Pictogramas                 conforme riscos confirmados
-Impressão                   prevista
+Impressão                   implementada
 Logo Embrapa                canto inferior esquerdo
 ```
 
-O campo `qrCodeConteudo` pode continuar existindo no contrato do backend, mas não será renderizado no rótulo do protótipo atual.
+O campo `qrCodeConteudo` pode continuar existindo no contrato do backend, mas não é renderizado nem impresso no protótipo atual.
+
+## Fluxo implementado
+
+```text
+LIBERADO_PARA_ARMAZENAMENTO
+→ botão Visualizar rótulo
+→ GET /v1/residuos/{id}/rotulo
+→ rota /residuos/{id}/rotulo
+→ ResiduoRotuloModelo
+→ pré-visualização sem sidebar/topbar
+→ Imprimir rótulo
+```
+
+A rota de impressão é independente do `GestaoLayout` justamente para que menus e barra superior não apareçam no papel.
 
 ## Referência visual
 
-O modelo segue a organização do template fornecido para a etapa:
+O modelo segue a organização do template definido para a etapa:
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
@@ -33,13 +47,13 @@ O modelo segue a organização do template fornecido para a etapa:
 └──────────────────────────────────────────────────────────────┘
 ```
 
-O componente inicial está em:
+Arquivos principais:
 
 ```text
 src/modules/residuos/components/rotulo/ResiduoRotuloModelo.vue
+src/modules/residuos/views/gestao/RotuloResiduoView.vue
+src/modules/residuos/config/pictogramas.ts
 ```
-
-Ele ainda não está ligado a uma rota para não avançar a funcionalidade antes da validação da etapa atual.
 
 ## Pictogramas
 
@@ -65,15 +79,7 @@ gas-pressurizado.png
 perigo-ambiental.png
 ```
 
-Mapeamento:
-
-```text
-src/modules/residuos/config/pictogramas.ts
-```
-
-`NENHUM` não usa pictograma.
-
-O componente mantém fallback visual se algum arquivo falhar ao carregar, mas os onze riscos atuais já possuem asset correspondente.
+`NENHUM` não usa pictograma. Os pictogramas são escolhidos a partir de `riscos` retornado pelo DTO do rótulo, que prioriza os riscos confirmados pela Gestão.
 
 ## Logo Embrapa
 
@@ -89,13 +95,9 @@ Arquivo principal:
 embrapa.png
 ```
 
-O scaffold mantém `embrapa.svg` apenas como wrapper de compatibilidade para o componente inicial. A imagem efetiva usada pelo wrapper é `embrapa.png`.
-
-No rótulo a marca fica no canto inferior esquerdo.
+O projeto mantém `embrapa.svg` como wrapper de compatibilidade que aponta para o PNG. A marca fica no canto inferior esquerdo do rótulo.
 
 ## Dados usados
-
-O modelo foi preparado para `RotuloResiduoResponseDTO` do backend:
 
 ```text
 residuoId
@@ -116,24 +118,22 @@ dataPrevistaDespacho
 dataRotulagem
 ```
 
-`qrCodeConteudo` é deliberadamente ignorado na interface de rótulo desta etapa.
+`qrCodeConteudo` é deliberadamente ignorado.
 
-## Sobre textos de segurança
+## Textos de segurança
 
-O frontend não deve inventar frases regulamentares de perigo ou prudência a partir de um enum genérico. No scaffold atual, a seção de advertências apresenta apenas os riscos confirmados pela Gestão e os demais dados operacionais reais.
+O frontend não inventa frases regulamentares de perigo ou prudência a partir de um enum genérico. A seção de advertências mostra os riscos efetivamente confirmados e os dados operacionais existentes.
 
-Caso o projeto passe a exigir frases GHS oficiais, elas devem entrar como regra/dado formalmente definido no domínio antes de serem impressas.
+Se frases GHS oficiais forem exigidas futuramente, elas devem entrar como dado/regra formal do domínio antes de serem impressas.
 
-## Próximo passo
-
-Após validar as interfaces já implementadas:
+## Validação pendente
 
 ```text
-GET /v1/residuos/{id}/rotulo
-→ ResiduoRotuloModelo
-→ tela de pré-visualização
-→ ação Imprimir
-→ CSS @media print
+pictogramas corretos para cada risco
+logo Embrapa carregada
+código SGL correto
+composição/quantidade corretas
+pré-visualização responsiva
+print preview sem elementos da interface
+legibilidade física do rótulo impresso
 ```
-
-Só então ligar o rótulo à central da Gestão.
