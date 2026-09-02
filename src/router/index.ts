@@ -32,6 +32,18 @@ export const router = createRouter({
       meta: { public: true },
     },
     {
+      path: '/residuos/:id/rotulo',
+      name: 'gestao-residuo-rotulo',
+      component: () => import('@/modules/residuos/views/gestao/RotuloResiduoAjustadoView.vue'),
+      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+    },
+    {
+      path: '/produtos/:id/rotulo',
+      name: 'gestao-produto-rotulo',
+      component: () => import('@/modules/produtos/views/RotuloProdutoView.vue'),
+      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+    },
+    {
       path: '/',
       component: () => import('@/layouts/SolicitanteLayout.vue'),
       meta: { requiresSession: true, perfis: PERFIS_SOLICITANTE },
@@ -42,9 +54,19 @@ export const router = createRouter({
           component: () => import('@/modules/pedidos/views/solicitante/MeusPedidosView.vue'),
         },
         {
+          path: 'meus-residuos',
+          name: 'meus-residuos',
+          component: () => import('@/modules/residuos/views/solicitante/MeusResiduosView.vue'),
+        },
+        {
           path: 'pedidos/novo',
           name: 'novo-pedido',
           component: () => import('@/modules/pedidos/views/solicitante/NovoPedidoView.vue'),
+        },
+        {
+          path: 'residuos/novo',
+          name: 'informar-residuo',
+          component: () => import('@/modules/residuos/views/solicitante/InformarResiduoView.vue'),
         },
       ],
     },
@@ -74,9 +96,19 @@ export const router = createRouter({
           component: () => import('@/modules/movimentacoes/views/MovimentacoesGestaoView.vue'),
         },
         {
+          path: 'residuos',
+          name: 'gestao-residuos',
+          component: () => import('@/modules/residuos/views/gestao/ResiduosGestaoCompletoView.vue'),
+        },
+        {
           path: 'relatorios',
           name: 'gestao-relatorios',
           component: () => import('@/modules/relatorios/views/RelatoriosExportacaoView.vue'),
+        },
+        {
+          path: 'relatorios/residuos',
+          name: 'gestao-relatorio-residuos',
+          component: () => import('@/modules/relatorios/views/RelatorioResiduosView.vue'),
         },
         {
           path: 'solicitacoes/novo',
@@ -102,14 +134,19 @@ export const router = createRouter({
 router.beforeEach((to) => {
   const session = useSessionStore()
 
-  // Rotas públicas devem ser resolvidas antes das regras de sessão/perfil.
-  // Isso garante que caminhos inexistentes sempre exibam a página 404,
-  // inclusive quando o usuário já está autenticado.
+  if (session.expirarSeNecessario()) {
+    if (to.path === '/login') return true
+
+    return {
+      path: '/login',
+      query: { motivo: 'sessao-expirada' },
+    }
+  }
+
   if (to.meta.public) {
     if (to.path === '/login' && session.autenticado) {
       return rotaInicial()
     }
-
     return true
   }
 

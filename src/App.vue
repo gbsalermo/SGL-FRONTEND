@@ -1,5 +1,32 @@
+<script setup lang="ts">
+import ProdutoRotuloAtalho from '@/modules/produtos/components/ProdutoRotuloAtalho.vue'
+</script>
+
 <template>
   <v-app>
     <router-view />
+    <ProdutoRotuloAtalho />
   </v-app>
 </template>
+
+<style>
+.produto-label .label-footer {
+  grid-template-columns: 38mm minmax(0, 1fr) 52mm !important;
+}
+
+.produto-label .sgl-brand {
+  min-width: 52mm !important;
+  min-height: 16mm !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.produto-label .sgl-brand img {
+  width: 48mm !important;
+  max-width: 48mm !important;
+  max-height: 18mm !important;
+  margin-inline: auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+</style>

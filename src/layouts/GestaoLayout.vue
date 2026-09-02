@@ -148,13 +148,12 @@ function sair() {
           <small v-if="!recolhida">em breve</small>
         </div>
 
-        <div class="gestao-nav__future" title="Resíduos — seção reservada para etapa futura">
+        <router-link to="/residuos" title="Resíduos">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 5h10l-1 16H8L7 5ZM5 5h14M9 5V3h6v2M10 9v8M14 9v8" />
           </svg>
           <span v-if="!recolhida">Resíduos</span>
-          <small v-if="!recolhida">em breve</small>
-        </div>
+        </router-link>
 
         <p v-if="!recolhida" class="gestao-nav__group">SOLICITAÇÕES</p>
         <router-link to="/solicitacoes/novo" title="Novo pedido">

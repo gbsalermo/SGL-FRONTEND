@@ -17,6 +17,7 @@ const nomes: Record<TipoRelatorioExportavel, string> = {
   movimentacoes: 'Movimentações',
   'resumo-operacional': 'Resumo operacional',
   'estoque-lotes': 'Estoque e lotes',
+  residuos: 'Resíduos',
   fiscalizacao: 'Fiscalização',
 }
 
