@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AdminCadastrosNavLink from '@/modules/admin/components/AdminCadastrosNavLink.vue'
 import ProdutoRotuloAtalho from '@/modules/produtos/components/ProdutoRotuloAtalho.vue'
 </script>
 
@@ -6,6 +7,7 @@ import ProdutoRotuloAtalho from '@/modules/produtos/components/ProdutoRotuloAtal
   <v-app>
     <router-view />
     <ProdutoRotuloAtalho />
+    <AdminCadastrosNavLink />
   </v-app>
 </template>
 
