@@ -1,8 +1,8 @@
 # Etapa Estagiários — Primeiro Protótipo SGL
 
-**Branch frontend:** `feat/estagiarios-interface`  
-**Branch backend:** `feat/estagiarios`  
-**Base:** branches de Resíduos já implementadas, sem merge antecipado na `main`.
+**Branch frontend:** `feat/estagiarios-v2`  
+**Branch backend:** `feat/estagiarios-v2`  
+**Base:** `main` atual, já contendo o módulo de Resíduos mergeado.
 
 ## Objetivo oficial
 
