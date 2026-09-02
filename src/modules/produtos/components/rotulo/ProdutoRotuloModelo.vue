@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { caminhoPictogramaResiduo, rotuloRiscoResiduo } from '@/modules/residuos/config/pictogramas'
 import type { TipoRiscoResiduo } from '@/modules/residuos/types/residuo'
 import type { OrgaoFiscalizadorProduto, ProdutoRotuloResponse } from '@/modules/produtos/types/produtoRotulo'
@@ -130,7 +129,7 @@ function textoEnum(valor: string | null) {
           <strong>{{ dados.orgaosFiscalizadores.map(orgaoRotulo).join(' / ') || 'Fiscalizado' }}</strong>
         </div>
         <div v-else class="sgl-brand" aria-label="Catálogo SGL">
-          <img :src="logoSgl" alt="SGL — Sistema de Gestão de Laboratórios" />
+          <img src="/assets/residuos/marcas/sgl-logo.png.png" alt="SGL — Sistema de Gestão de Laboratórios" />
         </div>
       </footer>
     </article>
