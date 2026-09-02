@@ -3,6 +3,7 @@ export type TipoBolsaEstagiario =
   | 'BOLSA_CAPES'
   | 'BOLSA_INSTITUCIONAL'
   | 'VOLUNTARIO'
+  | 'CONTRATUAL'
 
 export interface EstagiarioResponse {
   id: string
