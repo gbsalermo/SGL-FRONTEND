@@ -11,12 +11,36 @@ import type {
   TipoRiscoResiduo,
 } from '@/modules/residuos/types/residuo'
 
-const props = defineProps<{
+const LARGURA_BASE_MM = 180
+const ALTURA_BASE_MM = 108
+const LARGURA_MINIMA_MM = 70
+const LARGURA_MAXIMA_MM = 190
+
+const props = withDefaults(defineProps<{
   dados: RotuloResiduoResponse
-}>()
+  larguraMm?: number
+}>(), {
+  larguraMm: LARGURA_BASE_MM,
+})
 
 const pictogramasComErro = ref<Set<TipoRiscoResiduo>>(new Set())
 const logoComErro = ref(false)
+
+const larguraNormalizada = computed(() =>
+  Math.min(LARGURA_MAXIMA_MM, Math.max(LARGURA_MINIMA_MM, props.larguraMm)),
+)
+
+const escalaRotulo = computed(() => larguraNormalizada.value / LARGURA_BASE_MM)
+const alturaRotuloMm = computed(() => ALTURA_BASE_MM * escalaRotulo.value)
+
+const estiloMoldura = computed(() => ({
+  width: `${larguraNormalizada.value}mm`,
+  height: `${alturaRotuloMm.value}mm`,
+}))
+
+const estiloRotulo = computed(() => ({
+  transform: `scale(${escalaRotulo.value})`,
+}))
 
 const riscosVisiveis = computed(() =>
   props.dados.riscos.filter((risco) => risco !== 'NENHUM'),
@@ -78,119 +102,127 @@ function unidadeLegivel(valor: string) {
 </script>
 
 <template>
-  <article class="residuo-label" aria-label="Modelo de rótulo do resíduo">
-    <header class="label-header">
-      <div class="label-identification">
-        <p class="label-kicker">RESÍDUO LABORATORIAL</p>
-        <h2>{{ componentePrincipal }}</h2>
-        <strong>{{ dados.codigoRastreio }}</strong>
-      </div>
+  <div class="label-size-frame" :style="estiloMoldura">
+    <article class="residuo-label" :style="estiloRotulo" aria-label="Modelo de rótulo do resíduo">
+      <header class="label-header">
+        <div class="label-identification">
+          <p class="label-kicker">RESÍDUO LABORATORIAL</p>
+          <h2>{{ componentePrincipal }}</h2>
+          <strong>{{ dados.codigoRastreio }}</strong>
+        </div>
 
-      <div class="label-origin">
-        <strong>SGL — Sistema de Gestão de Laboratórios</strong>
-        <span>{{ dados.laboratorioNome }}</span>
-        <span>Gerador: {{ dados.geradorNome }}</span>
-        <span>Rotulagem: {{ formatarData(dados.dataRotulagem) }}</span>
-      </div>
-    </header>
+        <div class="label-origin">
+          <strong>SGL — Sistema de Gestão de Laboratórios</strong>
+          <span>{{ dados.laboratorioNome }}</span>
+          <span>Gerador: {{ dados.geradorNome }}</span>
+          <span>Rotulagem: {{ formatarData(dados.dataRotulagem) }}</span>
+        </div>
+      </header>
 
-    <div class="label-body">
-      <aside class="label-hazards" aria-label="Pictogramas de periculosidade">
-        <p>Pictogramas</p>
+      <div class="label-body">
+        <aside class="label-hazards" aria-label="Pictogramas de periculosidade">
+          <p>Pictogramas</p>
 
-        <div v-if="riscosVisiveis.length" class="hazard-grid">
-          <div v-for="risco in riscosVisiveis" :key="risco" class="hazard-item">
-            <img
-              v-if="caminhoPictograma(risco) && !pictogramaFalhou(risco)"
-              :src="caminhoPictograma(risco) ?? undefined"
-              :alt="rotuloRiscoResiduo(risco)"
-              @error="registrarErroPictograma(risco)"
-            />
-            <div v-else class="hazard-fallback" aria-hidden="true">
-              <span>!</span>
+          <div v-if="riscosVisiveis.length" class="hazard-grid">
+            <div v-for="risco in riscosVisiveis" :key="risco" class="hazard-item">
+              <img
+                v-if="caminhoPictograma(risco) && !pictogramaFalhou(risco)"
+                :src="caminhoPictograma(risco) ?? undefined"
+                :alt="rotuloRiscoResiduo(risco)"
+                @error="registrarErroPictograma(risco)"
+              />
+              <div v-else class="hazard-fallback" aria-hidden="true">
+                <span>!</span>
+              </div>
+              <small>{{ rotuloRiscoResiduo(risco) }}</small>
             </div>
-            <small>{{ rotuloRiscoResiduo(risco) }}</small>
           </div>
-        </div>
 
-        <div v-else class="no-hazard">Sem pictograma aplicável</div>
-      </aside>
+          <div v-else class="no-hazard">Sem pictograma aplicável</div>
+        </aside>
 
-      <section class="label-information">
-        <div class="risk-heading">
-          <span>NÍVEL DE RISCO CONFIRMADO</span>
-          <h3>{{ nivelRisco }}</h3>
-        </div>
+        <section class="label-information">
+          <div class="risk-heading">
+            <span>NÍVEL DE RISCO CONFIRMADO</span>
+            <h3>{{ nivelRisco }}</h3>
+          </div>
 
-        <div class="label-section">
-          <h4>Advertências de perigo</h4>
-          <p v-if="riscosVisiveis.length">
-            {{ riscosVisiveis.map(rotuloRiscoResiduo).join(' · ') }}
+          <div class="label-section">
+            <h4>Advertências de perigo</h4>
+            <p v-if="riscosVisiveis.length">
+              {{ riscosVisiveis.map(rotuloRiscoResiduo).join(' · ') }}
+            </p>
+            <p v-else>Nenhum risco específico confirmado pela Gestão.</p>
+          </div>
+
+          <div class="label-section">
+            <h4>Composição informada</h4>
+            <p>{{ composicao }}</p>
+          </div>
+
+          <div class="label-section label-section--compact">
+            <div>
+              <h4>Processo de origem</h4>
+              <p>{{ dados.processoOrigem }}</p>
+            </div>
+            <div>
+              <h4>Recipiente</h4>
+              <p>{{ dados.recipiente }}</p>
+            </div>
+          </div>
+
+          <div class="label-section label-section--compact">
+            <div>
+              <h4>Armazenamento temporário</h4>
+              <p>{{ dados.localArmazenamentoTemporario || 'Não informado' }}</p>
+            </div>
+            <div>
+              <h4>Destino previsto</h4>
+              <p>{{ dados.destinoFinalPrevisto || 'Não informado' }}</p>
+            </div>
+          </div>
+
+          <p v-if="dados.dataPrevistaDespacho" class="dispatch-date">
+            Despacho previsto: <strong>{{ formatarData(dados.dataPrevistaDespacho) }}</strong>
           </p>
-          <p v-else>Nenhum risco específico confirmado pela Gestão.</p>
-        </div>
-
-        <div class="label-section">
-          <h4>Composição informada</h4>
-          <p>{{ composicao }}</p>
-        </div>
-
-        <div class="label-section label-section--compact">
-          <div>
-            <h4>Processo de origem</h4>
-            <p>{{ dados.processoOrigem }}</p>
-          </div>
-          <div>
-            <h4>Recipiente</h4>
-            <p>{{ dados.recipiente }}</p>
-          </div>
-        </div>
-
-        <div class="label-section label-section--compact">
-          <div>
-            <h4>Armazenamento temporário</h4>
-            <p>{{ dados.localArmazenamentoTemporario || 'Não informado' }}</p>
-          </div>
-          <div>
-            <h4>Destino previsto</h4>
-            <p>{{ dados.destinoFinalPrevisto || 'Não informado' }}</p>
-          </div>
-        </div>
-
-        <p v-if="dados.dataPrevistaDespacho" class="dispatch-date">
-          Despacho previsto: <strong>{{ formatarData(dados.dataPrevistaDespacho) }}</strong>
-        </p>
-      </section>
-    </div>
-
-    <footer class="label-footer">
-      <div class="embrapa-brand">
-        <img
-          v-if="!logoComErro"
-          src="/assets/residuos/marcas/embrapa.svg"
-          alt="Embrapa"
-          @error="logoComErro = true"
-        />
-        <strong v-else>EMBRAPA</strong>
+        </section>
       </div>
 
-      <div class="label-description">
-        <span>Descrição</span>
-        <strong>{{ dados.descricao }}</strong>
-      </div>
+      <footer class="label-footer">
+        <div class="embrapa-brand">
+          <img
+            v-if="!logoComErro"
+            src="/assets/residuos/marcas/embrapa.png"
+            alt="Embrapa"
+            @error="logoComErro = true"
+          />
+          <strong v-else>EMBRAPA</strong>
+        </div>
 
-      <div class="nominal-quantity">
-        <span>Quantidade</span>
-        <strong>{{ dados.quantidade }} {{ unidadeLegivel(dados.unidadeMedida) }}</strong>
-      </div>
-    </footer>
-  </article>
+        <div class="label-description">
+          <span>Descrição</span>
+          <strong>{{ dados.descricao }}</strong>
+        </div>
+
+        <div class="nominal-quantity">
+          <span>Quantidade</span>
+          <strong>{{ dados.quantidade }} {{ unidadeLegivel(dados.unidadeMedida) }}</strong>
+        </div>
+      </footer>
+    </article>
+  </div>
 </template>
 
 <style scoped>
+.label-size-frame {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
 .residuo-label {
   width: 180mm;
-  min-height: 108mm;
+  height: 108mm;
   display: flex;
   flex-direction: column;
   padding: 7mm;
@@ -199,6 +231,7 @@ function unidadeLegivel(valor: string) {
   color: #111827;
   font-family: Arial, Helvetica, sans-serif;
   box-sizing: border-box;
+  transform-origin: top left;
 }
 
 .label-header {
@@ -253,6 +286,7 @@ function unidadeLegivel(valor: string) {
   grid-template-columns: 45mm minmax(0, 1fr);
   gap: 6mm;
   padding: 5mm 0;
+  min-height: 0;
 }
 
 .label-hazards {
@@ -319,6 +353,7 @@ function unidadeLegivel(valor: string) {
   display: flex;
   flex-direction: column;
   gap: 3mm;
+  min-height: 0;
 }
 
 .risk-heading span,
@@ -368,15 +403,17 @@ function unidadeLegivel(valor: string) {
 .embrapa-brand {
   min-height: 12mm;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .embrapa-brand img {
   display: block;
+  width: auto;
   max-width: 32mm;
   max-height: 11mm;
   object-fit: contain;
-  object-position: left bottom;
+  object-position: left center;
 }
 
 .embrapa-brand strong { font-size: 12pt; letter-spacing: .05em; }
@@ -406,27 +443,13 @@ function unidadeLegivel(valor: string) {
   white-space: nowrap;
 }
 
-@media (max-width: 850px) {
-  .residuo-label {
-    width: 100%;
-    min-height: 0;
-    padding: 20px;
+@media print {
+  .label-size-frame {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
-  .label-header,
-  .label-body,
-  .label-footer { grid-template-columns: 1fr; }
-
-  .label-hazards { padding: 0 0 18px; border-right: 0; border-bottom: 1px solid #cbd5e1; }
-  .hazard-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .nominal-quantity { text-align: left; }
-}
-
-@media print {
   .residuo-label {
-    width: 180mm;
-    min-height: 108mm;
-    break-inside: avoid;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
