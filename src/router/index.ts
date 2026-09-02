@@ -34,7 +34,13 @@ export const router = createRouter({
     {
       path: '/residuos/:id/rotulo',
       name: 'gestao-residuo-rotulo',
-      component: () => import('@/modules/residuos/views/gestao/RotuloResiduoView.vue'),
+      component: () => import('@/modules/residuos/views/gestao/RotuloResiduoAjustadoView.vue'),
+      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+    },
+    {
+      path: '/produtos/:id/rotulo',
+      name: 'gestao-produto-rotulo',
+      component: () => import('@/modules/produtos/views/RotuloProdutoView.vue'),
       meta: { requiresSession: true, perfis: PERFIS_GESTAO },
     },
     {
