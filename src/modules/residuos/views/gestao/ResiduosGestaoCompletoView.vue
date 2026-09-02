@@ -137,7 +137,35 @@ function acaoHistorico(acao: string) {
 function atualizarResiduo(atualizado: ResiduoResponse) {
   const index = residuos.value.findIndex((item) => item.id === atualizado.id)
   if (index >= 0) residuos.value[index] = atualizado
-  selecionado.value = atualizado
+}
+
+function limparSelecaoOperacional() {
+  selecionado.value = null
+  historico.value = []
+}
+
+function fecharRecebimento() {
+  if (enviando.value) return
+  recebimentoAberto.value = false
+  limparSelecaoOperacional()
+}
+
+function fecharAnalise() {
+  if (enviando.value) return
+  analiseAberta.value = false
+  limparSelecaoOperacional()
+}
+
+function fecharArmazenamento() {
+  if (enviando.value) return
+  armazenamentoAberto.value = false
+  limparSelecaoOperacional()
+}
+
+function fecharDespacho() {
+  if (enviando.value) return
+  despachoAberto.value = false
+  limparSelecaoOperacional()
 }
 
 async function carregar() {
@@ -173,8 +201,7 @@ async function abrirDetalhes(residuo: ResiduoResponse) {
 }
 
 function fecharDetalhes() {
-  selecionado.value = null
-  historico.value = []
+  limparSelecaoOperacional()
 }
 
 function abrirRecebimento(residuo: ResiduoResponse) {
@@ -197,7 +224,7 @@ async function confirmarRecebimento() {
     })
     atualizarResiduo(atualizado)
     recebimentoAberto.value = false
-    await carregarHistorico(atualizado.id)
+    limparSelecaoOperacional()
     sucesso.value = 'Recebimento registrado. O resíduo agora está em análise.'
   } catch (error) {
     erro.value = mensagemErro(error)
@@ -255,7 +282,7 @@ async function confirmarAnalise() {
     const atualizado = await residuoService.analisarELiberar(selecionado.value.id, payload)
     atualizarResiduo(atualizado)
     analiseAberta.value = false
-    await carregarHistorico(atualizado.id)
+    limparSelecaoOperacional()
     sucesso.value = `Análise concluída. Código ${atualizado.codigoRastreio ?? 'gerado'} disponível para o rótulo.`
   } catch (error) {
     erro.value = mensagemErro(error)
@@ -284,7 +311,7 @@ async function confirmarArmazenamento() {
     })
     atualizarResiduo(atualizado)
     armazenamentoAberto.value = false
-    await carregarHistorico(atualizado.id)
+    limparSelecaoOperacional()
     sucesso.value = 'Armazenamento temporário confirmado.'
   } catch (error) {
     erro.value = mensagemErro(error)
@@ -320,7 +347,7 @@ async function confirmarDespacho() {
     })
     atualizarResiduo(atualizado)
     despachoAberto.value = false
-    await carregarHistorico(atualizado.id)
+    limparSelecaoOperacional()
     sucesso.value = 'Despacho confirmado. O ciclo operacional do resíduo foi encerrado.'
   } catch (error) {
     erro.value = mensagemErro(error)
@@ -505,21 +532,21 @@ onMounted(carregar)
       </aside>
     </div>
 
-    <div v-if="recebimentoAberto && selecionado" class="modal-backdrop" @click.self="recebimentoAberto = false">
+    <div v-if="recebimentoAberto && selecionado" class="modal-backdrop" @click.self="fecharRecebimento">
       <section class="modal-card" role="dialog" aria-modal="true" aria-label="Receber resíduo">
-        <header><div><span>RECEBIMENTO</span><h2>Confirmar chegada à Gestão</h2></div><button type="button" @click="recebimentoAberto = false">×</button></header>
+        <header><div><span>RECEBIMENTO</span><h2>Confirmar chegada à Gestão</h2></div><button type="button" @click="fecharRecebimento">×</button></header>
         <div class="modal-content">
           <div class="selected-summary"><strong>{{ selecionado.descricao }}</strong><span>{{ selecionado.laboratorioNome }} · {{ selecionado.usuarioGeradorNome }}</span></div>
           <label class="field"><span>Observação do recebimento <small>(opcional)</small></span><textarea v-model="observacaoRecebimento" rows="4" /></label>
           <p class="guidance">Esta ação altera o status para <b>Em análise</b>. A classificação de risco permanece como originalmente informada até a análise técnica.</p>
         </div>
-        <footer><button class="secondary-action" type="button" @click="recebimentoAberto = false">Cancelar</button><button class="primary-action" type="button" :disabled="enviando" @click="confirmarRecebimento">{{ enviando ? 'Registrando...' : 'Confirmar recebimento' }}</button></footer>
+        <footer><button class="secondary-action" type="button" @click="fecharRecebimento">Cancelar</button><button class="primary-action" type="button" :disabled="enviando" @click="confirmarRecebimento">{{ enviando ? 'Registrando...' : 'Confirmar recebimento' }}</button></footer>
       </section>
     </div>
 
-    <div v-if="analiseAberta && selecionado" class="modal-backdrop" @click.self="analiseAberta = false">
+    <div v-if="analiseAberta && selecionado" class="modal-backdrop" @click.self="fecharAnalise">
       <section class="modal-card modal-card--large" role="dialog" aria-modal="true" aria-label="Analisar e classificar resíduo">
-        <header><div><span>ANÁLISE TÉCNICA</span><h2>Classificar e liberar resíduo</h2></div><button type="button" @click="analiseAberta = false">×</button></header>
+        <header><div><span>ANÁLISE TÉCNICA</span><h2>Classificar e liberar resíduo</h2></div><button type="button" @click="fecharAnalise">×</button></header>
         <div class="modal-content analysis-content">
           <div class="declaration-reference">
             <div><span>Informado pelo laboratório</span><strong>Risco {{ formatarEnum(selecionado.nivelRiscoInformado) }}</strong><p>{{ selecionado.riscosInformados.map(formatarEnum).join(' · ') }}</p></div>
@@ -537,32 +564,32 @@ onMounted(carregar)
           <label class="field"><span>Observação técnica <small>(opcional)</small></span><textarea v-model="observacaoGestor" rows="4" /></label>
           <p class="guidance guidance--warning">Ao confirmar, o resíduo é liberado para armazenamento e o código de rastreio do rótulo é gerado.</p>
         </div>
-        <footer><button class="secondary-action" type="button" @click="analiseAberta = false">Cancelar</button><button class="analysis-action" type="button" :disabled="enviando" @click="confirmarAnalise">{{ enviando ? 'Salvando...' : 'Confirmar classificação' }}</button></footer>
+        <footer><button class="secondary-action" type="button" @click="fecharAnalise">Cancelar</button><button class="analysis-action" type="button" :disabled="enviando" @click="confirmarAnalise">{{ enviando ? 'Salvando...' : 'Confirmar classificação' }}</button></footer>
       </section>
     </div>
 
-    <div v-if="armazenamentoAberto && selecionado" class="modal-backdrop" @click.self="armazenamentoAberto = false">
+    <div v-if="armazenamentoAberto && selecionado" class="modal-backdrop" @click.self="fecharArmazenamento">
       <section class="modal-card" role="dialog" aria-modal="true" aria-label="Confirmar armazenamento temporário">
-        <header><div><span>ARMAZENAMENTO</span><h2>Confirmar armazenamento temporário</h2></div><button type="button" @click="armazenamentoAberto = false">×</button></header>
+        <header><div><span>ARMAZENAMENTO</span><h2>Confirmar armazenamento temporário</h2></div><button type="button" @click="fecharArmazenamento">×</button></header>
         <div class="modal-content">
           <div class="selected-summary"><strong>{{ selecionado.codigoRastreio }}</strong><span>{{ selecionado.descricao }}</span></div>
           <label class="field"><span>Local de armazenamento</span><input v-model="localArmazenamentoConfirmacao" placeholder="Local físico do recipiente" /></label>
           <p class="guidance">Confirme o local físico onde o recipiente rotulado foi armazenado. É possível corrigir o local definido na análise.</p>
         </div>
-        <footer><button class="secondary-action" type="button" @click="armazenamentoAberto = false">Cancelar</button><button class="storage-action" type="button" :disabled="enviando" @click="confirmarArmazenamento">{{ enviando ? 'Confirmando...' : 'Confirmar armazenamento' }}</button></footer>
+        <footer><button class="secondary-action" type="button" @click="fecharArmazenamento">Cancelar</button><button class="storage-action" type="button" :disabled="enviando" @click="confirmarArmazenamento">{{ enviando ? 'Confirmando...' : 'Confirmar armazenamento' }}</button></footer>
       </section>
     </div>
 
-    <div v-if="despachoAberto && selecionado" class="modal-backdrop" @click.self="despachoAberto = false">
+    <div v-if="despachoAberto && selecionado" class="modal-backdrop" @click.self="fecharDespacho">
       <section class="modal-card" role="dialog" aria-modal="true" aria-label="Confirmar despacho">
-        <header><div><span>DESPACHO</span><h2>Confirmar destinação do resíduo</h2></div><button type="button" @click="despachoAberto = false">×</button></header>
+        <header><div><span>DESPACHO</span><h2>Confirmar destinação do resíduo</h2></div><button type="button" @click="fecharDespacho">×</button></header>
         <div class="modal-content">
           <div class="selected-summary"><strong>{{ selecionado.codigoRastreio }}</strong><span>{{ selecionado.descricao }}</span></div>
           <label class="field"><span>Destino final confirmado</span><input v-model="destinoFinalConfirmado" placeholder="Empresa, unidade ou destino responsável" /></label>
           <label class="field field--spaced"><span>Observação <small>(opcional)</small></span><textarea v-model="observacaoDespacho" rows="4" /></label>
           <p class="guidance guidance--warning">O despacho encerra o ciclo operacional do resíduo no SGL e fica registrado no histórico.</p>
         </div>
-        <footer><button class="secondary-action" type="button" @click="despachoAberto = false">Cancelar</button><button class="dispatch-action" type="button" :disabled="enviando" @click="confirmarDespacho">{{ enviando ? 'Confirmando...' : 'Confirmar despacho' }}</button></footer>
+        <footer><button class="secondary-action" type="button" @click="fecharDespacho">Cancelar</button><button class="dispatch-action" type="button" :disabled="enviando" @click="confirmarDespacho">{{ enviando ? 'Confirmando...' : 'Confirmar despacho' }}</button></footer>
       </section>
     </div>
   </section>
