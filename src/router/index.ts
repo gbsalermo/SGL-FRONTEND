@@ -96,6 +96,11 @@ export const router = createRouter({
           component: () => import('@/modules/movimentacoes/views/MovimentacoesGestaoView.vue'),
         },
         {
+          path: 'estagiarios',
+          name: 'gestao-estagiarios',
+          component: () => import('@/modules/estagiarios/views/EstagiariosGestaoView.vue'),
+        },
+        {
           path: 'residuos',
           name: 'gestao-residuos',
           component: () => import('@/modules/residuos/views/gestao/ResiduosGestaoCompletoView.vue'),
