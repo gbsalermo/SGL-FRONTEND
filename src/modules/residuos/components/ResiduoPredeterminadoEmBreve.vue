@@ -33,7 +33,7 @@ onBeforeUnmount(() => observer?.disconnect())
 <template>
   <Teleport v-if="alvoCadastrosDisponivel" to=".tabs-card">
     <button
-      class="tab-button residuo-modelo-admin-tab"
+      class="residuo-modelo-admin-tab"
       type="button"
       disabled
       aria-disabled="true"
@@ -86,15 +86,19 @@ onBeforeUnmount(() => observer?.disconnect())
 
 <style>
 .residuo-modelo-admin-tab {
-  cursor: not-allowed !important;
-  opacity: .72;
-  border-style: dashed !important;
-  background: #fafbfc !important;
-}
-
-.residuo-modelo-admin-tab:hover {
-  border-color: #e0e6ef !important;
-  background: #fafbfc !important;
+  width: 100%;
+  min-height: 66px;
+  display: grid;
+  gap: 3px;
+  padding: 11px 12px;
+  border: 1px dashed #d6dee9;
+  border-radius: 7px;
+  background: #fafbfc;
+  color: #536178;
+  font: inherit;
+  text-align: left;
+  cursor: not-allowed;
+  opacity: .78;
 }
 
 .residuo-modelo-admin-tab__topline {
@@ -105,17 +109,18 @@ onBeforeUnmount(() => observer?.disconnect())
 }
 
 .residuo-modelo-admin-tab__topline strong {
+  color: #41516a;
   font-size: 12px;
 }
 
 .residuo-modelo-admin-tab__topline small {
-  margin: 0 !important;
+  margin: 0;
   padding: 3px 6px;
   border-radius: 999px;
   background: #eef1f5;
-  color: #758196 !important;
-  font-size: 7px !important;
-  font-weight: 900 !important;
+  color: #758196;
+  font-size: 7px;
+  font-weight: 900;
   letter-spacing: .05em;
 }
 
