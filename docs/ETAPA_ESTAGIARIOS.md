@@ -4,20 +4,18 @@
 **Branch backend:** `feat/estagiarios-v2`  
 **Base:** `main` atual, já contendo o módulo de Resíduos mergeado.
 
-## Objetivo oficial
-
-Concluir a gestão operacional dos vínculos de estágio antes de iniciar Administração → Cadastros.
+## Estado
 
 ```text
 1. Listagem                         ✅ implementado
 2. Cadastro                         ✅ implementado
 3. Edição                           ✅ implementado
-4. Vínculo com laboratório/unidade  ✅ aplicado no cadastro/edição
-5. Período de estágio               ✅ aplicado no cadastro/edição
-6. Encerramento de estágio          ⏳ próximo bloco
+4. Vínculo com laboratório/unidade  ✅ implementado
+5. Período de estágio               ✅ implementado
+6. Encerramento de estágio          ✅ implementado
 ```
 
-A interface desta etapa é deliberadamente simples: trata-se principalmente de uma área de consulta, auditoria e manutenção do vínculo, sem necessidade de acabamento visual equivalente aos fluxos operacionais de Pedidos ou Resíduos.
+A interface é deliberadamente simples porque esta área tem finalidade principal de consulta, auditoria e manutenção de vínculo.
 
 ## Contrato backend
 
@@ -26,8 +24,6 @@ Base:
 ```text
 /api/v1/estagiarios
 ```
-
-Endpoints usados:
 
 ```text
 GET  /api/v1/estagiarios
@@ -46,11 +42,12 @@ O backend valida:
 - laboratório e usuário devem pertencer à mesma unidade;
 - data final não pode ser anterior à data inicial;
 - usuário vinculado não pode ser trocado durante edição;
-- estágio já encerrado não pode ser encerrado novamente.
+- estágio já encerrado não pode ser encerrado novamente;
+- estágio não pode ser encerrado antes da data de início.
 
 ## Tipos de vínculo
 
-O campo técnico continua chamado `tipoBolsa` por compatibilidade com o domínio atual, mas a interface usa **Tipo de vínculo**, pois nem todos os casos representam bolsa.
+O campo técnico continua chamado `tipoBolsa` por compatibilidade, enquanto a interface usa **Tipo de vínculo**.
 
 ```text
 BOLSA_CNPQ
@@ -60,87 +57,90 @@ VOLUNTARIO
 CONTRATUAL
 ```
 
-`CONTRATUAL` representa estágio empregatício/contratual sem conexão com bolsa ou voluntariado.
+`CONTRATUAL` representa estágio empregatício/contratual sem conexão com bolsa ou voluntariado. Como o enum é persistido com `EnumType.STRING` em coluna textual, não exige migration.
 
-Como o enum é persistido com `EnumType.STRING` em coluna textual, a inclusão de `CONTRATUAL` não exige migration de banco.
+## Vínculo institucional
 
-## Listagem
-
-Rota:
+A resposta de Estagiários expõe explicitamente:
 
 ```text
-/estagiarios
+unidadeId
+unidadeNome
+laboratorioId
+laboratorioNome
 ```
 
-Acesso atual:
+Na criação e edição:
 
 ```text
-GESTOR
-ADMINISTRADOR
+usuário ESTAGIARIO
+→ identifica a unidade do usuário
+→ lista apenas laboratórios ativos dessa unidade
+→ frontend valida compatibilidade
+→ backend valida novamente a mesma regra
 ```
 
-Funcionalidades:
+A unidade aparece na tabela, no detalhe e no formulário como dado de auditoria.
 
-- total de ativos e encerrados;
-- vínculos terminando em até 30 dias;
-- ativos sem data final;
-- busca textual;
-- filtro por status;
-- filtro por laboratório;
-- filtro por tipo de vínculo;
-- detalhe lateral do vínculo;
-- visualização do período e observações.
+## Período de estágio
 
-## Cadastro
-
-O botão **Novo estágio** abre formulário simples com:
+A interface registra e exibe:
 
 ```text
-usuário estagiário
-laboratório
 data de início
-data de fim prevista (opcional)
-tipo de vínculo
-observação
+data de fim prevista/efetiva
+quantidade de dias de vínculo
+situação do período
 ```
 
-Regras da UI:
-
-- lista somente usuários ativos com perfil `ESTAGIARIO`;
-- não oferece usuário que já possui vínculo de estágio;
-- depois da escolha do usuário, oferece somente laboratórios ativos da mesma unidade;
-- valida período antes do envio;
-- envia `ativo=true` no novo vínculo.
-
-## Edição
-
-A edição pode ser aberta pela tabela ou pelo detalhe.
-
-O usuário vinculado fica bloqueado, respeitando a regra do backend. Podem ser alterados:
+Indicadores de auditoria:
 
 ```text
-laboratório da mesma unidade
-início
-fim previsto
-tipo de vínculo
-observação
+ativos
+terminando em até 30 dias
+prazo vencido ainda ativo
+encerrados
 ```
 
-## Próxima validação
+A tabela e o detalhe informam quando o término está próximo, vencido ou quando não existe data final definida.
+
+## Encerramento
+
+A ação **Encerrar estágio** aparece somente para vínculos ativos.
+
+Fluxo:
+
+```text
+usuário escolhe Encerrar
+→ modal de confirmação
+→ PUT /api/v1/estagiarios/{id}/encerrar
+→ ativo = false
+→ dataFimEstagio = data atual
+→ histórico permanece na listagem como ENCERRADO
+```
+
+A data final planejada é substituída pela data efetiva quando o encerramento é confirmado, evitando vínculo inativo com data final futura.
+
+## Validação final da etapa
 
 Validar localmente:
 
 ```text
-menu Estagiários abre /estagiarios
-listagem e filtros funcionam
-Novo estágio lista somente usuários ESTAGIARIO elegíveis
-laboratórios respeitam a unidade do usuário
-cadastro persiste e aparece na tabela
-CONTRATUAL é aceito e exibido corretamente
-edição mantém usuário bloqueado
-edição persiste laboratório/período/vínculo/observação
-fechar/cancelar modal volta para a listagem sem abrir drawer
-layout continua legível em 100%
+1. listagem e filtros
+2. unidade e laboratório aparecem corretamente
+3. Novo estágio lista somente usuários ESTAGIARIO elegíveis
+4. laboratório fica restrito à unidade do usuário
+5. cadastrar vínculo normal
+6. cadastrar vínculo CONTRATUAL
+7. editar laboratório/período/tipo/observação
+8. data final anterior ao início é rejeitada
+9. indicador de término em até 30 dias
+10. indicador de prazo vencido ainda ativo
+11. abrir Encerrar e cancelar
+12. confirmar Encerrar
+13. registro passa para ENCERRADO
+14. data final passa a ser a data efetiva do encerramento
+15. tentativa de encerrar novamente é impedida
 ```
 
-Após aprovação, seguir somente para **Encerramento de estágio**.
+Após esta validação, a etapa de **Estagiários** pode ser encerrada e o roadmap segue para **Administração → Cadastros**.
