@@ -304,7 +304,7 @@ onMounted(carregarDados)
         <h2>Registro enviado para a Gestão</h2>
         <p>O resíduo foi registrado como <strong>INFORMADO</strong>. A classificação técnica final será realizada pela Gestão sem alterar sua declaração original.</p>
         <div class="success-meta">
-          <div><small>Identificador</small><strong>{{ resultado.id }}</strong></div>
+          <div><small>Código SGL</small><strong>{{ resultado.codigoRastreio ?? 'Código indisponível' }}</strong></div>
           <div><small>Data</small><strong>{{ formatarData(resultado.dataInformacao) }}</strong></div>
           <div><small>Componentes</small><strong>{{ resultado.componentes.length }}</strong></div>
         </div>
