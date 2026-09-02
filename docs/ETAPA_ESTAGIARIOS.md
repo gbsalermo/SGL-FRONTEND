@@ -121,6 +121,46 @@ usuário escolhe Encerrar
 
 A data final planejada é substituída pela data efetiva quando o encerramento é confirmado, evitando vínculo inativo com data final futura.
 
+## Relatório complementar — Pessoas por laboratório
+
+Antes de seguir para Administração foi incluído um relatório de auditoria institucional para o Gestor identificar todas as pessoas vinculadas a um laboratório, não apenas estagiários.
+
+Rota frontend:
+
+```text
+/relatorios/pessoas-laboratorio
+```
+
+Endpoints:
+
+```text
+GET /api/v1/relatorios/pessoas-laboratorio?laboratorioId=...
+GET /api/v1/relatorios/pessoas-laboratorio/exportar?formato=PDF|XLSX&laboratorioId=...
+```
+
+Filtros opcionais:
+
+```text
+perfil
+ativo
+```
+
+O relatório apresenta:
+
+```text
+laboratório e unidade
+responsável cadastrado do laboratório
+nome e e-mail das pessoas
+perfil: gestor, pesquisador, técnico, analista, estagiário ou administrador
+situação ativa/inativa
+identificação explícita de quem é o responsável
+para estagiários: tipo de vínculo, início e fim do estágio
+totais por perfil
+exportação PDF/XLSX
+```
+
+O responsável é obtido de `Laboratorio.responsavel` e os demais vínculos de `Usuario.laboratorio`. Se o responsável também estiver diretamente vinculado ao laboratório, ele aparece uma única vez, marcado como **Responsável**.
+
 ## Validação final da etapa
 
 Validar localmente:
@@ -141,6 +181,13 @@ Validar localmente:
 13. registro passa para ENCERRADO
 14. data final passa a ser a data efetiva do encerramento
 15. tentativa de encerrar novamente é impedida
+16. Relatórios → Pessoas por laboratório abre normalmente
+17. responsável do laboratório aparece destacado
+18. pesquisadores/técnicos/analistas/estagiários vinculados aparecem por perfil
+19. filtro ativos/inativos/todos funciona
+20. filtro por perfil funciona
+21. estagiário mostra tipo e período do vínculo
+22. PDF e XLSX são gerados com os mesmos filtros
 ```
 
-Após esta validação, a etapa de **Estagiários** pode ser encerrada e o roadmap segue para **Administração → Cadastros**.
+Após esta validação, a etapa de **Estagiários + auditoria de vínculos do laboratório** pode ser encerrada e o roadmap segue para **Administração → Cadastros**.
