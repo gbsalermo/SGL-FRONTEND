@@ -9,6 +9,8 @@ export interface EstagiarioResponse {
   id: string
   usuarioId: string
   usuarioNome: string
+  unidadeId: string | null
+  unidadeNome: string | null
   laboratorioId: string | null
   laboratorioNome: string | null
   dataInicioEstagio: string
