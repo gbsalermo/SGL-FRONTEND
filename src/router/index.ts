@@ -173,8 +173,10 @@ router.beforeEach((to) => {
 
   if (session.autenticado) {
     const perfil = session.usuario?.perfil
-    const perfisPermitidos = to.matched
-      .flatMap((record) => (record.meta.perfis as PerfilUsuario[] | undefined) ?? [])
+    const perfisPermitidos = [...to.matched]
+      .reverse()
+      .map((record) => (record.meta.perfis as PerfilUsuario[] | undefined) ?? [])
+      .find((perfis) => perfis.length > 0) ?? []
 
     if (perfisPermitidos.length > 0 && (!perfil || !perfisPermitidos.includes(perfil))) {
       return rotaInicial()
