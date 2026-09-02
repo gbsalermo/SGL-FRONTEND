@@ -110,20 +110,75 @@ As regras de fiscalização continuam as definidas anteriormente:
 - `fiscalizado=true` exige ao menos um órgão;
 - fiscalização não é inferida automaticamente por risco ou perecibilidade.
 
+### Resíduos pré-determinados — opção em estudo
+
+A central exibe uma opção **Resíduos — em breve**, deliberadamente inativa neste protótipo.
+
+A ideia é permitir que a Gestão cadastre modelos de resíduos recorrentes. O usuário poderia selecionar um modelo já conhecido em **Informar resíduo**, evitando redigitar informações repetitivas.
+
+Se a funcionalidade for ativada, o cadastro do modelo deverá armazenar os dados que hoje são informados manualmente no fluxo de resíduo:
+
+```text
+nome/identificação do modelo
+descrição do resíduo
+processo de origem
+recipiente padrão
+quantidade padrão ou referência de quantidade
+unidade de medida
+nível de risco sugerido
+riscos sugeridos
+composição
+  ├── produtos do catálogo, quando aplicável
+  ├── componentes livres, quando aplicável
+  ├── componente principal
+  ├── concentração/quantidade do componente
+  └── observação do componente
+observação padrão do gerador
+ativo/inativo
+```
+
+A quantidade efetiva deve continuar editável no registro real, porque a quantidade gerada pode variar mesmo quando o tipo de resíduo é recorrente.
+
+Projeto, laboratório e usuário gerador continuam sendo contexto do registro real e não devem ser engessados pelo modelo global, salvo decisão futura de criar modelos restritos por laboratório.
+
+O modelo **não movimenta estoque**. Referências a Produto continuam sendo apenas informativas para composição do resíduo.
+
+A seleção do modelo também não elimina a análise da Gestão: os riscos carregados pelo modelo funcionam como preenchimento inicial e a classificação confirmada continua ocorrendo no fluxo normal.
+
+Regra planejada para **Informar resíduo**, somente se esta opção for ativada:
+
+```text
+produto do catálogo OU resíduo pré-cadastrado
+→ pelo menos um dos dois deve estar selecionado
+
+se resíduo pré-cadastrado for selecionado
+→ produto passa a ser opcional
+
+se produto for selecionado
+→ resíduo pré-cadastrado passa a ser opcional
+```
+
+Componentes livres podem complementar a composição, mas não substituem essa regra mínima se a funcionalidade futura for confirmada.
+
+No protótipo atual a opção permanece desabilitada e **nenhuma validação existente é alterada**.
+
 ## Interface
 
-A central usa quatro abas simples:
+A central usa quatro áreas funcionais e uma opção planejada:
 
 ```text
 Laboratórios
 Projetos
 Produtos
 Permissões
+Resíduos — em breve / inativo
 ```
 
-Cada cadastro tem busca, consulta de ativos, opção de mostrar inativos, criação, edição e ativação/inativação.
+Cada cadastro funcional tem busca, consulta de ativos, opção de mostrar inativos, criação, edição e ativação/inativação.
 
 Não há CRUD de Usuários e não há CRUD de Unidades.
+
+Na tela **Informar resíduo**, a opção de resíduo pré-cadastrado também aparece visualmente como **Em breve**, próxima da composição/produtos, acompanhada da regra futura Produto ou Resíduo. Ela permanece sem ação neste protótipo.
 
 ## Segurança do frontend
 
@@ -151,4 +206,6 @@ A autorização definitiva no backend continua vinculada à futura etapa de aute
 13. alteração de perfil usa somente PUT /usuarios/{id}/perfil
 14. perfil da sessão atual não pode ser alterado pela própria tela
 15. ESTAGIARIO com estágio ativo não pode perder esse perfil
+16. Cadastros mostra Resíduos com indicação Em breve e sem ação
+17. Informar resíduo mostra a opção futura de modelo pré-cadastrado sem alterar o fluxo atual
 ```
