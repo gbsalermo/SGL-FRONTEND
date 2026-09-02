@@ -4,6 +4,7 @@ import type { PerfilUsuario } from '@/modules/auth/types/session'
 import { useSessionStore } from '@/stores/session'
 
 const PERFIS_GESTAO: PerfilUsuario[] = ['GESTOR', 'ADMINISTRADOR']
+const PERFIS_ADMIN: PerfilUsuario[] = ['ADMINISTRADOR']
 const PERFIS_SOLICITANTE: PerfilUsuario[] = ['TECNICO', 'ANALISTA', 'PESQUISADOR', 'ESTAGIARIO']
 
 function ehPerfilGestao(perfil?: PerfilUsuario) {
@@ -119,6 +120,12 @@ export const router = createRouter({
           path: 'relatorios/pessoas-laboratorio',
           name: 'gestao-relatorio-pessoas-laboratorio',
           component: () => import('@/modules/relatorios/views/RelatorioPessoasLaboratorioView.vue'),
+        },
+        {
+          path: 'administracao/cadastros',
+          name: 'admin-cadastros',
+          component: () => import('@/modules/admin/views/CadastrosAdminView.vue'),
+          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
         },
         {
           path: 'solicitacoes/novo',
