@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import '@/modules/admin/styles/cadastros-scale.css'
 import AdminCadastrosNavLink from '@/modules/admin/components/AdminCadastrosNavLink.vue'
+import EstoqueFiltroEmbalagem from '@/modules/estoque/components/EstoqueFiltroEmbalagem.vue'
 import ResiduoPredeterminadoEmBreve from '@/modules/residuos/components/ResiduoPredeterminadoEmBreve.vue'
 import ProdutoRotuloAtalho from '@/modules/produtos/components/ProdutoRotuloAtalho.vue'
 </script>
@@ -11,6 +12,7 @@ import ProdutoRotuloAtalho from '@/modules/produtos/components/ProdutoRotuloAtal
     <ProdutoRotuloAtalho />
     <AdminCadastrosNavLink />
     <ResiduoPredeterminadoEmBreve />
+    <EstoqueFiltroEmbalagem />
   </v-app>
 </template>
 
