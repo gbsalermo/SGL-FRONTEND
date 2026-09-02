@@ -19,6 +19,10 @@ import type {
   RelatorioResiduosFiltros,
   RelatorioResiduosResponse,
 } from '@/modules/relatorios/types/residuoRelatorio'
+import type {
+  RelatorioPessoasLaboratorioFiltros,
+  RelatorioPessoasLaboratorioResponse,
+} from '@/modules/relatorios/types/pessoasLaboratorioRelatorio'
 
 export type FormatoExportacaoRelatorio = 'PDF' | 'XLSX'
 export type TipoRelatorioExportavel =
@@ -29,6 +33,7 @@ export type TipoRelatorioExportavel =
   | 'estoque-lotes'
   | 'residuos'
   | 'fiscalizacao'
+  | 'pessoas-laboratorio'
 
 export interface UltimaConsultaRelatorio {
   tipo: TipoRelatorioExportavel
@@ -92,6 +97,14 @@ export const relatorioService = {
   async listarFiscalizacao(filtros: RelatorioFiscalizacaoFiltros = {}) {
     const { data } = await http.get<RelatorioFiscalizacaoResponse>('/v1/relatorios/fiscalizacao', { params: filtros })
     registrarConsulta('fiscalizacao', filtros)
+    return data
+  },
+
+  async listarPessoasLaboratorio(filtros: RelatorioPessoasLaboratorioFiltros) {
+    const { data } = await http.get<RelatorioPessoasLaboratorioResponse>('/v1/relatorios/pessoas-laboratorio', {
+      params: filtros,
+    })
+    registrarConsulta('pessoas-laboratorio', filtros)
     return data
   },
 

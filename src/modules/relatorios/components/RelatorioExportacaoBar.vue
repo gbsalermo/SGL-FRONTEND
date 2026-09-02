@@ -19,6 +19,7 @@ const nomes: Record<TipoRelatorioExportavel, string> = {
   'estoque-lotes': 'Estoque e lotes',
   residuos: 'Resíduos',
   fiscalizacao: 'Fiscalização',
+  'pessoas-laboratorio': 'Pessoas por laboratório',
 }
 
 const podeExportar = computed(() => Boolean(ultimaConsultaRelatorio.value))

@@ -139,14 +139,13 @@ function sair() {
           <span v-if="!recolhida">Relatórios</span>
         </router-link>
 
-        <div class="gestao-nav__future" title="Estagiários — seção reservada para etapa futura">
+        <router-link to="/estagiarios" title="Estagiários">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="9" cy="8" r="3" />
             <path d="M3 20v-2a6 6 0 0 1 12 0v2M16 7h5M18.5 4.5v5" />
           </svg>
           <span v-if="!recolhida">Estagiários</span>
-          <small v-if="!recolhida">em breve</small>
-        </div>
+        </router-link>
 
         <router-link to="/residuos" title="Resíduos">
           <svg viewBox="0 0 24 24" aria-hidden="true">
