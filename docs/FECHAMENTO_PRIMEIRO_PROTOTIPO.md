@@ -1,31 +1,22 @@
 # Fechamento do Primeiro Protótipo — SGL
 
 **Status:** planejamento oficial de fechamento  
-**Base:** `main` após Relatórios, exportações e 404  
+**Base atual:** `main` após Resíduos, Estagiários, relatórios e exportações  
 **Objetivo:** concluir o frontend operacional e congelar o primeiro protótipo funcional antes da homologação completa.
 
-## Estado da branch `feat/residuos-interface` — 01/09/2026
+## Etapas já concluídas
 
 ```text
-Backend de Resíduos — fluxo base                          ✅ validado
-Frontend — Informar resíduo                               ✅ validado visual/funcionalmente
-Frontend — Meus resíduos                                  🟡 implementado; aguardando validação integrada
-Frontend Gestão — Central de resíduos                     🟡 implementado; aguardando validação integrada
-Frontend Gestão — Recebimento                             🟡 implementado; aguardando validação integrada
-Frontend Gestão — Análise/classificação                   ✅ validado pelo usuário
-Rótulo com código + pictogramas + impressão               🟡 implementado; aguardando validação
-Armazenamento temporário                                  🟡 implementado; aguardando validação
-Despacho / destinação                                     🟡 implementado; aguardando validação
-Histórico visual                                          🟡 implementado; aguardando validação
-Relatório de Resíduos                                     🟡 implementado; aguardando validação
-Exportação PDF / XLSX de Resíduos                         🟡 implementado; aguardando validação
+1. Resíduos                                                   ✅ concluído e mergeado
+2. Estagiários + auditoria de pessoas por laboratório         ✅ concluído e mergeado
+3. Administração → Cadastros                                  🟡 em desenvolvimento
 ```
 
-### Decisão atual sobre o rótulo
+## Decisão atual sobre os rótulos
 
 O QR Code foi retirado da experiência visual do protótipo atual por decisão de produto. O backend pode manter o campo técnico existente sem que ele seja exibido ou impresso.
 
-O rótulo físico usa:
+O rótulo físico de Resíduos usa:
 
 ```text
 código SGL de rastreio
@@ -39,40 +30,42 @@ quantidade
 logo da Embrapa
 ```
 
-Os pictogramas são assets PNG locais em `public/assets/residuos/pictogramas/` e a marca da Embrapa fica em `public/assets/residuos/marcas/embrapa.png`.
+O rótulo de Produto usa os dados do catálogo e destaca explicitamente fiscalização/controle externo quando aplicável.
 
 ## Ordem oficial restante
 
 ```text
-1. Resíduos
-   ├── backend reconciliado com a main
-   ├── frente do usuário comum
-   │   ├── Informar resíduo
-   │   └── Meus resíduos
-   ├── frente da Gestão
-   │   ├── receber
-   │   ├── analisar/classificar
-   │   ├── liberar/rotular
-   │   ├── armazenar temporariamente
-   │   └── despachar/destinar
-   ├── histórico/rastreabilidade
-   ├── rótulo + impressão
-   └── relatório + PDF/XLSX
+1. Resíduos                                                    ✅
 
-2. Estagiários
+2. Estagiários                                                 ✅
    ├── listagem
    ├── cadastro
    ├── edição
    ├── vínculo com laboratório/unidade
    ├── período de estágio
-   └── encerramento de estágio
+   ├── encerramento de estágio
+   └── relatório Pessoas por laboratório
 
-3. Administração → Cadastros
-   ├── Produtos
-   │   └── incluir fiscalização
+3. Administração → Cadastros                                  ← ATUAL
    ├── Laboratórios
+   │   ├── unidade institucional
+   │   ├── responsável
+   │   └── ativação/inativação
    ├── Projetos
-   └── Usuários
+   │   ├── laboratório
+   │   ├── período
+   │   └── ativação/inativação
+   ├── Produtos
+   │   ├── catálogo-base
+   │   ├── riscos/perecibilidade
+   │   ├── fiscalização externa
+   │   └── ativação/inativação
+   └── Permissões
+       └── alterar apenas o perfil de usuários já existentes
+
+   NÃO FAZER NESTA ETAPA:
+   ├── CRUD manual de Usuários
+   └── CRUD manual de Unidades
 
 4. Dashboard
    └── indicadores úteis por perfil, sem duplicar telas operacionais
@@ -102,6 +95,30 @@ Os pictogramas são assets PNG locais em `public/assets/residuos/pictogramas/` e
 9. Homologação completa do protótipo congelado
    └── executar `docs/PLANO_TESTES_PRIMEIRO_PROTOTIPO.md`
 ```
+
+## Regra institucional de Administração → Cadastros
+
+A área de Cadastros repassa e mantém os dados-base necessários ao sistema.
+
+### Usuários
+
+O usuário **não é criado manualmente nesta interface**. O cadastro deverá nascer/sincronizar automaticamente a partir do login institucional quando a autenticação definitiva for integrada.
+
+A única manutenção administrativa prevista sobre usuários nesta etapa é:
+
+```text
+alterar perfil/permissão de acesso
+```
+
+Isso é exclusivo de `ADMINISTRADOR` na interface e usa endpoint específico que não altera nome, e-mail, senha, unidade ou laboratório.
+
+### Unidades
+
+Unidades são dados institucionais e aparecem somente como referência para vínculos e auditoria. Não haverá CRUD manual de Unidade nesta etapa.
+
+### Produtos
+
+Produto é catálogo-base. Estoque, lotes e movimentações continuam em suas áreas operacionais e não devem ser duplicados em Cadastros.
 
 ## Regra para Resíduos
 
@@ -133,24 +150,6 @@ laboratório gera → usuário informa → material chega à Gestão
 ```
 
 `Produto` e `Resíduo` são domínios diferentes. Um componente de resíduo pode referenciar um Produto apenas para rastreabilidade; isso não altera estoque automaticamente.
-
-## Validação integrada pendente do módulo de Resíduos
-
-Antes de considerar a etapa 1 encerrada, validar localmente:
-
-```text
-Meus resíduos e detalhe do usuário
-recebimento pela Gestão
-análise/classificação
-rótulo com código + pictogramas + logo Embrapa
-pré-visualização de impressão sem sidebar/topbar
-confirmação de armazenamento temporário
-confirmação de despacho
-histórico visual com todos os eventos
-relatório filtrável
-exportação PDF
-exportação XLSX
-```
 
 ## Diretrizes de permissões antes da implementação definitiva
 
