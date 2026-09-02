@@ -47,9 +47,8 @@ function atualizarLegenda() {
   if (!selectEmbalagem) return
   const card = selectEmbalagem.closest('.view-card')
   const legenda = card?.querySelector('small')
-  if (legenda) {
-    legenda.textContent = 'A seleção também filtra os lotes exibidos abaixo.'
-  }
+  const texto = 'A seleção também filtra os lotes exibidos abaixo.'
+  if (legenda && legenda.textContent !== texto) legenda.textContent = texto
 }
 
 function removerEstadoVazio() {
@@ -95,8 +94,15 @@ function aplicarFiltro() {
     contador.textContent = String(visiveis)
   }
 
-  removerEstadoVazio()
-  if (filtrarPorEmbalagem && linhas.length > 0 && visiveis === 0) {
+  const estadoVazio = raiz.querySelector('[data-embalagem-empty="true"]')
+  const precisaEstadoVazio = filtrarPorEmbalagem && linhas.length > 0 && visiveis === 0
+
+  if (!precisaEstadoVazio) {
+    estadoVazio?.remove()
+    return
+  }
+
+  if (!estadoVazio) {
     const tbody = raiz.querySelector<HTMLTableSectionElement>('.table-wrap table tbody')
     if (tbody) {
       const linha = document.createElement('tr')
