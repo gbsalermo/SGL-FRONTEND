@@ -4,24 +4,45 @@ import { http } from '@/services/http'
 import type { UsuarioSessao } from '@/modules/auth/types/session'
 
 const STORAGE_KEY = 'sgl.dev-session'
+export const DURACAO_SESSAO_MS = 5 * 60 * 60 * 1000
 
-function carregarSessao(): UsuarioSessao | null {
+interface SessaoPersistida {
+  usuario: UsuarioSessao
+  expiraEm: number
+}
+
+function carregarSessao(): SessaoPersistida | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as UsuarioSessao) : null
+    if (!raw) return null
+
+    const sessao = JSON.parse(raw) as Partial<SessaoPersistida>
+
+    if (!sessao.usuario || typeof sessao.expiraEm !== 'number' || sessao.expiraEm <= Date.now()) {
+      localStorage.removeItem(STORAGE_KEY)
+      return null
+    }
+
+    return {
+      usuario: sessao.usuario,
+      expiraEm: sessao.expiraEm,
+    }
   } catch {
     localStorage.removeItem(STORAGE_KEY)
     return null
   }
 }
 
+const sessaoInicial = carregarSessao()
+
 export const useSessionStore = defineStore('session', {
   state: () => ({
-    usuario: carregarSessao() as UsuarioSessao | null,
+    usuario: sessaoInicial?.usuario ?? null as UsuarioSessao | null,
+    expiraEm: sessaoInicial?.expiraEm ?? null as number | null,
   }),
 
   getters: {
-    autenticado: (state) => Boolean(state.usuario),
+    autenticado: (state) => Boolean(state.usuario && state.expiraEm),
   },
 
   actions: {
@@ -61,13 +82,31 @@ export const useSessionStore = defineStore('session', {
       // Modo temporário de desenvolvimento: o backend ainda não possui endpoint de login.
       // A senha é exigida pela interface, mas não é validada até a etapa oficial de autenticação.
       this.usuario = usuario
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(usuario))
+      this.expiraEm = Date.now() + DURACAO_SESSAO_MS
+
+      const sessao: SessaoPersistida = {
+        usuario,
+        expiraEm: this.expiraEm,
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessao))
 
       return usuario
     },
 
+    expirarSeNecessario() {
+      if (!this.usuario) return false
+
+      if (!this.expiraEm || Date.now() >= this.expiraEm) {
+        this.sair()
+        return true
+      }
+
+      return false
+    },
+
     sair() {
       this.usuario = null
+      this.expiraEm = null
       localStorage.removeItem(STORAGE_KEY)
     },
   },
