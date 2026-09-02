@@ -28,14 +28,25 @@ function tratarCliqueRelatorios(event: MouseEvent) {
 
 <template>
   <div class="relatorios-exportacao-view" @click.capture="tratarCliqueRelatorios">
-    <router-link class="residuos-report-access" to="/relatorios/residuos">
-      <div>
-        <span>RELATÓRIO ATIVO</span>
-        <strong>Resíduos — rastreabilidade completa</strong>
-        <small>Geração, classificação, armazenamento, despacho e exportação PDF/XLSX.</small>
-      </div>
-      <b>Abrir relatório →</b>
-    </router-link>
+    <div class="special-reports">
+      <router-link class="special-report special-report--people" to="/relatorios/pessoas-laboratorio">
+        <div>
+          <span>VÍNCULOS DO LABORATÓRIO</span>
+          <strong>Pessoas por laboratório</strong>
+          <small>Responsável, pesquisadores, estagiários, técnicos, analistas e demais perfis vinculados.</small>
+        </div>
+        <b>Abrir relatório →</b>
+      </router-link>
+
+      <router-link class="special-report special-report--residuos" to="/relatorios/residuos">
+        <div>
+          <span>RELATÓRIO ATIVO</span>
+          <strong>Resíduos — rastreabilidade completa</strong>
+          <small>Geração, classificação, armazenamento, despacho e exportação PDF/XLSX.</small>
+        </div>
+        <b>Abrir relatório →</b>
+      </router-link>
+    </div>
 
     <RelatoriosGestaoView />
     <RelatorioExportacaoBar />
@@ -47,25 +58,35 @@ function tratarCliqueRelatorios(event: MouseEvent) {
   display: none !important;
 }
 
-.residuos-report-access {
+.special-reports {
   max-width: 1440px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 auto 18px;
+}
+.special-report {
+  min-height: 94px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  margin: 0 auto 18px;
   padding: 16px 18px;
-  border: 1px solid #bfd8ca;
   border-radius: 10px;
-  background: #f3faf5;
-  color: #173c2a;
   text-decoration: none;
-  box-shadow: 0 8px 24px rgb(21 92 53 / 5%);
+  box-shadow: 0 8px 24px rgb(21 55 92 / 5%);
 }
-.residuos-report-access > div { display: flex; flex-direction: column; gap: 3px; }
-.residuos-report-access span { color: #187145; font-size: 9px; font-weight: 900; letter-spacing: .07em; }
-.residuos-report-access strong { font-size: 14px; }
-.residuos-report-access small { color: #64786d; font-size: 10px; }
-.residuos-report-access b { color: #176b3b; font-size: 11px; white-space: nowrap; }
-@media (max-width: 650px) { .residuos-report-access { align-items: flex-start; flex-direction: column; } }
+.special-report > div { display: flex; flex-direction: column; gap: 3px; }
+.special-report span { font-size: 9px; font-weight: 900; letter-spacing: .07em; }
+.special-report strong { font-size: 14px; }
+.special-report small { font-size: 10px; line-height: 1.4; }
+.special-report b { font-size: 11px; white-space: nowrap; }
+.special-report--people { border: 1px solid #c8d7ef; background: #f5f8ff; color: #17345f; }
+.special-report--people span, .special-report--people b { color: #2456a8; }
+.special-report--people small { color: #687b99; }
+.special-report--residuos { border: 1px solid #bfd8ca; background: #f3faf5; color: #173c2a; }
+.special-report--residuos span, .special-report--residuos b { color: #187145; }
+.special-report--residuos small { color: #64786d; }
+@media (max-width: 900px) { .special-reports { grid-template-columns: 1fr; } }
+@media (max-width: 650px) { .special-report { align-items: flex-start; flex-direction: column; } }
 </style>
