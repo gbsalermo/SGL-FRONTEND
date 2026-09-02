@@ -128,6 +128,15 @@ export const router = createRouter({
 router.beforeEach((to) => {
   const session = useSessionStore()
 
+  if (session.expirarSeNecessario()) {
+    if (to.path === '/login') return true
+
+    return {
+      path: '/login',
+      query: { motivo: 'sessao-expirada' },
+    }
+  }
+
   if (to.meta.public) {
     if (to.path === '/login' && session.autenticado) {
       return rotaInicial()
