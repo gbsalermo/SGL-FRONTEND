@@ -4,6 +4,7 @@ import type { PerfilUsuario } from '@/modules/auth/types/session'
 import { useSessionStore } from '@/stores/session'
 
 const PERFIS_GESTAO: PerfilUsuario[] = ['GESTOR', 'ADMINISTRADOR']
+const PERFIS_ADMIN: PerfilUsuario[] = ['ADMINISTRADOR']
 const PERFIS_SOLICITANTE: PerfilUsuario[] = ['TECNICO', 'ANALISTA', 'PESQUISADOR', 'ESTAGIARIO']
 
 function ehPerfilGestao(perfil?: PerfilUsuario) {
@@ -121,6 +122,12 @@ export const router = createRouter({
           component: () => import('@/modules/relatorios/views/RelatorioPessoasLaboratorioView.vue'),
         },
         {
+          path: 'administracao/cadastros',
+          name: 'admin-cadastros',
+          component: () => import('@/modules/admin/views/CadastrosAdminView.vue'),
+          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+        },
+        {
           path: 'solicitacoes/novo',
           name: 'gestao-novo-pedido',
           component: () => import('@/modules/pedidos/views/solicitante/NovoPedidoView.vue'),
@@ -166,8 +173,10 @@ router.beforeEach((to) => {
 
   if (session.autenticado) {
     const perfil = session.usuario?.perfil
-    const perfisPermitidos = to.matched
-      .flatMap((record) => (record.meta.perfis as PerfilUsuario[] | undefined) ?? [])
+    const perfisPermitidos = [...to.matched]
+      .reverse()
+      .map((record) => (record.meta.perfis as PerfilUsuario[] | undefined) ?? [])
+      .find((perfis) => perfis.length > 0) ?? []
 
     if (perfisPermitidos.length > 0 && (!perfil || !perfisPermitidos.includes(perfil))) {
       return rotaInicial()
