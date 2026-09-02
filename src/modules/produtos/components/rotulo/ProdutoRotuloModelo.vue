@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { caminhoPictogramaResiduo, rotuloRiscoResiduo } from '@/modules/residuos/config/pictogramas'
 import type { TipoRiscoResiduo } from '@/modules/residuos/types/residuo'
 import type { OrgaoFiscalizadorProduto, ProdutoRotuloResponse } from '@/modules/produtos/types/produtoRotulo'
@@ -124,9 +125,12 @@ function textoEnum(valor: string | null) {
           <span>DESCRIÇÃO</span>
           <strong>{{ dados.descricao || dados.nome }}</strong>
         </div>
-        <div class="control-badge" :class="{ active: dados.fiscalizado }">
-          <span>{{ dados.fiscalizado ? 'CONTROLADO' : 'CATÁLOGO' }}</span>
-          <strong>{{ dados.fiscalizado ? dados.orgaosFiscalizadores.map(orgaoRotulo).join(' / ') || 'Fiscalizado' : 'SGL' }}</strong>
+        <div v-if="dados.fiscalizado" class="control-badge active">
+          <span>CONTROLADO</span>
+          <strong>{{ dados.orgaosFiscalizadores.map(orgaoRotulo).join(' / ') || 'Fiscalizado' }}</strong>
+        </div>
+        <div v-else class="sgl-brand" aria-label="Catálogo SGL">
+          <img :src="logoSgl" alt="SGL — Sistema de Gestão de Laboratórios" />
         </div>
       </footer>
     </article>
@@ -181,5 +185,7 @@ function textoEnum(valor: string | null) {
 .control-badge { padding: 2mm 2.5mm; border: 1px solid #cbd5e1; text-align: center; }
 .control-badge.active { border-color: #b45309; background: #fff8eb; }
 .control-badge strong { display: block; margin-top: .8mm; font-size: 7pt; line-height: 1.2; }
+.sgl-brand { min-width: 38mm; min-height: 13mm; display: flex; align-items: center; justify-content: flex-end; }
+.sgl-brand img { display: block; max-width: 38mm; max-height: 14mm; object-fit: contain; object-position: right center; }
 @media print { .produto-label { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
 </style>
