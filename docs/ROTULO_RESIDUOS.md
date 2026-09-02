@@ -8,8 +8,9 @@
 QR Code                     fora do rótulo nesta etapa
 Código de rastreio          obrigatório
 Pictogramas                 conforme riscos confirmados
-Impressão                   implementada
-Logo Embrapa                canto inferior esquerdo
+Impressão                   implementada em folha A4
+Tamanho do conteúdo         configurável em milímetros
+Logo Embrapa                canto inferior esquerdo, ao lado da descrição
 ```
 
 O campo `qrCodeConteudo` pode continuar existindo no contrato do backend, mas não é renderizado nem impresso no protótipo atual.
@@ -22,11 +23,31 @@ LIBERADO_PARA_ARMAZENAMENTO
 → GET /v1/residuos/{id}/rotulo
 → rota /residuos/{id}/rotulo
 → ResiduoRotuloModelo
+→ escolher tamanho físico do rótulo
 → pré-visualização sem sidebar/topbar
 → Imprimir rótulo
 ```
 
 A rota de impressão é independente do `GestaoLayout` justamente para que menus e barra superior não apareçam no papel.
+
+## Tamanho físico e folha A4
+
+A folha de impressão permanece A4 em modo retrato, com margem de 10 mm. O usuário controla apenas o tamanho físico do conteúdo do rótulo.
+
+O modelo-base possui proporção `180 × 108 mm`. A alteração de tamanho preserva essa proporção para evitar deformação de textos, pictogramas e marca.
+
+Presets iniciais:
+
+```text
+Pequeno       90 × 54 mm
+Médio        135 × 81 mm
+Grande       180 × 108 mm
+Máx. A4      190 × 114 mm aproximadamente
+```
+
+Também existe controle personalizado de largura entre `70 mm` e `190 mm`. A altura é calculada automaticamente.
+
+Isso permite adequar o mesmo rótulo a recipientes de diferentes dimensões, como frascos pequenos, garrafas, galões ou recipientes maiores, sem alterar o formato da folha.
 
 ## Referência visual
 
@@ -89,13 +110,13 @@ Pasta:
 public/assets/residuos/marcas/
 ```
 
-Arquivo principal:
+Arquivo usado diretamente pelo rótulo:
 
 ```text
 embrapa.png
 ```
 
-O projeto mantém `embrapa.svg` como wrapper de compatibilidade que aponta para o PNG. A marca fica no canto inferior esquerdo do rótulo.
+O componente não depende mais do wrapper SVG para a impressão. O PNG é carregado diretamente no bloco inferior esquerdo, imediatamente ao lado da seção `Descrição`, evitando a falha observada no print preview.
 
 ## Dados usados
 
@@ -130,10 +151,12 @@ Se frases GHS oficiais forem exigidas futuramente, elas devem entrar como dado/r
 
 ```text
 pictogramas corretos para cada risco
-logo Embrapa carregada
+logo Embrapa visível na prévia e no print preview
+presets Pequeno / Médio / Grande / Máx. A4
+largura personalizada entre 70 e 190 mm
+manutenção da proporção do conteúdo
 código SGL correto
 composição/quantidade corretas
-pré-visualização responsiva
 print preview sem elementos da interface
 legibilidade física do rótulo impresso
 ```
