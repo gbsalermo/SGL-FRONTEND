@@ -116,6 +116,11 @@ export const router = createRouter({
           component: () => import('@/modules/relatorios/views/RelatorioResiduosView.vue'),
         },
         {
+          path: 'relatorios/pessoas-laboratorio',
+          name: 'gestao-relatorio-pessoas-laboratorio',
+          component: () => import('@/modules/relatorios/views/RelatorioPessoasLaboratorioView.vue'),
+        },
+        {
           path: 'solicitacoes/novo',
           name: 'gestao-novo-pedido',
           component: () => import('@/modules/pedidos/views/solicitante/NovoPedidoView.vue'),
