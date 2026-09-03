@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import { router } from './router'
+import { instalarCompatibilidadeDashboard } from './router/dashboardCompatibility'
 import { vuetify } from './app/vuetify'
 import { useSessionStore } from './stores/session'
 
@@ -11,6 +12,7 @@ import './styles/base.css'
 import './styles/main.css'
 import './styles/relatorios-responsive.css'
 import './styles/gestao-shell-controls.css'
+import './styles/dashboard-layout-compat.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
@@ -27,6 +29,8 @@ document.documentElement.dataset.theme = temaInicial
 
 const app = createApp(App)
 const pinia = createPinia()
+
+instalarCompatibilidadeDashboard(router)
 
 app.use(pinia)
 app.use(router)

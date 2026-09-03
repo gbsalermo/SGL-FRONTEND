@@ -107,6 +107,13 @@ function sair() {
       <nav class="solicitante-nav" aria-label="Navegação principal">
         <p class="solicitante-nav__group">PRINCIPAL</p>
 
+        <router-link class="solicitante-nav__item" to="/inicio">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 11 12 4l9 7v9H3zM9 20v-6h6v6" />
+          </svg>
+          <span>Dashboard</span>
+        </router-link>
+
         <router-link class="solicitante-nav__item" to="/meus-pedidos">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 4h14v16H5z" />

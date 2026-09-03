@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { pedidoService } from '@/modules/pedidos/services/pedidoService'
@@ -19,6 +19,7 @@ const status = ref<StatusPedido | 'TODOS'>('TODOS')
 const pedidoExpandidoId = ref<string | null>(null)
 
 const criadoAgora = computed(() => route.query.criado === '1')
+const pedidoAlvo = computed(() => typeof route.query.pedido === 'string' ? route.query.pedido : '')
 
 const pedidosFiltrados = computed(() => {
   const termo = busca.value.trim().toLowerCase()
@@ -55,6 +56,23 @@ function mensagemErro(error: unknown) {
   return error instanceof Error ? error.message : 'Não foi possível carregar os pedidos.'
 }
 
+function aplicarStatusDaRota() {
+  const valor = typeof route.query.status === 'string' ? route.query.status.toUpperCase() : ''
+  const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
+  status.value = validos.includes(valor as StatusPedido) ? valor as StatusPedido : 'TODOS'
+}
+
+function abrirPedidoDaRota() {
+  if (!pedidoAlvo.value || pedidos.value.length === 0) return
+  const pedido = pedidos.value.find((item) => item.id === pedidoAlvo.value)
+  if (!pedido) return
+
+  pedidoExpandidoId.value = pedido.id
+  requestAnimationFrame(() => {
+    document.getElementById(`pedido-${pedido.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
+}
+
 async function carregarPedidos() {
   const usuarioId = session.usuario?.id
   if (!usuarioId) return
@@ -64,6 +82,8 @@ async function carregarPedidos() {
 
   try {
     pedidos.value = await pedidoService.listarPorUsuario(usuarioId)
+    aplicarStatusDaRota()
+    abrirPedidoDaRota()
   } catch (error) {
     erro.value = mensagemErro(error)
   } finally {
@@ -111,6 +131,11 @@ function textoObservacao(pedido: PedidoResponse) {
 
   return observacao || motivoLegado || 'Nenhuma observação informada neste pedido.'
 }
+
+watch([() => route.query.status, () => route.query.pedido], () => {
+  aplicarStatusDaRota()
+  if (!carregando.value) abrirPedidoDaRota()
+})
 
 onMounted(carregarPedidos)
 </script>
@@ -203,7 +228,14 @@ onMounted(carregarPedidos)
           </thead>
           <tbody>
             <template v-for="pedido in pedidosFiltrados" :key="pedido.id">
-              <tr class="order-row" :class="{ 'order-row--expanded': pedidoExpandidoId === pedido.id }">
+              <tr
+                :id="`pedido-${pedido.id}`"
+                class="order-row"
+                :class="{
+                  'order-row--expanded': pedidoExpandidoId === pedido.id,
+                  'order-row--target': pedidoAlvo === pedido.id,
+                }"
+              >
                 <td>
                   <strong class="table-primary">{{ formatarData(pedido.dataSolicitacao) }}</strong>
                   <span class="table-secondary">{{ pedido.id.slice(0, 8).toUpperCase() }}</span>
@@ -367,8 +399,10 @@ onMounted(carregarPedidos)
 table { width: 100%; min-width: 980px; border-collapse: collapse; font-size: 13px; }
 th, td { padding: 14px 16px; border-bottom: 1px solid #edf1f6; text-align: left; vertical-align: middle; }
 th { color: #35415a; background: #fbfcfe; font-size: 11px; text-transform: uppercase; letter-spacing: 0.035em; }
+.order-row { transition: background 160ms ease, box-shadow 160ms ease; }
 .order-row:hover { background: #fbfdff; }
 .order-row--expanded { background: #f8fbff; }
+.order-row--target { background: #eef5ff !important; box-shadow: inset 4px 0 0 #2d6bc4; }
 .table-primary, .table-secondary { display: block; }
 .table-primary { color: var(--sgl-text); font-weight: 650; }
 .table-secondary { margin-top: 3px; color: var(--sgl-text-muted); font-size: 11px; }

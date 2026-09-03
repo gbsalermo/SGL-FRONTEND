@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { residuoService } from '@/modules/residuos/services/residuoService'
 import type {
@@ -15,8 +15,11 @@ import type {
 } from '@/modules/residuos/types/residuo'
 import { useSessionStore } from '@/stores/session'
 
+type FiltroResiduo = StatusResiduo | 'TODOS' | 'PENDENTES_ANALISE'
+
 const session = useSessionStore()
 const router = useRouter()
+const route = useRoute()
 
 const residuos = ref<ResiduoResponse[]>([])
 const carregando = ref(false)
@@ -24,7 +27,7 @@ const enviando = ref(false)
 const erro = ref('')
 const sucesso = ref('')
 const busca = ref('')
-const aba = ref<StatusResiduo | 'TODOS'>('TODOS')
+const aba = ref<FiltroResiduo>('TODOS')
 const selecionado = ref<ResiduoResponse | null>(null)
 const historico = ref<HistoricoResiduoResponse[]>([])
 const carregandoHistorico = ref(false)
@@ -60,8 +63,9 @@ const tiposRisco: Array<{ valor: TipoRiscoResiduo; rotulo: string }> = [
   { valor: 'PERIGO_AMBIENTAL', rotulo: 'Perigo ambiental' },
 ]
 
-const abas: Array<{ valor: StatusResiduo | 'TODOS'; rotulo: string }> = [
+const abas: Array<{ valor: FiltroResiduo; rotulo: string }> = [
   { valor: 'TODOS', rotulo: 'Todos' },
+  { valor: 'PENDENTES_ANALISE', rotulo: 'Pendentes de análise' },
   { valor: 'INFORMADO', rotulo: 'A receber' },
   { valor: 'EM_ANALISE', rotulo: 'Em análise' },
   { valor: 'LIBERADO_PARA_ARMAZENAMENTO', rotulo: 'Liberados' },
@@ -69,10 +73,14 @@ const abas: Array<{ valor: StatusResiduo | 'TODOS'; rotulo: string }> = [
   { valor: 'DESPACHADO', rotulo: 'Despachados' },
 ]
 
+const residuoAlvo = computed(() => typeof route.query.residuo === 'string' ? route.query.residuo : '')
+
 const residuosFiltrados = computed(() => {
   const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
   return residuos.value.filter((residuo) => {
-    const statusOk = aba.value === 'TODOS' || residuo.status === aba.value
+    const statusOk = aba.value === 'TODOS'
+      || (aba.value === 'PENDENTES_ANALISE' && ['INFORMADO', 'EM_ANALISE'].includes(residuo.status))
+      || residuo.status === aba.value
     const buscaOk = !termo || [
       residuo.descricao,
       residuo.usuarioGeradorNome,
@@ -91,6 +99,37 @@ const podeRotular = computed(() => Boolean(
 
 function quantidadeStatus(status: StatusResiduo) {
   return residuos.value.filter((residuo) => residuo.status === status).length
+}
+
+function quantidadeFiltro(filtro: FiltroResiduo) {
+  if (filtro === 'TODOS') return residuos.value.length
+  if (filtro === 'PENDENTES_ANALISE') {
+    return residuos.value.filter((residuo) => ['INFORMADO', 'EM_ANALISE'].includes(residuo.status)).length
+  }
+  return quantidadeStatus(filtro)
+}
+
+function aplicarFiltroDaRota() {
+  const filtro = Array.isArray(route.query.filtro) ? route.query.filtro[0] : route.query.filtro
+  if (filtro === 'pendentes-analise') {
+    aba.value = 'PENDENTES_ANALISE'
+    return
+  }
+
+  const status = Array.isArray(route.query.status) ? route.query.status[0] : route.query.status
+  const statusValidos: StatusResiduo[] = [
+    'INFORMADO',
+    'EM_ANALISE',
+    'LIBERADO_PARA_ARMAZENAMENTO',
+    'ARMAZENADO_TEMPORARIAMENTE',
+    'DESPACHADO',
+  ]
+  if (status && statusValidos.includes(status as StatusResiduo)) {
+    aba.value = status as StatusResiduo
+    return
+  }
+
+  aba.value = 'TODOS'
 }
 
 function mensagemErro(error: unknown) {
@@ -176,6 +215,7 @@ async function carregar() {
     if (selecionado.value) {
       selecionado.value = residuos.value.find((item) => item.id === selecionado.value?.id) ?? null
     }
+    await abrirResiduoDaRota()
   } catch (error) {
     erro.value = mensagemErro(error)
   } finally {
@@ -198,6 +238,16 @@ async function abrirDetalhes(residuo: ResiduoResponse) {
   selecionado.value = residuo
   historico.value = []
   await carregarHistorico(residuo.id)
+}
+
+async function abrirResiduoDaRota() {
+  if (!residuoAlvo.value || residuos.value.length === 0) return
+  const residuo = residuos.value.find((item) => item.id === residuoAlvo.value)
+  if (!residuo) return
+  await abrirDetalhes(residuo)
+  requestAnimationFrame(() => {
+    document.getElementById(`residuo-${residuo.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
 }
 
 function fecharDetalhes() {
@@ -360,6 +410,16 @@ function abrirRotulo(residuo: ResiduoResponse) {
   router.push(`/residuos/${residuo.id}/rotulo`)
 }
 
+watch(
+  () => [route.query.filtro, route.query.status],
+  aplicarFiltroDaRota,
+  { immediate: true },
+)
+
+watch(() => route.query.residuo, () => {
+  if (!carregando.value) void abrirResiduoDaRota()
+})
+
 onMounted(carregar)
 </script>
 
@@ -389,7 +449,7 @@ onMounted(carregar)
       <div class="status-tabs" role="tablist" aria-label="Filtrar resíduos por status">
         <button v-for="item in abas" :key="item.valor" type="button" :class="{ active: aba === item.valor }" @click="aba = item.valor">
           {{ item.rotulo }}
-          <small>{{ item.valor === 'TODOS' ? residuos.length : quantidadeStatus(item.valor as StatusResiduo) }}</small>
+          <small>{{ quantidadeFiltro(item.valor) }}</small>
         </button>
       </div>
 
@@ -417,7 +477,7 @@ onMounted(carregar)
             </tr>
           </thead>
           <tbody>
-            <tr v-for="residuo in residuosFiltrados" :key="residuo.id" @click="abrirDetalhes(residuo)">
+            <tr v-for="residuo in residuosFiltrados" :id="`residuo-${residuo.id}`" :key="residuo.id" :class="{ 'residuo-alvo': residuoAlvo === residuo.id }" @click="abrirDetalhes(residuo)">
               <td><span class="status-pill" :data-status="residuo.status">{{ statusRotulo(residuo.status) }}</span></td>
               <td>
                 <strong>{{ residuo.descricao }}</strong>
@@ -598,6 +658,8 @@ onMounted(carregar)
 <style scoped>
 .residuos-completo { max-width: 1500px; margin: 0 auto; color: #16243b; }
 .metrics-grid--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.residuo-alvo { background: #fbf8ff !important; box-shadow: inset 4px 0 0 #7446df; animation: destaque-residuo 900ms ease-out; }
+@keyframes destaque-residuo { from { background: #eee5ff; } to { background: #fbf8ff; } }
 .storage-action, .dispatch-action, .label-action { min-height: 40px; padding: 0 14px; border: 0; border-radius: 7px; color: #fff; font: inherit; font-size: 11px; font-weight: 850; cursor: pointer; }
 .storage-action { background: #0f766e; }
 .dispatch-action { background: #6b4fa1; }

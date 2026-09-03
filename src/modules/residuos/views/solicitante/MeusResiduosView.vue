@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { residuoService } from '@/modules/residuos/services/residuoService'
 import type { ApiErrorResponse, ResiduoResponse, StatusResiduo } from '@/modules/residuos/types/residuo'
 import { useSessionStore } from '@/stores/session'
 
+type FiltroStatusResiduo = StatusResiduo | 'TODOS' | 'ATIVOS'
+
+const route = useRoute()
 const router = useRouter()
 const session = useSessionStore()
 
@@ -14,11 +17,14 @@ const residuos = ref<ResiduoResponse[]>([])
 const carregando = ref(false)
 const erro = ref('')
 const busca = ref('')
-const statusFiltro = ref<StatusResiduo | 'TODOS'>('TODOS')
+const statusFiltro = ref<FiltroStatusResiduo>('TODOS')
 const selecionado = ref<ResiduoResponse | null>(null)
 
-const statusOpcoes: Array<{ valor: StatusResiduo | 'TODOS'; rotulo: string }> = [
+const residuoAlvo = computed(() => typeof route.query.residuo === 'string' ? route.query.residuo : '')
+
+const statusOpcoes: Array<{ valor: FiltroStatusResiduo; rotulo: string }> = [
   { valor: 'TODOS', rotulo: 'Todos' },
+  { valor: 'ATIVOS', rotulo: 'Em andamento' },
   { valor: 'INFORMADO', rotulo: 'Informados' },
   { valor: 'EM_ANALISE', rotulo: 'Em análise' },
   { valor: 'LIBERADO_PARA_ARMAZENAMENTO', rotulo: 'Liberados' },
@@ -29,7 +35,9 @@ const statusOpcoes: Array<{ valor: StatusResiduo | 'TODOS'; rotulo: string }> = 
 const residuosFiltrados = computed(() => {
   const termo = busca.value.trim().toLowerCase()
   return residuos.value.filter((residuo) => {
-    const statusOk = statusFiltro.value === 'TODOS' || residuo.status === statusFiltro.value
+    const statusOk = statusFiltro.value === 'TODOS'
+      || (statusFiltro.value === 'ATIVOS' && residuo.status !== 'DESPACHADO')
+      || residuo.status === statusFiltro.value
     const buscaOk = !termo || [
       residuo.descricao,
       residuo.processoOrigem,
@@ -73,6 +81,31 @@ function formatarRisco(valor: string) {
     .replace(/^./, (letra) => letra.toUpperCase())
 }
 
+function aplicarStatusDaRota() {
+  const valor = typeof route.query.status === 'string' ? route.query.status.toUpperCase() : ''
+  const validos: FiltroStatusResiduo[] = [
+    'TODOS',
+    'ATIVOS',
+    'INFORMADO',
+    'EM_ANALISE',
+    'LIBERADO_PARA_ARMAZENAMENTO',
+    'ARMAZENADO_TEMPORARIAMENTE',
+    'DESPACHADO',
+  ]
+  statusFiltro.value = validos.includes(valor as FiltroStatusResiduo) ? valor as FiltroStatusResiduo : 'TODOS'
+}
+
+function abrirResiduoDaRota() {
+  if (!residuoAlvo.value || residuos.value.length === 0) return
+  const residuo = residuos.value.find((item) => item.id === residuoAlvo.value)
+  if (!residuo) return
+
+  selecionado.value = residuo
+  requestAnimationFrame(() => {
+    document.getElementById(`residuo-${residuo.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
+}
+
 async function carregar() {
   const usuarioId = session.usuario?.id
   if (!usuarioId) {
@@ -84,12 +117,19 @@ async function carregar() {
   erro.value = ''
   try {
     residuos.value = await residuoService.listarPorGerador(usuarioId)
+    aplicarStatusDaRota()
+    abrirResiduoDaRota()
   } catch (error) {
     erro.value = mensagemErro(error)
   } finally {
     carregando.value = false
   }
 }
+
+watch([() => route.query.status, () => route.query.residuo], () => {
+  aplicarStatusDaRota()
+  if (!carregando.value) abrirResiduoDaRota()
+})
 
 onMounted(carregar)
 </script>
@@ -147,7 +187,15 @@ onMounted(carregar)
       </div>
 
       <div v-else class="cards-list">
-        <button v-for="residuo in residuosFiltrados" :key="residuo.id" class="residuo-card" type="button" @click="selecionado = residuo">
+        <button
+          v-for="residuo in residuosFiltrados"
+          :id="`residuo-${residuo.id}`"
+          :key="residuo.id"
+          class="residuo-card"
+          :class="{ 'residuo-card--target': residuoAlvo === residuo.id }"
+          type="button"
+          @click="selecionado = residuo"
+        >
           <div class="card-main">
             <div class="card-topline">
               <span class="status-pill" :data-status="residuo.status">{{ statusRotulo(residuo.status) }}</span>
@@ -263,9 +311,10 @@ onMounted(carregar)
 .empty-state strong { display: block; color: #263750; }
 .empty-state p { margin: 6px 0 0; font-size: 12px; }
 .cards-list { padding: 8px 18px 18px; }
-.residuo-card { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 22px; padding: 18px 2px; border: 0; border-bottom: 1px solid #e7ecf3; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.residuo-card { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 22px; padding: 18px 2px; border: 0; border-bottom: 1px solid #e7ecf3; background: transparent; color: inherit; text-align: left; cursor: pointer; transition: background 160ms ease, box-shadow 160ms ease; }
 .residuo-card:last-child { border-bottom: 0; }
 .residuo-card:hover { background: linear-gradient(90deg, rgb(35 82 176 / 3%), transparent); }
+.residuo-card--target { background: #eef5ff !important; box-shadow: inset 4px 0 0 #2d6bc4; }
 .card-topline { display: flex; align-items: center; gap: 12px; }
 .card-topline small { color: #7c8ba0; font-size: 10px; }
 .status-pill { display: inline-flex; align-items: center; min-height: 24px; padding: 0 9px; border-radius: 999px; background: #eef2f7; color: #52647d; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }

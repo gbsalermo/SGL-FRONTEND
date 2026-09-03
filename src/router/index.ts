@@ -13,7 +13,7 @@ function ehPerfilGestao(perfil?: PerfilUsuario) {
 
 function rotaInicial() {
   const session = useSessionStore()
-  return ehPerfilGestao(session.usuario?.perfil) ? '/pedidos' : '/meus-pedidos'
+  return ehPerfilGestao(session.usuario?.perfil) ? '/dashboard' : '/inicio'
 }
 
 export const router = createRouter({
@@ -50,6 +50,11 @@ export const router = createRouter({
       meta: { requiresSession: true, perfis: PERFIS_SOLICITANTE },
       children: [
         {
+          path: 'inicio',
+          name: 'solicitante-dashboard',
+          component: () => import('@/modules/dashboard/views/solicitante/DashboardSolicitanteView.vue'),
+        },
+        {
           path: 'meus-pedidos',
           name: 'meus-pedidos',
           component: () => import('@/modules/pedidos/views/solicitante/MeusPedidosView.vue'),
@@ -77,6 +82,11 @@ export const router = createRouter({
       meta: { requiresSession: true, perfis: PERFIS_GESTAO },
       children: [
         {
+          path: 'dashboard',
+          name: 'gestao-dashboard',
+          component: () => import('@/modules/dashboard/views/gestao/DashboardGestaoView.vue'),
+        },
+        {
           path: 'pedidos',
           name: 'gestao-pedidos',
           component: () => import('@/modules/pedidos/views/gestao/PedidosGestaoView.vue'),
@@ -85,6 +95,11 @@ export const router = createRouter({
           path: 'estoque',
           name: 'gestao-estoque',
           component: () => import('@/modules/estoque/views/EstoqueGestaoView.vue'),
+        },
+        {
+          path: 'estoque/lotes-vencendo',
+          name: 'gestao-lotes-vencendo',
+          component: () => import('@/modules/estoque/views/LotesVencendoView.vue'),
         },
         {
           path: 'estoque/:id',

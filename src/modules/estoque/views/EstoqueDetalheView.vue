@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { estoqueService } from '@/modules/estoque/services/estoqueService'
@@ -79,6 +79,10 @@ const formularioLote = ref<AtualizarLoteRequest>({
 
 const estoqueId = computed(() => String(route.params.id ?? ''))
 const usuarioId = computed(() => session.usuario?.id ?? '')
+const loteAlvo = computed(() => {
+  const valor = route.query.highlightLote ?? route.query.lote ?? route.query.highlight
+  return typeof valor === 'string' ? valor : ''
+})
 const lotesAtivos = computed(() => lotes.value.filter((lote) => lote.ativo))
 const proximos = computed(() => lotesAtivos.value.filter(loteProximoVencimento).length)
 const lotesVencidosComSaldo = computed(() => lotesAtivos.value.filter((lote) => loteVencido(lote) && lote.quantidadeDisponivel > 0))
@@ -194,6 +198,22 @@ function limparFiltrosLote() {
   situacaoLote.value = 'TODOS'
 }
 
+function aplicarSituacaoDaRota() {
+  const valor = typeof route.query.situacao === 'string' ? route.query.situacao.toUpperCase() : ''
+  const validas: SituacaoLoteFiltro[] = ['VALIDO', 'PROXIMO', 'VENCIDO', 'ESGOTADO', 'DESCARTADO']
+  if (validas.includes(valor as SituacaoLoteFiltro)) situacaoLote.value = valor as SituacaoLoteFiltro
+}
+
+function destacarLoteDaRota() {
+  if (!loteAlvo.value || lotes.value.length === 0) return
+  const lote = lotes.value.find((item) => item.id === loteAlvo.value)
+  if (!lote) return
+
+  requestAnimationFrame(() => {
+    document.getElementById(`lote-${lote.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
+}
+
 function quantidadeFisica(lote: LoteResponse) {
   const recebida = Number(lote.quantidadeApresentacoes)
   if (recebida > 0) return recebida
@@ -234,6 +254,8 @@ async function carregar() {
       && !opcoesEmbalagem.value.some((opcao) => opcao.chave === visualizacaoQuantidade.value)) {
       visualizacaoQuantidade.value = 'UNITARIA'
     }
+    aplicarSituacaoDaRota()
+    destacarLoteDaRota()
   } catch (error) {
     erro.value = mensagemErro(error, 'Não foi possível carregar os detalhes deste estoque.')
   } finally {
@@ -390,6 +412,15 @@ async function registrarDescarte() {
   }
 }
 
+watch(
+  [() => route.query.lote, () => route.query.highlightLote, () => route.query.highlight, () => route.query.situacao],
+  () => {
+    if (lotes.value.length === 0) return
+    aplicarSituacaoDaRota()
+    destacarLoteDaRota()
+  },
+)
+
 onMounted(carregar)
 </script>
 
@@ -432,7 +463,7 @@ onMounted(carregar)
         <div v-else-if="lotesFiltrados.length === 0" class="state-box">Nenhum lote encontrado para os filtros atuais.</div>
         <div v-else class="table-wrap">
           <table><thead><tr><th>Código SGL</th><th>Unidade</th><th>Disponível agora</th><th>Entrada</th><th>Validade</th><th>Situação</th><th></th></tr></thead><tbody>
-            <tr v-for="lote in lotesFiltrados" :key="lote.id" class="lot-row" @click="abrirLote(lote)">
+            <tr v-for="lote in lotesFiltrados" :id="`lote-${lote.id}`" :key="lote.id" class="lot-row" :class="{ 'lot-row--alvo': loteAlvo === lote.id }" @click="abrirLote(lote)">
               <td><strong>{{ lote.codigoInterno }}</strong><small>Fornecedor: {{ lote.numeroLote }}</small></td>
               <td><strong>{{ resumoRecebido(lote) }}</strong><small>{{ lote.apresentacao || 'Sem especificação de embalagem' }}</small></td>
               <td><strong>{{ resumoDisponivel(lote) }}</strong></td><td>{{ dataFormatada(lote.dataEntrada) }}</td><td>{{ dataFormatada(lote.dataValidade) }}</td>
@@ -525,7 +556,8 @@ onMounted(carregar)
 .lot-card { padding: 16px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }.lot-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }.lot-card__heading h2 { margin: 0; color: #0d2b5e; font-size: 16px; }.lot-card__heading p { margin: 5px 0 14px; color: #64748b; font-size: 12px; }.lot-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .lot-filter-bar { display: grid; grid-template-columns: minmax(260px, 1.5fr) minmax(190px, .7fr) auto; align-items: end; gap: 10px; margin: 2px 0 14px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 9px; background: #f8fafc; }.lot-filter-bar label { display: flex; min-width: 0; flex-direction: column; gap: 5px; }.lot-filter-bar label > span { color: #475569; font-size: 10px; font-weight: 800; }.lot-filter-bar input, .lot-filter-bar select { width: 100%; min-height: 38px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1e293b; box-sizing: border-box; }.lot-filter-result { display: flex; min-height: 38px; align-items: center; gap: 5px; white-space: nowrap; color: #64748b; font-size: 10px; }.lot-filter-result strong { color: #0d2b5e; font-size: 15px; }.lot-filter-result button { margin-left: 5px; border: 0; background: transparent; color: #1a4da1; font-size: 10px; font-weight: 800; cursor: pointer; }
 .primary-action, .secondary-action, .danger-action { min-height: 38px; padding: 0 14px; border-radius: 7px; font-size: 12px; font-weight: 800; cursor: pointer; }.primary-action { border: 1px solid #1a4da1; background: #1a4da1; color: #fff; }.secondary-action { border: 1px solid #cbd5e1; background: #fff; color: #334155; }.danger-action { border: 1px solid #b42318; background: #b42318; color: #fff; }.primary-action:disabled, .secondary-action:disabled, .danger-action:disabled { opacity: .55; cursor: not-allowed; }
-.table-wrap { overflow-x: auto; }table { width: 100%; min-width: 1120px; border-collapse: collapse; }th { padding: 11px 12px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 800; text-align: left; text-transform: uppercase; }td { padding: 12px; border-bottom: 1px solid #eef2f7; color: #334155; font-size: 12px; vertical-align: middle; }td small { display: block; margin-top: 4px; color: #94a3b8; font-size: 10px; }.lot-row { cursor: pointer; }.lot-row:hover { background: #fbfdff; }.detail-button { min-height: 30px; padding: 0 10px; border: 1px solid #dbe4f0; border-radius: 6px; background: #f8fafc; color: #1a4da1; font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; }.lot-chip { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }.lot-chip--ok { background: #e7f7ed; color: #007a3d; }.lot-chip--warning { background: #fff7d6; color: #946200; }.lot-chip--danger { background: #fee2e2; color: #b42318; }.lot-chip--empty { background: #e8f1ff; color: #1a4da1; }.lot-chip--discarded { background: #e2e8f0; color: #475569; }
+.table-wrap { overflow-x: auto; }table { width: 100%; min-width: 1120px; border-collapse: collapse; }th { padding: 11px 12px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 800; text-align: left; text-transform: uppercase; }td { padding: 12px; border-bottom: 1px solid #eef2f7; color: #334155; font-size: 12px; vertical-align: middle; }td small { display: block; margin-top: 4px; color: #94a3b8; font-size: 10px; }.lot-row { cursor: pointer; transition: background 160ms ease, box-shadow 160ms ease; }.lot-row:hover { background: #fbfdff; }.lot-row--alvo { background: #fff8e8 !important; box-shadow: inset 4px 0 0 #e79a1c; animation: destaque-lote 900ms ease-out; }.detail-button { min-height: 30px; padding: 0 10px; border: 1px solid #dbe4f0; border-radius: 6px; background: #f8fafc; color: #1a4da1; font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; }.lot-chip { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; font-size: 9px; font-weight: 800; white-space: nowrap; }.lot-chip--ok { background: #e7f7ed; color: #007a3d; }.lot-chip--warning { background: #fff7d6; color: #946200; }.lot-chip--danger { background: #fee2e2; color: #b42318; }.lot-chip--empty { background: #e8f1ff; color: #1a4da1; }.lot-chip--discarded { background: #e2e8f0; color: #475569; }
+@keyframes destaque-lote { from { background: #ffe6a8; } to { background: #fff8e8; } }
 .state-box { padding: 34px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #64748b; text-align: center; }.state-box--error { border-color: #fecaca; color: #b42318; background: #fffafa; }
 .modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 24px; background: rgb(9 22 48 / 58%); backdrop-filter: blur(2px); }.modal-card { width: min(760px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; border: 1px solid #dbe4f0; border-radius: 13px; background: #fff; box-shadow: 0 24px 70px rgb(9 22 48 / 28%); }.lot-modal, .discard-modal { width: min(820px, 100%); }.modal-card__header { display: flex; justify-content: space-between; gap: 16px; padding: 20px 22px 16px; border-bottom: 1px solid #eef2f7; }.modal-card__header span { color: #1a4da1; font-size: 10px; font-weight: 800; text-transform: uppercase; }.modal-card__header h2 { margin: 4px 0 0; color: #0d2b5e; font-size: 21px; }.modal-card__header p { margin: 5px 0 0; color: #64748b; font-size: 12px; }.modal-close { width: 32px; height: 32px; border: 0; border-radius: 50%; background: #f1f5f9; color: #334155; font-size: 22px; cursor: pointer; }
 .entry-form, .lot-detail-body { padding: 18px 22px 22px; }.entry-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }.entry-grid label, .entry-observation { display: flex; flex-direction: column; gap: 6px; }.entry-grid label > span, .entry-observation > span, .read-only-field > span { color: #475569; font-size: 11px; font-weight: 800; }.entry-grid input, .entry-grid select, .entry-observation textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1e293b; font: inherit; box-sizing: border-box; }.entry-grid input, .entry-grid select { min-height: 40px; padding: 0 10px; }.entry-observation { margin-top: 14px; }.entry-observation textarea { min-height: 86px; padding: 10px; resize: vertical; }.entry-grid small, .read-only-field small { color: #94a3b8; font-size: 10px; }.read-only-field { display: flex; min-height: 67px; flex-direction: column; gap: 6px; justify-content: center; padding: 0 11px; border: 1px solid #e2e8f0; border-radius: 7px; background: #f8fafc; }.read-only-field strong { color: #1e293b; font-size: 12px; }.input-with-unit { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; }.input-with-unit b { min-width: 50px; color: #475569; font-size: 11px; }
