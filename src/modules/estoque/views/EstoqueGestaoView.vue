@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { estoqueService } from '@/modules/estoque/services/estoqueService'
 import type { EstoqueCentralResponse, LoteResponse } from '@/modules/estoque/types/estoque'
 import { useSessionStore } from '@/stores/session'
 
+const route = useRoute()
 const router = useRouter()
 const session = useSessionStore()
 
@@ -23,7 +24,7 @@ const direcao = ref<'ASC' | 'DESC'>('ASC')
 const unidadeId = computed(() => session.usuario?.unidadeId)
 const ordemQuantitativa = computed(() => ordenarPor.value === 'QUANTIDADE' || ordenarPor.value === 'MINIMO')
 const rotuloOrdem = computed(() => ordemQuantitativa.value ? 'Ordem por quantidade' : 'Ordem alfabética')
-const filtroAtivo = computed(() => buscaEmFoco.value || filtrosAbertos.value)
+const filtroAtivo = computed(() => buscaEmFoco.value || filtrosAbertos.value || situacao.value !== 'TODOS')
 
 function estoqueBaixo(item: EstoqueCentralResponse) {
   return item.quantidadeAtual < item.quantidadeMinima
@@ -82,6 +83,7 @@ function limparFiltros() {
   situacao.value = 'TODOS'
   ordenarPor.value = 'PRODUTO'
   direcao.value = 'ASC'
+  if (route.query.situacao) router.replace({ path: '/estoque' })
 }
 
 async function carregar() {
@@ -110,6 +112,17 @@ async function carregar() {
 function abrirDetalhe(item: EstoqueCentralResponse) {
   router.push(`/estoque/${item.id}`)
 }
+
+watch(() => route.query.situacao, (valor) => {
+  const situacaoRota = typeof valor === 'string' ? valor.toUpperCase() : ''
+  const validas = ['BAIXO', 'NORMAL', 'ZERADO', 'VENCIDO'] as const
+  if (validas.includes(situacaoRota as (typeof validas)[number])) {
+    situacao.value = situacaoRota as typeof situacao.value
+    filtrosAbertos.value = true
+  } else {
+    situacao.value = 'TODOS'
+  }
+}, { immediate: true })
 
 onMounted(carregar)
 </script>
