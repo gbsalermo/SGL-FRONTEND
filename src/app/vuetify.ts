@@ -19,6 +19,20 @@ export const vuetify = createVuetify({
           error: '#DC2626',
         },
       },
+      sglDark: {
+        dark: true,
+        colors: {
+          background: '#08111F',
+          surface: '#101B30',
+          primary: '#5B8DE0',
+          'primary-darken-1': '#173D78',
+          secondary: '#38A169',
+          info: '#78A4EB',
+          success: '#38A169',
+          warning: '#F6C343',
+          error: '#F87171',
+        },
+      },
     },
   },
   defaults: {
