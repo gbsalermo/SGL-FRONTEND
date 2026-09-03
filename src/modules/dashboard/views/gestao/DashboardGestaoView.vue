@@ -129,7 +129,7 @@ const itensAtencao = computed<ItemAtencao[]>(() => {
       descricao: pedido.itens.map((item) => item.produtoNome).slice(0, 2).join(' · ') || 'Solicitação sem itens',
       detalhe: tempoDesde(pedido.dataSolicitacao),
       nivel: 'critico',
-      rota: '/pedidos?status=PENDENTE',
+      rota: '/pedidos?status=PENDENTE&urgencia=URGENTE',
     })
   })
 
@@ -371,11 +371,11 @@ onMounted(carregarDashboard)
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5zM8 9h8M8 13h8M8 17h5" /></svg></span>
         <span><small>Pedidos</small><strong>{{ pedidosPendentes.length }}</strong><em>Solicitações pendentes</em></span>
       </button>
-      <button class="kpi-card kpi-card--red" type="button" @click="abrir('/pedidos?status=PENDENTE')">
+      <button class="kpi-card kpi-card--red" type="button" @click="abrir('/pedidos?status=PENDENTE&urgencia=URGENTE')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 17h.01" /></svg></span>
         <span><small>Urgentes</small><strong>{{ pedidosUrgentes.length }}</strong><em>Requerem prioridade</em></span>
       </button>
-      <button class="kpi-card kpi-card--orange" type="button" @click="abrir('/estoque')">
+      <button class="kpi-card kpi-card--orange" type="button" @click="abrir('/estoque?situacao=BAIXO')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9" /></svg></span>
         <span><small>Baixo estoque</small><strong>{{ estoquesBaixos.length }}</strong><em>Itens abaixo do mínimo</em></span>
       </button>
