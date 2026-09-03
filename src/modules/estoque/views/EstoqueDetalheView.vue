@@ -204,12 +204,11 @@ function aplicarSituacaoDaRota() {
   if (validas.includes(valor as SituacaoLoteFiltro)) situacaoLote.value = valor as SituacaoLoteFiltro
 }
 
-async function abrirLoteDaRota() {
+function destacarLoteDaRota() {
   if (!loteAlvo.value || lotes.value.length === 0) return
   const lote = lotes.value.find((item) => item.id === loteAlvo.value)
   if (!lote) return
 
-  await abrirLote(lote)
   requestAnimationFrame(() => {
     document.getElementById(`lote-${lote.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   })
@@ -256,7 +255,7 @@ async function carregar() {
       visualizacaoQuantidade.value = 'UNITARIA'
     }
     aplicarSituacaoDaRota()
-    await abrirLoteDaRota()
+    destacarLoteDaRota()
   } catch (error) {
     erro.value = mensagemErro(error, 'Não foi possível carregar os detalhes deste estoque.')
   } finally {
@@ -418,7 +417,7 @@ watch(
   () => {
     if (lotes.value.length === 0) return
     aplicarSituacaoDaRota()
-    void abrirLoteDaRota()
+    destacarLoteDaRota()
   },
 )
 
