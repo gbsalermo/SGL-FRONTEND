@@ -189,6 +189,21 @@
   color: #8a6500 !important;
 }
 
+/* Dashboard: ocupa melhor a altura útil da janela sem deixar os painéis
+   crescerem indefinidamente. Em Full HD, elimina a grande área vazia inferior;
+   em telas menores, reduz proporcionalmente e preserva o scroll interno. */
+.gestao-shell .dashboard-page .dashboard-panel--fixed {
+  height: clamp(460px, calc(100vh - 370px), 650px) !important;
+  max-height: 650px !important;
+}
+
+@media (max-height: 760px) {
+  .gestao-shell .dashboard-page .dashboard-panel--fixed {
+    height: 430px !important;
+    max-height: 430px !important;
+  }
+}
+
 @media (max-width: 900px) {
   .gestao-shell .estoque-detalhe .product-context {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
