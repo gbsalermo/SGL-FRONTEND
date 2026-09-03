@@ -209,9 +209,9 @@ function sair() {
 </template>
 
 <style scoped>
-.gestao-shell { --sidebar-width: 264px; min-height: 100vh; background: var(--sgl-background, #f5f7fa); color: var(--sgl-text, #1a1a2e); }
+.gestao-shell { --sidebar-width: 264px; width: 100%; max-width: 100%; min-width: 0; min-height: 100vh; overflow-x: hidden; box-sizing: border-box; background: var(--sgl-background, #f5f7fa); color: var(--sgl-text, #1a1a2e); }
 .gestao-shell--collapsed { --sidebar-width: 72px; }
-.gestao-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; width: var(--sidebar-width); height: 100vh; display: flex; flex-direction: column; padding: 18px 14px 16px; background: linear-gradient(180deg, #07142f 0%, #0b1b3a 55%, #0d2147 100%); color: #fff; transition: width 300ms ease; }
+.gestao-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; width: var(--sidebar-width); height: 100vh; display: flex; flex-direction: column; padding: 18px 14px 16px; box-sizing: border-box; background: linear-gradient(180deg, #07142f 0%, #0b1b3a 55%, #0d2147 100%); color: #fff; transition: width 300ms ease; }
 .gestao-brand { min-height: 92px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgb(255 255 255 / 10%); }
 .gestao-brand img { width: 178px; max-height: 72px; object-fit: contain; filter: drop-shadow(0 4px 14px rgb(0 0 0 / 18%)); transition: width 300ms ease; }
 .gestao-shell--collapsed .gestao-brand img { width: 42px; object-fit: cover; object-position: left; }
@@ -241,8 +241,8 @@ function sair() {
 .gestao-nav__future small { margin-left: auto; color: #6f86aa; font-size: 9px; font-weight: 700; }
 .gestao-shell--collapsed .gestao-nav a, .gestao-shell--collapsed .gestao-tool, .gestao-shell--collapsed .gestao-nav__future, .gestao-shell--collapsed .gestao-nav-parent { justify-content: center; padding-inline: 0; }
 .gestao-shell--collapsed .gestao-nav-parent__main { justify-content: center; padding-inline: 0; }
-.gestao-workspace { min-width: 0; margin-left: var(--sidebar-width); transition: margin-left 300ms ease; }
-.gestao-topbar { position: sticky; top: 0; z-index: 20; min-height: 72px; display: flex; align-items: center; gap: 10px; padding: 0 24px; background: linear-gradient(90deg, #08162f 0%, #0b1934 100%); color: #fff; box-shadow: 0 1px 0 rgb(255 255 255 / 7%); }
+.gestao-workspace { width: calc(100% - var(--sidebar-width)); max-width: calc(100% - var(--sidebar-width)); min-width: 0; margin-left: var(--sidebar-width); overflow-x: hidden; box-sizing: border-box; transition: width 300ms ease, max-width 300ms ease, margin-left 300ms ease; }
+.gestao-topbar { position: sticky; top: 0; z-index: 20; width: 100%; max-width: 100%; min-height: 72px; display: flex; align-items: center; gap: 10px; padding: 0 24px; box-sizing: border-box; background: linear-gradient(90deg, #08162f 0%, #0b1934 100%); color: #fff; box-shadow: 0 1px 0 rgb(255 255 255 / 7%); }
 .gestao-topbar button { border: 0; background: transparent; color: inherit; cursor: pointer; }
 .gestao-topbar__collapse, .gestao-topbar__back, .gestao-topbar__search { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; font-size: 25px; }
 .gestao-topbar__collapse:hover, .gestao-topbar__back:hover, .gestao-topbar__search:hover, .gestao-topbar__logout:hover { background: rgb(255 255 255 / 8%); }
@@ -251,6 +251,6 @@ function sair() {
 .gestao-topbar__search { background: rgb(45 107 196 / 14%) !important; }
 .gestao-topbar__logout { min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid rgb(255 255 255 / 18%) !important; border-radius: 8px; font-size: 13px; }
 .gestao-topbar__logout svg { width: 18px; height: 18px; }
-.gestao-main { min-height: calc(100vh - 72px); padding: 28px 30px 40px; background: linear-gradient(135deg, #f8fafc 0%, #f2f5fa 100%); }
-@media (max-width: 900px) { .gestao-sidebar { position: static; width: 100%; height: auto; } .gestao-shell--collapsed .gestao-sidebar { width: 100%; } .gestao-workspace { margin-left: 0; } .gestao-brand img { width: 150px !important; object-fit: contain !important; } .gestao-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .gestao-nav p { grid-column: 1 / -1; } .gestao-subnav { grid-column: 1 / -1; } .gestao-topbar__collapse { display: none; } .gestao-main { padding: 18px 16px 30px; } }
+.gestao-main { width: 100%; max-width: 100%; min-width: 0; min-height: calc(100vh - 72px); padding: clamp(18px, 2vw, 28px) clamp(16px, 2.2vw, 30px) 40px; overflow-x: hidden; box-sizing: border-box; background: linear-gradient(135deg, #f8fafc 0%, #f2f5fa 100%); }
+@media (max-width: 900px) { .gestao-sidebar { position: static; width: 100%; height: auto; } .gestao-shell--collapsed .gestao-sidebar { width: 100%; } .gestao-workspace { width: 100%; max-width: 100%; margin-left: 0; } .gestao-brand img { width: 150px !important; object-fit: contain !important; } .gestao-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .gestao-nav p { grid-column: 1 / -1; } .gestao-subnav { grid-column: 1 / -1; } .gestao-topbar__collapse { display: none; } .gestao-main { padding: 18px 16px 30px; } }
 </style>
