@@ -73,6 +73,8 @@ const abas: Array<{ valor: FiltroResiduo; rotulo: string }> = [
   { valor: 'DESPACHADO', rotulo: 'Despachados' },
 ]
 
+const residuoAlvo = computed(() => typeof route.query.residuo === 'string' ? route.query.residuo : '')
+
 const residuosFiltrados = computed(() => {
   const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
   return residuos.value.filter((residuo) => {
@@ -213,6 +215,7 @@ async function carregar() {
     if (selecionado.value) {
       selecionado.value = residuos.value.find((item) => item.id === selecionado.value?.id) ?? null
     }
+    await abrirResiduoDaRota()
   } catch (error) {
     erro.value = mensagemErro(error)
   } finally {
@@ -235,6 +238,16 @@ async function abrirDetalhes(residuo: ResiduoResponse) {
   selecionado.value = residuo
   historico.value = []
   await carregarHistorico(residuo.id)
+}
+
+async function abrirResiduoDaRota() {
+  if (!residuoAlvo.value || residuos.value.length === 0) return
+  const residuo = residuos.value.find((item) => item.id === residuoAlvo.value)
+  if (!residuo) return
+  await abrirDetalhes(residuo)
+  requestAnimationFrame(() => {
+    document.getElementById(`residuo-${residuo.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
 }
 
 function fecharDetalhes() {
@@ -403,6 +416,10 @@ watch(
   { immediate: true },
 )
 
+watch(() => route.query.residuo, () => {
+  if (!carregando.value) void abrirResiduoDaRota()
+})
+
 onMounted(carregar)
 </script>
 
@@ -460,7 +477,7 @@ onMounted(carregar)
             </tr>
           </thead>
           <tbody>
-            <tr v-for="residuo in residuosFiltrados" :key="residuo.id" @click="abrirDetalhes(residuo)">
+            <tr v-for="residuo in residuosFiltrados" :id="`residuo-${residuo.id}`" :key="residuo.id" :class="{ 'residuo-alvo': residuoAlvo === residuo.id }" @click="abrirDetalhes(residuo)">
               <td><span class="status-pill" :data-status="residuo.status">{{ statusRotulo(residuo.status) }}</span></td>
               <td>
                 <strong>{{ residuo.descricao }}</strong>
@@ -641,6 +658,8 @@ onMounted(carregar)
 <style scoped>
 .residuos-completo { max-width: 1500px; margin: 0 auto; color: #16243b; }
 .metrics-grid--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.residuo-alvo { background: #fbf8ff !important; box-shadow: inset 4px 0 0 #7446df; animation: destaque-residuo 900ms ease-out; }
+@keyframes destaque-residuo { from { background: #eee5ff; } to { background: #fbf8ff; } }
 .storage-action, .dispatch-action, .label-action { min-height: 40px; padding: 0 14px; border: 0; border-radius: 7px; color: #fff; font: inherit; font-size: 11px; font-weight: 850; cursor: pointer; }
 .storage-action { background: #0f766e; }
 .dispatch-action { background: #6b4fa1; }
