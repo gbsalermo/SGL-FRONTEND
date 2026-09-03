@@ -35,12 +35,6 @@ interface ResumoLaboratorio {
   total: number
 }
 
-interface BarraAtividade {
-  data: string
-  valor: number
-  percentual: number
-}
-
 const router = useRouter()
 const session = useSessionStore()
 
@@ -104,6 +98,8 @@ const entradasHoje = computed(() =>
 const saidasHoje = computed(() =>
   movimentacoes.value.filter((movimentacao) => movimentacao.tipoMovimentacao === 'SAIDA' && mesmoDia(new Date(movimentacao.dataMovimentacao), new Date())),
 )
+
+const movimentacoesHoje = computed(() => entradasHoje.value.length + saidasHoje.value.length)
 
 const itensAtencao = computed<ItemAtencao[]>(() => {
   const itens: ItemAtencao[] = []
@@ -239,30 +235,6 @@ const resumoLaboratorios = computed<ResumoLaboratorio[]>(() => {
     .slice(0, 4)
 })
 
-const barrasAtividade = computed<BarraAtividade[]>(() => {
-  const dias: Array<{ data: Date; chave: string; valor: number }> = []
-  for (let deslocamento = 11; deslocamento >= 0; deslocamento -= 1) {
-    const data = new Date()
-    data.setHours(0, 0, 0, 0)
-    data.setDate(data.getDate() - deslocamento)
-    dias.push({ data, chave: chaveDia(data), valor: 0 })
-  }
-
-  const mapa = new Map(dias.map((dia) => [dia.chave, dia]))
-  movimentacoes.value.forEach((movimentacao) => {
-    const data = new Date(movimentacao.dataMovimentacao)
-    const registro = mapa.get(chaveDia(data))
-    if (registro) registro.valor += 1
-  })
-
-  const maior = Math.max(...dias.map((dia) => dia.valor), 1)
-  return dias.map((dia) => ({
-    data: new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(dia.data),
-    valor: dia.valor,
-    percentual: dia.valor === 0 ? 8 : Math.max(15, Math.round((dia.valor / maior) * 100)),
-  }))
-})
-
 async function carregarDashboard() {
   carregando.value = true
   erro.value = ''
@@ -345,10 +317,6 @@ function fimDoDia(data: Date) {
 
 function mesmoDia(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
-}
-
-function chaveDia(data: Date) {
-  return `${data.getFullYear()}-${data.getMonth()}-${data.getDate()}`
 }
 
 function diasAteValidade(lote: LoteResponse) {
@@ -485,7 +453,7 @@ onMounted(carregarDashboard)
             </span>
           </button>
         </div>
-        <footer class="panel-hint">Clique em uma pendência para abrir diretamente o contexto que exige ação.</footer>
+        <footer class="panel-hint">Clique em uma pendência para abrir o contexto correspondente.</footer>
       </article>
 
       <article class="dashboard-panel dashboard-panel--history">
@@ -540,7 +508,10 @@ onMounted(carregarDashboard)
           <div v-else-if="resumoLaboratorios.length === 0" class="panel-empty panel-empty--compact">Não há laboratórios com dados disponíveis.</div>
           <div v-else class="labs-grid">
             <article v-for="laboratorio in resumoLaboratorios" :key="laboratorio.id" class="lab-card">
-              <header><span class="lab-icon"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v4l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 16l-5-9V3M7.5 14h9" /></svg></span><strong>{{ laboratorio.nome }}</strong></header>
+              <header>
+                <span class="lab-icon"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v4l-5 9a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 16l-5-9V3M7.5 14h9" /></svg></span>
+                <strong>{{ laboratorio.nome }}</strong>
+              </header>
               <div class="lab-metrics">
                 <span><small>Pendências</small><b>{{ laboratorio.pedidosPendentes }}</b></span>
                 <span><small>Urgentes</small><b class="lab-value--red">{{ laboratorio.urgentes }}</b></span>
@@ -560,24 +531,39 @@ onMounted(carregarDashboard)
               <h2>Resumo rápido</h2>
             </div>
           </header>
-          <div class="quick-summary-list">
-            <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z" /></svg></span><span>Laboratórios ativos</span><strong>{{ laboratoriosAtivos.length }}</strong></div>
-            <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3" /><path d="M3 19c.5-4 2.5-6 6-6s5.5 2 6 6M16 6a3 3 0 0 1 0 6M17 14c2.4.5 3.7 2.2 4 5" /></svg></span><span>Usuários ativos</span><strong>{{ usuariosAtivos.length }}</strong></div>
-            <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="1" /><path d="M8 8h8M8 12h8M8 16h5" /></svg></span><span>Pedidos</span><strong>{{ pedidosPendentes.length }}</strong></div>
-            <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14" /></svg></span><span>Entradas hoje</span><strong>{{ entradasHoje.length }}</strong></div>
-            <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M12 20V8M7 13l5-5 5 5M5 4h14" /></svg></span><span>Saídas hoje</span><strong>{{ saidasHoje.length }}</strong></div>
+
+          <div class="quick-summary-grid">
+            <div class="quick-summary-card quick-summary-card--blue">
+              <span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z" /></svg></span>
+              <span><small>Laboratórios ativos</small><strong>{{ laboratoriosAtivos.length }}</strong></span>
+            </div>
+            <div class="quick-summary-card quick-summary-card--slate">
+              <span class="quick-summary-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3" /><path d="M3 19c.5-4 2.5-6 6-6s5.5 2 6 6M16 6a3 3 0 0 1 0 6M17 14c2.4.5 3.7 2.2 4 5" /></svg></span>
+              <span><small>Usuários ativos</small><strong>{{ usuariosAtivos.length }}</strong></span>
+            </div>
+            <div class="quick-summary-card quick-summary-card--wide quick-summary-card--pending">
+              <span class="quick-summary-icon"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="1" /><path d="M8 8h8M8 12h8M8 16h5" /></svg></span>
+              <span><small>Pedidos pendentes</small><strong>{{ pedidosPendentes.length }}</strong><em>aguardando andamento da gestão</em></span>
+            </div>
+            <div class="quick-summary-card quick-summary-card--entry">
+              <span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14" /></svg></span>
+              <span><small>Entradas hoje</small><strong>{{ entradasHoje.length }}</strong></span>
+            </div>
+            <div class="quick-summary-card quick-summary-card--exit">
+              <span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M12 20V8M7 13l5-5 5 5M5 4h14" /></svg></span>
+              <span><small>Saídas hoje</small><strong>{{ saidasHoje.length }}</strong></span>
+            </div>
           </div>
-          <div class="mini-chart" aria-label="Volume de movimentações nos últimos 12 dias">
-            <div class="mini-chart-bars">
-              <span v-for="barra in barrasAtividade" :key="barra.data" class="mini-chart-column" :title="`${barra.data}: ${barra.valor} movimentação(ões)`">
-                <i :style="{ height: `${barra.percentual}%` }" />
-              </span>
+
+          <div class="quick-summary-footer">
+            <div class="operation-today">
+              <span class="operation-today__icon"><svg viewBox="0 0 24 24"><path d="M4 12h4l2-5 4 10 2-5h4" /></svg></span>
+              <span><strong>{{ movimentacoesHoje }} movimentação(ões) hoje</strong><small>{{ entradasHoje.length }} entrada(s) · {{ saidasHoje.length }} saída(s)</small></span>
             </div>
             <div class="quick-summary-updated">
               <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" /></svg>
-              <span v-if="atualizadoEm">Dados atualizados às {{ formatarHora(atualizadoEm.toISOString()) }}</span>
-              <span v-else>Dados aguardando atualização</span>
-              <small>atividade dos últimos 12 dias</small>
+              <span v-if="atualizadoEm">Atualizado às {{ formatarHora(atualizadoEm.toISOString()) }}</span>
+              <span v-else>Aguardando atualização</span>
             </div>
           </div>
         </article>
@@ -587,20 +573,21 @@ onMounted(carregarDashboard)
 </template>
 
 <style scoped>
-.dashboard-page { display: grid; gap: 18px; color: var(--sgl-text); }
-.dashboard-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.dashboard-page { width: 100%; max-width: 100%; min-width: 0; display: grid; gap: 18px; overflow-x: hidden; box-sizing: border-box; color: var(--sgl-text); }
+.dashboard-heading { min-width: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.dashboard-heading > div { min-width: 0; }
 .dashboard-eyebrow { display: block; margin-bottom: 5px; color: var(--sgl-primary); font-size: 10px; font-weight: 800; letter-spacing: .12em; }
 .dashboard-heading h1 { margin: 0; color: #111a2f; font-size: clamp(24px, 2.3vw, 31px); line-height: 1.1; }
 .dashboard-heading p { margin: 7px 0 0; color: var(--sgl-text-muted); font-size: 13px; }
-.dashboard-refresh { min-height: 38px; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid #b7c7df; border-radius: 7px; background: #fff; color: var(--sgl-primary); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease; }
+.dashboard-refresh { min-height: 38px; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid #b7c7df; border-radius: 7px; background: #fff; color: var(--sgl-primary); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease; }
 .dashboard-refresh:hover:not(:disabled) { transform: translateY(-1px); border-color: #7e9bc4; box-shadow: 0 6px 16px rgb(13 43 94 / 10%); }
 .dashboard-refresh:disabled { opacity: .55; cursor: wait; }
 .dashboard-refresh svg, .dashboard-warning svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .dashboard-warning { min-height: 42px; display: flex; align-items: center; gap: 9px; padding: 9px 12px; border: 1px solid #f4d390; border-radius: 8px; background: #fffbeb; color: #8b5b08; font-size: 12px; }
 
-.dashboard-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-.kpi-card { min-width: 0; min-height: 102px; display: grid; grid-template-columns: 46px 1fr; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--sgl-border); border-radius: 9px; background: var(--sgl-surface); color: var(--sgl-text); text-align: left; font: inherit; cursor: pointer; transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease; }
-.kpi-card:hover { transform: translateY(-4px) scale(1.015); border-color: #9fb6d8; background: #fbfdff; box-shadow: 0 12px 26px rgb(13 43 94 / 16%); }
+.dashboard-kpis { min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.kpi-card { min-width: 0; min-height: 102px; display: grid; grid-template-columns: 46px minmax(0, 1fr); align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--sgl-border); border-radius: 9px; background: var(--sgl-surface); color: var(--sgl-text); text-align: left; font: inherit; cursor: pointer; transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease; }
+.kpi-card:hover { transform: translateY(-4px); border-color: #9fb6d8; background: #fbfdff; box-shadow: 0 12px 26px rgb(13 43 94 / 16%); }
 .kpi-card > span:last-child { min-width: 0; display: grid; }
 .kpi-card small { color: #46566e; font-size: 11px; font-weight: 700; }
 .kpi-card strong { margin-top: 2px; color: #111a2f; font-size: 24px; line-height: 1; }
@@ -615,7 +602,7 @@ onMounted(carregarDashboard)
 .kpi-card--red { border-color: #f1cccc; }
 .kpi-card--orange, .kpi-card--amber { border-color: #f1ddbb; }
 
-.dashboard-content-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(350px, 1.12fr); gap: 14px; align-items: stretch; }
+.dashboard-content-grid { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(330px, 1.08fr); gap: 14px; align-items: stretch; }
 .dashboard-right-stack { min-width: 0; display: grid; grid-template-rows: auto auto; gap: 14px; align-content: start; }
 .dashboard-panel { min-width: 0; display: flex; flex-direction: column; border: 1px solid var(--sgl-border); border-radius: 10px; background: var(--sgl-surface); overflow: hidden; box-shadow: 0 4px 14px rgb(17 26 47 / 3%); }
 .panel-heading { min-height: 50px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px; border-bottom: 1px solid #eef2f7; background: linear-gradient(180deg, #fff 0%, #fcfdff 100%); }
@@ -704,59 +691,71 @@ onMounted(carregarDashboard)
 .timeline-chevron { width: 13px; height: 13px; align-self: center; fill: none; stroke: #9aa6b6; stroke-width: 2; transition: transform 150ms ease, stroke 150ms ease; }
 .timeline-item:hover .timeline-chevron { transform: translateX(3px); stroke: #315f9f; }
 
-.labs-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; padding: 11px; }
-.lab-card { min-width: 0; min-height: 126px; display: grid; gap: 9px; padding: 11px; border: 1px solid #e5eaf1; border-radius: 9px; background: #fff; transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease; }
-.lab-card:hover { transform: translateY(-2px); border-color: #b8cae4; box-shadow: 0 7px 18px rgb(13 43 94 / 8%); }
-.lab-card header { min-width: 0; display: flex; align-items: center; gap: 7px; }
-.lab-icon { width: 26px; height: 26px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #f3efff; color: #7044d9; }
-.lab-icon svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.lab-card header strong { overflow: hidden; color: #19243a; font-size: 9.5px; text-overflow: ellipsis; white-space: nowrap; }
-.lab-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-.lab-metrics > span { min-width: 0; display: grid; gap: 3px; padding: 5px 7px; border-right: 1px solid #edf1f6; border-bottom: 1px solid #edf1f6; }
-.lab-metrics > span:nth-child(2n) { border-right: 0; }
-.lab-metrics > span:nth-last-child(-n+2) { border-bottom: 0; }
-.lab-metrics small { color: #728096; font-size: 7.8px; }
-.lab-metrics b { color: #2d63bf; font-size: 13px; }
+.labs-grid { display: grid; grid-template-columns: 1fr; gap: 10px; padding: 12px; }
+.lab-card { min-width: 0; display: grid; gap: 11px; padding: 14px; border: 1px solid #e1e7ef; border-radius: 10px; background: #fff; transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease; }
+.lab-card:hover { transform: translateY(-2px); border-color: #b8cae4; box-shadow: 0 8px 20px rgb(13 43 94 / 9%); }
+.lab-card header { min-width: 0; display: flex; align-items: center; gap: 9px; }
+.lab-icon { width: 32px; height: 32px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #f3efff; color: #7044d9; }
+.lab-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.lab-card header strong { overflow: hidden; color: #19243a; font-size: 11.5px; text-overflow: ellipsis; white-space: nowrap; }
+.lab-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.lab-metrics > span { min-width: 0; display: grid; gap: 3px; padding: 8px 9px; border: 1px solid #edf1f6; border-radius: 7px; background: #f9fbfd; }
+.lab-metrics small { color: #66758b; font-size: 9px; font-weight: 650; }
+.lab-metrics b { color: #2d63bf; font-size: 17px; line-height: 1; }
 .lab-value--red { color: #e03939 !important; }
 .lab-value--purple { color: #7446df !important; }
 .lab-value--orange { color: #e48314 !important; }
 
-.quick-summary-list { display: grid; padding: 6px 12px 2px; }
-.quick-summary-list > div { min-height: 35px; display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 7px; border-bottom: 1px solid #eef2f7; color: #536176; font-size: 9px; }
-.quick-summary-list > div:last-child { border-bottom: 0; }
-.quick-summary-list strong { color: #1d2a42; font-size: 10px; }
-.quick-summary-icon { width: 22px; height: 22px; display: grid; place-items: center; color: #607390; }
-.quick-summary-icon svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.mini-chart { padding: 9px 12px 11px; border-top: 1px solid #eef2f7; background: #fbfcfe; }
-.mini-chart-bars { height: 35px; display: flex; align-items: flex-end; gap: 4px; padding: 0 2px; }
-.mini-chart-column { flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
-.mini-chart-column i { width: 100%; max-width: 8px; min-height: 3px; border-radius: 2px 2px 0 0; background: linear-gradient(180deg, #3c7de5 0%, #8bb5f4 100%); opacity: .9; transition: height 180ms ease, opacity 150ms ease, transform 150ms ease; }
-.mini-chart-column:hover i { opacity: 1; transform: scaleX(1.2); }
-.quick-summary-updated { display: grid; grid-template-columns: 15px minmax(0, 1fr) auto; align-items: center; gap: 5px; margin-top: 7px; color: #7c899b; font-size: 8px; }
+.quick-summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px; }
+.quick-summary-card { min-width: 0; min-height: 70px; display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; gap: 9px; padding: 10px; border: 1px solid #e6ebf2; border-radius: 9px; background: #fbfcfe; }
+.quick-summary-card--wide { grid-column: 1 / -1; min-height: 76px; }
+.quick-summary-card > span:last-child { min-width: 0; display: grid; gap: 2px; }
+.quick-summary-card small { color: #607087; font-size: 9px; font-weight: 700; }
+.quick-summary-card strong { color: #17243b; font-size: 20px; line-height: 1; }
+.quick-summary-card em { overflow: hidden; color: #8793a5; font-size: 8px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+.quick-summary-icon { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: #607390; }
+.quick-summary-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.quick-summary-card--blue .quick-summary-icon { background: #edf4ff; color: #225ebd; }
+.quick-summary-card--slate .quick-summary-icon { background: #eef2f6; color: #52647e; }
+.quick-summary-card--pending { border-color: #d9e6fa; background: #f7faff; }
+.quick-summary-card--pending .quick-summary-icon { background: #e7f0ff; color: #1e5bc8; }
+.quick-summary-card--entry .quick-summary-icon { background: #edf8f1; color: #168847; }
+.quick-summary-card--exit .quick-summary-icon { background: #fff0f0; color: #d64040; }
+.quick-summary-footer { display: grid; gap: 9px; margin-top: auto; padding: 11px 12px; border-top: 1px solid #eef2f7; background: #f8fafc; }
+.operation-today { min-width: 0; display: grid; grid-template-columns: 32px minmax(0, 1fr); align-items: center; gap: 9px; }
+.operation-today__icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: #edf4ff; color: #225ebd; }
+.operation-today__icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.operation-today > span:last-child { min-width: 0; display: grid; gap: 2px; }
+.operation-today strong { color: #24354d; font-size: 10px; }
+.operation-today small { color: #7a8798; font-size: 8.5px; }
+.quick-summary-updated { display: flex; align-items: center; gap: 6px; color: #8793a5; font-size: 8px; }
 .quick-summary-updated svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.quick-summary-updated small { color: #9aa5b4; font-size: 7px; }
 
-@media (max-width: 1260px) {
-  .dashboard-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .dashboard-content-grid { grid-template-columns: 1fr 1fr; }
-  .dashboard-right-stack { grid-column: 1 / -1; grid-template-columns: 1.35fr .65fr; grid-template-rows: none; }
+@media (max-width: 1500px) {
+  .dashboard-content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-right-stack { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr); grid-template-rows: none; }
+  .labs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-@media (max-width: 900px) {
-  .dashboard-heading { flex-direction: column; }
-  .dashboard-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 1080px) {
   .dashboard-content-grid { grid-template-columns: 1fr; }
   .dashboard-right-stack { grid-column: auto; grid-template-columns: 1fr; }
+  .labs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-@media (max-width: 620px) {
-  .dashboard-kpis { grid-template-columns: 1fr; }
+@media (max-width: 760px) {
+  .dashboard-heading { flex-direction: column; }
+  .dashboard-refresh { width: 100%; justify-content: center; }
   .labs-grid { grid-template-columns: 1fr; }
   .attention-item { grid-template-columns: 34px minmax(0, 1fr); }
   .attention-side { grid-column: 2; justify-content: flex-start; }
   .timeline-item { grid-template-columns: 38px 16px minmax(0, 1fr) 14px; }
   .timeline-status { display: none; }
-  .quick-summary-updated { grid-template-columns: 15px 1fr; }
-  .quick-summary-updated small { display: none; }
+}
+
+@media (max-width: 480px) {
+  .dashboard-kpis { grid-template-columns: 1fr; }
+  .quick-summary-grid { grid-template-columns: 1fr; }
+  .quick-summary-card--wide { grid-column: auto; }
 }
 </style>
