@@ -10,6 +10,7 @@ import './styles/tokens.css'
 import './styles/base.css'
 import './styles/main.css'
 import './styles/relatorios-responsive.css'
+import './styles/gestao-shell-controls.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
