@@ -27,21 +27,21 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --sgl-primary: #5B8DE0;
-  --sgl-primary-dark: #173D78;
-  --sgl-primary-light: #78A4EB;
+  --sgl-primary: #4F8CFF;
+  --sgl-primary-dark: #1D4F9E;
+  --sgl-primary-light: #7FB0FF;
 
-  --sgl-green: #38A169;
-  --sgl-green-light: #63B985;
-  --sgl-green-soft: #2C6A49;
+  --sgl-green: #4ADE80;
+  --sgl-green-light: #6EE7A0;
+  --sgl-green-soft: #24533C;
 
-  --sgl-background: #08111F;
-  --sgl-surface: #101B30;
-  --sgl-surface-elevated: #16233A;
-  --sgl-text: #EDF4FF;
-  --sgl-text-muted: #A9B7CC;
-  --sgl-border: #293A55;
+  --sgl-background: #07111F;
+  --sgl-surface: #0F1B2E;
+  --sgl-surface-elevated: #14233A;
+  --sgl-text: #F4F7FB;
+  --sgl-text-muted: #91A0B6;
+  --sgl-border: #283952;
 
-  --sgl-warning: #F6C343;
-  --sgl-error: #F87171;
+  --sgl-warning: #F2B84B;
+  --sgl-error: #FB5F6D;
 }
