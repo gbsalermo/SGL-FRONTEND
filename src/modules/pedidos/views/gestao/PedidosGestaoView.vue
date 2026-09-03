@@ -44,7 +44,10 @@ const statusOptions: Array<{ label: string; value: StatusPedido | 'TODOS' }> = [
 ]
 
 const laboratorios = computed(() => [...new Set(pedidos.value.map((pedido) => pedido.laboratorioNome))].sort((a, b) => a.localeCompare(b, 'pt-BR')))
-const pedidoAlvo = computed(() => typeof route.query.pedido === 'string' ? route.query.pedido : '')
+const pedidoAlvo = computed(() => {
+  const valor = route.query.highlight ?? route.query.expand ?? route.query.pedido
+  return typeof valor === 'string' ? valor : ''
+})
 const totais = computed(() => ({
   pendentes: pedidos.value.filter((pedido) => pedido.status === 'PENDENTE').length,
   urgentes: pedidos.value.filter((pedido) => pedido.urgente).length,
@@ -280,7 +283,7 @@ watch(() => route.query.urgencia, (valor) => {
   if (urgencia.value !== 'TODOS') filtrosAbertos.value = true
 }, { immediate: true })
 
-watch(() => route.query.pedido, () => {
+watch([() => route.query.pedido, () => route.query.highlight, () => route.query.expand], () => {
   if (!carregando.value) void abrirPedidoDaRota()
 })
 

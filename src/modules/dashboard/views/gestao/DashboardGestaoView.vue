@@ -97,10 +97,6 @@ const usuariosAtivos = computed(() =>
   usuarios.value.filter((usuario) => usuario.ativo && (!unidadeId.value || usuario.unidadeId === unidadeId.value)),
 )
 
-const pedidosHoje = computed(() =>
-  pedidos.value.filter((pedido) => mesmoDia(new Date(pedido.dataSolicitacao), new Date())),
-)
-
 const entradasHoje = computed(() =>
   movimentacoes.value.filter((movimentacao) => movimentacao.tipoMovimentacao === 'ENTRADA' && mesmoDia(new Date(movimentacao.dataMovimentacao), new Date())),
 )
@@ -323,13 +319,17 @@ function abrir(rota: string) {
 }
 
 function abrirMovimentacao(movimentacao: MovimentacaoEstoqueResponse) {
-  if (movimentacao.pedidoId) {
+  if (movimentacao.tipoMovimentacao === 'SAIDA' && movimentacao.pedidoId) {
     router.push(`/pedidos?pedido=${encodeURIComponent(movimentacao.pedidoId)}`)
     return
   }
   if (movimentacao.estoqueCentralId) {
     const lote = movimentacao.loteId ? `?lote=${encodeURIComponent(movimentacao.loteId)}` : ''
     router.push(`/estoque/${movimentacao.estoqueCentralId}${lote}`)
+    return
+  }
+  if (movimentacao.pedidoId) {
+    router.push(`/pedidos?pedido=${encodeURIComponent(movimentacao.pedidoId)}`)
     return
   }
   router.push(`/movimentacoes?movimentacao=${encodeURIComponent(movimentacao.id)}`)
@@ -563,7 +563,7 @@ onMounted(carregarDashboard)
           <div class="quick-summary-list">
             <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z" /></svg></span><span>Laboratórios ativos</span><strong>{{ laboratoriosAtivos.length }}</strong></div>
             <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3" /><path d="M3 19c.5-4 2.5-6 6-6s5.5 2 6 6M16 6a3 3 0 0 1 0 6M17 14c2.4.5 3.7 2.2 4 5" /></svg></span><span>Usuários ativos</span><strong>{{ usuariosAtivos.length }}</strong></div>
-            <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="1" /><path d="M8 8h8M8 12h8M8 16h5" /></svg></span><span>Pedidos hoje</span><strong>{{ pedidosHoje.length }}</strong></div>
+            <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="1" /><path d="M8 8h8M8 12h8M8 16h5" /></svg></span><span>Pedidos</span><strong>{{ pedidosPendentes.length }}</strong></div>
             <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14" /></svg></span><span>Entradas hoje</span><strong>{{ entradasHoje.length }}</strong></div>
             <div><span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M12 20V8M7 13l5-5 5 5M5 4h14" /></svg></span><span>Saídas hoje</span><strong>{{ saidasHoje.length }}</strong></div>
           </div>
@@ -639,16 +639,16 @@ onMounted(carregarDashboard)
 .panel-hint { min-height: 42px; display: grid; place-items: center; margin-top: auto; padding: 8px 12px; border-top: 1px solid #eef2f7; background: #fbfcfe; color: #738198; font-size: 9px; text-align: center; }
 
 .attention-list { display: grid; padding: 4px 0; }
-.attention-item { position: relative; min-height: 74px; display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 9px 12px 9px 14px; border: 0; border-bottom: 1px solid #eef2f7; background: #fff; color: inherit; text-align: left; font: inherit; cursor: pointer; transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease; }
-.attention-item::before { content: ''; position: absolute; inset: 8px auto 8px 0; width: 3px; border-radius: 0 4px 4px 0; background: #e6a523; transition: width 150ms ease; }
-.attention-item--critico::before { background: #ef3333; }
-.attention-item--alto::before { background: #f1841c; }
-.attention-item--medio::before { background: #7446df; }
-.attention-item:hover { z-index: 1; transform: translateX(3px); background: #fbfdff; box-shadow: 0 7px 18px rgb(13 43 94 / 9%); }
+.attention-item { position: relative; min-height: 74px; display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 9px 12px 9px 14px; border: 1px solid transparent; border-bottom-color: #eef2f7; background: #fff; color: inherit; text-align: left; font: inherit; cursor: pointer; transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
+.attention-item--critico { --attention-accent: #ef3333; }
+.attention-item--alto { --attention-accent: #f1841c; }
+.attention-item--medio { --attention-accent: #7446df; }
+.attention-item::before { content: ''; position: absolute; inset: 8px auto 8px 0; width: 3px; border-radius: 0 4px 4px 0; background: var(--attention-accent, #e6a523); transition: width 180ms ease; }
+.attention-item:hover { z-index: 1; transform: translateY(-2px) translateX(2px); border-color: var(--attention-accent, #9fb6d8); background: #fbfdff; box-shadow: 0 11px 24px rgb(13 43 94 / 14%); }
 .attention-item:hover::before { width: 5px; }
-.attention-item--pedido:hover { background: #fff9f9; }
-.attention-item--estoque:hover, .attention-item--lote:hover { background: #fffcf7; }
-.attention-item--residuo:hover { background: #fbf9ff; }
+.attention-item--pedido:hover { background: #fff7f7; }
+.attention-item--estoque:hover, .attention-item--lote:hover { background: #fffbf3; }
+.attention-item--residuo:hover { background: #faf7ff; }
 .attention-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: #eef2f7; color: #55627a; }
 .attention-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .attention-item--pedido .attention-icon { background: #fff0f0; color: #e13b3b; }
@@ -664,16 +664,21 @@ onMounted(carregarDashboard)
 .attention-copy small { color: var(--sgl-text-muted); font-size: 8.8px; }
 .attention-side { min-width: 58px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: #6d7789; font-size: 8.5px; font-weight: 800; text-align: right; }
 .attention-side svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; transition: transform 150ms ease; }
-.attention-item:hover .attention-side svg { transform: translateX(2px); }
+.attention-item:hover .attention-side svg { transform: translateX(3px); }
 
 .timeline-list { display: grid; padding: 4px 0; }
-.timeline-item { min-height: 58px; display: grid; grid-template-columns: 40px 18px minmax(0, 1fr) auto 14px; align-items: stretch; gap: 7px; padding: 0 11px; border: 0; background: #fff; color: inherit; text-align: left; font: inherit; cursor: pointer; transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease; }
-.timeline-item:hover { z-index: 1; transform: translateX(2px); background: #f9fbff; box-shadow: 0 7px 18px rgb(13 43 94 / 8%); }
-.timeline-item--entrada:hover { background: #f6faff; }
-.timeline-item--saida:hover { background: #fff8f8; }
-.timeline-item--ajuste:hover { background: #fbf9ff; }
-.timeline-item--devolucao:hover { background: #f7fcf8; }
-.timeline-item--descarte:hover { background: #fffaf3; }
+.timeline-item { min-height: 58px; display: grid; grid-template-columns: 40px 18px minmax(0, 1fr) auto 14px; align-items: stretch; gap: 7px; padding: 0 11px; border: 1px solid transparent; border-bottom-color: #eef2f7; background: #fff; color: inherit; text-align: left; font: inherit; cursor: pointer; transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
+.timeline-item--entrada { --timeline-accent: #2b66d0; }
+.timeline-item--saida { --timeline-accent: #e13b3b; }
+.timeline-item--ajuste { --timeline-accent: #7446df; }
+.timeline-item--devolucao { --timeline-accent: #20a452; }
+.timeline-item--descarte { --timeline-accent: #e38a16; }
+.timeline-item:hover { z-index: 1; transform: translateY(-2px) translateX(2px); border-color: var(--timeline-accent, #9fb6d8); background: #f9fbff; box-shadow: 0 11px 24px rgb(13 43 94 / 13%); }
+.timeline-item--entrada:hover { background: #f3f8ff; }
+.timeline-item--saida:hover { background: #fff5f5; }
+.timeline-item--ajuste:hover { background: #f9f6ff; }
+.timeline-item--devolucao:hover { background: #f4fbf6; }
+.timeline-item--descarte:hover { background: #fff8ef; }
 .timeline-item time { align-self: center; color: #47566e; font-size: 9px; font-weight: 800; text-align: right; }
 .timeline-axis { position: relative; display: grid; place-items: center; color: #2b66d0; }
 .timeline-line { position: absolute; left: 50%; width: 1.5px; transform: translateX(-50%); background: #d9e1ec; }
@@ -697,7 +702,7 @@ onMounted(carregarDashboard)
 .timeline-status--devolucao { background: #ebf8ef; color: #198d45; }
 .timeline-status--descarte { background: #fff4e5; color: #cf750c; }
 .timeline-chevron { width: 13px; height: 13px; align-self: center; fill: none; stroke: #9aa6b6; stroke-width: 2; transition: transform 150ms ease, stroke 150ms ease; }
-.timeline-item:hover .timeline-chevron { transform: translateX(2px); stroke: #315f9f; }
+.timeline-item:hover .timeline-chevron { transform: translateX(3px); stroke: #315f9f; }
 
 .labs-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; padding: 11px; }
 .lab-card { min-width: 0; min-height: 126px; display: grid; gap: 9px; padding: 11px; border: 1px solid #e5eaf1; border-radius: 9px; background: #fff; transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease; }

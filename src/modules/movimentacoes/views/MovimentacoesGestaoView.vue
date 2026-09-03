@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { estoqueService } from '@/modules/estoque/services/estoqueService'
 import { movimentacaoService } from '@/modules/movimentacoes/services/movimentacaoService'
@@ -10,6 +11,7 @@ import type {
 } from '@/modules/movimentacoes/types/movimentacao'
 import { useSessionStore } from '@/stores/session'
 
+const route = useRoute()
 const session = useSessionStore()
 
 const movimentacoes = ref<MovimentacaoEstoqueResponse[]>([])
@@ -25,6 +27,10 @@ const ordem = ref<'RECENTES' | 'ANTIGAS'>('RECENTES')
 const expandida = ref<string | null>(null)
 
 const unidadeId = computed(() => session.usuario?.unidadeId)
+const movimentacaoAlvo = computed(() => {
+  const valor = route.query.highlight ?? route.query.movimentacao
+  return typeof valor === 'string' ? valor : ''
+})
 
 const tipos: Array<{ valor: TipoMovimentacao; rotulo: string }> = [
   { valor: 'ENTRADA', rotulo: 'Entrada' },
@@ -127,6 +133,17 @@ function alternarDetalhe(id: string) {
   expandida.value = expandida.value === id ? null : id
 }
 
+function abrirMovimentacaoDaRota() {
+  if (!movimentacaoAlvo.value || movimentacoes.value.length === 0) return
+  const movimentacao = movimentacoes.value.find((item) => item.id === movimentacaoAlvo.value)
+  if (!movimentacao) return
+
+  expandida.value = movimentacao.id
+  requestAnimationFrame(() => {
+    document.getElementById(`movimentacao-${movimentacao.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
+}
+
 async function carregar() {
   if (!unidadeId.value) {
     erro.value = 'O usuário atual não possui unidade vinculada.'
@@ -145,12 +162,17 @@ async function carregar() {
 
     const estoquesPermitidos = new Set(estoquesDaUnidade.map((item) => item.id))
     movimentacoes.value = movimentacoesData.filter((item) => estoquesPermitidos.has(item.estoqueCentralId))
+    abrirMovimentacaoDaRota()
   } catch {
     erro.value = 'Não foi possível carregar as movimentações da unidade.'
   } finally {
     carregando.value = false
   }
 }
+
+watch([() => route.query.movimentacao, () => route.query.highlight], () => {
+  if (!carregando.value) abrirMovimentacaoDaRota()
+})
 
 onMounted(carregar)
 </script>
@@ -220,7 +242,7 @@ onMounted(carregar)
         </thead>
         <tbody>
           <template v-for="item in movimentacoesFiltradas" :key="item.id">
-            <tr class="movement-row" @click="alternarDetalhe(item.id)">
+            <tr :id="`movimentacao-${item.id}`" class="movement-row" :class="{ 'movement-row--alvo': movimentacaoAlvo === item.id }" @click="alternarDetalhe(item.id)">
               <td>{{ formatarData(item.dataMovimentacao) }}</td>
               <td><strong>{{ item.produtoNome }}</strong><small v-if="item.laboratorioNome">{{ item.laboratorioNome }}</small></td>
               <td><span :class="classeTipo(item.tipoMovimentacao)">{{ rotuloTipo(item.tipoMovimentacao) }}</span></td>
@@ -231,7 +253,7 @@ onMounted(carregar)
               <td><strong>{{ item.quantidadeAnterior }}</strong> → <strong>{{ item.quantidadeAtual }}</strong></td>
               <td><button class="detail-button" type="button" :aria-label="expandida === item.id ? 'Recolher detalhes' : 'Ver detalhes'" @click.stop="alternarDetalhe(item.id)">{{ expandida === item.id ? '⌃' : '⌄' }}</button></td>
             </tr>
-            <tr v-if="expandida === item.id" class="detail-row">
+            <tr v-if="expandida === item.id" class="detail-row" :class="{ 'detail-row--alvo': movimentacaoAlvo === item.id }">
               <td colspan="9">
                 <div class="detail-grid">
                   <div><span>Laboratório</span><strong>{{ item.laboratorioNome || 'Não vinculado' }}</strong></div>
@@ -282,8 +304,11 @@ onMounted(carregar)
 table { width: 100%; min-width: 1200px; border-collapse: collapse; }
 th { padding: 12px 13px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 800; text-align: left; text-transform: uppercase; }
 td { padding: 13px; border-bottom: 1px solid #eef2f7; color: #334155; font-size: 12px; vertical-align: middle; }
-.movement-row { cursor: pointer; }
+.movement-row { cursor: pointer; transition: background 160ms ease, box-shadow 160ms ease; }
 .movement-row:hover { background: #f8fbff; }
+.movement-row--alvo { background: #fff8e8 !important; box-shadow: inset 4px 0 0 #e79a1c; animation: destaque-movimentacao 900ms ease-out; }
+.detail-row--alvo td { background: #fffcf4; }
+@keyframes destaque-movimentacao { from { background: #ffe6a8; } to { background: #fff8e8; } }
 td strong { color: #1e293b; }
 td small { display: block; margin-top: 3px; color: #94a3b8; font-size: 10px; }
 .quantity { font-size: 14px; }
