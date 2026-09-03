@@ -46,10 +46,6 @@ const lotes = ref<LoteResponse[]>([])
 
 const hoje = computed(() => inicioDoDia(new Date()))
 
-const pedidosHoje = computed(() =>
-  pedidos.value.filter((pedido) => mesmaData(new Date(pedido.dataSolicitacao), hoje.value)).length,
-)
-
 const pedidosUrgentes = computed(() =>
   pedidos.value.filter((pedido) => pedido.status === 'PENDENTE' && pedido.urgente),
 )
@@ -62,8 +58,8 @@ const pedidosAprovados = computed(() =>
   pedidos.value.filter((pedido) => pedido.status === 'APROVADO'),
 )
 
-const residuosEmAnalise = computed(() =>
-  residuos.value.filter((residuo) => residuo.status === 'EM_ANALISE'),
+const residuosPendentesAnalise = computed(() =>
+  residuos.value.filter((residuo) => residuo.status === 'INFORMADO' || residuo.status === 'EM_ANALISE'),
 )
 
 const residuosAtivos = computed(() =>
@@ -96,8 +92,8 @@ const processos = computed(() => {
     },
     {
       titulo: 'Resíduos aguardando análise',
-      descricao: 'Recebidos e pendentes de classificação',
-      valor: residuosEmAnalise.value.length,
+      descricao: 'Informados ou já em análise pela gestão',
+      valor: residuosPendentesAnalise.value.length,
       tom: 'roxo',
       rota: '/residuos',
     },
@@ -176,11 +172,11 @@ const itensAtencao = computed<ItemAtencao[]>(() => {
     })
   })
 
-  residuosEmAnalise.value.forEach((residuo) => {
+  residuosPendentesAnalise.value.forEach((residuo) => {
     itens.push({
       id: `residuo-${residuo.id}`,
       tipo: 'residuo',
-      categoria: 'Resíduo em análise',
+      categoria: residuo.status === 'INFORMADO' ? 'Resíduo aguardando análise' : 'Resíduo em análise',
       titulo: residuo.codigoRastreio || `Resíduo ${codigoCurto(residuo.id)}`,
       descricao: `${residuo.descricao} · ${residuo.laboratorioNome}`,
       detalhe: tempoDesde(residuo.dataRecebimento || residuo.dataInformacao),
@@ -299,12 +295,6 @@ function fimDoDia(data: Date) {
   return new Date(data.getFullYear(), data.getMonth(), data.getDate(), 23, 59, 59, 999)
 }
 
-function mesmaData(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear()
-    && a.getMonth() === b.getMonth()
-    && a.getDate() === b.getDate()
-}
-
 function diasAteValidade(lote: LoteResponse) {
   if (!lote.ativo || !lote.dataValidade) return Number.POSITIVE_INFINITY
   const validade = inicioDoDia(new Date(`${lote.dataValidade}T00:00:00`))
@@ -377,9 +367,9 @@ onMounted(carregarDashboard)
     </div>
 
     <div class="dashboard-kpis" aria-label="Indicadores principais">
-      <button class="kpi-card kpi-card--blue" type="button" @click="abrir('/pedidos')">
+      <button class="kpi-card kpi-card--blue" type="button" @click="abrir('/pedidos?status=PENDENTE')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5zM8 9h8M8 13h8M8 17h5" /></svg></span>
-        <span><small>Pedidos hoje</small><strong>{{ pedidosHoje }}</strong><em>Solicitações registradas</em></span>
+        <span><small>Pedidos</small><strong>{{ pedidosPendentes.length }}</strong><em>Solicitações pendentes</em></span>
       </button>
       <button class="kpi-card kpi-card--red" type="button" @click="abrir('/pedidos?status=PENDENTE')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 17h.01" /></svg></span>
@@ -391,7 +381,7 @@ onMounted(carregarDashboard)
       </button>
       <button class="kpi-card kpi-card--purple" type="button" @click="abrir('/residuos')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.7 3h10.6A2 2 0 0 0 19 17l-5-9V3M8 14h8" /></svg></span>
-        <span><small>Resíduos em análise</small><strong>{{ residuosEmAnalise.length }}</strong><em>Aguardando decisão da gestão</em></span>
+        <span><small>Resíduos a analisar</small><strong>{{ residuosPendentesAnalise.length }}</strong><em>Pendentes ou em análise</em></span>
       </button>
       <button class="kpi-card kpi-card--amber" type="button" @click="abrir('/estoque')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M8 3v4M16 3v4M4 10h16M8 14h3M13 14h3" /></svg></span>
@@ -604,9 +594,14 @@ onMounted(carregarDashboard)
   text-align: left;
   font: inherit;
   cursor: pointer;
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
-.kpi-card:hover { transform: translateY(-1px); border-color: #c8d5e8; box-shadow: 0 7px 20px rgb(13 43 94 / 7%); }
+.kpi-card:hover {
+  transform: translateY(-4px) scale(1.015);
+  border-color: #9fb6d8;
+  background: #fbfdff;
+  box-shadow: 0 12px 26px rgb(13 43 94 / 16%);
+}
 .kpi-card > span:last-child { min-width: 0; display: grid; }
 .kpi-card small { color: #46566e; font-size: 11px; font-weight: 700; }
 .kpi-card strong { margin-top: 2px; color: #111a2f; font-size: 24px; line-height: 1; }
