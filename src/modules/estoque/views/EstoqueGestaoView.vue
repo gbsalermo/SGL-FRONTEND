@@ -1,22 +1,25 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { estoqueService } from '@/modules/estoque/services/estoqueService'
 import type { EstoqueCentralResponse, LoteResponse } from '@/modules/estoque/types/estoque'
+import { gestaoShellService } from '@/services/gestaoShellService'
 import { useSessionStore } from '@/stores/session'
 
+const route = useRoute()
 const router = useRouter()
 const session = useSessionStore()
 
 const estoques = ref<EstoqueCentralResponse[]>([])
 const lotesVencidos = ref<LoteResponse[]>([])
+const produtosComLoteProximo = ref<Set<string>>(new Set())
 const carregando = ref(true)
 const erro = ref('')
 const busca = ref('')
 const buscaEmFoco = ref(false)
 const filtrosAbertos = ref(false)
-const situacao = ref<'TODOS' | 'BAIXO' | 'NORMAL' | 'ZERADO' | 'VENCIDO'>('TODOS')
+const situacao = ref<'TODOS' | 'BAIXO' | 'NORMAL' | 'ZERADO' | 'VENCIDO' | 'PROXIMO'>('TODOS')
 const ordenarPor = ref<'PRODUTO' | 'QUANTIDADE' | 'MINIMO' | 'LOCALIZACAO'>('PRODUTO')
 const direcao = ref<'ASC' | 'DESC'>('ASC')
 
@@ -43,6 +46,10 @@ function possuiLoteVencido(item: EstoqueCentralResponse) {
   return produtosComLoteVencido.value.has(item.produtoId)
 }
 
+function possuiLoteProximo(item: EstoqueCentralResponse) {
+  return produtosComLoteProximo.value.has(item.produtoId)
+}
+
 const resumo = computed(() => ({
   produtos: estoques.value.filter((item) => item.ativo).length,
   baixo: estoques.value.filter((item) => item.ativo && estoqueBaixo(item)).length,
@@ -55,9 +62,10 @@ const estoquesFiltrados = computed(() => {
   const filtrados = estoques.value.filter((item) => {
     if (!item.ativo) return false
     if (situacao.value === 'BAIXO' && !estoqueBaixo(item)) return false
-    if (situacao.value === 'NORMAL' && (estoqueBaixo(item) || estoqueZerado(item) || possuiLoteVencido(item))) return false
+    if (situacao.value === 'NORMAL' && (estoqueBaixo(item) || estoqueZerado(item) || possuiLoteVencido(item) || possuiLoteProximo(item))) return false
     if (situacao.value === 'ZERADO' && !estoqueZerado(item)) return false
     if (situacao.value === 'VENCIDO' && !possuiLoteVencido(item)) return false
+    if (situacao.value === 'PROXIMO' && !possuiLoteProximo(item)) return false
     if (!termo) return true
 
     return [item.produtoNome, item.produtoCodigoReferencia, item.produtoUnidadeArmazenamento, item.produtoLocalizacaoFisica, item.unidadeNome, item.unidadeSigla]
@@ -77,11 +85,40 @@ const estoquesFiltrados = computed(() => {
   })
 })
 
+function aplicarFiltrosRota() {
+  busca.value = typeof route.query.busca === 'string' ? route.query.busca : ''
+
+  if (route.query.alerta === 'estoque-baixo') {
+    situacao.value = 'BAIXO'
+    filtrosAbertos.value = true
+    return
+  }
+
+  if (route.query.validade === 'VENCIDO') {
+    situacao.value = 'VENCIDO'
+    filtrosAbertos.value = true
+    return
+  }
+
+  if (route.query.validade === 'PROXIMO_VENCIMENTO') {
+    situacao.value = 'PROXIMO'
+    filtrosAbertos.value = true
+    return
+  }
+
+  situacao.value = 'TODOS'
+  filtrosAbertos.value = Boolean(busca.value)
+}
+
 function limparFiltros() {
   busca.value = ''
   situacao.value = 'TODOS'
   ordenarPor.value = 'PRODUTO'
   direcao.value = 'ASC'
+
+  if (Object.keys(route.query).length > 0) {
+    void router.replace({ path: '/estoque' })
+  }
 }
 
 async function carregar() {
@@ -94,12 +131,18 @@ async function carregar() {
   carregando.value = true
   erro.value = ''
   try {
-    const [estoquesData, vencidosData] = await Promise.all([
+    const [estoquesData, vencidosData, resumoEstoque] = await Promise.all([
       estoqueService.listarPorUnidade(unidadeId.value),
       estoqueService.listarLotesVencidos(),
+      gestaoShellService.obterResumoEstoque(unidadeId.value),
     ])
     estoques.value = estoquesData
     lotesVencidos.value = vencidosData
+    produtosComLoteProximo.value = new Set(
+      resumoEstoque.lotes
+        .filter((lote) => lote.ativo && lote.quantidadeDisponivel > 0 && lote.situacao === 'PROXIMO_VENCIMENTO')
+        .map((lote) => lote.produtoId),
+    )
   } catch {
     erro.value = 'Não foi possível carregar o estoque da unidade.'
   } finally {
@@ -108,9 +151,10 @@ async function carregar() {
 }
 
 function abrirDetalhe(item: EstoqueCentralResponse) {
-  router.push(`/estoque/${item.id}`)
+  void router.push(`/estoque/${item.id}`)
 }
 
+watch(() => route.query, aplicarFiltrosRota, { immediate: true, deep: true })
 onMounted(carregar)
 </script>
 
@@ -145,7 +189,7 @@ onMounted(carregar)
       </div>
 
       <div v-if="filtrosAbertos" class="filter-grid">
-        <label><span>Situação</span><select v-model="situacao"><option value="TODOS">Todos</option><option value="BAIXO">Estoque baixo</option><option value="ZERADO">Zerados</option><option value="VENCIDO">Com lote vencido</option><option value="NORMAL">Normal</option></select></label>
+        <label><span>Situação</span><select v-model="situacao"><option value="TODOS">Todos</option><option value="BAIXO">Estoque baixo</option><option value="ZERADO">Zerados</option><option value="PROXIMO">Próximo do vencimento</option><option value="VENCIDO">Com lote vencido</option><option value="NORMAL">Normal</option></select></label>
         <label><span>Organizar por</span><select v-model="ordenarPor"><option value="PRODUTO">Produto</option><option value="LOCALIZACAO">Localização</option><option value="QUANTIDADE">Quantidade atual</option><option value="MINIMO">Quantidade mínima</option></select></label>
         <label><span>{{ rotuloOrdem }}</span><select v-model="direcao"><option v-if="ordemQuantitativa" value="ASC">Menor → maior</option><option v-if="ordemQuantitativa" value="DESC">Maior → menor</option><option v-if="!ordemQuantitativa" value="ASC">A → Z</option><option v-if="!ordemQuantitativa" value="DESC">Z → A</option></select></label>
       </div>
@@ -170,6 +214,7 @@ onMounted(carregar)
             <td>
               <span v-if="estoqueZerado(item)" class="chip danger-chip">ZERADO</span>
               <span v-else-if="possuiLoteVencido(item)" class="chip danger-chip">LOTE VENCIDO</span>
+              <span v-else-if="possuiLoteProximo(item)" class="chip warning-chip">PRÓX. VENCIMENTO</span>
               <span v-else-if="estoqueBaixo(item)" class="chip warning-chip">ESTOQUE BAIXO</span>
               <span v-else class="chip ok-chip">NORMAL</span>
             </td>

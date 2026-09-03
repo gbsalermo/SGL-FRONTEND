@@ -55,21 +55,59 @@ function limpar() {
   alvo = null
 }
 
-watch(() => route.path, async () => {
+async function aplicarContextoBuscaGlobal() {
+  if (route.path !== '/administracao/cadastros' || session.usuario?.perfil !== 'ADMINISTRADOR') return
+
+  const secao = typeof route.query.secao === 'string' ? route.query.secao : ''
+  const rotuloAba: Record<string, string> = {
+    laboratorios: 'Laboratórios',
+    projetos: 'Projetos',
+    produtos: 'Produtos',
+    usuarios: 'Permissões',
+    permissoes: 'Permissões',
+  }
+
+  const rotulo = rotuloAba[secao]
+  if (rotulo) {
+    const botao = [...document.querySelectorAll<HTMLButtonElement>('.admin-page .tab-button')]
+      .find((item) => item.querySelector('strong')?.textContent?.trim() === rotulo)
+    if (botao && !botao.classList.contains('tab-button--active')) {
+      botao.click()
+      await nextTick()
+    }
+  }
+
+  const termo = typeof route.query.busca === 'string' ? route.query.busca : ''
+  if (!termo) return
+
+  const input = document.querySelector<HTMLInputElement>('.admin-page .toolbar .search-field input')
+  if (!input || input.value === termo) return
+
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+  setter?.call(input, termo)
+  input.dispatchEvent(new Event('input', { bubbles: true }))
+  input.focus()
+}
+
+watch(() => route.fullPath, async () => {
   await nextTick()
   aplicar()
   atualizarAtivo()
+  await aplicarContextoBuscaGlobal()
 })
 
 watch(() => session.usuario?.perfil, async () => {
   await nextTick()
-  if (session.usuario?.perfil === 'ADMINISTRADOR') aplicar()
-  else limpar()
+  if (session.usuario?.perfil === 'ADMINISTRADOR') {
+    aplicar()
+    await aplicarContextoBuscaGlobal()
+  } else limpar()
 })
 
 onMounted(async () => {
   await nextTick()
   aplicar()
+  await aplicarContextoBuscaGlobal()
   observer = new MutationObserver(() => aplicar())
   observer.observe(document.body, { childList: true, subtree: true })
 })

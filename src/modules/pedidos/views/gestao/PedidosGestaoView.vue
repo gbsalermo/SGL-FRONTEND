@@ -75,7 +75,7 @@ const pedidosFiltrados = computed(() => {
     if (fim !== null && dataPedido > fim) return false
     if (!termo) return true
 
-    return [pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.status, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
+    return [pedido.id, pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.status, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
       .filter(Boolean).join(' ').toLowerCase().includes(termo)
   })
 
@@ -145,6 +145,19 @@ async function alternarDetalhe(pedido: PedidoResponse) {
     limparAcao()
     return
   }
+  pedidoExpandido.value = pedido.id
+  prepararPedido(pedido)
+  await carregarMovimentacoesPedido(pedido)
+}
+
+async function abrirPedidoDaRota(valor: unknown) {
+  const pedidoId = typeof valor === 'string' ? valor : ''
+  busca.value = pedidoId
+  if (!pedidoId) return
+
+  const pedido = pedidos.value.find((item) => item.id === pedidoId)
+  if (!pedido || pedidoExpandido.value === pedido.id) return
+
   pedidoExpandido.value = pedido.id
   prepararPedido(pedido)
   await carregarMovimentacoesPedido(pedido)
@@ -235,7 +248,8 @@ async function entregar(pedido: PedidoResponse) {
 
 function limparFiltros() {
   busca.value = ''; status.value = 'TODOS'; urgencia.value = 'TODOS'; laboratorio.value = 'TODOS'; dataInicio.value = ''; dataFim.value = ''; ordenarPor.value = 'DATA'; direcao.value = 'DESC'
-  if (route.query.status) router.replace({ path: '/pedidos' })
+  pedidoExpandido.value = null
+  if (Object.keys(route.query).length > 0) void router.replace({ path: '/pedidos' })
 }
 
 async function carregar() {
@@ -243,6 +257,7 @@ async function carregar() {
   erro.value = ''
   try {
     pedidos.value = await pedidoService.listarTodos()
+    await abrirPedidoDaRota(route.query.pedido)
   } catch {
     erro.value = 'Não foi possível carregar os pedidos. Verifique a conexão com a API.'
   } finally {
@@ -254,6 +269,10 @@ watch(() => route.query.status, (valor) => {
   const statusRota = typeof valor === 'string' ? valor.toUpperCase() : ''
   const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
   status.value = validos.includes(statusRota as StatusPedido) ? statusRota as StatusPedido : 'TODOS'
+}, { immediate: true })
+
+watch(() => route.query.pedido, (valor) => {
+  void abrirPedidoDaRota(valor)
 }, { immediate: true })
 
 onMounted(carregar)
