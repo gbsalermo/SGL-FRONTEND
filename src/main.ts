@@ -11,12 +11,27 @@ import './styles/base.css'
 import './styles/main.css'
 import './styles/relatorios-responsive.css'
 
+const TEMA_STORAGE_KEY = 'sgl.theme'
+
+function carregarTemaInicial() {
+  try {
+    return localStorage.getItem(TEMA_STORAGE_KEY) === 'dark' ? 'dark' : 'light'
+  } catch {
+    return 'light'
+  }
+}
+
+const temaInicial = carregarTemaInicial()
+document.documentElement.dataset.theme = temaInicial
+
 const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
 app.use(vuetify)
+
+vuetify.theme.global.name.value = temaInicial === 'dark' ? 'sglDark' : 'sglLight'
 
 const session = useSessionStore(pinia)
 let timerExpiracao: ReturnType<typeof setTimeout> | null = null
