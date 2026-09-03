@@ -92,6 +92,11 @@ export const router = createRouter({
           component: () => import('@/modules/estoque/views/EstoqueGestaoView.vue'),
         },
         {
+          path: 'estoque/lotes-vencendo',
+          name: 'gestao-lotes-vencendo',
+          component: () => import('@/modules/estoque/views/LotesVencendoView.vue'),
+        },
+        {
           path: 'estoque/:id',
           name: 'gestao-estoque-detalhe',
           component: () => import('@/modules/estoque/views/EstoqueDetalheView.vue'),
