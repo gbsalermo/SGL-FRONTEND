@@ -44,6 +44,7 @@ const statusOptions: Array<{ label: string; value: StatusPedido | 'TODOS' }> = [
 ]
 
 const laboratorios = computed(() => [...new Set(pedidos.value.map((pedido) => pedido.laboratorioNome))].sort((a, b) => a.localeCompare(b, 'pt-BR')))
+const pedidoAlvo = computed(() => typeof route.query.pedido === 'string' ? route.query.pedido : '')
 const totais = computed(() => ({
   pendentes: pedidos.value.filter((pedido) => pedido.status === 'PENDENTE').length,
   urgentes: pedidos.value.filter((pedido) => pedido.urgente).length,
@@ -150,6 +151,20 @@ async function alternarDetalhe(pedido: PedidoResponse) {
   await carregarMovimentacoesPedido(pedido)
 }
 
+async function abrirPedidoDaRota() {
+  if (!pedidoAlvo.value || pedidos.value.length === 0) return
+  const pedido = pedidos.value.find((item) => item.id === pedidoAlvo.value)
+  if (!pedido) return
+
+  pedidoExpandido.value = pedido.id
+  prepararPedido(pedido)
+  await carregarMovimentacoesPedido(pedido)
+
+  requestAnimationFrame(() => {
+    document.getElementById(`pedido-${pedido.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
+}
+
 function mensagemErro(error: unknown) {
   const apiError = error as { response?: { data?: { message?: string } } }
   return apiError.response?.data?.message ?? 'Não foi possível concluir a operação.'
@@ -235,7 +250,8 @@ async function entregar(pedido: PedidoResponse) {
 
 function limparFiltros() {
   busca.value = ''; status.value = 'TODOS'; urgencia.value = 'TODOS'; laboratorio.value = 'TODOS'; dataInicio.value = ''; dataFim.value = ''; ordenarPor.value = 'DATA'; direcao.value = 'DESC'
-  if (route.query.status || route.query.urgencia) router.replace({ path: '/pedidos' })
+  pedidoExpandido.value = null
+  if (Object.keys(route.query).length > 0) router.replace({ path: '/pedidos' })
 }
 
 async function carregar() {
@@ -243,6 +259,7 @@ async function carregar() {
   erro.value = ''
   try {
     pedidos.value = await pedidoService.listarTodos()
+    await abrirPedidoDaRota()
   } catch {
     erro.value = 'Não foi possível carregar os pedidos. Verifique a conexão com a API.'
   } finally {
@@ -262,6 +279,10 @@ watch(() => route.query.urgencia, (valor) => {
   urgencia.value = urgenciaRota === 'URGENTE' || urgenciaRota === 'NORMAL' ? urgenciaRota : 'TODOS'
   if (urgencia.value !== 'TODOS') filtrosAbertos.value = true
 }, { immediate: true })
+
+watch(() => route.query.pedido, () => {
+  if (!carregando.value) void abrirPedidoDaRota()
+})
 
 onMounted(carregar)
 </script>
@@ -307,7 +328,7 @@ onMounted(carregar)
         <thead><tr><th>Data</th><th>Solicitante / Projeto</th><th>Produtos</th><th>Laboratório</th><th>Status</th><th>Urgência</th><th></th></tr></thead>
         <tbody>
           <template v-for="pedido in pedidosFiltrados" :key="pedido.id">
-            <tr>
+            <tr :id="`pedido-${pedido.id}`" :class="{ 'pedido-alvo': pedidoAlvo === pedido.id }">
               <td>{{ dataFormatada(pedido.dataSolicitacao) }}</td>
               <td><strong>{{ pedido.usuarioNome }}</strong><small>{{ pedido.projetoNome ?? 'Sem projeto' }}</small></td>
               <td><strong>{{ produtosResumo(pedido) }}</strong><small>{{ pedido.itens.length }} {{ pedido.itens.length === 1 ? 'item' : 'itens' }}</small></td>
@@ -317,7 +338,7 @@ onMounted(carregar)
               <td><button class="detail-button" type="button" @click="alternarDetalhe(pedido)">{{ pedidoExpandido === pedido.id ? '⌃' : '⌄' }}</button></td>
             </tr>
 
-            <tr v-if="pedidoExpandido === pedido.id" class="gestao-detail-row">
+            <tr v-if="pedidoExpandido === pedido.id" class="gestao-detail-row" :class="{ 'gestao-detail-row--alvo': pedidoAlvo === pedido.id }">
               <td colspan="7">
                 <div class="gestao-detail">
                   <div class="gestao-detail__items">
@@ -404,6 +425,9 @@ onMounted(carregar)
 .gestao-table td { padding: 12px 13px; border-bottom: 1px solid #eef2f7; color: #334155; font-size: 12px; vertical-align: middle; }
 .gestao-table td strong { display: block; color: #1e293b; font-size: 12px; }
 .gestao-table td small { display: block; margin-top: 3px; color: #94a3b8; font-size: 10px; }
+.pedido-alvo { position: relative; background: #fff8e8 !important; box-shadow: inset 4px 0 0 #e79a1c; animation: destaque-pedido 900ms ease-out; }
+.gestao-detail-row--alvo td { background: #fffcf4; }
+@keyframes destaque-pedido { from { background: #ffe6a8; } to { background: #fff8e8; } }
 .status-chip, .urgent-chip { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; font-size: 9px; font-weight: 800; }
 .status-chip[data-status='PENDENTE'] { background: #fff7d6; color: #946200; }.status-chip[data-status='APROVADO'] { background: #e7f7ed; color: #007a3d; }.status-chip[data-status='REJEITADO'] { background: #fee2e2; color: #b42318; }.status-chip[data-status='CANCELADO'] { background: #f1f5f9; color: #64748b; }.status-chip[data-status='ENTREGUE'] { background: #e8f1ff; color: #1a4da1; }
 .urgent-chip { background: #fee2e2; color: #b42318; }.neutral-copy { color: #94a3b8; font-size: 11px; }
