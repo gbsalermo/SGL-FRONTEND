@@ -13,7 +13,7 @@ function ehPerfilGestao(perfil?: PerfilUsuario) {
 
 function rotaInicial() {
   const session = useSessionStore()
-  return ehPerfilGestao(session.usuario?.perfil) ? '/pedidos' : '/meus-pedidos'
+  return ehPerfilGestao(session.usuario?.perfil) ? '/dashboard' : '/meus-pedidos'
 }
 
 export const router = createRouter({
@@ -76,6 +76,11 @@ export const router = createRouter({
       component: () => import('@/layouts/GestaoLayout.vue'),
       meta: { requiresSession: true, perfis: PERFIS_GESTAO },
       children: [
+        {
+          path: 'dashboard',
+          name: 'gestao-dashboard',
+          component: () => import('@/modules/dashboard/views/gestao/DashboardGestaoView.vue'),
+        },
         {
           path: 'pedidos',
           name: 'gestao-pedidos',
