@@ -235,7 +235,7 @@ async function entregar(pedido: PedidoResponse) {
 
 function limparFiltros() {
   busca.value = ''; status.value = 'TODOS'; urgencia.value = 'TODOS'; laboratorio.value = 'TODOS'; dataInicio.value = ''; dataFim.value = ''; ordenarPor.value = 'DATA'; direcao.value = 'DESC'
-  if (route.query.status) router.replace({ path: '/pedidos' })
+  if (route.query.status || route.query.urgencia) router.replace({ path: '/pedidos' })
 }
 
 async function carregar() {
@@ -254,6 +254,13 @@ watch(() => route.query.status, (valor) => {
   const statusRota = typeof valor === 'string' ? valor.toUpperCase() : ''
   const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
   status.value = validos.includes(statusRota as StatusPedido) ? statusRota as StatusPedido : 'TODOS'
+  if (status.value !== 'TODOS') filtrosAbertos.value = true
+}, { immediate: true })
+
+watch(() => route.query.urgencia, (valor) => {
+  const urgenciaRota = typeof valor === 'string' ? valor.toUpperCase() : ''
+  urgencia.value = urgenciaRota === 'URGENTE' || urgenciaRota === 'NORMAL' ? urgenciaRota : 'TODOS'
+  if (urgencia.value !== 'TODOS') filtrosAbertos.value = true
 }, { immediate: true })
 
 onMounted(carregar)
