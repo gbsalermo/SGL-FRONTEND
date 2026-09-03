@@ -9,6 +9,7 @@
 
   --sgl-background: #F5F7FA;
   --sgl-surface: #FFFFFF;
+  --sgl-surface-elevated: #FFFFFF;
   --sgl-text: #1A1A2E;
   --sgl-text-muted: #64748B;
   --sgl-border: #E2E8F0;
@@ -21,4 +22,26 @@
   --sgl-page-padding: 24px;
   --sgl-transition-fast: 180ms;
   --sgl-transition-route: 300ms;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --sgl-primary: #5B8DE0;
+  --sgl-primary-dark: #173D78;
+  --sgl-primary-light: #78A4EB;
+
+  --sgl-green: #38A169;
+  --sgl-green-light: #63B985;
+  --sgl-green-soft: #2C6A49;
+
+  --sgl-background: #08111F;
+  --sgl-surface: #101B30;
+  --sgl-surface-elevated: #16233A;
+  --sgl-text: #EDF4FF;
+  --sgl-text-muted: #A9B7CC;
+  --sgl-border: #293A55;
+
+  --sgl-warning: #F6C343;
+  --sgl-error: #F87171;
 }
