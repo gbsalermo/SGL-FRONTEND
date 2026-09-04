@@ -23,8 +23,8 @@ async function entrar() {
 
     await router.replace(
       perfil === 'GESTOR' || perfil === 'ADMINISTRADOR'
-        ? '/pedidos'
-        : '/meus-pedidos',
+        ? '/dashboard'
+        : '/inicio',
     )
   } catch (error) {
     erro.value = error instanceof Error ? error.message : 'Não foi possível acessar o sistema.'
