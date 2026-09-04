@@ -60,10 +60,8 @@ src/
 │   ├── auth/
 │   ├── cadastros/
 │   ├── dashboard/
-│   ├── documentos/
 │   ├── estagiarios/
 │   ├── estoque/
-│   ├── lotes/
 │   ├── movimentacoes/
 │   ├── pedidos/
 │   ├── produtos/
@@ -79,7 +77,7 @@ src/
 └── styles/
 ```
 
-A existência de uma pasta não garante uma rota própria ou uma funcionalidade independente. Exemplo: `lotes` continua pertencendo funcionalmente ao contexto de Estoque.
+A estrutura deve representar implementação real, não placeholders vazios. Lotes continuam pertencendo funcionalmente ao contexto de Estoque e documentos só devem ganhar módulo próprio quando houver implementação/contrato que justifique isso.
 
 ---
 
@@ -224,11 +222,11 @@ public/animations/folder-not-found.lottie
 
 1. Solicitante e Gestão compartilham domínio, mas podem ter Views diferentes quando a responsabilidade muda a experiência.
 2. Administração reutiliza Gestão e adiciona Cadastros.
-3. Lote continua contextual a Estoque mesmo que possua organização técnica própria.
-4. Documentos só devem ganhar experiência definitiva quando houver contrato backend real.
+3. Lote continua contextual a Estoque; não manter módulo vazio apenas para representar esse conceito.
+4. Documentos só devem ganhar experiência/módulo definitivo quando houver contrato backend real.
 5. Fiscalização faz parte do cadastro de Produto e possui relatório especializado; não exige item isolado principal.
 6. Não criar componente compartilhado antes de existir reuso/responsabilidade real.
-7. Não criar service/store apenas para preencher pastas.
+7. Não criar service/store/pasta apenas para preencher estrutura prevista.
 8. Não criar CRUD manual de Unidade.
 9. Não criar área operacional de Produto duplicando Cadastro/Estoque sem nova decisão.
 10. UUID público é o identificador de fronteira.
