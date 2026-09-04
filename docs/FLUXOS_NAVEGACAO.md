@@ -1,10 +1,10 @@
 # Fluxos e Navegação — SGL Frontend
 
-**Atualizado em:** 31/08/2026  
+**Atualizado em:** 03/09/2026  
 **Rotas reais:** `src/router/index.ts`  
 **Estado/planejamento:** `../CONTINUIDADE.md`
 
-Este documento descreve a navegação vigente e os fluxos já consolidados. Ele substitui como referência atual o snapshot inicial de 21/08.
+Este documento descreve a navegação vigente no fechamento do primeiro protótipo.
 
 ---
 
@@ -19,17 +19,18 @@ retorno após ação → previsível
 regra de negócio crítica → backend
 ```
 
-Decisões vigentes:
+Decisões:
 
-1. Layout por responsabilidade: Solicitante e Gestão/Admin.
+1. Layout separado por responsabilidade: Solicitante e Gestão/Admin.
 2. Lotes permanecem contextuais a Estoque.
 3. Movimentações são trilha operacional independente.
-4. Relatórios usam central única.
-5. Produto tem CRUD em Administração, não rota operacional duplicada.
-6. Unidade não possui CRUD manual no frontend.
-7. Documentos ficam contextuais.
-8. 404 de rota e 404 de recurso são situações diferentes.
-9. Dashboard será implementado depois; não é rota atual.
+4. Relatórios usam uma central e rotas específicas apenas quando necessário.
+5. Produto tem CRUD em Administração, não módulo operacional duplicado.
+6. Unidade não possui CRUD manual normal.
+7. Resíduos possui fluxo inverso a Pedidos.
+8. Dashboard é rota inicial para Gestão/Admin; `/inicio` para Solicitantes.
+9. Rótulos de Produto/Resíduo abrem em rotas próprias imprimíveis.
+10. 404 de rota e recurso da API não encontrado são situações diferentes.
 
 ---
 
@@ -39,125 +40,173 @@ Decisões vigentes:
 /login
 
 SOLICITANTE
+/inicio
 /meus-pedidos
+/meus-residuos
 /pedidos/novo
+/residuos/novo
 
 GESTÃO / ADMIN
+/dashboard
 /pedidos
 /estoque
+/estoque/lotes-vencendo
 /estoque/:id
 /movimentacoes
+/estagiarios
+/residuos
 /relatorios
+/relatorios/residuos
+/relatorios/pessoas-laboratorio
+/administracao/cadastros
 /solicitacoes/novo
 /solicitacoes/meus-pedidos
+
+RÓTULOS
+/residuos/:id/rotulo
+/produtos/:id/rotulo
 
 SISTEMA
 /:pathMatch(.*)*
 ```
 
-Rotas futuras não devem aparecer como implementadas antes da etapa correspondente.
-
 ---
 
 # 3. Entrada no sistema
 
-## Desenvolvimento atual
+## Sessão DEV atual
 
 ```text
 /login
 → preencher identificador + senha
-→ frontend busca usuários ativos no backend
+→ frontend consulta usuários existentes
+→ resolve usuário ativo
 → sessão DEV
+→ expiração automática em 5h
 → perfil define rota inicial
 ```
 
-Rota inicial atual:
+Rota inicial:
 
 ```text
 GESTOR / ADMINISTRADOR
-→ /pedidos
+→ /dashboard
 
 TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO
-→ /meus-pedidos
+→ /inicio
 ```
 
-A senha ainda não é validada por autenticação backend real.
-
-## Futuro
+Sessão expirada:
 
 ```text
-autenticação real
-→ sessão segura
-→ autorização
-→ auditoria
-→ integração corporativa
+qualquer rota protegida
+→ expirarSeNecessario()
+→ /login?motivo=sessao-expirada
 ```
+
+Senha ainda não é validada por autenticação backend definitiva.
 
 ---
 
-# 4. Fluxo do Solicitante
+# 4. Fluxo do Solicitante — Dashboard
+
+```text
+/login
+→ /inicio
+→ visualizar resumo pessoal
+→ navegar para Pedido ou Resíduo conforme necessidade
+```
+
+O dashboard do Solicitante não expõe ações de Gestão/Administração.
+
+---
+
+# 5. Fluxo do Solicitante — Pedido
 
 ## Novo pedido
 
 ```text
-/pedidos/novo
-→ contexto do laboratório/projeto
+/inicio ou menu
+→ /pedidos/novo
+→ selecionar contexto laboratório/projeto
 → adicionar materiais
-→ definir quantidade e forma de retirada
+→ quantidade + forma de retirada
+→ urgência quando aplicável
 → revisar
 → enviar
 → feedback
+→ acompanhar em /meus-pedidos
 ```
 
-O backend valida:
-
-```text
-produto
-estoque disponível
-embalagem/forma de retirada
-FIFO/FEFO quando ocorrer aprovação
-regras de domínio
-```
-
-Erros de validação devem manter o contexto/formulário quando possível.
+Backend valida estoque, lote elegível, FIFO/FEFO e regras de domínio.
 
 ## Meus pedidos
 
 ```text
 /meus-pedidos
 → listar solicitações do usuário
-→ acompanhar status
-→ visualizar informações relevantes
+→ filtrar/acompanhar status
+→ abrir informações relevantes
 ```
-
-Ações administrativas não devem aparecer para perfis solicitantes.
 
 ---
 
-# 5. Fluxo da Gestão — Pedidos
+# 6. Fluxo da Gestão — Dashboard
 
-Entrada:
+Entrada principal:
+
+```text
+/login
+→ /dashboard
+```
+
+Dashboard reúne:
+
+```text
+pedidos pendentes/urgentes
+estoque baixo
+lotes vencidos/próximos
+resíduos aguardando ação
+movimentações recentes
+resumo por laboratório
+```
+
+Navegação contextual:
+
+```text
+pedido urgente
+→ /pedidos?status=PENDENTE&urgencia=URGENTE&pedido=<id>
+
+estoque baixo
+→ /estoque ou /estoque/:id
+
+lote vencido/próximo
+→ /estoque/:id?lote=<id>&situacao=...
+
+resíduo pendente
+→ /residuos?filtro=pendentes-analise&residuo=<id>
+```
+
+O dashboard não substitui as telas operacionais; ele aponta para elas.
+
+---
+
+# 7. Fluxo da Gestão — Pedidos
 
 ```text
 /pedidos
-```
-
-Fluxo:
-
-```text
-fila/listagem
+→ fila/filtros
 → selecionar pedido
 → revisar solicitante/laboratório/projeto/itens
-→ tomar ação permitida pelo estado
+→ executar ação permitida pelo estado
 ```
 
 Aprovação:
 
 ```text
 PENDENTE
-→ revisar quantidades
 → Aprovar
-→ backend executa baixa + FIFO/FEFO
+→ backend baixa estoque usando FIFO/FEFO
 → APROVADO
 ```
 
@@ -166,7 +215,6 @@ Rejeição:
 ```text
 PENDENTE
 → Rejeitar
-→ motivo/observação quando aplicável
 → REJEITADO
 ```
 
@@ -178,23 +226,13 @@ APROVADO
 → ENTREGUE
 ```
 
-Entrega **não faz segunda baixa de estoque**.
+Entrega não faz segunda baixa.
 
-Cancelamento:
-
-```text
-estado permitido
-→ Cancelar
-→ confirmação
-→ backend restaura lotes quando necessário
-→ CANCELADO
-```
-
-Urgência já faz parte da experiência e deve permanecer visualmente evidente quando aplicável.
+Cancelamento após aprovação restaura os lotes exatos conforme regra backend.
 
 ---
 
-# 6. Fluxo de Estoque
+# 8. Fluxo de Estoque
 
 ## Visão geral
 
@@ -202,7 +240,7 @@ Urgência já faz parte da experiência e deve permanecer visualmente evidente q
 /estoque
 → buscar/filtrar
 → visualizar saldo/situação
-→ abrir produto em uma unidade
+→ abrir produto/unidade
 → /estoque/:id
 ```
 
@@ -210,61 +248,53 @@ Urgência já faz parte da experiência e deve permanecer visualmente evidente q
 
 ```text
 /estoque/:id
-→ produto + unidade
 → saldo + mínimo
 → lotes
 → entrada
 → edição segura
 → descarte
 → histórico/rastreabilidade
+→ rótulo de Produto quando aplicável
 ```
 
-Lote permanece no contexto de Estoque.
+## Lotes vencendo
+
+```text
+/estoque/lotes-vencendo
+→ listar lotes na janela operacional de vencimento
+→ abrir estoque/lote alvo
+```
 
 ## Entrada de lote
 
 ```text
 Detalhe de estoque
 → Registrar entrada
-→ informar lote/apresentação/quantidade/multiplicador/fracionamento/validade
-→ confirmar total na unidade-base
+→ lote/apresentação/quantidade/multiplicador/fracionamento/validade
+→ confirmar total em unidade-base
 → backend registra entrada
-→ atualizar saldo e lotes
+→ saldo/lotes atualizam
 ```
 
-## Fracionamento
+Fracionamento:
 
 ```text
 false → true  permitido
-true  → false não permitido
-```
-
-## Descarte
-
-```text
-lote vencido/elegível
-→ Descartar
-→ quantidade/justificativa conforme contrato
-→ confirmar
-→ backend registra movimentação
-→ atualizar tela
+true  → false proibido
 ```
 
 ---
 
-# 7. Fluxo de Movimentações
+# 9. Fluxo de Movimentações
 
 ```text
 /movimentacoes
-→ histórico
-→ busca/filtros
-→ expandir contexto
-→ rastrear produto/lote/origem/responsável/pedido
+→ filtros
+→ histórico operacional
+→ rastrear produto/lote/origem/responsável
 ```
 
-A página é de consulta/auditoria. Entrada de lote e descarte continuam acionados no contexto de Estoque.
-
-Cores:
+Semântica:
 
 ```text
 ENTRADA   azul
@@ -272,293 +302,254 @@ SAÍDA     vermelho
 DESCARTE  amarelo
 ```
 
-Pedidos entregues são analisados como recorte dessa trilha, não em relatório exclusivo.
+Pedidos entregues são analisados aqui, não em relatório separado.
 
 ---
 
-# 8. Fluxo de Relatórios
+# 10. Fluxo de Resíduos — Solicitante
+
+## Informar
+
+```text
+/inicio ou menu
+→ /residuos/novo
+→ contexto laboratório/projeto
+→ descrição/processo/recipiente/quantidade
+→ riscos informados
+→ composição
+→ enviar
+→ Código SGL disponível no registro inicial
+→ acompanhar em /meus-residuos
+```
+
+Regra:
+
+```text
+Produto != Resíduo
+```
+
+Produto referenciado na composição não movimenta estoque automaticamente.
+
+## Meus Resíduos
+
+```text
+/meus-residuos
+→ listar resíduos gerados pelo usuário
+→ acompanhar status/ciclo
+```
+
+---
+
+# 11. Fluxo de Resíduos — Gestão
+
+```text
+/residuos
+→ localizar resíduo
+→ receber
+→ analisar/classificar
+→ liberar
+→ abrir/imprimir rótulo
+→ armazenar temporariamente
+→ despachar
+→ consultar histórico
+```
+
+Status:
+
+```text
+INFORMADO
+→ EM_ANALISE
+→ LIBERADO_PARA_ARMAZENAMENTO
+→ ARMAZENADO_TEMPORARIAMENTE
+→ DESPACHADO
+```
+
+Rótulo:
+
+```text
+/residuos/:id/rotulo
+```
+
+Sem QR Code visual no protótipo atual.
+
+---
+
+# 12. Fluxo de Estagiários
+
+```text
+/estagiarios
+→ listar/filtrar
+→ Novo estágio ou Editar
+→ escolher usuário ESTAGIARIO elegível
+→ unidade do usuário orienta laboratórios disponíveis
+→ registrar tipo/período
+→ salvar
+```
+
+Encerramento:
+
+```text
+estágio ativo
+→ Encerrar estágio
+→ confirmação
+→ backend grava inativo + data efetiva
+→ histórico permanece visível
+```
+
+---
+
+# 13. Fluxo de Administração/Cadastros
+
+Acesso:
+
+```text
+ADMINISTRADOR
+→ /administracao/cadastros
+```
+
+GESTOR tentando acessar a rota específica é redirecionado para sua rota inicial permitida.
+
+Áreas:
+
+```text
+Laboratórios
+→ criar/editar/ativar/inativar
+
+Projetos
+→ criar/editar/ativar/inativar
+
+Produtos
+→ catálogo + risco + perecibilidade + fiscalização + rótulo
+
+Permissões
+→ consultar usuários existentes
+→ alterar perfil permitido
+
+Resíduos — Em breve
+→ sem ação operacional atual
+```
+
+Não há cadastro manual de Unidade ou Usuário nessa central.
+
+---
+
+# 14. Fluxo de Relatórios
+
+Central:
 
 ```text
 /relatorios
 → selecionar relatório
-→ mostrar filtros específicos
-→ consultar
-→ loading
-→ prévia
-→ exportar PDF ou XLSX
+→ preencher filtros
+→ gerar prévia
+→ exportar a mesma prévia em PDF/XLSX
 ```
 
-Relatórios atuais:
+Relatórios especiais com rota:
 
 ```text
-Estagiários
-Produtos
-Movimentações
-Resumo operacional
-Estoque e lotes
-Fiscalização
+/relatorios/residuos
+/relatorios/pessoas-laboratorio
 ```
 
-Resíduos será acrescentado após integração do módulo.
+Regra de exportação:
 
-A exportação usa a mesma consulta/filtros da prévia e é gerada no backend.
-
-O frontend rastreia a última prévia válida; trocar ou limpar o contexto invalida a exportação anterior.
+```text
+mesma consulta
++ mesmos filtros
+= prévia / PDF / XLSX coerentes
+```
 
 ---
 
-# 9. Fluxo de Administração — PRÓXIMO
+# 15. Rótulos
 
-Administração reutiliza as áreas de Gestão e acrescentará Cadastros.
-
-```text
-Cadastros
-├── Produtos
-├── Laboratórios
-├── Projetos
-├── Usuários
-└── Estagiários
-```
-
-Não incluir Unidade.
-
-## Padrão de cadastro
+## Resíduo
 
 ```text
-/cadastros/<modulo>
-→ listagem/busca
-├── Novo → formulário → salvar
-├── Editar → salvar mantendo contexto quando possível
-└── inativar/encerrar/excluir conforme regra → confirmação
+contexto do resíduo
+→ /residuos/:id/rotulo
+→ revisar dados
+→ ajustar impressão quando disponível
+→ imprimir
 ```
 
-### Produtos — primeiro
+## Produto
 
 ```text
-/cadastros/produtos
-→ listar/buscar
-→ Novo
-→ Editar
-→ fiscalização
+contexto de Produto/Cadastros
+→ /produtos/:id/rotulo
+→ revisar dados/fiscalização
+→ imprimir
 ```
-
-Fiscalização deve fazer parte do cadastro, não de Relatórios:
-
-```text
-Fiscalizado?
-Órgãos fiscalizadores
-Observação
-```
-
-### Estagiários
-
-`Encerrar estágio` deve ser ação própria e claramente separada de exclusão.
 
 ---
 
-# 10. Unidade institucional
-
-Não existe fluxo de cadastro manual.
+# 16. Alertas operacionais
 
 ```text
-API corporativa futura
-→ backend resolve/cria/reutiliza Unidade
-→ associa usuário
-→ frontend consome unidade da sessão
+shell Gestão
+→ botão Alertas operacionais
+→ visualizar itens relevantes
+→ clicar
+→ navegar ao contexto filtrado
 ```
 
-A interface pode exibir Unidade em filtros, detalhes e relações, mas não oferecer “Nova Unidade”.
+Cobertura alinhada ao dashboard:
+
+```text
+Pedidos
+Estoque
+Lotes
+Resíduos
+```
 
 ---
 
-# 11. Fluxo futuro de Resíduos
-
-Só iniciar após o backend reconciliar `feat/gestao-residuos` com a `main` e publicar contrato Swagger atualizado.
-
-## Solicitante
-
-Rota conceitual:
+# 17. Busca global
 
 ```text
-/informar-residuo
+shell
+→ pesquisa
+→ selecionar resultado
+→ navegar para módulo/alvo
 ```
 
-Fluxo esperado:
-
-```text
-laboratório gera resíduo
-→ informar composição
-→ uso/processo
-→ recipiente
-→ quantidade
-→ riscos percebidos
-→ enviar para gestão
-```
-
-## Gestão
-
-Rota conceitual:
-
-```text
-/residuos
-```
-
-Fluxo esperado:
-
-```text
-receber
-→ fichar/analisar
-→ confirmar riscos
-→ rotular/liberar
-→ armazenar temporariamente
-→ despachar/destinar
-```
-
-Produto e Resíduo permanecem independentes; composição de resíduo não baixa estoque automaticamente.
+A busca atua como atalho de navegação, não como fonte paralela de regra de negócio.
 
 ---
 
-# 12. Documentos/anexos
-
-Permanecem contextuais:
+# 18. Aparência
 
 ```text
-Pedido
-→ documento da solicitação
-
-Produto
-→ ficha técnica
-
-Lote
-→ nota fiscal / certificado / laudo / documento de entrada
+shell
+→ alternar claro/escuro
+→ preferência persiste
 ```
 
-Não existe ainda fluxo definitivo de upload/download. Não criar persistência fictícia no frontend.
+Tema não altera dados ou permissões.
 
 ---
 
-# 13. 404 e recurso não encontrado
-
-## Rota inexistente ✅
+# 19. 404
 
 ```text
-/caminho-invalido
-→ /:pathMatch(.*)*
+rota inexistente
 → NotFoundView
-→ animação folder-not-found.lottie
 ```
 
-## Recurso inexistente
-
-```text
-API retorna 404 para pedido/estoque/etc.
-→ estado contextual “recurso não encontrado”
-→ retorno funcional apropriado
-```
-
-Nunca converter automaticamente 404 da API em página 404 de rota.
+Recurso da API inexistente deve ser tratado dentro da tela relevante, não necessariamente redirecionado à 404 global.
 
 ---
 
-# 14. Regras de retorno
-
-Padrões:
+# 20. Próximo fluxo de desenvolvimento
 
 ```text
-pedido criado → contexto/lista correspondente
-entrada de lote → detalhe do estoque
-edição → permanecer no contexto
-cadastro criado → listagem atualizada
-inativação/encerramento → listagem + feedback
+consolidar matriz de permissões
+→ validar menus/rotas/ações por perfil
+→ congelar o primeiro protótipo
+→ executar PLANO_TESTES_PRIMEIRO_PROTOTIPO.md
+→ corrigir apenas falhas de homologação
 ```
 
-Sempre preferir retorno funcional conhecido a `history.back()` quando a origem puder ser ambígua.
-
----
-
-# 15. Confirmações
-
-Sem confirmação adicional:
-
-```text
-buscar
-filtrar
-navegar
-abrir detalhe
-```
-
-Com confirmação:
-
-```text
-rejeitar
-entregar
-cancelar
-descartar
-inativar
-excluir quando existir essa regra
-encerrar estágio
-```
-
----
-
-# 16. Alterações não salvas
-
-Formulários administrativos e operações com trabalho relevante devem avisar ao sair com alterações não salvas.
-
-Não aplicar essa proteção a filtros simples.
-
----
-
-# 17. Responsividade e movimento
-
-Direção vigente:
-
-```text
-desktop → sidebar/topbar estáveis
-mobile → drawer/overlay
-conteúdo largo → scroll ou apresentação responsiva sem esconder dado crítico
-```
-
-A transição entre rotas pode usar fade/deslocamento suave, respeitando futuramente `prefers-reduced-motion`.
-
----
-
-# 18. Fluxos consolidados
-
-```text
-SOLICITANTE
-Novo pedido → Meus pedidos → acompanhamento
-
-GESTÃO
-Pedidos → analisar → aprovar/rejeitar → entregar/cancelar
-Estoque → detalhe → lotes/entrada/descarte
-Movimentações → auditoria
-Relatórios → filtros → prévia → PDF/XLSX
-
-ADMINISTRAÇÃO — PRÓXIMO
-Produtos → Laboratórios → Projetos → Usuários → Estagiários
-
-COMPLEMENTAR
-Resíduos → Documentos/Rotulagem → Dashboard/Robustez → Autenticação
-```
-
----
-
-# 19. Próximo fluxo a implementar
-
-```text
-/cadastros/produtos
-```
-
-Sequência:
-
-```text
-Swagger
-→ listagem
-→ busca
-→ criar/editar
-→ fiscalização
-→ feedback
-→ validação
-→ merge
-```
+Não adicionar novas rotas por conveniência antes do congelamento.
