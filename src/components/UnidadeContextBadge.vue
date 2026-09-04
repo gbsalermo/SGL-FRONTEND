@@ -16,24 +16,11 @@ const unidade = computed(() => {
     ? `${usuario.unidadeSigla} — ${usuario.unidadeNome}`
     : usuario.unidadeNome
 })
-
-const secao = computed(() => {
-  const path = route.path
-  if (path.startsWith('/pedidos')) return 'Pedidos'
-  if (path.startsWith('/estoque')) return 'Estoque / Lotes'
-  if (path.startsWith('/movimentacoes')) return 'Movimentações'
-  if (path.startsWith('/residuos')) return 'Resíduos'
-  if (path.startsWith('/projetos')) return 'Projetos'
-  if (path.startsWith('/administracao')) return 'Administração'
-  if (path.startsWith('/relatorios')) return 'Relatórios'
-  if (path.startsWith('/dashboard') || path.startsWith('/inicio')) return 'Dashboard'
-  return 'Unidade atual'
-})
 </script>
 
 <template>
   <div v-if="visivel" class="sgl-unidade-context" aria-label="Unidade atual do sistema">
-    <span>{{ secao }}</span>
+    <span>Unidade:</span>
     <strong>{{ unidade }}</strong>
   </div>
 </template>
@@ -41,56 +28,44 @@ const secao = computed(() => {
 <style scoped>
 .sgl-unidade-context {
   position: fixed;
-  top: 86px;
-  right: 24px;
-  z-index: 40;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  max-width: min(460px, calc(100vw - 32px));
-  padding: 8px 12px;
-  border: 1px solid rgba(79, 113, 160, .24);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .94);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, .08);
-  backdrop-filter: blur(8px);
-  color: #334155;
+  top: 222px;
+  left: 26px;
+  z-index: 31;
+  width: 210px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.35;
   pointer-events: none;
 }
 
-.sgl-unidade-context span {
-  color: #64748b;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
+.sgl-unidade-context span,
+.sgl-unidade-context strong {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .sgl-unidade-context strong {
-  overflow: hidden;
-  color: #173d75;
-  font-size: 12px;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
-:global(body.sgl-dark-active) .sgl-unidade-context {
-  border-color: #2b3e59;
-  background: rgba(17, 29, 48, .94);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, .22);
+:global(.gestao-shell--collapsed) + .sgl-unidade-context {
+  display: none;
 }
 
-:global(body.sgl-dark-active) .sgl-unidade-context span { color: #93a6bf; }
-:global(body.sgl-dark-active) .sgl-unidade-context strong { color: #dce8ff; }
-
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .sgl-unidade-context {
-    top: auto;
-    right: 12px;
-    bottom: 12px;
-    left: 12px;
-    justify-content: center;
+    position: static;
+    width: auto;
+    margin: 8px 16px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #0b1b3a;
   }
 }
 
