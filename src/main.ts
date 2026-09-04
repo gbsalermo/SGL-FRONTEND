@@ -13,6 +13,7 @@ import './styles/main.css'
 import './styles/relatorios-responsive.css'
 import './styles/gestao-shell-controls.css'
 import './styles/dashboard-layout-compat.css'
+import './styles/dark-mode.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
