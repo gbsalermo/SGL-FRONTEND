@@ -15,6 +15,7 @@ import './styles/gestao-shell-controls.css'
 import './styles/dashboard-layout-compat.css'
 import './styles/dark-mode.css'
 import './styles/dark-mode-legacy-fix.css'
+import './styles/dark-mode-runtime.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
@@ -28,13 +29,19 @@ function carregarTemaPersistido(): TemaAplicacao {
   }
 }
 
+function sincronizarClasseTema(tema: TemaAplicacao) {
+  document.body.classList.toggle('sgl-dark-active', tema === 'dark')
+  document.body.classList.toggle('sgl-light-active', tema === 'light')
+}
+
 function aplicarTemaGlobal(tema: TemaAplicacao) {
   document.documentElement.dataset.theme = tema
+  sincronizarClasseTema(tema)
   vuetify.theme.global.name.value = tema === 'dark' ? 'sglDark' : 'sglLight'
 }
 
 function aplicarTemaDaRota(path: string) {
-  // Login e rotas públicas permanecem sempre no tema visual original.
+  // Login é visualmente independente do tema escolhido na área autenticada.
   if (path === '/login') {
     aplicarTemaGlobal('light')
     return
@@ -43,9 +50,22 @@ function aplicarTemaDaRota(path: string) {
   aplicarTemaGlobal(carregarTemaPersistido())
 }
 
-// O bootstrap sempre começa claro para impedir que uma preferência salva
-// contamine a tela de login antes de o Vue Router resolver a rota atual.
+// Bootstrap sempre claro. O tema salvo só entra depois que a rota é resolvida.
 document.documentElement.dataset.theme = 'light'
+document.body.classList.add('sgl-light-active')
+document.body.classList.remove('sgl-dark-active')
+
+// O GestaoLayout altera data-theme diretamente quando o usuário usa o seletor.
+// Mantemos o body sincronizado para que dialogs/overlays fora do shell recebam o tema.
+const observadorTema = new MutationObserver(() => {
+  const temaAtual: TemaAplicacao = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+  sincronizarClasseTema(temaAtual)
+})
+
+observadorTema.observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ['data-theme'],
+})
 
 const app = createApp(App)
 const pinia = createPinia()
