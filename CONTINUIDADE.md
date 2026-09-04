@@ -3,192 +3,471 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 31/08/2026  
+**Última atualização:** 03/09/2026  
 **Branch estável:** `main`  
-**Fase atual:** fluxos operacionais principais concluídos; próxima etapa é Administração/Cadastros.  
-**Últimos blocos integrados:** Relatórios/Fiscalização/PDF-XLSX e página 404 animada.  
-**Próximo passo exato:** `Administração → Cadastros → Produtos`, incluindo fiscalização na criação/edição.  
-**Handoff completo:** `docs/DOSSIE_PROJETO_SGL.md`
+**Fase atual:** fechamento do primeiro protótipo.  
+**Próximo passo oficial:** consolidar diretrizes/matriz de permissões → congelar protótipo → homologação completa.  
+**Handoff:** `docs/DOSSIE_PROJETO_SGL.md`
 
-Este arquivo é a fonte principal de retomada do frontend. Se algum documento antigo disser que Pedidos, Estoque, Movimentações, Relatórios ou 404 ainda são a “próxima etapa”, considerar esse texto histórico.
-
----
-
-# 0. Como continuar
-
-```text
-1. ler CONTINUIDADE.md
-2. ler docs/DOSSIE_PROJETO_SGL.md
-3. conferir src/router/index.ts para rotas reais
-4. usar Swagger/OpenAPI como fonte de verdade HTTP
-5. conferir decisão específica do módulo
-6. criar branch própria
-7. implementar um bloco funcional
-8. validar visual e integração
-9. merge
-10. atualizar documentação afetada
-```
-
-Não duplicar regra de negócio do backend e não reorganizar o roadmap sem registrar uma nova decisão.
+Este é o checkpoint principal para retomada. Rotas reais: `src/router/index.ts`. Contratos HTTP: Swagger/OpenAPI do backend.
 
 ---
 
-# 1. Stack oficial
+# 1. Regra de trabalho
 
 ```text
-Vue 3.5
-Vite 8
-TypeScript 5.9
-Vue Router 5
-Pinia 4
-Axios 1.19
-Vuetify 3.13
-Node >= 20.19
+branch própria
+→ implementar
+→ validar
+→ refinar
+→ PR
+→ main
+→ atualizar documentação
 ```
 
-Regras técnicas:
-
-- UUID público nas fronteiras;
-- Axios concentrado em services;
-- Store apenas para estado realmente compartilhado/global;
-- Administração reutiliza a experiência da Gestão;
-- não duplicar FIFO/FEFO nem regras de estoque no frontend;
-- não reescrever dados históricos de lote/apresentação;
-- código técnico poderá ser traduzido para inglês no pós-protótipo, mas a interface permanece em português.
+Não criar roadmap alternativo nem reabrir etapas já concluídas sem necessidade concreta.
 
 ---
 
-# 2. Estado geral em 31/08/2026
+# 2. Estado geral em 03/09/2026
 
 ```text
-Login visual                                      ✅
-Sessão de desenvolvimento                         ✅
-Pedidos do Solicitante                            ✅
-Forma de retirada por embalagem                   ✅
-Pedidos Gestão                                    ✅
-Urgência de pedido                                ✅
-Lotes utilizados em pedido entregue               ✅
-Shell Gestão/Admin                                ✅
-Perfil/configurações da sessão DEV                ✅
-Estoque — visão geral                             ✅
-Estoque — detalhe                                 ✅
-Lotes — entrada                                   ✅
-Lotes — Código SGL                                ✅
-Lotes — embalagem/multiplicador                   ✅
-Lotes — detalhe/edição                            ✅
-Lotes — histórico de saídas                      ✅
-Lotes — fracionamento irreversível                ✅
-Lotes — FIFO/FEFO                                 ✅ integração backend
-Lotes — descarte por vencimento                   ✅
-Lotes — busca/filtros/status                      ✅
-Movimentações                                     ✅
-Relatórios — central                              ✅
-Relatório de Estagiários                          ✅
-Relatório de Produtos                             ✅
-Relatório de Movimentações                        ✅
-Resumo Operacional                                ✅
-Relatório de Estoque e Lotes                      ✅
-Relatório de Fiscalização                         ✅
-Exportação PDF                                    ✅
-Exportação XLSX                                   ✅
-Página 404 animada                                ✅
-Administração / Cadastros                         ⏳ PRÓXIMA ETAPA
-Resíduos operacional                              ⏳ depende de reconciliação backend
-Resíduos relatório/exportação                     ⏳
-Documentos / upload real                          ⏳
-Rotulagem complementar                            ⏳
-Dashboard final / alertas / robustez              ⏳
-Autenticação/autorização/auditoria definitiva     ⏳
-Integração corporativa                            ⏳
-Refactor técnico para inglês                      ⏳ pós-protótipo
+Bootstrap / identidade visual                         ✅
+Login visual / sessão DEV                            ✅
+Expiração automática da sessão em 5h                 ✅
+Pedidos do Solicitante                               ✅
+Pedidos da Gestão                                    ✅
+Estoque / lotes                                      ✅
+Movimentações                                        ✅
+Relatórios / fiscalização                            ✅
+PDF/XLSX                                             ✅
+Resíduos — Solicitante                               ✅
+Resíduos — Gestão                                    ✅
+Rótulo de Resíduo                                    ✅
+Rótulo de Produto                                    ✅
+Estagiários                                          ✅
+Pessoas por laboratório                              ✅
+Administração / Cadastros                            ✅
+Dashboard Gestão                                     ✅
+Dashboard Solicitante                                ✅
+Alertas operacionais                                 ✅
+Busca global                                         ✅
+Tema claro/escuro + persistência                     ✅
+404 animada                                          ✅
+Diretrizes/matriz final de permissões                ⏳ PRÓXIMO
+Congelamento do protótipo                            ⏳
+Homologação completa                                 ⏳
+Autenticação/autorização definitiva                  ⏳ posterior
+Integração corporativa                               ⏳ posterior
 ```
+
+A antiga indicação “Administração/Cadastros é a próxima etapa” está superada.
 
 ---
 
-# 3. Login — interpretação correta
+# 3. Rotas atuais
 
-A interface de login está pronta, mas o fluxo é temporário de desenvolvimento.
-
-Hoje:
-
-```text
-LoginAccessForm
-→ session.entrarDesenvolvimento(...)
-→ GET /v1/usuarios
-→ localiza usuário ativo
-→ senha é exigida na UI, mas NÃO validada no backend
-→ sessão salva em localStorage
-```
-
-Chave:
-
-```text
-sgl.dev-session
-```
-
-Portanto:
-
-```text
-login visual                         ✅
-sessão DEV                           ✅
-autenticação real                    ⏳
-autorização real                     ⏳
-auditoria por sessão autenticada     ⏳
-SSO/API corporativa                  ⏳
-```
-
-Não tratar a sessão DEV como segurança definitiva.
-
----
-
-# 4. Rotas atuais reais
-
-Conferidas em `src/router/index.ts` em 31/08/2026:
+Fonte: `src/router/index.ts`.
 
 ```text
 /login
 
 SOLICITANTE
+/inicio
 /meus-pedidos
+/meus-residuos
 /pedidos/novo
+/residuos/novo
 
 GESTÃO / ADMIN
+/dashboard
 /pedidos
 /estoque
+/estoque/lotes-vencendo
 /estoque/:id
 /movimentacoes
+/estagiarios
+/residuos
 /relatorios
+/relatorios/residuos
+/relatorios/pessoas-laboratorio
+/administracao/cadastros     ADMINISTRADOR
 /solicitacoes/novo
 /solicitacoes/meus-pedidos
 
+RÓTULOS
+/residuos/:id/rotulo
+/produtos/:id/rotulo
+
 SISTEMA
-/:pathMatch(.*)* → NotFoundView
+/:pathMatch(.*)*
 ```
 
-Ainda não existem no router:
+Rota inicial:
 
 ```text
-/dashboard
-/cadastros/produtos
-/cadastros/laboratorios
-/cadastros/projetos
-/cadastros/usuarios
-/cadastros/estagiarios
-/residuos
-/informar-residuo
+GESTOR / ADMINISTRADOR → /dashboard
+TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO → /inicio
 ```
-
-Essas rotas futuras só devem ser adicionadas na respectiva etapa.
 
 ---
 
-# 5. Página 404 — concluída
+# 4. Sessão DEV e permissões atuais
 
-Implementada em 30/08/2026.
+Perfis conhecidos:
+
+```text
+ADMINISTRADOR
+GESTOR
+TECNICO
+ANALISTA
+PESQUISADOR
+ESTAGIARIO
+```
+
+Grupos do router:
+
+```text
+Gestão: GESTOR + ADMINISTRADOR
+Admin:  ADMINISTRADOR
+Solicitante: TECNICO + ANALISTA + PESQUISADOR + ESTAGIARIO
+```
+
+A rota `/administracao/cadastros` usa a permissão mais específica e não herda acesso de Gestor apenas por estar dentro do `GestaoLayout`.
+
+O login atual continua DEV:
+
+```text
+frontend consulta usuário existente
+→ senha não é validada por autenticação backend definitiva
+→ sessão local
+→ expiração em 5h
+```
+
+Guardas e menus por perfil são úteis para UX, mas não são segurança final. O próximo bloco deve consolidar **o que cada perfil pode ver/fazer** antes do congelamento.
+
+---
+
+# 5. Pedidos
+
+## Solicitante
+
+```text
+/pedidos/novo
+/meus-pedidos
+```
+
+## Gestão
+
+```text
+/pedidos
+```
+
+Regras de negócio permanecem no backend:
+
+```text
+aprovação → baixa
+entrega → sem segunda baixa
+cancelamento aprovado → restaura lotes exatos
+perecível → FEFO
+não perecível → FIFO
+```
+
+Urgência está integrada e o Dashboard/alertas conseguem abrir pedidos pendentes/urgentes já filtrados.
+
+---
+
+# 6. Estoque e Lotes
+
+```text
+/estoque
+/estoque/:id
+/estoque/lotes-vencendo
+```
+
+Cobertura:
+
+```text
+saldo/mínimo
+entrada de lote
+Código SGL
+validade
+embalagem
+multiplicador
+fracionamento
+edição segura
+descarte
+histórico/rastreabilidade
+filtros de situação
+filtro de embalagem
+integração com dashboard/alertas/busca
+```
+
+A visão `/estoque/lotes-vencendo` reúne lotes próximos do vencimento, com foco na janela operacional de até 30 dias.
+
+Lote continua contextual a Estoque; não criar item principal independente na sidebar.
+
+---
+
+# 7. Movimentações
+
+```text
+/movimentacoes
+```
+
+Função:
+
+```text
+histórico
+rastreabilidade
+auditoria
+filtros
+```
+
+Cores aprovadas:
+
+```text
+ENTRADA   azul
+SAÍDA     vermelho
+DESCARTE  amarelo
+```
+
+Pedidos entregues são recorte de Movimentações; não criar relatório dedicado.
+
+---
+
+# 8. Resíduos
+
+A etapa foi concluída e mergeada. Não tratar mais a antiga branch backend divergente como estado atual.
+
+```text
+Solicitante
+/residuos/novo
+/meus-residuos
+
+Gestão
+/residuos
+
+Rótulo
+/residuos/:id/rotulo
+
+Relatório
+/relatorios/residuos
+```
+
+Fluxo:
+
+```text
+INFORMADO
+→ EM_ANALISE
+→ LIBERADO_PARA_ARMAZENAMENTO
+→ ARMAZENADO_TEMPORARIAMENTE
+→ DESPACHADO
+```
+
+Decisão:
+
+```text
+Produto != Resíduo
+```
+
+Componente de Resíduo pode referenciar Produto apenas para rastreabilidade e não altera estoque automaticamente.
+
+O Código SGL aparece desde o registro inicial. QR Code não integra o rótulo visual atual.
+
+Modelos de Resíduos pré-determinados são apenas opção futura “Em breve”.
+
+---
+
+# 9. Rótulos
+
+## Resíduo
+
+```text
+/residuos/:id/rotulo
+```
+
+## Produto
+
+```text
+/produtos/:id/rotulo
+```
+
+O rótulo de Produto possui visualização/impressão e atalho contextual. Quando fiscalizado, evidencia o controle externo.
+
+Existe controle visual de tamanho/escala para impressão em A4 no fluxo implementado.
+
+---
+
+# 10. Estagiários
+
+```text
+/estagiarios
+```
+
+Estado:
+
+```text
+listagem                         ✅
+cadastro                         ✅
+edição                           ✅
+unidade/laboratório              ✅
+período                          ✅
+tipo de vínculo                  ✅
+encerramento                     ✅
+auditoria visual                 ✅
+```
+
+Tipos incluem `CONTRATUAL`.
+
+Relatório adicional:
+
+```text
+/relatorios/pessoas-laboratorio
+```
+
+Com responsável, pessoas vinculadas, perfil, situação e dados de estágio, além de PDF/XLSX.
+
+---
+
+# 11. Administração / Cadastros
+
+```text
+/administracao/cadastros
+```
+
+Exclusivo de `ADMINISTRADOR`.
+
+Áreas:
+
+```text
+Laboratórios
+Projetos
+Produtos
+Permissões
+Resíduos — Em breve
+```
+
+Regras consolidadas:
+
+- Unidade é referência institucional; sem CRUD manual normal;
+- usuário não é criado manualmente na central;
+- Permissões altera perfil de usuário existente;
+- Produto é catálogo-base;
+- Estoque/lotes não são duplicados em Cadastros;
+- responsável de Laboratório deve pertencer à mesma Unidade;
+- projetos e cadastros usam ativação/inativação quando a preservação histórica importa;
+- auto-rebaixamento do Administrador da sessão é bloqueado na interface;
+- `ESTAGIARIO` com estágio ativo não deve perder esse perfil antes do encerramento.
+
+Detalhes: `docs/ETAPA_CADASTROS_ADMIN.md`.
+
+---
+
+# 12. Relatórios
+
+Central:
+
+```text
+/relatorios
+```
+
+Cobertura do produto:
+
+```text
+Estagiários
+Produtos
+Movimentações
+Resumo operacional
+Estoque e lotes
+Fiscalização
+Resíduos
+Pessoas por laboratório
+```
+
+Exportações PDF/XLSX devem usar os mesmos filtros da prévia.
+
+---
+
+# 13. Dashboard Gestão
+
+```text
+/dashboard
+```
+
+Objetivo: interface operacional da Gestão, não painel decorativo.
+
+Dados usados:
+
+```text
+pedidos
+estoques baixos
+resíduos
+movimentações
+lotes
+laboratórios
+usuários
+```
+
+KPIs/atenções:
+
+```text
+pedidos pendentes
+pedidos urgentes
+estoque baixo
+lotes vencidos
+lotes vencendo em 7/30 dias
+resíduos INFORMADO ou EM_ANALISE
+movimentações recentes
+resumo por laboratório
+resumo rápido
+```
+
+Navegação contextual já implementada:
+
+```text
+pedido urgente → /pedidos com filtro/alvo
+estoque baixo → /estoque ou detalhe
+lote vencido/próximo → estoque/lote alvo
+resíduo pendente → /residuos com filtro/alvo
+```
+
+Não voltar a contar “todos os resíduos” como “em análise”: o indicador operacional considera `INFORMADO` + `EM_ANALISE`.
+
+---
+
+# 14. Dashboard Solicitante
+
+```text
+/inicio
+```
+
+É a rota inicial de perfis solicitantes e deve mostrar apenas contexto útil ao usuário comum, sem controles de Gestão/Administração.
+
+---
+
+# 15. Shell — alertas, busca e aparência
+
+Concluído e integrado:
+
+```text
+Aparência claro/escuro           ✅
+persistência do tema             ✅
+Alertas operacionais             ✅
+Busca global                     ✅
+responsividade do layout         ✅
+```
+
+A busca global aplica contexto ao destino quando possível, inclusive Pedidos, Estoque e Cadastros.
+
+Alertas operacionais ficam acessíveis fora do conteúdo da sidebar e direcionam ao contexto operacional correspondente.
+
+---
+
+# 16. 404
 
 ```text
 /:pathMatch(.*)*
-→ src/modules/system/views/NotFoundView.vue
 ```
 
 Asset:
@@ -197,419 +476,109 @@ Asset:
 public/animations/folder-not-found.lottie
 ```
 
-Título atual:
-
-```text
-Page Not Found
-```
-
-A 404 não é mais pendência. Ainda permanecem robustez de erros remotos, retry, acessibilidade/motion e dashboard/alertas finais.
-
-HTTP 404 de um recurso da API deve virar estado contextual da tela; não redirecionar automaticamente todo 404 para a página de rota inexistente.
+A animação está concluída. Não recolocar 404 como pendência.
 
 ---
 
-# 6. Pedidos ↔ Estoque/Lotes — consolidado
+# 17. Documentos/upload
 
-Forma de retirada:
+Persistência real de documentos ainda não deve ser inventada no frontend.
 
-```text
-UNITARIO
-KIT
-CAIXA
-GARRAFA
-GALAO
-```
-
-Compatibilidade e FIFO/FEFO são validados pelo backend.
-
-Fluxo:
+Contextos possíveis continuam sendo:
 
 ```text
-solicitante escolhe opção disponível
-→ backend valida
-→ gestão aprova
-→ backend seleciona lotes por FIFO/FEFO
-→ movimentações registram lotes usados
-→ pedido entregue pode exibir rastreabilidade
-→ lote pode exibir histórico de saídas
+Pedido
+Produto
+Lote
 ```
 
-Entrega não significa nova baixa de estoque.
+Aguardar contrato backend real antes de criar upload/download definitivo. Isso não impede o congelamento do primeiro protótipo operacional atual, salvo decisão explícita do produto.
 
 ---
 
-# 7. Estoque e Lotes — concluído
+# 18. Próximo bloco — matriz de permissões
 
-Principais entregas:
-
-```text
-saldo consolidado em unidade-base
-entrada com embalagem/multiplicador
-Código SGL automático
-modal/detalhe do lote
-edição segura
-fracionamento false → true sem retorno
-FIFO/FEFO
-bloqueio/descartar vencidos
-busca/filtros/status
-histórico de saída por lote
-rastreabilidade pedido/solicitante
-```
-
-Código SGL vigente:
+Antes de congelar, registrar para cada perfil:
 
 ```text
-LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
+menus visíveis
+rota inicial
+unidade/laboratório visíveis
+registros que pode criar
+registros que pode editar
+transições de Pedido permitidas
+transições de Resíduo permitidas
+relatórios disponíveis
+exportações disponíveis
+acesso a Administração/Cadastros
+ações exclusivas de Gestor/Admin
 ```
 
-Documentos antigos com formatos experimentais diferentes são históricos.
+A matriz é primeiro uma especificação de UX/negócio. Depois deve orientar a autorização real no backend.
 
 ---
 
-# 8. Movimentações — concluído
+# 19. Congelamento e homologação
 
-Rota:
+Depois da matriz:
 
 ```text
-/movimentacoes
+congelar primeiro protótipo
+→ não adicionar funcionalidades novas
+→ executar docs/PLANO_TESTES_PRIMEIRO_PROTOTIPO.md
+→ corrigir falhas
+→ repetir testes afetados
 ```
 
-Foco:
+A homologação deve incluir os blocos adicionados após 31/08:
 
 ```text
-histórico operacional
-auditoria
-produto/lote
-origem
-responsável
-pedido/solicitante
-laboratório
-saldo
-```
-
-Cores semânticas aprovadas:
-
-```text
-ENTRADA   → azul
-SAÍDA     → vermelho
-DESCARTE  → amarelo
-```
-
-Pedidos entregues não possuem relatório exclusivo; usar Movimentações com recorte de origem `PEDIDO` e tipo `SAIDA` quando aplicável.
-
----
-
-# 9. Central de Relatórios — concluída
-
-Rota:
-
-```text
-/relatorios
-```
-
-UX:
-
-```text
-escolher relatório
-→ filtros específicos
-→ prévia
-→ PDF ou XLSX
-```
-
-Relatórios:
-
-```text
-Estagiários             ✅
-Produtos                ✅
-Movimentações           ✅
-Resumo operacional      ✅
-Estoque e lotes         ✅
-Fiscalização            ✅
-Resíduos                ⏳ reservado
-```
-
-Exportação usa a última prévia concluída. Alterar/limpar o contexto invalida a exportação até nova consulta.
-
-Ciclo de exportação foi integrado em 28/08/2026 pelo PR #14 do frontend e PR #9 do backend.
-
----
-
-# 10. Produtos e Fiscalização
-
-Decisão atual:
-
-```text
-Gestão operacional
-→ Estoque
-→ Lotes
-→ Movimentações
-→ Relatórios
-
+Resíduos completo
+Código SGL inicial
+rótulos
+Estagiários
+Pessoas por laboratório
 Administração
-→ Cadastros
-   └── Produtos
+Dashboard Gestão
+Dashboard Solicitante
+alertas
+busca global
+claro/escuro
+sessão expirada
+rotas/perfis
 ```
-
-Não criar módulo operacional duplicado `/produtos`.
-
-No cadastro de Produto incluir:
-
-```text
-fiscalizado
-orgaosFiscalizadores
-observacaoFiscalizacao
-```
-
-Órgãos iniciais:
-
-```text
-Polícia Federal
-Vigilância Sanitária
-ANVISA
-Exército
-Outro
-```
-
-Se fiscalizado, ao menos um órgão é obrigatório.
-
-Não inferir fiscalização por risco ou perecibilidade.
 
 ---
 
-# 11. Unidade institucional — decisão vigente
-
-`Unidade` não terá CRUD manual no frontend.
-
-Documento:
+# 20. Pós-protótipo
 
 ```text
+autenticação/autorização/auditoria definitiva
+integração corporativa
+upload documental quando contrato existir
+refactor técnico para inglês
+```
+
+A interface permanece em português.
+
+---
+
+# 21. Documentação para leitura
+
+```text
+docs/DOSSIE_PROJETO_SGL.md
+docs/README.md
+docs/ROADMAP_INTERFACE_GESTAO.md
+docs/INVENTARIO_TELAS.md
+docs/FLUXOS_NAVEGACAO.md
+docs/FECHAMENTO_PRIMEIRO_PROTOTIPO.md
+docs/ETAPA_CADASTROS_ADMIN.md
+docs/ETAPA_ESTAGIARIOS.md
 docs/DECISAO_UNIDADES_CORPORATIVAS.md
 ```
 
-Portanto, não criar:
-
-```text
-/cadastros/unidades
-```
-
-A unidade virá futuramente da API corporativa e será resolvida/sincronizada pelo backend no fluxo de autenticação.
-
-O CRUD técnico existente no backend pode permanecer para DEV/testes até essa integração.
-
 ---
 
-# 12. Administração / Cadastros — PRÓXIMA ETAPA
+# 22. Regra final de retomada
 
-Ordem oficial:
-
-```text
-1. Produtos
-2. Laboratórios
-3. Projetos
-4. Usuários
-5. Estagiários
-```
-
-Rotas previstas:
-
-```text
-/cadastros/produtos
-/cadastros/laboratorios
-/cadastros/projetos
-/cadastros/usuarios
-/cadastros/estagiarios
-```
-
-## Produtos
-
-Primeiro bloco a implementar.
-
-Usar o Swagger para definir o formulário real. A criação/edição deve incluir fiscalização.
-
-## Estagiários
-
-Cadastro obrigatório. `Encerrar estágio` deve ser ação própria do domínio, distinta de exclusão genérica.
-
-## Tipos de unidade/embalagem
-
-Não criar cadastro fictício. Só entra quando o backend possuir domínio configurável para isso.
-
----
-
-# 13. Resíduos — estado real
-
-Há dois fluxos conceituais:
-
-```text
-Solicitante → Informar resíduo
-Gestão → Resíduos
-```
-
-Não renomear a área da Gestão para “Informar resíduos”.
-
-Decisão:
-
-```text
-Produto = catálogo/estoque
-Resíduo = material gerado pelo laboratório
-```
-
-Um resíduo pode citar produtos/reagentes sem afetar automaticamente seus saldos.
-
-Backend:
-
-```text
-feat/gestao-residuos
-```
-
-Em 31/08/2026 a branch está divergente da `main` e não deve ser tratada como contrato pronto. O backend deve primeiro portar/reconciliar a modelagem e publicar o contrato atual no Swagger.
-
-Depois:
-
-```text
-frontend operacional
-→ relatório Resíduos
-→ PDF/XLSX Resíduos
-```
-
----
-
-# 14. Documentos e Rotulagem
-
-Continuam pendentes.
-
-Não existe ainda contrato definitivo para upload/download de documentos. O frontend não deve simular persistência local como solução final.
-
-Contextos previstos:
-
-```text
-Pedido → documentos da solicitação
-Produto → ficha técnica
-Lote → nota fiscal/certificado/laudo/documento de entrada
-```
-
-Rotulagem permanece complementar para Produto/Lote, sem reintroduzir uma área operacional duplicada de Produto.
-
----
-
-# 15. Dashboard / alertas / robustez
-
-Ainda previstos:
-
-```text
-Dashboard final
-estoque baixo
-lotes próximos do vencimento
-lotes vencidos
-pedidos pendentes/urgentes
-estados loading/empty/error/retry consistentes
-acessibilidade
-prefers-reduced-motion
-refino responsivo final
-```
-
-Já concluído neste tema:
-
-```text
-404 customizada ✅
-```
-
----
-
-# 16. Roadmap oficial consolidado
-
-```text
-Etapa 0 — Handoff backend → frontend                       ✅
-Etapa 1 — Fundação visual/técnica                          ✅
-Etapa 2 — Bootstrap técnico                                ✅
-Etapa 3 — Interfaces iniciais                              ✅
-  Login                                                     ✅
-  Pedidos Solicitante                                      ✅
-  Pedidos Gestão                                           ✅
-Etapa 4 — Estoque / Lotes                                  ✅
-Etapa 5 — Produtos operacional                             ↪ consolidado em Estoque + Cadastro
-  Rotulagem                                                 ⏳
-Etapa 6 — Movimentações                                    ✅
-Etapa 7 — Relatórios / Fiscalização                        ✅
-  PDF/XLSX                                                  ✅
-  Documentos                                                ⏳
-  Resíduos em Relatórios                                    ⏳
-Etapa 8 — Administração / Cadastros                        🟡 PRÓXIMA
-  Produtos                                                  ⏳
-  Laboratórios                                              ⏳
-  Projetos                                                  ⏳
-  Usuários                                                  ⏳
-  Estagiários                                               ⏳
-Etapa complementar — Resíduos operacional                  ⏳ após reconciliação backend
-Etapa 9 — Dashboard / alertas / robustez                   ⏳
-  404                                                       ✅
-Etapa 10 — Autenticação / autorização / auditoria          ⏳
-Pós-protótipo — padronização técnica em inglês             ⏳
-```
-
----
-
-# 17. Próximo passo exato
-
-```text
-Administração → Cadastros → Produtos
-```
-
-Passos:
-
-```text
-1. criar branch própria
-2. conferir Product/Produto no Swagger
-3. definir types/service da feature
-4. criar listagem/busca
-5. criar Novo/Editar
-6. incluir Fiscalização
-7. tratar loading/empty/error/success
-8. validar integração
-9. validar visualmente
-10. merge e atualizar continuidade
-```
-
-Só depois seguir:
-
-```text
-Laboratórios → Projetos → Usuários → Estagiários
-```
-
----
-
-# 18. Pós-protótipo — código em inglês
-
-Registrado no backend em:
-
-```text
-docs/PENDENCIAS_POS_PROTOTIPO.md
-```
-
-O refactor deverá atingir nomes técnicos de classes/métodos e também types/services/composables/stores quando aplicável.
-
-Não executar junto com Administração, Resíduos ou autenticação. Preservar contratos externos até existir migração coordenada.
-
----
-
-# 19. Documentos de referência
-
-Começar por:
-
-- `docs/DOSSIE_PROJETO_SGL.md`
-- `docs/README.md`
-- `docs/ROADMAP_INTERFACE_GESTAO.md`
-- `docs/INVENTARIO_TELAS.md`
-- `docs/FLUXOS_NAVEGACAO.md`
-- `docs/DECISAO_UNIDADES_CORPORATIVAS.md`
-- `docs/IDENTIDADE_VISUAL.md`
-- `docs/PADROES_PAGINA.md`
-
-Arquivos de etapas anteriores devem ser lidos como histórico, não como checkpoint atual.
-
----
-
-# 20. Regra central
-
-**O frontend simplifica a operação; o backend continua responsável por integridade, FIFO/FEFO, concorrência, rastreabilidade, fiscalização, relatórios e geração oficial de arquivos. A próxima implementação é Administração/Cadastros, começando por Produtos.**
+**Não refazer módulos concluídos. O estado atual é fechamento do primeiro protótipo: consolidar permissões, congelar, homologar e estabilizar.**
