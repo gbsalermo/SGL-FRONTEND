@@ -15,6 +15,7 @@ import './styles/gestao-shell-controls.css'
 import './styles/dashboard-layout-compat.css'
 import './styles/dark-mode-runtime.css'
 import './styles/dark-mode-coverage.css'
+import './styles/dark-mode-consistency.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
