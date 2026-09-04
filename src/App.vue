@@ -5,11 +5,13 @@ import EstoqueFiltroEmbalagem from '@/modules/estoque/components/EstoqueFiltroEm
 import ResiduoPredeterminadoEmBreve from '@/modules/residuos/components/ResiduoPredeterminadoEmBreve.vue'
 import ProdutoRotuloAtalho from '@/modules/produtos/components/ProdutoRotuloAtalho.vue'
 import SolicitanteThemeToggle from '@/components/SolicitanteThemeToggle.vue'
+import UnidadeContextBadge from '@/components/UnidadeContextBadge.vue'
 </script>
 
 <template>
   <v-app>
     <router-view />
+    <UnidadeContextBadge />
     <SolicitanteThemeToggle />
     <ProdutoRotuloAtalho />
     <AdminCadastrosNavLink />
