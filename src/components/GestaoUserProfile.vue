@@ -30,10 +30,8 @@ const nomeExibicao = computed(() =>
 
 const unidadeExibicao = computed(() => {
   const usuario = session.usuario
-  if (!usuario?.unidadeNome) return 'Unidade não identificada'
-  return usuario.unidadeSigla
-    ? `${usuario.unidadeSigla} - ${usuario.unidadeNome}`
-    : usuario.unidadeNome
+  if (!usuario?.unidadeNome && !usuario?.unidadeSigla) return 'Unidade não identificada'
+  return usuario.unidadeSigla || usuario.unidadeNome || 'Unidade não identificada'
 })
 
 const iniciais = computed(() =>
