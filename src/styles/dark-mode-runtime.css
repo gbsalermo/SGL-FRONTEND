@@ -1,0 +1,276 @@
+/*
+ * Dark mode runtime do SGL.
+ *
+ * Regra: o body recebe .sgl-dark-active quando o tema escuro está realmente ativo.
+ * Esta camada NÃO depende da posição do componente dentro da .gestao-shell,
+ * portanto também alcança dialogs/overlays renderizados fora do conteúdo principal.
+ */
+
+body.sgl-dark-active {
+  --sgl-background: #0b1627;
+  --sgl-surface: #111e31;
+  --sgl-surface-elevated: #17263d;
+  --sgl-text: #f4f7fc;
+  --sgl-text-muted: #a7b5c9;
+  --sgl-border: #2a3c55;
+  --sgl-primary: #5b8ff7;
+  --sgl-primary-light: #7dabff;
+  --sgl-warning: #f4b942;
+  --sgl-error: #f25f6b;
+  color-scheme: dark;
+}
+
+body.sgl-dark-active .gestao-shell,
+body.sgl-dark-active .gestao-workspace,
+body.sgl-dark-active .gestao-main,
+body.sgl-dark-active .dashboard-page {
+  background: #0b1627 !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .gestao-sidebar {
+  background: linear-gradient(180deg, #0a1728 0%, #0d1c30 58%, #10223a 100%) !important;
+  box-shadow: inset -1px 0 0 rgb(129 157 194 / 14%) !important;
+}
+
+body.sgl-dark-active .gestao-topbar {
+  background: #0b1729 !important;
+  border-color: #26384f !important;
+}
+
+/* Dashboard */
+body.sgl-dark-active .dashboard-panel,
+body.sgl-dark-active .dashboard-panel--summary,
+body.sgl-dark-active .kpi-card,
+body.sgl-dark-active .lab-card,
+body.sgl-dark-active .lab-metrics > span,
+body.sgl-dark-active .lab-total,
+body.sgl-dark-active .quick-summary-card {
+  border-color: #2a3c55 !important;
+  background: #111e31 !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .panel-heading,
+body.sgl-dark-active .summary-tabs,
+body.sgl-dark-active .lab-navigation,
+body.sgl-dark-active .panel-footer-link,
+body.sgl-dark-active .panel-hint {
+  border-color: #2a3c55 !important;
+  background: #17263d !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .panel-heading {
+  background: linear-gradient(180deg, #182941 0%, #142338 100%) !important;
+}
+
+body.sgl-dark-active .panel-heading h2,
+body.sgl-dark-active .dashboard-heading h1,
+body.sgl-dark-active .kpi-card strong,
+body.sgl-dark-active .attention-copy strong,
+body.sgl-dark-active .timeline-copy strong,
+body.sgl-dark-active .lab-title strong,
+body.sgl-dark-active .lab-total strong,
+body.sgl-dark-active .quick-summary-card strong,
+body.sgl-dark-active .panel-empty,
+body.sgl-dark-active .panel-loading {
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .dashboard-heading p,
+body.sgl-dark-active .kpi-card small,
+body.sgl-dark-active .kpi-card em,
+body.sgl-dark-active .attention-copy small,
+body.sgl-dark-active .attention-side,
+body.sgl-dark-active .timeline-copy small,
+body.sgl-dark-active .timeline-item time,
+body.sgl-dark-active .lab-title small,
+body.sgl-dark-active .lab-metrics small,
+body.sgl-dark-active .lab-total span,
+body.sgl-dark-active .quick-summary-card small,
+body.sgl-dark-active .quick-summary-card em,
+body.sgl-dark-active .panel-hint {
+  color: #a7b5c9 !important;
+}
+
+body.sgl-dark-active .attention-item,
+body.sgl-dark-active .timeline-item {
+  border-color: transparent !important;
+  border-bottom-color: #2a3c55 !important;
+  background: #111e31 !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .attention-item:hover,
+body.sgl-dark-active .timeline-item:hover,
+body.sgl-dark-active .attention-item--pedido:hover,
+body.sgl-dark-active .attention-item--estoque:hover,
+body.sgl-dark-active .attention-item--lote:hover,
+body.sgl-dark-active .attention-item--residuo:hover,
+body.sgl-dark-active .timeline-item--entrada:hover,
+body.sgl-dark-active .timeline-item--saida:hover,
+body.sgl-dark-active .timeline-item--ajuste:hover,
+body.sgl-dark-active .timeline-item--devolucao:hover,
+body.sgl-dark-active .timeline-item--descarte:hover {
+  background: #17263d !important;
+}
+
+body.sgl-dark-active .summary-tabs button {
+  background: transparent !important;
+  color: #9eacc0 !important;
+}
+
+body.sgl-dark-active .summary-tabs button:hover,
+body.sgl-dark-active .summary-tabs button.summary-tab--active {
+  border-color: #3b577c !important;
+  background: #203855 !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .lab-navigation button,
+body.sgl-dark-active .dashboard-refresh {
+  border-color: #3b5272 !important;
+  background: #17263d !important;
+  color: #dce8fb !important;
+}
+
+body.sgl-dark-active .dashboard-refresh:hover:not(:disabled),
+body.sgl-dark-active .lab-navigation button:hover:not(:disabled) {
+  border-color: #5b759b !important;
+  background: #1c304b !important;
+}
+
+body.sgl-dark-active .timeline-line {
+  background: #33465f !important;
+}
+
+body.sgl-dark-active .timeline-dot {
+  background: #111e31 !important;
+  box-shadow: 0 0 0 2px #111e31 !important;
+}
+
+/* Ícones sem bolhas brancas. */
+body.sgl-dark-active .kpi-card--blue .kpi-icon,
+body.sgl-dark-active .panel-icon--blue { background: #17345d !important; color: #75a5ff !important; }
+body.sgl-dark-active .kpi-card--red .kpi-icon,
+body.sgl-dark-active .panel-icon--red,
+body.sgl-dark-active .attention-item--pedido .attention-icon { background: #49232e !important; color: #ff7180 !important; }
+body.sgl-dark-active .kpi-card--orange .kpi-icon,
+body.sgl-dark-active .attention-item--estoque .attention-icon { background: #4a3019 !important; color: #ff9c48 !important; }
+body.sgl-dark-active .kpi-card--amber .kpi-icon,
+body.sgl-dark-active .attention-item--lote .attention-icon { background: #4a3919 !important; color: #f6be49 !important; }
+body.sgl-dark-active .kpi-card--purple .kpi-icon,
+body.sgl-dark-active .attention-item--residuo .attention-icon,
+body.sgl-dark-active .lab-icon { background: #35245b !important; color: #ad84ff !important; }
+
+/* Páginas de Gestão em geral. */
+body.sgl-dark-active .gestao-main h1,
+body.sgl-dark-active .gestao-main h2,
+body.sgl-dark-active .gestao-main h3,
+body.sgl-dark-active .gestao-main strong,
+body.sgl-dark-active .gestao-main b {
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .gestao-main p,
+body.sgl-dark-active .gestao-main small,
+body.sgl-dark-active .gestao-main label,
+body.sgl-dark-active .gestao-main .breadcrumb {
+  color: #a7b5c9 !important;
+}
+
+body.sgl-dark-active .summary-card,
+body.sgl-dark-active .filter-card,
+body.sgl-dark-active .filters-card,
+body.sgl-dark-active .filters-panel,
+body.sgl-dark-active .table-card,
+body.sgl-dark-active .table-panel,
+body.sgl-dark-active .content-card,
+body.sgl-dark-active .detail-card,
+body.sgl-dark-active .details-card,
+body.sgl-dark-active .form-card,
+body.sgl-dark-active .report-card,
+body.sgl-dark-active .report-panel,
+body.sgl-dark-active .resumo-card,
+body.sgl-dark-active .resumo-cards article {
+  border-color: #2a3c55 !important;
+  background: #111e31 !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .gestao-main input,
+body.sgl-dark-active .gestao-main textarea,
+body.sgl-dark-active .gestao-main select,
+body.sgl-dark-active .gestao-main .secondary-action,
+body.sgl-dark-active .gestao-main .ghost-action,
+body.sgl-dark-active .gestao-main .outline-action {
+  border-color: #3a506d !important;
+  background: #17263d !important;
+  color: #edf3fb !important;
+}
+
+body.sgl-dark-active .gestao-main input::placeholder,
+body.sgl-dark-active .gestao-main textarea::placeholder {
+  color: #8393a9 !important;
+}
+
+body.sgl-dark-active .gestao-main table,
+body.sgl-dark-active .gestao-main th,
+body.sgl-dark-active .gestao-main td {
+  border-color: #2a3c55 !important;
+}
+
+body.sgl-dark-active .gestao-main th {
+  background: #17263d !important;
+  color: #c0ccdc !important;
+}
+
+body.sgl-dark-active .gestao-main td,
+body.sgl-dark-active .gestao-main tbody tr {
+  background: #111e31 !important;
+  color: #e8eef7 !important;
+}
+
+body.sgl-dark-active .gestao-main tbody tr:hover td {
+  background: #17263d !important;
+}
+
+/* Modais, dialogs, dropdowns e overlays que podem ficar fora da .gestao-shell. */
+body.sgl-dark-active .profile-dialog,
+body.sgl-dark-active .modal,
+body.sgl-dark-active .dialog,
+body.sgl-dark-active [role='dialog'],
+body.sgl-dark-active .v-overlay-container .v-card,
+body.sgl-dark-active .v-overlay-container .v-sheet,
+body.sgl-dark-active .v-overlay-container .v-list,
+body.sgl-dark-active .v-menu > .v-overlay__content,
+body.sgl-dark-active .v-dialog > .v-overlay__content {
+  border-color: #2a3c55 !important;
+  background: #17263d !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .profile-dialog header,
+body.sgl-dark-active .profile-dialog footer,
+body.sgl-dark-active [role='dialog'] header,
+body.sgl-dark-active [role='dialog'] footer {
+  border-color: #2a3c55 !important;
+  background: #142338 !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .profile-dialog input,
+body.sgl-dark-active .profile-dialog textarea,
+body.sgl-dark-active [role='dialog'] input,
+body.sgl-dark-active [role='dialog'] textarea,
+body.sgl-dark-active [role='dialog'] select {
+  border-color: #3a506d !important;
+  background: #111e31 !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .v-overlay__scrim,
+body.sgl-dark-active .profile-backdrop {
+  background: rgb(2 8 18 / 72%) !important;
+}
