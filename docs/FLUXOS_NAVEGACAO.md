@@ -1,10 +1,10 @@
 # Fluxos e Navegação — SGL Frontend
 
-**Atualizado em:** 03/09/2026  
+**Atualizado em:** 04/09/2026  
 **Rotas reais:** `src/router/index.ts`  
 **Estado/planejamento:** `../CONTINUIDADE.md`
 
-Este documento descreve a navegação vigente no fechamento do primeiro protótipo.
+Este documento descreve a navegação vigente no estado funcional aprovado do SGL.
 
 ---
 
@@ -31,6 +31,7 @@ Decisões:
 8. Dashboard é rota inicial para Gestão/Admin; `/inicio` para Solicitantes.
 9. Rótulos de Produto/Resíduo abrem em rotas próprias imprimíveis.
 10. 404 de rota e recurso da API não encontrado são situações diferentes.
+11. O contexto de Unidade da sessão DEV é propagado à API para isolamento funcional.
 
 ---
 
@@ -104,7 +105,9 @@ qualquer rota protegida
 → /login?motivo=sessao-expirada
 ```
 
-Senha ainda não é validada por autenticação backend definitiva.
+A senha ainda não é validada por autenticação backend definitiva.
+
+A sessão contém o contexto da Unidade. O interceptor HTTP envia `X-SGL-Unidade-Id`, utilizado pelo backend para restringir dados no modo DEV.
 
 ---
 
@@ -175,16 +178,16 @@ Navegação contextual:
 
 ```text
 pedido urgente
-→ /pedidos?status=PENDENTE&urgencia=URGENTE&pedido=<id>
+→ /pedidos com filtro/alvo
 
 estoque baixo
 → /estoque ou /estoque/:id
 
 lote vencido/próximo
-→ /estoque/:id?lote=<id>&situacao=...
+→ detalhe do estoque/lote
 
 resíduo pendente
-→ /residuos?filtro=pendentes-analise&residuo=<id>
+→ /residuos com filtro/alvo
 ```
 
 O dashboard não substitui as telas operacionais; ele aponta para elas.
@@ -228,7 +231,7 @@ APROVADO
 
 Entrega não faz segunda baixa.
 
-Cancelamento após aprovação restaura os lotes exatos conforme regra backend.
+Cancelamento após aprovação restaura os lotes utilizados conforme regra backend.
 
 ---
 
@@ -292,14 +295,6 @@ true  → false proibido
 → filtros
 → histórico operacional
 → rastrear produto/lote/origem/responsável
-```
-
-Semântica:
-
-```text
-ENTRADA   azul
-SAÍDA     vermelho
-DESCARTE  amarelo
 ```
 
 Pedidos entregues são analisados aqui, não em relatório separado.
@@ -370,7 +365,7 @@ Rótulo:
 /residuos/:id/rotulo
 ```
 
-Sem QR Code visual no protótipo atual.
+Sem QR Code visual na implementação atual.
 
 ---
 
@@ -381,7 +376,7 @@ Sem QR Code visual no protótipo atual.
 → listar/filtrar
 → Novo estágio ou Editar
 → escolher usuário ESTAGIARIO elegível
-→ unidade do usuário orienta laboratórios disponíveis
+→ Unidade do usuário orienta laboratórios disponíveis
 → registrar tipo/período
 → salvar
 ```
@@ -407,8 +402,6 @@ ADMINISTRADOR
 → /administracao/cadastros
 ```
 
-GESTOR tentando acessar a rota específica é redirecionado para sua rota inicial permitida.
-
 Áreas:
 
 ```text
@@ -429,7 +422,7 @@ Resíduos — Em breve
 → sem ação operacional atual
 ```
 
-Não há cadastro manual de Unidade ou Usuário nessa central.
+Não há cadastro manual normal de Unidade ou criação manual de Usuário nessa central.
 
 ---
 
@@ -470,7 +463,6 @@ mesma consulta
 contexto do resíduo
 → /residuos/:id/rotulo
 → revisar dados
-→ ajustar impressão quando disponível
 → imprimir
 ```
 
@@ -489,7 +481,7 @@ contexto de Produto/Cadastros
 
 ```text
 shell Gestão
-→ botão Alertas operacionais
+→ Alertas operacionais
 → visualizar itens relevantes
 → clicar
 → navegar ao contexto filtrado
@@ -522,12 +514,14 @@ A busca atua como atalho de navegação, não como fonte paralela de regra de ne
 # 18. Aparência
 
 ```text
-shell
+interface autenticada
 → alternar claro/escuro
 → preferência persiste
 ```
 
 Tema não altera dados ou permissões.
+
+A tela de login permanece independente do tema das interfaces autenticadas, salvo nova decisão explícita.
 
 ---
 
@@ -542,14 +536,27 @@ Recurso da API inexistente deve ser tratado dentro da tela relevante, não neces
 
 ---
 
-# 20. Próximo fluxo de desenvolvimento
+# 20. Fase atual de desenvolvimento
+
+O primeiro protótipo foi funcionalmente aprovado.
+
+Trabalho atual:
 
 ```text
-consolidar matriz de permissões
-→ validar menus/rotas/ações por perfil
-→ congelar o primeiro protótipo
-→ executar PLANO_TESTES_PRIMEIRO_PROTOTIPO.md
-→ corrigir apenas falhas de homologação
+limpeza/revisão documental
+→ planejamento dos ajustes de pré-produção
+→ implementação/refinamento
+→ estabilização do bloco
 ```
 
-Não adicionar novas rotas por conveniência antes do congelamento.
+Depois, o roadmap formal retoma:
+
+```text
+matriz de permissões
+→ congelamento funcional
+→ homologação integrada final
+→ segurança definitiva
+→ integração corporativa
+```
+
+Não usar este documento para impedir melhorias justificadas do bloco atual de pré-produção. O planejamento vigente está em `../CONTINUIDADE.md`.
