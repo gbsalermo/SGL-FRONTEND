@@ -1,6 +1,6 @@
 # Etapa 2 — Bootstrap técnico do SGL Frontend
 
-> **Documento histórico.** Esta etapa foi concluída e este arquivo preserva as decisões técnicas do bootstrap. A seção “próximo passo” registrada na época **não representa o estado atual do projeto**. Para retomar o desenvolvimento em 31/08/2026, usar `../CONTINUIDADE.md` e `DOSSIE_PROJETO_SGL.md`.
+> **DOCUMENTO HISTÓRICO.** Esta etapa foi concluída em 25/08/2026 e este arquivo preserva decisões técnicas da criação do frontend. Qualquer seção de “próximo passo” abaixo deve ser lida apenas como registro da época. Para o estado atual, usar `../CONTINUIDADE.md`, `DOSSIE_PROJETO_SGL.md` e `README.md`.
 
 ## Status
 
@@ -23,11 +23,11 @@ LOGIN
 → RELATÓRIOS / DOCUMENTOS
 ```
 
-Esse fluxo é histórico. O roadmap atual já concluiu Login, Pedidos, Estoque/Lotes, Movimentações, Relatórios/Fiscalização, PDF/XLSX e 404; Administração/Cadastros é a próxima etapa vigente.
+Esse fluxo é exclusivamente histórico. Todos os principais blocos acima evoluíram e o primeiro protótipo funcional já foi aprovado.
 
 ---
 
-## Stack oficial definida no bootstrap
+## Stack definida no bootstrap
 
 ```text
 Vue 3
@@ -39,30 +39,27 @@ Axios
 Vuetify 3
 ```
 
-Versões da linha adotada:
+Linha de versões adotada na origem:
 
 ```text
 Vue                 3.5.x
-Vite                8.2.x
+Vite                8.x
 TypeScript          5.9.x
-Vue Router          5.2.x
-Pinia               4.0.x
-Axios               1.19.x
-Vuetify             3.13.x
-vite-plugin-vuetify 2.1.x
-vue-tsc             3.3.x
-@types/node         instalado para tipagem do ambiente Node/Vite
+Vue Router          5.x
+Pinia               4.x
+Axios               1.x
+Vuetify             3.x
+vite-plugin-vuetify 2.x
+vue-tsc             3.x
 ```
 
 ### Compatibilidade TypeScript
 
 Durante a validação inicial, TypeScript 7.0.x apresentou incompatibilidade com `vue-tsc 3.3.x`, devido ao acesso ao subpath interno `typescript/lib/tsc`.
 
-A correção adotada foi manter TypeScript na linha `~5.9.3`.
+A decisão foi manter TypeScript na linha 5.9. Também foram incluídos os tipos de Node necessários ao `vite.config.ts`.
 
-Também foi necessário incluir `@types/node` e o tipo `node` no `tsconfig.json`, pois `vite.config.ts` utiliza `node:url`.
-
-Essas decisões fazem parte da origem da base atual.
+Essas informações explicam a origem da base, mas versões atuais devem ser confirmadas no `package.json`.
 
 ---
 
@@ -83,7 +80,7 @@ src/modules/auth/views/LoginView.vue
 src/styles/tokens.css
 ```
 
-A árvore evoluiu significativamente depois disso; usar o repositório atual para inventário real de arquivos.
+A árvore evoluiu significativamente desde então. Usar o repositório atual para inventário real de arquivos.
 
 ---
 
@@ -97,31 +94,15 @@ VITE_API_BASE_URL
 
 Axios centralizado em `src/services/http.ts`.
 
-Não espalhar chamadas HTTP diretamente em Views e Components.
+Não espalhar chamadas HTTP diretamente em Views e Components sem necessidade.
 
 ### Estado global
 
-Pinia somente para estado realmente compartilhado.
-
-Não criar Store para toda listagem ou formulário.
+Pinia para estado realmente compartilhado. Não criar Store apenas por existir uma listagem ou formulário.
 
 ### Tema
 
-Paleta base definida:
-
-```text
-#1A4DA1 azul principal
-#0D2B5E azul escuro
-#2D6BC4 azul claro
-#007A3D verde institucional
-#F5F7FA background
-#FFFFFF surface
-#1A1A2E texto
-#64748B texto secundário
-#E2E8F0 borda
-```
-
-Tokens em `src/styles/tokens.css`.
+A etapa estabeleceu a base de tokens visuais. A implementação atual de tema claro/escuro e os arquivos atuais de estilo prevalecem sobre valores históricos registrados aqui.
 
 ---
 
@@ -133,7 +114,7 @@ npm run type-check
 npm run dev
 ```
 
-Resultado no fechamento da etapa:
+Resultado na época:
 
 ```text
 instalação concluída                         ✅
@@ -148,16 +129,16 @@ Router funcionando                          ✅
 
 ---
 
-## Próximo passo registrado em 25/08/2026 — HISTÓRICO
+## Registro de próximos passos da época
 
-Naquele momento, a próxima tarefa era a interface real de Login e depois Pedidos do Solicitante/Gestão.
+Em 25/08/2026, a sequência ainda previa Login, Pedidos e posteriormente Administração. Essas etapas foram concluídas e **não representam pendências atuais**.
 
-Essas etapas já foram concluídas.
-
-**Próximo passo vigente em 31/08/2026:**
+Estado vigente em 04/09/2026:
 
 ```text
-Administração → Cadastros → Produtos
+primeiro protótipo funcional aprovado
+→ pré-produção pós-aprovação em andamento
+→ roadmap formal de matriz/permissões somente depois desse bloco
 ```
 
-Depois: Laboratórios → Projetos → Usuários → Estagiários.
+Para continuidade real, não usar este documento como roadmap.
