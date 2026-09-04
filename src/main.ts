@@ -45,10 +45,16 @@ function forcarTemaGlobalClaro() {
   vuetify.theme.global.name.value = 'sglLight'
 }
 
+function ehRotaPublica(path: string) {
+  return path === '/login' || path.startsWith('/404')
+}
+
 function aplicarTemaDaRota(path: string) {
+  // O Vuetify e o documento global permanecem claros.
+  // A preferência dark afeta apenas a interface autenticada via classe no body.
   forcarTemaGlobalClaro()
 
-  if (path === '/login' || path.startsWith('/404')) {
+  if (ehRotaPublica(path)) {
     aplicarTemaDaInterface('light')
     return
   }
@@ -58,44 +64,6 @@ function aplicarTemaDaRota(path: string) {
 
 forcarTemaGlobalClaro()
 aplicarTemaDaInterface('light')
-
-/*
- * Compatibilidade com o seletor existente do GestaoLayout:
- * ele ainda tenta trocar data-theme/Vuetify. Capturamos a escolha,
- * transformamos em uma classe local no body e imediatamente restauramos
- * o tema global claro. Assim o dark mode só existe na interface autenticada.
- */
-let restaurandoTemaGlobal = false
-const observadorTema = new MutationObserver(() => {
-  if (restaurandoTemaGlobal) return
-
-  const temaSolicitado: TemaAplicacao = document.documentElement.dataset.theme === 'dark'
-    ? 'dark'
-    : 'light'
-
-  const rotaAtual = router.currentRoute.value.path
-  const rotaPublica = rotaAtual === '/login' || rotaAtual.startsWith('/404')
-
-  if (rotaPublica) {
-    aplicarTemaDaInterface('light')
-  } else {
-    persistirTema(temaSolicitado)
-    aplicarTemaDaInterface(temaSolicitado)
-  }
-
-  if (document.documentElement.dataset.theme !== 'light' || vuetify.theme.global.name.value !== 'sglLight') {
-    restaurandoTemaGlobal = true
-    forcarTemaGlobalClaro()
-    queueMicrotask(() => {
-      restaurandoTemaGlobal = false
-    })
-  }
-})
-
-observadorTema.observe(document.documentElement, {
-  attributes: true,
-  attributeFilter: ['data-theme'],
-})
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -108,6 +76,35 @@ app.use(vuetify)
 
 router.afterEach((to) => {
   aplicarTemaDaRota(to.path)
+})
+
+/*
+ * A aparência só muda quando o usuário clica nos controles de tema.
+ * Não observamos mais data-theme, porque mudanças técnicas do router/Vuetify
+ * não podem sobrescrever a preferência salva.
+ */
+document.addEventListener('click', (event) => {
+  const target = event.target
+  if (!(target instanceof Element)) return
+
+  const botaoTema = target.closest('.gestao-theme-switch button')
+  if (!(botaoTema instanceof HTMLButtonElement)) return
+
+  const rotulo = `${botaoTema.getAttribute('aria-label') ?? ''} ${botaoTema.title}`.toLowerCase()
+  const novoTema: TemaAplicacao | null = rotulo.includes('escuro')
+    ? 'dark'
+    : rotulo.includes('claro')
+      ? 'light'
+      : null
+
+  if (!novoTema) return
+
+  // Aguarda o handler do componente terminar e então aplica somente o tema local.
+  queueMicrotask(() => {
+    persistirTema(novoTema)
+    aplicarTemaDaInterface(novoTema)
+    forcarTemaGlobalClaro()
+  })
 })
 
 const session = useSessionStore(pinia)
