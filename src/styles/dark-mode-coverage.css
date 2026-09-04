@@ -1,0 +1,200 @@
+/*
+ * Cobertura complementar do dark mode.
+ * Mantém a mesma paleta do Dashboard em todas as interfaces autenticadas.
+ */
+
+body.sgl-dark-active .gestao-main,
+body.sgl-dark-active .solicitante-main,
+body.sgl-dark-active .solicitante-workspace,
+body.sgl-dark-active .solicitante-shell {
+  background: #0b1627 !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .solicitante-topbar {
+  border-color: #26384f !important;
+  background: #0b1729 !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .solicitante-sidebar {
+  background: linear-gradient(180deg, #0a1728 0%, #0d1c30 58%, #10223a 100%) !important;
+}
+
+/* Superfícies comuns das telas autenticadas. */
+body.sgl-dark-active .gestao-main .summary-grid > *,
+body.sgl-dark-active .solicitante-main .summary-grid > *,
+body.sgl-dark-active .gestao-main .metrics-grid > *,
+body.sgl-dark-active .solicitante-main .metrics-grid > *,
+body.sgl-dark-active .gestao-main .result-card,
+body.sgl-dark-active .solicitante-main .result-card,
+body.sgl-dark-active .gestao-main .lab-summary,
+body.sgl-dark-active .solicitante-main .lab-summary,
+body.sgl-dark-active .gestao-main .panel,
+body.sgl-dark-active .solicitante-main .panel,
+body.sgl-dark-active .gestao-main .section-card,
+body.sgl-dark-active .solicitante-main .section-card,
+body.sgl-dark-active .gestao-main .info-card,
+body.sgl-dark-active .solicitante-main .info-card,
+body.sgl-dark-active .gestao-main .item-card,
+body.sgl-dark-active .solicitante-main .item-card,
+body.sgl-dark-active .gestao-main .list-card,
+body.sgl-dark-active .solicitante-main .list-card,
+body.sgl-dark-active .gestao-main .toolbar,
+body.sgl-dark-active .solicitante-main .toolbar,
+body.sgl-dark-active .gestao-main .controls,
+body.sgl-dark-active .solicitante-main .controls,
+body.sgl-dark-active .gestao-main .state-box,
+body.sgl-dark-active .solicitante-main .state-box,
+body.sgl-dark-active .gestao-main .table-wrap,
+body.sgl-dark-active .solicitante-main .table-wrap {
+  border-color: #2a3c55 !important;
+  background: #111e31 !important;
+  color: #f4f7fc !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .gestao-main .summary-grid > *.warning,
+body.sgl-dark-active .solicitante-main .summary-grid > *.warning,
+body.sgl-dark-active .gestao-main .summary-card--amber,
+body.sgl-dark-active .solicitante-main .summary-card--amber {
+  border-color: #6d5727 !important;
+  background: #211f19 !important;
+}
+
+body.sgl-dark-active .gestao-main .summary-grid > *.danger,
+body.sgl-dark-active .solicitante-main .summary-grid > *.danger,
+body.sgl-dark-active .gestao-main .summary-card--danger,
+body.sgl-dark-active .solicitante-main .summary-card--danger {
+  border-color: #63313b !important;
+  background: #251a22 !important;
+}
+
+body.sgl-dark-active .gestao-main .summary-grid > *.positive,
+body.sgl-dark-active .solicitante-main .summary-grid > *.positive,
+body.sgl-dark-active .gestao-main .summary-card--positive,
+body.sgl-dark-active .solicitante-main .summary-card--positive {
+  border-color: #2f5f4a !important;
+  background: #17261f !important;
+}
+
+body.sgl-dark-active .gestao-main .summary-grid span,
+body.sgl-dark-active .solicitante-main .summary-grid span,
+body.sgl-dark-active .gestao-main .summary-grid small,
+body.sgl-dark-active .solicitante-main .summary-grid small,
+body.sgl-dark-active .gestao-main .metrics-grid span,
+body.sgl-dark-active .solicitante-main .metrics-grid span,
+body.sgl-dark-active .gestao-main .metrics-grid small,
+body.sgl-dark-active .solicitante-main .metrics-grid small {
+  color: #9eacc0 !important;
+}
+
+body.sgl-dark-active .gestao-main .summary-grid strong,
+body.sgl-dark-active .solicitante-main .summary-grid strong,
+body.sgl-dark-active .gestao-main .metrics-grid strong,
+body.sgl-dark-active .solicitante-main .metrics-grid strong {
+  color: #f4f7fc !important;
+}
+
+/* Formulários e filtros. */
+body.sgl-dark-active .gestao-main input,
+body.sgl-dark-active .gestao-main textarea,
+body.sgl-dark-active .gestao-main select,
+body.sgl-dark-active .solicitante-main input,
+body.sgl-dark-active .solicitante-main textarea,
+body.sgl-dark-active .solicitante-main select {
+  border-color: #3a506d !important;
+  background: #17263d !important;
+  color: #edf3fb !important;
+}
+
+body.sgl-dark-active .gestao-main input::placeholder,
+body.sgl-dark-active .gestao-main textarea::placeholder,
+body.sgl-dark-active .solicitante-main input::placeholder,
+body.sgl-dark-active .solicitante-main textarea::placeholder {
+  color: #8393a9 !important;
+}
+
+body.sgl-dark-active .gestao-main .filter-toggle,
+body.sgl-dark-active .solicitante-main .filter-toggle,
+body.sgl-dark-active .gestao-main .secondary-action,
+body.sgl-dark-active .solicitante-main .secondary-action,
+body.sgl-dark-active .gestao-main .detail-button,
+body.sgl-dark-active .solicitante-main .detail-button,
+body.sgl-dark-active .gestao-main .profile-cancel,
+body.sgl-dark-active .solicitante-main .profile-cancel {
+  border-color: #3a506d !important;
+  background: #17263d !important;
+  color: #edf3fb !important;
+}
+
+/* Tabelas e linhas expandidas. */
+body.sgl-dark-active .gestao-main table,
+body.sgl-dark-active .solicitante-main table,
+body.sgl-dark-active .gestao-main th,
+body.sgl-dark-active .solicitante-main th,
+body.sgl-dark-active .gestao-main td,
+body.sgl-dark-active .solicitante-main td {
+  border-color: #2a3c55 !important;
+}
+
+body.sgl-dark-active .gestao-main th,
+body.sgl-dark-active .solicitante-main th {
+  background: #17263d !important;
+  color: #c0ccdc !important;
+}
+
+body.sgl-dark-active .gestao-main td,
+body.sgl-dark-active .solicitante-main td,
+body.sgl-dark-active .gestao-main tbody tr,
+body.sgl-dark-active .solicitante-main tbody tr,
+body.sgl-dark-active .gestao-main .detail-row td,
+body.sgl-dark-active .solicitante-main .detail-row td {
+  background: #111e31 !important;
+  color: #e8eef7 !important;
+}
+
+body.sgl-dark-active .gestao-main tbody tr:hover td,
+body.sgl-dark-active .solicitante-main tbody tr:hover td {
+  background: #17263d !important;
+}
+
+/* Tipografia comum das páginas. */
+body.sgl-dark-active .solicitante-main h1,
+body.sgl-dark-active .solicitante-main h2,
+body.sgl-dark-active .solicitante-main h3,
+body.sgl-dark-active .solicitante-main strong,
+body.sgl-dark-active .solicitante-main b {
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .solicitante-main p,
+body.sgl-dark-active .solicitante-main small,
+body.sgl-dark-active .solicitante-main label,
+body.sgl-dark-active .solicitante-main .breadcrumb {
+  color: #a7b5c9 !important;
+}
+
+/* Modais/perfil do solicitante também seguem a mesma paleta. */
+body.sgl-dark-active .profile-dialog,
+body.sgl-dark-active .profile-content,
+body.sgl-dark-active .profile-essential,
+body.sgl-dark-active .profile-field,
+body.sgl-dark-active .profile-photo-row {
+  border-color: #2a3c55 !important;
+  background: #17263d !important;
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .profile-essential > div {
+  border-color: #2a3c55 !important;
+  background: #111e31 !important;
+}
+
+/* Exceção: telas de impressão/rótulo devem conservar fundo claro para impressão. */
+body.sgl-dark-active .print-page,
+body.sgl-dark-active .produto-label,
+body.sgl-dark-active .rotulo-page,
+body.sgl-dark-active .label-sheet {
+  color-scheme: light;
+}
