@@ -38,48 +38,69 @@ function aplicarTema(novoTema: TemaAplicacao) {
 </script>
 
 <template>
-  <div v-if="visivel" class="solicitante-theme-toggle" aria-label="Aparência">
-    <button
-      type="button"
-      title="Modo claro"
-      aria-label="Ativar modo claro"
-      :aria-pressed="tema === 'light'"
-      :class="{ active: tema === 'light' }"
-      @click="aplicarTema('light')"
-    >
-      ☀
-    </button>
-    <button
-      type="button"
-      title="Modo escuro"
-      aria-label="Ativar modo escuro"
-      :aria-pressed="tema === 'dark'"
-      :class="{ active: tema === 'dark' }"
-      @click="aplicarTema('dark')"
-    >
-      ☾
-    </button>
+  <div v-if="visivel" class="solicitante-theme-control" aria-label="Aparência">
+    <span class="solicitante-theme-control__label">Aparência</span>
+
+    <div class="solicitante-theme-toggle">
+      <button
+        type="button"
+        title="Modo claro"
+        aria-label="Ativar modo claro"
+        :aria-pressed="tema === 'light'"
+        :class="{ active: tema === 'light' }"
+        @click="aplicarTema('light')"
+      >
+        ☀
+      </button>
+      <button
+        type="button"
+        title="Modo escuro"
+        aria-label="Ativar modo escuro"
+        :aria-pressed="tema === 'dark'"
+        :class="{ active: tema === 'dark' }"
+        @click="aplicarTema('dark')"
+      >
+        ☾
+      </button>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.solicitante-theme-toggle {
+.solicitante-theme-control {
   position: fixed;
   z-index: 45;
-  top: 17px;
-  right: 102px;
+  top: 11px;
+  right: 132px;
+  min-height: 38px;
   display: inline-flex;
-  gap: 3px;
-  padding: 3px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px 0 11px;
   border: 1px solid #dbe3ee;
   border-radius: 9px;
   background: #ffffff;
   box-shadow: 0 4px 14px rgb(15 23 42 / 7%);
 }
 
+.solicitante-theme-control__label {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.solicitante-theme-toggle {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 7px;
+  background: #f1f5f9;
+}
+
 .solicitante-theme-toggle button {
-  width: 32px;
-  height: 30px;
+  width: 30px;
+  height: 28px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -87,8 +108,14 @@ function aplicarTema(novoTema: TemaAplicacao) {
   border-radius: 6px;
   background: transparent;
   color: #64748b;
-  font-size: 16px;
+  font-size: 15px;
+  line-height: 1;
   cursor: pointer;
+}
+
+.solicitante-theme-toggle button:hover {
+  background: #e2e8f0;
+  color: #1a4da1;
 }
 
 .solicitante-theme-toggle button.active {
@@ -96,14 +123,27 @@ function aplicarTema(novoTema: TemaAplicacao) {
   color: #ffffff;
 }
 
-:global(body.sgl-dark-active) .solicitante-theme-toggle {
+:global(body.sgl-dark-active) .solicitante-theme-control {
   border-color: #2a3c55;
   background: #111e31;
   box-shadow: none;
 }
 
+:global(body.sgl-dark-active) .solicitante-theme-control__label {
+  color: #a7b5c9;
+}
+
+:global(body.sgl-dark-active) .solicitante-theme-toggle {
+  background: #17263d;
+}
+
 :global(body.sgl-dark-active) .solicitante-theme-toggle button {
   color: #9eacc0;
+}
+
+:global(body.sgl-dark-active) .solicitante-theme-toggle button:hover {
+  background: #203855;
+  color: #dce8fb;
 }
 
 :global(body.sgl-dark-active) .solicitante-theme-toggle button.active {
@@ -111,10 +151,21 @@ function aplicarTema(novoTema: TemaAplicacao) {
   color: #ffffff;
 }
 
+@media (max-width: 860px) {
+  .solicitante-theme-control__label {
+    display: none;
+  }
+
+  .solicitante-theme-control {
+    right: 118px;
+    padding-inline: 4px;
+  }
+}
+
 @media (max-width: 720px) {
-  .solicitante-theme-toggle {
-    top: 12px;
-    right: 84px;
+  .solicitante-theme-control {
+    top: 8px;
+    right: 106px;
   }
 }
 </style>
