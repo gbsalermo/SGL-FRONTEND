@@ -1,332 +1,166 @@
 # Fechamento do Primeiro Protótipo — SGL
 
-**Atualizado em:** 03/09/2026  
-**Status:** planejamento oficial de fechamento  
-**Base atual:** `main` após Resíduos, Estagiários, Administração/Cadastros, dashboards e recursos do shell.  
-**Objetivo:** congelar e homologar o primeiro protótipo funcional antes de iniciar autenticação/autorização definitiva e novas expansões.
+**Atualizado em:** 04/09/2026  
+**Estado:** **APROVADO FUNCIONALMENTE**  
+**Uso atual deste documento:** registro de fechamento do protótipo e referência para futuras homologações.
+
+> Este arquivo deixou de representar um gate pendente. O primeiro protótipo foi aprovado e o projeto está em ajustes de pré-produção pós-aprovação.
 
 ---
 
-## 1. Etapas concluídas
+## 1. Escopo funcional aprovado
+
+O protótipo aprovado reúne:
 
 ```text
-1. Resíduos                                                   ✅
-2. Estagiários + Pessoas por laboratório                      ✅
-3. Administração → Cadastros                                  ✅
-4. Dashboard Gestão                                           ✅
-5. Dashboard Solicitante                                      ✅
-6. Alertas operacionais                                       ✅
-7. Busca global                                               ✅
-8. Aparência claro/escuro + persistência                      ✅
-9. Rótulos Produto/Resíduo                                    ✅
-10. 404                                                       ✅
+Login visual / sessão DEV
+Pedidos do Solicitante
+Pedidos da Gestão
+Estoque e Lotes
+FIFO / FEFO via backend
+Movimentações e rastreabilidade
+Relatórios e fiscalização
+Exportações PDF/XLSX
+Resíduos — Solicitante e Gestão
+Rótulos de Produto e Resíduo
+Estagiários
+Pessoas por laboratório
+Administração / Cadastros
+Dashboard Gestão
+Dashboard Solicitante
+Alertas operacionais
+Busca global
+Tema claro/escuro com persistência
+404
+Isolamento funcional por Unidade
 ```
 
-A antiga indicação “Administração → Cadastros ← ATUAL” está encerrada.
+A aprovação funcional não significa que autenticação/autorização de produção já esteja concluída.
 
 ---
 
-## 2. Decisões fechadas
+## 2. Decisões consolidadas
 
-### Rótulos
-
-QR Code foi retirado da experiência visual do primeiro protótipo. O backend pode manter campo técnico por compatibilidade sem que ele seja exibido/impresso.
-
-Resíduo usa:
+### Estoque e Pedidos
 
 ```text
-Código SGL
-pictogramas conforme riscos confirmados
-composição
-nível de risco confirmado
-laboratório e gerador
-processo/recipiente
-armazenamento/destino
-quantidade
-identidade SGL/Embrapa
+criação de Pedido → não baixa estoque
+aprovação → baixa estoque
+entrega → não baixa novamente
+cancelamento aprovado → restaura lotes utilizados
+perecível → FEFO
+não perecível → FIFO
 ```
 
-Produto usa dados do catálogo e destaca fiscalização quando aplicável.
-
-### Unidade
-
-Não terá CRUD manual normal. Deve ser sincronizada pela integração corporativa futura.
-
-### Usuário
-
-Não é criado manualmente em Administração. A central atual altera permissões/perfis de usuários existentes.
-
-### Produto
-
-Cadastro é catálogo-base; estoque/lotes continuam nas telas operacionais.
-
-### Resíduo
+### Resíduos
 
 ```text
 Produto != Resíduo
 ```
 
-Referência a Produto em composição é rastreabilidade e não movimenta estoque automaticamente.
+Referenciar Produto na composição de Resíduo não movimenta estoque automaticamente.
 
-### Resíduos pré-determinados
+Fluxo:
 
-São ideia futura “Em breve”, não requisito do primeiro protótipo.
+```text
+INFORMADO
+→ EM_ANALISE
+→ LIBERADO_PARA_ARMAZENAMENTO
+→ ARMAZENADO_TEMPORARIAMENTE
+→ DESPACHADO
+```
+
+### Unidade
+
+Unidade é referência institucional. Não deve possuir CRUD manual normal no frontend.
+
+O isolamento atual usa o contexto da sessão DEV e `X-SGL-Unidade-Id`, suficiente para validação funcional, mas não como autorização final de produção.
+
+### Usuários
+
+Usuários não são cadastrados manualmente pela central administrativa. A futura integração corporativa deverá criar/sincronizar a identidade institucional.
 
 ---
 
-## 3. Estado das áreas operacionais
+## 3. O que a aprovação não encerra
+
+Itens planejados para o ciclo formal de produção:
 
 ```text
-SOLICITANTE
-/inicio                  ✅ Dashboard
-/pedidos/novo            ✅
-/meus-pedidos            ✅
-/residuos/novo           ✅
-/meus-residuos           ✅
-
-GESTÃO
-/dashboard               ✅
-/pedidos                 ✅
-/estoque                 ✅
-/estoque/:id             ✅
-/estoque/lotes-vencendo  ✅
-/movimentacoes           ✅
-/estagiarios             ✅
-/residuos                ✅
-/relatorios              ✅
-
-ADMIN
-/administracao/cadastros ✅
+matriz detalhada de permissões
+autenticação definitiva
+autorização no backend
+auditoria por identidade autenticada
+integração corporativa / SSO
+resolução confiável de tenant/Unidade
+documentos/upload quando houver contrato definitivo
+refactors técnicos planejados
 ```
 
-Rótulos e relatórios específicos também estão integrados.
+Esses itens são evolução para produção, não evidência de que o protótipo funcional esteja incompleto.
 
 ---
 
-## 4. Dashboard e alertas — concluídos
+## 4. Fase atual — pré-produção pós-aprovação
 
-Dashboard Gestão apresenta dados reais e ações contextuais para:
+Antes do roadmap formal acima, o projeto executa:
 
 ```text
-pedidos pendentes
-pedidos urgentes
-estoque baixo
-lotes vencidos
-lotes próximos do vencimento
-resíduos INFORMADO/EM_ANALISE
-movimentações recentes
-resumo por laboratório
+1. limpeza, revisão e atualização documental
+2. planejamento dos ajustes de pré-produção
+3. implementação/refinamento
+4. validação e estabilização do bloco
 ```
 
-Alertas operacionais e busca global foram integrados ao shell.
-
-Tema claro/escuro funciona com persistência.
+Essa fase existe para aproximar o produto do estado ideal antes do ciclo formal de preparação para produção.
 
 ---
 
-## 5. Próxima etapa obrigatória — Matriz de Permissões
+## 5. Homologação futura
 
-Antes de congelar, consolidar diretrizes funcionais por perfil:
+`PLANO_TESTES_PRIMEIRO_PROTOTIPO.md` continua útil como base para a homologação integrada posterior.
 
-```text
-ADMINISTRADOR
-GESTOR
-TECNICO
-ANALISTA
-PESQUISADOR
-ESTAGIARIO
-```
-
-A matriz deve registrar:
+Quando usado novamente, deve ser adaptado para incluir o estado atual da aplicação, principalmente:
 
 ```text
-rota inicial
-menus visíveis
-escopo de unidade/laboratório
-criação de registros
-edição de registros
-aprovação/rejeição/entrega/cancelamento de Pedido
-recebimento/análise/armazenamento/despacho de Resíduo
-acesso a Estagiários
-acesso a Relatórios
-permissão de exportar
-acesso a Administração/Cadastros
-alteração de perfis
-```
-
-### Regra importante
-
-Essa matriz é, neste momento, especificação de **produto/UX e negócio**.
-
-Os guards do Vue Router e validações pontuais existentes são temporários e não substituem a futura autorização real no backend.
-
----
-
-## 6. Critério de congelamento
-
-O primeiro protótipo pode ser congelado quando:
-
-```text
-fluxos principais do usuário comum funcionarem        ✅
-fluxos principais da Gestão funcionarem               ✅
-Administração/Cadastros funcionar                     ✅
-Resíduos funcionar ponta a ponta                      ✅
-Dashboard usar dados reais                            ✅
-Alertas operacionais estiverem conectados             ✅
-Claro/Escuro estiver funcional                        ✅
-404 e erros básicos estiverem tratados                ✅ funcionalmente
-Diretrizes/matriz de permissões estiverem registradas ⏳
-Nenhuma falha conhecida impedir a homologação         ⏳ confirmar
-```
-
-Portanto, o item funcional estruturado restante antes do congelamento é **a matriz de permissões**, seguido de uma checagem rápida de bloqueadores conhecidos.
-
----
-
-## 7. Congelamento
-
-Depois da matriz:
-
-```text
-1. marcar o protótipo como congelado
-2. parar entrada de funcionalidades novas
-3. permitir apenas correções necessárias à homologação
-4. registrar qualquer exceção explicitamente
-```
-
-Não inserir no meio da homologação:
-
-```text
-novos módulos
-refactor amplo
-renomeação técnica para inglês
-integração corporativa
-mudança estrutural de autenticação
-modelos pré-determinados de resíduos
-```
-
----
-
-## 8. Homologação completa
-
-Após congelar, executar:
-
-```text
-docs/PLANO_TESTES_PRIMEIRO_PROTOTIPO.md
-```
-
-A bateria deve ser ponta a ponta e cobrir no mínimo:
-
-```text
-Login DEV e sessão expirada
-Rotas por perfil
-Pedidos — Solicitante/Gestão
-Urgência
+isolamento por Unidade
+sessão DEV e expiração
+rotas/perfis
+Pedidos
 Estoque/Lotes
-Embalagem/fracionamento
-Vencidos e lotes vencendo
 Movimentações
-Relatórios
-PDF/XLSX
-Fiscalização
-Resíduos completo
-Código SGL do Resíduo no registro inicial
-Rótulo de Resíduo
-Rótulo de Produto
+Resíduos
 Estagiários
-Encerramento de estágio
-Pessoas por laboratório
-Administração/Cadastros
-Permissões
-Dashboard Gestão
-Dashboard Solicitante
-Alertas operacionais
+Administração
+Relatórios/PDF/XLSX
+Dashboards
+Alertas
 Busca global
-Claro/Escuro
-Responsividade crítica
+Tema claro/escuro
+Rótulos
 404
 ```
 
 ---
 
-## 9. Regra da homologação
+## 6. Roadmap formal posterior
+
+Após a pré-produção atual:
 
 ```text
-teste falhou
-→ abrir/corrigir defeito
-→ testar correção
-→ repetir fluxo afetado
-→ atualizar documentação se o comportamento final mudar
+matriz de permissões
+→ congelamento funcional
+→ homologação integrada final
+→ correções
+→ autenticação/autorização/auditoria
+→ integração corporativa
+→ demais etapas de produção
 ```
 
-Não transformar um defeito encontrado em oportunidade para ampliar escopo sem necessidade.
+Detalhes: `ROADMAP_INTERFACE_GESTAO.md`.
 
 ---
 
-## 10. Segurança após o protótipo congelado
+## 7. Regra final
 
-Depois da homologação funcional:
-
-```text
-autenticação real
-→ autorização backend por perfil/escopo
-→ identidade segura para auditoria
-→ integração corporativa/SSO
-```
-
-Estado atual:
-
-```text
-login visual                       ✅
-sessão DEV                         ✅
-expiração em 5h                    ✅
-guardas de rota                    ✅ UX
-senha validada de forma real       ⏳
-autorização servidor               ⏳
-auditoria por identidade segura    ⏳
-```
-
----
-
-## 11. Documentos/upload
-
-Upload/download documental definitivo ainda depende de contrato backend real.
-
-Isso permanece como evolução posterior, a menos que o produto declare explicitamente que é bloqueador para homologação.
-
-Não criar persistência fictícia.
-
----
-
-## 12. Pós-protótipo
-
-Refactor técnico para inglês continua documentado como etapa posterior:
-
-```text
-backend: classes/métodos/DTOs/services/repositories/controllers
-frontend: nomenclatura técnica interna
-```
-
-A interface permanece em português.
-
----
-
-## 13. Sequência oficial restante
-
-```text
-AGORA
-Matriz/diretrizes de permissões
-
-EM SEGUIDA
-Congelamento do primeiro protótipo
-→ Homologação completa
-→ Estabilização
-
-DEPOIS
-Autenticação/Autorização/Auditoria definitiva
-→ Integração corporativa
-→ Documentos/upload quando definido
-→ Refactor técnico para inglês
-```
-
-**Administração, Resíduos, Dashboards, Alertas, Busca e Claro/Escuro não são mais etapas pendentes.**
+**Não voltar a tratar o primeiro protótipo como “aguardando fechamento”. Ele está funcionalmente aprovado. Este documento passa a registrar essa aprovação e a servir como referência para o ciclo formal posterior.**
