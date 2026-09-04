@@ -1,11 +1,11 @@
 # Inventário de Telas — SGL Frontend
 
-**Atualizado em:** 03/09/2026  
+**Atualizado em:** 04/09/2026  
 **Fonte de rotas reais:** `src/router/index.ts`  
 **Fonte de contratos:** Swagger/OpenAPI do backend  
 **Checkpoint:** `../CONTINUIDADE.md`
 
-Este documento registra a cobertura real da aplicação no fechamento do primeiro protótipo.
+Este documento registra a cobertura real da aplicação no estado funcional aprovado.
 
 ---
 
@@ -31,6 +31,7 @@ Decisões:
 8. Rótulos de Produto e Resíduo possuem rotas próprias imprimíveis.
 9. 404 de rota é diferente de recurso da API não encontrado.
 10. Documentos/upload aguardam contrato real e não possuem tela funcional definitiva.
+11. O contexto de Unidade é enviado ao backend por `X-SGL-Unidade-Id` durante a fase DEV.
 
 ---
 
@@ -41,7 +42,7 @@ Decisões:
 | Rota | Tela | Estado |
 |---|---|---:|
 | `/login` | Login visual + sessão DEV | ✅ |
-| `/:pathMatch(.*)*` | Page Not Found animada | ✅ |
+| `/:pathMatch(.*)*` | Page Not Found | ✅ |
 
 ## Solicitante
 
@@ -101,7 +102,7 @@ Se a sessão DEV expirar, o router redireciona para:
 
 ---
 
-# 4. Login
+# 4. Login e sessão DEV
 
 ```text
 /login
@@ -121,6 +122,8 @@ identificador + senha preenchidos
 ```
 
 Senha ainda não é validada pelo backend de autenticação definitivo.
+
+A sessão mantém o contexto institucional do usuário, incluindo Unidade e Laboratório. O interceptor HTTP envia `X-SGL-Unidade-Id` para suportar o isolamento funcional atual.
 
 ---
 
@@ -220,17 +223,9 @@ Função:
 
 ```text
 histórico operacional
-auditoria
+auditoria operacional
 rastreabilidade
 filtros
-```
-
-Semântica visual:
-
-```text
-ENTRADA   azul
-SAÍDA     vermelho
-DESCARTE  amarelo
 ```
 
 ---
@@ -280,7 +275,7 @@ DESPACHADO
 /residuos/:id/rotulo
 ```
 
-Sem QR visual no protótipo atual.
+Sem QR visual na implementação atual.
 
 ---
 
@@ -296,7 +291,7 @@ Cobertura:
 listar
 cadastrar
 editar
-unidade/laboratório
+Unidade/Laboratório
 período
 tipo de vínculo
 encerrar
@@ -351,7 +346,7 @@ Tela imprimível, contextual ao catálogo, com indicação de fiscalização qua
 /relatorios
 ```
 
-Cobertura do produto:
+Cobertura:
 
 ```text
 Estagiários
@@ -417,6 +412,8 @@ Topbar                    ✅
 
 Esses recursos não devem ser inventariados como páginas separadas.
 
+A tela de login permanece independente do tema das interfaces autenticadas, salvo nova decisão explícita.
+
 ---
 
 # 16. Telas não implementadas / futuras
@@ -431,21 +428,31 @@ Aparecem apenas como **Em breve** dentro de Administração/Informar Resíduo. N
 
 ## Autenticação definitiva
 
-Não é uma “nova tela” apenas; envolve backend, sessão segura, autorização e integração corporativa.
+Não é apenas uma nova tela; envolve backend, sessão segura, autorização e integração corporativa.
 
 ---
 
-# 17. Próximo trabalho de interface
+# 17. Fase atual
 
-Não criar nova rota funcional antes do congelamento sem necessidade de homologação.
+O primeiro protótipo foi funcionalmente aprovado.
 
-Próximo bloco:
+O trabalho imediato não é criar novas rotas nem iniciar a matriz de permissões. A sequência atual é:
 
 ```text
-matriz funcional de permissões
-→ congelamento
-→ homologação
-→ correções
+limpeza/revisão documental
+→ planejamento dos ajustes de pré-produção
+→ implementação/refinamento
+→ estabilização do bloco
 ```
 
-A matriz deve validar se as rotas/menus atuais estão corretos para cada perfil antes de qualquer expansão.
+Depois, o roadmap formal retoma:
+
+```text
+matriz de permissões
+→ congelamento funcional
+→ homologação integrada final
+→ segurança definitiva
+→ integração corporativa
+```
+
+Este inventário deve ser atualizado quando uma rota/tela real mudar, não para registrar planejamento abstrato.
