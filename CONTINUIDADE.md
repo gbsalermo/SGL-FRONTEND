@@ -60,6 +60,8 @@ Busca global                                         ✅
 Tema claro/escuro + persistência                     ✅ base atual; refinamento planejado
 404                                                   ✅
 Contexto de Unidade enviado à API                    ✅
+Testes unitários/componentes frontend                ⏳ Etapa 9 — Vitest + Vue Test Utils
+Testes E2E frontend                                  ⏳ Etapa 9 — Cypress
 Matriz formal de permissões                          ⏳ após pré-produção atual
 Congelamento funcional                               ⏳ posterior
 Homologação final                                    ⏳ posterior
@@ -533,7 +535,27 @@ Não inventar persistência real de arquivos apenas no frontend. Antes de criar 
 
 ---
 
-# 18. Fase atual — pré-produção pós-aprovação
+# 18. Testes automatizados do Frontend — planejado
+
+A Etapa 9 fecha o bloco de pré-produção com uma suíte automatizada de regressão.
+
+Stack definida:
+
+```text
+Vitest + Vue Test Utils
+→ testes unitários e de componentes/lógica Vue
+
+Cypress
+→ testes End-to-End em navegador real
+```
+
+Entre Selenium e Cypress, **Cypress é a ferramenta E2E escolhida para o SGL**. Selenium não é o padrão principal planejado para este frontend.
+
+A suíte deve cobrir os fluxos críticos existentes ao final das Etapas 1 a 8 e ter execução headless reproduzível. Ela não substitui a homologação integrada final posterior; serve como rede automatizada de regressão antes do congelamento.
+
+---
+
+# 19. Fase atual — pré-produção pós-aprovação
 
 O planejamento foi consolidado no documento canônico `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`.
 
@@ -550,6 +572,7 @@ Etapa 5 — Projetos + vínculos de Estagiários          ⏳
 Etapa 6 — relatórios de Projetos/Laboratórios         ⏳
 Etapa 7 — unidades + Soluções + Pedidos               ⏳
 Etapa 8 — Manual do Usuário + decisão delete lógico  ⏳
+Etapa 9 — testes automatizados do Frontend            ⏳
 ```
 
 Dependências centrais:
@@ -559,11 +582,12 @@ padrão visual → Dark Mode
 Resíduos atuais → expansão/modelos de Resíduos
 Projetos/Estagiários → relatório de Projetos
 unidades → Soluções → Pedidos com Soluções
+Etapas 1 a 8 estabilizadas → testes automatizados frontend
 ```
 
 ---
 
-# 19. Roadmap formal posterior
+# 20. Roadmap formal posterior
 
 Depois do bloco atual:
 
@@ -582,7 +606,7 @@ Esse roadmap continua válido, mas não representa a tarefa imediata atual.
 
 ---
 
-# 20. Documentação para leitura
+# 21. Documentação para leitura
 
 ```text
 CONTINUIDADE.md
@@ -600,6 +624,6 @@ docs/DECISAO_UNIDADES_CORPORATIVAS.md
 
 ---
 
-# 21. Regra final de retomada
+# 22. Regra final de retomada
 
-**O SGL está funcionalmente aprovado. A fase atual é a execução do plano de pré-produção registrado no backend em `docs/PLANO_PRE_PRODUCAO.md`, começando pela Etapa 1 — padronização/refinamento visual. Não tratar a matriz de permissões como tarefa imediata até o encerramento desse bloco. Conferir `main`, router e Swagger antes de confiar em documentos históricos, e lembrar que alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto.**
+**O SGL está funcionalmente aprovado. A fase atual é a execução do plano de pré-produção registrado no backend em `docs/PLANO_PRE_PRODUCAO.md`, começando pela Etapa 1 — padronização/refinamento visual e terminando na Etapa 9 — testes automatizados do Frontend com Cypress como E2E principal. Não tratar a matriz de permissões como tarefa imediata até o encerramento desse bloco. Conferir `main`, router e Swagger antes de confiar em documentos históricos, e lembrar que alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto.**
