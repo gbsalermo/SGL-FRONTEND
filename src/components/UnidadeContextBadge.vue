@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
 
 import { useSessionStore } from '@/stores/session'
 
-const route = useRoute()
 const session = useSessionStore()
 
-const visivel = computed(() => Boolean(session.usuario && route.path !== '/login'))
+const visivel = computed(() => {
+  const perfil = session.usuario?.perfil
+  return perfil === 'ADMINISTRADOR' || perfil === 'GESTOR'
+})
 
 const unidade = computed(() => {
   const usuario = session.usuario
@@ -19,46 +20,38 @@ const unidade = computed(() => {
 </script>
 
 <template>
-  <div v-if="visivel" class="sgl-unidade-context" aria-label="Unidade atual do sistema">
-    <strong>{{ unidade }}</strong>
-  </div>
+  <Teleport v-if="visivel" to=".gestao-topbar">
+    <div class="sgl-unidade-context" aria-label="Unidade atual do sistema">
+      {{ unidade }}
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
 .sgl-unidade-context {
-  position: fixed;
-  top: 0;
-  left: 82px;
-  z-index: 45;
-  height: 60px;
+  order: -90;
+  min-width: 0;
   display: flex;
   align-items: center;
-  max-width: min(620px, calc(100vw - 320px));
-  padding-top: 1px;
+  align-self: stretch;
+  margin-left: 12px;
+  margin-right: auto;
   color: #fff;
   font-family: inherit;
-  line-height: 1;
-  pointer-events: none;
-}
-
-.sgl-unidade-context strong {
-  overflow: hidden;
-  color: #fff;
   font-size: 15px;
   font-weight: 600;
   line-height: 1.2;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .sgl-unidade-context {
-    left: 72px;
-    max-width: calc(100vw - 220px);
-  }
-
-  .sgl-unidade-context strong {
+    margin-left: 8px;
     font-size: 14px;
+    max-width: 45vw;
   }
 }
 
