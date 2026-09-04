@@ -1,44 +1,102 @@
-# Decisão de Arquitetura — Unidades via integração corporativa
+# Decisão de Arquitetura — Unidades e integração corporativa
 
-**Data:** 26/08/2026  
-**Status:** decisão aprovada para implementação futura  
-**Impacto atual:** documentação e planejamento; fluxo DEV permanece inalterado
+**Decisão original:** 26/08/2026  
+**Revisado em:** 04/09/2026  
+**Status:** decisão vigente  
+**Estado atual:** isolamento funcional por Unidade já implementado em DEV; resolução corporativa confiável continua futura.
 
 ---
 
 ## 1. Decisão
 
-`Unidade` **não terá cadastro manual no frontend do SGL**.
+`Unidade` **não terá cadastro manual normal no frontend do SGL**.
 
-Portanto, a etapa futura **Administração → Cadastros** deve conter:
+A central atual de Administração/Cadastros contém:
 
 ```text
 Cadastros
-├── Produtos
 ├── Laboratórios
 ├── Projetos
-├── Usuários
-└── Estagiários
+├── Produtos
+└── Permissões de usuários existentes
 ```
 
-Não criar:
+Não criar como fluxo administrativo normal:
 
 ```text
 Cadastros → Unidades
 /cadastros/unidades
 ```
 
-Qualquer documentação anterior que apresente `Unidades` como CRUD administrativo de uso normal deve ser considerada substituída por esta decisão.
+Qualquer documentação anterior que apresente `Unidade` como CRUD administrativo comum está superada.
 
 ---
 
-## 2. Origem da Unidade
+## 2. Estado atual — modo DEV
 
-A unidade institucional do usuário virá da **API corporativa** no fluxo de autenticação definitiva.
+O sistema já possui contexto funcional por Unidade.
 
-No primeiro acesso/autenticação corporativa, o SGL deverá receber um JSON com as informações institucionais da pessoa. Entre os dados recebidos estará a identificação da `Unidade` à qual a pessoa pertence.
+A sessão DEV do frontend contém informações como:
 
-Exemplo conceitual — o contrato real deverá seguir a API corporativa quando estiver disponível:
+```text
+unidadeId
+unidadeNome
+unidadeSigla
+laboratorioId
+laboratorioNome
+```
+
+O interceptor HTTP envia:
+
+```text
+X-SGL-Unidade-Id: <unidadeId>
+```
+
+No backend:
+
+```text
+TenantRequestFilter
+→ valida o UUID
+→ define TenantContext
+→ services/repositories restringem dados da Unidade
+→ limpa TenantContext ao final da requisição
+```
+
+Esse mecanismo permite validar isolamento entre Unidades no desenvolvimento e já faz parte do estado funcional aprovado.
+
+---
+
+## 3. Limite de segurança do mecanismo atual
+
+O isolamento atual **não é a solução definitiva de autorização**.
+
+Motivo:
+
+```text
+unidadeId vem da sessão/localStorage do cliente
+→ cliente envia o header
+→ backend ainda não deriva tenant de identidade autenticada confiável
+```
+
+Portanto:
+
+```text
+isolamento funcional multitenant                ✅
+validação de cenários entre Unidades            ✅
+fronteira definitiva de segurança               ❌
+```
+
+Na produção, o tenant deverá ser obtido da sessão/token institucional e não de um valor livremente controlável pelo navegador.
+
+---
+
+## 4. Origem definitiva da Unidade
+
+A Unidade institucional do usuário virá da **integração corporativa** durante a autenticação definitiva.
+
+Conceitualmente, o SGL receberá identidade da pessoa e identificação institucional da Unidade.
+
+Exemplo apenas ilustrativo:
 
 ```json
 {
@@ -54,132 +112,126 @@ Exemplo conceitual — o contrato real deverá seguir a API corporativa quando e
 }
 ```
 
-Os nomes e formatos acima são apenas ilustrativos. Não fixar o DTO definitivo antes de conhecer o contrato real da API corporativa.
+Não fixar o DTO definitivo antes de conhecer o contrato real da API corporativa.
 
 ---
 
-## 3. Regra de sincronização
-
-Fluxo futuro obrigatório:
-
-```text
-login pela API corporativa
-→ receber JSON institucional
-→ extrair identificação da unidade
-→ procurar unidade correspondente no SGL
-
-se a unidade já existir
-→ reutilizar a unidade existente
-→ associar/anexar o usuário a ela
-
-se a unidade ainda não existir
-→ criar a unidade automaticamente com os dados corporativos
-→ associar/anexar o usuário à nova unidade
-```
-
-A operação deve ser **idempotente**: logins posteriores do mesmo usuário não podem criar unidades duplicadas.
-
----
-
-## 4. Identidade e deduplicação
-
-A futura integração não deve decidir que duas unidades são iguais apenas pelo nome exibido.
-
-Prioridade desejada para identificação:
-
-```text
-1. código/identificador corporativo estável, se fornecido pela API
-2. outro identificador institucional único e estável
-3. nome/sigla somente como apoio e compatibilidade, não como primeira escolha
-```
-
-Quando o contrato corporativo for conhecido, o backend deverá definir uma chave de integração própria para impedir duplicidade e permitir atualização segura de nome/sigla sem recriar a unidade.
-
----
-
-## 5. Responsabilidade do backend
-
-A regra de criação/reutilização de Unidade pertence ao **backend**, não ao frontend.
-
-O frontend deverá apenas consumir a sessão já resolvida, contendo a unidade vinculada ao usuário.
+## 5. Regra futura de sincronização
 
 Fluxo esperado:
 
 ```text
-API corporativa
+login / SSO corporativo
+→ receber identidade institucional
+→ extrair identificador estável da Unidade
+→ procurar Unidade correspondente no SGL
+
+se existir
+→ reutilizar
+→ sincronizar dados permitidos
+→ associar/sincronizar usuário
+
+se não existir
+→ criar de forma controlada
+→ associar/sincronizar usuário
+```
+
+A operação deve ser idempotente: logins posteriores não podem criar Unidades duplicadas.
+
+---
+
+## 6. Identidade e deduplicação
+
+Não considerar duas Unidades iguais apenas pelo nome exibido.
+
+Prioridade desejada:
+
+```text
+1. código/identificador corporativo estável
+2. outro identificador institucional único
+3. nome/sigla apenas como informação auxiliar
+```
+
+Quando o contrato corporativo for conhecido, o backend deverá possuir uma chave estável de integração e proteção contra concorrência/duplicidade.
+
+---
+
+## 7. Responsabilidade do backend
+
+A resolução, criação e sincronização institucional de Unidade pertencem ao backend.
+
+Fluxo esperado:
+
+```text
+API/SSO corporativo
 → serviço de autenticação/sincronização do SGL
-→ resolve/cria Unidade
-→ resolve/cria/atualiza vínculo do Usuário
-→ sessão/resposta para o frontend
+→ resolve/sincroniza Unidade
+→ resolve/sincroniza Usuário
+→ gera contexto autenticado confiável
+→ frontend consome a sessão
 ```
 
 Não implementar no Vue lógica de deduplicação ou criação automática de Unidade.
 
 ---
 
-## 6. Relação com os demais cadastros
+## 8. Relação com os demais domínios
 
-A retirada de `Unidade` do cadastro manual **não elimina a entidade Unidade do domínio**.
+Retirar Unidade do CRUD manual não elimina a entidade.
 
-Ela continua sendo usada para:
-
-```text
-Usuário → Unidade
-Laboratório → Unidade
-Estoque Central → Unidade
-consultas e relatórios por Unidade
-contexto institucional da sessão
-```
-
-A diferença é apenas a **origem e governança do dado**:
+Ela continua sendo referência para:
 
 ```text
-antes previsto: administrador cadastra manualmente
-agora definido: integração corporativa cria/reutiliza automaticamente
+Usuário
+Laboratório
+Projeto
+Estagiário
+Pedido
+Resíduo
+Estoque Central
+Lote / Movimentação por contexto de estoque
+consultas e relatórios
+sessão institucional
 ```
 
-Produtos, Laboratórios, Projetos e demais cadastros continuam seguindo seus fluxos administrativos próprios enquanto não houver outra decisão de integração corporativa.
+A decisão trata de **origem e governança do dado**, não da remoção da entidade do domínio.
 
 ---
 
-## 7. Compatibilidade com o modo DEV atual
+## 9. Compatibilidade com o modo DEV
 
-**Não alterar agora o login temporário de desenvolvimento.**
-
-O ambiente atual usa usuários/unidades já presentes no banco para permitir o desenvolvimento das interfaces. Essa base deve continuar funcionando normalmente até a etapa de autenticação corporativa.
-
-Portanto, nesta fase:
+Até a integração corporativa definitiva:
 
 ```text
-DataInitializer / dados DEV existentes       → permanecem
-login DEV atual                              → permanece
-CRUD/backend de Unidade já existente         → não precisa ser removido agora
-rota/tela futura de cadastro manual          → não implementar
-integração automática corporativa            → implementar na etapa de autenticação
+dados DEV / seeds existentes                     → permanecem
+login DEV                                        → permanece temporariamente
+isolamento por X-SGL-Unidade-Id                  → permanece para validação
+CRUD técnico backend de Unidade                  → pode permanecer para testes/ferramentas
+CRUD manual normal no frontend                   → não implementar
 ```
 
-Manter o CRUD técnico existente no backend por enquanto evita quebrar testes, seeds e ferramentas internas. Quando a integração corporativa for implementada, avaliar se endpoints de escrita de Unidade devem ser restringidos a uso interno ou removidos da superfície administrativa.
+Quando a autenticação corporativa existir, avaliar a restrição ou remoção de endpoints técnicos de escrita de Unidade da superfície pública.
 
 ---
 
-## 8. Critérios para a implementação futura
+## 10. Critérios para implementação corporativa futura
 
-Quando chegar a etapa **Autenticação / Autorização / Integração corporativa**, validar:
+Validar:
 
-- contrato real do JSON corporativo;
-- identificador estável da unidade;
+- contrato real da identidade corporativa;
+- identificador estável da Unidade;
 - criação automática quando inexistente;
-- reutilização sem duplicidade quando existente;
-- associação do usuário à unidade resolvida;
-- atualização segura de nome/sigla quando a fonte corporativa mudar;
-- concorrência de dois primeiros logins da mesma unidade ao mesmo tempo;
-- constraint única no banco para o identificador corporativo escolhido;
-- transação envolvendo resolução da unidade e sincronização do usuário;
-- comportamento para unidade ausente ou inválida no JSON;
-- auditoria da origem corporativa dos dados.
+- reutilização sem duplicidade;
+- sincronização segura de nome/sigla;
+- concorrência em primeiros acessos simultâneos;
+- constraint única para o identificador institucional;
+- transação envolvendo Unidade e Usuário;
+- comportamento para Unidade ausente/inválida;
+- auditoria da origem corporativa;
+- substituição da confiança no `X-SGL-Unidade-Id` informado pelo browser por tenant derivado da identidade autenticada.
 
 ---
 
-## 9. Regra resumida para retomada
+## 11. Regra resumida para retomada
 
-> Unidade é dado institucional proveniente da API corporativa. O administrador não cria Unidade manualmente. No login, o backend procura a unidade pelo identificador corporativo: se existir, reutiliza e associa o usuário; se não existir, cria e associa. O modo DEV atual permanece intacto até essa integração ser implementada.
+> Unidade é dado institucional. Hoje o SGL já aplica isolamento funcional por Unidade usando a sessão DEV e `X-SGL-Unidade-Id`. Em produção, o administrador continuará sem cadastrar Unidade manualmente e o backend deverá resolver/sincronizar a Unidade a partir da identidade corporativa, usando um identificador estável e confiável.
