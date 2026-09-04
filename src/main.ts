@@ -17,7 +17,9 @@ import './styles/dark-mode.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
-function carregarTemaInicial() {
+type TemaAplicacao = 'light' | 'dark'
+
+function carregarTemaPersistido(): TemaAplicacao {
   try {
     return localStorage.getItem(TEMA_STORAGE_KEY) === 'dark' ? 'dark' : 'light'
   } catch {
@@ -25,8 +27,24 @@ function carregarTemaInicial() {
   }
 }
 
-const temaInicial = carregarTemaInicial()
-document.documentElement.dataset.theme = temaInicial
+function aplicarTemaGlobal(tema: TemaAplicacao) {
+  document.documentElement.dataset.theme = tema
+  vuetify.theme.global.name.value = tema === 'dark' ? 'sglDark' : 'sglLight'
+}
+
+function aplicarTemaDaRota(path: string) {
+  // Login e rotas públicas permanecem sempre no tema visual original.
+  if (path === '/login') {
+    aplicarTemaGlobal('light')
+    return
+  }
+
+  aplicarTemaGlobal(carregarTemaPersistido())
+}
+
+// O bootstrap sempre começa claro para impedir que uma preferência salva
+// contamine a tela de login antes de o Vue Router resolver a rota atual.
+document.documentElement.dataset.theme = 'light'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -37,7 +55,11 @@ app.use(pinia)
 app.use(router)
 app.use(vuetify)
 
-vuetify.theme.global.name.value = temaInicial === 'dark' ? 'sglDark' : 'sglLight'
+vuetify.theme.global.name.value = 'sglLight'
+
+router.afterEach((to) => {
+  aplicarTemaDaRota(to.path)
+})
 
 const session = useSessionStore(pinia)
 let timerExpiracao: ReturnType<typeof setTimeout> | null = null
