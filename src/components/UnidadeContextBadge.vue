@@ -20,35 +20,30 @@ const unidade = computed(() => {
 </script>
 
 <template>
-  <div v-if="visivel" class="sgl-unidade-context" aria-label="Unidade atual do sistema">
-    {{ unidade }}
-  </div>
+  <Teleport v-if="visivel" to=".gestao-tools">
+    <div class="sgl-unidade-context" aria-label="Unidade atual do sistema">
+      {{ unidade }}
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
 .sgl-unidade-context {
-  position: fixed;
-  top: 0;
-  left: 344px;
-  right: 190px;
-  z-index: 25;
-  height: 72px;
-  display: flex;
-  align-items: center;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 4px 2px;
   overflow: hidden;
   color: #fff;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
-  pointer-events: none;
-  transition: left 300ms ease;
 }
 
-:global(.v-application:has(.gestao-shell--collapsed)) .sgl-unidade-context {
-  left: 152px;
+:global(.gestao-shell--collapsed) .sgl-unidade-context {
+  display: none;
 }
 
 @media (max-width: 900px) {
