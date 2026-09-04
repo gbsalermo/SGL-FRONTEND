@@ -41,8 +41,6 @@ function aplicarTemaDaInterface(tema: TemaAplicacao) {
 }
 
 function forcarTemaGlobalClaro() {
-  // O dark mode do SGL é apenas uma aparência da interface autenticada.
-  // Login, 404 e Vuetify global permanecem sempre claros.
   document.documentElement.dataset.theme = 'light'
   vuetify.theme.global.name.value = 'sglLight'
 }
@@ -61,6 +59,44 @@ function aplicarTemaDaRota(path: string) {
 forcarTemaGlobalClaro()
 aplicarTemaDaInterface('light')
 
+/*
+ * Compatibilidade com o seletor existente do GestaoLayout:
+ * ele ainda tenta trocar data-theme/Vuetify. Capturamos a escolha,
+ * transformamos em uma classe local no body e imediatamente restauramos
+ * o tema global claro. Assim o dark mode só existe na interface autenticada.
+ */
+let restaurandoTemaGlobal = false
+const observadorTema = new MutationObserver(() => {
+  if (restaurandoTemaGlobal) return
+
+  const temaSolicitado: TemaAplicacao = document.documentElement.dataset.theme === 'dark'
+    ? 'dark'
+    : 'light'
+
+  const rotaAtual = router.currentRoute.value.path
+  const rotaPublica = rotaAtual === '/login' || rotaAtual.startsWith('/404')
+
+  if (rotaPublica) {
+    aplicarTemaDaInterface('light')
+  } else {
+    persistirTema(temaSolicitado)
+    aplicarTemaDaInterface(temaSolicitado)
+  }
+
+  if (document.documentElement.dataset.theme !== 'light' || vuetify.theme.global.name.value !== 'sglLight') {
+    restaurandoTemaGlobal = true
+    forcarTemaGlobalClaro()
+    queueMicrotask(() => {
+      restaurandoTemaGlobal = false
+    })
+  }
+})
+
+observadorTema.observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ['data-theme'],
+})
+
 const app = createApp(App)
 const pinia = createPinia()
 
@@ -72,30 +108,6 @@ app.use(vuetify)
 
 router.afterEach((to) => {
   aplicarTemaDaRota(to.path)
-})
-
-/*
- * O GestaoLayout já possui os dois botões de Aparência e mantém seu estado local.
- * Ele ainda altera data-theme por compatibilidade histórica. Após o clique,
- * convertemos essa escolha para a única regra atual: body.sgl-dark-active.
- * Em seguida restauramos o tema global claro, impedindo vazamento para o login.
- */
-document.addEventListener('click', (event) => {
-  const target = event.target
-  if (!(target instanceof Element)) return
-
-  const botao = target.closest('.gestao-theme-switch button')
-  if (!(botao instanceof HTMLButtonElement)) return
-
-  queueMicrotask(() => {
-    const temaEscolhido: TemaAplicacao = document.documentElement.dataset.theme === 'dark'
-      ? 'dark'
-      : 'light'
-
-    persistirTema(temaEscolhido)
-    aplicarTemaDaInterface(temaEscolhido)
-    forcarTemaGlobalClaro()
-  })
 })
 
 const session = useSessionStore(pinia)
