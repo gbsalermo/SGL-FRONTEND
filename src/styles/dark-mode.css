@@ -1,0 +1,156 @@
+/*
+ * Dark mode do SGL
+ * Referência visual: rascunho inicial do Painel Operacional.
+ * Mantém azul-marinho no fundo, superfícies levemente elevadas e bordas discretas.
+ */
+
+:root[data-theme='dark'] body,
+:root[data-theme='dark'] #app {
+  background: var(--sgl-background);
+  color: var(--sgl-text);
+}
+
+:root[data-theme='dark'] .gestao-shell {
+  background: var(--sgl-background);
+  color: var(--sgl-text);
+}
+
+:root[data-theme='dark'] .gestao-sidebar {
+  background: linear-gradient(180deg, #0c1a2d 0%, #0d1b2f 55%, #0e2037 100%);
+  box-shadow: inset -1px 0 0 rgb(126 155 194 / 14%);
+}
+
+:root[data-theme='dark'] .gestao-topbar {
+  background: linear-gradient(90deg, #0c1829 0%, #0d1a2d 100%);
+  box-shadow: 0 1px 0 rgb(126 155 194 / 14%);
+}
+
+:root[data-theme='dark'] .gestao-main {
+  background: var(--sgl-background);
+}
+
+:root[data-theme='dark'] .gestao-nav a.router-link-active {
+  background: linear-gradient(135deg, #214c91 0%, #315fae 100%);
+  box-shadow: 0 6px 18px rgb(10 34 72 / 35%);
+}
+
+:root[data-theme='dark'] .gestao-theme-switch button.gestao-theme-switch__option--active {
+  background: #244f9d;
+}
+
+/* Dashboard: corrige cores claras hardcoded e aproxima o contraste do mockup. */
+:root[data-theme='dark'] .dashboard-page,
+:root[data-theme='dark'] .dashboard-heading h1,
+:root[data-theme='dark'] .dashboard-panel,
+:root[data-theme='dark'] .kpi-card,
+:root[data-theme='dark'] .kpi-card strong,
+:root[data-theme='dark'] .panel-heading h2,
+:root[data-theme='dark'] .attention-copy strong,
+:root[data-theme='dark'] .timeline-copy strong,
+:root[data-theme='dark'] .lab-title strong,
+:root[data-theme='dark'] .lab-total strong,
+:root[data-theme='dark'] .quick-summary-card strong {
+  color: var(--sgl-text) !important;
+}
+
+:root[data-theme='dark'] .dashboard-heading p,
+:root[data-theme='dark'] .kpi-card small,
+:root[data-theme='dark'] .kpi-card em,
+:root[data-theme='dark'] .attention-copy small,
+:root[data-theme='dark'] .attention-side,
+:root[data-theme='dark'] .timeline-copy small,
+:root[data-theme='dark'] .lab-title small,
+:root[data-theme='dark'] .lab-metrics small,
+:root[data-theme='dark'] .lab-total span,
+:root[data-theme='dark'] .panel-hint {
+  color: var(--sgl-text-muted) !important;
+}
+
+:root[data-theme='dark'] .kpi-card,
+:root[data-theme='dark'] .dashboard-panel,
+:root[data-theme='dark'] .lab-card,
+:root[data-theme='dark'] .lab-metrics > span,
+:root[data-theme='dark'] .lab-total,
+:root[data-theme='dark'] .quick-summary-card {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface) !important;
+}
+
+:root[data-theme='dark'] .dashboard-panel,
+:root[data-theme='dark'] .lab-card {
+  box-shadow: 0 12px 30px rgb(3 10 20 / 18%);
+}
+
+:root[data-theme='dark'] .kpi-card:hover {
+  border-color: #3b5477 !important;
+  background: var(--sgl-surface-elevated) !important;
+  box-shadow: 0 12px 28px rgb(3 10 20 / 30%) !important;
+}
+
+:root[data-theme='dark'] .dashboard-refresh {
+  border-color: #365071 !important;
+  background: #15243a !important;
+  color: #72a3ff !important;
+}
+
+:root[data-theme='dark'] .dashboard-refresh:hover:not(:disabled) {
+  border-color: #5274a1 !important;
+  background: #192a43 !important;
+}
+
+:root[data-theme='dark'] .panel-heading,
+:root[data-theme='dark'] .summary-tabs,
+:root[data-theme='dark'] .panel-hint,
+:root[data-theme='dark'] .panel-footer-link,
+:root[data-theme='dark'] .lab-navigation,
+:root[data-theme='dark'] .timeline-item,
+:root[data-theme='dark'] .attention-item {
+  border-color: var(--sgl-border) !important;
+}
+
+:root[data-theme='dark'] .summary-tabs,
+:root[data-theme='dark'] .lab-navigation {
+  background: #152239 !important;
+}
+
+:root[data-theme='dark'] .summary-tabs button {
+  color: var(--sgl-text-muted) !important;
+}
+
+:root[data-theme='dark'] .summary-tabs button.summary-tab--active {
+  border-color: #365782 !important;
+  background: #203756 !important;
+  color: var(--sgl-text) !important;
+}
+
+:root[data-theme='dark'] .attention-item:hover,
+:root[data-theme='dark'] .timeline-item:hover {
+  background: #15243a !important;
+}
+
+:root[data-theme='dark'] .panel-footer-link,
+:root[data-theme='dark'] .panel-heading > button {
+  color: #72a3ff !important;
+}
+
+:root[data-theme='dark'] .dashboard-warning {
+  border-color: #6d5623 !important;
+  background: #2b2417 !important;
+  color: #f6c969 !important;
+}
+
+/* Campos e superfícies Vuetify/herdadas ganham a mesma hierarquia visual. */
+:root[data-theme='dark'] .v-card,
+:root[data-theme='dark'] .v-sheet,
+:root[data-theme='dark'] .gestao-alert-panel,
+:root[data-theme='dark'] .gestao-search-panel {
+  border-color: var(--sgl-border);
+  background-color: var(--sgl-surface-elevated);
+  color: var(--sgl-text);
+}
+
+:root[data-theme='dark'] input,
+:root[data-theme='dark'] textarea,
+:root[data-theme='dark'] select {
+  color-scheme: dark;
+}
