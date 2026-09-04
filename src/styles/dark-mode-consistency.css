@@ -1,0 +1,194 @@
+/*
+ * Ajustes finais de consistência do dark mode.
+ * Só atua quando o usuário escolheu modo escuro.
+ */
+
+/* A troca de rota nunca deve reintroduzir o fundo claro da view carregada. */
+body.sgl-dark-active .gestao-main > *,
+body.sgl-dark-active .solicitante-main > * {
+  background-color: #0b1627 !important;
+  color: #f4f7fc !important;
+}
+
+/* Superfícies operacionais que aparecem em páginas lazy-loaded. */
+body.sgl-dark-active .gestao-main article,
+body.sgl-dark-active .solicitante-main article,
+body.sgl-dark-active .gestao-main .filter-card,
+body.sgl-dark-active .solicitante-main .filter-card,
+body.sgl-dark-active .gestao-main .filters-card,
+body.sgl-dark-active .solicitante-main .filters-card,
+body.sgl-dark-active .gestao-main .table-wrap,
+body.sgl-dark-active .solicitante-main .table-wrap,
+body.sgl-dark-active .gestao-main .table-card,
+body.sgl-dark-active .solicitante-main .table-card,
+body.sgl-dark-active .gestao-main .content-card,
+body.sgl-dark-active .solicitante-main .content-card,
+body.sgl-dark-active .gestao-main .detail-card,
+body.sgl-dark-active .solicitante-main .detail-card,
+body.sgl-dark-active .gestao-main .details-card,
+body.sgl-dark-active .solicitante-main .details-card,
+body.sgl-dark-active .gestao-main .form-card,
+body.sgl-dark-active .solicitante-main .form-card,
+body.sgl-dark-active .gestao-main .report-card,
+body.sgl-dark-active .solicitante-main .report-card,
+body.sgl-dark-active .gestao-main .report-panel,
+body.sgl-dark-active .solicitante-main .report-panel,
+body.sgl-dark-active .gestao-main .list-card,
+body.sgl-dark-active .solicitante-main .list-card,
+body.sgl-dark-active .gestao-main .result-card,
+body.sgl-dark-active .solicitante-main .result-card,
+body.sgl-dark-active .gestao-main .state-box,
+body.sgl-dark-active .solicitante-main .state-box {
+  border-color: #2a3c55 !important;
+  background: #111e31 !important;
+  color: #f4f7fc !important;
+  box-shadow: none !important;
+}
+
+/* Evita faixas brancas em cabeçalhos/rodapés internos de cards e tabelas. */
+body.sgl-dark-active .gestao-main .card-header,
+body.sgl-dark-active .solicitante-main .card-header,
+body.sgl-dark-active .gestao-main .card-footer,
+body.sgl-dark-active .solicitante-main .card-footer,
+body.sgl-dark-active .gestao-main .table-header,
+body.sgl-dark-active .solicitante-main .table-header,
+body.sgl-dark-active .gestao-main .table-footer,
+body.sgl-dark-active .solicitante-main .table-footer,
+body.sgl-dark-active .gestao-main .section-header,
+body.sgl-dark-active .solicitante-main .section-header {
+  border-color: #2a3c55 !important;
+  background: #17263d !important;
+  color: #f4f7fc !important;
+}
+
+/*
+ * Estados semânticos: no dark mode a cor continua comunicando o significado,
+ * mas o fundo deixa de ser branco/pastel claro.
+ */
+body.sgl-dark-active .chip--positive,
+body.sgl-dark-active .ok-chip,
+body.sgl-dark-active .lot-chip--ok,
+body.sgl-dark-active .status-success,
+body.sgl-dark-active .status--success {
+  border-color: #2f6b50 !important;
+  background: #173428 !important;
+  color: #75dfa8 !important;
+}
+
+body.sgl-dark-active .chip--positive:hover,
+body.sgl-dark-active .ok-chip:hover,
+body.sgl-dark-active .lot-chip--ok:hover,
+body.sgl-dark-active .status-success:hover,
+body.sgl-dark-active .status--success:hover {
+  background: #1e4937 !important;
+  color: #9af0c2 !important;
+}
+
+body.sgl-dark-active .chip--danger,
+body.sgl-dark-active .danger-chip,
+body.sgl-dark-active .lot-chip--danger,
+body.sgl-dark-active .lot-chip--discarded,
+body.sgl-dark-active .status-danger,
+body.sgl-dark-active .status--danger,
+body.sgl-dark-active .status-error,
+body.sgl-dark-active .status--error {
+  border-color: #71333e !important;
+  background: #3a1c25 !important;
+  color: #ff7b89 !important;
+}
+
+body.sgl-dark-active .chip--danger:hover,
+body.sgl-dark-active .danger-chip:hover,
+body.sgl-dark-active .lot-chip--danger:hover,
+body.sgl-dark-active .lot-chip--discarded:hover,
+body.sgl-dark-active .status-danger:hover,
+body.sgl-dark-active .status--danger:hover,
+body.sgl-dark-active .status-error:hover,
+body.sgl-dark-active .status--error:hover {
+  background: #522630 !important;
+  color: #ff9ca6 !important;
+}
+
+body.sgl-dark-active .chip--warning,
+body.sgl-dark-active .warning-chip,
+body.sgl-dark-active .lot-chip--warning,
+body.sgl-dark-active .status-warning,
+body.sgl-dark-active .status--warning {
+  border-color: #755b28 !important;
+  background: #382b17 !important;
+  color: #f7c65e !important;
+}
+
+body.sgl-dark-active .chip--warning:hover,
+body.sgl-dark-active .warning-chip:hover,
+body.sgl-dark-active .lot-chip--warning:hover,
+body.sgl-dark-active .status-warning:hover,
+body.sgl-dark-active .status--warning:hover {
+  background: #51401e !important;
+  color: #ffdc86 !important;
+}
+
+body.sgl-dark-active .chip--neutral,
+body.sgl-dark-active .lot-chip--empty,
+body.sgl-dark-active .status-info,
+body.sgl-dark-active .status--info,
+body.sgl-dark-active .status-blue,
+body.sgl-dark-active .status--blue {
+  border-color: #315c99 !important;
+  background: #17345d !important;
+  color: #7dabff !important;
+}
+
+body.sgl-dark-active .chip--neutral:hover,
+body.sgl-dark-active .lot-chip--empty:hover,
+body.sgl-dark-active .status-info:hover,
+body.sgl-dark-active .status--info:hover,
+body.sgl-dark-active .status-blue:hover,
+body.sgl-dark-active .status--blue:hover {
+  background: #214979 !important;
+  color: #9bc0ff !important;
+}
+
+/* Hover dos itens do Dashboard respeita a cor da ocorrência. */
+body.sgl-dark-active .attention-item--pedido:hover {
+  background: #321b24 !important;
+}
+
+body.sgl-dark-active .attention-item--estoque:hover {
+  background: #332317 !important;
+}
+
+body.sgl-dark-active .attention-item--lote:hover {
+  background: #352d17 !important;
+}
+
+body.sgl-dark-active .attention-item--residuo:hover {
+  background: #291d3d !important;
+}
+
+body.sgl-dark-active .timeline-item--entrada:hover {
+  background: #173428 !important;
+}
+
+body.sgl-dark-active .timeline-item--saida:hover {
+  background: #321b24 !important;
+}
+
+body.sgl-dark-active .timeline-item--descarte:hover {
+  background: #382b17 !important;
+}
+
+body.sgl-dark-active .timeline-item--ajuste:hover,
+body.sgl-dark-active .timeline-item--devolucao:hover {
+  background: #17345d !important;
+}
+
+/* O texto secundário continua legível sem perder a hierarquia. */
+body.sgl-dark-active .gestao-main small,
+body.sgl-dark-active .solicitante-main small,
+body.sgl-dark-active .gestao-main .muted,
+body.sgl-dark-active .solicitante-main .muted,
+body.sgl-dark-active .gestao-main .hint,
+body.sgl-dark-active .solicitante-main .hint {
+  color: #9eacc0 !important;
+}
