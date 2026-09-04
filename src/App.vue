@@ -4,11 +4,13 @@ import AdminCadastrosNavLink from '@/modules/admin/components/AdminCadastrosNavL
 import EstoqueFiltroEmbalagem from '@/modules/estoque/components/EstoqueFiltroEmbalagem.vue'
 import ResiduoPredeterminadoEmBreve from '@/modules/residuos/components/ResiduoPredeterminadoEmBreve.vue'
 import ProdutoRotuloAtalho from '@/modules/produtos/components/ProdutoRotuloAtalho.vue'
+import SolicitanteThemeToggle from '@/components/SolicitanteThemeToggle.vue'
 </script>
 
 <template>
   <v-app>
     <router-view />
+    <SolicitanteThemeToggle />
     <ProdutoRotuloAtalho />
     <AdminCadastrosNavLink />
     <ResiduoPredeterminadoEmBreve />
