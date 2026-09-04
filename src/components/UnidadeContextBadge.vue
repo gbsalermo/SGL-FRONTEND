@@ -28,48 +28,56 @@ const unidade = computed(() => {
 <style scoped>
 .sgl-unidade-context {
   position: fixed;
-  top: 222px;
-  left: 26px;
-  z-index: 31;
-  width: 210px;
+  top: 0;
+  left: 78px;
+  z-index: 45;
+  height: 64px;
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
+  max-width: min(560px, calc(100vw - 300px));
   color: #fff;
   font-family: inherit;
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 14px;
+  line-height: 1;
   pointer-events: none;
 }
 
-.sgl-unidade-context span,
+.sgl-unidade-context span {
+  color: rgba(255, 255, 255, .78);
+  font-weight: 500;
+}
+
 .sgl-unidade-context strong {
+  overflow: hidden;
   color: #fff;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.sgl-unidade-context strong {
-  overflow-wrap: anywhere;
-}
-
-:global(.gestao-shell--collapsed) + .sgl-unidade-context {
-  display: none;
-}
-
-@media (max-width: 900px) {
+@media (max-width: 800px) {
   .sgl-unidade-context {
-    position: static;
-    width: auto;
-    margin: 8px 16px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    background: #0b1b3a;
+    left: 68px;
+    max-width: calc(100vw - 210px);
+    font-size: 13px;
+  }
+
+  .sgl-unidade-context strong {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 560px) {
+  .sgl-unidade-context span {
+    display: none;
   }
 }
 
 @media print {
-  .sgl-unidade-context { display: none !important; }
+  .sgl-unidade-context {
+    display: none !important;
+  }
 }
 </style>
