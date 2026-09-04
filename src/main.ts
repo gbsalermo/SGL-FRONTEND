@@ -13,8 +13,6 @@ import './styles/main.css'
 import './styles/relatorios-responsive.css'
 import './styles/gestao-shell-controls.css'
 import './styles/dashboard-layout-compat.css'
-import './styles/dark-mode.css'
-import './styles/dark-mode-legacy-fix.css'
 import './styles/dark-mode-runtime.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
@@ -29,43 +27,39 @@ function carregarTemaPersistido(): TemaAplicacao {
   }
 }
 
-function sincronizarClasseTema(tema: TemaAplicacao) {
+function persistirTema(tema: TemaAplicacao) {
+  try {
+    localStorage.setItem(TEMA_STORAGE_KEY, tema)
+  } catch {
+    // A aplicação continua funcional quando o navegador bloqueia localStorage.
+  }
+}
+
+function aplicarTemaDaInterface(tema: TemaAplicacao) {
   document.body.classList.toggle('sgl-dark-active', tema === 'dark')
   document.body.classList.toggle('sgl-light-active', tema === 'light')
 }
 
-function aplicarTemaGlobal(tema: TemaAplicacao) {
-  document.documentElement.dataset.theme = tema
-  sincronizarClasseTema(tema)
-  vuetify.theme.global.name.value = tema === 'dark' ? 'sglDark' : 'sglLight'
+function forcarTemaGlobalClaro() {
+  // O dark mode do SGL é apenas uma aparência da interface autenticada.
+  // Login, 404 e Vuetify global permanecem sempre claros.
+  document.documentElement.dataset.theme = 'light'
+  vuetify.theme.global.name.value = 'sglLight'
 }
 
 function aplicarTemaDaRota(path: string) {
-  // Login é visualmente independente do tema escolhido na área autenticada.
-  if (path === '/login') {
-    aplicarTemaGlobal('light')
+  forcarTemaGlobalClaro()
+
+  if (path === '/login' || path.startsWith('/404')) {
+    aplicarTemaDaInterface('light')
     return
   }
 
-  aplicarTemaGlobal(carregarTemaPersistido())
+  aplicarTemaDaInterface(carregarTemaPersistido())
 }
 
-// Bootstrap sempre claro. O tema salvo só entra depois que a rota é resolvida.
-document.documentElement.dataset.theme = 'light'
-document.body.classList.add('sgl-light-active')
-document.body.classList.remove('sgl-dark-active')
-
-// O GestaoLayout altera data-theme diretamente quando o usuário usa o seletor.
-// Mantemos o body sincronizado para que dialogs/overlays fora do shell recebam o tema.
-const observadorTema = new MutationObserver(() => {
-  const temaAtual: TemaAplicacao = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
-  sincronizarClasseTema(temaAtual)
-})
-
-observadorTema.observe(document.documentElement, {
-  attributes: true,
-  attributeFilter: ['data-theme'],
-})
+forcarTemaGlobalClaro()
+aplicarTemaDaInterface('light')
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -76,10 +70,32 @@ app.use(pinia)
 app.use(router)
 app.use(vuetify)
 
-vuetify.theme.global.name.value = 'sglLight'
-
 router.afterEach((to) => {
   aplicarTemaDaRota(to.path)
+})
+
+/*
+ * O GestaoLayout já possui os dois botões de Aparência e mantém seu estado local.
+ * Ele ainda altera data-theme por compatibilidade histórica. Após o clique,
+ * convertemos essa escolha para a única regra atual: body.sgl-dark-active.
+ * Em seguida restauramos o tema global claro, impedindo vazamento para o login.
+ */
+document.addEventListener('click', (event) => {
+  const target = event.target
+  if (!(target instanceof Element)) return
+
+  const botao = target.closest('.gestao-theme-switch button')
+  if (!(botao instanceof HTMLButtonElement)) return
+
+  queueMicrotask(() => {
+    const temaEscolhido: TemaAplicacao = document.documentElement.dataset.theme === 'dark'
+      ? 'dark'
+      : 'light'
+
+    persistirTema(temaEscolhido)
+    aplicarTemaDaInterface(temaEscolhido)
+    forcarTemaGlobalClaro()
+  })
 })
 
 const session = useSessionStore(pinia)
@@ -95,6 +111,8 @@ function limparTimerExpiracao() {
 function encerrarSessaoExpirada() {
   limparTimerExpiracao()
   session.sair()
+  aplicarTemaDaInterface('light')
+  forcarTemaGlobalClaro()
 
   if (router.currentRoute.value.path !== '/login') {
     void router.replace({
