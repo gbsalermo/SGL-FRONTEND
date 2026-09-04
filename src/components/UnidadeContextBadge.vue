@@ -13,14 +13,13 @@ const unidade = computed(() => {
   const usuario = session.usuario
   if (!usuario?.unidadeNome) return 'Unidade não identificada'
   return usuario.unidadeSigla
-    ? `${usuario.unidadeSigla} — ${usuario.unidadeNome}`
+    ? `${usuario.unidadeSigla} - ${usuario.unidadeNome}`
     : usuario.unidadeNome
 })
 </script>
 
 <template>
   <div v-if="visivel" class="sgl-unidade-context" aria-label="Unidade atual do sistema">
-    <span>Unidade:</span>
     <strong>{{ unidade }}</strong>
   </div>
 </template>
@@ -29,23 +28,17 @@ const unidade = computed(() => {
 .sgl-unidade-context {
   position: fixed;
   top: 0;
-  left: 78px;
+  left: 82px;
   z-index: 45;
-  height: 64px;
+  height: 60px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  max-width: min(560px, calc(100vw - 300px));
+  max-width: min(620px, calc(100vw - 320px));
+  padding-top: 1px;
   color: #fff;
   font-family: inherit;
-  font-size: 14px;
   line-height: 1;
   pointer-events: none;
-}
-
-.sgl-unidade-context span {
-  color: rgba(255, 255, 255, .78);
-  font-weight: 500;
 }
 
 .sgl-unidade-context strong {
@@ -53,25 +46,19 @@ const unidade = computed(() => {
   color: #fff;
   font-size: 15px;
   font-weight: 600;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 @media (max-width: 800px) {
   .sgl-unidade-context {
-    left: 68px;
-    max-width: calc(100vw - 210px);
-    font-size: 13px;
+    left: 72px;
+    max-width: calc(100vw - 220px);
   }
 
   .sgl-unidade-context strong {
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 560px) {
-  .sgl-unidade-context span {
-    display: none;
+    font-size: 14px;
   }
 }
 
