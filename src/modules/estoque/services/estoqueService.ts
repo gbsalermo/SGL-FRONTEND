@@ -22,6 +22,10 @@ function validarContratoLotes(lotes: LoteResponse[]) {
   return lotes
 }
 
+function emDashboardGestao() {
+  return typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard')
+}
+
 export const estoqueService = {
   async listarPorUnidade(unidadeId: string) {
     const { data } = await http.get<EstoqueCentralResponse[]>('/v1/estoque-central/por-unidade', { params: { unidadeId } })
@@ -40,12 +44,19 @@ export const estoqueService = {
 
   async listarLotesPorEstoque(estoqueId: string) {
     const { data } = await http.get<LoteResponse[]>('/v1/lotes/por-estoque', { params: { estoqueId } })
-    return validarContratoLotes(data)
+    const lotes = validarContratoLotes(data)
+
+    // O painel operacional deve exibir apenas lotes que ainda exigem ação.
+    // Após descarte/consumo total o lote continua disponível para histórico nas
+    // telas de estoque, mas deixa de ser uma pendência do Dashboard.
+    return emDashboardGestao()
+      ? lotes.filter((lote) => lote.quantidadeDisponivel > 0)
+      : lotes
   },
 
   async listarLotesVencidos() {
     const { data } = await http.get<LoteResponse[]>('/v1/lotes/vencidos')
-    return validarContratoLotes(data)
+    return validarContratoLotes(data).filter((lote) => lote.quantidadeDisponivel > 0)
   },
 
   async listarMovimentacoesPorLote(loteId: string) {
