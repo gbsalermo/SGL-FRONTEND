@@ -1,0 +1,304 @@
+/*
+ * Correção de legibilidade do dark mode da área de Gestão.
+ *
+ * Motivo: várias views antigas possuem cores claras hardcoded em estilos scoped.
+ * Este arquivo é carregado por último e usa seletores de alta especificidade +
+ * !important para garantir que o tema escuro prevaleça sem atingir login/404.
+ */
+
+:root[data-theme='dark'] .gestao-shell .gestao-main {
+  --dark-bg: #0d182a;
+  --dark-surface: #111d30;
+  --dark-surface-2: #15243a;
+  --dark-surface-3: #1a2b44;
+  --dark-border: #293950;
+  --dark-border-strong: #3a506f;
+  --dark-text: #f4f7fc;
+  --dark-muted: #a8b6cb;
+  --dark-blue: #72a3ff;
+}
+
+/* ---------- Dashboard: superfícies principais ---------- */
+:root[data-theme='dark'] .gestao-shell .gestao-main .dashboard-page,
+:root[data-theme='dark'] .gestao-shell .gestao-main .dashboard-content-grid,
+:root[data-theme='dark'] .gestao-shell .gestao-main .summary-view {
+  color: var(--dark-text) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .dashboard-panel,
+:root[data-theme='dark'] .gestao-shell .gestao-main .dashboard-panel--summary,
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-card {
+  border-color: var(--dark-border) !important;
+  background: var(--dark-surface) !important;
+  color: var(--dark-text) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .panel-heading {
+  border-bottom-color: var(--dark-border) !important;
+  background: linear-gradient(180deg, #17243a 0%, #142238 100%) !important;
+  color: var(--dark-text) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .panel-heading h2,
+:root[data-theme='dark'] .gestao-shell .gestao-main .dashboard-heading h1,
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-card strong,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-copy strong,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-copy strong,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-title strong,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-total strong,
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-card strong {
+  color: var(--dark-text) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .dashboard-heading p,
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-card small,
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-card em,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-copy small,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-side,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-copy small,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-item time,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-title small,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-metrics small,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-total span,
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-card small,
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-card em {
+  color: var(--dark-muted) !important;
+}
+
+/* ---------- Dashboard: listas e rodapés ---------- */
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-item {
+  border-color: transparent !important;
+  border-bottom-color: var(--dark-border) !important;
+  background: var(--dark-surface) !important;
+  color: var(--dark-text) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-item:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item--pedido:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item--estoque:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item--lote:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item--residuo:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-item--entrada:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-item--saida:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-item--ajuste:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-item--devolucao:hover,
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-item--descarte:hover {
+  background: var(--dark-surface-2) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .panel-footer-link,
+:root[data-theme='dark'] .gestao-shell .gestao-main .panel-hint {
+  border-top-color: var(--dark-border) !important;
+  background: #132137 !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .panel-footer-link {
+  color: var(--dark-blue) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .panel-hint {
+  color: var(--dark-muted) !important;
+}
+
+/* ---------- Dashboard: resumo por laboratório ---------- */
+:root[data-theme='dark'] .gestao-shell .gestao-main .summary-tabs {
+  border-bottom-color: var(--dark-border) !important;
+  background: #142238 !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .summary-tabs button {
+  background: transparent !important;
+  color: #9eafc7 !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .summary-tabs button:hover {
+  background: #1a2b44 !important;
+  color: var(--dark-text) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .summary-tabs button.summary-tab--active {
+  border-color: #3b5680 !important;
+  background: #203756 !important;
+  color: var(--dark-text) !important;
+  box-shadow: inset 0 0 0 1px rgb(114 163 255 / 8%) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-card {
+  box-shadow: 0 8px 22px rgb(2 9 20 / 28%) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-metrics > span,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-total {
+  border-color: var(--dark-border) !important;
+  background: var(--dark-surface-2) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-navigation {
+  border-top-color: var(--dark-border) !important;
+  background: #142238 !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-navigation button {
+  border-color: var(--dark-border-strong) !important;
+  background: var(--dark-surface-2) !important;
+  color: #b9d0ff !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-navigation > span,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-navigation > span strong {
+  color: var(--dark-muted) !important;
+}
+
+/* ---------- Dashboard: resumo rápido ---------- */
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-card--pending {
+  border-color: var(--dark-border) !important;
+  background: var(--dark-surface-2) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-footer,
+:root[data-theme='dark'] .gestao-shell .gestao-main .operation-today,
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-updated {
+  border-color: var(--dark-border) !important;
+  background: #142238 !important;
+  color: var(--dark-muted) !important;
+}
+
+/* ---------- Botão Atualizar e controles ---------- */
+:root[data-theme='dark'] .gestao-shell .gestao-main .dashboard-refresh {
+  border-color: #3a5579 !important;
+  background: linear-gradient(180deg, #1b2d48 0%, #17263e 100%) !important;
+  color: #d9e7ff !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .dashboard-refresh:hover:not(:disabled) {
+  border-color: #5878a5 !important;
+  background: #203653 !important;
+}
+
+/* ---------- Ícones: mantém cor sem usar fundos quase brancos ---------- */
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .panel-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-icon {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 5%);
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-card--blue .kpi-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .panel-icon--blue,
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-card--blue .quick-summary-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .quick-summary-card--pending .quick-summary-icon {
+  background: #17345e !important;
+  color: #72a3ff !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-card--red .kpi-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .panel-icon--red,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item--pedido .attention-icon {
+  background: #49222d !important;
+  color: #ff7180 !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-card--orange .kpi-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item--estoque .attention-icon {
+  background: #4a3019 !important;
+  color: #ff9b45 !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-card--amber .kpi-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item--lote .attention-icon {
+  background: #4b3918 !important;
+  color: #f6bd43 !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .kpi-card--purple .kpi-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .attention-item--residuo .attention-icon,
+:root[data-theme='dark'] .gestao-shell .gestao-main .lab-icon {
+  background: #34235b !important;
+  color: #a77cff !important;
+}
+
+/* Timeline não pode manter círculo branco no eixo. */
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-line {
+  background: #31435c !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .timeline-dot {
+  background: var(--dark-surface) !important;
+  box-shadow: 0 0 0 2px var(--dark-surface) !important;
+}
+
+/* ---------- Demais telas da Gestão: padrões legados ---------- */
+:root[data-theme='dark'] .gestao-shell .gestao-main .page-header h1,
+:root[data-theme='dark'] .gestao-shell .gestao-main .page-heading h1,
+:root[data-theme='dark'] .gestao-shell .gestao-main .detail-heading h1,
+:root[data-theme='dark'] .gestao-shell .gestao-main .section-title,
+:root[data-theme='dark'] .gestao-shell .gestao-main .card-title {
+  color: var(--dark-text) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .page-header p,
+:root[data-theme='dark'] .gestao-shell .gestao-main .page-heading p,
+:root[data-theme='dark'] .gestao-shell .gestao-main .detail-heading p,
+:root[data-theme='dark'] .gestao-shell .gestao-main .breadcrumb {
+  color: var(--dark-muted) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .summary-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .summary-grid > *,
+:root[data-theme='dark'] .gestao-shell .gestao-main .filter-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .filters-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .filters-panel,
+:root[data-theme='dark'] .gestao-shell .gestao-main .table-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .table-panel,
+:root[data-theme='dark'] .gestao-shell .gestao-main .content-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .detail-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .details-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .form-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .report-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .report-panel,
+:root[data-theme='dark'] .gestao-shell .gestao-main .resumo-card,
+:root[data-theme='dark'] .gestao-shell .gestao-main .resumo-cards article {
+  border-color: var(--dark-border) !important;
+  background: var(--dark-surface) !important;
+  color: var(--dark-text) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main .secondary-action,
+:root[data-theme='dark'] .gestao-shell .gestao-main .ghost-action,
+:root[data-theme='dark'] .gestao-shell .gestao-main .outline-action {
+  border-color: var(--dark-border-strong) !important;
+  background: var(--dark-surface-2) !important;
+  color: #dbe6f4 !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main input,
+:root[data-theme='dark'] .gestao-shell .gestao-main textarea,
+:root[data-theme='dark'] .gestao-shell .gestao-main select {
+  border-color: #354a66 !important;
+  background: #142238 !important;
+  color: var(--dark-text) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main table,
+:root[data-theme='dark'] .gestao-shell .gestao-main th,
+:root[data-theme='dark'] .gestao-shell .gestao-main td {
+  border-color: var(--dark-border) !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main th {
+  background: var(--dark-surface-2) !important;
+  color: #c0cde0 !important;
+}
+
+:root[data-theme='dark'] .gestao-shell .gestao-main td,
+:root[data-theme='dark'] .gestao-shell .gestao-main tbody tr {
+  background: var(--dark-surface) !important;
+  color: #e7edf6 !important;
+}
