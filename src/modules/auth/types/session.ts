@@ -13,6 +13,7 @@ export interface UsuarioSessao {
   perfil: PerfilUsuario
   unidadeId: string | null
   unidadeNome: string | null
+  unidadeSigla: string | null
   laboratorioId: string | null
   laboratorioNome: string | null
   ativo: boolean
