@@ -6,11 +6,13 @@
 **Última atualização:** 04/09/2026  
 **Branch estável:** `main`  
 **Fase atual:** ajustes de pré-produção pós-aprovação funcional.  
-**Bloco atual:** limpeza documental → planejamento dos ajustes → refinamentos.  
+**Bloco atual:** planejamento consolidado → execução sequencial das etapas de pré-produção.  
+**Etapa atual:** Etapa 1 — padronização e refinamento visual global.  
+**Plano oficial da pré-produção:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Roadmap formal posterior:** matriz de permissões → congelamento → homologação final → segurança/integração corporativa.  
 **Handoff:** `docs/DOSSIE_PROJETO_SGL.md`
 
-Este é o checkpoint principal para retomada. Rotas reais: `src/router/index.ts`. Contratos HTTP: Swagger/OpenAPI do backend.
+Este é o checkpoint principal para retomada. O fluxo detalhado da pré-produção é canônico no backend em `docs/PLANO_PRE_PRODUCAO.md`. Rotas reais: `src/router/index.ts`. Contratos HTTP: Swagger/OpenAPI do backend.
 
 ---
 
@@ -28,6 +30,8 @@ branch própria
 
 Não reconstruir módulos aprovados sem necessidade concreta. Mudanças de pré-produção devem preservar o comportamento funcional já aprovado, salvo decisão explícita em contrário.
 
+**Regra especial deste bloco:** alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto. O apoio de IA pode analisar o backend, definir modelagem/contratos, orientar a implementação e revisar o resultado, mas não deve aplicar diretamente código funcional de backend sem nova autorização explícita.
+
 ---
 
 # 2. Estado consolidado
@@ -44,16 +48,16 @@ Relatórios / fiscalização                            ✅
 PDF/XLSX                                             ✅
 Resíduos — Solicitante                               ✅
 Resíduos — Gestão                                    ✅
-Rótulo de Resíduo                                    ✅
+Rótulo de Resíduo                                    ✅ base atual; refinamento planejado
 Rótulo de Produto                                    ✅
-Estagiários                                          ✅
+Estagiários                                          ✅ base atual; evolução planejada
 Pessoas por laboratório                              ✅
-Administração / Cadastros                            ✅
+Administração / Cadastros                            ✅ base atual; expansão planejada
 Dashboard Gestão                                     ✅
 Dashboard Solicitante                                ✅
 Alertas operacionais                                 ✅
 Busca global                                         ✅
-Tema claro/escuro + persistência                     ✅
+Tema claro/escuro + persistência                     ✅ base atual; refinamento planejado
 404                                                   ✅
 Contexto de Unidade enviado à API                    ✅
 Matriz formal de permissões                          ⏳ após pré-produção atual
@@ -73,12 +77,13 @@ O produto foi aprovado funcionalmente. A fase atual é de pré-produção e refi
 1. código da main
 2. Swagger/OpenAPI do backend
 3. CONTINUIDADE.md do repositório em trabalho
-4. docs/DOSSIE_PROJETO_SGL.md
-5. decisões e documentos específicos
-6. documentos de etapas antigas e snapshots
+4. plano canônico de pré-produção do backend durante o bloco atual
+5. docs/DOSSIE_PROJETO_SGL.md
+6. decisões e documentos específicos
+7. documentos de etapas antigas e snapshots
 ```
 
-Documentos históricos que ainda usem expressões como “próxima etapa” não prevalecem sobre este arquivo.
+Documentos históricos que ainda usem expressões como “próxima etapa” não prevalecem sobre este arquivo nem sobre o plano canônico atual.
 
 ---
 
@@ -126,6 +131,8 @@ Rota inicial:
 GESTOR / ADMINISTRADOR → /dashboard
 TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO → /inicio
 ```
+
+Novas rotas que vierem das etapas de pré-produção devem ser definidas somente no momento da respectiva implementação e registradas aqui depois de integradas à `main`.
 
 ---
 
@@ -217,6 +224,8 @@ não perecível → FIFO
 
 Urgência está integrada e não altera FIFO/FEFO.
 
+A Etapa 7 da pré-produção introduzirá Soluções em Pedidos somente depois da normalização de unidades e da criação do domínio de Soluções. Um Pedido deverá poder conter Produto, Solução ou ambos.
+
 ---
 
 # 7. Estoque e Lotes
@@ -227,7 +236,7 @@ Urgência está integrada e não altera FIFO/FEFO.
 /estoque/lotes-vencendo
 ```
 
-Cobertura:
+Cobertura atual:
 
 ```text
 saldo/mínimo
@@ -244,7 +253,9 @@ filtros
 integração com dashboard/alertas/busca
 ```
 
-Lote continua contextual a Estoque; não criar item principal independente na sidebar.
+Lote continua contextual a Estoque; não criar item principal independente na sidebar sem nova decisão.
+
+A Etapa 7 revisará a representação de unidades de medida e apresentações físicas antes das Soluções. Até lá, preservar o comportamento atual.
 
 ---
 
@@ -284,7 +295,7 @@ Relatório
 /relatorios/residuos
 ```
 
-Fluxo:
+Fluxo atual:
 
 ```text
 INFORMADO
@@ -304,17 +315,26 @@ Componente de Resíduo pode referenciar Produto para rastreabilidade sem alterar
 
 O Código SGL existe desde o registro inicial. QR Code não integra o rótulo visual atual.
 
-Modelos de Resíduos pré-determinados permanecem opção futura.
+Pré-produção planejada:
+
+- Etapa 3: remover a sequência visual redundante de pendências/análise, refinar o rótulo e separar geração/visualização da permissão de impressão;
+- Etapa 4: cadastrar locais de armazenamento e liberar modelos de Resíduos padrão pela Gestão;
+- o Solicitante poderá escolher entre um Resíduo pré-cadastrado e preenchimento manual;
+- um modelo é reutilizável, enquanto cada `Residuo` continua sendo uma ocorrência operacional independente.
+
+Alterar um modelo posteriormente não deve alterar ocorrências históricas já criadas a partir dele.
 
 ---
 
-# 10. Estagiários
+# 10. Estagiários e Projetos
+
+Rota atual de Estagiários:
 
 ```text
 /estagiarios
 ```
 
-Cobertura:
+Cobertura atual:
 
 ```text
 listagem
@@ -327,13 +347,17 @@ encerramento
 auditoria visual
 ```
 
-Relatório:
+Relatório atual:
 
 ```text
 /relatorios/pessoas-laboratorio
 ```
 
 Com responsável, pessoas vinculadas, perfil, situação e dados de estágio, além de PDF/XLSX.
+
+A Etapa 5 reestruturará Projetos e o vínculo Projeto–Estagiário. O projeto passará a ter código/número obrigatório, ciclo de vida e vínculos de pessoas. O vínculo de Estagiário com Projeto deverá preservar atividade exercida, período, status, encerramento e renovação, permitindo histórico e múltiplos projetos ao longo do tempo.
+
+A ação atual de encerramento do Estagiário também será revista para distinguir inativação temporária, inativação sem previsão e encerramento definitivo, sempre com motivo detalhado.
 
 ---
 
@@ -345,14 +369,14 @@ Com responsável, pessoas vinculadas, perfil, situação e dados de estágio, al
 
 Exclusivo de `ADMINISTRADOR`.
 
-Áreas:
+Áreas atuais:
 
 ```text
 Laboratórios
 Projetos
 Produtos
 Permissões
-Resíduos — Em breve
+Resíduos — Em breve na implementação atual
 ```
 
 Regras consolidadas:
@@ -367,6 +391,16 @@ Regras consolidadas:
 - auto-rebaixamento do Administrador da sessão é bloqueado na interface;
 - `ESTAGIARIO` com estágio ativo não deve perder o perfil antes do encerramento.
 
+Expansões já planejadas no plano de pré-produção:
+
+```text
+Etapa 4 → Locais de armazenamento + modelos de Resíduos
+Etapa 5 → Projetos com código, status/ciclo e vínculos
+Etapa 7 → Soluções padrão
+```
+
+Portanto, “Resíduos — Em breve” descreve apenas a interface atual, não uma ideia indefinida/futura.
+
 ---
 
 # 12. Relatórios
@@ -377,7 +411,7 @@ Central:
 /relatorios
 ```
 
-Cobertura:
+Cobertura atual:
 
 ```text
 Estagiários
@@ -391,6 +425,8 @@ Pessoas por laboratório
 ```
 
 Exportações PDF/XLSX devem usar os mesmos filtros da prévia.
+
+A Etapa 6 avaliará uma visão consolidada de Laboratórios e Projetos depois que o novo domínio de Projetos/Estagiários estiver estabilizado.
 
 ---
 
@@ -437,18 +473,27 @@ Os itens relevantes navegam para a tela operacional correspondente com contexto/
 
 É a rota inicial dos perfis solicitantes e não deve expor controles de Gestão/Administração.
 
+A Etapa 8 adicionará a seção Manual do Usuário inicialmente nesta experiência de Solicitante, após definição do contrato de documentos necessário.
+
 ---
 
 # 15. Shell, busca, alertas e aparência
 
-Concluído e integrado:
+Estado atual:
 
 ```text
-Aparência claro/escuro           ✅
+Aparência claro/escuro           ✅ base funcional
 persistência do tema             ✅
 Alertas operacionais             ✅
 Busca global                     ✅
 responsividade                   ✅
+```
+
+A aparência atual não é considerada visualmente final. O início da pré-produção será:
+
+```text
+Etapa 1 → padronização/refinamento de cards, ícones, botões, setas, filtros e alinhamentos
+Etapa 2 → Dark Mode definitivo a partir de esboço, paleta, comportamento e testes
 ```
 
 A tela de login não deve herdar mudanças visuais do tema das interfaces autenticadas sem uma decisão explícita.
@@ -471,34 +516,50 @@ Menus e rotas por perfil não equivalem a segurança de produção.
 
 ---
 
-# 17. Documentos/upload
+# 17. Documentos / Manual do Usuário
 
-Persistência real de documentos ainda não deve ser inventada no frontend.
-
-Contextos potenciais:
+A Etapa 8 prevê uma seção **Manual do Usuário**, inicialmente para perfis Solicitantes, para disponibilizar materiais como:
 
 ```text
-Pedido
-Produto
-Lote
+como usar o SGL
+padrões de Soluções
+regras da Embrapa
+segurança em laboratório
+manuseio de produtos
+outros procedimentos institucionais
 ```
 
-Aguardar contrato backend real antes de criar upload/download definitivo.
+Não inventar persistência real de arquivos apenas no frontend. Antes de criar upload/download definitivo, definir o contrato backend e a estratégia de armazenamento. A decisão deve evitar binários grandes diretamente no PostgreSQL sem justificativa técnica.
 
 ---
 
 # 18. Fase atual — pré-produção pós-aprovação
 
-Sequência:
+O planejamento foi consolidado no documento canônico `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`.
+
+Situação:
 
 ```text
-1. limpeza, revisão e atualização documental          ← ATUAL
-2. levantamento dos ajustes de pré-produção
-3. execução/refinamento
-4. validação e estabilização do bloco
+limpeza/revisão documental                            ✅ concluída
+planejamento dos ajustes                              ✅ consolidado
+Etapa 1 — refinamento visual global                   ⏭ ATUAL / próxima implementação
+Etapa 2 — Dark Mode definitivo                        ⏳
+Etapa 3 — refinamentos do fluxo atual de Resíduos     ⏳
+Etapa 4 — expansão operacional de Resíduos            ⏳
+Etapa 5 — Projetos + vínculos de Estagiários          ⏳
+Etapa 6 — relatórios de Projetos/Laboratórios         ⏳
+Etapa 7 — unidades + Soluções + Pedidos               ⏳
+Etapa 8 — Manual do Usuário + decisão delete lógico  ⏳
 ```
 
-Durante essa fase podem entrar melhorias justificadas sem confundi-las com a etapa formal de segurança/produção.
+Dependências centrais:
+
+```text
+padrão visual → Dark Mode
+Resíduos atuais → expansão/modelos de Resíduos
+Projetos/Estagiários → relatório de Projetos
+unidades → Soluções → Pedidos com Soluções
+```
 
 ---
 
@@ -513,7 +574,7 @@ Depois do bloco atual:
 4. correção de falhas encontradas
 5. autenticação + autorização + auditoria definitiva
 6. integração corporativa / tenant confiável
-7. documentos/upload quando houver contrato
+7. demais contratos/documentos de produção necessários
 8. refactors técnicos planejados
 ```
 
@@ -524,6 +585,8 @@ Esse roadmap continua válido, mas não representa a tarefa imediata atual.
 # 20. Documentação para leitura
 
 ```text
+CONTINUIDADE.md
+Backend: docs/PLANO_PRE_PRODUCAO.md   ← plano atual canônico
 docs/DOSSIE_PROJETO_SGL.md
 docs/README.md
 docs/INVENTARIO_TELAS.md
@@ -539,4 +602,4 @@ docs/DECISAO_UNIDADES_CORPORATIVAS.md
 
 # 21. Regra final de retomada
 
-**O SGL está funcionalmente aprovado. A fase atual é pré-produção pós-aprovação. Não tratar a matriz de permissões como tarefa imediata até o encerramento do bloco atual. Conferir `main`, router e Swagger antes de confiar em qualquer documento histórico.**
+**O SGL está funcionalmente aprovado. A fase atual é a execução do plano de pré-produção registrado no backend em `docs/PLANO_PRE_PRODUCAO.md`, começando pela Etapa 1 — padronização/refinamento visual. Não tratar a matriz de permissões como tarefa imediata até o encerramento desse bloco. Conferir `main`, router e Swagger antes de confiar em documentos históricos, e lembrar que alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto.**
