@@ -29,6 +29,9 @@ export interface PedidoResponse {
   id: string
   usuarioId: string
   usuarioNome: string
+  unidadeId: string
+  unidadeNome: string
+  unidadeSigla: string
   laboratorioId: string
   laboratorioNome: string
   projetoId: string | null
@@ -62,10 +65,7 @@ export interface PedidoRequest {
 export interface AprovarPedidoRequest {
   observacao: string | null
   usuarioAprovadorId: string
-  itens: Array<{
-    itemId: string
-    quantidadeAprovada: number
-  }>
+  itens: Array<{ itemId: string; quantidadeAprovada: number }>
 }
 
 export interface ProjetoResponse {
