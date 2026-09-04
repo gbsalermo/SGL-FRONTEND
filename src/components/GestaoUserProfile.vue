@@ -28,6 +28,14 @@ const nomeExibicao = computed(() =>
   preferencias.value.apelido || session.usuario?.nome || 'Usuário',
 )
 
+const unidadeExibicao = computed(() => {
+  const usuario = session.usuario
+  if (!usuario?.unidadeNome) return 'Unidade não identificada'
+  return usuario.unidadeSigla
+    ? `${usuario.unidadeSigla} - ${usuario.unidadeNome}`
+    : usuario.unidadeNome
+})
+
 const iniciais = computed(() =>
   nomeExibicao.value
     .split(' ')
@@ -106,6 +114,7 @@ function salvarConfiguracoes() {
         <small>{{ session.usuario?.perfil }}</small>
       </div>
       <span>{{ session.usuario?.email }}</span>
+      <span class="gestao-profile__unit" :title="unidadeExibicao">{{ unidadeExibicao }}</span>
     </div>
 
     <button
@@ -182,6 +191,10 @@ function salvarConfiguracoes() {
               <span>Perfil</span>
               <strong>{{ session.usuario?.perfil }}</strong>
             </div>
+            <div>
+              <span>Unidade</span>
+              <strong>{{ unidadeExibicao }}</strong>
+            </div>
           </div>
         </div>
 
@@ -205,6 +218,7 @@ function salvarConfiguracoes() {
 .gestao-profile__copy strong, .gestao-profile__copy > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gestao-profile__copy strong { min-width: 0; font-size: 12px; }
 .gestao-profile__copy > span { margin-top: 3px; color: #aebed7; font-size: 10px; }
+.gestao-profile__copy > .gestao-profile__unit { margin-top: 5px; color: #fff; font-size: 10.5px; font-weight: 700; }
 .gestao-profile__line small { flex: 0 0 auto; padding: 2px 5px; border-radius: 4px; background: #1f4eac; color: #dce8ff; font-size: 8px; font-weight: 800; }
 .gestao-profile__settings { width: 32px; height: 32px; flex: 0 0 auto; display: grid; place-items: center; border: 0; border-radius: 7px; background: transparent; color: #9fb4d5; cursor: pointer; }
 .gestao-profile__settings:hover { background: rgb(255 255 255 / 8%); color: #fff; }
