@@ -14,6 +14,7 @@ import './styles/relatorios-responsive.css'
 import './styles/gestao-shell-controls.css'
 import './styles/dashboard-layout-compat.css'
 import './styles/dark-mode-runtime.css'
+import './styles/dark-mode-coverage.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
@@ -50,8 +51,6 @@ function ehRotaPublica(path: string) {
 }
 
 function aplicarTemaDaRota(path: string) {
-  // O Vuetify e o documento global permanecem claros.
-  // A preferência dark afeta apenas a interface autenticada via classe no body.
   forcarTemaGlobalClaro()
 
   if (ehRotaPublica(path)) {
@@ -78,11 +77,6 @@ router.afterEach((to) => {
   aplicarTemaDaRota(to.path)
 })
 
-/*
- * A aparência só muda quando o usuário clica nos controles de tema.
- * Não observamos mais data-theme, porque mudanças técnicas do router/Vuetify
- * não podem sobrescrever a preferência salva.
- */
 document.addEventListener('click', (event) => {
   const target = event.target
   if (!(target instanceof Element)) return
@@ -99,7 +93,6 @@ document.addEventListener('click', (event) => {
 
   if (!novoTema) return
 
-  // Aguarda o handler do componente terminar e então aplica somente o tema local.
   queueMicrotask(() => {
     persistirTema(novoTema)
     aplicarTemaDaInterface(novoTema)
