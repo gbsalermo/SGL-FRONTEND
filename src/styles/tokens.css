@@ -27,21 +27,23 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --sgl-primary: #5B8DE0;
-  --sgl-primary-dark: #173D78;
-  --sgl-primary-light: #78A4EB;
+  /* Paleta baseada no rascunho visual original do painel operacional. */
+  --sgl-primary: #4C83F3;
+  --sgl-primary-dark: #244F9D;
+  --sgl-primary-light: #72A3FF;
 
   --sgl-green: #38A169;
   --sgl-green-light: #63B985;
   --sgl-green-soft: #2C6A49;
 
-  --sgl-background: #08111F;
-  --sgl-surface: #101B30;
-  --sgl-surface-elevated: #16233A;
-  --sgl-text: #EDF4FF;
-  --sgl-text-muted: #A9B7CC;
-  --sgl-border: #293A55;
+  /* Azul-marinho menos preto e com hierarquia clara entre fundo e cards. */
+  --sgl-background: #0D182A;
+  --sgl-surface: #111D30;
+  --sgl-surface-elevated: #17243A;
+  --sgl-text: #F4F7FC;
+  --sgl-text-muted: #A8B6CB;
+  --sgl-border: #293950;
 
-  --sgl-warning: #F6C343;
-  --sgl-error: #F87171;
+  --sgl-warning: #F6B93B;
+  --sgl-error: #F05A69;
 }
