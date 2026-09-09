@@ -17,7 +17,7 @@ withDefaults(defineProps<{
 
 <template>
   <SglIconButton
-    :aria-label="ariaLabel"
+    :ariaLabel="ariaLabel"
     :title="title || ariaLabel"
     :disabled="disabled"
   >
