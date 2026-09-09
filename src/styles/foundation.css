@@ -1,0 +1,312 @@
+/*
+ * Fundação visual compartilhada do SGL.
+ *
+ * Etapa 1.2 — cria padrões reutilizáveis sem forçar a migração imediata das
+ * telas existentes. As classes abaixo serão aplicadas progressivamente nas
+ * próximas subetapas para preservar o MVP funcional já aprovado.
+ */
+
+.sgl-page-title {
+  margin: 0;
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
+}
+
+.sgl-section-title {
+  margin: 0;
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-section-title);
+  font-weight: var(--sgl-font-weight-semibold);
+  line-height: var(--sgl-line-height-tight);
+}
+
+.sgl-card-title {
+  margin: 0;
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-card-title);
+  font-weight: var(--sgl-font-weight-semibold);
+  line-height: var(--sgl-line-height-tight);
+}
+
+.sgl-body-text {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-regular);
+  line-height: var(--sgl-line-height-body);
+}
+
+.sgl-label-text {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+  line-height: var(--sgl-line-height-tight);
+}
+
+.sgl-helper-text {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+.sgl-control {
+  min-height: var(--sgl-control-height);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  transition:
+    border-color var(--sgl-transition-fast) ease,
+    background-color var(--sgl-transition-fast) ease,
+    color var(--sgl-transition-fast) ease,
+    box-shadow var(--sgl-transition-fast) ease;
+}
+
+.sgl-control:focus-visible,
+.sgl-button:focus-visible,
+.sgl-icon-button:focus-visible {
+  outline: var(--sgl-focus-width) solid var(--sgl-focus);
+  outline-offset: var(--sgl-focus-offset);
+}
+
+.sgl-control:disabled,
+.sgl-button:disabled,
+.sgl-icon-button:disabled {
+  border-color: var(--sgl-disabled-border);
+  background: var(--sgl-disabled-background);
+  color: var(--sgl-disabled-text);
+  cursor: not-allowed;
+  opacity: var(--sgl-disabled-opacity);
+}
+
+.sgl-button {
+  min-height: var(--sgl-control-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sgl-space-2);
+  padding: 0 var(--sgl-space-4);
+  border: var(--sgl-border-width) solid transparent;
+  border-radius: var(--sgl-radius-control);
+  font: inherit;
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--sgl-transition-fast) ease,
+    border-color var(--sgl-transition-fast) ease,
+    color var(--sgl-transition-fast) ease,
+    box-shadow var(--sgl-transition-fast) ease,
+    transform var(--sgl-transition-fast) ease;
+}
+
+.sgl-button--primary {
+  border-color: var(--sgl-primary);
+  background: var(--sgl-primary);
+  color: #FFFFFF;
+}
+
+.sgl-button--secondary {
+  border-color: var(--sgl-border-strong);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+}
+
+.sgl-button--danger {
+  border-color: var(--sgl-error);
+  background: var(--sgl-error);
+  color: #FFFFFF;
+}
+
+.sgl-icon-button {
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  min-width: var(--sgl-icon-button-size);
+  min-height: var(--sgl-icon-button-size);
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--sgl-transition-fast) ease,
+    border-color var(--sgl-transition-fast) ease,
+    color var(--sgl-transition-fast) ease,
+    box-shadow var(--sgl-transition-fast) ease,
+    transform var(--sgl-transition-fast) ease;
+}
+
+.sgl-icon {
+  width: var(--sgl-icon-size);
+  height: var(--sgl-icon-size);
+  flex: 0 0 var(--sgl-icon-size);
+}
+
+.sgl-chevron {
+  width: var(--sgl-chevron-size);
+  height: var(--sgl-chevron-size);
+  flex: 0 0 var(--sgl-chevron-size);
+}
+
+.sgl-filter-button {
+  min-height: var(--sgl-control-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sgl-space-2);
+  padding: 0 var(--sgl-space-3);
+  border: var(--sgl-border-width) solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+  cursor: pointer;
+  transition:
+    background-color var(--sgl-transition-fast) ease,
+    border-color var(--sgl-transition-fast) ease,
+    color var(--sgl-transition-fast) ease,
+    transform var(--sgl-transition-fast) ease;
+}
+
+.sgl-filter-button.is-active,
+.sgl-filter-button[aria-pressed='true'] {
+  border-color: var(--sgl-primary-light);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-primary);
+}
+
+.sgl-filter-count {
+  min-width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 var(--sgl-space-1);
+  border-radius: var(--sgl-radius-pill);
+  background: var(--sgl-primary);
+  color: #FFFFFF;
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: 1;
+}
+
+.sgl-card {
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+.sgl-card--interactive {
+  cursor: pointer;
+  transition:
+    background-color var(--sgl-transition-fast) ease,
+    border-color var(--sgl-transition-fast) ease,
+    box-shadow var(--sgl-transition-fast) ease,
+    transform var(--sgl-transition-fast) ease;
+}
+
+.sgl-card--kpi {
+  display: grid;
+  gap: var(--sgl-space-2);
+}
+
+.sgl-card--kpi .sgl-kpi-value {
+  color: var(--sgl-text);
+  font-size: 26px;
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: 1;
+}
+
+.sgl-table-row {
+  min-height: var(--sgl-table-row-height);
+  font-size: var(--sgl-font-body);
+}
+
+.sgl-status {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--sgl-space-2);
+  border-radius: var(--sgl-radius-pill);
+  background: var(--sgl-neutral-soft);
+  color: var(--sgl-neutral-strong);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+  line-height: 1;
+}
+
+.sgl-status--info {
+  color: var(--sgl-info);
+}
+
+.sgl-status--success {
+  color: var(--sgl-success);
+}
+
+.sgl-status--warning {
+  color: #8A6500;
+}
+
+.sgl-status--error,
+.sgl-status--urgent {
+  color: var(--sgl-error);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sgl-button--primary:hover:not(:disabled) {
+    border-color: var(--sgl-primary-dark);
+    background: var(--sgl-primary-dark);
+  }
+
+  .sgl-button--secondary:hover:not(:disabled),
+  .sgl-icon-button:hover:not(:disabled),
+  .sgl-filter-button:hover:not(:disabled) {
+    border-color: var(--sgl-primary-light);
+    background: var(--sgl-surface-soft);
+    color: var(--sgl-primary);
+  }
+
+  .sgl-button--danger:hover:not(:disabled) {
+    filter: brightness(0.94);
+  }
+
+  .sgl-card--interactive:hover {
+    border-color: var(--sgl-border-strong);
+    box-shadow: var(--sgl-shadow-level-1);
+  }
+}
+
+.sgl-button:active:not(:disabled),
+.sgl-icon-button:active:not(:disabled),
+.sgl-filter-button:active:not(:disabled),
+.sgl-card--interactive:active {
+  transform: scale(var(--sgl-press-scale));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sgl-control,
+  .sgl-button,
+  .sgl-icon-button,
+  .sgl-filter-button,
+  .sgl-card--interactive {
+    transition: none;
+  }
+
+  .sgl-button:active:not(:disabled),
+  .sgl-icon-button:active:not(:disabled),
+  .sgl-filter-button:active:not(:disabled),
+  .sgl-card--interactive:active {
+    transform: none;
+  }
+}
