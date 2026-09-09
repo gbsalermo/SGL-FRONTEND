@@ -9,6 +9,7 @@ import { useSessionStore } from './stores/session'
 
 import './styles/tokens.css'
 import './styles/base.css'
+import './styles/foundation.css'
 import './styles/main.css'
 import './styles/relatorios-responsive.css'
 import './styles/gestao-shell-controls.css'
