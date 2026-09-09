@@ -1,4 +1,5 @@
 :root {
+  /* Identidade institucional */
   --sgl-primary: #1A4DA1;
   --sgl-primary-dark: #0D2B5E;
   --sgl-primary-light: #2D6BC4;
@@ -7,19 +8,79 @@
   --sgl-green-light: #4EA674;
   --sgl-green-soft: #A5D6A7;
 
+  /* Superfícies e texto */
   --sgl-background: #F5F7FA;
   --sgl-surface: #FFFFFF;
   --sgl-surface-elevated: #FFFFFF;
+  --sgl-surface-soft: #F8FAFC;
   --sgl-text: #1A1A2E;
   --sgl-text-muted: #64748B;
+  --sgl-text-subtle: #94A3B8;
   --sgl-border: #E2E8F0;
+  --sgl-border-strong: #CBD5E1;
 
+  /* Cores semânticas aprovadas na Etapa 1.1 */
+  --sgl-info: #2D6BC4;
+  --sgl-success: #007A3D;
   --sgl-warning: #F59E0B;
   --sgl-error: #DC2626;
+  --sgl-neutral: #64748B;
+  --sgl-neutral-strong: #475569;
+  --sgl-neutral-soft: #F1F5F9;
 
+  /* Estados sem interação / indisponíveis */
+  --sgl-disabled-background: #F1F5F9;
+  --sgl-disabled-text: #94A3B8;
+  --sgl-disabled-border: #E2E8F0;
+  --sgl-disabled-opacity: 0.72;
+
+  /* Dimensões-base */
+  --sgl-control-height: 40px;
+  --sgl-icon-button-size: 40px;
+  --sgl-icon-size: 20px;
+  --sgl-chevron-size: 24px;
+  --sgl-table-row-height: 48px;
+  --sgl-card-padding: 20px;
+  --sgl-page-padding: 24px;
+
+  /* Tipografia */
+  --sgl-font-page-title: 24px;
+  --sgl-font-section-title: 18px;
+  --sgl-font-card-title: 16px;
+  --sgl-font-body: 14px;
+  --sgl-font-label: 13px;
+  --sgl-font-helper: 12px;
+  --sgl-font-weight-regular: 400;
+  --sgl-font-weight-semibold: 600;
+  --sgl-font-weight-bold: 700;
+  --sgl-line-height-tight: 1.2;
+  --sgl-line-height-body: 1.5;
+
+  /* Grade de espaçamento */
+  --sgl-space-1: 4px;
+  --sgl-space-2: 8px;
+  --sgl-space-3: 12px;
+  --sgl-space-4: 16px;
+  --sgl-space-6: 24px;
+  --sgl-space-8: 32px;
+
+  /* Bordas e raios */
+  --sgl-border-width: 1px;
   --sgl-radius-control: 6px;
   --sgl-radius-surface: 8px;
-  --sgl-page-padding: 24px;
+  --sgl-radius-floating: 10px;
+  --sgl-radius-pill: 999px;
+
+  /* Sombras: a hierarquia visual deve priorizar espaço, fundo e borda. */
+  --sgl-shadow-level-0: none;
+  --sgl-shadow-level-1: 0 2px 8px rgb(15 23 42 / 6%);
+  --sgl-shadow-level-2: 0 10px 24px rgb(15 23 42 / 14%);
+
+  /* Foco e interação */
+  --sgl-focus: #2D6BC4;
+  --sgl-focus-width: 2px;
+  --sgl-focus-offset: 2px;
+  --sgl-press-scale: 0.98;
   --sgl-transition-fast: 180ms;
   --sgl-transition-route: 300ms;
 }
@@ -27,7 +88,8 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  /* Paleta baseada no rascunho visual original do painel operacional. */
+  /* Paleta baseada no rascunho visual original do painel operacional.
+     O refinamento definitivo do Dark Mode pertence à Etapa 2. */
   --sgl-primary: #4C83F3;
   --sgl-primary-dark: #244F9D;
   --sgl-primary-light: #72A3FF;
@@ -36,7 +98,6 @@
   --sgl-green-light: #63B985;
   --sgl-green-soft: #2C6A49;
 
-  /* Azul-marinho menos preto e com hierarquia clara entre fundo e cards. */
   --sgl-background: #0D182A;
   --sgl-surface: #111D30;
   --sgl-surface-elevated: #17243A;
