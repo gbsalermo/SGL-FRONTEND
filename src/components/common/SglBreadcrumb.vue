@@ -1,5 +1,5 @@
 <script setup lang="ts">
-export type SglBreadcrumbItem = {
+type SglBreadcrumbItem = {
   label: string
   to?: string
 }
