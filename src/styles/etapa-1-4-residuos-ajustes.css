@@ -1,11 +1,16 @@
 /*
  * Ajustes aprovados durante a validação da Etapa 1.4 — Resíduos.
  *
- * Em /meus-residuos, a identidade de domínio não usa fundo creme.
- * A diferenciação amarela/creme permanece útil no Dashboard, onde separa
- * visualmente Pedidos e Resíduos, mas a listagem operacional mantém o padrão
- * branco/neutro do SGL.
+ * Regra final de cor do domínio:
+ * - o Dashboard do Solicitante mantém a diferenciação visual por domínio;
+ * - as telas operacionais de Resíduos usam superfícies brancas/neutras;
+ * - o creme/amarelo suave fica reservado ao hover de elementos interativos;
+ * - cores semânticas de status, alerta, erro e sucesso permanecem inalteradas.
  */
+
+/* ========================================================================== */
+/* Solicitante — Meus resíduos                                                */
+/* ========================================================================== */
 
 body.sgl-light-active .solicitante-main .meus-residuos-page .summary-grid article,
 body.sgl-light-active .solicitante-main .meus-residuos-page .toolbar,
@@ -15,8 +20,8 @@ body.sgl-light-active .solicitante-main .meus-residuos-page .detail-drawer > hea
 }
 
 body.sgl-light-active .solicitante-main .meus-residuos-page .residuo-card:hover {
-  background: var(--sgl-surface-soft);
-  box-shadow: inset 0 0 0 1px var(--sgl-border);
+  background: var(--sgl-residuo-soft);
+  box-shadow: inset 0 0 0 1px var(--sgl-residuo-border);
 }
 
 body.sgl-light-active .solicitante-main .meus-residuos-page .residuo-card--target {
@@ -29,4 +34,63 @@ body.sgl-light-active .solicitante-main .meus-residuos-page .component-row,
 body.sgl-light-active .solicitante-main .meus-residuos-page .risk-comparison > div:first-child {
   border-color: var(--sgl-border);
   background: var(--sgl-surface-soft);
+}
+
+/* ========================================================================== */
+/* Solicitante — Informar resíduo                                             */
+/* ========================================================================== */
+
+body.sgl-light-active .solicitante-main .residuo-page .context-grid article,
+body.sgl-light-active .solicitante-main .residuo-page .component-card,
+body.sgl-light-active .solicitante-main .residuo-page .form-footer {
+  border-color: var(--sgl-border);
+  background: var(--sgl-surface);
+}
+
+/* A numeração de etapas continua destacada, mas sem amarelo/creme estático. */
+body.sgl-light-active .solicitante-main .residuo-page .section-title > span,
+body.sgl-light-active .solicitante-main .residuo-page .section-title__copy > span {
+  background: #eef5ff;
+  color: var(--sgl-primary);
+}
+
+/* Componentes são blocos de formulário, não cards de domínio coloridos. */
+body.sgl-light-active .solicitante-main .residuo-page .component-card:hover {
+  border-color: var(--sgl-residuo-border);
+  background: var(--sgl-residuo-soft);
+}
+
+/* ========================================================================== */
+/* Gestão/Admin — Central de resíduos                                         */
+/* ========================================================================== */
+
+body.sgl-light-active .gestao-main .residuos-gestao-page .metrics-grid article,
+body.sgl-light-active .gestao-main .residuos-gestao-page .status-tabs,
+body.sgl-light-active .gestao-main .residuos-gestao-page .toolbar,
+body.sgl-light-active .gestao-main .residuos-gestao-page .detail-drawer > header,
+body.sgl-light-active .gestao-main .residuos-gestao-page .modal-card > header {
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .residuos-gestao-page .origin-grid article,
+body.sgl-light-active .gestao-main .residuos-gestao-page .tracking-card,
+body.sgl-light-active .gestao-main .residuos-gestao-page .selected-summary,
+body.sgl-light-active .gestao-main .residuos-gestao-page .risk-section > div:first-child {
+  border-color: var(--sgl-border);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .gestao-main .residuos-gestao-page .components-list article {
+  background: var(--sgl-surface);
+}
+
+/* O hover é o único uso decorativo do creme nas telas operacionais. */
+body.sgl-light-active .gestao-main .residuos-gestao-page tbody tr:hover {
+  background: var(--sgl-residuo-soft);
+}
+
+/* Destaque vindo de navegação/seleção usa azul institucional, não creme. */
+body.sgl-light-active .gestao-main .residuos-gestao-page .residuo-alvo {
+  background: #eef5ff !important;
+  box-shadow: inset 4px 0 0 var(--sgl-primary-light);
 }
