@@ -54,10 +54,12 @@ body.sgl-light-active .solicitante-main .residuo-page .section-title__copy > spa
   color: var(--sgl-primary);
 }
 
-/* Componentes são blocos de formulário, não cards de domínio coloridos. */
-body.sgl-light-active .solicitante-main .residuo-page .component-card:hover {
-  border-color: var(--sgl-residuo-border);
-  background: var(--sgl-residuo-soft);
+/* O bloco só recebe o creme durante interação por ponteiro. */
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-light-active .solicitante-main .residuo-page .component-card:hover {
+    border-color: var(--sgl-residuo-border);
+    background: var(--sgl-residuo-soft);
+  }
 }
 
 /* ========================================================================== */
