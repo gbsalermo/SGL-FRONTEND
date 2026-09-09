@@ -1,11 +1,10 @@
 # Padrão Visual de Pré-Produção — SGL Frontend
 
 **Etapa:** 1 — Padronização e refinamento visual global  
-**Subetapa:** 1.1 — Definir o padrão visual SGL  
-**Status:** ✅ CONCLUÍDA / decisões aprovadas  
+**Estado:** 1.1 ✅ concluída · 1.2 ✅ concluída · 1.3 ⏭ próxima  
 **Data:** 09/09/2026
 
-Este documento registra as decisões oficiais fechadas na subetapa 1.1 da pré-produção. Ele não redefine a identidade visual original do SGL; consolida os valores e regras que devem orientar a implementação das próximas subetapas sem quebrar o MVP funcional já aprovado.
+Este documento registra as decisões oficiais fechadas na subetapa 1.1 e acompanha a implementação da Etapa 1 de pré-produção. Ele não redefine a identidade visual original do SGL; consolida os valores e regras que devem orientar as próximas subetapas sem quebrar o MVP funcional já aprovado.
 
 Referências anteriores que continuam válidas:
 
@@ -390,24 +389,55 @@ A Etapa 1 deve estabilizar primeiro o padrão visual do tema claro. A Etapa 2 tr
 
 ```text
 1.1 — Definir padrão visual SGL             ✅ concluída
-1.2 — Fundação visual compartilhada          ⏭ próxima subetapa
-1.3 — Padronizar componentes básicos         ⏳
+1.2 — Fundação visual compartilhada          ✅ concluída
+1.3 — Padronizar componentes básicos         ⏭ próxima subetapa
 1.4 — Aplicar tela a tela                     ⏳
 1.5 — Limpar exceções/CSS corretivo           ⏳
 1.6 — Revisão visual final                    ⏳
 ```
 
-A próxima subetapa não deve alterar regra de negócio. Ela deve transformar as decisões deste documento em uma fundação compartilhada e incremental, preservando o MVP aprovado.
+A 1.3 deve começar a aplicar a fundação criada na 1.2 de forma incremental, sem alterar regra de negócio e sem migrar todo o frontend de uma vez.
 
 ---
 
-## 15. Regra de continuidade
+## 15. Implementação da subetapa 1.2
+
+A fundação visual compartilhada foi criada sem migrar as Views existentes.
+
+Arquivos:
+
+```text
+src/styles/tokens.css
+→ concentra valores aprovados de dimensões, tipografia, espaçamento,
+  semântica, estados, bordas, raios, sombras e interação
+
+src/styles/foundation.css
+→ classes compartilhadas para tipografia, controles, botões,
+  icon-only, filtros, cards, status e linhas de tabela
+
+src/main.ts
+→ carrega foundation.css depois dos tokens/base
+```
+
+Decisões de implementação:
+
+- nenhuma View foi alterada na 1.2;
+- as novas classes não substituem automaticamente estilos legados;
+- a migração será progressiva na 1.3/1.4;
+- a iconografia MDI será aplicada quando os componentes básicos forem padronizados;
+- nenhum ajuste de Dark Mode faz parte desta implementação;
+- o objetivo desta camada é permitir que telas antigas e novas compartilhem o mesmo padrão sem quebrar o MVP.
+
+---
+
+## 16. Regra de continuidade
 
 Toda IA ou pessoa que continuar a Etapa 1 deve:
 
 1. ler este documento antes de alterar aparência;
 2. preservar as decisões fechadas na 1.1;
-3. evitar criar novo padrão visual local por tela;
-4. não misturar correções de Dark Mode na Etapa 1;
-5. comparar mudanças com o MVP atual e evitar regressões funcionais;
-6. registrar qualquer nova decisão visual neste documento antes de espalhá-la pela aplicação.
+3. usar os tokens/classes criados na 1.2 em vez de criar novo padrão local por tela;
+4. evitar criar novo padrão visual local por tela;
+5. não misturar correções de Dark Mode na Etapa 1;
+6. comparar mudanças com o MVP atual e evitar regressões funcionais;
+7. registrar qualquer nova decisão visual neste documento antes de espalhá-la pela aplicação.
