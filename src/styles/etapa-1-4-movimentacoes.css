@@ -1,0 +1,370 @@
+/*
+ * Etapa 1.4 — aplicação visual em Movimentações.
+ * Escopo: Gestão/Admin /movimentacoes.
+ * Somente tema claro autenticado. Nenhuma regra de negócio é alterada.
+ */
+
+body.sgl-light-active .gestao-main .movimentacoes-page {
+  color: var(--sgl-text);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .breadcrumb {
+  margin-bottom: var(--sgl-space-2);
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .page-header {
+  gap: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .page-header h1 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .page-header p {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .secondary-action {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-4);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid {
+  gap: var(--sgl-space-3);
+  margin: var(--sgl-space-6) 0 var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid article {
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid strong {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-primary-dark);
+  font-size: 26px;
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid article.positive {
+  border-color: #BBDFCA;
+  background: #F6FBF8;
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid article.positive strong {
+  color: var(--sgl-success);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid article.danger {
+  border-color: #FECACA;
+  background: #FEF2F2;
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid article.danger strong {
+  color: var(--sgl-error);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-card {
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-space-4);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-top {
+  gap: var(--sgl-space-3);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .search-field,
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-grid label {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .search-field span,
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-grid span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .search-field input,
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-grid input,
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-grid select {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-toggle {
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  margin-bottom: 0;
+  border: var(--sgl-border-width) solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-toggle svg {
+  width: var(--sgl-icon-size);
+  height: var(--sgl-icon-size);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-toggle.active {
+  border-color: var(--sgl-primary);
+  background: #EEF5FF;
+  color: var(--sgl-primary);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-grid {
+  gap: var(--sgl-space-3);
+  margin-top: var(--sgl-space-4);
+  padding-top: var(--sgl-space-4);
+  border-top-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-footer {
+  margin-top: var(--sgl-space-4);
+  padding-top: var(--sgl-space-3);
+  border-top-color: var(--sgl-border);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .filter-footer button {
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .table-wrap {
+  overflow-x: auto;
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page th {
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page td {
+  min-height: var(--sgl-table-row-height);
+  padding: var(--sgl-space-4);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page td strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page td small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .movement-row:hover {
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .movement-row--alvo,
+body.sgl-light-active .gestao-main .movimentacoes-page .detail-row--alvo {
+  background: #EEF5FF !important;
+  box-shadow: inset 4px 0 0 var(--sgl-primary-light);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .quantity {
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-card-title);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .chip {
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: var(--sgl-radius-pill);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+/* A semântica das cores é preservada; apenas a legibilidade é ampliada. */
+body.sgl-light-active .gestao-main .movimentacoes-page .chip--positive {
+  background: #E7F7ED;
+  color: var(--sgl-success);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .chip--warning {
+  background: #FFF7D6;
+  color: #946200;
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .chip--danger {
+  background: #FEE2E2;
+  color: #B42318;
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .chip--neutral {
+  background: #EEF5FF;
+  color: var(--sgl-primary-dark);
+}
+
+/* Substitui visualmente os caracteres ⌃/⌄ por um chevron real. */
+body.sgl-light-active .gestao-main .movimentacoes-page .detail-button {
+  position: relative;
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  padding: 0;
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-primary-dark);
+  font-size: 0;
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .detail-button::before {
+  content: '';
+  position: absolute;
+  width: var(--sgl-chevron-size);
+  height: var(--sgl-chevron-size);
+  top: 50%;
+  left: 50%;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform var(--sgl-transition-fast) ease;
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .movement-row:has(+ .detail-row) .detail-button::before {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .detail-row td {
+  padding: 0 var(--sgl-space-4) var(--sgl-space-4);
+  background: #FBFCFE;
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .detail-grid {
+  gap: var(--sgl-space-3);
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .detail-grid > div {
+  min-width: 0;
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .detail-grid span {
+  display: block;
+  margin-bottom: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .detail-grid strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+  overflow-wrap: anywhere;
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page .state-box {
+  padding: var(--sgl-space-8);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .movimentacoes-page button:focus-visible,
+body.sgl-light-active .gestao-main .movimentacoes-page input:focus-visible,
+body.sgl-light-active .gestao-main .movimentacoes-page select:focus-visible {
+  outline: var(--sgl-focus-width) solid var(--sgl-focus);
+  outline-offset: var(--sgl-focus-offset);
+}
+
+@media (max-width: 900px) {
+  body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.sgl-light-active .gestao-main .movimentacoes-page .detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  body.sgl-light-active .gestao-main .movimentacoes-page .page-header {
+    flex-direction: column;
+  }
+
+  body.sgl-light-active .gestao-main .movimentacoes-page .summary-grid,
+  body.sgl-light-active .gestao-main .movimentacoes-page .filter-top,
+  body.sgl-light-active .gestao-main .movimentacoes-page .filter-grid,
+  body.sgl-light-active .gestao-main .movimentacoes-page .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-light-active .gestao-main .movimentacoes-page .filter-toggle {
+    justify-self: end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-light-active .gestao-main .movimentacoes-page * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
