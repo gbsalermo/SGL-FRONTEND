@@ -1,6 +1,6 @@
 # Documentação — SGL Frontend
 
-**Atualizado em:** 04/09/2026
+**Atualizado em:** 09/09/2026
 
 Este índice separa documentação vigente, decisões de produto, referências visuais e registros históricos. O objetivo é evitar que uma etapa antiga seja interpretada como planejamento atual.
 
@@ -10,11 +10,12 @@ Este índice separa documentação vigente, decisões de produto, referências v
 
 ```text
 1. ../CONTINUIDADE.md
-2. ../README.md
-3. DOSSIE_PROJETO_SGL.md
-4. src/router/index.ts para rotas reais
-5. Swagger/OpenAPI do backend para contratos HTTP
-6. documento específico da área em trabalho
+2. PADRAO_VISUAL_PRE_PRODUCAO.md durante a Etapa 1
+3. ../README.md
+4. DOSSIE_PROJETO_SGL.md
+5. src/router/index.ts para rotas reais
+6. Swagger/OpenAPI do backend para contratos HTTP
+7. documento específico da área em trabalho
 ```
 
 ---
@@ -25,6 +26,7 @@ Este índice separa documentação vigente, decisões de produto, referências v
 código da main
 → Swagger/OpenAPI
 → ../CONTINUIDADE.md
+→ PADRAO_VISUAL_PRE_PRODUCAO.md durante a Etapa 1
 → DOSSIE_PROJETO_SGL.md
 → decisões específicas
 → documentos de etapa e snapshots históricos
@@ -39,7 +41,8 @@ Um documento histórico pode continuar útil para explicar uma decisão, mas nã
 ```text
 Primeiro protótipo funcional                 ✅ aprovado
 Pré-produção pós-aprovação                   🔧 em andamento
-Limpeza/revisão documental                   🔧 bloco atual
+Etapa 1.1 — padrão visual SGL                ✅ concluída
+Etapa 1.2 — fundação visual compartilhada    ⏭ próxima subetapa
 Matriz formal de permissões                  ⏳ após a pré-produção atual
 Congelamento/homologação final               ⏳ posterior
 Autenticação definitiva                      ⏳ posterior
@@ -52,19 +55,23 @@ Integração corporativa                       ⏳ posterior
 
 | Documento | Papel | Estado |
 |---|---|---|
-| `../CONTINUIDADE.md` | checkpoint, fase atual e regra de retomada | **ATUAL — 04/09** |
-| `../README.md` | visão rápida e execução | **ATUAL — 04/09** |
-| `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL — 04/09** |
+| `../CONTINUIDADE.md` | checkpoint, fase atual e regra de retomada | **ATUAL** |
+| `PADRAO_VISUAL_PRE_PRODUCAO.md` | decisões concretas da Etapa 1.1: dimensões, tipografia, cards, ícones, filtros, setas, botões e estados | **DECISÃO ATUAL — 09/09** |
+| `../README.md` | visão rápida e execução | **ATUAL** |
+| `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL** |
 | `INVENTARIO_TELAS.md` | inventário de rotas/telas | **REFERÊNCIA VIGENTE** |
 | `FLUXOS_NAVEGACAO.md` | jornadas atuais | **REFERÊNCIA VIGENTE** |
 | `ETAPA_CADASTROS_ADMIN.md` | decisões de Administração/Cadastros | **DECISÃO VIGENTE** |
 | `ETAPA_ESTAGIARIOS.md` | decisões do módulo Estagiários | **DECISÃO VIGENTE** |
 | `DECISAO_UNIDADES_CORPORATIVAS.md` | Unidade institucional e integração futura | **DECISÃO VIGENTE** |
-| `IDENTIDADE_VISUAL.md` | identidade visual | **REFERÊNCIA** |
-| `PADROES_PAGINA.md` | padrões de composição | **REFERÊNCIA** |
+| `IDENTIDADE_VISUAL.md` | identidade visual conceitual original | **REFERÊNCIA BASE** |
+| `ICONOGRAFIA.md` | conceitos originais de iconografia | **REFERÊNCIA BASE** |
+| `PADROES_PAGINA.md` | padrões de composição | **REFERÊNCIA BASE** |
 | `SHELL_VISUAL.md` | sidebar/topbar/shell | **REFERÊNCIA** |
 | `ROTULO_PRODUTOS.md` | rótulo de Produto | **REFERÊNCIA** |
 | `ROTULO_RESIDUOS.md` | rótulo de Resíduo | **REFERÊNCIA** |
+
+Durante a Etapa 1, `PADRAO_VISUAL_PRE_PRODUCAO.md` consolida e atualiza as decisões das referências visuais anteriores sem apagar a identidade original do SGL.
 
 ---
 
@@ -77,6 +84,49 @@ Integração corporativa                       ⏳ posterior
 | `PLANO_TESTES_PRIMEIRO_PROTOTIPO.md` | bateria de testes reaproveitável na homologação formal posterior |
 
 A matriz de permissões continua planejada, mas não deve ser descrita como tarefa imediata enquanto o bloco atual de pré-produção estiver aberto.
+
+---
+
+## Decisões visuais atuais — Etapa 1
+
+A subetapa 1.1 foi concluída em 09/09/2026. O padrão aprovado está em `PADRAO_VISUAL_PRE_PRODUCAO.md`.
+
+Resumo obrigatório para retomada:
+
+```text
+preservar MVP e identidade original
+Vuetify/MDI como família de iconografia
+controle comum 40 px
+icon-only 40 × 40 px
+ícone comum 20 px
+seta/chevron 24 px, centralizada e palpável
+raio controles 6 px
+raio cards 8 px
+linha de tabela 48 px
+padding de card 20 px
+título de página 24 px
+texto normal 14 px
+label 13 px
+texto auxiliar mínimo 12 px
+filtros sempre representados por funil
+azul = ação/informação
+verde = sucesso
+amarelo = atenção
+vermelho = erro/urgência
+cinza = neutro/sem interação
+Dark Mode reservado integralmente à Etapa 2
+```
+
+Status interno da Etapa 1:
+
+```text
+1.1 definir padrão visual                  ✅
+1.2 fundação visual compartilhada          ⏭
+1.3 padronizar componentes básicos         ⏳
+1.4 aplicar tela a tela                     ⏳
+1.5 limpar exceções/CSS corretivo           ⏳
+1.6 revisão visual final                    ⏳
+```
 
 ---
 
@@ -102,7 +152,7 @@ Se um documento histórico disser que Administração, Resíduos, Dashboard, Ale
 - Administração usa `/administracao/cadastros` e é exclusiva de `ADMINISTRADOR`;
 - usuário não é criado manualmente em Cadastros; permissões alteram perfis existentes;
 - `Produto != Resíduo`;
-- modelos pré-determinados de Resíduo continuam possibilidade futura;
+- modelos pré-cadastrados de Resíduo fazem parte da Etapa 4 da pré-produção;
 - QR Code não integra o rótulo visual atual;
 - sessão atual é DEV e expira em 5h;
 - o tema claro/escuro pertence às interfaces autenticadas e não deve alterar a tela de login sem decisão explícita;
@@ -116,9 +166,11 @@ Se um documento histórico disser que Administração, Resíduos, Dashboard, Ale
 ### Agora
 
 ```text
-limpeza e atualização documental
-→ planejamento dos ajustes de pré-produção
-→ execução/refinamento
+planejamento de pré-produção                 ✅
+→ Etapa 1.1 padrão visual                    ✅
+→ Etapa 1.2 fundação visual compartilhada   ⏭
+→ demais subetapas da Etapa 1
+→ Etapas 2 a 9
 → estabilização do bloco
 ```
 
@@ -141,11 +193,12 @@ Antes de implementar algo novo:
 
 ```text
 1. ler ../CONTINUIDADE.md
-2. conferir src/router/index.ts
-3. conferir a main atual
-4. conferir Swagger/OpenAPI quando houver contrato HTTP
-5. abrir o documento específico da área
-6. distinguir decisão atual de registro histórico
+2. durante a Etapa 1, ler PADRAO_VISUAL_PRE_PRODUCAO.md
+3. conferir src/router/index.ts
+4. conferir a main atual
+5. conferir Swagger/OpenAPI quando houver contrato HTTP
+6. abrir o documento específico da área
+7. distinguir decisão atual de registro histórico
 ```
 
-Não reconstruir módulos aprovados apenas porque uma documentação antiga descreve uma fase anterior.
+Não reconstruir módulos aprovados apenas porque uma documentação antiga descreve uma fase anterior. Durante a Etapa 1, não inventar novos padrões visuais locais nem misturar a correção definitiva do Dark Mode com o refinamento do tema claro.
