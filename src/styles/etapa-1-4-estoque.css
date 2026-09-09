@@ -1,0 +1,742 @@
+/*
+ * Etapa 1.4 — aplicação visual em Estoque.
+ *
+ * Escopo:
+ * - Gestão/Admin: /estoque
+ * - Gestão/Admin: /estoque/lotes-vencendo
+ * - Gestão/Admin: /estoque/:id
+ *
+ * Somente tema claro autenticado. Views, services e regras de negócio permanecem intactos.
+ */
+
+/* ========================================================================== */
+/* Base comum                                                                 */
+/* ========================================================================== */
+
+body.sgl-light-active .gestao-main .estoque-page,
+body.sgl-light-active .gestao-main .lotes-vencendo-page,
+body.sgl-light-active .gestao-main .estoque-detalhe {
+  color: var(--sgl-text);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .breadcrumb,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .breadcrumb,
+body.sgl-light-active .gestao-main .estoque-detalhe .breadcrumb {
+  margin-bottom: var(--sgl-space-2);
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .page-header,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .page-header {
+  gap: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .page-header h1,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .page-header h1,
+body.sgl-light-active .gestao-main .estoque-detalhe .page-header h1 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
+  letter-spacing: normal;
+}
+
+body.sgl-light-active .gestao-main .estoque-page .page-header p,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .page-header p,
+body.sgl-light-active .gestao-main .estoque-detalhe .page-header p {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .page-eyebrow {
+  margin-bottom: var(--sgl-space-1);
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  letter-spacing: .06em;
+}
+
+body.sgl-light-active .gestao-main .estoque-page .primary-action,
+body.sgl-light-active .gestao-main .estoque-page .secondary-action,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .primary-action,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .secondary-action,
+body.sgl-light-active .gestao-main .estoque-detalhe .primary-action,
+body.sgl-light-active .gestao-main .estoque-detalhe .secondary-action,
+body.sgl-light-active .gestao-main .estoque-detalhe .danger-action {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-4);
+  border-radius: var(--sgl-radius-control);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .primary-action,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .primary-action,
+body.sgl-light-active .gestao-main .estoque-detalhe .primary-action {
+  border-color: var(--sgl-primary);
+  background: var(--sgl-primary);
+  color: #fff;
+}
+
+body.sgl-light-active .gestao-main .estoque-page .secondary-action,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .secondary-action,
+body.sgl-light-active .gestao-main .estoque-detalhe .secondary-action {
+  border-color: var(--sgl-border-strong);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .danger-action {
+  border-color: var(--sgl-error);
+  background: var(--sgl-error);
+  color: #fff;
+}
+
+body.sgl-light-active .gestao-main .estoque-page .state-box,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .state-box,
+body.sgl-light-active .gestao-main .estoque-detalhe .state-box {
+  padding: var(--sgl-space-8);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+}
+
+/* ========================================================================== */
+/* /estoque                                                                   */
+/* ========================================================================== */
+
+body.sgl-light-active .gestao-main .estoque-page .summary-grid {
+  gap: var(--sgl-space-3);
+  margin: var(--sgl-space-6) 0 var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .summary-grid article {
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .summary-grid span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .summary-grid strong {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-primary-dark);
+  font-size: 26px;
+}
+
+body.sgl-light-active .gestao-main .estoque-page .summary-grid small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+/* Estes fundos têm significado operacional, portanto permanecem semânticos. */
+body.sgl-light-active .gestao-main .estoque-page .summary-grid article.warning {
+  border-color: #FDE68A !important;
+  background: #FFFBEB !important;
+}
+
+body.sgl-light-active .gestao-main .estoque-page .summary-grid article.danger {
+  border-color: #FECACA !important;
+  background: #FEF2F2 !important;
+}
+
+body.sgl-light-active .gestao-main .estoque-page .filter-card {
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-space-4);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .filter-top {
+  gap: var(--sgl-space-3);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .search-field,
+body.sgl-light-active .gestao-main .estoque-page .filter-grid label {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .search-field span,
+body.sgl-light-active .gestao-main .estoque-page .filter-grid span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .search-field input,
+body.sgl-light-active .gestao-main .estoque-page .filter-grid select {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .filter-toggle {
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  margin-bottom: 0;
+  border: var(--sgl-border-width) solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .filter-toggle svg {
+  width: var(--sgl-icon-size);
+  height: var(--sgl-icon-size);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .filter-toggle.active {
+  border-color: var(--sgl-primary);
+  background: #EEF5FF;
+  color: var(--sgl-primary);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .filter-grid {
+  gap: var(--sgl-space-3);
+  margin-top: var(--sgl-space-4);
+  padding-top: var(--sgl-space-4);
+  border-top-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .filter-footer {
+  margin-top: var(--sgl-space-4);
+  padding-top: var(--sgl-space-3);
+  border-top-color: var(--sgl-border);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .filter-footer button {
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .table-wrap,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .table-wrap {
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .estoque-page th,
+body.sgl-light-active .gestao-main .lotes-vencendo-page th,
+body.sgl-light-active .gestao-main .estoque-detalhe th {
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .estoque-page td,
+body.sgl-light-active .gestao-main .lotes-vencendo-page td,
+body.sgl-light-active .gestao-main .estoque-detalhe td {
+  padding: var(--sgl-space-4);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .estoque-page td strong,
+body.sgl-light-active .gestao-main .lotes-vencendo-page td strong,
+body.sgl-light-active .gestao-main .estoque-detalhe td strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .estoque-page td small,
+body.sgl-light-active .gestao-main .lotes-vencendo-page td small,
+body.sgl-light-active .gestao-main .estoque-detalhe td small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-page tbody tr:hover,
+body.sgl-light-active .gestao-main .lotes-vencendo-page tbody tr:hover,
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-row:hover {
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .quantity,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .quantity {
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-card-title);
+}
+
+body.sgl-light-active .gestao-main .estoque-page .chip,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .prazo-chip,
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-chip {
+  min-height: 26px;
+  padding: 0 10px;
+  font-size: var(--sgl-font-helper);
+}
+
+/* Chevrons reais em vez de caracteres ›. */
+body.sgl-light-active .gestao-main .estoque-page .detail-button,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .detail-button {
+  position: relative;
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  padding: 0;
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-primary-dark);
+  font-size: 0;
+}
+
+body.sgl-light-active .gestao-main .estoque-page .detail-button::before,
+body.sgl-light-active .gestao-main .lotes-vencendo-page .detail-button::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9 6 6 6-6 6' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9 6 6 6-6 6' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* ========================================================================== */
+/* /estoque/lotes-vencendo                                                    */
+/* ========================================================================== */
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .header-actions {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .summary-grid {
+  gap: var(--sgl-space-3);
+  margin: var(--sgl-space-6) 0 var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .summary-card {
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .summary-card span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .summary-card strong {
+  margin-top: var(--sgl-space-2);
+  font-size: 26px;
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .summary-card small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .summary-card--amber {
+  border-color: #FDE68A;
+  background: #FFFBEB;
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .summary-card--orange {
+  border-color: #FED7AA;
+  background: #FFF7ED;
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .summary-card--red {
+  border-color: #FECACA;
+  background: #FEF2F2;
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .warning-box {
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  border-radius: var(--sgl-radius-surface);
+  font-size: var(--sgl-font-label);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .filter-card {
+  gap: var(--sgl-space-4);
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-space-4);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .filter-card label {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .filter-card label span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .filter-card input {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .filter-result {
+  min-height: var(--sgl-control-height);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .filter-result strong {
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-card-title, 16px);
+}
+
+body.sgl-light-active .gestao-main .lotes-vencendo-page .filter-result button {
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-label);
+}
+
+/* ========================================================================== */
+/* /estoque/:id                                                               */
+/* ========================================================================== */
+
+body.sgl-light-active .gestao-main .estoque-detalhe .product-context {
+  gap: var(--sgl-space-3);
+  margin-top: var(--sgl-space-4);
+  padding: var(--sgl-space-4);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .product-context span {
+  margin-bottom: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+  text-transform: none;
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .product-context strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .summary-grid {
+  gap: var(--sgl-space-3);
+  margin: var(--sgl-space-4) 0;
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .summary-grid article {
+  padding: var(--sgl-card-padding);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .summary-grid span,
+body.sgl-light-active .gestao-main .estoque-detalhe .view-card label {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .summary-grid strong {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-primary-dark);
+  font-size: 24px;
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .summary-grid small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .view-card select,
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-filter-bar input,
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-filter-bar select,
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-grid input,
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-grid select {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-card {
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-card__heading {
+  gap: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-card__heading h2 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-section-title);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-card__heading p {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-filter-bar {
+  gap: var(--sgl-space-3);
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-space-3);
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-filter-bar label > span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-filter-result {
+  min-height: var(--sgl-control-height);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-filter-result strong {
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-card-title);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-filter-result button {
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .detail-button {
+  min-height: var(--sgl-control-height);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sgl-space-2);
+  padding: 0 var(--sgl-space-3);
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .detail-button::after {
+  content: '';
+  width: var(--sgl-chevron-size);
+  height: var(--sgl-chevron-size);
+  flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9 6 6 6-6 6' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9 6 6 6-6 6' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-row--alvo {
+  background: #EEF5FF !important;
+  box-shadow: inset 4px 0 0 var(--sgl-primary-light);
+  animation: none;
+}
+
+/* Modais de estoque */
+body.sgl-light-active .gestao-main .estoque-detalhe .modal-card {
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-floating);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .modal-card__header {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-card-padding) var(--sgl-space-6);
+  border-bottom-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .modal-card__header span {
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .modal-card__header h2 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-section-title);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .modal-card__header p {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .modal-close {
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-neutral-strong);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-form,
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-body {
+  padding: var(--sgl-card-padding) var(--sgl-space-6) var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-grid {
+  gap: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-grid label,
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-observation {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-grid label > span,
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-observation > span,
+body.sgl-light-active .gestao-main .estoque-detalhe .read-only-field > span {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-grid small,
+body.sgl-light-active .gestao-main .estoque-detalhe .read-only-field small,
+body.sgl-light-active .gestao-main .estoque-detalhe .fraction-option small,
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-preview,
+body.sgl-light-active .gestao-main .estoque-detalhe .locked-info,
+body.sgl-light-active .gestao-main .estoque-detalhe .immutable-code-box {
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-observation textarea {
+  padding: var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .read-only-field,
+body.sgl-light-active .gestao-main .estoque-detalhe .fraction-option,
+body.sgl-light-active .gestao-main .estoque-detalhe .entry-preview,
+body.sgl-light-active .gestao-main .estoque-detalhe .locked-info,
+body.sgl-light-active .gestao-main .estoque-detalhe .immutable-code-box {
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .fraction-option strong,
+body.sgl-light-active .gestao-main .estoque-detalhe .read-only-field strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .form-error {
+  padding: var(--sgl-space-3);
+  border-radius: var(--sgl-radius-control);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .modal-actions {
+  gap: var(--sgl-space-2);
+  margin-top: var(--sgl-space-4);
+  padding-top: var(--sgl-space-4);
+  border-top-color: var(--sgl-border);
+}
+
+/* ========================================================================== */
+/* Estados de interação                                                       */
+/* ========================================================================== */
+
+body.sgl-light-active .gestao-main .estoque-page button:focus-visible,
+body.sgl-light-active .gestao-main .estoque-page input:focus-visible,
+body.sgl-light-active .gestao-main .estoque-page select:focus-visible,
+body.sgl-light-active .gestao-main .lotes-vencendo-page button:focus-visible,
+body.sgl-light-active .gestao-main .lotes-vencendo-page input:focus-visible,
+body.sgl-light-active .gestao-main .estoque-detalhe button:focus-visible,
+body.sgl-light-active .gestao-main .estoque-detalhe input:focus-visible,
+body.sgl-light-active .gestao-main .estoque-detalhe select:focus-visible,
+body.sgl-light-active .gestao-main .estoque-detalhe textarea:focus-visible {
+  outline: var(--sgl-focus-width) solid var(--sgl-focus);
+  outline-offset: var(--sgl-focus-offset);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-light-active .gestao-main .estoque-page button:hover,
+  body.sgl-light-active .gestao-main .lotes-vencendo-page button:hover,
+  body.sgl-light-active .gestao-main .estoque-detalhe button:hover {
+    transform: none;
+  }
+
+  body.sgl-light-active .gestao-main .estoque-page .detail-button:hover,
+  body.sgl-light-active .gestao-main .lotes-vencendo-page .detail-button:hover,
+  body.sgl-light-active .gestao-main .estoque-detalhe .detail-button:hover {
+    border-color: var(--sgl-primary-light);
+    background: #EEF5FF;
+  }
+}
+
+@media (max-width: 900px) {
+  body.sgl-light-active .gestao-main .estoque-detalhe .product-context,
+  body.sgl-light-active .gestao-main .estoque-detalhe .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  body.sgl-light-active .gestao-main .estoque-page .summary-grid,
+  body.sgl-light-active .gestao-main .lotes-vencendo-page .summary-grid,
+  body.sgl-light-active .gestao-main .estoque-detalhe .product-context,
+  body.sgl-light-active .gestao-main .estoque-detalhe .summary-grid,
+  body.sgl-light-active .gestao-main .estoque-detalhe .entry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-light-active .gestao-main .lotes-vencendo-page .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  body.sgl-light-active .gestao-main .estoque-detalhe .entry-form,
+  body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-body,
+  body.sgl-light-active .gestao-main .estoque-detalhe .modal-card__header {
+    padding-inline: var(--sgl-space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-light-active .gestao-main .estoque-page *,
+  body.sgl-light-active .gestao-main .lotes-vencendo-page *,
+  body.sgl-light-active .gestao-main .estoque-detalhe * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
