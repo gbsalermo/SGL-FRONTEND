@@ -1,0 +1,70 @@
+/* Ajustes de validação do piloto da Etapa 1.4. */
+
+body.sgl-light-active .gestao-main .gestao-pedidos__header,
+body.sgl-light-active .solicitante-main .pedidos-page .page-heading {
+  gap: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .gestao-summary {
+  margin-top: var(--sgl-space-6);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .page-heading {
+  margin-bottom: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .filter-toggle[aria-expanded='true'] {
+  border-color: var(--sgl-primary-light);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-primary);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .detail-button::before {
+  width: var(--sgl-chevron-size);
+  height: var(--sgl-chevron-size);
+  border: 0;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m8 10 4 4 4-4' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m8 10 4 4 4-4' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  transform: none;
+  transform-origin: center;
+  transition: transform var(--sgl-transition-fast) ease;
+}
+
+body.sgl-light-active .gestao-main .gestao-table tr:has(+ .gestao-detail-row) .detail-button::before {
+  transform: rotate(180deg);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .secondary-action:focus-visible,
+body.sgl-light-active .gestao-main .gestao-pedidos .filter-toggle:focus-visible,
+body.sgl-light-active .gestao-main .gestao-pedidos .detail-button:focus-visible,
+body.sgl-light-active .gestao-main .action-button:focus-visible,
+body.sgl-light-active .gestao-main .justification-box button:focus-visible,
+body.sgl-light-active .solicitante-main .pedidos-page .primary-action:focus-visible,
+body.sgl-light-active .solicitante-main .pedidos-page .expand-button:focus-visible,
+body.sgl-light-active .solicitante-main .pedidos-page .status-filter select:focus-visible,
+body.sgl-light-active .solicitante-main .pedidos-page .search-control:focus-within {
+  outline: var(--sgl-focus-width) solid var(--sgl-focus);
+  outline-offset: var(--sgl-focus-offset);
+}
+
+body.sgl-light-active .gestao-main .action-button:disabled,
+body.sgl-light-active .gestao-main .justification-box button:disabled,
+body.sgl-light-active .solicitante-main .pedidos-page button:disabled {
+  border-color: var(--sgl-disabled-border);
+  background: var(--sgl-disabled-background);
+  color: var(--sgl-disabled-text);
+  cursor: not-allowed;
+  opacity: var(--sgl-disabled-opacity);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-light-active .gestao-main .gestao-pedidos .secondary-action,
+  body.sgl-light-active .gestao-main .gestao-pedidos .filter-toggle,
+  body.sgl-light-active .gestao-main .gestao-pedidos .detail-button,
+  body.sgl-light-active .solicitante-main .pedidos-page .primary-action,
+  body.sgl-light-active .solicitante-main .pedidos-page .expand-button {
+    transition: none;
+    transform: none;
+  }
+}
