@@ -1,0 +1,48 @@
+/*
+ * Ajuste fino da Etapa 1.4 — Movimentações.
+ *
+ * A cor aparece somente no hover da linha para ajudar a leitura em uma tabela
+ * densa sem transformar o estado normal em uma interface excessivamente colorida.
+ */
+
+body.sgl-light-active .gestao-main .movimentacoes-page .movement-row {
+  transition:
+    background-color var(--sgl-transition-fast) ease,
+    box-shadow var(--sgl-transition-fast) ease;
+}
+
+/* Entrada / devolução */
+body.sgl-light-active .gestao-main .movimentacoes-page .movement-row:has(.chip--positive):hover {
+  background: #F2FAF5;
+  box-shadow: inset 3px 0 0 #4EA674;
+}
+
+/* Saída */
+body.sgl-light-active .gestao-main .movimentacoes-page .movement-row:has(.chip--neutral):hover {
+  background: #F2F6FD;
+  box-shadow: inset 3px 0 0 #2D6BC4;
+}
+
+/* Ajuste */
+body.sgl-light-active .gestao-main .movimentacoes-page .movement-row:has(.chip--warning):hover {
+  background: #FFFBEB;
+  box-shadow: inset 3px 0 0 #F59E0B;
+}
+
+/* Descarte por vencimento */
+body.sgl-light-active .gestao-main .movimentacoes-page .movement-row:has(.chip--danger):hover {
+  background: #FEF2F2;
+  box-shadow: inset 3px 0 0 #DC2626;
+}
+
+/* O destaque vindo de rota continua tendo prioridade sobre o hover semântico. */
+body.sgl-light-active .gestao-main .movimentacoes-page .movement-row--alvo:hover {
+  background: #EEF5FF !important;
+  box-shadow: inset 4px 0 0 var(--sgl-primary-light) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-light-active .gestao-main .movimentacoes-page .movement-row {
+    transition: none;
+  }
+}
