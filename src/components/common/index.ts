@@ -1,5 +1,4 @@
 export { default as SglBreadcrumb } from './SglBreadcrumb.vue'
-export type { SglBreadcrumbItem } from './SglBreadcrumb.vue'
 export { default as SglButton } from './SglButton.vue'
 export { default as SglCard } from './SglCard.vue'
 export { default as SglChevronButton } from './SglChevronButton.vue'
