@@ -1,0 +1,94 @@
+/* Ajustes de validação visual da Etapa 1.4 — dashboards. */
+
+/* -------------------------------------------------------------------------- */
+/* Solicitante: recuperar diferenciação visual entre Pedidos e Resíduos.      */
+/* -------------------------------------------------------------------------- */
+
+body.sgl-light-active .solicitante-main .tracking-card--pedido {
+  border-color: #CFE0F7;
+  background: #F4F8FF;
+}
+
+body.sgl-light-active .solicitante-main .tracking-card--residuo {
+  border-color: #F1D8A8;
+  background: #FFF9EC;
+}
+
+body.sgl-light-active .solicitante-main .tracking-card--pedido .tracking-message {
+  border-color: #CFE0F7;
+  background: #EEF4FF;
+}
+
+body.sgl-light-active .solicitante-main .tracking-card--residuo .tracking-message--orange {
+  border-color: #F1D8A8;
+  background: #FFF4DA;
+  color: #6F5310;
+}
+
+body.sgl-light-active .solicitante-main .tracking-card--residuo .tracking-message--orange svg {
+  stroke: #B7791F;
+}
+
+/* Ações rápidas também preservam a leitura por domínio sem saturar a tela. */
+body.sgl-light-active .solicitante-main .quick-actions-grid button:nth-child(1),
+body.sgl-light-active .solicitante-main .quick-actions-grid button:nth-child(3) {
+  border-color: #D7E4F7;
+  background: #F7FAFF;
+}
+
+body.sgl-light-active .solicitante-main .quick-actions-grid button:nth-child(2),
+body.sgl-light-active .solicitante-main .quick-actions-grid button:nth-child(4) {
+  border-color: #F0DDB8;
+  background: #FFFBF2;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Gestão: legibilidade da central de Alertas operacionais no shell.           */
+/* -------------------------------------------------------------------------- */
+
+body.sgl-light-active .gestao-shell .gestao-alert-panel {
+  width: 380px;
+  max-width: calc(100vw - 32px);
+}
+
+body.sgl-light-active .gestao-shell .gestao-alert-panel__header strong {
+  font-size: var(--sgl-font-card-title);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-shell .gestao-alert-panel__header small {
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-shell .gestao-alert-panel button strong {
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+  line-height: 1.35;
+}
+
+body.sgl-light-active .gestao-shell .gestao-alert-panel button small {
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-shell .gestao-alert-panel button > b {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+body.sgl-light-active .gestao-shell .gestao-alert-panel__loading,
+body.sgl-light-active .gestao-shell .gestao-alert-panel__error,
+body.sgl-light-active .gestao-shell .gestao-alert-panel footer {
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+@media (max-width: 520px) {
+  body.sgl-light-active .gestao-shell .gestao-alert-panel {
+    width: calc(100vw - 24px);
+  }
+}
