@@ -58,6 +58,23 @@ body.sgl-light-active .solicitante-main .pedidos-page button:disabled {
   opacity: var(--sgl-disabled-opacity);
 }
 
+/* Novo pedido: mantém Produto, Tipo de unidade e Quantidade na mesma linha
+   mesmo quando apenas uma coluna exibe texto auxiliar/aviso. */
+body.sgl-light-active .solicitante-main .novo-pedido-page .item-row {
+  align-items: start;
+}
+
+body.sgl-light-active .solicitante-main .novo-pedido-page .remove-item {
+  align-self: start;
+  margin-top: 25px;
+}
+
+@media (max-width: 720px) {
+  body.sgl-light-active .solicitante-main .novo-pedido-page .remove-item {
+    margin-top: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   body.sgl-light-active .gestao-main .gestao-pedidos .secondary-action,
   body.sgl-light-active .gestao-main .gestao-pedidos .filter-toggle,
