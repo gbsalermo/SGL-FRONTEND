@@ -2,7 +2,7 @@
 
 ## Status
 
-Em validação visual.
+Validação visual concluída quanto à estrutura, tipografia, responsividade e comportamento. Ajuste final de cor aplicado para conferência antes do merge.
 
 ## Escopo
 
@@ -16,15 +16,31 @@ Nenhuma regra de negócio, service, API, rota ou transição de status foi alter
 
 ## Objetivo visual
 
-Aplicar o padrão fechado na Etapa 1.1 preservando a identidade própria de Resíduos.
+Aplicar o padrão fechado na Etapa 1.1 preservando a clareza operacional do SGL.
 
-A diferenciação do domínio utiliza fundo amarelo/creme suave em superfícies específicas, sem substituir as cores semânticas de status:
+### Regra final de cor para Resíduos
+
+A diferenciação amarela/creme por domínio permanece no **Dashboard do Solicitante**, onde ajuda a separar visualmente Pedidos e Resíduos.
+
+Nas telas operacionais de Resíduos, a regra é diferente:
+
+```text
+estado normal
+→ superfícies brancas/neutras
+
+hover de elemento interativo
+→ creme/amarelo muito suave
+```
+
+O creme não deve permanecer como fundo decorativo estático nessas telas.
+
+As cores semânticas continuam independentes dessa regra:
 
 - azul = ação/informação;
 - verde = sucesso;
 - amarelo = atenção/status quando aplicável;
 - vermelho = erro/crítico;
-- creme suave = identidade visual de Resíduos, sem significado operacional isolado.
+- neutro = conteúdo sem estado especial.
 
 ## Principais ajustes
 
@@ -34,7 +50,8 @@ A diferenciação do domínio utiliza fundo amarelo/creme suave em superfícies 
 - controles e botões em 40 px;
 - raio de controles em 6 px e superfícies em 8 px;
 - sombras reduzidas;
-- cards de Resíduos com diferenciação creme suave;
+- superfícies operacionais brancas/neutras;
+- creme suave reservado ao hover de elementos interativos;
 - tabela da Gestão com tipografia e espaçamento ampliados;
 - ações operacionais da Gestão padronizadas em azul;
 - status continuam com cores semânticas próprias;
@@ -43,49 +60,52 @@ A diferenciação do domínio utiliza fundo amarelo/creme suave em superfícies 
 
 ## Checklist — Solicitante `/meus-residuos`
 
-- [ ] título, breadcrumb e descrição legíveis;
-- [ ] botão `Informar resíduo` com 40 px;
-- [ ] cards de resumo equilibrados;
-- [ ] busca e status alinhados;
-- [ ] cards de resíduos com fundo creme suave sem excesso de amarelo;
-- [ ] status facilmente identificáveis;
-- [ ] `Ver detalhes` com chevron grande e claro;
-- [ ] drawer de detalhes legível;
-- [ ] composição, risco e andamento sem fontes pequenas;
-- [ ] responsividade preservada.
+- [x] título, breadcrumb e descrição legíveis;
+- [x] botão `Informar resíduo` com 40 px;
+- [x] cards de resumo equilibrados;
+- [x] busca e status alinhados;
+- [x] superfícies normais brancas/neutras;
+- [x] creme suave apenas no hover dos cards interativos;
+- [x] status facilmente identificáveis;
+- [x] `Ver detalhes` com chevron grande e claro;
+- [x] drawer de detalhes legível;
+- [x] composição, risco e andamento sem fontes pequenas;
+- [x] responsividade preservada.
 
 ## Checklist — Solicitante `/residuos/novo`
 
-- [ ] contexto de gerador/laboratório legível;
-- [ ] seções numeradas com identidade creme suave;
-- [ ] inputs/selects com 40 px;
-- [ ] labels e textos auxiliares legíveis;
-- [ ] seleção de risco clara;
-- [ ] adicionar/remover componente funcionando;
-- [ ] alternância catálogo/componente livre funcionando;
-- [ ] componente principal funcionando;
-- [ ] mensagens de erro/aviso legíveis;
-- [ ] envio do resíduo funcionando;
-- [ ] superfície de sucesso legível;
-- [ ] responsividade preservada.
+- [x] contexto de gerador/laboratório legível;
+- [x] blocos e seções sem creme estático decorativo;
+- [x] inputs/selects com 40 px;
+- [x] labels e textos auxiliares legíveis;
+- [x] seleção de risco clara;
+- [x] adicionar/remover componente funcionando;
+- [x] alternância catálogo/componente livre funcionando;
+- [x] componente principal funcionando;
+- [x] mensagens de erro/aviso legíveis;
+- [x] envio do resíduo funcionando;
+- [x] superfície de sucesso legível;
+- [x] responsividade preservada.
 
 ## Checklist — Gestão `/residuos`
 
-- [ ] título e métricas legíveis;
-- [ ] abas de status com contadores claros;
-- [ ] busca com 40 px;
-- [ ] tabela legível em zoom 100%;
-- [ ] linhas não utilizam textos minúsculos;
-- [ ] status continuam semanticamente distintos;
-- [ ] Receber funciona;
-- [ ] Analisar funciona;
-- [ ] Armazenar funciona;
-- [ ] Despachar funciona;
-- [ ] Visualizar rótulo continua disponível somente quando permitido;
-- [ ] drawer de detalhes legível;
-- [ ] histórico/rastreabilidade legível;
-- [ ] modais operacionais legíveis;
-- [ ] responsividade preservada.
+- [x] título e métricas legíveis;
+- [x] abas de status com contadores claros;
+- [x] busca com 40 px;
+- [x] tabela legível em zoom 100%;
+- [x] linhas não utilizam textos minúsculos;
+- [x] superfícies normais brancas/neutras;
+- [x] creme suave preservado no hover das linhas;
+- [x] status continuam semanticamente distintos;
+- [x] Receber funciona;
+- [x] Analisar funciona;
+- [x] Armazenar funciona;
+- [x] Despachar funciona;
+- [x] Visualizar rótulo continua disponível somente quando permitido;
+- [x] drawer de detalhes legível;
+- [x] histórico/rastreabilidade legível;
+- [x] modais operacionais legíveis;
+- [x] responsividade preservada.
 
 ## Fora do escopo
 
