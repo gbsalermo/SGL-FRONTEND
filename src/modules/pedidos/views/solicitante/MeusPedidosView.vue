@@ -306,10 +306,10 @@ onMounted(carregarPedidos)
                               <span>{{ item.produtoUnidadeArmazenamento }}</span>
                             </div>
                             <div class="material-quantity">
-                              <span>Solicitado</span>
-                              <strong>{{ item.quantidadeSolicitada }}</strong>
+                              <span>{{ item.quantidadeAprovada != null ? 'Aprovado' : 'Solicitado' }}</span>
+                              <strong>{{ item.quantidadeAprovada ?? item.quantidadeSolicitada }}</strong>
                               <small v-if="item.quantidadeAprovada != null">
-                                Aprovado: {{ item.quantidadeAprovada }}
+                                Solicitado: {{ item.quantidadeSolicitada }}
                               </small>
                             </div>
                           </div>
