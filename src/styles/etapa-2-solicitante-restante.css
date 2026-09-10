@@ -938,8 +938,10 @@ body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-note-block > 
 
 @media (hover: hover) and (pointer: fine) {
   body.sgl-dark-active .solicitante-main .meus-residuos-page .residuo-card:hover {
-    background: linear-gradient(90deg, #2a2417 0%, rgb(42 36 23 / 46%) 48%, transparent 100%) !important;
-    box-shadow: inset 3px 0 0 #b28a3e !important;
+    background: #111f33 !important;
+    box-shadow:
+      inset 4px 0 0 #c29a43,
+      inset 0 0 0 1px #4d4129 !important;
   }
 
   body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:hover {
