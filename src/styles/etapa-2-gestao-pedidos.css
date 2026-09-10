@@ -701,3 +701,18 @@ body.sgl-dark-active .gestao-main .gestao-pedidos .approval-quantity input {
   font-weight: 700 !important;
   text-align: center !important;
 }
+
+
+/* APROVADO / ENTREGUE: o rótulo precisa caber sem reduzir a fonte. */
+body.sgl-light-active .gestao-main .gestao-pedidos .gestao-detail__item,
+body.sgl-dark-active .gestao-main .gestao-pedidos .gestao-detail__item {
+  grid-template-columns: minmax(0, 1fr) 150px 200px !important;
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .approved-quantity > strong,
+body.sgl-dark-active .gestao-main .gestao-pedidos .approved-quantity > strong {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+}
