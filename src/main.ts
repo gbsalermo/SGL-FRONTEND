@@ -55,7 +55,7 @@ app.use(vuetify)
 aplicarTemaDaRota(window.location.pathname)
 
 router.afterEach((to) => {
-  aplicarTemaDaRota(to.path)
+  aplicarTemaDaRota(to.path, Boolean(to.meta.public) || to.name === 'not-found')
 })
 
 const session = useSessionStore(pinia)
