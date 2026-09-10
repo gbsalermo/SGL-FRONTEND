@@ -260,13 +260,19 @@ onMounted(carregar)
               <h3>Declaração do laboratório</h3>
               <strong>{{ formatarRisco(selecionado.nivelRiscoInformado) }}</strong>
               <p>{{ selecionado.riscosInformados.map(formatarRisco).join(' · ') || 'Nenhum risco específico' }}</p>
-              <small>{{ selecionado.observacaoGerador ?? 'Sem observação.' }}</small>
+              <div class="detail-note-block">
+                <span>Observação do laboratório</span>
+                <p>{{ selecionado.observacaoGerador ?? 'Sem observação.' }}</p>
+              </div>
             </div>
             <div :class="{ muted: !selecionado.nivelRiscoConfirmado }">
               <h3>Classificação da Gestão</h3>
               <strong>{{ selecionado.nivelRiscoConfirmado ? formatarRisco(selecionado.nivelRiscoConfirmado) : 'Aguardando análise' }}</strong>
               <p>{{ selecionado.riscosConfirmados.length ? selecionado.riscosConfirmados.map(formatarRisco).join(' · ') : 'Ainda não confirmada.' }}</p>
-              <small>{{ selecionado.observacaoGestor ?? 'A declaração original permanece preservada.' }}</small>
+              <div class="detail-note-block">
+                <span>Observação da Gestão</span>
+                <p>{{ selecionado.observacaoGestor ?? 'A declaração original permanece preservada.' }}</p>
+              </div>
             </div>
           </section>
 
@@ -358,6 +364,9 @@ dd { margin: 5px 0 0; color: #1d2d45; font-size: 11px; font-weight: 700; }
 .risk-comparison strong { font-size: 15px; }
 .risk-comparison p { margin: 7px 0; color: #4f6078; font-size: 10px; }
 .risk-comparison small { color: #748298; font-size: 9px; }
+.detail-note-block { margin-top: 12px; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f7f9fc; }
+.detail-note-block > span { display: block; margin-bottom: 6px; color: #6f7f95; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.detail-note-block > p { margin: 0; color: #314259; font-size: 12px; line-height: 1.6; }
 @media (max-width: 800px) {
   .page-heading { align-items: flex-start; flex-direction: column; }
   .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
