@@ -2,7 +2,7 @@
 
 ## Status
 
-Em validação — 10/09/2026.
+Concluída e validada — 10/09/2026.
 
 ## Escopo desta rodada
 
@@ -89,3 +89,20 @@ Com base na conferência visual das três telas:
 - observações do laboratório e da Gestão passaram a usar blocos próprios de leitura, seguindo a hierarquia adotada em Meus pedidos.
 
 Esses ajustes são exclusivamente visuais e não alteram a regra de negócio.
+
+
+## Validação final
+
+O conjunto completo de interfaces do Solicitante foi validado em Dark Mode.
+
+Interfaces fechadas:
+
+- `/inicio`;
+- `/meus-pedidos`;
+- `/meus-residuos`;
+- `/pedidos/novo`;
+- `/residuos/novo`.
+
+A última correção ajustou o espaçamento interno dos cards de resíduos para impedir que a barra lateral de interação invadisse o conteúdo textual.
+
+Próximo passo: iniciar a aplicação tela a tela do Dark Mode nas interfaces da Gestão.
