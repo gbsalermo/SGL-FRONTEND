@@ -23,8 +23,11 @@ function aplicarTemaEfetivo(novoTema: TemaAplicacao) {
   vuetify.theme.change(novoTema === 'dark' ? 'sglDark' : 'sglLight')
 }
 
-function ehRotaPublica(path: string) {
-  return path === '/login' || path.startsWith('/404')
+function ehRotaSempreClara(path: string) {
+  return path === '/login'
+    || path.startsWith('/404')
+    || /^\/residuos\/[^/]+\/rotulo$/.test(path)
+    || /^\/produtos\/[^/]+\/rotulo$/.test(path)
 }
 
 export function aplicarTema(novoTema: TemaAplicacao) {
@@ -44,7 +47,7 @@ export function alternarTema() {
 }
 
 export function aplicarTemaDaRota(path: string) {
-  if (ehRotaPublica(path)) {
+  if (ehRotaSempreClara(path)) {
     aplicarTemaEfetivo('light')
     return
   }
