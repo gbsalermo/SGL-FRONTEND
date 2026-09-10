@@ -28,22 +28,18 @@ body.sgl-dark-active .gestao-main .dashboard-page .dashboard-heading p {
 }
 
 body.sgl-dark-active .gestao-main .dashboard-page .dashboard-refresh {
-  border-color: #4f90e8 !important;
-  background: #2f78d8 !important;
-  color: #ffffff !important;
-  box-shadow: 0 7px 18px rgb(15 78 164 / 20%) !important;
-}
-
-body.sgl-dark-active .gestao-main .dashboard-page .dashboard-refresh svg {
-  color: #ffffff !important;
-  stroke: currentColor !important;
+  border-color: #365271 !important;
+  background: #111f33 !important;
+  color: #dbe8f8 !important;
+  box-shadow: none !important;
 }
 
 body.sgl-dark-active .gestao-main .dashboard-page .dashboard-refresh:hover:not(:disabled) {
-  border-color: #72a9ff !important;
-  background: #3c87e6 !important;
+  transform: none !important;
+  border-color: #5b8fd0 !important;
+  background: #172941 !important;
   color: #ffffff !important;
-  box-shadow: 0 10px 24px rgb(15 78 164 / 30%) !important;
+  box-shadow: 0 8px 20px rgb(0 5 14 / 22%) !important;
 }
 
 body.sgl-dark-active .gestao-main .dashboard-page .dashboard-warning {
