@@ -9,14 +9,14 @@
 
 /* Gestão — aplica somente com a sidebar expandida para não afetar o recorte
  * compacto usado quando a navegação está recolhida. */
-.gestao-shell:not(.gestao-shell--collapsed) .gestao-brand {
+.gestao-shell:not(.gestao-shell--collapsed) .gestao-sidebar .gestao-brand {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.gestao-shell:not(.gestao-shell--collapsed) .gestao-brand img {
+.gestao-shell:not(.gestao-shell--collapsed) .gestao-sidebar .gestao-brand img {
   display: block;
   max-width: calc(100% - 24px);
   margin-inline: auto;
@@ -25,14 +25,14 @@
 
 /* Solicitante — mesma compensação óptica para manter a identidade da marca
  * na mesma posição percebida entre as duas interfaces autenticadas. */
-.solicitante-sidebar__brand {
+.solicitante-shell .solicitante-sidebar .solicitante-sidebar__brand {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.solicitante-sidebar__brand img {
+.solicitante-shell .solicitante-sidebar .solicitante-sidebar__brand img {
   display: block;
   max-width: calc(100% - 24px);
   margin-inline: auto;
@@ -41,6 +41,6 @@
 
 /* A versão recolhida da Gestão continua usando o comportamento próprio do
  * layout, sem deslocamento adicional. */
-.gestao-shell--collapsed .gestao-brand img {
+.gestao-shell.gestao-shell--collapsed .gestao-sidebar .gestao-brand img {
   transform: none;
 }
