@@ -1,8 +1,8 @@
 # Etapa 1.4 — Estagiários
 
 **Rota:** `/estagiarios`  
-**Status:** preparado em 09/09/2026 e aguardando validação visual/funcional.  
-**Branch:** `feat/etapa-1-4-estagiarios`
+**Status:** ✅ aprovado em 10/09/2026 pelo responsável do projeto.  
+**Branch de implementação:** `feat/etapa-1-4-estagiarios`
 
 ## Objetivo
 
@@ -38,41 +38,22 @@ Aplicar o padrão visual aprovado da Etapa 1 ao módulo de Estagiários sem alte
 - futura modelagem Projeto ↔ Estagiário da Etapa 5;
 - Dark Mode, reservado para a Etapa 2.
 
-## Checklist de validação
+## Validação
 
-### Visual
+Em 10/09/2026, o responsável do projeto conferiu a interface de Estagiários e confirmou que ela está de acordo com o padrão visual consolidado do SGL.
 
-- [ ] título e descrição legíveis;
-- [ ] cards de indicadores coerentes;
-- [ ] campos/filtros com 40 px;
-- [ ] tabela legível sem textos minúsculos;
-- [ ] status ATIVO/ENCERRADO legíveis;
-- [ ] drawer de detalhes confortável para leitura;
-- [ ] modal de novo estágio legível;
-- [ ] modal de edição legível;
-- [ ] confirmação de encerramento legível;
-- [ ] responsividade sem sobreposição.
+Resultado:
 
-### Funcional
+```text
+padrão visual                  ✅ aprovado
+legibilidade geral             ✅ aprovada
+coerência com demais telas     ✅ aprovada
+regressões reportadas          nenhuma
+```
 
-- [ ] carregar listagem;
-- [ ] atualizar;
-- [ ] buscar;
-- [ ] filtrar por status;
-- [ ] filtrar por laboratório;
-- [ ] filtrar por tipo de bolsa;
-- [ ] limpar filtros;
-- [ ] abrir/fechar detalhes;
-- [ ] cadastrar novo estágio;
-- [ ] editar vínculo;
-- [ ] encerrar estágio;
-- [ ] mensagens de sucesso/erro continuam corretas.
+A aprovação visual autoriza o merge do PR da Etapa 1.4 de Estagiários.
 
-## Regra de merge
-
-Não mergear esta branch antes da validação do responsável do projeto.
-
-## Próxima continuidade após aprovação
+## Próxima continuidade
 
 Depois de Estagiários, restam na aplicação visual da Etapa 1.4:
 
@@ -83,4 +64,4 @@ Depois de Estagiários, restam na aplicação visual da Etapa 1.4:
 /administracao/cadastros
 ```
 
-Os três caminhos de Relatórios podem ser tratados como um único bloco visual. Depois deles, Administração/Cadastros fecha as interfaces operacionais principais da Etapa 1.4.
+Os três caminhos de Relatórios devem ser tratados como um único bloco visual. Depois deles, Administração/Cadastros fecha as interfaces operacionais principais da Etapa 1.4.
