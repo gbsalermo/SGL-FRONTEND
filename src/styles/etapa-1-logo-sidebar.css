@@ -1,0 +1,46 @@
+/*
+ * Acabamento final da Etapa 1 — alinhamento óptico da marca SGL.
+ *
+ * O arquivo da logo possui peso visual levemente deslocado para a esquerda.
+ * Os containers já usam centralização geométrica; este ajuste faz a
+ * compensação óptica sem alterar o asset original nem o comportamento dos
+ * layouts autenticados.
+ */
+
+/* Gestão — aplica somente com a sidebar expandida para não afetar o recorte
+ * compacto usado quando a navegação está recolhida. */
+.gestao-shell:not(.gestao-shell--collapsed) .gestao-brand {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gestao-shell:not(.gestao-shell--collapsed) .gestao-brand img {
+  display: block;
+  max-width: calc(100% - 24px);
+  margin-inline: auto;
+  transform: translateX(8px);
+}
+
+/* Solicitante — mesma compensação óptica para manter a identidade da marca
+ * na mesma posição percebida entre as duas interfaces autenticadas. */
+.solicitante-sidebar__brand {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.solicitante-sidebar__brand img {
+  display: block;
+  max-width: calc(100% - 24px);
+  margin-inline: auto;
+  transform: translateX(8px);
+}
+
+/* A versão recolhida da Gestão continua usando o comportamento próprio do
+ * layout, sem deslocamento adicional. */
+.gestao-shell--collapsed .gestao-brand img {
+  transform: none;
+}
