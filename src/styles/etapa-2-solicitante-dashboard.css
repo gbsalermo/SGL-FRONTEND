@@ -1,0 +1,394 @@
+/*
+ * Etapa 2.1 — piloto visual do Dark Mode no Dashboard do Solicitante (/inicio).
+ *
+ * Objetivo:
+ * - validar a paleta definitiva antes da refatoração estrutural do tema;
+ * - aproximar o SGL das referências aprovadas: navy profundo + superfícies em camadas;
+ * - preservar a diferenciação por domínio já aprovada no light:
+ *   Pedido = azul; Resíduo = creme/âmbar.
+ *
+ * Esta folha é propositalmente carregada depois das camadas provisórias atuais de Dark Mode.
+ */
+
+body.sgl-dark-active .solicitante-shell {
+  --s2-bg: #07111f;
+  --s2-bg-deep: #050d19;
+  --s2-surface: #0d1929;
+  --s2-surface-raised: #111f33;
+  --s2-surface-hover: #172941;
+  --s2-border: #233650;
+  --s2-border-strong: #315071;
+  --s2-text: #f5f8fc;
+  --s2-text-muted: #9fb0c6;
+  --s2-text-subtle: #7488a4;
+  --s2-blue: #5b9df8;
+  --s2-blue-strong: #3183ed;
+  --s2-green: #54d59a;
+  --s2-amber: #f2be55;
+  --s2-red: #ff7180;
+  --s2-violet: #9d82f5;
+
+  background: var(--s2-bg) !important;
+  color: var(--s2-text) !important;
+}
+
+body.sgl-dark-active .solicitante-workspace,
+body.sgl-dark-active .solicitante-main {
+  background: var(--s2-bg) !important;
+  color: var(--s2-text) !important;
+}
+
+body.sgl-dark-active .solicitante-sidebar {
+  background: linear-gradient(180deg, #061226 0%, #0a1930 55%, #0c2140 100%) !important;
+  box-shadow: inset -1px 0 0 rgb(108 149 201 / 14%) !important;
+}
+
+body.sgl-dark-active .solicitante-topbar {
+  border-color: #1d3049 !important;
+  background: #071426 !important;
+  color: var(--s2-text) !important;
+}
+
+body.sgl-dark-active .solicitante-main .user-dashboard {
+  color: var(--s2-text) !important;
+  background: transparent !important;
+}
+
+/* Cabeçalho */
+body.sgl-dark-active .solicitante-main .welcome-copy h1,
+body.sgl-dark-active .solicitante-main .section-heading h2,
+body.sgl-dark-active .solicitante-main .tracking-heading h2,
+body.sgl-dark-active .solicitante-main .lower-heading h2 {
+  color: var(--s2-text) !important;
+}
+
+body.sgl-dark-active .solicitante-main .eyebrow {
+  color: #72a9ff !important;
+}
+
+body.sgl-dark-active .solicitante-main .user-context,
+body.sgl-dark-active .solicitante-main .section-heading p {
+  color: var(--s2-text-muted) !important;
+}
+
+body.sgl-dark-active .solicitante-main .user-context i {
+  background: #30445f !important;
+}
+
+body.sgl-dark-active .solicitante-main .date-card,
+body.sgl-dark-active .solicitante-main .refresh-button {
+  border-color: var(--s2-border) !important;
+  background: var(--s2-surface) !important;
+  color: #c9d7e9 !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .solicitante-main .refresh-button:hover:not(:disabled) {
+  border-color: var(--s2-border-strong) !important;
+  background: var(--s2-surface-hover) !important;
+  color: #ffffff !important;
+}
+
+/* Indicadores superiores */
+body.sgl-dark-active .solicitante-main .overview-card {
+  border-color: var(--s2-border) !important;
+  background: linear-gradient(180deg, #101d30 0%, #0c1828 100%) !important;
+  color: var(--s2-text) !important;
+  box-shadow: 0 10px 24px rgb(0 5 14 / 14%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-card:hover {
+  border-color: #3a5577 !important;
+  background: linear-gradient(180deg, #14243a 0%, #101e31 100%) !important;
+  box-shadow: 0 12px 28px rgb(0 5 14 / 24%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-copy small {
+  color: #bac7d8 !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-copy em {
+  color: var(--s2-text-muted) !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-card--red .overview-icon {
+  background: #3a1d29 !important;
+  color: var(--s2-red) !important;
+}
+body.sgl-dark-active .solicitante-main .overview-card--red .overview-copy strong {
+  color: #ff8290 !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-card--green .overview-icon {
+  background: #153429 !important;
+  color: var(--s2-green) !important;
+}
+body.sgl-dark-active .solicitante-main .overview-card--green .overview-copy strong {
+  color: #66dfa8 !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-card--orange .overview-icon {
+  background: #3a2c16 !important;
+  color: var(--s2-amber) !important;
+}
+body.sgl-dark-active .solicitante-main .overview-card--orange .overview-copy strong {
+  color: #f6c967 !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-card--blue .overview-icon {
+  background: #15345c !important;
+  color: #77adff !important;
+}
+body.sgl-dark-active .solicitante-main .overview-card--blue .overview-copy strong {
+  color: #7eb2ff !important;
+}
+
+/*
+ * Acompanhamentos: mantém a leitura por domínio aprovada no Light.
+ * Azul e creme continuam sendo os fundos-base, apenas em versões escuras e menos luminosas.
+ */
+body.sgl-dark-active .solicitante-main .tracking-card--pedido {
+  border-color: #28517e !important;
+  background: linear-gradient(145deg, #102640 0%, #0d1d33 100%) !important;
+  box-shadow: inset 0 1px 0 rgb(111 166 236 / 5%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo {
+  border-color: #6a5427 !important;
+  background: linear-gradient(145deg, #292315 0%, #201c13 100%) !important;
+  box-shadow: inset 0 1px 0 rgb(246 204 116 / 5%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-heading button {
+  border-color: #355170 !important;
+  background: rgb(8 20 37 / 42%) !important;
+  color: #d6e3f3 !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .tracking-heading button {
+  border-color: #725c31 !important;
+  background: rgb(29 24 14 / 52%) !important;
+  color: #f2dfb7 !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-identity,
+body.sgl-dark-active .solicitante-main .tracking-identity:hover {
+  background: transparent !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-identity strong {
+  color: #9bc3ff !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .tracking-identity strong {
+  color: #f0cd80 !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-identity small,
+body.sgl-dark-active .solicitante-main .progress-step small,
+body.sgl-dark-active .solicitante-main .tracking-state {
+  color: #9bacc2 !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .tracking-identity small,
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step small {
+  color: #b9aa87 !important;
+}
+
+body.sgl-dark-active .solicitante-main .identity-icon--blue {
+  background: #163c6a !important;
+  color: #78b4ff !important;
+}
+body.sgl-dark-active .solicitante-main .identity-icon--orange {
+  background: #4a3618 !important;
+  color: #f5c35f !important;
+}
+
+body.sgl-dark-active .solicitante-main .progress-step strong {
+  color: #d5deea !important;
+}
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step strong {
+  color: #e7dcc4 !important;
+}
+
+body.sgl-dark-active .solicitante-main .progress-step:not(:last-child)::after {
+  background: #30445f !important;
+}
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step:not(:last-child)::after {
+  background: #55492d !important;
+}
+
+body.sgl-dark-active .solicitante-main .progress-step--done:not(:last-child)::after,
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step--done:not(:last-child)::after {
+  background: #4c8fe9 !important;
+}
+
+body.sgl-dark-active .solicitante-main .progress-marker {
+  border-color: #496079 !important;
+  background: #0e1d30 !important;
+  color: #91a3bb !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-marker {
+  border-color: #77653f !important;
+  background: #211d14 !important;
+  color: #bda978 !important;
+}
+
+body.sgl-dark-active .solicitante-main .progress-step--done .progress-marker,
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step--done .progress-marker {
+  border-color: #357de0 !important;
+  background: #357de0 !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .solicitante-main .progress-step--current .progress-marker,
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step--current .progress-marker {
+  border-color: #62a5ff !important;
+  background: #102640 !important;
+  color: #8fc0ff !important;
+  box-shadow: 0 0 0 4px rgb(54 126 224 / 18%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .progress-step--current strong,
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step--current strong {
+  color: #8fc0ff !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-message {
+  border-color: #2b527d !important;
+  background: #112b49 !important;
+  color: #c7d9ef !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .tracking-message--orange {
+  border-color: #765d2a !important;
+  background: #302716 !important;
+  color: #ecd69f !important;
+}
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .tracking-message--orange svg {
+  stroke: #f0bd55 !important;
+}
+
+/* Painéis inferiores */
+body.sgl-dark-active .solicitante-main .lower-card {
+  border-color: var(--s2-border) !important;
+  background: var(--s2-surface) !important;
+  color: var(--s2-text) !important;
+  box-shadow: 0 10px 24px rgb(0 5 14 / 12%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .lower-heading {
+  border-color: var(--s2-border) !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .solicitante-main .lower-icon {
+  color: #7eaff7 !important;
+}
+
+body.sgl-dark-active .solicitante-main .quick-actions-grid button {
+  border-color: var(--s2-border) !important;
+  background: #101d30 !important;
+  color: var(--s2-text) !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .solicitante-main .quick-actions-grid button:nth-child(1),
+body.sgl-dark-active .solicitante-main .quick-actions-grid button:nth-child(3) {
+  border-color: #254a74 !important;
+  background: #10223a !important;
+}
+
+body.sgl-dark-active .solicitante-main .quick-actions-grid button:nth-child(2),
+body.sgl-dark-active .solicitante-main .quick-actions-grid button:nth-child(4) {
+  border-color: #655126 !important;
+  background: #241f14 !important;
+}
+
+body.sgl-dark-active .solicitante-main .quick-actions-grid button strong {
+  color: #eef4fb !important;
+}
+body.sgl-dark-active .solicitante-main .quick-actions-grid button small {
+  color: var(--s2-text-muted) !important;
+}
+body.sgl-dark-active .solicitante-main .quick-actions-grid button:nth-child(2) small,
+body.sgl-dark-active .solicitante-main .quick-actions-grid button:nth-child(4) small {
+  color: #b9aa87 !important;
+}
+
+body.sgl-dark-active .solicitante-main .quick-icon--blue {
+  background: #163c6a !important;
+  color: #7ab6ff !important;
+}
+body.sgl-dark-active .solicitante-main .quick-icon--orange {
+  background: #493617 !important;
+  color: #f2be55 !important;
+}
+body.sgl-dark-active .solicitante-main .quick-icon--green {
+  background: #17362a !important;
+  color: #5cdaa0 !important;
+}
+body.sgl-dark-active .solicitante-main .quick-chevron {
+  color: #8ca0bb !important;
+}
+
+body.sgl-dark-active .solicitante-main .updates-list button {
+  border-color: #1e3048 !important;
+  background: transparent !important;
+  color: var(--s2-text) !important;
+}
+body.sgl-dark-active .solicitante-main .updates-list button:hover {
+  background: #14243a !important;
+}
+body.sgl-dark-active .solicitante-main .update-copy strong {
+  color: #eaf0f8 !important;
+}
+body.sgl-dark-active .solicitante-main .update-copy small,
+body.sgl-dark-active .solicitante-main .updates-list time,
+body.sgl-dark-active .solicitante-main .updates-state {
+  color: var(--s2-text-muted) !important;
+}
+
+body.sgl-dark-active .solicitante-main .update-icon--blue {
+  background: #15345d !important;
+  color: #75adff !important;
+}
+body.sgl-dark-active .solicitante-main .update-icon--green {
+  background: #153429 !important;
+  color: #58d69c !important;
+}
+body.sgl-dark-active .solicitante-main .update-icon--orange {
+  background: #3c2e18 !important;
+  color: #f3bd55 !important;
+}
+body.sgl-dark-active .solicitante-main .update-icon--slate {
+  background: #202c3d !important;
+  color: #a9b8ca !important;
+}
+
+body.sgl-dark-active .solicitante-main .dashboard-alert {
+  border-color: #725727 !important;
+  background: #2b2417 !important;
+  color: #f0d498 !important;
+}
+body.sgl-dark-active .solicitante-main .dashboard-alert button {
+  color: #8ebcff !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-dark-active .solicitante-main .quick-actions-grid button:hover {
+    transform: none !important;
+    border-color: #3d5a7b !important;
+    filter: brightness(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-dark-active .solicitante-main .overview-card,
+  body.sgl-dark-active .solicitante-main .quick-actions-grid button,
+  body.sgl-dark-active .solicitante-main .refresh-button {
+    transition: none !important;
+    transform: none !important;
+  }
+}
