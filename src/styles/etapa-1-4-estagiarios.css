@@ -1,0 +1,418 @@
+/*
+ * Etapa 1.4 — aplicação visual em Estagiários.
+ * Escopo: Gestão/Admin /estagiarios.
+ * Somente tema claro autenticado. Nenhuma regra de negócio é alterada.
+ */
+
+body.sgl-light-active .gestao-main .intern-page {
+  color: var(--sgl-text);
+}
+
+body.sgl-light-active .gestao-main .intern-page .page-heading {
+  gap: var(--sgl-space-6);
+  margin-bottom: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .intern-page .breadcrumb {
+  margin-bottom: var(--sgl-space-2);
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  letter-spacing: .04em;
+}
+
+body.sgl-light-active .gestao-main .intern-page .page-heading h1 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
+}
+
+body.sgl-light-active .gestao-main .intern-page .page-heading p:not(.breadcrumb) {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page .heading-actions,
+body.sgl-light-active .gestao-main .intern-page .drawer-actions,
+body.sgl-light-active .gestao-main .intern-page .form-actions {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .intern-page .secondary-action,
+body.sgl-light-active .gestao-main .intern-page .detail-action,
+body.sgl-light-active .gestao-main .intern-page .primary-action,
+body.sgl-light-active .gestao-main .intern-page .danger-action {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-4);
+  border-radius: var(--sgl-radius-control);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .intern-page .primary-action {
+  border-color: var(--sgl-primary);
+  background: var(--sgl-primary);
+  color: #fff;
+}
+
+body.sgl-light-active .gestao-main .intern-page .secondary-action,
+body.sgl-light-active .gestao-main .intern-page .detail-action {
+  border-color: var(--sgl-border-strong);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+}
+
+body.sgl-light-active .gestao-main .intern-page .danger-action {
+  border-color: #FECACA;
+  background: #FEF2F2;
+  color: #B42318;
+}
+
+body.sgl-light-active .gestao-main .intern-page .metrics-grid {
+  gap: var(--sgl-space-3);
+  margin-bottom: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .intern-page .metrics-grid article {
+  padding: var(--sgl-card-padding);
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .intern-page .metrics-grid article.warning {
+  border-color: #FDE68A;
+  background: #FFFBEB;
+}
+
+body.sgl-light-active .gestao-main .intern-page .metrics-grid article.danger {
+  border-color: #FECACA;
+  background: #FEF2F2;
+}
+
+body.sgl-light-active .gestao-main .intern-page .metrics-grid span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+  text-transform: none;
+}
+
+body.sgl-light-active .gestao-main .intern-page .metrics-grid strong {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-primary-dark);
+  font-size: 26px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .metrics-grid small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page .feedback {
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  border-radius: var(--sgl-radius-surface);
+  font-size: var(--sgl-font-label);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page .workspace-card {
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .intern-page .filters-grid {
+  gap: var(--sgl-space-3);
+  padding: var(--sgl-space-4);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .gestao-main .intern-page .field {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .intern-page .field > span,
+body.sgl-light-active .gestao-main .intern-page .unit-readonly span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+  text-transform: none;
+}
+
+body.sgl-light-active .gestao-main .intern-page .field input,
+body.sgl-light-active .gestao-main .intern-page .field select {
+  height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page .field textarea {
+  padding: var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page .field small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page .filter-summary {
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  border-color: var(--sgl-border);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .intern-page .filter-summary button {
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .intern-page .state-box {
+  padding: var(--sgl-space-8);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page th {
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+body.sgl-light-active .gestao-main .intern-page td {
+  padding: var(--sgl-space-4);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page td strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .intern-page td small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .intern-page tbody tr {
+  transition: background-color var(--sgl-transition-fast) ease;
+}
+
+body.sgl-light-active .gestao-main .intern-page tbody tr:hover {
+  background: #F5F8FD;
+}
+
+body.sgl-light-active .gestao-main .intern-page .actions-column {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .intern-page .status-pill {
+  min-height: 26px;
+  align-items: center;
+  padding: 0 10px;
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .intern-page .status-pill--active {
+  background: #E7F7ED;
+  color: var(--sgl-success);
+}
+
+body.sgl-light-active .gestao-main .intern-page .status-pill--closed {
+  background: #EEF1F5;
+  color: var(--sgl-text-muted);
+}
+
+/* Drawer e modais */
+body.sgl-light-active .gestao-main .intern-page .detail-drawer {
+  width: min(760px, 96vw);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-drawer > header,
+body.sgl-light-active .gestao-main .intern-page .form-modal > header {
+  padding: var(--sgl-space-6);
+  border-bottom-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-drawer header h2,
+body.sgl-light-active .gestao-main .intern-page .form-modal header h2,
+body.sgl-light-active .gestao-main .intern-page .confirm-modal h2 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-section-title);
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-drawer header p,
+body.sgl-light-active .gestao-main .intern-page .confirm-modal p {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-drawer header > button,
+body.sgl-light-active .gestao-main .intern-page .form-modal header > button {
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-text);
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-content {
+  gap: var(--sgl-space-6);
+  padding: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-grid {
+  gap: var(--sgl-space-3);
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-grid article,
+body.sgl-light-active .gestao-main .intern-page .period-card,
+body.sgl-light-active .gestao-main .intern-page .unit-readonly,
+body.sgl-light-active .gestao-main .intern-page .confirm-summary,
+body.sgl-light-active .gestao-main .intern-page .observation {
+  padding: var(--sgl-space-4);
+  border-radius: var(--sgl-radius-surface);
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-grid article,
+body.sgl-light-active .gestao-main .intern-page .unit-readonly,
+body.sgl-light-active .gestao-main .intern-page .confirm-summary {
+  border-color: var(--sgl-border);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .gestao-main .intern-page .period-card {
+  border-color: #D8E5F8;
+  background: #F4F8FF;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-grid span,
+body.sgl-light-active .gestao-main .intern-page .period-card > span,
+body.sgl-light-active .gestao-main .intern-page .confirm-summary span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+  text-transform: none;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-grid strong,
+body.sgl-light-active .gestao-main .intern-page .period-card strong,
+body.sgl-light-active .gestao-main .intern-page .unit-readonly strong,
+body.sgl-light-active .gestao-main .intern-page .confirm-summary strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page .period-card p,
+body.sgl-light-active .gestao-main .intern-page .observation {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-content h3 {
+  margin-bottom: var(--sgl-space-2);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-card-title);
+  text-transform: none;
+}
+
+body.sgl-light-active .gestao-main .intern-page .form-modal,
+body.sgl-light-active .gestao-main .intern-page .confirm-modal {
+  border-radius: var(--sgl-radius-floating);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .intern-page .form-modal {
+  width: min(720px, 96vw);
+}
+
+body.sgl-light-active .gestao-main .intern-page .form-modal header span {
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .intern-page .form-content {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .intern-page .form-grid {
+  gap: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .intern-page .confirm-modal {
+  padding: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .intern-page button:focus-visible,
+body.sgl-light-active .gestao-main .intern-page input:focus-visible,
+body.sgl-light-active .gestao-main .intern-page select:focus-visible,
+body.sgl-light-active .gestao-main .intern-page textarea:focus-visible {
+  outline: var(--sgl-focus-width) solid var(--sgl-focus);
+  outline-offset: var(--sgl-focus-offset);
+}
+
+@media (max-width: 1100px) {
+  body.sgl-light-active .gestao-main .intern-page .metrics-grid,
+  body.sgl-light-active .gestao-main .intern-page .filters-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .field--search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 680px) {
+  body.sgl-light-active .gestao-main .intern-page .page-heading,
+  body.sgl-light-active .gestao-main .intern-page .heading-actions,
+  body.sgl-light-active .gestao-main .intern-page .drawer-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metrics-grid,
+  body.sgl-light-active .gestao-main .intern-page .filters-grid,
+  body.sgl-light-active .gestao-main .intern-page .form-grid,
+  body.sgl-light-active .gestao-main .intern-page .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .field--search {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-light-active .gestao-main .intern-page * {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
