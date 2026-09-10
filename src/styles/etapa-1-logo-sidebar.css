@@ -133,6 +133,10 @@
   align-items: center !important;
   justify-content: center !important;
   pointer-events: auto !important;
+}
+
+.gestao-shell.gestao-shell--collapsed .gestao-nav > a,
+.gestao-shell.gestao-shell--collapsed .gestao-nav-parent__main {
   cursor: pointer !important;
 }
 
@@ -146,7 +150,6 @@
   align-items: center !important;
   justify-content: center !important;
   pointer-events: auto !important;
-  cursor: pointer !important;
 }
 
 .gestao-shell.gestao-shell--collapsed .gestao-nav svg,
@@ -162,12 +165,6 @@
   width: calc(100% - var(--sidebar-width)) !important;
   max-width: calc(100% - var(--sidebar-width)) !important;
   margin-left: var(--sidebar-width) !important;
-}
-
-/* Não deixa painéis flutuantes invisíveis bloquearem a navegação recolhida. */
-.gestao-shell.gestao-shell--collapsed .gestao-search-panel:not(:has(input:focus)),
-.gestao-shell.gestao-shell--collapsed .gestao-alert-panel[style*='display: none'] {
-  pointer-events: none !important;
 }
 
 /* Em telas móveis o SGL deixa de operar com a sidebar compacta. */
