@@ -112,6 +112,43 @@ A primeira aplicação será validada visualmente antes de congelar os valores f
 
 Esses valores são a base inicial do piloto, não uma autorização para espalhar hexadecimais pelas Views. Depois da validação visual eles devem convergir para tokens semânticos definitivos.
 
+## Regra obrigatória de paridade visual com o Light Mode
+
+O Dark Mode **não cria uma segunda linguagem visual para o SGL**.
+
+Ao adaptar qualquer interface, a versão escura deve preservar o padrão já aprovado na Etapa 1 para:
+
+- tamanho e peso das palavras;
+- hierarquia entre título, seção, card, corpo, label e helper;
+- organização dos blocos;
+- espaçamento e densidade;
+- dimensões de controles e botões;
+- alinhamento;
+- legibilidade;
+- intensidade visual relativa entre informação principal e secundária;
+- destaque de ações e estados.
+
+A mudança de tema deve alterar principalmente:
+
+- cores de fundo e superfícies;
+- cores de borda;
+- contraste de texto;
+- cores de hover/foco;
+- adaptação das cores semânticas ao fundo escuro.
+
+Portanto, antes de considerar uma tela pronta no Dark Mode, deve-se comparar diretamente com sua versão Light e confirmar:
+
+```text
+mesma hierarquia
++ mesma organização
++ mesma densidade
++ mesma legibilidade
++ mesma força relativa dos destaques
++ paleta adaptada ao escuro
+```
+
+Não reduzir fontes, enfraquecer títulos, achatar cards ou alterar a organização apenas por estar no modo escuro.
+
 ## Comportamento semântico
 
 ### Azul
@@ -248,10 +285,10 @@ Validar Gestão e Solicitante, incluindo modais, drawers, dropdowns, tabelas, fi
 ## Ponto atual de continuidade
 
 ```text
-Etapa 2.1
-→ Dashboard do Solicitante aplicado na branch feat/etapa-2-dark-mode
-→ aguardando validação visual em /inicio
-→ próxima interface após aprovação: /meus-pedidos
+Solicitante — concluído e validado
+Gestão /dashboard — validado
+→ próxima interface: Gestão /pedidos
+→ toda nova adaptação deve obedecer à paridade visual obrigatória com o Light Mode
 ```
 
 ## Critério de conclusão
