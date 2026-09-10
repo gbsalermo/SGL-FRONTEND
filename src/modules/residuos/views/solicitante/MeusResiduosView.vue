@@ -317,7 +317,7 @@ onMounted(carregar)
 .empty-state strong { display: block; color: #263750; }
 .empty-state p { margin: 6px 0 0; font-size: 12px; }
 .cards-list { padding: 8px 18px 18px; }
-.residuo-card { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 22px; padding: 18px 2px; border: 0; border-bottom: 1px solid #e7ecf3; background: transparent; color: inherit; text-align: left; cursor: pointer; transition: background 160ms ease, box-shadow 160ms ease; }
+.residuo-card { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 22px; padding: 18px 16px 18px 18px; border: 0; border-bottom: 1px solid #e7ecf3; background: transparent; color: inherit; text-align: left; cursor: pointer; transition: background 160ms ease, box-shadow 160ms ease; }
 .residuo-card:last-child { border-bottom: 0; }
 .residuo-card:hover { background: linear-gradient(90deg, rgb(35 82 176 / 3%), transparent); }
 .residuo-card--target { background: #eef5ff !important; box-shadow: inset 4px 0 0 #2d6bc4; }
