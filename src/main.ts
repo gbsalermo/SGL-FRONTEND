@@ -39,7 +39,20 @@ import './styles/etapa-2-gestao-estoque.css'
 import './styles/etapa-2-gestao-movimentacoes.css'
 import './styles/etapa-2-gestao-estagiarios.css'
 
+const app = createApp(App)
+const pinia = createPinia()
+
+instalarCompatibilidadeDashboard(router)
+
+app.use(pinia)
+app.use(router)
+app.use(vuetify)
+
 aplicarTemaDaRota(window.location.pathname)
+
+router.afterEach((to) => {
+  aplicarTemaDaRota(to.path)
+})
 
 const session = useSessionStore(pinia)
 let timerExpiracao: ReturnType<typeof setTimeout> | null = null
