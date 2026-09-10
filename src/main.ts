@@ -37,6 +37,7 @@ import './styles/etapa-2-meus-pedidos.css'
 import './styles/etapa-2-solicitante-restante.css'
 import './styles/etapa-2-gestao-dashboard.css'
 import './styles/etapa-2-gestao-pedidos.css'
+import './styles/etapa-2-gestao-estoque.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
