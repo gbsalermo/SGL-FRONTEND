@@ -34,6 +34,7 @@ import './styles/dark-mode-consistency.css'
 import './styles/etapa-2-solicitante-dashboard.css'
 import './styles/etapa-2-solicitante-dashboard-ajustes.css'
 import './styles/etapa-2-meus-pedidos.css'
+import './styles/etapa-2-solicitante-restante.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
