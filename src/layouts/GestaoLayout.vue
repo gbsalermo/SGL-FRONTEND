@@ -477,7 +477,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="gestao-tools">
-        <div v-if="!recolhida" class="gestao-tool gestao-tool--appearance" title="Aparência">
+        <div v-show="!recolhida" class="gestao-tool gestao-tool--appearance" title="Aparência">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="12" r="4" />
             <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
@@ -511,7 +511,7 @@ onBeforeUnmount(() => {
         </div>
 
         <button
-          v-else
+          v-show="recolhida"
           class="gestao-tool gestao-tool--theme-compact"
           type="button"
           :title="tema === 'light' ? 'Ativar modo escuro' : 'Ativar modo claro'"
@@ -541,7 +541,7 @@ onBeforeUnmount(() => {
             <svg class="gestao-tool__alert-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
             </svg>
-            <span v-if="!recolhida">Alertas operacionais</span>
+            <span v-show="!recolhida">Alertas operacionais</span>
             <small
               v-if="totalAlertas > 0"
               class="gestao-alert-badge"
@@ -615,15 +615,15 @@ onBeforeUnmount(() => {
       </div>
 
       <nav class="gestao-nav" aria-label="Navegação da gestão">
-        <p v-if="!recolhida">PRINCIPAL</p>
+        <p v-show="!recolhida">PRINCIPAL</p>
         <router-link to="/dashboard" title="Dashboard">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3 11 12 4l9 7v9H3zM9 20v-6h6v6" />
           </svg>
-          <span v-if="!recolhida">Dashboard</span>
+          <span v-show="!recolhida">Dashboard</span>
         </router-link>
 
-        <p v-if="!recolhida" class="gestao-nav__group">OPERAÇÃO</p>
+        <p v-show="!recolhida" class="gestao-nav__group">OPERAÇÃO</p>
 
         <div class="gestao-nav-parent" :class="{ 'gestao-nav-parent--active': route.path === '/pedidos' }">
           <button class="gestao-nav-parent__main" type="button" title="Pedidos" @click="abrirTodosPedidos">
@@ -631,10 +631,10 @@ onBeforeUnmount(() => {
               <rect x="5" y="4" width="14" height="16" rx="1" />
               <path d="M8 8h8M8 12h8M8 16h5" />
             </svg>
-            <span v-if="!recolhida">Pedidos</span>
+            <span v-show="!recolhida">Pedidos</span>
           </button>
           <button
-            v-if="!recolhida"
+            v-show="!recolhida"
             class="gestao-nav-parent__toggle"
             type="button"
             :aria-label="pedidosAbertos ? 'Recolher filtros de pedidos' : 'Expandir filtros de pedidos'"
@@ -644,7 +644,7 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
-        <div v-if="pedidosAbertos && !recolhida" class="gestao-subnav">
+        <div v-show="pedidosAbertos && !recolhida" class="gestao-subnav">
           <router-link :to="{ path: '/pedidos' }" :class="{ 'gestao-subnav--active': !route.query.status }">Todos os pedidos</router-link>
           <router-link :to="{ path: '/pedidos', query: { status: 'PENDENTE' } }">Pendentes</router-link>
           <router-link :to="{ path: '/pedidos', query: { status: 'APROVADO' } }">Aprovados</router-link>
@@ -657,19 +657,19 @@ onBeforeUnmount(() => {
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9" />
           </svg>
-          <span v-if="!recolhida">Estoque</span>
+          <span v-show="!recolhida">Estoque</span>
         </router-link>
         <router-link to="/movimentacoes" title="Movimentações">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 8h14M15 5l3 3-3 3M20 16H6M9 13l-3 3 3 3" />
           </svg>
-          <span v-if="!recolhida">Movimentações</span>
+          <span v-show="!recolhida">Movimentações</span>
         </router-link>
         <router-link to="/relatorios" title="Relatórios">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 20V10h3v10M11 20V4h3v16M17 20v-7h3v7" />
           </svg>
-          <span v-if="!recolhida">Relatórios</span>
+          <span v-show="!recolhida">Relatórios</span>
         </router-link>
 
         <router-link to="/estagiarios" title="Estagiários">
@@ -677,40 +677,40 @@ onBeforeUnmount(() => {
             <circle cx="9" cy="8" r="3" />
             <path d="M3 20v-2a6 6 0 0 1 12 0v2M16 7h5M18.5 4.5v5" />
           </svg>
-          <span v-if="!recolhida">Estagiários</span>
+          <span v-show="!recolhida">Estagiários</span>
         </router-link>
 
         <router-link to="/residuos" title="Resíduos">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 5h10l-1 16H8L7 5ZM5 5h14M9 5V3h6v2M10 9v8M14 9v8" />
           </svg>
-          <span v-if="!recolhida">Resíduos</span>
+          <span v-show="!recolhida">Resíduos</span>
         </router-link>
 
-        <p v-if="!recolhida" class="gestao-nav__group">SOLICITAÇÕES</p>
+        <p v-show="!recolhida" class="gestao-nav__group">SOLICITAÇÕES</p>
         <router-link to="/solicitacoes/novo" title="Novo pedido">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-          <span v-if="!recolhida">Novo pedido</span>
+          <span v-show="!recolhida">Novo pedido</span>
         </router-link>
         <router-link to="/solicitacoes/meus-pedidos" title="Meus pedidos">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" /></svg>
-          <span v-if="!recolhida">Meus pedidos</span>
+          <span v-show="!recolhida">Meus pedidos</span>
         </router-link>
 
         <template v-if="ehAdministrador">
-          <p v-if="!recolhida" class="gestao-nav__group">ADMINISTRAÇÃO</p>
+          <p v-show="!recolhida" class="gestao-nav__group">ADMINISTRAÇÃO</p>
           <div class="gestao-nav__future" title="Cadastros — etapa de Administração">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="9" cy="8" r="3" />
               <path d="M3 20v-2a6 6 0 0 1 12 0v2M17 8h4M19 6v4" />
             </svg>
-            <span v-if="!recolhida">Cadastros</span>
-            <small v-if="!recolhida">em breve</small>
+            <span v-show="!recolhida">Cadastros</span>
+            <small v-show="!recolhida">em breve</small>
           </div>
         </template>
       </nav>
 
-      <GestaoUserProfile :compact="recolhida" />
+      <GestaoUserProfile :compact="false" />
     </aside>
 
     <div class="gestao-workspace">
@@ -838,9 +838,43 @@ onBeforeUnmount(() => {
 .gestao-shell { --sidebar-width: 264px; min-height: 100vh; background: var(--sgl-background, #f5f7fa); color: var(--sgl-text, #1a1a2e); }
 .gestao-shell--collapsed { --sidebar-width: 72px; }
 .gestao-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; width: var(--sidebar-width); height: 100vh; display: flex; flex-direction: column; padding: 18px 14px 16px; background: linear-gradient(180deg, #07142f 0%, #0b1b3a 55%, #0d2147 100%); color: #fff; transition: width 300ms ease; }
-.gestao-brand { min-height: 92px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgb(255 255 255 / 10%); }
-.gestao-brand img { width: 178px; max-height: 72px; object-fit: contain; filter: drop-shadow(0 4px 14px rgb(0 0 0 / 18%)); transition: width 300ms ease; }
-.gestao-shell--collapsed .gestao-brand img { width: 42px; object-fit: cover; object-position: left; }
+.gestao-brand {
+  width: 100%;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+.gestao-brand img {
+  display: block;
+  width: 190px;
+  max-width: 100%;
+  max-height: 76px;
+  margin: 0 auto;
+  object-fit: contain;
+  transform: translate(-4px, -6px);
+  filter: drop-shadow(0 4px 14px rgb(0 0 0 / 18%));
+  transition: width 300ms ease, transform 300ms ease;
+}
+.gestao-shell--collapsed .gestao-brand {
+  justify-content: flex-start;
+  padding-inline: 0;
+  overflow: hidden;
+}
+
+.gestao-shell--collapsed .gestao-brand img {
+  width: 190px;
+  max-width: none;
+  max-height: 76px;
+  flex: 0 0 190px;
+  margin: 0;
+  object-fit: contain;
+  object-position: left center;
+  transform: translate(-2px, -5px);
+}
 .gestao-tools { position: relative; padding: 16px 0 6px; }
 .gestao-tool, .gestao-nav a, .gestao-nav__future, .gestao-nav-parent { width: 100%; min-height: 42px; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; background: transparent; color: #eef4ff; font: inherit; font-size: 12px; font-weight: 600; text-decoration: none; }
 .gestao-tool, .gestao-nav a, .gestao-nav__future { padding: 0 11px; }
@@ -899,7 +933,19 @@ button.gestao-tool { cursor: pointer; }
 .gestao-nav__future { position: relative; color: #a6b6cf; cursor: default; }
 .gestao-nav__future small { margin-left: auto; color: #6f86aa; font-size: 9px; font-weight: 700; }
 .gestao-shell--collapsed .gestao-nav a, .gestao-shell--collapsed .gestao-tool, .gestao-shell--collapsed .gestao-nav__future, .gestao-shell--collapsed .gestao-nav-parent { justify-content: center; padding-inline: 0; }
-.gestao-shell--collapsed .gestao-nav-parent__main { justify-content: center; padding-inline: 0; }
+.gestao-shell--collapsed .gestao-nav-parent__main {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.gestao-shell--collapsed :deep(.gestao-profile) {
+  justify-content: center;
+}
+
+.gestao-shell--collapsed :deep(.gestao-profile__copy),
+.gestao-shell--collapsed :deep(.gestao-profile__settings) {
+  display: none;
+}
 .gestao-workspace { min-width: 0; margin-left: var(--sidebar-width); transition: margin-left 300ms ease; }
 .gestao-topbar { position: sticky; top: 0; z-index: 20; min-height: 72px; display: flex; align-items: center; gap: 10px; padding: 0 24px; background: linear-gradient(90deg, #08162f 0%, #0b1934 100%); color: #fff; box-shadow: 0 1px 0 rgb(255 255 255 / 7%); }
 .gestao-topbar button { border: 0; background: transparent; color: inherit; cursor: pointer; }
