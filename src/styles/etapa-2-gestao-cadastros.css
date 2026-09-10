@@ -84,16 +84,16 @@ body.sgl-dark-active .gestao-main .admin-page .scope-note {
   gap: var(--sgl-space-3);
   margin-bottom: var(--sgl-space-4);
   padding: var(--sgl-space-3) var(--sgl-space-4);
-  border-color: #BFDBFE;
+  border-color: #315071;
   border-radius: var(--sgl-radius-surface);
-  background: #F8FBFF;
+  background: #111F33;
   color: var(--sgl-text-muted);
   font-size: var(--sgl-font-body);
   line-height: var(--sgl-line-height-body);
 }
 
 body.sgl-dark-active .gestao-main .admin-page .scope-note strong {
-  color: var(--sgl-primary-dark);
+  color: var(--sgl-primary-light);
   font-weight: var(--sgl-font-weight-semibold);
 }
 
