@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { type RouteLocationRaw, useRoute, useRouter } from 'vue-router'
-import { useTheme } from 'vuetify'
-
 import GestaoUserProfile from '@/components/GestaoUserProfile.vue'
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { gestaoShellService, type BaseBuscaGestao } from '@/services/gestaoShellService'
 import { useSessionStore } from '@/stores/session'
+import { alternarTema, aplicarTema, tema } from '@/services/themeService'
 
-const TEMA_STORAGE_KEY = 'sgl.theme'
-
-type TemaAplicacao = 'light' | 'dark'
 type TipoResultadoBusca = 'pedido' | 'produto' | 'laboratorio' | 'usuario'
 
 type ResumoAlertas = {
@@ -34,12 +30,8 @@ interface ResultadoBuscaGlobal {
 const router = useRouter()
 const route = useRoute()
 const session = useSessionStore()
-const vuetifyTheme = useTheme()
-
 const recolhida = ref(false)
 const pedidosAbertos = ref(route.path === '/pedidos')
-
-const tema = ref<TemaAplicacao>(carregarTemaPersistido())
 
 const alertasRef = ref<HTMLElement | null>(null)
 const alertasAbertos = ref(false)
@@ -208,30 +200,6 @@ watch(
     void carregarAlertas()
   },
 )
-
-function carregarTemaPersistido(): TemaAplicacao {
-  try {
-    return localStorage.getItem(TEMA_STORAGE_KEY) === 'dark' ? 'dark' : 'light'
-  } catch {
-    return 'light'
-  }
-}
-
-function aplicarTema(novoTema: TemaAplicacao) {
-  tema.value = novoTema
-  document.documentElement.dataset.theme = novoTema
-  vuetifyTheme.global.name.value = novoTema === 'dark' ? 'sglDark' : 'sglLight'
-
-  try {
-    localStorage.setItem(TEMA_STORAGE_KEY, novoTema)
-  } catch {
-    // A aplicação continua funcional mesmo quando o navegador bloqueia persistência local.
-  }
-}
-
-function alternarTema() {
-  aplicarTema(tema.value === 'light' ? 'dark' : 'light')
-}
 
 function normalizarBusca(valor: string) {
   return valor
@@ -998,70 +966,4 @@ button.gestao-tool { cursor: pointer; }
 @media (max-width: 560px) { .gestao-topbar { padding-inline: 14px; } .gestao-topbar__logout span { display: none; } .gestao-search-panel { right: 10px; left: 10px; } .gestao-search-input kbd { display: none; } .gestao-search-input { grid-template-columns: 18px minmax(0, 1fr); } }
 </style>
 
-<style>
-html[data-theme='dark'] body,
-html[data-theme='dark'] #app,
-html[data-theme='dark'] .v-application {
-  background: var(--sgl-background);
-  color: var(--sgl-text);
-}
 
-html[data-theme='dark'] .gestao-main {
-  background: linear-gradient(135deg, #08111f 0%, #0b1628 100%) !important;
-  color: var(--sgl-text) !important;
-}
-
-html[data-theme='dark'] .gestao-main :where(
-  article,
-  [class*='card'],
-  [class*='panel'],
-  [class*='table-wrap'],
-  [class*='table-container'],
-  [class*='filters'],
-  [class*='filter-box'],
-  [class*='preview-result'],
-  [class*='modal-content'],
-  [class*='dialog-content']
-) {
-  border-color: var(--sgl-border) !important;
-  background-color: var(--sgl-surface) !important;
-  color: var(--sgl-text) !important;
-}
-
-html[data-theme='dark'] .gestao-main :where(h1, h2, h3, h4, h5, h6, th, label) {
-  color: var(--sgl-text) !important;
-}
-
-html[data-theme='dark'] .gestao-main :where(p, td) {
-  border-color: var(--sgl-border) !important;
-  color: var(--sgl-text-muted) !important;
-}
-
-html[data-theme='dark'] .gestao-main :where(input, select, textarea) {
-  border-color: var(--sgl-border) !important;
-  background: var(--sgl-surface-elevated) !important;
-  color: var(--sgl-text) !important;
-}
-
-html[data-theme='dark'] .gestao-main :where(input, textarea)::placeholder {
-  color: #8190a6 !important;
-}
-
-html[data-theme='dark'] .gestao-main :where(.secondary-action, .ghost-action, .outline-action) {
-  border-color: var(--sgl-border) !important;
-  background: var(--sgl-surface-elevated) !important;
-  color: var(--sgl-text) !important;
-}
-
-html[data-theme='dark'] .gestao-main :where(table, thead, tbody, tr) {
-  border-color: var(--sgl-border) !important;
-}
-
-html[data-theme='dark'] .gestao-main thead {
-  background: #132039 !important;
-}
-
-html[data-theme='dark'] .gestao-main hr {
-  border-color: var(--sgl-border) !important;
-}
-</style>
