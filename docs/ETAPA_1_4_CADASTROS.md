@@ -1,7 +1,7 @@
 # Etapa 1.4 — Administração / Cadastros
 
 **Rota:** `/administracao/cadastros`  
-**Status:** preparado em 10/09/2026 e aguardando validação visual/funcional.  
+**Status:** em validação visual; estrutura aprovada em 10/09/2026 e escala ampliada após feedback.  
 **Branch:** `feat/etapa-1-4-cadastros`
 
 ## Objetivo
@@ -30,24 +30,44 @@ Não antecipar nesta etapa:
 ## Ajustes visuais aplicados
 
 - título de página em 24 px;
-- corpo em 14 px;
+- corpo em 14 px ou superior nos pontos operacionais que precisavam de mais legibilidade;
 - labels em 13 px;
 - auxiliares com mínimo de 12 px;
 - cards de resumo com raio 8 px e sem sombra decorativa;
 - navegação lateral de Cadastros mais legível;
 - aba ativa com destaque azul institucional;
-- campos e botões principais em 40 px;
+- campos e botões principais em 40 px ou 44 px nos controles de alta frequência desta tela;
 - barra de busca e controle de inativos padronizados;
 - tabelas com cabeçalhos e conteúdo ampliados;
 - chips Ativo/Inativo ampliados;
-- ações de tabela mais fáceis de clicar;
-- seletor de perfil em Permissões passa a 40 px;
+- ações de tabela com alvo mínimo de 40 px;
+- seletor de perfil em Permissões ampliado;
 - avisos da sessão atual mais legíveis;
 - modais de Laboratório, Projeto e Produto ampliados e padronizados;
 - seções internas do cadastro de Produto mais legíveis;
 - checkboxes e textos associados ampliados;
 - responsividade ajustada para tablet/mobile;
 - foco visível e `prefers-reduced-motion` preservados.
+
+## Ajuste após primeira validação
+
+A primeira versão foi considerada coerente em estrutura e identidade, porém visualmente pequena em desktop largo. Por isso foi adicionada uma camada complementar de escala em `src/styles/etapa-1-4-cadastros-ajustes.css`.
+
+O ajuste aumenta sem alterar a estrutura:
+
+- coluna lateral de Cadastros de 280 px para 310 px em desktop;
+- cards laterais para cerca de 88 px de altura;
+- títulos e descrições da navegação;
+- cabeçalho da área selecionada;
+- campo de busca para 44 px;
+- linhas da tabela para cerca de 60 px;
+- textos principais da tabela para 15 px;
+- chips de situação;
+- botões de Editar/Inativar/Reativar para 40 px;
+- seletor de perfil;
+- escala e largura dos modais.
+
+Em larguras menores a interface volta progressivamente para dimensões mais compactas, preservando a responsividade.
 
 ## O que não foi alterado
 
@@ -86,6 +106,7 @@ Os modais preservam o mesmo formulário e os mesmos campos. A alteração é som
 - [ ] cards de resumo legíveis;
 - [ ] aviso sobre escopo institucional legível;
 - [ ] Atualizar dados funciona normalmente;
+- [ ] escala geral confortável em desktop;
 - [ ] responsividade sem sobreposição.
 
 ### Navegação e busca
@@ -95,12 +116,14 @@ Os modais preservam o mesmo formulário e os mesmos campos. A alteração é som
 - [ ] Produtos abre normalmente;
 - [ ] Permissões abre normalmente;
 - [ ] aba ativa é claramente identificável;
+- [ ] cards laterais possuem tamanho confortável;
 - [ ] busca continua funcionando;
 - [ ] Mostrar inativos continua funcionando onde aplicável.
 
 ### Laboratórios
 
 - [ ] tabela legível;
+- [ ] ações da tabela confortáveis para clique;
 - [ ] Novo laboratório abre modal;
 - [ ] edição funciona;
 - [ ] inativação/reativação funciona;
@@ -138,7 +161,7 @@ Os modais preservam o mesmo formulário e os mesmos campos. A alteração é som
 
 ## Regra de merge
 
-Não mergear antes da validação visual e funcional pelo responsável do projeto.
+Não mergear antes da validação visual e funcional final pelo responsável do projeto.
 
 ## Próximo passo após aprovação
 
