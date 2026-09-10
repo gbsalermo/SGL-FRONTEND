@@ -438,10 +438,23 @@ onMounted(carregar)
 .gestao-detail-row td { padding: 0; background: #f8fafc; }
 .gestao-detail { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, .8fr); gap: 18px; padding: 20px 22px; }
 .gestao-detail h3 { margin: 0 0 10px; color: #0d2b5e; font-size: 12px; }
-.gestao-detail__item { display: grid; grid-template-columns: minmax(0, 1fr) 150px 180px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #dbe3ec; }
+.gestao-detail__item { display: grid; grid-template-columns: minmax(0, 1fr) 150px 200px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #dbe3ec; }
 .requested-form { color: #1a4da1 !important; font-weight: 700; }
 .quantity-card { min-width: 0; min-height: 60px; display: flex; flex-direction: column; justify-content: center; align-items: stretch; gap: 4px; padding: 8px 10px; border-radius: 6px; }
-.quantity-card strong, .approval-quantity > span { white-space: nowrap; text-align: center; line-height: 1.2; }
+.quantity-card strong,
+.approval-quantity > span {
+  text-align: center;
+  line-height: 1.2;
+}
+.requested-quantity strong,
+.approval-quantity > span {
+  white-space: nowrap;
+}
+.approved-quantity strong {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
 .quantity-card > span { text-align: center; }
 .approval-quantity input { text-align: center; }
 .quantity-card strong, .approval-quantity > span { color: #475569; font-size: 9px; font-weight: 800; }.quantity-card > span { color: #0d2b5e; font-size: 15px; font-weight: 800; }
