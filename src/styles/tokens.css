@@ -10,9 +10,11 @@
 
   /* Superfícies e texto */
   --sgl-background: #F5F7FA;
+  --sgl-background-deep: #EEF2F7;
   --sgl-surface: #FFFFFF;
   --sgl-surface-elevated: #FFFFFF;
   --sgl-surface-soft: #F8FAFC;
+  --sgl-surface-interactive: #EEF5FF;
   --sgl-text: #1A1A2E;
   --sgl-text-muted: #64748B;
   --sgl-text-subtle: #94A3B8;
@@ -88,23 +90,58 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  /* Paleta baseada no rascunho visual original do painel operacional.
-     O refinamento definitivo do Dark Mode pertence à Etapa 2. */
-  --sgl-primary: #4C83F3;
-  --sgl-primary-dark: #244F9D;
-  --sgl-primary-light: #72A3FF;
+  /* Etapa 2 — paleta definitiva aprovada. */
+  --sgl-primary: #5B9DF8;
+  --sgl-primary-dark: #3183ED;
+  --sgl-primary-light: #78ADFF;
 
-  --sgl-green: #38A169;
-  --sgl-green-light: #63B985;
-  --sgl-green-soft: #2C6A49;
+  --sgl-green: #54D59A;
+  --sgl-green-light: #72DBA8;
+  --sgl-green-soft: #163629;
 
-  --sgl-background: #0D182A;
-  --sgl-surface: #111D30;
-  --sgl-surface-elevated: #17243A;
-  --sgl-text: #F4F7FC;
-  --sgl-text-muted: #A8B6CB;
-  --sgl-border: #293950;
+  --sgl-background: #07111F;
+  --sgl-background-deep: #050D19;
+  --sgl-surface: #0D1929;
+  --sgl-surface-elevated: #111F33;
+  --sgl-surface-soft: #101D30;
+  --sgl-surface-interactive: #172941;
 
-  --sgl-warning: #F6B93B;
-  --sgl-error: #F05A69;
+  --sgl-text: #F5F8FC;
+  --sgl-text-muted: #9FB0C6;
+  --sgl-text-subtle: #7488A4;
+  --sgl-border: #233650;
+  --sgl-border-strong: #315071;
+
+  --sgl-info: #5B9DF8;
+  --sgl-success: #54D59A;
+  --sgl-warning: #F2BE55;
+  --sgl-error: #FF7180;
+  --sgl-neutral: #9FB0C6;
+  --sgl-neutral-strong: #C2CFDF;
+  --sgl-neutral-soft: #172941;
+
+  --sgl-disabled-background: #17202D;
+  --sgl-disabled-text: #7488A4;
+  --sgl-disabled-border: #2A394C;
+  --sgl-disabled-opacity: 0.72;
+
+  --sgl-focus: #72A9FF;
+
+  /* Aliases usados pelas primeiras interfaces da própria Etapa 2. */
+  --s2-bg: var(--sgl-background);
+  --s2-bg-deep: var(--sgl-background-deep);
+  --s2-surface: var(--sgl-surface);
+  --s2-surface-raised: var(--sgl-surface-elevated);
+  --s2-surface-hover: var(--sgl-surface-interactive);
+  --s2-border: var(--sgl-border);
+  --s2-border-strong: var(--sgl-border-strong);
+  --s2-text: var(--sgl-text);
+  --s2-text-muted: var(--sgl-text-muted);
+  --s2-text-subtle: var(--sgl-text-subtle);
+  --s2-blue: var(--sgl-info);
+  --s2-blue-strong: var(--sgl-primary-dark);
+  --s2-green: var(--sgl-success);
+  --s2-amber: var(--sgl-warning);
+  --s2-red: var(--sgl-error);
+  --s2-violet: #9D82F5;
 }
