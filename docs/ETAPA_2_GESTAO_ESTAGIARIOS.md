@@ -2,7 +2,7 @@
 
 ## Status
 
-Em validação — 10/09/2026.
+Concluída e validada — 10/09/2026.
 
 ## Escopo
 
@@ -58,6 +58,10 @@ O Dark preserva integralmente a linguagem visual aprovada na Etapa 1:
 - futura modelagem Projeto ↔ Estagiário continua reservada à Etapa 5;
 - Light Mode permanece intacto.
 
+## Validação final
+
+A interface foi validada em Light e Dark sem necessidade de ajustes adicionais.
+
 ## Próximo passo
 
-Validar `/estagiarios` em Light e Dark antes do merge.
+Seguir para o fechamento consolidado da Etapa 2.
