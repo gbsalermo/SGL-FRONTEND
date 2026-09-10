@@ -668,3 +668,36 @@ body.sgl-dark-active .gestao-main .gestao-pedidos textarea:focus-visible {
     transform: none !important;
   }
 }
+
+
+/* Ajuste de escala interna dos cards de quantidade — Light e Dark */
+body.sgl-light-active .gestao-main .gestao-pedidos .quantity-card,
+body.sgl-dark-active .gestao-main .gestao-pedidos .quantity-card {
+  min-height: 68px !important;
+  padding: 10px 12px !important;
+  gap: 6px !important;
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .quantity-card strong,
+body.sgl-light-active .gestao-main .gestao-pedidos .approval-quantity > span,
+body.sgl-dark-active .gestao-main .gestao-pedidos .quantity-card strong,
+body.sgl-dark-active .gestao-main .gestao-pedidos .approval-quantity > span {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .quantity-card > span,
+body.sgl-dark-active .gestao-main .gestao-pedidos .quantity-card > span {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .approval-quantity input,
+body.sgl-dark-active .gestao-main .gestao-pedidos .approval-quantity input {
+  min-height: 34px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
