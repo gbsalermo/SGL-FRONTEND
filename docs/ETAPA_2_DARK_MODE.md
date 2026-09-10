@@ -78,26 +78,39 @@ fundo da aplicação
 
 Nenhuma superfície operacional deve virar branco puro no tema escuro.
 
+### Referências escolhidas
+
+Foram avaliados cinco protótipos visuais. A direção escolhida combina principalmente os protótipos 1 e 2:
+
+- fundo navy profundo, quase preto;
+- cards escuros em camadas;
+- bordas discretas;
+- contraste alto sem excesso de brilho;
+- azul como cor principal de ação;
+- verde, amarelo, vermelho e violeta usados de forma semântica e controlada.
+
 ### Paleta-base para o piloto
 
 A primeira aplicação será validada visualmente antes de congelar os valores finais.
 
 | Papel | Valor-base |
 | --- | --- |
-| Fundo profundo | `#0B1627` |
-| Superfície base | `#111E31` |
-| Superfície elevada | `#17263D` |
-| Superfície interativa | `#1C304B` |
-| Borda | `#2A3C55` |
-| Texto principal | `#F4F7FC` |
-| Texto secundário | `#A7B5C9` |
-| Azul de ação | `#5B8FF7` |
-| Azul institucional de apoio | `#2D6BC4` |
-| Verde | `#72D3A1` |
-| Amarelo | `#F6C343` |
+| Fundo profundo | `#07111F` |
+| Fundo secundário | `#050D19` |
+| Superfície base | `#0D1929` |
+| Superfície elevada | `#111F33` |
+| Superfície interativa | `#172941` |
+| Borda | `#233650` |
+| Borda forte | `#315071` |
+| Texto principal | `#F5F8FC` |
+| Texto secundário | `#9FB0C6` |
+| Azul de ação | `#5B9DF8` |
+| Verde | `#54D59A` |
+| Amarelo | `#F2BE55` |
 | Vermelho | `#FF7180` |
+| Violeta | `#9D82F5` |
 
-Esses valores são a base inicial do piloto, não uma autorização para espalhar hexadecimais pelas Views. Eles devem virar tokens.
+Esses valores são a base inicial do piloto, não uma autorização para espalhar hexadecimais pelas Views. Depois da validação visual eles devem convergir para tokens semânticos definitivos.
 
 ## Comportamento semântico
 
@@ -131,7 +144,35 @@ Esses valores são a base inicial do piloto, não uma autorização para espalha
 
 ### Resíduos e Pedidos
 
-A diferenciação por domínio aprovada no Dashboard deve continuar existindo em Dark Mode por tons escuros/tintas discretas, nunca por grandes superfícies claras.
+A diferenciação por domínio aprovada no Dashboard permanece também no Dark Mode.
+
+No Dashboard do Solicitante:
+
+```text
+Acompanhamento de Pedido
+→ fundo azul identificado, adaptado para profundidade escura
+
+Acompanhamento de Resíduo
+→ fundo creme/âmbar identificado, adaptado para profundidade escura
+```
+
+A intenção é manter a leitura imediata existente no Light Mode sem inserir grandes superfícies claras no tema escuro.
+
+## Estratégia de aplicação aprovada
+
+A aplicação prática será feita **interface por interface**, repetindo a estratégia de validação utilizada na Etapa 1.
+
+A ordem começa pela área do Solicitante:
+
+```text
+/inicio
+→ /meus-pedidos
+→ /pedidos/novo
+→ /meus-residuos
+→ /residuos/novo
+```
+
+Somente depois da validação das interfaces do Solicitante a aplicação segue para Gestão/Admin.
 
 ## Arquitetura-alvo
 
@@ -155,12 +196,22 @@ Não deve permanecer dependência de listener global que interpreta texto de bot
 
 ## Sequência de execução
 
-### 2.1 — Esboço e paleta
+### 2.1 — Esboço, paleta e piloto do Solicitante
 
-- confirmar direção visual;
-- consolidar papéis de superfície;
-- validar contraste e semântica;
-- usar Dashboard como piloto visual por possuir maior variedade de componentes/estados.
+- referências visuais escolhidas: protótipos 1 e 2;
+- paleta-base definida;
+- Dashboard do Solicitante (`/inicio`) aplicado como primeiro piloto prático;
+- preservar fundo azul para acompanhamento de Pedido;
+- preservar fundo creme/âmbar para acompanhamento de Resíduo;
+- aguardar validação visual antes de congelar a paleta.
+
+Implementação piloto:
+
+```text
+src/styles/etapa-2-solicitante-dashboard.css
+```
+
+Essa folha é carregada após as camadas provisórias atuais apenas durante o piloto. A arquitetura antiga ainda não é considerada definitiva.
 
 ### 2.2 — Regras e fonte única de tema
 
@@ -178,18 +229,7 @@ Não deve permanecer dependência de listener global que interpreta texto de bot
 
 ### 2.4 — Aplicação nas interfaces autenticadas
 
-Ordem sugerida:
-
-```text
-Dashboards
-→ Pedidos
-→ Resíduos
-→ Estoque
-→ Movimentações
-→ Estagiários
-→ Relatórios
-→ Administração/Cadastros
-```
+A validação será incremental, começando pelo Solicitante e depois seguindo para Gestão.
 
 ### 2.5 — Revisão tela a tela
 
@@ -204,6 +244,15 @@ Validar Gestão e Solicitante, incluindo modais, drawers, dropdowns, tabelas, fi
 - testar logout/login sem contaminar Login;
 - testar impressão/rótulos em tema claro;
 - executar build final.
+
+## Ponto atual de continuidade
+
+```text
+Etapa 2.1
+→ Dashboard do Solicitante aplicado na branch feat/etapa-2-dark-mode
+→ aguardando validação visual em /inicio
+→ próxima interface após aprovação: /meus-pedidos
+```
 
 ## Critério de conclusão
 
