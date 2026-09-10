@@ -354,7 +354,7 @@ onMounted(carregar)
                         <span>QUANTIDADE A APROVAR</span>
                         <input v-model.number="quantidadesAprovadas[item.id]" type="number" min="1" :max="item.quantidadeSolicitada" :step="item.tipoEmbalagemSolicitada === 'UNITARIO' ? 1 : item.multiplicadorSolicitado" />
                       </label>
-                      <div v-else-if="item.quantidadeAprovada !== null" class="quantity-card approved-quantity"><strong>QUANTIDADE APROVADA</strong><span>{{ item.quantidadeAprovada }}</span></div>
+                      <div v-else-if="item.quantidadeAprovada !== null" class="quantity-card approved-quantity"><strong>{{ pedido.status === 'ENTREGUE' ? 'ENTREGUE' : 'APROVADA' }}</strong><span>{{ item.quantidadeAprovada }}</span></div>
 
                       <div v-if="pedido.status === 'ENTREGUE'" class="delivered-lots">
                         <strong>LOTES UTILIZADOS NA SAÍDA</strong>
