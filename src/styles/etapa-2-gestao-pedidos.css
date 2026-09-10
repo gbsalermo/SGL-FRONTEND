@@ -422,7 +422,7 @@ body.sgl-dark-active .gestao-main .gestao-detail__item .requested-form {
 }
 
 body.sgl-dark-active .gestao-main .quantity-card {
-  min-height: 56px !important;
+  min-height: 60px !important;
   gap: var(--sgl-space-1) !important;
   padding: var(--sgl-space-2) var(--sgl-space-3) !important;
   border-radius: var(--sgl-radius-control) !important;
