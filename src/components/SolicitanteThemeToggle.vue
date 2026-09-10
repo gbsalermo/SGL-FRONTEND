@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useSessionStore } from '@/stores/session'
-
-const TEMA_STORAGE_KEY = 'sgl.theme'
-type TemaAplicacao = 'light' | 'dark'
+import { aplicarTema, tema } from '@/services/themeService'
 
 const session = useSessionStore()
-const tema = ref<TemaAplicacao>(carregarTema())
 
 const visivel = computed(() => {
   const perfil = session.usuario?.perfil
@@ -16,25 +13,6 @@ const visivel = computed(() => {
     || perfil === 'ESTAGIARIO'
 })
 
-function carregarTema(): TemaAplicacao {
-  try {
-    return localStorage.getItem(TEMA_STORAGE_KEY) === 'dark' ? 'dark' : 'light'
-  } catch {
-    return 'light'
-  }
-}
-
-function aplicarTema(novoTema: TemaAplicacao) {
-  tema.value = novoTema
-  document.body.classList.toggle('sgl-dark-active', novoTema === 'dark')
-  document.body.classList.toggle('sgl-light-active', novoTema === 'light')
-
-  try {
-    localStorage.setItem(TEMA_STORAGE_KEY, novoTema)
-  } catch {
-    // Mantém a troca de tema funcional mesmo sem persistência local.
-  }
-}
 </script>
 
 <template>
