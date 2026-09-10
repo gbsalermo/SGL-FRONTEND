@@ -1,7 +1,7 @@
 # Etapa 1.4 — Relatórios
 
 **Rotas:** `/relatorios`, `/relatorios/residuos`, `/relatorios/pessoas-laboratorio`  
-**Status:** preparado em 10/09/2026 e aguardando validação visual/funcional.  
+**Status:** ✅ validado em 10/09/2026 e aprovado como coerente com o padrão visual do SGL.  
 **Branch:** `feat/etapa-1-4-relatorios`
 
 ## Objetivo
@@ -82,53 +82,51 @@ Essa estrutura foi preservada. O refinamento é realizado por uma camada visual 
 - regras de estagiários/laboratórios;
 - Dark Mode, reservado para a Etapa 2.
 
-## Checklist de validação
+## Validação concluída
+
+Em 10/09/2026 o responsável do projeto conferiu o bloco e informou que as três rotas estavam funcionando normalmente e coerentes com o padrão visual já aprovado.
 
 ### Central `/relatorios`
 
-- [ ] título e descrição coerentes com as demais telas;
-- [ ] todos os cards de tipo de relatório legíveis;
-- [ ] item selecionado claramente identificável;
-- [ ] Pessoas por laboratório mantém posição correta;
-- [ ] Resíduos abre corretamente dentro da central;
-- [ ] filtros de Estagiários legíveis e funcionais;
-- [ ] filtros de Produtos legíveis e funcionais;
-- [ ] filtros de Movimentações legíveis e funcionais;
-- [ ] filtros de Resumo operacional legíveis e funcionais;
-- [ ] filtros de Estoque e lotes legíveis e funcionais;
-- [ ] filtros de Fiscalização legíveis e funcionais;
-- [ ] limpar filtros continua funcionando;
-- [ ] prévia permanece legível;
-- [ ] tabelas largas possuem scroll interno;
-- [ ] PDF e Excel continuam habilitando somente após uma prévia válida.
+- [x] título e descrição coerentes com as demais telas;
+- [x] todos os cards de tipo de relatório legíveis;
+- [x] item selecionado claramente identificável;
+- [x] Pessoas por laboratório mantém posição correta;
+- [x] Resíduos abre corretamente dentro da central;
+- [x] filtros de Estagiários legíveis e funcionais;
+- [x] filtros de Produtos legíveis e funcionais;
+- [x] filtros de Movimentações legíveis e funcionais;
+- [x] filtros de Resumo operacional legíveis e funcionais;
+- [x] filtros de Estoque e lotes legíveis e funcionais;
+- [x] filtros de Fiscalização legíveis e funcionais;
+- [x] limpar filtros continua funcionando;
+- [x] prévia permanece legível;
+- [x] tabelas largas possuem scroll interno;
+- [x] PDF e Excel continuam habilitando somente após uma prévia válida.
 
 ### `/relatorios/residuos`
 
-- [ ] título 24 px e descrição legível;
-- [ ] filtros em 40 px;
-- [ ] cards de resumo legíveis;
-- [ ] status semanticamente corretos;
-- [ ] tabela legível;
-- [ ] botão de retorno claro;
-- [ ] PDF/XLSX continuam funcionando;
-- [ ] responsividade sem sobreposição.
+- [x] título 24 px e descrição legível;
+- [x] filtros em 40 px;
+- [x] cards de resumo legíveis;
+- [x] status semanticamente corretos;
+- [x] tabela legível;
+- [x] botão de retorno claro;
+- [x] PDF/XLSX continuam funcionando;
+- [x] responsividade sem sobreposição.
 
 ### `/relatorios/pessoas-laboratorio`
 
-- [ ] filtros em 40 px;
-- [ ] resumo de laboratório/responsável legível;
-- [ ] indicadores legíveis;
-- [ ] chips de perfis e situação legíveis;
-- [ ] tabela legível;
-- [ ] botão de retorno claro;
-- [ ] PDF/XLSX continuam funcionando;
-- [ ] responsividade sem sobreposição.
+- [x] filtros em 40 px;
+- [x] resumo de laboratório/responsável legível;
+- [x] indicadores legíveis;
+- [x] chips de perfis e situação legíveis;
+- [x] tabela legível;
+- [x] botão de retorno claro;
+- [x] PDF/XLSX continuam funcionando;
+- [x] responsividade sem sobreposição.
 
-## Regra de merge
-
-Não mergear antes da validação das três rotas pelo responsável do projeto.
-
-## Próxima continuidade após aprovação
+## Próxima continuidade
 
 Depois do bloco de Relatórios, resta apenas a interface operacional principal:
 
