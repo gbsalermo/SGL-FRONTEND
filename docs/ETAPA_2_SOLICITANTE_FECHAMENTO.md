@@ -77,3 +77,15 @@ Solicitante concluído
 → merge desta rodada
 → iniciar interfaces da Gestão
 ```
+
+
+## Ajustes após primeira validação
+
+Com base na conferência visual das três telas:
+
+- Novo pedido: alinhamento dos campos, textos auxiliares e botão de remoção refinado;
+- Informar resíduo: bloco futuro de Resíduo pré-cadastrado integrado à paleta Dark mesmo enquanto permanece bloqueado;
+- Meus resíduos: drawer de detalhes ganhou maior contraste, tipografia e separação de informações;
+- observações do laboratório e da Gestão passaram a usar blocos próprios de leitura, seguindo a hierarquia adotada em Meus pedidos.
+
+Esses ajustes são exclusivamente visuais e não alteram a regra de negócio.
