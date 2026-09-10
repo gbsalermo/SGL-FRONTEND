@@ -1,0 +1,749 @@
+/*
+ * Etapa 2 — fechamento visual do Solicitante
+ * Escopo:
+ * - /meus-residuos
+ * - /pedidos/novo
+ * - /residuos/novo
+ *
+ * A paleta segue o Dashboard e Meus pedidos já validados.
+ * Resíduos operacionais permanecem neutros em repouso; âmbar/creme aparece
+ * apenas em estados, seleção, foco ou hover coerente.
+ */
+
+/* ========================================================================== */
+/* Base compartilhada das três telas                                          */
+/* ========================================================================== */
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page,
+body.sgl-dark-active .solicitante-main .novo-pedido-page,
+body.sgl-dark-active .solicitante-main .residuo-page {
+  color: var(--s2-text, #f5f8fc) !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .page-heading h1,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .page-heading h1,
+body.sgl-dark-active .solicitante-main .residuo-page .page-heading h1 {
+  color: #f7f9fd !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .breadcrumb,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .breadcrumb,
+body.sgl-dark-active .solicitante-main .residuo-page .breadcrumb {
+  color: #78adff !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .page-heading > div > p:last-child,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .page-heading > div > p:last-child,
+body.sgl-dark-active .solicitante-main .residuo-page .page-heading p:not(.breadcrumb) {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .context-grid article,
+body.sgl-dark-active .solicitante-main .residuo-page .context-grid article {
+  border-color: #273b55 !important;
+  background: linear-gradient(180deg, #101d30 0%, #0d1929 100%) !important;
+  box-shadow: 0 10px 24px rgb(0 5 14 / 13%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .context-grid span,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .context-grid small,
+body.sgl-dark-active .solicitante-main .residuo-page .context-grid span,
+body.sgl-dark-active .solicitante-main .residuo-page .context-grid small {
+  color: #93a6bf !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .context-grid strong,
+body.sgl-dark-active .solicitante-main .residuo-page .context-grid strong {
+  color: #eef4fb !important;
+}
+
+/* ========================================================================== */
+/* Meus resíduos                                                              */
+/* ========================================================================== */
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .primary-action {
+  border: 1px solid #4a8ee8 !important;
+  background: #3183ed !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 22px rgb(22 92 185 / 20%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .primary-action:hover {
+  border-color: #72a9ff !important;
+  background: #3f8ff0 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .secondary-action {
+  border-color: #304863 !important;
+  background: #111f33 !important;
+  color: #d8e4f2 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .secondary-action:hover:not(:disabled) {
+  border-color: #4c83c4 !important;
+  background: #172941 !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article {
+  border-color: #273b55 !important;
+  background: linear-gradient(180deg, #101d30 0%, #0c1828 100%) !important;
+  box-shadow: 0 10px 24px rgb(0 5 14 / 13%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid span {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid strong {
+  color: #f5f8fc !important;
+}
+
+/* Situações do domínio de resíduos */
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:nth-child(1) {
+  border-color: #315071 !important;
+}
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:nth-child(1) strong {
+  color: #8ebcff !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:nth-child(2) {
+  border-color: #665027 !important;
+}
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:nth-child(2) strong {
+  color: #f2c45f !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:nth-child(3) {
+  border-color: #654b26 !important;
+}
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:nth-child(3) strong {
+  color: #e4b755 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:nth-child(4) {
+  border-color: #275643 !important;
+}
+body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:nth-child(4) strong {
+  color: #66dfa8 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .list-surface {
+  border-color: #263a54 !important;
+  background: #0d1929 !important;
+  box-shadow: 0 12px 30px rgb(0 5 14 / 14%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .toolbar {
+  border-color: #263a54 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .search-field span,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .filter-field span {
+  color: #a8b7ca !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .search-field input,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .filter-field select {
+  border-color: #30455f !important;
+  background: #111f33 !important;
+  color: #eef4fb !important;
+  color-scheme: dark;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .search-field input::placeholder {
+  color: #7488a4 !important;
+  opacity: 1;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .search-field input:focus,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .filter-field select:focus {
+  border-color: #5b9df8 !important;
+  box-shadow: 0 0 0 3px rgb(91 157 248 / 14%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .state-box,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .empty-state {
+  background: #111f33 !important;
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .empty-state strong {
+  color: #edf3fb !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .state-box--error {
+  border-color: #713845 !important;
+  background: #251821 !important;
+  color: #ff9aa5 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .residuo-card {
+  border-color: #20324a !important;
+  background: transparent !important;
+  color: #dce6f2 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .card-topline small,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .card-main > p,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .card-meta,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .card-side > span:first-child,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .card-side small {
+  color: #8fa2bb !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .card-main h2,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .card-side strong {
+  color: #edf3fb !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .details-link {
+  color: #79adf8 !important;
+}
+
+/* status */
+body.sgl-dark-active .solicitante-main .meus-residuos-page .status-pill[data-status='INFORMADO'] {
+  border: 1px solid #315f99 !important;
+  background: #17345d !important;
+  color: #a9cbff !important;
+}
+body.sgl-dark-active .solicitante-main .meus-residuos-page .status-pill[data-status='EM_ANALISE'] {
+  border: 1px solid #765d2a !important;
+  background: #352b17 !important;
+  color: #f2c45f !important;
+}
+body.sgl-dark-active .solicitante-main .meus-residuos-page .status-pill[data-status='LIBERADO_PARA_ARMAZENAMENTO'] {
+  border: 1px solid #2d674d !important;
+  background: #163629 !important;
+  color: #72dba8 !important;
+}
+body.sgl-dark-active .solicitante-main .meus-residuos-page .status-pill[data-status='ARMAZENADO_TEMPORARIAMENTE'] {
+  border: 1px solid #28616a !important;
+  background: #15343a !important;
+  color: #70d5dc !important;
+}
+body.sgl-dark-active .solicitante-main .meus-residuos-page .status-pill[data-status='DESPACHADO'] {
+  border: 1px solid #46556a !important;
+  background: #202c3d !important;
+  color: #c2cedd !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .residuo-card--target {
+  background: #112743 !important;
+  box-shadow: inset 4px 0 0 #5b9df8 !important;
+}
+
+/* drawer */
+body.sgl-dark-active .solicitante-main .meus-residuos-page .drawer-backdrop {
+  background: rgb(1 8 18 / 72%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-drawer {
+  background: #0d1929 !important;
+  color: #dce6f2 !important;
+  box-shadow: -22px 0 64px rgb(0 0 0 / 42%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-drawer > header {
+  border-color: #263a54 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-drawer h2 {
+  color: #f5f8fc !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-drawer header p {
+  color: #8fa2bb !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-drawer header button {
+  border: 1px solid #30455f !important;
+  background: #172941 !important;
+  color: #dce6f2 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content section + section {
+  border-color: #263a54 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content h3 {
+  color: #b7c5d8 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content dl div {
+  background: #111f33 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content dt {
+  color: #8fa2bb !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content dd {
+  color: #eef4fb !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .component-row {
+  border-color: #2a3d58 !important;
+  background: #111f33 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .component-row strong {
+  color: #eef4fb !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .component-row small,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .component-row p {
+  color: #96a8c0 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .component-row > span {
+  border: 1px solid #315f99 !important;
+  background: #17345d !important;
+  color: #a9cbff !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison > div {
+  border-color: #2a3d58 !important;
+  background: #111f33 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison > div:last-child {
+  border-color: #2b5945 !important;
+  background: #132a23 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison .muted {
+  border-color: #34465d !important;
+  background: #151f2c !important;
+  opacity: .78;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison strong {
+  color: #f0f5fb !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison p,
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison small {
+  color: #9fb0c6 !important;
+}
+
+/* ========================================================================== */
+/* Novo pedido                                                                */
+/* ========================================================================== */
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .secondary-action,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .section-title--action button {
+  border-color: #304863 !important;
+  background: #111f33 !important;
+  color: #d7e3f1 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .secondary-action:hover,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .section-title--action button:hover:not(:disabled) {
+  border-color: #5b9df8 !important;
+  background: #172941 !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .request-surface {
+  border-color: #263a54 !important;
+  background: #0d1929 !important;
+  box-shadow: 0 12px 30px rgb(0 5 14 / 14%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .form-section {
+  border-color: #263a54 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .section-title > div > span {
+  background: #17345d !important;
+  color: #9bc3ff !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .section-title h2 {
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .section-title p {
+  color: #94a7bf !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field > span,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field-label {
+  color: #c9d5e5 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field > span small,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field-label small,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field > small {
+  color: #8fa2bb !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field select,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field input,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field textarea {
+  border-color: #30455f !important;
+  background: #111f33 !important;
+  color: #eef4fb !important;
+  color-scheme: dark;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field textarea::placeholder,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field input::placeholder {
+  color: #7488a4 !important;
+  opacity: 1;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field select:focus,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field input:focus,
+body.sgl-dark-active .solicitante-main .novo-pedido-page .field textarea:focus {
+  border-color: #5b9df8 !important;
+  box-shadow: 0 0 0 3px rgb(91 157 248 / 14%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .package-guidance {
+  color: #e6bc61 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .urgency-field {
+  border-color: #32445d !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .urgency-field p {
+  color: #93a6bf !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .urgency-toggle {
+  border-color: #40546e !important;
+  background: #111f33 !important;
+  color: #d4deeb !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .urgency-toggle:hover {
+  border-color: #d95a69 !important;
+  color: #ff8996 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .urgency-toggle--active {
+  border-color: #713845 !important;
+  background: #3a1d29 !important;
+  color: #ff8996 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .urgency-guidance {
+  border-color: #d95a69 !important;
+  background: #2b1a23 !important;
+  color: #ffadb6 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .item-row {
+  border-color: #2a3d58 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .remove-item {
+  border-color: #50303d !important;
+  background: #241820 !important;
+  color: #ff8492 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .remove-item:hover:not(:disabled) {
+  border-color: #8b4554 !important;
+  background: #321d27 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .remove-item:disabled {
+  border-color: #2b3849 !important;
+  background: #17202c !important;
+  color: #59687b !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .state-box {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .error-banner {
+  border-color: #713845 !important;
+  background: #2b1a23 !important;
+  color: #ff9aa5 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .form-footer {
+  border-top: 1px solid #263a54 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .form-footer p {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .urgent-footer-note {
+  color: #83b6ff !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .primary-action {
+  border: 1px solid #4a8ee8 !important;
+  background: #3183ed !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 22px rgb(22 92 185 / 20%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .primary-action:hover:not(:disabled) {
+  border-color: #72a9ff !important;
+  background: #3f8ff0 !important;
+}
+
+/* ========================================================================== */
+/* Informar resíduo                                                           */
+/* ========================================================================== */
+
+body.sgl-dark-active .solicitante-main .residuo-page .residuo-form {
+  border-color: #263a54 !important;
+  background: #0d1929 !important;
+  box-shadow: 0 12px 30px rgb(0 5 14 / 14%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .form-section {
+  border-color: #263a54 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .section-title > span,
+body.sgl-dark-active .solicitante-main .residuo-page .section-title__copy > span {
+  background: #17345d !important;
+  color: #9bc3ff !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .section-title h2 {
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .section-title p {
+  color: #94a7bf !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .add-component {
+  border-color: #40546e !important;
+  background: #111f33 !important;
+  color: #cdd9e8 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .add-component:hover:not(:disabled) {
+  border-color: #b99547 !important;
+  background: #2a2417 !important;
+  color: #f2cb75 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .field > span {
+  color: #c9d5e5 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .field > span small,
+body.sgl-dark-active .solicitante-main .residuo-page .field small {
+  color: #8fa2bb !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .field input,
+body.sgl-dark-active .solicitante-main .residuo-page .field select,
+body.sgl-dark-active .solicitante-main .residuo-page .field textarea {
+  border-color: #30455f !important;
+  background: #111f33 !important;
+  color: #eef4fb !important;
+  color-scheme: dark;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .field input::placeholder,
+body.sgl-dark-active .solicitante-main .residuo-page .field textarea::placeholder {
+  color: #7488a4 !important;
+  opacity: 1;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .field input:focus,
+body.sgl-dark-active .solicitante-main .residuo-page .field select:focus,
+body.sgl-dark-active .solicitante-main .residuo-page .field textarea:focus {
+  border-color: #5b9df8 !important;
+  box-shadow: 0 0 0 3px rgb(91 157 248 / 14%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .risk-option {
+  border-color: #34475f !important;
+  background: #101d30 !important;
+  color: #b9c7d8 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .risk-option:has(input:checked) {
+  border-color: #b28a3e !important;
+  background: #2a2417 !important;
+  color: #f0c76f !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .risk-option input {
+  accent-color: #d0a54b !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .risk-none {
+  background: #111f33 !important;
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .component-card {
+  border-color: #2a3d58 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .component-card__header span {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .component-card__header strong {
+  border: 1px solid #2b644b !important;
+  background: #163629 !important;
+  color: #72dba8 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .remove-component {
+  color: #ff8996 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .origin-switch {
+  border-color: #30455f !important;
+  background: #111f33 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .origin-switch button {
+  border-color: #30455f !important;
+  background: transparent !important;
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .origin-switch button.active {
+  background: #17345d !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .principal-action {
+  border-color: #40546e !important;
+  background: #111f33 !important;
+  color: #aebdd0 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .principal-action.active {
+  border-color: #2b644b !important;
+  background: #163629 !important;
+  color: #72dba8 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .notice--error {
+  border-color: #713845 !important;
+  background: #2b1a23 !important;
+  color: #ff9aa5 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .notice--warning {
+  border-color: #765d2a !important;
+  background: #302716 !important;
+  color: #ecd69f !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .form-footer {
+  border-top: 1px solid #263a54 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .form-footer strong {
+  color: #dce6f2 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .form-footer span {
+  color: #94a7bf !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .submit-action {
+  border: 1px solid #4a8ee8 !important;
+  background: linear-gradient(135deg, #246fce, #3183ed) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 22px rgb(22 92 185 / 20%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .success-surface {
+  border-color: #2d674d !important;
+  background: linear-gradient(135deg, #132a23, #10221d) !important;
+  color: #dce6f2 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .success-icon {
+  background: #1f8a57 !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .success-copy > span {
+  color: #72dba8 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .success-copy h2 {
+  color: #eefaf4 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .success-copy p {
+  color: #a6c1b3 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .success-meta div {
+  background: rgb(13 25 41 / 72%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .success-meta small {
+  color: #87a697 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .success-meta strong {
+  color: #dff5e9 !important;
+}
+
+body.sgl-dark-active .solicitante-main .residuo-page .success-surface > button {
+  border-color: #3c7659 !important;
+  background: #142c24 !important;
+  color: #8be0b4 !important;
+}
+
+/* ========================================================================== */
+/* Hovers e acessibilidade                                                    */
+/* ========================================================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-dark-active .solicitante-main .meus-residuos-page .residuo-card:hover {
+    background: linear-gradient(90deg, #2a2417 0%, rgb(42 36 23 / 46%) 48%, transparent 100%) !important;
+    box-shadow: inset 3px 0 0 #b28a3e !important;
+  }
+
+  body.sgl-dark-active .solicitante-main .meus-residuos-page .summary-grid article:hover {
+    filter: brightness(1.08);
+  }
+
+  body.sgl-dark-active .solicitante-main .novo-pedido-page .item-row:hover {
+    border-color: #3c5574 !important;
+    background: #122139 !important;
+  }
+
+  body.sgl-dark-active .solicitante-main .residuo-page .component-card:hover {
+    border-color: #8b733d !important;
+    background: #171f28 !important;
+  }
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page button:focus-visible,
+body.sgl-dark-active .solicitante-main .novo-pedido-page button:focus-visible,
+body.sgl-dark-active .solicitante-main .residuo-page button:focus-visible {
+  outline: 2px solid #72a9ff !important;
+  outline-offset: 2px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-dark-active .solicitante-main .meus-residuos-page *,
+  body.sgl-dark-active .solicitante-main .novo-pedido-page *,
+  body.sgl-dark-active .solicitante-main .residuo-page * {
+    transition: none !important;
+  }
+}
