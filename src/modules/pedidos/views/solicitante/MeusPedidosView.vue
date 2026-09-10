@@ -467,12 +467,14 @@ th { color: #35415a; background: #fbfcfe; font-size: 11px; text-transform: upper
 .material-item > div:first-child { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
 .material-item > div:first-child strong { color: var(--sgl-text); font-size: 12px; }
 .material-item > div:first-child span { color: var(--sgl-text-muted); font-size: 10px; }
-.material-quantity { flex: 0 0 auto; display: grid; grid-template-columns: auto auto; gap: 2px 8px; text-align: right; }
+.material-quantity { flex: 0 0 auto; display: grid; grid-template-columns: auto auto; align-items: baseline; justify-content: end; gap: 2px 8px; text-align: right; }
 .material-quantity span { color: var(--sgl-text-muted); font-size: 9px; text-transform: uppercase; }
 .material-quantity--approved > span {
+  align-self: baseline;
   color: #187443;
   font-size: 12px;
   font-weight: 800;
+  line-height: 1;
   letter-spacing: 0.045em;
 }
 .material-quantity strong { font-size: 13px; }
