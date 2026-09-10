@@ -46,8 +46,8 @@ export function alternarTema() {
   aplicarTema(tema.value === 'light' ? 'dark' : 'light')
 }
 
-export function aplicarTemaDaRota(path: string) {
-  if (ehRotaSempreClara(path)) {
+export function aplicarTemaDaRota(path: string, forcarClaro = false) {
+  if (forcarClaro || ehRotaSempreClara(path)) {
     aplicarTemaEfetivo('light')
     return
   }
