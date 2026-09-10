@@ -289,20 +289,24 @@ function sair() {
 }
 
 .solicitante-sidebar__brand {
-  min-height: 92px;
+  width: 100%;
+  min-height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  padding: 0 8px;
+  box-sizing: border-box;
   border-bottom: 1px solid rgb(255 255 255 / 11%);
 }
 
 .solicitante-sidebar__brand img {
   display: block;
-  width: 178px;
-  max-height: 74px;
+  width: 190px;
+  max-width: 100%;
+  max-height: 76px;
+  margin: 0 auto;
   object-fit: contain;
-  transform: none;
+  transform: translate(-4px, -18px);
   filter: drop-shadow(0 4px 14px rgb(0 0 0 / 22%));
 }
 
