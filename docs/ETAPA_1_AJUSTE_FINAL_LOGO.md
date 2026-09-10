@@ -2,33 +2,43 @@
 
 ## Status
 
-Em validação.
+Concluído e validado em 10/09/2026.
 
 ## Contexto
 
-Após o fechamento visual da Etapa 1, foi solicitado um último acabamento na posição da marca SGL nas duas interfaces autenticadas.
+Após o fechamento visual da Etapa 1, foi solicitado um último acabamento na posição da marca SGL nas duas interfaces autenticadas. Durante a validação também foi identificado um erro no recolhimento da sidebar da Gestão, com falha de atualização do DOM no Vue (`insertBefore`).
 
-A primeira tentativa de compensação visual não produziu diferença perceptível suficiente e, durante a validação, a sidebar recolhida da Gestão também apresentou comportamento inadequado para navegação entre rotas.
+## Solução final
 
-## Correção atual
+A solução definitiva foi aplicada diretamente nos layouts, sem manter a camada CSS externa usada nas primeiras tentativas.
 
-A revisão atual trata os dois pontos em conjunto:
+### Gestão
 
-- reforça a centralização óptica da marca nas interfaces de Gestão e Solicitante;
-- aumenta levemente a presença visual da logo sem alterar o asset original;
-- usa seletores com prioridade suficiente para vencer os estilos `scoped` dos layouts;
-- isola completamente o comportamento da marca quando a sidebar da Gestão está recolhida;
-- amplia a sidebar recolhida para 80 px, preservando espaço seguro para os ícones;
-- garante alvos de navegação centralizados e clicáveis no modo recolhido;
-- mantém a largura do workspace sincronizada com a largura efetiva da sidebar;
-- preserva o comportamento responsivo em telas menores.
+- elementos de apresentação ligados ao estado `recolhida` passaram de `v-if` para `v-show`, evitando destruição e recriação desnecessária de nós durante o recolhimento;
+- o perfil permanece montado e tem apenas as informações secundárias ocultadas visualmente no modo recolhido;
+- a navegação permanece funcional com a sidebar aberta e recolhida;
+- a logo foi ajustada diretamente no `GestaoLayout.vue`, com compensação óptica para cima e para a esquerda;
+- no modo recolhido, a marca volta a exibir somente o símbolo do frasco do SGL, preservando o comportamento visual aprovado.
 
-## Validação obrigatória antes do merge
+### Solicitante
 
-1. Gestão com sidebar expandida: conferir centralização da logo.
-2. Gestão com sidebar recolhida: navegar por Dashboard, Estoque, Movimentações, Relatórios, Estagiários, Resíduos e Pedidos.
-3. Expandir novamente e confirmar que layout e navegação permanecem estáveis.
-4. Solicitante: conferir centralização da logo e navegação normal.
-5. Confirmar ausência de regressão em conteúdo, rotas e responsividade.
+- a logo foi ajustada diretamente no `SolicitanteLayout.vue`;
+- foi aplicada compensação própria para a diferença de dimensões/padding da sidebar do Solicitante, mantendo o mesmo alinhamento percebido da Gestão;
+- navegação e demais elementos do layout não foram alterados.
 
-Somente após essa validação a Etapa 1 deve ser marcada como definitivamente concluída e a Etapa 2 — Dark Mode definitivo — pode ser iniciada.
+## Validação realizada
+
+Foram validados:
+
+- Gestão com sidebar expandida;
+- recolhimento e expansão da sidebar sem erro de `insertBefore`;
+- navegação entre os principais endpoints no modo recolhido;
+- botão de tema no modo recolhido;
+- perfil no modo recolhido;
+- logo da Gestão aberta e recolhida;
+- logo do Solicitante;
+- ausência de regressão funcional nas interfaces testadas.
+
+## Resultado
+
+Com este ajuste aprovado, a Etapa 1 — Padronização e refinamento visual global — está concluída. O próximo trabalho do roadmap é a Etapa 2 — Dark Mode definitivo.
