@@ -236,56 +236,223 @@ body.sgl-dark-active .solicitante-main .pedidos-page .expand-button--open {
   color: #ffffff !important;
 }
 
-/* Painel expandido */
+/* Painel expandido — hierarquia e legibilidade refinadas */
 body.sgl-dark-active .solicitante-main .pedidos-page .expanded-row > td {
-  border-color: #263a54 !important;
+  padding: 0 !important;
+  border-color: #2a3d58 !important;
   background: #0a1524 !important;
 }
 
 body.sgl-dark-active .solicitante-main .pedidos-page .expanded-panel {
-  border-color: #263a54 !important;
-  background: linear-gradient(180deg, #101d30 0%, #0c1828 100%) !important;
+  padding: 24px !important;
+  border-top: 1px solid #2a3d58 !important;
+  border-bottom: 1px solid #2a3d58 !important;
+  background: linear-gradient(180deg, #11203a 0%, #0e1b30 100%) !important;
   color: #dce6f2 !important;
-  box-shadow: inset 0 6px 14px rgb(0 5 14 / 16%) !important;
+  box-shadow: inset 0 6px 16px rgb(0 5 14 / 18%) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading span,
+body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading {
+  margin-bottom: 20px !important;
+  padding-bottom: 16px !important;
+  border-bottom: 1px solid #263a54 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading > div > span {
+  display: block !important;
+  margin-bottom: 5px !important;
+  color: #8fa6c4 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading strong {
+  display: block !important;
+  color: #ffffff !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+}
+
 body.sgl-dark-active .solicitante-main .pedidos-page .expanded-date {
-  color: #8fa2bb !important;
+  color: #a9bad0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading strong,
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section h3 {
-  color: #f2f6fb !important;
+body.sgl-dark-active .solicitante-main .pedidos-page .expanded-grid {
+  gap: 16px !important;
 }
 
 body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section {
-  border-color: #263a54 !important;
-  background: #111f33 !important;
+  padding: 18px !important;
+  border: 1px solid #2b4260 !important;
+  border-radius: 10px !important;
+  background: #14243c !important;
   color: #d8e2ef !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-item,
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-urgency,
+body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section h3 {
+  margin-bottom: 16px !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.035em !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-list {
+  gap: 0 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-item {
+  gap: 20px !important;
+  padding: 15px 0 !important;
+  border-color: #2a3d58 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-item:first-child {
+  padding-top: 0 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-item:last-child {
+  padding-bottom: 0 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-item > div:first-child {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-item > div:first-child > strong {
+  display: block !important;
+  margin-bottom: 7px !important;
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 750 !important;
+  line-height: 1.35 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-item > div:first-child > span {
+  display: block !important;
+  color: #a8b9ce !important;
+  font-size: 12px !important;
+  line-height: 1.55 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity {
+  min-width: 128px !important;
+  padding: 11px 12px !important;
+  border: 1px solid #315071 !important;
+  border-radius: 8px !important;
+  background: #0f2037 !important;
+  text-align: right !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > span {
+  color: #8fa6c4 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > strong {
+  margin: 3px 0 !important;
+  color: #ffffff !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > small {
+  color: #72d3a1 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .info-list {
+  gap: 0 !important;
+}
+
 body.sgl-dark-active .solicitante-main .pedidos-page .info-list > div {
-  border-color: #263a54 !important;
+  padding: 11px 0 !important;
+  border-top: 1px solid #293d58 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-item strong,
-body.sgl-dark-active .solicitante-main .pedidos-page .info-list dd,
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section--observation p {
-  color: #e6edf7 !important;
+body.sgl-dark-active .solicitante-main .pedidos-page .info-list > div:first-child {
+  padding-top: 0 !important;
+  border-top: 0 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-item span,
-body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity span,
-body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity small,
+body.sgl-dark-active .solicitante-main .pedidos-page .info-list > div:last-child {
+  padding-bottom: 0 !important;
+}
+
 body.sgl-dark-active .solicitante-main .pedidos-page .info-list dt {
-  color: #91a3bb !important;
+  margin-bottom: 4px !important;
+  color: #8fa6c4 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.055em !important;
+  text-transform: uppercase !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity strong {
-  color: #8fc0ff !important;
+body.sgl-dark-active .solicitante-main .pedidos-page .info-list dd {
+  margin: 0 !important;
+  color: #f4f7fc !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  line-height: 1.45 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .expanded-urgency {
+  margin-top: 14px !important;
+  padding-top: 13px !important;
+  border-color: #2a3d58 !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section--observation p {
+  margin: 0 !important;
+  color: #d9e3ef !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+  white-space: pre-line !important;
+}
+
+/* A linha aberta precisa deixar claro que pertence ao painel de detalhes. */
+body.sgl-dark-active .solicitante-main .pedidos-page .order-row--expanded,
+body.sgl-dark-active .solicitante-main .pedidos-page .order-row--expanded td {
+  background: #10213a !important;
+}
+
+body.sgl-dark-active .solicitante-main .pedidos-page .expand-button--open {
+  border-color: #5b8fd0 !important;
+  background: #1b477c !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 760px) {
+  body.sgl-dark-active .solicitante-main .pedidos-page .expanded-panel {
+    padding: 18px !important;
+  }
+
+  body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading {
+    gap: 10px !important;
+  }
+
+  body.sgl-dark-active .solicitante-main .pedidos-page .material-item {
+    flex-direction: column !important;
+  }
+
+  body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity {
+    width: 100% !important;
+    min-width: 0 !important;
+    text-align: left !important;
+  }
 }
 
 /* Loading, vazio e erro */
