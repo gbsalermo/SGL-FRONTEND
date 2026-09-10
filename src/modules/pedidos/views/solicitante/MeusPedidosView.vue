@@ -305,7 +305,10 @@ onMounted(carregarPedidos)
                               <strong>{{ item.produtoNome }}</strong>
                               <span>{{ item.produtoUnidadeArmazenamento }}</span>
                             </div>
-                            <div class="material-quantity">
+                            <div
+                              class="material-quantity"
+                              :class="{ 'material-quantity--approved': item.quantidadeAprovada != null }"
+                            >
                               <span>{{ item.quantidadeAprovada != null ? 'Aprovado' : 'Solicitado' }}</span>
                               <strong>{{ item.quantidadeAprovada ?? item.quantidadeSolicitada }}</strong>
                               <small v-if="item.quantidadeAprovada != null">
@@ -466,6 +469,12 @@ th { color: #35415a; background: #fbfcfe; font-size: 11px; text-transform: upper
 .material-item > div:first-child span { color: var(--sgl-text-muted); font-size: 10px; }
 .material-quantity { flex: 0 0 auto; display: grid; grid-template-columns: auto auto; gap: 2px 8px; text-align: right; }
 .material-quantity span { color: var(--sgl-text-muted); font-size: 9px; text-transform: uppercase; }
+.material-quantity--approved > span {
+  color: #187443;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.045em;
+}
 .material-quantity strong { font-size: 13px; }
 .material-quantity small { grid-column: 1 / -1; color: #187443; font-size: 9px; }
 
