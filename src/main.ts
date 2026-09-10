@@ -39,6 +39,9 @@ import './styles/etapa-2-gestao-pedidos.css'
 import './styles/etapa-2-gestao-estoque.css'
 import './styles/etapa-2-gestao-movimentacoes.css'
 import './styles/etapa-2-gestao-estagiarios.css'
+import './styles/etapa-2-gestao-residuos.css'
+import './styles/etapa-2-gestao-relatorios.css'
+import './styles/etapa-2-gestao-cadastros.css'
 
 const app = createApp(App)
 const pinia = createPinia()
