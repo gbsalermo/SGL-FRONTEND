@@ -709,6 +709,230 @@ body.sgl-dark-active .solicitante-main .residuo-page .success-surface > button {
 }
 
 /* ========================================================================== */
+/* Ajustes de legibilidade e alinhamento da rodada de validação               */
+/* ========================================================================== */
+
+/* Novo pedido: labels, controles e textos auxiliares ficam no mesmo eixo. */
+body.sgl-dark-active .solicitante-main .novo-pedido-page .item-row {
+  align-items: start !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .item-row .field {
+  align-self: start !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .item-row .field > small {
+  display: block !important;
+  min-height: 16px !important;
+  margin-top: 6px !important;
+}
+
+body.sgl-dark-active .solicitante-main .novo-pedido-page .remove-item {
+  align-self: start !important;
+  margin-top: 26px !important;
+}
+
+/* Informar resíduo: componente "pré-cadastrado / em breve" no padrão Dark. */
+body.sgl-dark-active .residuo-modelo-user-card {
+  border-color: #344b68 !important;
+  background: linear-gradient(135deg, #101d30 0%, #0d1929 100%) !important;
+  color: #cbd7e6 !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%) !important;
+}
+
+body.sgl-dark-active .residuo-modelo-user-card > header span {
+  color: #8fa6c4 !important;
+}
+
+body.sgl-dark-active .residuo-modelo-user-card > header h3 {
+  color: #f2f6fb !important;
+}
+
+body.sgl-dark-active .residuo-modelo-user-card > header > strong {
+  border: 1px solid #46566c !important;
+  background: #202c3d !important;
+  color: #b8c5d6 !important;
+}
+
+body.sgl-dark-active .residuo-modelo-user-card label > span {
+  color: #a9b8ca !important;
+}
+
+body.sgl-dark-active .residuo-modelo-user-card select {
+  border-color: #30455f !important;
+  background: #17253a !important;
+  color: #7f91aa !important;
+  color-scheme: dark;
+}
+
+body.sgl-dark-active .residuo-modelo-user-card__rule {
+  border: 1px solid #30455f !important;
+  background: #14243c !important;
+}
+
+body.sgl-dark-active .residuo-modelo-user-card__rule strong {
+  color: #9bc3ff !important;
+}
+
+body.sgl-dark-active .residuo-modelo-user-card__rule span {
+  color: #a8b9ce !important;
+}
+
+body.sgl-dark-active .residuo-modelo-user-card > p {
+  color: #91a3bb !important;
+}
+
+/* Meus resíduos: drawer com hierarquia equivalente aos detalhes de Pedidos. */
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-drawer {
+  background: #0c1828 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-drawer > header {
+  padding: 24px 26px 20px !important;
+  border-color: #2a3d58 !important;
+  background: linear-gradient(180deg, #11203a 0%, #0f1d31 100%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-drawer h2 {
+  margin-top: 11px !important;
+  color: #ffffff !important;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  line-height: 1.22 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-drawer header p {
+  margin-top: 6px !important;
+  color: #9fb0c6 !important;
+  font-size: 12px !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content {
+  padding: 24px 26px 38px !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content section + section {
+  margin-top: 26px !important;
+  padding-top: 24px !important;
+  border-color: #2a3d58 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content h3 {
+  margin-bottom: 14px !important;
+  color: #c6d4e6 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: .055em !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content dl {
+  gap: 10px !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content dl div {
+  min-height: 56px !important;
+  padding: 12px 13px !important;
+  border: 1px solid #213550 !important;
+  border-radius: 8px !important;
+  background: #13223a !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content dt {
+  color: #8fa6c4 !important;
+  font-size: 10px !important;
+  letter-spacing: .045em !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-content dd {
+  margin-top: 6px !important;
+  color: #f4f7fc !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .component-row {
+  padding: 14px !important;
+  border-color: #2b4260 !important;
+  border-radius: 9px !important;
+  background: #14243c !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .component-row strong {
+  color: #ffffff !important;
+  font-size: 14px !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .component-row small {
+  color: #a6b7cb !important;
+  font-size: 10px !important;
+  line-height: 1.45 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .component-row p {
+  margin-top: 6px !important;
+  color: #b9c7d8 !important;
+  font-size: 11px !important;
+  line-height: 1.5 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison > div {
+  padding: 17px !important;
+  border-color: #2b4260 !important;
+  background: #14243c !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison > div:last-child {
+  border-color: #316148 !important;
+  background: #142d25 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison > div > strong {
+  display: block !important;
+  margin-top: 2px !important;
+  color: #ffffff !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison > div > p {
+  margin: 9px 0 0 !important;
+  color: #b9c7d8 !important;
+  font-size: 11px !important;
+  line-height: 1.5 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-note-block {
+  margin-top: 14px !important;
+  padding: 12px 13px !important;
+  border: 1px solid #30455f !important;
+  border-radius: 8px !important;
+  background: #0f1f35 !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .risk-comparison > div:last-child .detail-note-block {
+  border-color: #2f5a45 !important;
+  background: #10261f !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-note-block > span {
+  display: block !important;
+  margin-bottom: 7px !important;
+  color: #9fb0c6 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .05em !important;
+  text-transform: uppercase !important;
+}
+
+body.sgl-dark-active .solicitante-main .meus-residuos-page .detail-note-block > p {
+  margin: 0 !important;
+  color: #e0e8f3 !important;
+  font-size: 12px !important;
+  line-height: 1.65 !important;
+}
+
+/* ========================================================================== */
 /* Hovers e acessibilidade                                                    */
 /* ========================================================================== */
 
