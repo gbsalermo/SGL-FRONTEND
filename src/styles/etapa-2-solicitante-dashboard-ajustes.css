@@ -48,7 +48,7 @@ body.sgl-light-active .solicitante-main .tracking-card--residuo .progress-step--
 body.sgl-dark-active .solicitante-main .current-status[data-status='ENTREGUE'] {
   border: 1px solid #315F99 !important;
   background: #17345D !important;
-  color: #9BC3FF !important;
+  color: #FFFFFF !important;
 }
 
 /* ========================================================================== */
