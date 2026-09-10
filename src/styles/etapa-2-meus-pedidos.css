@@ -360,6 +360,13 @@ body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > span {
   text-transform: uppercase !important;
 }
 
+body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity--approved > span {
+  color: #72d3a1 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.055em !important;
+}
+
 body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > strong {
   margin: 3px 0 !important;
   color: #ffffff !important;
