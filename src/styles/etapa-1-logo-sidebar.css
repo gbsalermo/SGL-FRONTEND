@@ -1,100 +1,194 @@
 /*
  * Acabamento final da Etapa 1 — marca SGL e sidebar recolhida.
  *
- * A marca precisa de uma compensação óptica um pouco maior do que a
- * centralização geométrica do container. O modo recolhido da Gestão fica
- * isolado dessas regras e recebe apenas ajustes de robustez/clicabilidade.
+ * Este arquivo é deliberadamente específico porque os layouts possuem estilos
+ * scoped próprios. As regras abaixo precisam vencer esses estilos sem alterar
+ * o comportamento das demais telas.
  */
 
-/* Gestão — somente quando expandida. */
-.gestao-shell:not(.gestao-shell--collapsed) .gestao-brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* -------------------------------------------------------------------------- */
+/* Marca — Gestão                                                             */
+/* -------------------------------------------------------------------------- */
+
+.gestao-shell:not(.gestao-shell--collapsed) .gestao-sidebar .gestao-brand {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 96px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding-inline: 8px !important;
+  overflow: hidden !important;
 }
 
-.gestao-shell:not(.gestao-shell--collapsed) .gestao-brand img {
-  display: block;
-  width: 186px;
-  max-width: calc(100% - 20px);
-  max-height: 74px;
-  margin-inline: auto;
-  object-fit: contain;
-  transform: translateX(14px);
-}
-
-/* Solicitante — mesma percepção visual da Gestão. */
-.solicitante-sidebar__brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.solicitante-sidebar__brand img {
-  display: block;
-  width: 186px;
-  max-width: calc(100% - 20px);
-  max-height: 74px;
-  margin-inline: auto;
-  object-fit: contain;
-  transform: translateX(14px);
-}
-
-/*
- * Gestão recolhida: não herda deslocamento/tamanho da logo expandida.
- * Também garantimos que os alvos de navegação permaneçam inteiros e
- * clicáveis dentro dos 72 px da sidebar.
- */
-.gestao-shell--collapsed .gestao-sidebar {
-  box-sizing: border-box;
-  width: var(--sidebar-width);
-  padding-inline: 10px;
-}
-
-.gestao-shell--collapsed .gestao-brand {
-  width: 100%;
-  min-width: 0;
-}
-
-.gestao-shell--collapsed .gestao-brand img {
-  width: 40px !important;
-  max-width: 40px !important;
-  height: auto;
-  max-height: 58px;
-  margin-inline: auto;
+.gestao-shell:not(.gestao-shell--collapsed) .gestao-sidebar .gestao-brand img {
+  display: block !important;
+  width: 194px !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 76px !important;
+  margin: 0 auto !important;
   object-fit: contain !important;
   object-position: center !important;
+  transform: translateX(12px) scale(1.03) !important;
+  transform-origin: center center !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Marca — Solicitante                                                        */
+/* -------------------------------------------------------------------------- */
+
+.solicitante-shell .solicitante-sidebar .solicitante-sidebar__brand {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 96px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding-inline: 8px !important;
+  overflow: hidden !important;
+}
+
+.solicitante-shell .solicitante-sidebar .solicitante-sidebar__brand img {
+  display: block !important;
+  width: 194px !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 76px !important;
+  margin: 0 auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: translateX(12px) scale(1.03) !important;
+  transform-origin: center center !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sidebar da Gestão recolhida                                                */
+/* -------------------------------------------------------------------------- */
+
+.gestao-shell.gestao-shell--collapsed {
+  --sidebar-width: 80px !important;
+}
+
+.gestao-shell.gestao-shell--collapsed .gestao-sidebar {
+  box-sizing: border-box !important;
+  width: var(--sidebar-width) !important;
+  min-width: var(--sidebar-width) !important;
+  padding: 16px 10px !important;
+  overflow-x: hidden !important;
+}
+
+.gestao-shell.gestao-shell--collapsed .gestao-sidebar .gestao-brand {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 76px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.gestao-shell.gestao-shell--collapsed .gestao-sidebar .gestao-brand img {
+  display: block !important;
+  width: 46px !important;
+  max-width: 46px !important;
+  height: 46px !important;
+  max-height: 46px !important;
+  margin: 0 auto !important;
+  object-fit: cover !important;
+  object-position: left center !important;
   transform: none !important;
 }
 
-.gestao-shell--collapsed .gestao-tools,
-.gestao-shell--collapsed .gestao-nav {
-  width: 100%;
-  min-width: 0;
+.gestao-shell.gestao-shell--collapsed .gestao-tools,
+.gestao-shell.gestao-shell--collapsed .gestao-nav {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
 }
 
-.gestao-shell--collapsed .gestao-tool,
-.gestao-shell--collapsed .gestao-nav a,
-.gestao-shell--collapsed .gestao-nav-parent,
-.gestao-shell--collapsed .gestao-nav__future {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  min-width: 0;
-  min-height: 44px;
-  pointer-events: auto;
+.gestao-shell.gestao-shell--collapsed .gestao-nav {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding-right: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
-.gestao-shell--collapsed .gestao-nav a svg,
-.gestao-shell--collapsed .gestao-tool svg,
-.gestao-shell--collapsed .gestao-nav-parent svg {
-  pointer-events: none;
+.gestao-shell.gestao-shell--collapsed .gestao-tool,
+.gestao-shell.gestao-shell--collapsed .gestao-nav > a,
+.gestao-shell.gestao-shell--collapsed .gestao-nav-parent,
+.gestao-shell.gestao-shell--collapsed .gestao-nav__future {
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 2 !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  min-height: 46px !important;
+  margin-inline: auto !important;
+  padding-inline: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }
 
-/* Em telas móveis o layout deixa de usar a sidebar recolhida. */
+.gestao-shell.gestao-shell--collapsed .gestao-nav-parent__main {
+  box-sizing: border-box !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  min-height: 46px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.gestao-shell.gestao-shell--collapsed .gestao-nav svg,
+.gestao-shell.gestao-shell--collapsed .gestao-tool svg,
+.gestao-shell.gestao-shell--collapsed .gestao-nav-parent svg {
+  width: 21px !important;
+  height: 21px !important;
+  flex: 0 0 21px !important;
+  pointer-events: none !important;
+}
+
+.gestao-shell.gestao-shell--collapsed .gestao-workspace {
+  width: calc(100% - var(--sidebar-width)) !important;
+  max-width: calc(100% - var(--sidebar-width)) !important;
+  margin-left: var(--sidebar-width) !important;
+}
+
+/* Não deixa painéis flutuantes invisíveis bloquearem a navegação recolhida. */
+.gestao-shell.gestao-shell--collapsed .gestao-search-panel:not(:has(input:focus)),
+.gestao-shell.gestao-shell--collapsed .gestao-alert-panel[style*='display: none'] {
+  pointer-events: none !important;
+}
+
+/* Em telas móveis o SGL deixa de operar com a sidebar compacta. */
 @media (max-width: 900px) {
-  .gestao-shell:not(.gestao-shell--collapsed) .gestao-brand img,
-  .solicitante-sidebar__brand img {
-    transform: none;
+  .gestao-shell.gestao-shell--collapsed {
+    --sidebar-width: 100% !important;
+  }
+
+  .gestao-shell.gestao-shell--collapsed .gestao-sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .gestao-shell.gestao-shell--collapsed .gestao-workspace {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .gestao-shell:not(.gestao-shell--collapsed) .gestao-sidebar .gestao-brand img,
+  .solicitante-shell .solicitante-sidebar .solicitante-sidebar__brand img {
+    transform: none !important;
   }
 }
