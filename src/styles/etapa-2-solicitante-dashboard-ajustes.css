@@ -1,0 +1,142 @@
+/*
+ * Ajustes de validação — Etapa 2.1 / Dashboard do Solicitante.
+ *
+ * - status ENTREGUE integrado à paleta escura;
+ * - linha do tempo de Resíduos em creme/âmbar no Light e no Dark;
+ * - KPIs com contorno e hover coerentes com a situação representada.
+ */
+
+/* ========================================================================== */
+/* Light: corrigir a identidade creme/âmbar da linha do tempo de Resíduos.    */
+/* ========================================================================== */
+
+body.sgl-light-active .solicitante-main .tracking-card--residuo .progress-step:not(:last-child)::after {
+  background: #E7D4A6 !important;
+}
+
+body.sgl-light-active .solicitante-main .tracking-card--residuo .progress-step--done:not(:last-child)::after {
+  background: #C9962F !important;
+}
+
+body.sgl-light-active .solicitante-main .tracking-card--residuo .progress-marker {
+  border-color: #D8C69A !important;
+  background: #FFFDF7 !important;
+  color: #9B7A32 !important;
+}
+
+body.sgl-light-active .solicitante-main .tracking-card--residuo .progress-step--done .progress-marker {
+  border-color: #C9962F !important;
+  background: #C9962F !important;
+  color: #FFFFFF !important;
+}
+
+body.sgl-light-active .solicitante-main .tracking-card--residuo .progress-step--current .progress-marker {
+  border-color: #B7791F !important;
+  background: #FFF9EC !important;
+  color: #A86A00 !important;
+  box-shadow: 0 0 0 4px #F8E9C5 !important;
+}
+
+body.sgl-light-active .solicitante-main .tracking-card--residuo .progress-step--current strong {
+  color: #9A650D !important;
+}
+
+/* ========================================================================== */
+/* Dark: status do pedido entregue.                                           */
+/* ========================================================================== */
+
+body.sgl-dark-active .solicitante-main .current-status[data-status='ENTREGUE'] {
+  border: 1px solid #315F99 !important;
+  background: #17345D !important;
+  color: #FFFFFF !important;
+}
+
+/* ========================================================================== */
+/* Dark: linha do tempo de Resíduos usa creme/âmbar, não azul.                */
+/* ========================================================================== */
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step:not(:last-child)::after {
+  background: #5B4E30 !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step--done:not(:last-child)::after {
+  background: #D0A54B !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-marker {
+  border-color: #796740 !important;
+  background: #211D14 !important;
+  color: #C8B580 !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step--done .progress-marker {
+  border-color: #D0A54B !important;
+  background: #D0A54B !important;
+  color: #17130B !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step--current .progress-marker {
+  border-color: #E0B75F !important;
+  background: #2A2416 !important;
+  color: #F0CD80 !important;
+  box-shadow: 0 0 0 4px rgb(224 183 95 / 16%) !important;
+}
+
+body.sgl-dark-active .solicitante-main .tracking-card--residuo .progress-step--current strong {
+  color: #F0CD80 !important;
+}
+
+/* ========================================================================== */
+/* KPIs: contorno semântico permanente + reforço no hover.                    */
+/* ========================================================================== */
+
+body.sgl-dark-active .solicitante-main .overview-card--red {
+  border-color: #56303C !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-card--green {
+  border-color: #275643 !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-card--orange {
+  border-color: #624C25 !important;
+}
+
+body.sgl-dark-active .solicitante-main .overview-card--blue {
+  border-color: #2A4F7B !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-dark-active .solicitante-main .overview-card--red:hover {
+    border-color: #D95A69 !important;
+    background: linear-gradient(180deg, #201B2A 0%, #161725 100%) !important;
+    box-shadow: 0 0 0 1px rgb(255 113 128 / 10%), 0 12px 28px rgb(0 5 14 / 24%) !important;
+  }
+
+  body.sgl-dark-active .solicitante-main .overview-card--green:hover {
+    border-color: #45B77F !important;
+    background: linear-gradient(180deg, #14251F 0%, #101D1C 100%) !important;
+    box-shadow: 0 0 0 1px rgb(84 213 154 / 9%), 0 12px 28px rgb(0 5 14 / 24%) !important;
+  }
+
+  body.sgl-dark-active .solicitante-main .overview-card--orange:hover {
+    border-color: #C99B42 !important;
+    background: linear-gradient(180deg, #211E18 0%, #191A1D 100%) !important;
+    box-shadow: 0 0 0 1px rgb(242 190 85 / 10%), 0 12px 28px rgb(0 5 14 / 24%) !important;
+  }
+
+  body.sgl-dark-active .solicitante-main .overview-card--blue:hover {
+    border-color: #4E8EDA !important;
+    background: linear-gradient(180deg, #14243A 0%, #101E31 100%) !important;
+    box-shadow: 0 0 0 1px rgb(91 157 248 / 10%), 0 12px 28px rgb(0 5 14 / 24%) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-dark-active .solicitante-main .overview-card--red:hover,
+  body.sgl-dark-active .solicitante-main .overview-card--green:hover,
+  body.sgl-dark-active .solicitante-main .overview-card--orange:hover,
+  body.sgl-dark-active .solicitante-main .overview-card--blue:hover {
+    transform: none !important;
+  }
+}
