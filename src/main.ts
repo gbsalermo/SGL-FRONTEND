@@ -32,6 +32,7 @@ import './styles/dark-mode-runtime.css'
 import './styles/dark-mode-coverage.css'
 import './styles/dark-mode-consistency.css'
 import './styles/etapa-2-solicitante-dashboard.css'
+import './styles/etapa-2-solicitante-dashboard-ajustes.css'
 
 const TEMA_STORAGE_KEY = 'sgl.theme'
 
