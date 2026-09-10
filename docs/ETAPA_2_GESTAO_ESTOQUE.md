@@ -2,7 +2,7 @@
 
 ## Status
 
-Em validação — 10/09/2026.
+Concluída e validada — 10/09/2026.
 
 ## Escopo
 
@@ -85,6 +85,10 @@ A escala ampliada aprovada na Etapa 1 foi preservada no Dark Mode:
 - Light Mode permanece intacto;
 - Login/404 continuam claros.
 
+## Validação final
+
+As três interfaces foram conferidas em Light e Dark sem necessidade de ajustes adicionais.
+
 ## Próximo passo
 
-Validar as três telas em Light e Dark antes do merge.
+Seguir para Gestão → `/movimentacoes`.
