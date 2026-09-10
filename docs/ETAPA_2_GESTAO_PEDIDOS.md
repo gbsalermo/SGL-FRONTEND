@@ -2,7 +2,7 @@
 
 ## Status
 
-Em validação — 10/09/2026.
+Concluída e validada — 10/09/2026.
 
 ## Escopo
 
@@ -62,6 +62,18 @@ A diferença entre Light e Dark fica concentrada em paleta, contraste, bordas, h
 - Light Mode permanece intacto;
 - Login/404 permanecem claros.
 
+## Validação final
+
+A interface foi validada em Light e Dark.
+
+Ajustes finais aprovados:
+
+- escala interna dos cards de quantidade ampliada;
+- rótulo `SOLICITADA` preservado;
+- estado pendente mantém `QUANTIDADE A APROVAR`;
+- estados concluídos usam `APROVADA` ou `ENTREGUE`, conforme o status do pedido;
+- paridade visual entre Light e Dark mantida.
+
 ## Próximo passo
 
-Validar `/pedidos` em Dark e Light antes do merge.
+Seguir para Gestão → `/estoque`.
