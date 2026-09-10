@@ -2,7 +2,7 @@
 
 ## Status
 
-Em validação — 10/09/2026.
+Concluída e validada — 10/09/2026.
 
 ## Escopo
 
@@ -59,6 +59,10 @@ O destaque vindo de rota/query continua azul institucional e tem prioridade sobr
 - nenhum service, rota ou payload alterado;
 - Light Mode permanece intacto.
 
+## Validação final
+
+A interface foi validada em Light e Dark sem necessidade de ajustes adicionais.
+
 ## Próximo passo
 
-Validar `/movimentacoes` em Light e Dark antes do merge.
+Seguir para Gestão → `/estagiarios`.
