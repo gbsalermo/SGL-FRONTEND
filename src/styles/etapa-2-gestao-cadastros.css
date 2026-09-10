@@ -252,7 +252,7 @@ body.sgl-dark-active .gestao-main .admin-page .btn {
 body.sgl-dark-active .gestao-main .admin-page .btn--primary {
   border-color: var(--sgl-primary);
   background: var(--sgl-primary);
-  color: #0D1929;
+  color: #FFFFFF;
 }
 
 body.sgl-dark-active .gestao-main .admin-page .btn--primary:hover:not(:disabled) {
