@@ -348,7 +348,7 @@ onMounted(carregar)
                     <h3>Materiais solicitados</h3>
                     <div v-for="item in pedido.itens" :key="item.id" class="gestao-detail__item">
                       <div><strong>{{ item.produtoNome }}</strong><small>{{ item.produtoUnidadeArmazenamento }}</small><small class="requested-form">Solicitado como: {{ formaSolicitada(item) }}</small></div>
-                      <div class="quantity-card requested-quantity"><strong>QUANT. SOLICITADA</strong><span>{{ item.quantidadeSolicitada }}</span></div>
+                      <div class="quantity-card requested-quantity"><strong>SOLICITADA</strong><span>{{ item.quantidadeSolicitada }}</span></div>
 
                       <label v-if="pedido.status === 'PENDENTE'" class="quantity-card approval-quantity">
                         <span>QUANTIDADE A APROVAR</span>
