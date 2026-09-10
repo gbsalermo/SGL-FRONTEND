@@ -419,9 +419,11 @@ onMounted(carregarDados)
 .urgency-guidance { margin-top: 12px; padding: 10px 12px; border-left: 3px solid #dc2626; border-radius: 4px; background: #fff7f7; color: #8f2d24; font-size: 11px; line-height: 1.45; }
 .observation-field textarea { min-height: 96px; }
 .items-list { display: flex; flex-direction: column; gap: 12px; }
-.item-row { display: grid; grid-template-columns: minmax(250px, 1.25fr) minmax(250px, 1fr) 120px 38px; align-items: end; gap: 12px; padding: 14px; border: 1px solid #e5eaf1; border-radius: 8px; background: #fbfcfe; }
+.item-row { display: grid; grid-template-columns: minmax(250px, 1.25fr) minmax(250px, 1fr) 120px 38px; align-items: start; gap: 12px; padding: 14px; border: 1px solid #e5eaf1; border-radius: 8px; background: #fbfcfe; }
+.item-row .field { align-self: start; }
+.item-row .field > small { display: block; min-height: 16px; margin-top: 6px; }
 .item-row .field + .field { margin-top: 0; }
-.remove-item { width: 38px; height: 44px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; color: #b42318; font-size: 20px; cursor: pointer; }
+.remove-item { width: 38px; height: 44px; align-self: start; margin-top: 26px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; color: #b42318; font-size: 20px; cursor: pointer; }
 .remove-item:disabled { color: #cbd5e1; cursor: not-allowed; }
 .state-box { padding: 24px; color: var(--sgl-text-muted); text-align: center; }
 .error-banner { margin: 18px 22px 0; padding: 12px 14px; border: 1px solid #fecaca; border-radius: 7px; background: #fff1f1; color: #b42318; font-size: 12px; }
