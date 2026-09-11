@@ -199,6 +199,41 @@ body.sgl-dark-active .profile-cancel {
   color: var(--sgl-text) !important;
 }
 
+body.sgl-dark-active .profile-upload {
+  border-color: var(--sgl-border-strong) !important;
+  background: var(--sgl-surface-interactive) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .profile-upload:hover {
+  border-color: var(--sgl-primary) !important;
+  background: #1b3150 !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .profile-dialog > header > button {
+  border: 1px solid var(--sgl-border-strong) !important;
+  background: var(--sgl-surface-interactive) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .profile-dialog > header > button:hover {
+  border-color: var(--sgl-primary) !important;
+  background: #1b3150 !important;
+}
+
+body.sgl-dark-active .profile-save {
+  border: 1px solid var(--sgl-action-primary-border) !important;
+  background: var(--sgl-action-primary) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .profile-save:hover:not(:disabled) {
+  border-color: var(--sgl-primary-light) !important;
+  background: var(--sgl-action-primary-hover) !important;
+}
+
 /* Foco único em todo o sistema autenticado. */
 body.sgl-dark-active :where(button, input, select, textarea, a):focus-visible {
   outline-color: var(--sgl-focus);
