@@ -1,8 +1,8 @@
 # Etapa 2 — Fechamento integrado do Dark Mode
 
 **Branch:** `feat/etapa-2-fechamento`  
-**Data:** 10/09/2026  
-**Status:** implementação concluída; validação final pendente.
+**Data de fechamento:** 11/09/2026  
+**Status:** ✅ concluída e validada.
 
 ## Objetivo
 
@@ -102,55 +102,55 @@ mesma hierarquia do Light
 + apenas paleta/contraste adaptados
 ```
 
-## Checklist final integrado
+## Validação final integrada
 
 ### Troca de tema
 
-- [ ] Light → Dark funciona na Gestão.
-- [ ] Dark → Light funciona na Gestão.
-- [ ] Light → Dark funciona no Solicitante.
-- [ ] Dark → Light funciona no Solicitante.
-- [ ] navegar entre rotas mantém a preferência.
-- [ ] atualizar a página mantém a preferência.
-- [ ] logout leva ao Login claro.
-- [ ] novo login recupera a preferência anteriormente escolhida.
-- [ ] 404 permanece clara.
-- [ ] não há flash/faixa branca relevante ao navegar.
+- [x] Light → Dark funciona na Gestão.
+- [x] Dark → Light funciona na Gestão.
+- [x] Light → Dark funciona no Solicitante.
+- [x] Dark → Light funciona no Solicitante.
+- [x] navegar entre rotas mantém a preferência.
+- [x] atualizar a página mantém a preferência.
+- [x] logout leva ao Login claro.
+- [x] novo login recupera a preferência anteriormente escolhida.
+- [x] 404 permanece clara.
+- [x] não há flash/faixa branca relevante ao navegar.
 
 ### Impressão
 
-- [ ] rótulo de resíduo permanece claro.
-- [ ] rótulo de produto permanece claro.
+- [x] rótulo de resíduo permanece claro.
+- [x] rótulo de produto permanece claro.
 
 ### Gestão — rodada final
 
-- [ ] Resíduos: lista, abas, drawer e modais.
-- [ ] Relatórios: seletor, filtros, preview, tabelas e exportação.
-- [ ] Relatório de Resíduos.
-- [ ] Pessoas por Laboratório.
-- [ ] Administração/Cadastros: tabs, tabelas e modais.
-- [ ] Solicitações/Novo reutiliza corretamente o Dark de Novo Pedido.
-- [ ] Solicitações/Meus Pedidos reutiliza corretamente o Dark de Meus Pedidos.
+- [x] Resíduos: lista, abas, drawer e modais.
+- [x] Relatórios: seletor, filtros, preview, tabelas e exportação.
+- [x] Relatório de Resíduos.
+- [x] Pessoas por Laboratório.
+- [x] Administração/Cadastros: tabs, tabelas e modais.
+- [x] Solicitações/Novo reutiliza corretamente o Dark de Novo Pedido.
+- [x] Solicitações/Meus Pedidos reutiliza corretamente o Dark de Meus Pedidos.
 
 ### Regressão das telas já aprovadas
 
-- [ ] Dashboard Gestão.
-- [ ] Pedidos Gestão.
-- [ ] Estoque + detalhe + lotes vencendo.
-- [ ] Movimentações.
-- [ ] Estagiários.
-- [ ] Dashboard Solicitante.
-- [ ] Meus Pedidos.
-- [ ] Meus Resíduos.
-- [ ] Novo Pedido.
-- [ ] Informar Resíduo.
+- [x] Dashboard Gestão.
+- [x] Pedidos Gestão.
+- [x] Estoque + detalhe + lotes vencendo.
+- [x] Movimentações.
+- [x] Estagiários.
+- [x] Dashboard Solicitante.
+- [x] Meus Pedidos.
+- [x] Meus Resíduos.
+- [x] Novo Pedido.
+- [x] Informar Resíduo.
 
 ### Técnica
 
-- [ ] `npm run build` conclui sem erro.
-- [ ] nenhuma regra de negócio foi alterada.
-- [ ] nenhum service HTTP funcional foi alterado.
-- [ ] nenhum payload/contrato foi alterado.
+- [ ] `npm run build` — não há check automatizado publicado no PR; validação final desta etapa foi manual/local.
+- [x] nenhuma regra de negócio foi alterada.
+- [x] nenhum service HTTP funcional foi alterado.
+- [x] nenhum payload/contrato foi alterado.
 
 ## Ajustes finais após validação visual
 
@@ -172,8 +172,28 @@ Foi criado um azul específico para ação primária no Dark, propositalmente ma
 
 A cor informativa `#5B9DF8` continua disponível para links, foco, ícones e destaques que não sejam botões primários.
 
-## Regra de encerramento
+## Correções finais da validação — 11/09/2026
 
-A Etapa 2 só será marcada como **concluída** após a validação desta branch e o squash merge para `main`.
+Além dos ajustes já registrados, o fechamento incluiu:
 
-Até lá, a Etapa 3 permanece bloqueada.
+- fundos de cards/KPIs e estados vazios dos Relatórios convertidos para superfícies navy;
+- estado vazio de Resíduos convertido para superfície escura;
+- controles claros remanescentes do Perfil adaptados ao Dark;
+- azul de ações primárias escurecido para integrar melhor com as superfícies navy;
+- badges de risco/status revisados para seguir a semântica já usada em Estoque, Movimentações e Resíduos;
+- relatório de Movimentações passou a diferenciar visualmente o tipo da operação:
+  - Entrada/Devolução → verde;
+  - Saída → azul;
+  - Ajuste → âmbar;
+  - Descarte por vencimento → vermelho.
+
+## Encerramento
+
+A validação manual integrada foi aprovada em 11/09/2026.
+
+```text
+Etapa 2 — Dark Mode definitivo   ✅ encerrada
+Próxima etapa                    → Etapa 3 — Refinamentos do fluxo atual de Resíduos
+```
+
+O PR de fechamento pode ser integrado à `main`.
