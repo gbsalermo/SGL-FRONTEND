@@ -3,10 +3,24 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Snapshot:** 04/09/2026  
-**Estado:** primeiro protótipo funcional aprovado; ajustes de pré-produção em andamento.
+**Atualizado em:** 11/09/2026  
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1 e 2 da pré-produção concluídas; Etapa 3 — Resíduos — em andamento.
 
 Este documento resume o estado real do frontend para retomada humana ou por IA. O objetivo é evitar reconstrução de módulos já aprovados e impedir que roadmaps antigos sejam tratados como tarefa imediata.
+
+## Checkpoint atual — 11/09/2026
+
+```text
+Etapa 1 — padrão visual global              ✅ concluída
+Etapa 2 — Dark Mode definitivo              ✅ concluída
+Etapa 3 — refinamentos do fluxo de Resíduos 🔧 atual
+```
+
+Próxima subetapa: **3.1 — remover redundância visual de análise**. O plano canônico está no backend em `docs/PLANO_PRE_PRODUCAO.md` e o checkpoint específico em `docs/CONTINUIDADE_ETAPA_3_2026-09-11.md`.
+
+Dark Mode definitivo: fonte única em `src/services/themeService.ts`, tokens consolidados, Vuetify/DOM sincronizados e Login/404/rótulos de impressão preservados em Light.
+
+---
 
 ---
 
@@ -352,7 +366,7 @@ Composição pode referenciar Produto para rastreabilidade sem movimentar estoqu
 
 O Código SGL existe desde o registro inicial. QR Code não integra o rótulo visual atual.
 
-Modelos de Resíduos pré-determinados permanecem ideia futura.
+Modelos de Resíduos pré-cadastrados estão planejados para a Etapa 4; a Etapa 3 atual refina o fluxo já existente.
 
 ---
 

@@ -1,6 +1,6 @@
 # Documentação — SGL Frontend
 
-**Atualizado em:** 09/09/2026
+**Atualizado em:** 11/09/2026
 
 Este índice separa documentação vigente, decisões de produto, referências visuais e registros históricos. O objetivo é evitar que uma etapa antiga seja interpretada como planejamento atual.
 
@@ -10,12 +10,13 @@ Este índice separa documentação vigente, decisões de produto, referências v
 
 ```text
 1. ../CONTINUIDADE.md
-2. PADRAO_VISUAL_PRE_PRODUCAO.md durante a Etapa 1
-3. ../README.md
-4. DOSSIE_PROJETO_SGL.md
-5. src/router/index.ts para rotas reais
-6. Swagger/OpenAPI do backend para contratos HTTP
-7. documento específico da área em trabalho
+2. backend: docs/PLANO_PRE_PRODUCAO.md
+3. backend: docs/CONTINUIDADE_ETAPA_3_2026-09-11.md
+4. ../README.md
+5. DOSSIE_PROJETO_SGL.md
+6. src/router/index.ts para rotas reais
+7. Swagger/OpenAPI do backend para contratos HTTP
+8. documento específico da área em trabalho
 ```
 
 ---
@@ -41,8 +42,9 @@ Um documento histórico pode continuar útil para explicar uma decisão, mas nã
 ```text
 Primeiro protótipo funcional                 ✅ aprovado
 Pré-produção pós-aprovação                   🔧 em andamento
-Etapa 1.1 — padrão visual SGL                ✅ concluída
-Etapa 1.2 — fundação visual compartilhada    ⏭ próxima subetapa
+Etapa 1 — padrão visual global               ✅ concluída
+Etapa 2 — Dark Mode definitivo               ✅ concluída
+Etapa 3 — refinamentos de Resíduos           🔧 atual
 Matriz formal de permissões                  ⏳ após a pré-produção atual
 Congelamento/homologação final               ⏳ posterior
 Autenticação definitiva                      ⏳ posterior
@@ -56,7 +58,7 @@ Integração corporativa                       ⏳ posterior
 | Documento | Papel | Estado |
 |---|---|---|
 | `../CONTINUIDADE.md` | checkpoint, fase atual e regra de retomada | **ATUAL** |
-| `PADRAO_VISUAL_PRE_PRODUCAO.md` | decisões concretas da Etapa 1.1: dimensões, tipografia, cards, ícones, filtros, setas, botões e estados | **DECISÃO ATUAL — 09/09** |
+| `PADRAO_VISUAL_PRE_PRODUCAO.md` | decisões concretas da Etapa 1.1: dimensões, tipografia, cards, ícones, filtros, setas, botões e estados | **DECISÃO VIGENTE — Etapa 1 concluída** |
 | `../README.md` | visão rápida e execução | **ATUAL** |
 | `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL** |
 | `INVENTARIO_TELAS.md` | inventário de rotas/telas | **REFERÊNCIA VIGENTE** |
@@ -71,7 +73,7 @@ Integração corporativa                       ⏳ posterior
 | `ROTULO_PRODUTOS.md` | rótulo de Produto | **REFERÊNCIA** |
 | `ROTULO_RESIDUOS.md` | rótulo de Resíduo | **REFERÊNCIA** |
 
-Durante a Etapa 1, `PADRAO_VISUAL_PRE_PRODUCAO.md` consolida e atualiza as decisões das referências visuais anteriores sem apagar a identidade original do SGL.
+`PADRAO_VISUAL_PRE_PRODUCAO.md` permanece como referência do padrão aprovado na Etapa 1; `ETAPA_2_DARK_MODE.md` e `ETAPA_2_FECHAMENTO.md` registram o fechamento visual da Etapa 2.
 
 ---
 
@@ -114,18 +116,19 @@ verde = sucesso
 amarelo = atenção
 vermelho = erro/urgência
 cinza = neutro/sem interação
-Dark Mode reservado integralmente à Etapa 2
+Dark Mode consolidado e concluído na Etapa 2
 ```
 
-Status interno da Etapa 1:
+Status da Etapa 1:
 
 ```text
 1.1 definir padrão visual                  ✅
-1.2 fundação visual compartilhada          ⏭
-1.3 padronizar componentes básicos         ⏳
-1.4 aplicar tela a tela                     ⏳
-1.5 limpar exceções/CSS corretivo           ⏳
-1.6 revisão visual final                    ⏳
+1.2 fundação visual compartilhada          ✅
+1.3 padronizar componentes básicos         ✅
+1.4 aplicar tela a tela                     ✅
+1.5 limpar exceções/CSS corretivo           ✅
+1.6 revisão visual final                    ✅
+Etapa 1                                    ✅ concluída
 ```
 
 ---
@@ -167,10 +170,10 @@ Se um documento histórico disser que Administração, Resíduos, Dashboard, Ale
 
 ```text
 planejamento de pré-produção                 ✅
-→ Etapa 1.1 padrão visual                    ✅
-→ Etapa 1.2 fundação visual compartilhada   ⏭
-→ demais subetapas da Etapa 1
-→ Etapas 2 a 9
+→ Etapa 1 padrão visual                     ✅
+→ Etapa 2 Dark Mode definitivo              ✅
+→ Etapa 3 refinamentos de Resíduos          🔧
+→ Etapas 4 a 9
 → estabilização do bloco
 ```
 
@@ -193,12 +196,13 @@ Antes de implementar algo novo:
 
 ```text
 1. ler ../CONTINUIDADE.md
-2. durante a Etapa 1, ler PADRAO_VISUAL_PRE_PRODUCAO.md
-3. conferir src/router/index.ts
-4. conferir a main atual
-5. conferir Swagger/OpenAPI quando houver contrato HTTP
-6. abrir o documento específico da área
-7. distinguir decisão atual de registro histórico
+2. ler o plano canônico do backend: docs/PLANO_PRE_PRODUCAO.md
+3. ler o checkpoint da Etapa 3: docs/CONTINUIDADE_ETAPA_3_2026-09-11.md
+4. conferir src/router/index.ts
+5. conferir a main atual
+6. conferir Swagger/OpenAPI quando houver contrato HTTP
+7. abrir o documento específico da área
+8. distinguir decisão atual de registro histórico
 ```
 
-Não reconstruir módulos aprovados apenas porque uma documentação antiga descreve uma fase anterior. Durante a Etapa 1, não inventar novos padrões visuais locais nem misturar a correção definitiva do Dark Mode com o refinamento do tema claro.
+Não reconstruir módulos aprovados apenas porque uma documentação antiga descreve uma fase anterior. Preservar o padrão visual consolidado na Etapa 1 e a arquitetura de tema consolidada na Etapa 2; só reabrir esses blocos diante de regressão concreta ou nova decisão.
