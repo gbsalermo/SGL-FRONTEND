@@ -358,7 +358,7 @@ Relatório atual:
 
 Com responsável, pessoas vinculadas, perfil, situação e dados de estágio, além de PDF/XLSX.
 
-A Etapa 5 reestruturará Projetos, possíveis Atividades e vínculos de Estagiários de forma hierárquica. Projeto permanecerá N:1 com Laboratório e deverá possuir Código SEG institucional além da rastreabilidade SGL, líder/responsável, financiador, datas, ciclo de vida e situação de execução. Antes da implementação serão confirmadas as regras pendentes de Atividades, Código SEG Projeto × Atividade, tipo PROJETO/SCI e situações oficiais de execução. Só depois disso serão fechados os vínculos com Estagiários e a interface final.
+A Etapa 5 reestruturará Projetos, possíveis Atividades e Estagiários de forma hierárquica. Depois de Projeto/Atividade estabilizados, o Estagiário deverá expor Orientador obrigatório, Projeto/Atividade, Bolsa/vínculo separado de Curso/Formação, Cultura/área temática, treinamento inicial de segurança e ciclo com prorrogações justificadas. O portão 5.0 confirmará cardinalidades, elegibilidade do Orientador, Cultura, regra de prorrogação e demais pontos pendentes antes de fechar contratos e telas.
 
 A ação atual de encerramento do Estagiário também será revista para distinguir inativação temporária, inativação sem previsão e encerramento definitivo, sempre com motivo detalhado.
 
@@ -398,7 +398,7 @@ Expansões já planejadas no plano de pré-produção:
 
 ```text
 Etapa 4 → Locais de armazenamento + modelos de Resíduos
-Etapa 5 → Projeto base → Código SEG → Atividades se confirmadas → vínculos de Estagiários → interface
+Etapa 5 → Projeto base → Código SEG → Atividades se confirmadas → domínio do Estagiário → vínculos → ciclo/prorrogações → interfaces
 Etapa 7 → Soluções padrão
 ```
 
@@ -429,7 +429,7 @@ Pessoas por laboratório
 
 Exportações PDF/XLSX devem usar os mesmos filtros da prévia.
 
-A Etapa 6 avaliará uma visão consolidada de Laboratórios e Projetos depois que o novo domínio de Projetos/Estagiários estiver estabilizado.
+A Etapa 6 consolidará relatórios de Laboratórios, Projetos e Estagiários após a estabilização da Etapa 5, incluindo filtros/contagens por Orientador, responsável de Laboratório, Bolsa/vínculo, Curso/Formação, Cultura/área temática, Projeto, Atividade e situação.
 
 ---
 
@@ -572,7 +572,7 @@ Etapa 2 — Dark Mode definitivo                        ✅ concluída
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ⏭ ATUAL / próxima implementação
 Etapa 4 — expansão operacional de Resíduos            ⏳
 Etapa 5 — Projetos + Atividades + Estagiários         ⏳
-Etapa 6 — relatórios de Projetos/Laboratórios         ⏳
+Etapa 6 — relatórios Projetos/Estagiários/Laboratórios ⏳
 Etapa 7 — unidades + Soluções + Pedidos               ⏳
 Etapa 8 — Rótulos + documento de lote + impressão      ⏳
 Etapa 9 — Manual do Usuário + decisão delete lógico   ⏳
@@ -584,7 +584,7 @@ Dependências centrais:
 ```text
 padrão visual → Dark Mode
 Resíduos atuais → expansão/modelos de Resíduos
-Projeto base → Atividades (se confirmadas) → vínculos de Estagiários → relatório de Projetos
+Projeto base → Atividades (se confirmadas) → domínio/vínculos de Estagiários → relatórios consolidados
 unidades → Soluções → Pedidos com Soluções
 Produto/Resíduo/Solução estabilizados → rótulos adaptados + documento de lote + impressão
 Etapas 1 a 9 estabilizadas → testes automatizados frontend
