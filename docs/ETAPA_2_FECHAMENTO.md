@@ -196,4 +196,4 @@ Etapa 2 — Dark Mode definitivo   ✅ encerrada
 Próxima etapa                    → Etapa 3 — Refinamentos do fluxo atual de Resíduos
 ```
 
-O PR de fechamento pode ser integrado à `main`.
+O fechamento foi integrado à `main` pelo **PR #50**, com squash merge `a3fff4fa8edb6b8900c4a5b359dbfc0245afb87c`.
