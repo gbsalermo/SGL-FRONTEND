@@ -58,7 +58,7 @@ Integração corporativa                       ⏳ posterior
 | Documento | Papel | Estado |
 |---|---|---|
 | `../CONTINUIDADE.md` | checkpoint, fase atual e regra de retomada | **ATUAL** |
-| `PADRAO_VISUAL_PRE_PRODUCAO.md` | decisões concretas da Etapa 1.1: dimensões, tipografia, cards, ícones, filtros, setas, botões e estados | **DECISÃO ATUAL — 09/09** |
+| `PADRAO_VISUAL_PRE_PRODUCAO.md` | decisões concretas da Etapa 1.1: dimensões, tipografia, cards, ícones, filtros, setas, botões e estados | **DECISÃO VIGENTE — Etapa 1 concluída** |
 | `../README.md` | visão rápida e execução | **ATUAL** |
 | `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL** |
 | `INVENTARIO_TELAS.md` | inventário de rotas/telas | **REFERÊNCIA VIGENTE** |
@@ -116,18 +116,19 @@ verde = sucesso
 amarelo = atenção
 vermelho = erro/urgência
 cinza = neutro/sem interação
-Dark Mode reservado integralmente à Etapa 2
+Dark Mode consolidado e concluído na Etapa 2
 ```
 
-Status interno da Etapa 1:
+Status da Etapa 1:
 
 ```text
 1.1 definir padrão visual                  ✅
-1.2 fundação visual compartilhada          ⏭
-1.3 padronizar componentes básicos         ⏳
-1.4 aplicar tela a tela                     ⏳
-1.5 limpar exceções/CSS corretivo           ⏳
-1.6 revisão visual final                    ⏳
+1.2 fundação visual compartilhada          ✅
+1.3 padronizar componentes básicos         ✅
+1.4 aplicar tela a tela                     ✅
+1.5 limpar exceções/CSS corretivo           ✅
+1.6 revisão visual final                    ✅
+Etapa 1                                    ✅ concluída
 ```
 
 ---
@@ -204,4 +205,4 @@ Antes de implementar algo novo:
 8. distinguir decisão atual de registro histórico
 ```
 
-Não reconstruir módulos aprovados apenas porque uma documentação antiga descreve uma fase anterior. Durante a Etapa 1, não inventar novos padrões visuais locais nem misturar a correção definitiva do Dark Mode com o refinamento do tema claro.
+Não reconstruir módulos aprovados apenas porque uma documentação antiga descreve uma fase anterior. Preservar o padrão visual consolidado na Etapa 1 e a arquitetura de tema consolidada na Etapa 2; só reabrir esses blocos diante de regressão concreta ou nova decisão.
