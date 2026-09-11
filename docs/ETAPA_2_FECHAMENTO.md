@@ -152,6 +152,26 @@ mesma hierarquia do Light
 - [ ] nenhum service HTTP funcional foi alterado.
 - [ ] nenhum payload/contrato foi alterado.
 
+## Ajustes finais após validação visual
+
+Após a primeira validação integrada, foram corrigidos escapes do tema claro que ainda apareciam no Dark:
+
+- cards de resumo e rankings da prévia de Relatórios;
+- estados vazios de Relatórios e relatórios especiais;
+- estado vazio da Central de Resíduos;
+- botão `Escolher foto` e botão de fechar do modal de Perfil;
+- ação `Salvar alterações` do Perfil;
+- ações primárias de Relatórios, incluindo `Visualizar relatório`;
+- ações primárias de Administração/Cadastros, incluindo `+ Novo produto`.
+
+Foi criado um azul específico para ação primária no Dark, propositalmente mais escuro que o azul informativo:
+
+- ação: `#315FAE`;
+- hover: `#3B6FC3`;
+- borda: `#4D7ED1`.
+
+A cor informativa `#5B9DF8` continua disponível para links, foco, ícones e destaques que não sejam botões primários.
+
 ## Regra de encerramento
 
 A Etapa 2 só será marcada como **concluída** após a validação desta branch e o squash merge para `main`.
