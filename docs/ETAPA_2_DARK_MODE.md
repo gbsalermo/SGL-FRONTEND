@@ -2,9 +2,9 @@
 
 ## Status
 
-Implementação concluída; validação final integrada pendente — 10/09/2026.
+✅ **Concluída e validada — 11/09/2026.**
 
-A Etapa 1 — Padronização e refinamento visual global — foi concluída e validada. Na Etapa 2, todas as interfaces autenticadas já receberam cobertura Dark e a arquitetura do tema foi consolidada. Falta apenas a validação integrada desta branch antes do merge e do encerramento oficial.
+A Etapa 2 foi encerrada após validação integrada das interfaces autenticadas em Light/Dark, correção dos últimos escapes de superfícies claras e alinhamento final das cores semânticas. A próxima etapa oficial é a **Etapa 3 — Refinamentos do fluxo atual de Resíduos**.
 
 ## Objetivo
 
@@ -346,14 +346,47 @@ Gestão
 
 As rotas `/solicitacoes/novo` e `/solicitacoes/meus-pedidos` reutilizam as mesmas Views de Pedidos e agora compartilham os mesmos estilos Dark nas duas shells.
 
+## Validação e fechamento final — 11/09/2026
+
+A validação integrada confirmou a coerência geral do Dark Mode. Os últimos ajustes realizados foram:
+
+- remoção de superfícies/cards brancos que ainda escapavam em Relatórios e Resíduos;
+- correção dos controles do modal de Perfil;
+- redução da luminosidade dos botões primários no Dark;
+- definição de azul próprio para ação primária no tema escuro;
+- correção dos badges/chips dos relatórios para seguir a mesma semântica do restante do sistema;
+- diferenciação de tipos de movimentação também dentro dos Relatórios.
+
+Semântica consolidada para movimentações:
+
+```text
+ENTRADA / DEVOLUÇÃO      → verde
+SAÍDA                    → azul
+AJUSTE                   → âmbar
+DESCARTE_VENCIMENTO      → vermelho
+```
+
+Semântica geral preservada:
+
+```text
+normal / ativo / liberado          → verde
+atenção / médio / próximo venc.    → âmbar
+alto / vencido / crítico           → vermelho
+informação / a receber             → azul
+em análise                         → violeta
+despachado                         → teal
+neutro / nenhum / inativo          → cinza/navy
+```
+
 ## Ponto atual de continuidade
 
 ```text
-Etapa 2 — implementação concluída
-→ branch: feat/etapa-2-fechamento
-→ validação integrada Light/Dark pendente
-→ não iniciar Etapa 3 antes do merge e fechamento oficial
+Etapa 1 — padrão visual global          ✅ concluída
+Etapa 2 — Dark Mode definitivo          ✅ concluída
+Etapa 3 — fluxo atual de Resíduos       ⏭ próxima etapa
 ```
+
+Não reabrir a arquitetura do Dark Mode sem regressão concreta ou nova decisão visual.
 
 ## Critério de conclusão
 
