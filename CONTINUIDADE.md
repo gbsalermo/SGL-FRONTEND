@@ -3,11 +3,11 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 04/09/2026  
+**Última atualização:** 11/09/2026  
 **Branch estável:** `main`  
 **Fase atual:** ajustes de pré-produção pós-aprovação funcional.  
 **Bloco atual:** planejamento consolidado → execução sequencial das etapas de pré-produção.  
-**Etapa atual:** Etapa 1 — padronização e refinamento visual global.  
+**Etapa atual:** Etapa 3 — refinamentos do fluxo atual de Resíduos.  
 **Plano oficial da pré-produção:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Roadmap formal posterior:** matriz de permissões → congelamento → homologação final → segurança/integração corporativa.  
 **Handoff:** `docs/DOSSIE_PROJETO_SGL.md`
@@ -57,7 +57,7 @@ Dashboard Gestão                                     ✅
 Dashboard Solicitante                                ✅
 Alertas operacionais                                 ✅
 Busca global                                         ✅
-Tema claro/escuro + persistência                     ✅ base atual; refinamento planejado
+Tema claro/escuro + persistência                     ✅ Dark Mode definitivo concluído
 404                                                   ✅
 Contexto de Unidade enviado à API                    ✅
 Testes unitários/componentes frontend                ⏳ Etapa 9 — Vitest + Vue Test Utils
@@ -491,12 +491,14 @@ Busca global                     ✅
 responsividade                   ✅
 ```
 
-A aparência atual não é considerada visualmente final. O início da pré-produção será:
+A aparência autenticada foi estabilizada nas Etapas 1 e 2:
 
 ```text
-Etapa 1 → padronização/refinamento de cards, ícones, botões, setas, filtros e alinhamentos
-Etapa 2 → Dark Mode definitivo a partir de esboço, paleta, comportamento e testes
+Etapa 1 → padrão visual global                       ✅
+Etapa 2 → Dark Mode definitivo                       ✅
 ```
+
+O Dark Mode possui fonte única em `themeService.ts`, tokens consolidados, sincronização com Vuetify e cobertura de Gestão/Solicitante. Login, 404 e rótulos de impressão permanecem claros.
 
 A tela de login não deve herdar mudanças visuais do tema das interfaces autenticadas sem uma decisão explícita.
 
@@ -564,9 +566,9 @@ Situação:
 ```text
 limpeza/revisão documental                            ✅ concluída
 planejamento dos ajustes                              ✅ consolidado
-Etapa 1 — refinamento visual global                   ⏭ ATUAL / próxima implementação
-Etapa 2 — Dark Mode definitivo                        ⏳
-Etapa 3 — refinamentos do fluxo atual de Resíduos     ⏳
+Etapa 1 — refinamento visual global                   ✅ concluída
+Etapa 2 — Dark Mode definitivo                        ✅ concluída
+Etapa 3 — refinamentos do fluxo atual de Resíduos     ⏭ ATUAL / próxima implementação
 Etapa 4 — expansão operacional de Resíduos            ⏳
 Etapa 5 — Projetos + vínculos de Estagiários          ⏳
 Etapa 6 — relatórios de Projetos/Laboratórios         ⏳
@@ -626,4 +628,4 @@ docs/DECISAO_UNIDADES_CORPORATIVAS.md
 
 # 22. Regra final de retomada
 
-**O SGL está funcionalmente aprovado. A fase atual é a execução do plano de pré-produção registrado no backend em `docs/PLANO_PRE_PRODUCAO.md`, começando pela Etapa 1 — padronização/refinamento visual e terminando na Etapa 9 — testes automatizados do Frontend com Cypress como E2E principal. Não tratar a matriz de permissões como tarefa imediata até o encerramento desse bloco. Conferir `main`, router e Swagger antes de confiar em documentos históricos, e lembrar que alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto.**
+**O SGL está funcionalmente aprovado. As Etapas 1 e 2 da pré-produção foram concluídas. A retomada deve começar pela Etapa 3 — refinamentos do fluxo atual de Resíduos — seguindo `docs/PLANO_PRE_PRODUCAO.md` do backend. Não tratar a matriz de permissões como tarefa imediata até o encerramento desse bloco. Conferir `main`, router e Swagger antes de confiar em documentos históricos, e lembrar que alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto.**
