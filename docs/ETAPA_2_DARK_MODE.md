@@ -2,9 +2,9 @@
 
 ## Status
 
-Em andamento — início em 10/09/2026.
+✅ **Concluída e validada — 11/09/2026.**
 
-A Etapa 1 — Padronização e refinamento visual global — foi concluída e validada. A Etapa 2 passa a ser o trabalho atual do frontend.
+A Etapa 2 foi encerrada após validação integrada das interfaces autenticadas em Light/Dark, correção dos últimos escapes de superfícies claras e alinhamento final das cores semânticas. A próxima etapa oficial é a **Etapa 3 — Refinamentos do fluxo atual de Resíduos**.
 
 ## Objetivo
 
@@ -24,9 +24,9 @@ O Dark Mode deve preservar a identidade do SGL e seguir a referência visual já
 - cores semânticas de erro, atenção, sucesso e informação continuam existindo no tema escuro, adaptadas para contraste adequado;
 - telas de impressão/rótulo continuam claras quando necessário para impressão.
 
-## Auditoria do estado atual
+## Auditoria do estado anterior
 
-A implementação atual é funcional como protótipo, mas não deve ser mantida como arquitetura definitiva.
+A implementação provisória abaixo foi a base do protótipo e motivou a refatoração da Etapa 2. Os pontos desta seção foram resolvidos no fechamento técnico de 10/09/2026.
 
 ### 1. Três camadas CSS sobrepostas
 
@@ -282,14 +282,111 @@ Validar Gestão e Solicitante, incluindo modais, drawers, dropdowns, tabelas, fi
 - testar impressão/rótulos em tema claro;
 - executar build final.
 
+## Fechamento técnico — 10/09/2026
+
+A implementação da Etapa 2 agora converge para a arquitetura-alvo definida neste documento:
+
+```text
+preferência sgl.theme
+→ themeService.ts como fonte única
+→ DOM + body + Vuetify sincronizados
+→ tokens.css com paleta Dark definitiva
+→ etapa-2-dark-foundation.css
+→ CSS específico apenas quando a interface exige semântica própria
+```
+
+Foram removidas as camadas provisórias:
+
+- `dark-mode.css`;
+- `dark-mode-runtime.css`;
+- `dark-mode-coverage.css`;
+- `dark-mode-consistency.css`.
+
+Também foram removidos:
+
+- listener global baseado em texto/aria-label do botão;
+- persistência duplicada entre `main.ts`, Gestão e Solicitante;
+- uso de `theme.global.name.value` para troca de tema.
+
+A troca agora usa `vuetify.theme.change(...)`.
+
+Rotas sempre claras:
+
+- `/login`;
+- rota 404 pública;
+- `/residuos/:id/rotulo`;
+- `/produtos/:id/rotulo`.
+
+Cobertura autenticada concluída:
+
+```text
+Solicitante
+/inicio
+/meus-pedidos
+/meus-residuos
+/pedidos/novo
+/residuos/novo
+
+Gestão
+/dashboard
+/pedidos
+/estoque
+/estoque/lotes-vencendo
+/estoque/:id
+/movimentacoes
+/estagiarios
+/residuos
+/relatorios
+/relatorios/residuos
+/relatorios/pessoas-laboratorio
+/administracao/cadastros
+/solicitacoes/novo
+/solicitacoes/meus-pedidos
+```
+
+As rotas `/solicitacoes/novo` e `/solicitacoes/meus-pedidos` reutilizam as mesmas Views de Pedidos e agora compartilham os mesmos estilos Dark nas duas shells.
+
+## Validação e fechamento final — 11/09/2026
+
+A validação integrada confirmou a coerência geral do Dark Mode. Os últimos ajustes realizados foram:
+
+- remoção de superfícies/cards brancos que ainda escapavam em Relatórios e Resíduos;
+- correção dos controles do modal de Perfil;
+- redução da luminosidade dos botões primários no Dark;
+- definição de azul próprio para ação primária no tema escuro;
+- correção dos badges/chips dos relatórios para seguir a mesma semântica do restante do sistema;
+- diferenciação de tipos de movimentação também dentro dos Relatórios.
+
+Semântica consolidada para movimentações:
+
+```text
+ENTRADA / DEVOLUÇÃO      → verde
+SAÍDA                    → azul
+AJUSTE                   → âmbar
+DESCARTE_VENCIMENTO      → vermelho
+```
+
+Semântica geral preservada:
+
+```text
+normal / ativo / liberado          → verde
+atenção / médio / próximo venc.    → âmbar
+alto / vencido / crítico           → vermelho
+informação / a receber             → azul
+em análise                         → violeta
+despachado                         → teal
+neutro / nenhum / inativo          → cinza/navy
+```
+
 ## Ponto atual de continuidade
 
 ```text
-Solicitante — concluído e validado
-Gestão /dashboard — validado
-→ próxima interface: Gestão /pedidos
-→ toda nova adaptação deve obedecer à paridade visual obrigatória com o Light Mode
+Etapa 1 — padrão visual global          ✅ concluída
+Etapa 2 — Dark Mode definitivo          ✅ concluída
+Etapa 3 — fluxo atual de Resíduos       ⏭ próxima etapa
 ```
+
+Não reabrir a arquitetura do Dark Mode sem regressão concreta ou nova decisão visual.
 
 ## Critério de conclusão
 

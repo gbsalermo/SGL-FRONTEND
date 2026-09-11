@@ -1,0 +1,255 @@
+/*
+ * Etapa 2 — fundação definitiva do Dark Mode.
+ *
+ * Regras compartilhadas pelas interfaces autenticadas.
+ * Views específicas podem complementar esta base sem redefinir a arquitetura.
+ */
+
+body.sgl-dark-active,
+body.sgl-dark-active #app,
+body.sgl-dark-active .v-application {
+  background: var(--sgl-background) !important;
+  color: var(--sgl-text) !important;
+  color-scheme: dark;
+}
+
+body.sgl-dark-active .gestao-shell,
+body.sgl-dark-active .gestao-workspace,
+body.sgl-dark-active .gestao-main,
+body.sgl-dark-active .solicitante-shell,
+body.sgl-dark-active .solicitante-workspace,
+body.sgl-dark-active .solicitante-main {
+  background: var(--sgl-background) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main,
+body.sgl-dark-active .solicitante-main {
+  background-image:
+    radial-gradient(circle at top left, rgb(91 157 248 / 5%), transparent 30%) !important;
+}
+
+body.sgl-dark-active .gestao-sidebar,
+body.sgl-dark-active .solicitante-sidebar {
+  background: linear-gradient(180deg, #061226 0%, #0A1930 55%, #0C2140 100%) !important;
+  box-shadow: inset -1px 0 0 rgb(108 149 201 / 14%) !important;
+}
+
+body.sgl-dark-active .gestao-topbar,
+body.sgl-dark-active .solicitante-topbar {
+  border-color: #1D3049 !important;
+  background: #071426 !important;
+  color: var(--sgl-text) !important;
+}
+
+/* Superfícies de navegação, busca e alertas da shell. */
+body.sgl-dark-active .gestao-alert-panel,
+body.sgl-dark-active .gestao-search-panel {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-alert-panel__header,
+body.sgl-dark-active .gestao-alert-panel__footer,
+body.sgl-dark-active .gestao-search-scopes,
+body.sgl-dark-active .gestao-search-results {
+  border-color: var(--sgl-border) !important;
+}
+
+body.sgl-dark-active .gestao-search-input {
+  border-color: var(--sgl-border-strong) !important;
+  background: var(--sgl-surface) !important;
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-search-input input {
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-search-input kbd,
+body.sgl-dark-active .gestao-alert-list b,
+body.sgl-dark-active .gestao-search-result__icon {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-interactive) !important;
+  color: var(--sgl-primary-light) !important;
+}
+
+body.sgl-dark-active .gestao-alert-list > button,
+body.sgl-dark-active .gestao-search-scopes > button,
+body.sgl-dark-active .gestao-search-results__list > button {
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-alert-list > button:hover,
+body.sgl-dark-active .gestao-search-scopes > button:not(:disabled):hover,
+body.sgl-dark-active .gestao-search-results__list > button:not(:disabled):hover {
+  background: var(--sgl-surface-interactive) !important;
+}
+
+/* Tipografia e controles compartilhados. */
+body.sgl-dark-active :where(.gestao-main, .solicitante-main) :where(h1, h2, h3, h4, h5, h6) {
+  color: var(--sgl-text);
+}
+
+body.sgl-dark-active :where(.gestao-main, .solicitante-main) :where(input, select, textarea) {
+  border-color: var(--sgl-border-strong);
+  background: var(--sgl-surface-elevated);
+  color: var(--sgl-text);
+}
+
+body.sgl-dark-active :where(.gestao-main, .solicitante-main) :where(input, textarea)::placeholder {
+  color: var(--sgl-text-subtle);
+  opacity: 1;
+}
+
+body.sgl-dark-active :where(.gestao-main, .solicitante-main) :where(input, select, textarea):disabled {
+  border-color: var(--sgl-disabled-border);
+  background: var(--sgl-disabled-background);
+  color: var(--sgl-disabled-text);
+}
+
+/* Componentes visuais compartilhados Sgl*. */
+body.sgl-dark-active .sgl-card.v-card,
+body.sgl-dark-active .sgl-text-field .v-field,
+body.sgl-dark-active .sgl-select .v-field {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .sgl-card--interactive:hover {
+  border-color: var(--sgl-border-strong) !important;
+  background: var(--sgl-surface-interactive) !important;
+}
+
+body.sgl-dark-active .sgl-button--secondary.v-btn,
+body.sgl-dark-active .sgl-icon-button.v-btn,
+body.sgl-dark-active .sgl-filter-button.v-btn,
+body.sgl-dark-active .sgl-chevron-button.v-btn {
+  border-color: var(--sgl-border-strong) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .sgl-filter-button.is-active.v-btn {
+  border-color: var(--sgl-primary) !important;
+  background: var(--sgl-surface-interactive) !important;
+  color: var(--sgl-primary-light) !important;
+}
+
+/* Vuetify — menus, selects e diálogos renderizados fora da árvore da View. */
+body.sgl-dark-active .v-overlay-container .v-card,
+body.sgl-dark-active .v-overlay-container .v-sheet,
+body.sgl-dark-active .v-overlay-container .v-list,
+body.sgl-dark-active .v-menu > .v-overlay__content,
+body.sgl-dark-active .v-dialog > .v-overlay__content {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .v-overlay__scrim {
+  background: rgb(1 8 18 / 74%) !important;
+}
+
+/* Perfil compartilhado entre Gestão e Solicitante. */
+body.sgl-dark-active .profile-backdrop {
+  background: rgb(1 8 18 / 74%) !important;
+}
+
+body.sgl-dark-active .profile-dialog,
+body.sgl-dark-active .profile-content,
+body.sgl-dark-active .profile-photo-row,
+body.sgl-dark-active .profile-field,
+body.sgl-dark-active .profile-essential {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .profile-dialog > header,
+body.sgl-dark-active .profile-dialog > footer {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-soft) !important;
+}
+
+body.sgl-dark-active .profile-dialog h2,
+body.sgl-dark-active .profile-essential strong,
+body.sgl-dark-active .profile-field > span {
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .profile-dialog p,
+body.sgl-dark-active .profile-dialog small,
+body.sgl-dark-active .profile-essential span {
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .profile-dialog input,
+body.sgl-dark-active .profile-dialog textarea {
+  border-color: var(--sgl-border-strong) !important;
+  background: var(--sgl-surface) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .profile-cancel {
+  border-color: var(--sgl-border-strong) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .profile-upload {
+  border-color: var(--sgl-border-strong) !important;
+  background: var(--sgl-surface-interactive) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .profile-upload:hover {
+  border-color: var(--sgl-primary) !important;
+  background: #1b3150 !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .profile-dialog > header > button {
+  border: 1px solid var(--sgl-border-strong) !important;
+  background: var(--sgl-surface-interactive) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .profile-dialog > header > button:hover {
+  border-color: var(--sgl-primary) !important;
+  background: #1b3150 !important;
+}
+
+body.sgl-dark-active .profile-save {
+  border: 1px solid var(--sgl-action-primary-border) !important;
+  background: var(--sgl-action-primary) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .profile-save:hover:not(:disabled) {
+  border-color: var(--sgl-primary-light) !important;
+  background: var(--sgl-action-primary-hover) !important;
+}
+
+/* Foco único em todo o sistema autenticado. */
+body.sgl-dark-active :where(button, input, select, textarea, a):focus-visible {
+  outline-color: var(--sgl-focus);
+}
+
+/* Páginas de impressão permanecem visualmente claras. */
+body.sgl-light-active :where(.print-page, .rotulo-page, .label-sheet, .produto-label),
+body.sgl-dark-active :where(.print-page, .rotulo-page, .label-sheet, .produto-label) {
+  color-scheme: light;
+}
+
+/* Transições não devem impedir reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-dark-active *,
+  body.sgl-dark-active *::before,
+  body.sgl-dark-active *::after {
+    scroll-behavior: auto !important;
+  }
+}

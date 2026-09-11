@@ -6,244 +6,244 @@
  * quando body.sgl-dark-active está ativo.
  */
 
-body.sgl-dark-active .solicitante-main .pedidos-page {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page {
   color: var(--s2-text, #f5f8fc) !important;
 }
 
 /* Cabeçalho */
-body.sgl-dark-active .solicitante-main .pedidos-page .breadcrumb,
-body.sgl-dark-active .solicitante-main .pedidos-page .page-subtitle {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .breadcrumb,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .page-subtitle {
   color: var(--s2-text-muted, #9fb0c6) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .page-heading h1 {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .page-heading h1 {
   color: var(--s2-text, #f5f8fc) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .primary-action {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .primary-action {
   border: 1px solid #4a8ee8 !important;
   background: #3183ed !important;
   color: #ffffff !important;
   box-shadow: 0 8px 22px rgb(22 92 185 / 22%) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .primary-action:hover {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .primary-action:hover {
   border-color: #72a9ff !important;
   background: #3f8ff0 !important;
 }
 
 /* Confirmação de criação */
-body.sgl-dark-active .solicitante-main .pedidos-page .success-banner {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .success-banner {
   border-color: #285d47 !important;
   background: #132d25 !important;
   color: #8de5b7 !important;
 }
 
 /* Resumo por situação */
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card {
   border-color: var(--s2-border, #233650) !important;
   background: linear-gradient(180deg, #101d30 0%, #0c1828 100%) !important;
   color: var(--s2-text, #f5f8fc) !important;
   box-shadow: 0 10px 24px rgb(0 5 14 / 14%) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card span,
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card small {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card span,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card small {
   color: var(--s2-text-muted, #9fb0c6) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card strong {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card strong {
   color: var(--s2-text, #f5f8fc) !important;
 }
 
 /* Pendentes */
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card:nth-child(1) {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card:nth-child(1) {
   border-color: #56303c !important;
 }
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card:nth-child(1) strong {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card:nth-child(1) strong {
   color: #ff8290 !important;
 }
 
 /* Aprovados */
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card:nth-child(2) {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card:nth-child(2) {
   border-color: #275643 !important;
 }
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card:nth-child(2) strong {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card:nth-child(2) strong {
   color: #66dfa8 !important;
 }
 
 /* Entregues */
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card:nth-child(3) {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card:nth-child(3) {
   border-color: #2a4f7b !important;
 }
-body.sgl-dark-active .solicitante-main .pedidos-page .summary-card:nth-child(3) strong {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card:nth-child(3) strong {
   color: #7eb2ff !important;
 }
 
 /* Busca e filtros */
-body.sgl-dark-active .solicitante-main .pedidos-page .filter-surface {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .filter-surface {
   border-color: var(--s2-border, #233650) !important;
   background: var(--s2-surface, #0d1929) !important;
   box-shadow: none !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .search-control,
-body.sgl-dark-active .solicitante-main .pedidos-page .status-filter select {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .search-control,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-filter select {
   border-color: #30455f !important;
   background: #111f33 !important;
   color: #eef4fb !important;
   box-shadow: none !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .search-control:focus-within,
-body.sgl-dark-active .solicitante-main .pedidos-page .status-filter select:focus {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .search-control:focus-within,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-filter select:focus {
   border-color: #5b9df8 !important;
   box-shadow: 0 0 0 3px rgb(91 157 248 / 14%) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .search-control svg {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .search-control svg {
   color: #8ba1bd !important;
   stroke: currentColor !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .search-control input {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .search-control input {
   color: #eef4fb !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .search-control input::placeholder {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .search-control input::placeholder {
   color: #7488a4 !important;
   opacity: 1;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .status-filter > span {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-filter > span {
   color: #b8c6d8 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .status-filter select {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-filter select {
   color-scheme: dark;
 }
 
 /* Superfície da tabela */
-body.sgl-dark-active .solicitante-main .pedidos-page .table-surface {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .table-surface {
   border-color: var(--s2-border, #233650) !important;
   background: var(--s2-surface, #0d1929) !important;
   box-shadow: 0 12px 28px rgb(0 5 14 / 12%) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .table-scroll {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .table-scroll {
   background: transparent !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page table {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page table {
   background: transparent !important;
   color: #dce6f2 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page thead,
-body.sgl-dark-active .solicitante-main .pedidos-page thead tr,
-body.sgl-dark-active .solicitante-main .pedidos-page thead th {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page thead,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page thead tr,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page thead th {
   border-color: #263a54 !important;
   background: #101d30 !important;
   color: #9fb0c6 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page tbody tr.order-row,
-body.sgl-dark-active .solicitante-main .pedidos-page tbody tr.order-row td {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page tbody tr.order-row,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page tbody tr.order-row td {
   border-color: #20324a !important;
   background: #0d1929 !important;
   color: #cfdaea !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .table-primary,
-body.sgl-dark-active .solicitante-main .pedidos-page .product-summary strong {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .table-primary,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .product-summary strong {
   color: #edf3fb !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .table-secondary,
-body.sgl-dark-active .solicitante-main .pedidos-page .product-summary small,
-body.sgl-dark-active .solicitante-main .pedidos-page .more-products {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .table-secondary,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .product-summary small,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .more-products {
   color: #8fa2bb !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .more-products {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .more-products {
   background: #172941 !important;
 }
 
 /* Linha selecionada/aberta */
-body.sgl-dark-active .solicitante-main .pedidos-page .order-row--expanded,
-body.sgl-dark-active .solicitante-main .pedidos-page .order-row--expanded td {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .order-row--expanded,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .order-row--expanded td {
   background: #102039 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .order-row--target,
-body.sgl-dark-active .solicitante-main .pedidos-page .order-row--target td {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .order-row--target,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .order-row--target td {
   background: #112743 !important;
   box-shadow: inset 3px 0 0 #5b9df8 !important;
 }
 
 /* Chips de status */
-body.sgl-dark-active .solicitante-main .pedidos-page .status-chip {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-chip {
   border: 1px solid transparent !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .status-chip--pendente {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-chip--pendente {
   border-color: #7a5a20 !important;
   background: #352a16 !important;
   color: #f6c967 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .status-chip--aprovado {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-chip--aprovado {
   border-color: #2b644b !important;
   background: #163629 !important;
   color: #72dba8 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .status-chip--rejeitado {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-chip--rejeitado {
   border-color: #713845 !important;
   background: #3a1d29 !important;
   color: #ff8996 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .status-chip--entregue {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-chip--entregue {
   border-color: #315f99 !important;
   background: #17345d !important;
   color: #ffffff !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .status-chip--cancelado {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .status-chip--cancelado {
   border-color: #46556a !important;
   background: #202c3d !important;
   color: #c2cedd !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .urgent-status {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .urgent-status {
   border: 1px solid #70313f !important;
   background: #381c28 !important;
   color: #ff8492 !important;
 }
 
 /* Botão de detalhes */
-body.sgl-dark-active .solicitante-main .pedidos-page .expand-button {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expand-button {
   border-color: #304863 !important;
   background: #111f33 !important;
   color: #9fb4d0 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expand-button:hover,
-body.sgl-dark-active .solicitante-main .pedidos-page .expand-button--open {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expand-button:hover,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expand-button--open {
   border-color: #4b84cc !important;
   background: #17345d !important;
   color: #ffffff !important;
 }
 
 /* Painel expandido — hierarquia e legibilidade refinadas */
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-row > td {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-row > td {
   padding: 0 !important;
   border-color: #2a3d58 !important;
   background: #0a1524 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-panel {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-panel {
   padding: 24px !important;
   border-top: 1px solid #2a3d58 !important;
   border-bottom: 1px solid #2a3d58 !important;
@@ -252,13 +252,13 @@ body.sgl-dark-active .solicitante-main .pedidos-page .expanded-panel {
   box-shadow: inset 0 6px 16px rgb(0 5 14 / 18%) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-heading {
   margin-bottom: 20px !important;
   padding-bottom: 16px !important;
   border-bottom: 1px solid #263a54 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading > div > span {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-heading > div > span {
   display: block !important;
   margin-bottom: 5px !important;
   color: #8fa6c4 !important;
@@ -268,7 +268,7 @@ body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading > div > s
   text-transform: uppercase !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading strong {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-heading strong {
   display: block !important;
   color: #ffffff !important;
   font-size: 20px !important;
@@ -276,17 +276,17 @@ body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading strong {
   line-height: 1.25 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-date {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-date {
   color: #a9bad0 !important;
   font-size: 13px !important;
   font-weight: 500 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-grid {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-grid {
   gap: 16px !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-section {
   padding: 18px !important;
   border: 1px solid #2b4260 !important;
   border-radius: 10px !important;
@@ -295,7 +295,7 @@ body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%) !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section h3 {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-section h3 {
   margin-bottom: 16px !important;
   color: #ffffff !important;
   font-size: 14px !important;
@@ -304,30 +304,30 @@ body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section h3 {
   letter-spacing: 0.035em !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-list {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-list {
   gap: 0 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-item {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-item {
   gap: 20px !important;
   padding: 15px 0 !important;
   border-color: #2a3d58 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-item:first-child {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-item:first-child {
   padding-top: 0 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-item:last-child {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-item:last-child {
   padding-bottom: 0 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-item > div:first-child {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-item > div:first-child {
   min-width: 0 !important;
   flex: 1 1 auto !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-item > div:first-child > strong {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-item > div:first-child > strong {
   display: block !important;
   margin-bottom: 7px !important;
   color: #ffffff !important;
@@ -336,14 +336,14 @@ body.sgl-dark-active .solicitante-main .pedidos-page .material-item > div:first-
   line-height: 1.35 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-item > div:first-child > span {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-item > div:first-child > span {
   display: block !important;
   color: #a8b9ce !important;
   font-size: 12px !important;
   line-height: 1.55 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-quantity {
   min-width: 128px !important;
   padding: 11px 12px !important;
   border: 1px solid #315071 !important;
@@ -352,7 +352,7 @@ body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity {
   text-align: right !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > span {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-quantity > span {
   color: #8fa6c4 !important;
   font-size: 10px !important;
   font-weight: 800 !important;
@@ -360,14 +360,14 @@ body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > span {
   text-transform: uppercase !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity--approved > span {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-quantity--approved > span {
   color: #72d3a1 !important;
   font-size: 12px !important;
   font-weight: 800 !important;
   letter-spacing: 0.055em !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > strong {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-quantity > strong {
   margin: 3px 0 !important;
   color: #ffffff !important;
   font-size: 20px !important;
@@ -375,31 +375,31 @@ body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > strong
   line-height: 1.15 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity > small {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-quantity > small {
   color: #9fb0c6 !important;
   font-size: 11px !important;
   font-weight: 600 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .info-list {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .info-list {
   gap: 0 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .info-list > div {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .info-list > div {
   padding: 11px 0 !important;
   border-top: 1px solid #293d58 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .info-list > div:first-child {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .info-list > div:first-child {
   padding-top: 0 !important;
   border-top: 0 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .info-list > div:last-child {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .info-list > div:last-child {
   padding-bottom: 0 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .info-list dt {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .info-list dt {
   margin-bottom: 4px !important;
   color: #8fa6c4 !important;
   font-size: 10px !important;
@@ -408,7 +408,7 @@ body.sgl-dark-active .solicitante-main .pedidos-page .info-list dt {
   text-transform: uppercase !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .info-list dd {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .info-list dd {
   margin: 0 !important;
   color: #f4f7fc !important;
   font-size: 13px !important;
@@ -416,13 +416,13 @@ body.sgl-dark-active .solicitante-main .pedidos-page .info-list dd {
   line-height: 1.45 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-urgency {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-urgency {
   margin-top: 14px !important;
   padding-top: 13px !important;
   border-color: #2a3d58 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section--observation p {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-section--observation p {
   margin: 0 !important;
   color: #d9e3ef !important;
   font-size: 13px !important;
@@ -431,31 +431,31 @@ body.sgl-dark-active .solicitante-main .pedidos-page .expanded-section--observat
 }
 
 /* A linha aberta precisa deixar claro que pertence ao painel de detalhes. */
-body.sgl-dark-active .solicitante-main .pedidos-page .order-row--expanded,
-body.sgl-dark-active .solicitante-main .pedidos-page .order-row--expanded td {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .order-row--expanded,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .order-row--expanded td {
   background: #10213a !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .expand-button--open {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expand-button--open {
   border-color: #5b8fd0 !important;
   background: #1b477c !important;
   color: #ffffff !important;
 }
 
 @media (max-width: 760px) {
-  body.sgl-dark-active .solicitante-main .pedidos-page .expanded-panel {
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-panel {
     padding: 18px !important;
   }
 
-  body.sgl-dark-active .solicitante-main .pedidos-page .expanded-heading {
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expanded-heading {
     gap: 10px !important;
   }
 
-  body.sgl-dark-active .solicitante-main .pedidos-page .material-item {
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-item {
     flex-direction: column !important;
   }
 
-  body.sgl-dark-active .solicitante-main .pedidos-page .material-quantity {
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .material-quantity {
     width: 100% !important;
     min-width: 0 !important;
     text-align: left !important;
@@ -463,21 +463,21 @@ body.sgl-dark-active .solicitante-main .pedidos-page .expand-button--open {
 }
 
 /* Loading, vazio e erro */
-body.sgl-dark-active .solicitante-main .pedidos-page .state-box {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .state-box {
   background: #0d1929 !important;
   color: #9fb0c6 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .state-box strong {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .state-box strong {
   color: #edf3fb !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .state-box--error {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .state-box--error {
   background: #251821 !important;
   color: #ff9aa5 !important;
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .state-box button {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .state-box button {
   border-color: #315f99 !important;
   background: #17345d !important;
   color: #ffffff !important;
@@ -485,37 +485,37 @@ body.sgl-dark-active .solicitante-main .pedidos-page .state-box button {
 
 /* Interações */
 @media (hover: hover) and (pointer: fine) {
-  body.sgl-dark-active .solicitante-main .pedidos-page .summary-card:nth-child(1):hover {
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card:nth-child(1):hover {
     border-color: #d95a69 !important;
     background: linear-gradient(180deg, #201b2a 0%, #161725 100%) !important;
   }
 
-  body.sgl-dark-active .solicitante-main .pedidos-page .summary-card:nth-child(2):hover {
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card:nth-child(2):hover {
     border-color: #45b77f !important;
     background: linear-gradient(180deg, #14251f 0%, #101d1c 100%) !important;
   }
 
-  body.sgl-dark-active .solicitante-main .pedidos-page .summary-card:nth-child(3):hover {
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card:nth-child(3):hover {
     border-color: #4e8eda !important;
     background: linear-gradient(180deg, #14243a 0%, #101e31 100%) !important;
   }
 
-  body.sgl-dark-active .solicitante-main .pedidos-page tbody tr.order-row:hover td {
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page tbody tr.order-row:hover td {
     background: #14243a !important;
   }
 }
 
-body.sgl-dark-active .solicitante-main .pedidos-page .primary-action:focus-visible,
-body.sgl-dark-active .solicitante-main .pedidos-page .expand-button:focus-visible,
-body.sgl-dark-active .solicitante-main .pedidos-page .state-box button:focus-visible {
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .primary-action:focus-visible,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expand-button:focus-visible,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .state-box button:focus-visible {
   outline: 2px solid #72a9ff !important;
   outline-offset: 2px !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.sgl-dark-active .solicitante-main .pedidos-page .summary-card,
-  body.sgl-dark-active .solicitante-main .pedidos-page .primary-action,
-  body.sgl-dark-active .solicitante-main .pedidos-page .expand-button {
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .summary-card,
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .primary-action,
+  body.sgl-dark-active :where(.solicitante-main, .gestao-main) .pedidos-page .expand-button {
     transition: none !important;
     transform: none !important;
   }

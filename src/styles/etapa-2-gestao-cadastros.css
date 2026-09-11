@@ -1,0 +1,809 @@
+/*
+ * Etapa 2 — Dark Mode definitivo
+ * Administração / Cadastros
+ *
+ * Mantém inclusive os ajustes de escala aprovados no fechamento da Etapa 1:
+ * workspace de 310px, tabs maiores, campos 44px, tabela ampliada e modal 880px.
+ */
+
+/*
+ * Etapa 1.4 — aplicação visual em Administração / Cadastros.
+ * Escopo: /administracao/cadastros no tema claro autenticado.
+ * Nenhuma regra funcional, service, API ou modelagem de cadastro é alterada.
+ */
+
+body.sgl-dark-active .gestao-main .admin-page {
+  color: var(--sgl-text);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .page-header {
+  gap: var(--sgl-space-6);
+  margin-bottom: var(--sgl-space-4);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .eyebrow {
+  margin-bottom: var(--sgl-space-2);
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  letter-spacing: .04em;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .page-header h1 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
+  letter-spacing: 0;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .page-header span {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .summary-grid {
+  gap: var(--sgl-space-3);
+  margin-bottom: var(--sgl-space-3);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .summary-grid article {
+  min-height: 104px;
+  padding: var(--sgl-card-padding);
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .summary-grid span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+  text-transform: none;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .summary-grid strong {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-primary-dark);
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .summary-grid small {
+  display: block;
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .scope-note {
+  gap: var(--sgl-space-3);
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  border-color: #315071;
+  border-radius: var(--sgl-radius-surface);
+  background: #111F33;
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .scope-note strong {
+  color: var(--sgl-primary-light);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .feedback {
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  border-radius: var(--sgl-radius-surface);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .workspace {
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: var(--sgl-space-4);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tabs-card,
+body.sgl-dark-active .gestao-main .admin-page .content-card {
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tabs-card {
+  gap: var(--sgl-space-2);
+  padding: var(--sgl-space-4);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tabs-card h2 {
+  margin: 0 0 var(--sgl-space-1);
+  padding: 0 var(--sgl-space-1);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-card-title);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tab-button {
+  min-height: 72px;
+  gap: var(--sgl-space-1);
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  transition: border-color var(--sgl-transition-fast) ease,
+    background var(--sgl-transition-fast) ease,
+    box-shadow var(--sgl-transition-fast) ease;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tab-button strong {
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tab-button small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: 1.4;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tab-button:hover {
+  border-color: #315071;
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tab-button--active {
+  border-color: var(--sgl-primary-light);
+  background: #17345D;
+  box-shadow: inset 3px 0 0 var(--sgl-primary);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .content-card {
+  min-width: 0;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .content-header {
+  min-height: 88px;
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-space-4) var(--sgl-card-padding);
+  border-bottom-color: var(--sgl-border);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .content-header h2 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-section-title);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .content-header p {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .toolbar {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-space-4) var(--sgl-card-padding);
+  border-bottom-color: var(--sgl-border);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .search-field {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .search-field span,
+body.sgl-dark-active .gestao-main .admin-page .field > span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .search-field input,
+body.sgl-dark-active .gestao-main .admin-page .field input,
+body.sgl-dark-active .gestao-main .admin-page .field select,
+body.sgl-dark-active .gestao-main .admin-page .permissions-table select {
+  min-height: var(--sgl-control-height);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .search-field input {
+  height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .toggle-field,
+body.sgl-dark-active .gestao-main .admin-page .check-line {
+  min-height: var(--sgl-control-height);
+  gap: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--sgl-primary);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .btn {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-4);
+  border-radius: var(--sgl-radius-control);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .btn--primary {
+  border-color: var(--sgl-action-primary-border) !important;
+  background: var(--sgl-action-primary) !important;
+  color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .btn--primary:hover:not(:disabled) {
+  background: var(--sgl-action-primary-hover) !important;
+  border-color: var(--sgl-primary-light) !important;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .btn--ghost {
+  border-color: var(--sgl-border-strong);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .btn--ghost:hover:not(:disabled) {
+  background: var(--sgl-surface-soft);
+  border-color: #405A78;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+}
+
+body.sgl-dark-active .gestao-main .admin-page table {
+  color: var(--sgl-text);
+}
+
+body.sgl-dark-active .gestao-main .admin-page th {
+  height: var(--sgl-table-row-height);
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  letter-spacing: .02em;
+}
+
+body.sgl-dark-active .gestao-main .admin-page td {
+  height: var(--sgl-table-row-height);
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  border-top-color: var(--sgl-border);
+  color: var(--sgl-neutral-strong);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page tbody tr {
+  transition: background var(--sgl-transition-fast) ease;
+}
+
+body.sgl-dark-active .gestao-main .admin-page tbody tr:hover {
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-dark-active .gestao-main .admin-page td strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page td small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: 1.4;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .status {
+  min-width: 72px;
+  min-height: 28px;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--sgl-radius-pill);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  text-transform: none;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .status--active {
+  background: #163629;
+  color: #72DBA8;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .status--inactive {
+  background: var(--sgl-neutral-soft);
+  color: var(--sgl-neutral-strong);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .controlled {
+  color: var(--sgl-primary);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .actions button {
+  min-height: 36px;
+  margin-left: var(--sgl-space-1);
+  padding: 0 var(--sgl-space-3);
+  border: 1px solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+  transition: background var(--sgl-transition-fast) ease,
+    border-color var(--sgl-transition-fast) ease;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .actions button:hover:not(:disabled) {
+  border-color: #405A78;
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .permissions-table select {
+  min-width: 180px;
+  height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .self-note {
+  margin-top: var(--sgl-space-1);
+  color: #F2C45F;
+  font-size: var(--sgl-font-helper);
+  line-height: 1.4;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .empty-table,
+body.sgl-dark-active .gestao-main .admin-page .empty-state {
+  padding: var(--sgl-space-8);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal-backdrop {
+  padding: var(--sgl-space-6);
+  background: rgb(12 25 45 / 54%);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal {
+  width: min(820px, 96vw);
+  border-radius: var(--sgl-radius-floating);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-2);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal > header {
+  min-height: 72px;
+  padding: var(--sgl-space-4) var(--sgl-card-padding);
+  border-bottom-color: var(--sgl-border);
+  background: var(--sgl-surface);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal > header span {
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  letter-spacing: .04em;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal > header h2 {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-section-title);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal > header button {
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-text-muted);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal > header button:hover {
+  background: var(--sgl-neutral-soft);
+  color: var(--sgl-text);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal-feedback {
+  margin: var(--sgl-space-3) var(--sgl-card-padding) 0;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal-body {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-card-padding);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .form-grid {
+  gap: var(--sgl-space-3) var(--sgl-space-4);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .field {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .field input,
+body.sgl-dark-active .gestao-main .admin-page .field select {
+  height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .field textarea {
+  min-height: 84px;
+  padding: var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .field small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: 1.4;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .form-section {
+  gap: var(--sgl-space-3);
+  padding: var(--sgl-space-4);
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .form-section h3 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-card-title);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .split-section {
+  gap: var(--sgl-space-4);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .checkbox-grid {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .checkbox-grid label {
+  min-height: 32px;
+  gap: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal-actions {
+  gap: var(--sgl-space-2);
+  padding-top: var(--sgl-space-2);
+}
+
+body.sgl-dark-active .gestao-main .admin-page button:focus-visible,
+body.sgl-dark-active .gestao-main .admin-page input:focus-visible,
+body.sgl-dark-active .gestao-main .admin-page select:focus-visible,
+body.sgl-dark-active .gestao-main .admin-page textarea:focus-visible {
+  outline: var(--sgl-focus-width) solid var(--sgl-focus);
+  outline-offset: var(--sgl-focus-offset);
+}
+
+@media (max-width: 1100px) {
+  body.sgl-dark-active .gestao-main .admin-page .workspace {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  body.sgl-dark-active .gestao-main .admin-page .page-header,
+  body.sgl-dark-active .gestao-main .admin-page .content-header,
+  body.sgl-dark-active .gestao-main .admin-page .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .tabs-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .tabs-card h2 {
+    grid-column: 1 / -1;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .content-header .btn,
+  body.sgl-dark-active .gestao-main .admin-page .page-header .btn {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 680px) {
+  body.sgl-dark-active .gestao-main .admin-page .summary-grid,
+  body.sgl-dark-active .gestao-main .admin-page .form-grid,
+  body.sgl-dark-active .gestao-main .admin-page .split-section {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .summary-grid {
+    gap: var(--sgl-space-2);
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .summary-grid article {
+    min-height: 0;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .modal-backdrop {
+    padding: var(--sgl-space-3);
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .modal {
+    width: 100%;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .modal-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .modal-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  body.sgl-dark-active .gestao-main .admin-page .tabs-card,
+  body.sgl-dark-active .gestao-main .admin-page .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .content-header .btn,
+  body.sgl-dark-active .gestao-main .admin-page .page-header .btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-dark-active .gestao-main .admin-page *,
+  body.sgl-dark-active .gestao-main .admin-page *::before,
+  body.sgl-dark-active .gestao-main .admin-page *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+
+/* Ajustes de escala da Etapa 1 preservados no Dark Mode. */
+/*
+ * Ajuste de validação — Etapa 1.4 / Administração e Cadastros.
+ *
+ * A estrutura inicial foi aprovada, porém a interface ficou visualmente
+ * compacta em telas desktop largas. Este arquivo aumenta a escala percebida
+ * sem alterar comportamento, dados ou regras de negócio.
+ */
+
+body.sgl-dark-active .gestao-main .admin-page .workspace {
+  grid-template-columns: 310px minmax(0, 1fr);
+  gap: var(--sgl-space-6);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tabs-card {
+  gap: var(--sgl-space-3);
+  padding: var(--sgl-card-padding);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tabs-card h2 {
+  margin-bottom: var(--sgl-space-2);
+  font-size: var(--sgl-font-section-title);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tab-button {
+  min-height: 88px;
+  gap: var(--sgl-space-2);
+  padding: var(--sgl-space-4);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tab-button strong {
+  font-size: 15px;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .tab-button small {
+  font-size: var(--sgl-font-label);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .content-header {
+  min-height: 104px;
+  padding: var(--sgl-card-padding) var(--sgl-space-6);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .content-header h2 {
+  font-size: 20px;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .content-header p {
+  margin-top: var(--sgl-space-2);
+  font-size: 15px;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .toolbar {
+  padding: var(--sgl-card-padding) var(--sgl-space-6);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .search-field span {
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .search-field input {
+  height: 44px;
+  min-height: 44px;
+  font-size: 15px;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .toggle-field {
+  min-height: 44px;
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-dark-active .gestao-main .admin-page th {
+  height: 52px;
+  padding: var(--sgl-space-4);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-dark-active .gestao-main .admin-page td {
+  height: 60px;
+  padding: var(--sgl-space-4);
+  font-size: 15px;
+}
+
+body.sgl-dark-active .gestao-main .admin-page td strong {
+  font-size: 15px;
+}
+
+body.sgl-dark-active .gestao-main .admin-page td small {
+  margin-top: var(--sgl-space-2);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .status {
+  min-width: 76px;
+  min-height: 32px;
+  padding: var(--sgl-space-1) var(--sgl-space-3);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .actions button {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .permissions-table select {
+  height: 44px;
+  min-height: 44px;
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .scope-note {
+  min-height: 52px;
+  align-items: center;
+  padding: var(--sgl-space-4);
+  font-size: 15px;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal {
+  width: min(880px, 96vw);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal > header {
+  min-height: 80px;
+  padding: var(--sgl-space-4) var(--sgl-space-6);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal > header h2 {
+  font-size: 20px;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .modal-body {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-card-padding) var(--sgl-space-6) var(--sgl-space-6);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .field input,
+body.sgl-dark-active .gestao-main .admin-page .field select {
+  min-height: 44px;
+  height: 44px;
+  font-size: 15px;
+}
+
+body.sgl-dark-active .gestao-main .admin-page .field textarea {
+  font-size: 15px;
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .field small,
+body.sgl-dark-active .gestao-main .admin-page .checkbox-grid label {
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .form-section {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-space-4);
+}
+
+body.sgl-dark-active .gestao-main .admin-page .form-section h3 {
+  font-size: var(--sgl-font-card-title);
+}
+
+@media (max-width: 1100px) {
+  body.sgl-dark-active .gestao-main .admin-page .workspace {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: var(--sgl-space-4);
+  }
+}
+
+@media (max-width: 760px) {
+  body.sgl-dark-active .gestao-main .admin-page .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .tabs-card {
+    padding: var(--sgl-space-4);
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .tab-button {
+    min-height: 76px;
+  }
+
+  body.sgl-dark-active .gestao-main .admin-page .content-header,
+  body.sgl-dark-active .gestao-main .admin-page .toolbar {
+    padding-inline: var(--sgl-space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-dark-active .gestao-main .admin-page .tab-button,
+  body.sgl-dark-active .gestao-main .admin-page tbody tr,
+  body.sgl-dark-active .gestao-main .admin-page .actions button {
+    transition: none;
+  }
+}
+
