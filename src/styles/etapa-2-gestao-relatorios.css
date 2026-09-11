@@ -818,3 +818,104 @@ body.sgl-dark-active .gestao-main .relatorios-page .ranking-card--saida li b,
 body.sgl-dark-active .gestao-main .relatorios-page .quantidade--saida {
   color: #FF8996 !important;
 }
+
+/* Chips / badges de informação no Dark */
+body.sgl-dark-active .gestao-main .relatorios-page .status,
+body.sgl-dark-active .gestao-main .relatorio-especial-panel .status,
+body.sgl-dark-active .gestao-main .relatorio-residuos-page .status,
+body.sgl-dark-active .gestao-main .people-report-page .status {
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .status--neutro,
+body.sgl-dark-active .gestao-main .relatorio-especial-panel .status--neutro,
+body.sgl-dark-active .gestao-main .relatorio-residuos-page .status--neutro,
+body.sgl-dark-active .gestao-main .people-report-page .status--neutro {
+  background: #253246 !important;
+  border-color: #3d4c63 !important;
+  color: #f2f6fc !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .status--risco-alto,
+body.sgl-dark-active .gestao-main .relatorio-especial-panel .status--risco-alto,
+body.sgl-dark-active .gestao-main .relatorio-residuos-page .status--risco-alto,
+body.sgl-dark-active .gestao-main .people-report-page .status--risco-alto {
+  background: #3a1e26 !important;
+  border-color: #9a4a5b !important;
+  color: #ffb7c2 !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .status--risco-medio,
+body.sgl-dark-active .gestao-main .relatorio-especial-panel .status--risco-medio,
+body.sgl-dark-active .gestao-main .relatorio-residuos-page .status--risco-medio,
+body.sgl-dark-active .gestao-main .people-report-page .status--risco-medio {
+  background: #3b2f16 !important;
+  border-color: #8f7431 !important;
+  color: #ffd979 !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .status--ativo,
+body.sgl-dark-active .gestao-main .relatorio-especial-panel .status--ativo,
+body.sgl-dark-active .gestao-main .relatorio-residuos-page .status--ativo,
+body.sgl-dark-active .gestao-main .people-report-page .status--ativo,
+body.sgl-dark-active .gestao-main .relatorios-page .status--fiscalizado {
+  background: #183427 !important;
+  border-color: #2f7551 !important;
+  color: #93edbd !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .status--inativo,
+body.sgl-dark-active .gestao-main .relatorio-especial-panel .status--inativo,
+body.sgl-dark-active .gestao-main .relatorio-residuos-page .status--inativo,
+body.sgl-dark-active .gestao-main .people-report-page .status--inativo {
+  background: #2a3140 !important;
+  border-color: #46546b !important;
+  color: #dce5f2 !important;
+}
+
+/* === MOVIMENTACOES RELATORIO SGL START === */
+
+/*
+ * Tipos de movimentação no relatório.
+ * Mesmo padrão visual usado em /movimentacoes.
+ */
+
+/* Fallback neutro */
+body.sgl-dark-active .gestao-main .relatorios-page .status--mov {
+  border: 1px solid #46566B !important;
+  background: #202C3D !important;
+  background-image: none !important;
+  color: #C2CEDD !important;
+  box-shadow: none !important;
+}
+
+/* ENTRADA / DEVOLUÇÃO — verde */
+body.sgl-dark-active .gestao-main .relatorios-page .status--mov-entrada {
+  border-color: #2D674D !important;
+  background: #163629 !important;
+  color: #72DBA8 !important;
+}
+
+/* SAÍDA — azul */
+body.sgl-dark-active .gestao-main .relatorios-page .status--mov-saida {
+  border-color: #315F99 !important;
+  background: #17345D !important;
+  color: #A9CBFF !important;
+}
+
+/* AJUSTE — âmbar */
+body.sgl-dark-active .gestao-main .relatorios-page .status--mov-ajuste {
+  border-color: #765D2A !important;
+  background: #352B17 !important;
+  color: #F2C45F !important;
+}
+
+/* DESCARTE POR VENCIMENTO — vermelho */
+body.sgl-dark-active .gestao-main .relatorios-page .status--mov-descarte {
+  border-color: #713845 !important;
+  background: #3A1D29 !important;
+  color: #FF8996 !important;
+}
+
+/* === MOVIMENTACOES RELATORIO SGL END === */
