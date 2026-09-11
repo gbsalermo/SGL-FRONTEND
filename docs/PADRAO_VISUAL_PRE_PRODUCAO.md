@@ -1,8 +1,9 @@
 # Padrão Visual de Pré-Produção — SGL Frontend
 
 **Etapa:** 1 — Padronização e refinamento visual global  
-**Estado:** 1.1 ✅ concluída · 1.2 ✅ concluída · 1.3 ⏭ próxima  
-**Data:** 09/09/2026
+**Estado:** ✅ Etapa 1 concluída e validada  
+**Data de fechamento:** 10/09/2026  
+**Observação de continuidade:** este documento registra as decisões e a execução histórica da Etapa 1. A Etapa 2 — Dark Mode definitivo — também já foi concluída; a etapa atual do projeto é a Etapa 3 — refinamentos do fluxo de Resíduos.
 
 Este documento registra as decisões oficiais fechadas na subetapa 1.1 e acompanha a implementação da Etapa 1 de pré-produção. Ele não redefine a identidade visual original do SGL; consolida os valores e regras que devem orientar as próximas subetapas sem quebrar o MVP funcional já aprovado.
 
@@ -379,9 +380,9 @@ Aparência base sem destaque excessivo.
 
 Decisão explícita:
 
-> Não corrigir o Dark Mode durante a Etapa 1.
+> Durante a Etapa 1, o Dark Mode não foi corrigido junto com o refinamento visual.
 
-A Etapa 1 deve estabilizar primeiro o padrão visual do tema claro. A Etapa 2 tratará o Dark Mode de forma própria, com paleta, comportamento, aplicação e testes específicos.
+Essa separação foi respeitada. A Etapa 2 tratou o Dark Mode de forma própria e já foi concluída e validada em 11/09/2026.
 
 ---
 
@@ -390,13 +391,13 @@ A Etapa 1 deve estabilizar primeiro o padrão visual do tema claro. A Etapa 2 tr
 ```text
 1.1 — Definir padrão visual SGL             ✅ concluída
 1.2 — Fundação visual compartilhada          ✅ concluída
-1.3 — Padronizar componentes básicos         ⏭ próxima subetapa
-1.4 — Aplicar tela a tela                     ⏳
-1.5 — Limpar exceções/CSS corretivo           ⏳
-1.6 — Revisão visual final                    ⏳
+1.3 — Padronizar componentes básicos         ✅ concluída
+1.4 — Aplicar tela a tela                     ✅ concluída
+1.5 — Limpar exceções/CSS corretivo           ✅ concluída
+1.6 — Revisão visual final                    ✅ concluída
 ```
 
-A 1.3 deve começar a aplicar a fundação criada na 1.2 de forma incremental, sem alterar regra de negócio e sem migrar todo o frontend de uma vez.
+A Etapa 1 está encerrada. As instruções de execução incremental mantidas neste documento devem ser interpretadas como registro histórico das decisões adotadas, não como trabalho pendente.
 
 ---
 
@@ -432,12 +433,12 @@ Decisões de implementação:
 
 ## 16. Regra de continuidade
 
-Toda IA ou pessoa que continuar a Etapa 1 deve:
+Como a Etapa 1 está encerrada, estas regras passam a funcionar como critérios de preservação do padrão visual em etapas posteriores. Toda IA ou pessoa que alterar a aparência do SGL deve:
 
 1. ler este documento antes de alterar aparência;
 2. preservar as decisões fechadas na 1.1;
 3. usar os tokens/classes criados na 1.2 em vez de criar novo padrão local por tela;
 4. evitar criar novo padrão visual local por tela;
-5. não misturar correções de Dark Mode na Etapa 1;
-6. comparar mudanças com o MVP atual e evitar regressões funcionais;
-7. registrar qualquer nova decisão visual neste documento antes de espalhá-la pela aplicação.
+5. preservar a arquitetura definitiva do Dark Mode fechada na Etapa 2 e não recriar soluções provisórias;
+6. comparar mudanças com o padrão já aprovado e evitar regressões funcionais;
+7. registrar novas decisões visuais no documento da etapa correspondente antes de espalhá-las pela aplicação.
