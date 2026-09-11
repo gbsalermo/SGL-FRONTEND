@@ -321,7 +321,7 @@ Pré-produção planejada:
 
 - Etapa 3: remover a sequência visual redundante de pendências/análise, ampliar os dados operacionais do Resíduo e separar geração/visualização da permissão de impressão;
 - Etapa 4: cadastrar locais de armazenamento e liberar modelos de Resíduos padrão pela Gestão;
-- Etapa 8: consolidar padrão transversal de rótulos e templates adaptados de Produto, Resíduo e Solução;
+- Etapa 8: consolidar padrão transversal de rótulos e templates adaptados de Produto, Resíduo e Solução, além do Documento de Auditoria de Entrada de Lote imprimível;
 - o Solicitante poderá escolher entre um Resíduo pré-cadastrado e preenchimento manual;
 - um modelo é reutilizável, enquanto cada `Residuo` continua sendo uma ocorrência operacional independente.
 
@@ -574,7 +574,7 @@ Etapa 4 — expansão operacional de Resíduos            ⏳
 Etapa 5 — Projetos + vínculos de Estagiários          ⏳
 Etapa 6 — relatórios de Projetos/Laboratórios         ⏳
 Etapa 7 — unidades + Soluções + Pedidos               ⏳
-Etapa 8 — Rótulos + impressão operacional              ⏳
+Etapa 8 — Rótulos + documento de lote + impressão      ⏳
 Etapa 9 — Manual do Usuário + decisão delete lógico   ⏳
 Etapa 10 — testes automatizados do Frontend            ⏳
 ```
@@ -586,7 +586,7 @@ padrão visual → Dark Mode
 Resíduos atuais → expansão/modelos de Resíduos
 Projetos/Estagiários → relatório de Projetos
 unidades → Soluções → Pedidos com Soluções
-Produto/Resíduo/Solução estabilizados → rótulos adaptados + impressão
+Produto/Resíduo/Solução estabilizados → rótulos adaptados + documento de lote + impressão
 Etapas 1 a 9 estabilizadas → testes automatizados frontend
 ```
 
