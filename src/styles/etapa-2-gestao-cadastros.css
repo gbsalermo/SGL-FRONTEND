@@ -250,14 +250,15 @@ body.sgl-dark-active .gestao-main .admin-page .btn {
 }
 
 body.sgl-dark-active .gestao-main .admin-page .btn--primary {
-  border-color: var(--sgl-primary);
-  background: var(--sgl-primary);
-  color: #FFFFFF;
+  border-color: var(--sgl-action-primary-border) !important;
+  background: var(--sgl-action-primary) !important;
+  color: #FFFFFF !important;
+  box-shadow: none !important;
 }
 
 body.sgl-dark-active .gestao-main .admin-page .btn--primary:hover:not(:disabled) {
-  background: var(--sgl-primary-dark);
-  border-color: var(--sgl-primary-dark);
+  background: var(--sgl-action-primary-hover) !important;
+  border-color: var(--sgl-primary-light) !important;
 }
 
 body.sgl-dark-active .gestao-main .admin-page .btn--ghost {
