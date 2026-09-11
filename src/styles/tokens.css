@@ -95,6 +95,12 @@
   --sgl-primary-dark: #3183ED;
   --sgl-primary-light: #78ADFF;
 
+  /* Ações primárias em superfícies escuras: deliberadamente menos luminosas
+     que o azul informativo para não dominar a interface. */
+  --sgl-action-primary: #315FAE;
+  --sgl-action-primary-hover: #3B6FC3;
+  --sgl-action-primary-border: #4D7ED1;
+
   --sgl-green: #54D59A;
   --sgl-green-light: #72DBA8;
   --sgl-green-soft: #163629;
