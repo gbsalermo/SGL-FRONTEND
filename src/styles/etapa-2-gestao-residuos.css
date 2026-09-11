@@ -543,3 +543,20 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page :where(button, input, se
     transform: none !important;
   }
 }
+
+
+/* Estado vazio da listagem: não herda mais a superfície clara da View. */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .state-box {
+  padding: var(--sgl-space-8) !important;
+  border: 1px solid var(--sgl-border) !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .state-box--error {
+  border-color: #713845 !important;
+  background: #2B1A23 !important;
+  color: #FF9AA5 !important;
+}
