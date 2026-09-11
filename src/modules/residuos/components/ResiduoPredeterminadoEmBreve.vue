@@ -70,15 +70,16 @@ onBeforeUnmount(() => observer?.disconnect())
         <div class="residuo-modelo-user-card__rule">
           <strong>Regra planejada</strong>
           <span>
-            Produto do catálogo <b>ou</b> resíduo pré-cadastrado: pelo menos um dos dois deverá ser selecionado.
-            Ao escolher um modelo de resíduo, Produto passa a ser opcional; ao escolher Produto, o modelo passa a ser opcional.
+            O modelo de resíduo será uma definição reutilizável para pré-preencher a ocorrência.
+            Produtos do catálogo continuarão sendo referências opcionais dos componentes e não serão substituídos pelo modelo.
           </span>
         </div>
       </div>
 
       <p>
-        Quando ativado, o modelo poderá preencher automaticamente descrição, processo de origem, recipiente,
-        unidade, riscos, composição e observações. A quantidade real continuará ajustável no momento do registro.
+        Quando ativado, o Solicitante poderá escolher um modelo cadastrado pela Gestão ou informar o resíduo manualmente.
+        O modelo poderá preencher dados padrão como descrição, processo de origem, recipiente, riscos, composição e observações,
+        enquanto os dados específicos da ocorrência continuarão sendo registrados no novo Resíduo.
       </p>
     </article>
   </Teleport>
