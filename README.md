@@ -13,9 +13,9 @@
 
 ---
 
-## Estado atual — 04/09/2026
+## Estado atual — 11/09/2026
 
-O primeiro protótipo do SGL foi **funcionalmente aprovado**. O projeto entra agora em um bloco de **ajustes de pré-produção**, anterior ao roadmap formal de matriz de permissões, congelamento, homologação final e segurança definitiva.
+O primeiro protótipo do SGL foi **funcionalmente aprovado**. As Etapas 1 (padrão visual global) e 2 (Dark Mode definitivo) da pré-produção foram concluídas. A etapa atual é a **Etapa 3 — Refinamentos do fluxo atual de Resíduos**, anterior ao roadmap formal de matriz de permissões, congelamento, homologação final e segurança definitiva.
 
 Estado consolidado:
 
@@ -37,14 +37,14 @@ Dashboard Gestão                                  ✅
 Dashboard Solicitante                             ✅
 Alertas operacionais                              ✅
 Busca global                                      ✅
-Modo claro/escuro + persistência                  ✅
+Modo claro/escuro definitivo + persistência       ✅
 404                                               ✅
 Contexto de Unidade enviado à API                 ✅
 Autenticação/autorização definitiva               ⏳ etapa formal posterior
 Integração corporativa                            ⏳ etapa formal posterior
 ```
 
-> Para retomar o projeto, começar por [`CONTINUIDADE.md`](CONTINUIDADE.md), [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) e `src/router/index.ts`. Contratos HTTP pertencem ao Swagger/OpenAPI do backend.
+> Para retomar o projeto, começar por [`CONTINUIDADE.md`](CONTINUIDADE.md), pelo plano canônico do backend `docs/PLANO_PRE_PRODUCAO.md`, pelo checkpoint `docs/CONTINUIDADE_ETAPA_3_2026-09-11.md`, por [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) e `src/router/index.ts`. Contratos HTTP pertencem ao Swagger/OpenAPI do backend.
 
 ---
 
@@ -449,10 +449,10 @@ Não tratar visibilidade de menu/rota como segurança de produção.
 ### Agora — pré-produção pós-aprovação
 
 ```text
-1. limpeza e atualização documental
-2. planejamento dos ajustes de pré-produção
-3. implementação/refinamento
-4. estabilização do bloco
+Etapa 1 — padrão visual global                 ✅
+Etapa 2 — Dark Mode definitivo                 ✅
+Etapa 3 — refinamentos do fluxo de Resíduos    🔧 atual
+Etapas 4 a 9                                   ⏳ sequenciais
 ```
 
 ### Depois — roadmap formal de produção
