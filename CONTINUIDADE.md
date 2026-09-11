@@ -48,8 +48,8 @@ Relatórios / fiscalização                            ✅
 PDF/XLSX                                             ✅
 Resíduos — Solicitante                               ✅
 Resíduos — Gestão                                    ✅
-Rótulo de Resíduo                                    ✅ base atual; adaptação final na Etapa 8
-Rótulo de Produto                                    ✅ base atual; adaptação final na Etapa 8
+Rótulo de Resíduo                                    ✅ base atual; adaptação final na Etapa 10
+Rótulo de Produto                                    ✅ base atual; adaptação final na Etapa 10
 Estagiários                                          ✅ base atual; evolução planejada
 Pessoas por laboratório                              ✅
 Administração / Cadastros                            ✅ base atual; expansão planejada
@@ -60,8 +60,8 @@ Busca global                                         ✅
 Tema claro/escuro + persistência                     ✅ Dark Mode definitivo concluído
 404                                                   ✅
 Contexto de Unidade enviado à API                    ✅
-Testes unitários/componentes frontend                ⏳ Etapa 10 — Vitest + Vue Test Utils
-Testes E2E frontend                                  ⏳ Etapa 10 — Cypress
+Testes unitários/componentes frontend                ⏳ Etapa 12 — Vitest + Vue Test Utils
+Testes E2E frontend                                  ⏳ Etapa 12 — Cypress
 Matriz formal de permissões                          ⏳ após pré-produção atual
 Congelamento funcional                               ⏳ posterior
 Homologação final                                    ⏳ posterior
@@ -226,7 +226,7 @@ não perecível → FIFO
 
 Urgência está integrada e não altera FIFO/FEFO.
 
-A Etapa 7 da pré-produção introduzirá Soluções em Pedidos somente depois da normalização de unidades e da criação do domínio de Soluções. Um Pedido deverá poder conter Produto, Solução ou ambos.
+A Etapa 8 normalizará unidades e consolidará o domínio de Soluções. Somente na Etapa 9 Soluções serão integradas a Pedidos, conforme o escopo de Pedido confirmado pelo cliente.
 
 ---
 
@@ -257,7 +257,7 @@ integração com dashboard/alertas/busca
 
 Lote continua contextual a Estoque; não criar item principal independente na sidebar sem nova decisão.
 
-A Etapa 7 revisará a representação de unidades de medida e apresentações físicas antes das Soluções. Até lá, preservar o comportamento atual.
+A Etapa 8 revisará a representação de unidades de medida e apresentações físicas antes de fechar Soluções. Até lá, preservar o comportamento atual.
 
 ---
 
@@ -321,7 +321,7 @@ Pré-produção planejada:
 
 - Etapa 3: remover a sequência visual redundante de pendências/análise, ampliar os dados operacionais do Resíduo e separar geração/visualização da permissão de impressão;
 - Etapa 4: cadastrar locais de armazenamento e liberar modelos de Resíduos padrão pela Gestão;
-- Etapa 8: consolidar padrão transversal de rótulos e templates adaptados de Produto, Resíduo e Solução, além do Documento de Auditoria de Entrada de Lote imprimível;
+- Etapa 10: consolidar padrão transversal de rótulos e templates adaptados de Produto, Resíduo e Solução, além do Documento de Auditoria de Entrada de Lote imprimível;
 - o Solicitante poderá escolher entre um Resíduo pré-cadastrado e preenchimento manual;
 - um modelo é reutilizável, enquanto cada `Residuo` continua sendo uma ocorrência operacional independente.
 
@@ -358,7 +358,7 @@ Relatório atual:
 
 Com responsável, pessoas vinculadas, perfil, situação e dados de estágio, além de PDF/XLSX.
 
-A Etapa 5 reestruturará Projetos, possíveis Atividades e Estagiários de forma hierárquica. Depois de Projeto/Atividade estabilizados, o Estagiário deverá expor Orientador obrigatório, Projeto/Atividade, Bolsa/vínculo separado de Curso/Formação, Cultura/área temática, treinamento inicial de segurança e ciclo com prorrogações justificadas. O portão 5.0 confirmará cardinalidades, elegibilidade do Orientador, Cultura, regra de prorrogação e demais pontos pendentes antes de fechar contratos e telas.
+A Etapa 5 fecha Projetos e possíveis Atividades. Somente depois, a Etapa 6 evolui Estagiários com Orientador obrigatório, Projeto/Atividade, Bolsa/vínculo separado de Curso/Formação, Cultura/área temática, treinamento inicial de segurança e ciclo com prorrogações justificadas.
 
 A ação atual de encerramento do Estagiário também será revista para distinguir inativação temporária, inativação sem previsão e encerramento definitivo, sempre com motivo detalhado.
 
@@ -398,8 +398,10 @@ Expansões já planejadas no plano de pré-produção:
 
 ```text
 Etapa 4 → Locais de armazenamento + modelos de Resíduos
-Etapa 5 → Projeto base → Código SEG → Atividades se confirmadas → domínio do Estagiário → vínculos → ciclo/prorrogações → interfaces
-Etapa 7 → Soluções padrão
+Etapa 5 → Projeto base → Código SEG → Atividades se confirmadas → interface
+Etapa 6 → domínio do Estagiário → vínculos → ciclo/prorrogações → interface
+Etapa 8 → unidades + Soluções
+Etapa 9 → Pedidos + integração com Soluções
 ```
 
 Portanto, “Resíduos — Em breve” descreve apenas a interface atual, não uma ideia indefinida/futura.
@@ -429,7 +431,7 @@ Pessoas por laboratório
 
 Exportações PDF/XLSX devem usar os mesmos filtros da prévia.
 
-A Etapa 6 consolidará relatórios de Laboratórios, Projetos e Estagiários após a estabilização da Etapa 5, incluindo filtros/contagens por Orientador, responsável de Laboratório, Bolsa/vínculo, Curso/Formação, Cultura/área temática, Projeto, Atividade e situação.
+A Etapa 7 consolidará relatórios de Laboratórios, Projetos e Estagiários somente após as Etapas 5 e 6 estarem estabilizadas, incluindo filtros/contagens por Orientador, responsável de Laboratório, Bolsa/vínculo, Curso/Formação, Cultura/área temática, Projeto, Atividade e situação.
 
 ---
 
@@ -476,7 +478,7 @@ Os itens relevantes navegam para a tela operacional correspondente com contexto/
 
 É a rota inicial dos perfis solicitantes e não deve expor controles de Gestão/Administração.
 
-A Etapa 9 adicionará a seção Manual do Usuário inicialmente nesta experiência de Solicitante, após definição do contrato de documentos necessário.
+A Etapa 11 adicionará a seção Manual do Usuário inicialmente nesta experiência de Solicitante, após definição do contrato de documentos necessário.
 
 ---
 
@@ -523,7 +525,7 @@ Menus e rotas por perfil não equivalem a segurança de produção.
 
 # 17. Documentos / Manual do Usuário
 
-A Etapa 9 prevê uma seção **Manual do Usuário**, inicialmente para perfis Solicitantes, para disponibilizar materiais como:
+A Etapa 11 prevê uma seção **Manual do Usuário**, inicialmente para perfis Solicitantes, para disponibilizar materiais como:
 
 ```text
 como usar o SGL
@@ -540,7 +542,7 @@ Não inventar persistência real de arquivos apenas no frontend. Antes de criar 
 
 # 18. Testes automatizados do Frontend — planejado
 
-A Etapa 10 fecha o bloco de pré-produção com uma suíte automatizada de regressão.
+A Etapa 12 fecha o bloco de pré-produção com uma suíte automatizada de regressão.
 
 Stack definida:
 
@@ -554,7 +556,7 @@ Cypress
 
 Entre Selenium e Cypress, **Cypress é a ferramenta E2E escolhida para o SGL**. Selenium não é o padrão principal planejado para este frontend.
 
-A suíte deve cobrir os fluxos críticos existentes ao final das Etapas 1 a 9 e ter execução headless reproduzível. Ela não substitui a homologação integrada final posterior; serve como rede automatizada de regressão antes do congelamento.
+A suíte deve cobrir os fluxos críticos existentes ao final das Etapas 1 a 11 e ter execução headless reproduzível. Ela não substitui a homologação integrada final posterior; serve como rede automatizada de regressão antes do congelamento.
 
 ---
 
@@ -571,12 +573,14 @@ Etapa 1 — refinamento visual global                   ✅ concluída
 Etapa 2 — Dark Mode definitivo                        ✅ concluída
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ⏭ ATUAL / próxima implementação
 Etapa 4 — expansão operacional de Resíduos            ⏳
-Etapa 5 — Projetos + Atividades + Estagiários         ⏳
-Etapa 6 — relatórios Projetos/Estagiários/Laboratórios ⏳
-Etapa 7 — unidades + Soluções + Pedidos               ⏳
-Etapa 8 — Rótulos + documento de lote + impressão      ⏳
-Etapa 9 — Manual do Usuário + decisão delete lógico   ⏳
-Etapa 10 — testes automatizados do Frontend            ⏳
+Etapa 5 — Projetos + Atividades                       ⏳
+Etapa 6 — Estagiários + vínculos                      ⏳
+Etapa 7 — relatórios consolidados                     ⏳
+Etapa 8 — unidades + Soluções                         ⏳
+Etapa 9 — Pedidos + integração com Soluções           ⏳
+Etapa 10 — Rótulos + documento de lote + impressão    ⏳
+Etapa 11 — Manual do Usuário + decisão delete lógico  ⏳
+Etapa 12 — testes automatizados do Frontend           ⏳
 ```
 
 Dependências centrais:
@@ -584,10 +588,10 @@ Dependências centrais:
 ```text
 padrão visual → Dark Mode
 Resíduos atuais → expansão/modelos de Resíduos
-Projeto base → Atividades (se confirmadas) → domínio/vínculos de Estagiários → relatórios consolidados
+Projeto base → Atividades (se confirmadas) → Estagiários/vínculos → relatórios consolidados
 unidades → Soluções → Pedidos com Soluções
 Produto/Resíduo/Solução estabilizados → rótulos adaptados + documento de lote + impressão
-Etapas 1 a 9 estabilizadas → testes automatizados frontend
+Etapas 1 a 11 estabilizadas → testes automatizados frontend
 ```
 
 ---
