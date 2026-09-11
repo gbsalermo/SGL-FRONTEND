@@ -48,8 +48,8 @@ Relatórios / fiscalização                            ✅
 PDF/XLSX                                             ✅
 Resíduos — Solicitante                               ✅
 Resíduos — Gestão                                    ✅
-Rótulo de Resíduo                                    ✅ base atual; refinamento planejado
-Rótulo de Produto                                    ✅
+Rótulo de Resíduo                                    ✅ base atual; adaptação final na Etapa 8
+Rótulo de Produto                                    ✅ base atual; adaptação final na Etapa 8
 Estagiários                                          ✅ base atual; evolução planejada
 Pessoas por laboratório                              ✅
 Administração / Cadastros                            ✅ base atual; expansão planejada
@@ -60,8 +60,8 @@ Busca global                                         ✅
 Tema claro/escuro + persistência                     ✅ Dark Mode definitivo concluído
 404                                                   ✅
 Contexto de Unidade enviado à API                    ✅
-Testes unitários/componentes frontend                ⏳ Etapa 9 — Vitest + Vue Test Utils
-Testes E2E frontend                                  ⏳ Etapa 9 — Cypress
+Testes unitários/componentes frontend                ⏳ Etapa 10 — Vitest + Vue Test Utils
+Testes E2E frontend                                  ⏳ Etapa 10 — Cypress
 Matriz formal de permissões                          ⏳ após pré-produção atual
 Congelamento funcional                               ⏳ posterior
 Homologação final                                    ⏳ posterior
@@ -319,8 +319,9 @@ O Código SGL existe desde o registro inicial. QR Code não integra o rótulo vi
 
 Pré-produção planejada:
 
-- Etapa 3: remover a sequência visual redundante de pendências/análise, refinar o rótulo e separar geração/visualização da permissão de impressão;
+- Etapa 3: remover a sequência visual redundante de pendências/análise, ampliar os dados operacionais do Resíduo e separar geração/visualização da permissão de impressão;
 - Etapa 4: cadastrar locais de armazenamento e liberar modelos de Resíduos padrão pela Gestão;
+- Etapa 8: consolidar padrão transversal de rótulos e templates adaptados de Produto, Resíduo e Solução;
 - o Solicitante poderá escolher entre um Resíduo pré-cadastrado e preenchimento manual;
 - um modelo é reutilizável, enquanto cada `Residuo` continua sendo uma ocorrência operacional independente.
 
@@ -475,7 +476,7 @@ Os itens relevantes navegam para a tela operacional correspondente com contexto/
 
 É a rota inicial dos perfis solicitantes e não deve expor controles de Gestão/Administração.
 
-A Etapa 8 adicionará a seção Manual do Usuário inicialmente nesta experiência de Solicitante, após definição do contrato de documentos necessário.
+A Etapa 9 adicionará a seção Manual do Usuário inicialmente nesta experiência de Solicitante, após definição do contrato de documentos necessário.
 
 ---
 
@@ -522,7 +523,7 @@ Menus e rotas por perfil não equivalem a segurança de produção.
 
 # 17. Documentos / Manual do Usuário
 
-A Etapa 8 prevê uma seção **Manual do Usuário**, inicialmente para perfis Solicitantes, para disponibilizar materiais como:
+A Etapa 9 prevê uma seção **Manual do Usuário**, inicialmente para perfis Solicitantes, para disponibilizar materiais como:
 
 ```text
 como usar o SGL
@@ -539,7 +540,7 @@ Não inventar persistência real de arquivos apenas no frontend. Antes de criar 
 
 # 18. Testes automatizados do Frontend — planejado
 
-A Etapa 9 fecha o bloco de pré-produção com uma suíte automatizada de regressão.
+A Etapa 10 fecha o bloco de pré-produção com uma suíte automatizada de regressão.
 
 Stack definida:
 
@@ -553,7 +554,7 @@ Cypress
 
 Entre Selenium e Cypress, **Cypress é a ferramenta E2E escolhida para o SGL**. Selenium não é o padrão principal planejado para este frontend.
 
-A suíte deve cobrir os fluxos críticos existentes ao final das Etapas 1 a 8 e ter execução headless reproduzível. Ela não substitui a homologação integrada final posterior; serve como rede automatizada de regressão antes do congelamento.
+A suíte deve cobrir os fluxos críticos existentes ao final das Etapas 1 a 9 e ter execução headless reproduzível. Ela não substitui a homologação integrada final posterior; serve como rede automatizada de regressão antes do congelamento.
 
 ---
 
@@ -573,8 +574,9 @@ Etapa 4 — expansão operacional de Resíduos            ⏳
 Etapa 5 — Projetos + vínculos de Estagiários          ⏳
 Etapa 6 — relatórios de Projetos/Laboratórios         ⏳
 Etapa 7 — unidades + Soluções + Pedidos               ⏳
-Etapa 8 — Manual do Usuário + decisão delete lógico  ⏳
-Etapa 9 — testes automatizados do Frontend            ⏳
+Etapa 8 — Rótulos + impressão operacional              ⏳
+Etapa 9 — Manual do Usuário + decisão delete lógico   ⏳
+Etapa 10 — testes automatizados do Frontend            ⏳
 ```
 
 Dependências centrais:
@@ -584,7 +586,8 @@ padrão visual → Dark Mode
 Resíduos atuais → expansão/modelos de Resíduos
 Projetos/Estagiários → relatório de Projetos
 unidades → Soluções → Pedidos com Soluções
-Etapas 1 a 8 estabilizadas → testes automatizados frontend
+Produto/Resíduo/Solução estabilizados → rótulos adaptados + impressão
+Etapas 1 a 9 estabilizadas → testes automatizados frontend
 ```
 
 ---
