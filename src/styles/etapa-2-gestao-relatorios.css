@@ -242,10 +242,18 @@ body.sgl-dark-active .gestao-main .relatorios-page .btn--primary,
 body.sgl-dark-active .gestao-main .relatorio-especial-panel .btn--primary,
 body.sgl-dark-active .gestao-main .relatorio-residuos-page .btn--primary,
 body.sgl-dark-active .gestao-main .people-report-page .btn--primary {
-  border: 1px solid var(--sgl-primary);
-  background: var(--sgl-primary);
-  color: #fff;
-  box-shadow: none;
+  border: 1px solid var(--sgl-action-primary-border) !important;
+  background: var(--sgl-action-primary) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .btn--primary:hover:not(:disabled),
+body.sgl-dark-active .gestao-main .relatorio-especial-panel .btn--primary:hover:not(:disabled),
+body.sgl-dark-active .gestao-main .relatorio-residuos-page .btn--primary:hover:not(:disabled),
+body.sgl-dark-active .gestao-main .people-report-page .btn--primary:hover:not(:disabled) {
+  border-color: var(--sgl-primary-light) !important;
+  background: var(--sgl-action-primary-hover) !important;
 }
 
 body.sgl-dark-active .gestao-main .relatorios-page .btn--ghost,
@@ -725,4 +733,88 @@ body.sgl-dark-active .gestao-main .people-report-page select:focus-visible {
     transition-duration: .01ms !important;
     animation-duration: .01ms !important;
   }
+}
+
+
+/* Correções finais de superfícies que ainda herdavam branco do CSS local das Views. */
+body.sgl-dark-active .gestao-main .relatorios-page .preview-empty,
+body.sgl-dark-active .gestao-main .relatorio-especial-panel .empty-state,
+body.sgl-dark-active .gestao-main .relatorio-residuos-page .empty,
+body.sgl-dark-active .gestao-main .relatorio-residuos-page .empty-state,
+body.sgl-dark-active .gestao-main .people-report-page .empty,
+body.sgl-dark-active .gestao-main .people-report-page .empty-state,
+body.sgl-dark-active .gestao-main .relatorios-page .table-empty {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .preview-empty svg {
+  fill: var(--sgl-surface-interactive) !important;
+  stroke: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .preview-empty strong,
+body.sgl-dark-active .gestao-main .relatorios-page .preview-empty b {
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .preview-result {
+  background: var(--sgl-surface) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .resumo-cards article {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .resumo-cards span {
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .resumo-cards strong {
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-card {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-card h3,
+body.sgl-dark-active .gestao-main .relatorios-page .section-heading h3 {
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-card li {
+  background: var(--sgl-surface-soft) !important;
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-card li strong {
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-card li small,
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-empty,
+body.sgl-dark-active .gestao-main .relatorios-page .section-heading span {
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-card--entrada {
+  border-top-color: #4D7ED1 !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-card--entrada li b,
+body.sgl-dark-active .gestao-main .relatorios-page .quantidade--entrada {
+  color: #78ADFF !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-card--saida {
+  border-top-color: #9B4D5E !important;
+}
+
+body.sgl-dark-active .gestao-main .relatorios-page .ranking-card--saida li b,
+body.sgl-dark-active .gestao-main .relatorios-page .quantidade--saida {
+  color: #FF8996 !important;
 }
