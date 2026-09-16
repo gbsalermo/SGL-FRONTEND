@@ -49,7 +49,7 @@ onMounted(carregar)
 </script>
 
 <template>
-  <main class="print-page">
+  <main class="print-page" :class="{ 'print-page--blocked': dados && !dados.impressaoPermitida }">
     <header class="toolbar no-print">
       <button type="button" @click="voltar">← Voltar</button>
       <div>
@@ -119,5 +119,14 @@ onMounted(carregar)
   .print-page { min-height: 0; padding: 0; background: #fff; }
   .no-print { display: none !important; }
   .canvas { width: auto; max-width: none; margin: 0; padding: 0; box-shadow: none; }
+  .print-page--blocked .canvas { display: none !important; }
+  .print-page--blocked::after {
+    content: 'Impressão não autorizada: o Resíduo ainda não foi liberado pela Gestão.';
+    display: block;
+    padding: 20mm;
+    color: #111827;
+    font: 700 14pt Arial, sans-serif;
+    text-align: center;
+  }
 }
 </style>
