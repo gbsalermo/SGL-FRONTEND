@@ -104,9 +104,13 @@ const residuosFiltrados = computed(() => {
 })
 
 const minDataDespacho = computed(() => new Date().toISOString().slice(0, 10))
-const podeRotular = computed(() => Boolean(
-  selecionado.value && !['INFORMADO', 'EM_ANALISE'].includes(selecionado.value.status),
-))
+const podeVisualizarRotulo = computed(() => Boolean(selecionado.value))
+
+function rotuloAcaoRotulo(status: StatusResiduo) {
+  return ['INFORMADO', 'EM_ANALISE'].includes(status)
+    ? 'Visualizar prévia do rótulo'
+    : 'Visualizar rótulo'
+}
 
 function quantidadeStatus(status: StatusResiduo) {
   return residuos.value.filter((residuo) => residuo.status === status).length
@@ -460,7 +464,7 @@ onMounted(carregar)
 
     <div class="metrics-grid metrics-grid--five">
       <article><span>A receber</span><strong>{{ quantidadeStatus('INFORMADO') }}</strong><small>aguardando conferência física</small></article>
-      <article><span>Em análise</span><strong>{{ quantidadeStatus('EM_ANALISE') }}</strong><small>classificação técnica</small></article>
+      <article><span>Em análise</span><strong>{{ quantidadeStatus('EM_ANALISE') }}</strong><small>prévia disponível · impressão bloqueada</small></article>
       <article><span>Liberados</span><strong>{{ quantidadeStatus('LIBERADO_PARA_ARMAZENAMENTO') }}</strong><small>rótulo disponível</small></article>
       <article><span>Armazenados</span><strong>{{ quantidadeStatus('ARMAZENADO_TEMPORARIAMENTE') }}</strong><small>aguardando destinação</small></article>
       <article><span>Despachados</span><strong>{{ quantidadeStatus('DESPACHADO') }}</strong><small>ciclo concluído</small></article>
@@ -630,7 +634,7 @@ onMounted(carregar)
           </section>
 
           <div class="drawer-actions drawer-actions--wrap">
-            <button v-if="podeRotular" class="label-action" type="button" @click="abrirRotulo(selecionado)">Visualizar rótulo</button>
+            <button v-if="podeVisualizarRotulo" class="label-action" type="button" @click="abrirRotulo(selecionado)">{{ rotuloAcaoRotulo(selecionado.status) }}</button>
             <button v-if="selecionado.status === 'INFORMADO'" class="primary-action" type="button" @click="abrirRecebimento(selecionado)">Registrar recebimento</button>
             <button v-if="selecionado.status === 'EM_ANALISE'" class="analysis-action" type="button" @click="abrirAnalise(selecionado)">Analisar e classificar</button>
             <button v-if="selecionado.status === 'LIBERADO_PARA_ARMAZENAMENTO'" class="storage-action" type="button" @click="abrirArmazenamento(selecionado)">Confirmar armazenamento</button>
