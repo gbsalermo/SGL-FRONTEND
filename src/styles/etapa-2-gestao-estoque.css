@@ -1,0 +1,1080 @@
+/*
+ * Etapa 2 — Dark Mode definitivo
+ * Gestão — domínio Estoque
+ *
+ * Escopo:
+ * - /estoque
+ * - /estoque/lotes-vencendo
+ * - /estoque/:id
+ *
+ * Regra obrigatória: preservar no Dark Mode a mesma linguagem visual aprovada
+ * no Light Mode — tipografia, dimensões, espaçamento, organização, densidade
+ * e intensidade relativa. Esta folha adapta principalmente paleta e contraste.
+ */
+
+/* ========================================================================== */
+/* Base comum                                                                 */
+/* ========================================================================== */
+
+body.sgl-dark-active .gestao-main .estoque-page,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page,
+body.sgl-dark-active .gestao-main .estoque-detalhe {
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .breadcrumb,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .breadcrumb,
+body.sgl-dark-active .gestao-main .estoque-detalhe .breadcrumb {
+  margin-bottom: var(--sgl-space-2) !important;
+  color: #78adff !important;
+  font-size: var(--sgl-font-helper) !important;
+  font-weight: var(--sgl-font-weight-bold) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .page-header,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .page-header {
+  gap: var(--sgl-space-6) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .page-header h1,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .page-header h1,
+body.sgl-dark-active .gestao-main .estoque-detalhe .page-header h1 {
+  color: #f7f9fd !important;
+  font-size: var(--sgl-font-page-title) !important;
+  font-weight: var(--sgl-font-weight-bold) !important;
+  line-height: var(--sgl-line-height-tight) !important;
+  letter-spacing: normal !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .page-header p,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .page-header p,
+body.sgl-dark-active .gestao-main .estoque-detalhe .page-header p {
+  margin-top: var(--sgl-space-2) !important;
+  color: #a7b5c9 !important;
+  font-size: var(--sgl-font-body) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .page-eyebrow {
+  margin-bottom: var(--sgl-space-1) !important;
+  color: #78adff !important;
+  font-size: var(--sgl-font-helper) !important;
+  font-weight: var(--sgl-font-weight-bold) !important;
+  letter-spacing: .06em !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .primary-action,
+body.sgl-dark-active .gestao-main .estoque-page .secondary-action,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .primary-action,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .secondary-action,
+body.sgl-dark-active .gestao-main .estoque-detalhe .primary-action,
+body.sgl-dark-active .gestao-main .estoque-detalhe .secondary-action,
+body.sgl-dark-active .gestao-main .estoque-detalhe .danger-action {
+  min-height: var(--sgl-control-height) !important;
+  padding: 0 var(--sgl-space-4) !important;
+  border-radius: var(--sgl-radius-control) !important;
+  font-size: var(--sgl-font-body) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .primary-action,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .primary-action,
+body.sgl-dark-active .gestao-main .estoque-detalhe .primary-action {
+  border-color: #4a8ee8 !important;
+  background: #2f78d8 !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .secondary-action,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .secondary-action,
+body.sgl-dark-active .gestao-main .estoque-detalhe .secondary-action {
+  border-color: #36506d !important;
+  background: #111f33 !important;
+  color: #dbe8f8 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .danger-action {
+  border-color: #a94e60 !important;
+  background: #a7384d !important;
+  color: #ffffff !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-dark-active .gestao-main .estoque-page button:hover,
+  body.sgl-dark-active .gestao-main .lotes-vencendo-page button:hover,
+  body.sgl-dark-active .gestao-main .estoque-detalhe button:hover {
+    transform: none !important;
+  }
+
+  body.sgl-dark-active .gestao-main .estoque-page .secondary-action:hover,
+  body.sgl-dark-active .gestao-main .lotes-vencendo-page .secondary-action:hover,
+  body.sgl-dark-active .gestao-main .estoque-detalhe .secondary-action:hover {
+    border-color: #5b8fd0 !important;
+    background: #172941 !important;
+    color: #ffffff !important;
+  }
+
+  body.sgl-dark-active .gestao-main .estoque-page .primary-action:hover:not(:disabled),
+  body.sgl-dark-active .gestao-main .lotes-vencendo-page .primary-action:hover:not(:disabled),
+  body.sgl-dark-active .gestao-main .estoque-detalhe .primary-action:hover:not(:disabled) {
+    border-color: #72a9ff !important;
+    background: #3c87e6 !important;
+  }
+
+  body.sgl-dark-active .gestao-main .estoque-detalhe .danger-action:hover:not(:disabled) {
+    border-color: #cf6579 !important;
+    background: #bd4259 !important;
+  }
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .state-box,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .state-box,
+body.sgl-dark-active .gestao-main .estoque-detalhe .state-box {
+  padding: var(--sgl-space-8) !important;
+  border-color: #40546e !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #111f33 !important;
+  color: #a7b5c9 !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .state-box--error,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .state-box--error,
+body.sgl-dark-active .gestao-main .estoque-detalhe .state-box--error {
+  border-color: #713845 !important;
+  background: #2b1a23 !important;
+  color: #ff9aa5 !important;
+}
+
+/* Tabelas compartilhadas */
+body.sgl-dark-active .gestao-main .estoque-page .table-wrap,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .table-wrap,
+body.sgl-dark-active .gestao-main .estoque-detalhe .table-wrap {
+  border-color: #263a54 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #0d1929 !important;
+  box-shadow: 0 10px 26px rgb(0 5 14 / 12%) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page th,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page th,
+body.sgl-dark-active .gestao-main .estoque-detalhe th {
+  padding: var(--sgl-space-3) var(--sgl-space-4) !important;
+  border-color: #2a3d58 !important;
+  background: #14243c !important;
+  color: #b8c6d8 !important;
+  font-size: var(--sgl-font-helper) !important;
+  font-weight: var(--sgl-font-weight-bold) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page td,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page td,
+body.sgl-dark-active .gestao-main .estoque-detalhe td {
+  padding: var(--sgl-space-4) !important;
+  border-color: #223550 !important;
+  background: #0f1c2e !important;
+  color: #b8c6d8 !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page td strong,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page td strong,
+body.sgl-dark-active .gestao-main .estoque-detalhe td strong {
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page td small,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page td small,
+body.sgl-dark-active .gestao-main .estoque-detalhe td small {
+  margin-top: var(--sgl-space-1) !important;
+  color: #9fb0c6 !important;
+  font-size: var(--sgl-font-helper) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .quantity,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .quantity {
+  color: #ffffff !important;
+  font-size: var(--sgl-font-card-title) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-dark-active .gestao-main .estoque-page tbody tr:hover td,
+  body.sgl-dark-active .gestao-main .lotes-vencendo-page tbody tr:hover td,
+  body.sgl-dark-active .gestao-main .estoque-detalhe .lot-row:hover td {
+    background: #14243c !important;
+  }
+}
+
+/* ========================================================================== */
+/* /estoque                                                                   */
+/* ========================================================================== */
+
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid {
+  gap: var(--sgl-space-3) !important;
+  margin: var(--sgl-space-6) 0 var(--sgl-space-4) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid article {
+  padding: var(--sgl-card-padding) !important;
+  border: 1px solid #2a3e58 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: linear-gradient(180deg, #111f33 0%, #0e1b2e 100%) !important;
+  box-shadow: 0 9px 22px rgb(0 5 14 / 12%) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid span {
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid strong {
+  margin-top: var(--sgl-space-2) !important;
+  color: #ffffff !important;
+  font-size: 26px !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid small {
+  margin-top: var(--sgl-space-1) !important;
+  color: #bac8d9 !important;
+  font-size: var(--sgl-font-helper) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid article:first-child {
+  border-color: #315071 !important;
+}
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid article:first-child strong {
+  color: #8ab7ff !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid article.warning {
+  border-color: #765d2a !important;
+  background: linear-gradient(180deg, #211d17 0%, #17171c 100%) !important;
+}
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid article.warning strong {
+  color: #f2c45f !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid article.danger {
+  border-color: #713845 !important;
+  background: linear-gradient(180deg, #211825 0%, #171522 100%) !important;
+}
+body.sgl-dark-active .gestao-main .estoque-page .summary-grid article.danger strong {
+  color: #ff7f8d !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-dark-active .gestao-main .estoque-page .summary-grid article {
+    transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  }
+  body.sgl-dark-active .gestao-main .estoque-page .summary-grid article:hover {
+    transform: translateY(-2px);
+  }
+  body.sgl-dark-active .gestao-main .estoque-page .summary-grid article:first-child:hover {
+    border-color: #5b8fd0 !important;
+    background: #112743 !important;
+  }
+  body.sgl-dark-active .gestao-main .estoque-page .summary-grid article.warning:hover {
+    border-color: #9b7d37 !important;
+    background: #292316 !important;
+  }
+  body.sgl-dark-active .gestao-main .estoque-page .summary-grid article.danger:hover {
+    border-color: #9b4d5e !important;
+    background: #2b1a23 !important;
+  }
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .filter-card {
+  margin-bottom: var(--sgl-space-4) !important;
+  padding: var(--sgl-space-4) !important;
+  border: 1px solid #263a54 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #0d1929 !important;
+  box-shadow: 0 10px 26px rgb(0 5 14 / 12%) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .filter-top {
+  gap: var(--sgl-space-3) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .search-field,
+body.sgl-dark-active .gestao-main .estoque-page .filter-grid label {
+  gap: var(--sgl-space-2) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .search-field span,
+body.sgl-dark-active .gestao-main .estoque-page .filter-grid span {
+  color: #c9d5e5 !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .search-field input,
+body.sgl-dark-active .gestao-main .estoque-page .filter-grid select {
+  min-height: var(--sgl-control-height) !important;
+  padding: 0 var(--sgl-space-3) !important;
+  border: 1px solid #30455f !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: #111f33 !important;
+  color: #eef4fb !important;
+  font-size: var(--sgl-font-body) !important;
+  color-scheme: dark;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .search-field input::placeholder {
+  color: #7488a4 !important;
+  opacity: 1;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .filter-toggle {
+  width: var(--sgl-icon-button-size) !important;
+  height: var(--sgl-icon-button-size) !important;
+  margin-bottom: 0 !important;
+  border: 1px solid #36506d !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: #111f33 !important;
+  color: #d9e4f1 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .filter-toggle svg {
+  width: var(--sgl-icon-size) !important;
+  height: var(--sgl-icon-size) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .filter-toggle.active {
+  border-color: #5b8fd0 !important;
+  background: #17345d !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .filter-grid {
+  gap: var(--sgl-space-3) !important;
+  margin-top: var(--sgl-space-4) !important;
+  padding-top: var(--sgl-space-4) !important;
+  border-color: #263a54 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .filter-footer {
+  margin-top: var(--sgl-space-4) !important;
+  padding-top: var(--sgl-space-3) !important;
+  border-color: #263a54 !important;
+  color: #9fb0c6 !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .filter-footer button {
+  color: #83b6ff !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .chip,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .prazo-chip,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-chip {
+  min-height: 26px !important;
+  padding: 0 10px !important;
+  font-size: var(--sgl-font-helper) !important;
+  font-weight: 800 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .ok-chip,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-chip--ok {
+  border: 1px solid #2d674d !important;
+  background: #163629 !important;
+  color: #72dba8 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .warning-chip,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .prazo-chip--atencao,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .prazo-chip--proximo,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-chip--warning {
+  border: 1px solid #765d2a !important;
+  background: #352b17 !important;
+  color: #f2c45f !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .danger-chip,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .prazo-chip--critico,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-chip--danger {
+  border: 1px solid #713845 !important;
+  background: #3a1d29 !important;
+  color: #ff8996 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-chip--empty {
+  border: 1px solid #315f99 !important;
+  background: #17345d !important;
+  color: #a9cbff !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-chip--discarded {
+  border: 1px solid #46566b !important;
+  background: #202c3d !important;
+  color: #c2cedd !important;
+}
+
+/* Chevrons */
+body.sgl-dark-active .gestao-main .estoque-page .detail-button,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .detail-button {
+  position: relative !important;
+  width: var(--sgl-icon-button-size) !important;
+  height: var(--sgl-icon-button-size) !important;
+  padding: 0 !important;
+  border: 1px solid #36506d !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: #111f33 !important;
+  color: #8ab7ff !important;
+  font-size: 0 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-page .detail-button::before,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .detail-button::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9 6 6 6-6 6' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9 6 6 6-6 6' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-dark-active .gestao-main .estoque-page .detail-button:hover,
+  body.sgl-dark-active .gestao-main .lotes-vencendo-page .detail-button:hover {
+    border-color: #5b8fd0 !important;
+    background: #17345d !important;
+    color: #ffffff !important;
+  }
+}
+
+/* ========================================================================== */
+/* /estoque/lotes-vencendo                                                    */
+/* ========================================================================== */
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .header-actions {
+  gap: var(--sgl-space-2) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-grid {
+  gap: var(--sgl-space-3) !important;
+  margin: var(--sgl-space-6) 0 var(--sgl-space-4) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card {
+  padding: var(--sgl-card-padding) !important;
+  border: 1px solid #2a3e58 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: linear-gradient(180deg, #111f33 0%, #0e1b2e 100%) !important;
+  box-shadow: 0 9px 22px rgb(0 5 14 / 12%) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card span {
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card strong {
+  margin-top: var(--sgl-space-2) !important;
+  font-size: 26px !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card small {
+  margin-top: var(--sgl-space-1) !important;
+  color: #bac8d9 !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card--amber {
+  border-color: #765d2a !important;
+  background: linear-gradient(180deg, #211d17 0%, #17171c 100%) !important;
+}
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card--amber strong {
+  color: #f2c45f !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card--orange {
+  border-color: #80522c !important;
+  background: linear-gradient(180deg, #241b17 0%, #18171b 100%) !important;
+}
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card--orange strong {
+  color: #f0a45b !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card--red {
+  border-color: #713845 !important;
+  background: linear-gradient(180deg, #211825 0%, #171522 100%) !important;
+}
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-card--red strong {
+  color: #ff7f8d !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .warning-box {
+  margin-bottom: var(--sgl-space-4) !important;
+  padding: var(--sgl-space-3) var(--sgl-space-4) !important;
+  border-color: #765d2a !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #2a2417 !important;
+  color: #f0cf7e !important;
+  font-size: var(--sgl-font-label) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .filter-card {
+  gap: var(--sgl-space-4) !important;
+  margin-bottom: var(--sgl-space-4) !important;
+  padding: var(--sgl-space-4) !important;
+  border: 1px solid #263a54 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #0d1929 !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .filter-card label {
+  gap: var(--sgl-space-2) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .filter-card label span {
+  color: #c9d5e5 !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .filter-card input {
+  min-height: var(--sgl-control-height) !important;
+  padding: 0 var(--sgl-space-3) !important;
+  border: 1px solid #30455f !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: #111f33 !important;
+  color: #eef4fb !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .filter-card input::placeholder {
+  color: #7488a4 !important;
+  opacity: 1;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .filter-result {
+  min-height: var(--sgl-control-height) !important;
+  color: #9fb0c6 !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .filter-result strong {
+  color: #ffffff !important;
+  font-size: var(--sgl-card-title, 16px) !important;
+}
+
+body.sgl-dark-active .gestao-main .lotes-vencendo-page .filter-result button {
+  color: #83b6ff !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+/* ========================================================================== */
+/* /estoque/:id                                                               */
+/* ========================================================================== */
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .product-context {
+  gap: var(--sgl-space-3) !important;
+  margin-top: var(--sgl-space-4) !important;
+  padding: var(--sgl-space-4) !important;
+  border: 1px solid #263a54 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #0d1929 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .product-context span {
+  margin-bottom: var(--sgl-space-1) !important;
+  color: #9fb0c6 !important;
+  font-size: var(--sgl-font-helper) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+  text-transform: none !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .product-context strong {
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid {
+  gap: var(--sgl-space-3) !important;
+  margin: var(--sgl-space-4) 0 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid article {
+  padding: var(--sgl-card-padding) !important;
+  border: 1px solid #2a3e58 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: linear-gradient(180deg, #111f33 0%, #0e1b2e 100%) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid span,
+body.sgl-dark-active .gestao-main .estoque-detalhe .view-card label {
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid strong {
+  margin-top: var(--sgl-space-2) !important;
+  color: #ffffff !important;
+  font-size: 24px !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid small {
+  color: #bac8d9 !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid .warning {
+  border-color: #765d2a !important;
+  background: #211d17 !important;
+}
+body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid .warning strong {
+  color: #f2c45f !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid .danger {
+  border-color: #713845 !important;
+  background: #211825 !important;
+}
+body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid .danger strong {
+  color: #ff7f8d !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .view-card select,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-filter-bar input,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-filter-bar select,
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-grid input,
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-grid select {
+  min-height: var(--sgl-control-height) !important;
+  padding: 0 var(--sgl-space-3) !important;
+  border: 1px solid #30455f !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: #111f33 !important;
+  color: #eef4fb !important;
+  font-size: var(--sgl-font-body) !important;
+  color-scheme: dark;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-card {
+  padding: var(--sgl-card-padding) !important;
+  border: 1px solid #263a54 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #0d1929 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-card__heading {
+  gap: var(--sgl-space-4) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-card__heading h2 {
+  color: #f7f9fd !important;
+  font-size: var(--sgl-font-section-title) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-card__heading p {
+  margin-top: var(--sgl-space-1) !important;
+  color: #a7b5c9 !important;
+  font-size: var(--sgl-font-body) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-filter-bar {
+  gap: var(--sgl-space-3) !important;
+  margin-bottom: var(--sgl-space-4) !important;
+  padding: var(--sgl-space-3) !important;
+  border: 1px solid #263a54 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-filter-bar label > span {
+  color: #c9d5e5 !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-filter-result {
+  min-height: var(--sgl-control-height) !important;
+  color: #9fb0c6 !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-filter-result strong {
+  color: #ffffff !important;
+  font-size: var(--sgl-font-card-title) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-filter-result button {
+  color: #83b6ff !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .detail-button {
+  min-height: var(--sgl-control-height) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: var(--sgl-space-2) !important;
+  padding: 0 var(--sgl-space-3) !important;
+  border: 1px solid #36506d !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: #111f33 !important;
+  color: #8ab7ff !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .detail-button::after {
+  content: '';
+  width: var(--sgl-chevron-size);
+  height: var(--sgl-chevron-size);
+  flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9 6 6 6-6 6' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9 6 6 6-6 6' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-row--alvo td {
+  background: #112743 !important;
+}
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-row--alvo {
+  box-shadow: inset 4px 0 0 #5b9df8 !important;
+  animation: none !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .success-box {
+  border-color: #2d674d !important;
+  background: #163629 !important;
+  color: #72dba8 !important;
+}
+
+/* Modais */
+body.sgl-dark-active .gestao-main .estoque-detalhe .modal-backdrop {
+  background: rgb(1 8 18 / 76%) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .modal-card {
+  border-color: #2a3f5a !important;
+  border-radius: var(--sgl-radius-floating) !important;
+  background: #0d1929 !important;
+  color: #dce6f2 !important;
+  box-shadow: 0 28px 80px rgb(0 0 0 / 48%) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .modal-card__header {
+  gap: var(--sgl-space-4) !important;
+  padding: var(--sgl-card-padding) var(--sgl-space-6) !important;
+  border-color: #263a54 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .modal-card__header span {
+  color: #78adff !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .modal-card__header h2 {
+  color: #f7f9fd !important;
+  font-size: var(--sgl-font-section-title) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .modal-card__header p {
+  color: #a7b5c9 !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .modal-close {
+  width: var(--sgl-icon-button-size) !important;
+  height: var(--sgl-icon-button-size) !important;
+  border: 1px solid #30455f !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: #172941 !important;
+  color: #dce6f2 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-form,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-body {
+  padding: var(--sgl-card-padding) var(--sgl-space-6) var(--sgl-space-6) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-grid {
+  gap: var(--sgl-space-4) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-grid label,
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-observation {
+  gap: var(--sgl-space-2) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-grid label > span,
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-observation > span,
+body.sgl-dark-active .gestao-main .estoque-detalhe .read-only-field > span {
+  color: #c9d5e5 !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-grid small,
+body.sgl-dark-active .gestao-main .estoque-detalhe .read-only-field small,
+body.sgl-dark-active .gestao-main .estoque-detalhe .fraction-option small,
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-preview,
+body.sgl-dark-active .gestao-main .estoque-detalhe .locked-info,
+body.sgl-dark-active .gestao-main .estoque-detalhe .immutable-code-box {
+  color: #9fb0c6 !important;
+  font-size: var(--sgl-font-helper) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-observation textarea {
+  padding: var(--sgl-space-3) !important;
+  border: 1px solid #30455f !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: #111f33 !important;
+  color: #eef4fb !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .read-only-field,
+body.sgl-dark-active .gestao-main .estoque-detalhe .fraction-option,
+body.sgl-dark-active .gestao-main .estoque-detalhe .entry-preview,
+body.sgl-dark-active .gestao-main .estoque-detalhe .locked-info,
+body.sgl-dark-active .gestao-main .estoque-detalhe .immutable-code-box {
+  border-color: #2a3f5a !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #111f33 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .fraction-option strong,
+body.sgl-dark-active .gestao-main .estoque-detalhe .read-only-field strong {
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .fraction-option input {
+  accent-color: #5b9df8 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .fraction-option--locked {
+  border-color: #35445a !important;
+  background: #17202d !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .form-error {
+  padding: var(--sgl-space-3) !important;
+  border-color: #713845 !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: #2b1a23 !important;
+  color: #ff9aa5 !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .modal-actions {
+  gap: var(--sgl-space-2) !important;
+  margin-top: var(--sgl-space-4) !important;
+  padding-top: var(--sgl-space-4) !important;
+  border-color: #263a54 !important;
+}
+
+/* Detalhes de lote — mantém escala ampliada aprovada na Etapa 1 */
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-modal {
+  width: min(920px, 100%) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-body {
+  padding: var(--sgl-space-6) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-highlight {
+  gap: var(--sgl-space-3) !important;
+  margin-bottom: var(--sgl-space-4) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-highlight > div {
+  padding: var(--sgl-space-4) !important;
+  border: 1px solid #315071 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #132b4a !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-highlight span,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-grid span,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-history__heading > span {
+  color: #a9b8ca !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-highlight strong {
+  color: #ffffff !important;
+  font-size: var(--sgl-font-card-title) !important;
+  line-height: var(--sgl-line-height-tight) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-highlight small {
+  color: #a7b5c9 !important;
+  font-size: var(--sgl-font-helper) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-grid {
+  margin-bottom: var(--sgl-space-4) !important;
+  border-color: #263a54 !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #263a54 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-grid > div {
+  min-height: 72px !important;
+  padding: var(--sgl-space-4) !important;
+  background: #111f33 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-grid strong {
+  margin-top: var(--sgl-space-1) !important;
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-body) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-history {
+  margin-top: var(--sgl-space-4) !important;
+  padding: var(--sgl-space-4) !important;
+  border: 1px solid #2a3f5a !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: #111f33 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-history__heading {
+  gap: var(--sgl-space-3) !important;
+  margin-bottom: var(--sgl-space-3) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-history__heading h3 {
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-card-title) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-history__heading p,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-empty,
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-list article small {
+  color: #9fb0c6 !important;
+  font-size: var(--sgl-font-helper) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-list {
+  border-color: #263a54 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-list article {
+  min-height: 56px !important;
+  padding: var(--sgl-space-3) 0 !important;
+  border-color: #263a54 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-list article strong {
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-list article > strong:last-child {
+  color: #8ab7ff !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .lot-output-empty {
+  background: #0f1f35 !important;
+}
+
+/* Descarte */
+body.sgl-dark-active .gestao-main .estoque-detalhe .discard-summary div {
+  border-color: #713845 !important;
+  background: #2b1a23 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .discard-summary span {
+  color: #d5a4ad !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .discard-summary strong {
+  color: #ff8996 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .expired-list {
+  border-color: #2a3f5a !important;
+  background: #111f33 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .expired-item {
+  border-color: #263a54 !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .expired-item strong {
+  color: #f4f7fc !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .expired-item small {
+  color: #9fb0c6 !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .estoque-detalhe .discard-warning {
+  border-color: #765d2a !important;
+  background: #2a2417 !important;
+  color: #f0cf7e !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+/* Foco / responsividade / motion */
+body.sgl-dark-active .gestao-main .estoque-page button:focus-visible,
+body.sgl-dark-active .gestao-main .estoque-page input:focus-visible,
+body.sgl-dark-active .gestao-main .estoque-page select:focus-visible,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page button:focus-visible,
+body.sgl-dark-active .gestao-main .lotes-vencendo-page input:focus-visible,
+body.sgl-dark-active .gestao-main .estoque-detalhe button:focus-visible,
+body.sgl-dark-active .gestao-main .estoque-detalhe input:focus-visible,
+body.sgl-dark-active .gestao-main .estoque-detalhe select:focus-visible,
+body.sgl-dark-active .gestao-main .estoque-detalhe textarea:focus-visible {
+  outline: 2px solid #72a9ff !important;
+  outline-offset: 2px !important;
+}
+
+@media (max-width: 900px) {
+  body.sgl-dark-active .gestao-main .estoque-detalhe .product-context,
+  body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  body.sgl-dark-active .gestao-main .estoque-page .summary-grid,
+  body.sgl-dark-active .gestao-main .lotes-vencendo-page .summary-grid,
+  body.sgl-dark-active .gestao-main .estoque-detalhe .product-context,
+  body.sgl-dark-active .gestao-main .estoque-detalhe .summary-grid,
+  body.sgl-dark-active .gestao-main .estoque-detalhe .entry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-dark-active .gestao-main .lotes-vencendo-page .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  body.sgl-dark-active .gestao-main .estoque-detalhe .entry-form,
+  body.sgl-dark-active .gestao-main .estoque-detalhe .lot-detail-body,
+  body.sgl-dark-active .gestao-main .estoque-detalhe .modal-card__header {
+    padding-inline: var(--sgl-space-4) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-dark-active .gestao-main .estoque-page *,
+  body.sgl-dark-active .gestao-main .lotes-vencendo-page *,
+  body.sgl-dark-active .gestao-main .estoque-detalhe * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    transform: none !important;
+  }
+}

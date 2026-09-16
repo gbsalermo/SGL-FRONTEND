@@ -1,0 +1,44 @@
+.gestao-shell {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.gestao-sidebar {
+  box-sizing: border-box;
+}
+
+.gestao-workspace {
+  width: calc(100% - var(--sidebar-width));
+  max-width: calc(100% - var(--sidebar-width));
+  min-width: 0;
+  margin-left: var(--sidebar-width);
+  overflow-x: hidden;
+  box-sizing: border-box;
+  transition: width 300ms ease, max-width 300ms ease, margin-left 300ms ease;
+}
+
+.gestao-topbar {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.gestao-main {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: clamp(18px, 2vw, 28px) clamp(16px, 2.2vw, 30px) 40px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .gestao-workspace {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+}

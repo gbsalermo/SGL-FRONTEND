@@ -1,0 +1,562 @@
+/*
+ * Etapa 2 — Dark Mode definitivo
+ * Gestão — /residuos
+ *
+ * Preserva a escala e organização aprovadas no Light Mode. As superfícies
+ * operacionais ficam navy/neutras; cores fortes aparecem apenas para status,
+ * ações e risco.
+ */
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page,
+body.sgl-dark-active .gestao-main .residuos-completo {
+  color: var(--sgl-text) !important;
+}
+
+/* Cabeçalho */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .page-heading {
+  gap: var(--sgl-space-6) !important;
+  margin-bottom: var(--sgl-space-6) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .breadcrumb {
+  margin-bottom: var(--sgl-space-2) !important;
+  color: var(--sgl-primary-light) !important;
+  font-size: var(--sgl-font-helper) !important;
+  font-weight: var(--sgl-font-weight-bold) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .page-heading h1 {
+  color: var(--sgl-text) !important;
+  font-size: var(--sgl-font-page-title) !important;
+  font-weight: var(--sgl-font-weight-bold) !important;
+  line-height: var(--sgl-line-height-tight) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .page-heading > div > p:last-child {
+  margin-top: var(--sgl-space-2) !important;
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-body) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+/* Métricas */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid {
+  gap: var(--sgl-space-3) !important;
+  margin-bottom: var(--sgl-space-4) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article {
+  padding: var(--sgl-card-padding) !important;
+  border: 1px solid var(--sgl-border) !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: linear-gradient(180deg, var(--sgl-surface-elevated) 0%, var(--sgl-surface) 100%) !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid span {
+  color: var(--sgl-text) !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+  text-transform: none !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid strong {
+  margin-top: var(--sgl-space-1) !important;
+  color: #fff !important;
+  font-size: 26px !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid small {
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+/* Sequência do ciclo: informado, análise, liberado, armazenado, despachado. */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(1) {
+  border-color: #315071 !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(1) strong {
+  color: #8ab7ff !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(2) {
+  border-color: #574273 !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(2) strong {
+  color: #b29cf8 !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(3) {
+  border-color: #2d674d !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(3) strong {
+  color: #72dba8 !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(4) {
+  border-color: #5f562b !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(4) strong {
+  color: #e8c76e !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(5) {
+  border-color: #365b61 !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(5) strong {
+  color: #7ed6d0 !important;
+}
+
+/* Feedback */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .feedback {
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .feedback--success {
+  border-color: #2d674d !important;
+  background: #163629 !important;
+  color: #72dba8 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .feedback--error {
+  border-color: #713845 !important;
+  background: #2b1a23 !important;
+  color: #ff9aa5 !important;
+}
+
+/* Workspace / abas / filtros */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .workspace-card {
+  border: 1px solid var(--sgl-border) !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: var(--sgl-surface) !important;
+  box-shadow: none !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-tabs {
+  padding: 0 var(--sgl-space-4) !important;
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-soft) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-tabs button {
+  min-height: 48px !important;
+  gap: var(--sgl-space-2) !important;
+  padding: 0 var(--sgl-space-3) !important;
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-tabs button:hover {
+  background: var(--sgl-surface-interactive) !important;
+  color: var(--sgl-text) !important;
+  transform: none !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-tabs button.active {
+  border-bottom-color: var(--sgl-primary) !important;
+  color: var(--sgl-primary-light) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-tabs small {
+  min-width: 24px !important;
+  height: 24px !important;
+  background: #172941 !important;
+  color: #cbd8e8 !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-tabs button.active small {
+  background: #17345d !important;
+  color: #a9cbff !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .toolbar {
+  gap: var(--sgl-space-4) !important;
+  padding: var(--sgl-space-4) !important;
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .toolbar label {
+  gap: var(--sgl-space-2) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .toolbar label span {
+  color: #c9d5e5 !important;
+  font-size: var(--sgl-font-label) !important;
+  text-transform: none !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .toolbar input {
+  min-height: var(--sgl-control-height) !important;
+  padding: 0 var(--sgl-space-3) !important;
+  border: 1px solid var(--sgl-border-strong) !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text) !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .toolbar-note {
+  padding-bottom: var(--sgl-space-2) !important;
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+/* Tabela */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .table-wrap {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page th {
+  padding: var(--sgl-space-3) var(--sgl-space-4) !important;
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-soft) !important;
+  color: #b8c6d8 !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page td {
+  min-height: var(--sgl-table-row-height) !important;
+  padding: var(--sgl-space-4) !important;
+  border-color: #20324a !important;
+  background: var(--sgl-surface) !important;
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page td strong {
+  color: var(--sgl-text) !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page td small {
+  margin-top: var(--sgl-space-1) !important;
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-helper) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page tbody tr:hover td {
+  background: #131f31 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .residuo-alvo td {
+  background: #18213a !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .residuo-alvo {
+  box-shadow: inset 4px 0 0 #9d82f5 !important;
+  animation: none !important;
+}
+
+/* Status */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill {
+  min-height: 26px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--sgl-border-strong) !important;
+  background: #202c3d !important;
+  color: #c2cedd !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill[data-status='INFORMADO'] {
+  border-color: #315f99 !important;
+  background: #17345d !important;
+  color: #a9cbff !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill[data-status='EM_ANALISE'] {
+  border-color: #574273 !important;
+  background: #2d2343 !important;
+  color: #bda6ff !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill[data-status='LIBERADO_PARA_ARMAZENAMENTO'] {
+  border-color: #2d674d !important;
+  background: #163629 !important;
+  color: #72dba8 !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill[data-status='ARMAZENADO_TEMPORARIAMENTE'] {
+  border-color: #765d2a !important;
+  background: #352b17 !important;
+  color: #f2c45f !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill[data-status='DESPACHADO'] {
+  border-color: #356267 !important;
+  background: #153438 !important;
+  color: #83ddd8 !important;
+}
+
+/* Ações */
+body.sgl-dark-active .gestao-main .residuos-gestao-page :where(
+  .primary-action,
+  .analysis-action,
+  .storage-action,
+  .dispatch-action,
+  .secondary-action,
+  .details-action,
+  .label-action
+) {
+  min-height: var(--sgl-control-height) !important;
+  padding: 0 var(--sgl-space-4) !important;
+  border-radius: var(--sgl-radius-control) !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .primary-action {
+  border: 1px solid #4a8ee8 !important;
+  background: #2f78d8 !important;
+  color: #fff !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .analysis-action {
+  border: 1px solid #725aa0 !important;
+  background: #59428b !important;
+  color: #fff !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-action {
+  border: 1px solid #34766d !important;
+  background: #1f625b !important;
+  color: #fff !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .dispatch-action {
+  border: 1px solid #725aa0 !important;
+  background: #59428b !important;
+  color: #fff !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .secondary-action,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .details-action,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .label-action {
+  border: 1px solid var(--sgl-border-strong) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: #dbe8f8 !important;
+}
+
+/* Drawers e modais */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .drawer-backdrop,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-backdrop {
+  background: rgb(1 8 18 / 76%) !important;
+  backdrop-filter: blur(2px);
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .detail-drawer {
+  width: min(100%, 760px) !important;
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .detail-drawer > header,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card > header,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card > footer {
+  padding: var(--sgl-space-6) !important;
+  border-color: var(--sgl-border) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .detail-drawer > header,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card > header {
+  background: var(--sgl-surface-soft) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .detail-drawer h2,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card h2 {
+  color: var(--sgl-text) !important;
+  font-size: var(--sgl-font-section-title) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .detail-drawer header p,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card > header span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .origin-grid span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .risk-section span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .declaration-reference span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .tracking-card span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .history-heading span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .history-heading small,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .timeline-card time,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .timeline-card small {
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .detail-drawer header button,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card header button {
+  width: var(--sgl-icon-button-size) !important;
+  height: var(--sgl-icon-button-size) !important;
+  border: 1px solid var(--sgl-border-strong) !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: var(--sgl-surface-interactive) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .detail-content,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-content {
+  padding: var(--sgl-space-6) !important;
+  background: var(--sgl-surface) !important;
+}
+
+/* Conteúdo do drawer */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .origin-grid {
+  gap: var(--sgl-space-3) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .origin-grid article,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .tracking-card,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .selected-summary {
+  border-color: var(--sgl-border) !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: var(--sgl-surface-elevated) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .origin-grid strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .tracking-card strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .selected-summary strong {
+  color: var(--sgl-text) !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .detail-content h3 {
+  color: var(--sgl-text) !important;
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .body-copy {
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-body) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .components-list article,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .risk-section > div,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .history-state,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .timeline-card {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .risk-section > div:first-child {
+  border-color: #574273 !important;
+  background: #18172a !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .risk-section h3,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .timeline-card strong {
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .timeline li:not(:last-child)::before {
+  background: var(--sgl-border) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .timeline-dot {
+  border-color: var(--sgl-surface-elevated) !important;
+  background: var(--sgl-primary) !important;
+}
+
+/* Formulários de operação */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card {
+  border: 1px solid var(--sgl-border) !important;
+  border-radius: var(--sgl-radius-floating) !important;
+  background: var(--sgl-surface) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .field {
+  gap: var(--sgl-space-2) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .field > span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .risk-fieldset legend {
+  color: #c9d5e5 !important;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .field small {
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .field input,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .field select,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .field textarea {
+  border: 1px solid var(--sgl-border-strong) !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text) !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .field input,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .field select {
+  min-height: var(--sgl-control-height) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .declaration-reference,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .guidance,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .selected-summary {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .guidance--warning {
+  border-color: #765d2a !important;
+  background: #2a2417 !important;
+  color: #f0cf7e !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .risk-fieldset button {
+  min-height: var(--sgl-control-height) !important;
+  gap: var(--sgl-space-2) !important;
+  padding: 0 var(--sgl-space-3) !important;
+  border-color: var(--sgl-border-strong) !important;
+  border-radius: var(--sgl-radius-control) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .risk-fieldset button.selected {
+  border-color: var(--sgl-primary) !important;
+  background: #17345d !important;
+  color: #a9cbff !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .checkmark {
+  border-color: currentColor !important;
+}
+
+/* Focus e motion */
+body.sgl-dark-active .gestao-main .residuos-gestao-page :where(button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--sgl-focus) !important;
+  outline-offset: 2px !important;
+}
+
+@media (max-width: 620px) {
+  body.sgl-dark-active .gestao-main .residuos-gestao-page .detail-content,
+  body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-content {
+    padding-inline: var(--sgl-space-4) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-dark-active .gestao-main .residuos-gestao-page * {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    transform: none !important;
+  }
+}
+
+
+/* Estado vazio da listagem: não herda mais a superfície clara da View. */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .state-box {
+  padding: var(--sgl-space-8) !important;
+  border: 1px solid var(--sgl-border) !important;
+  border-radius: var(--sgl-radius-surface) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text-muted) !important;
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .state-box--error {
+  border-color: #713845 !important;
+  background: #2B1A23 !important;
+  color: #FF9AA5 !important;
+}

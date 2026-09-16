@@ -1,0 +1,67 @@
+/* Ajustes de responsividade e navegacao para a central de Relatorios.
+   O layout de gestao ja possui espacamento proprio; aqui evitamos o padding
+   duplicado da pagina e mantemos os relatorios largos acessiveis por scroll. */
+
+.gestao-shell .gestao-main:has(.relatorios-page) {
+  overflow-x: auto;
+}
+
+.gestao-shell .relatorios-page {
+  width: 100% !important;
+  max-width: 1480px !important;
+  margin-inline: auto !important;
+  padding: 8px 0 28px !important;
+  box-sizing: border-box;
+}
+
+.gestao-shell .relatorios-page .relatorios-grid,
+.gestao-shell .relatorios-page .relatorios-content,
+.gestao-shell .relatorios-page .filtros-card,
+.gestao-shell .relatorios-page .preview-card,
+.gestao-shell .relatorios-page .preview-result {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Cada tabela larga mantem sua largura util, mas passa a rolar dentro do card
+   em vez de empurrar ou cortar o restante da pagina. */
+.gestao-shell .relatorios-page .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gestao-shell .relatorios-page .table-wrap table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.gestao-shell .relatorios-page .table-wrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.gestao-shell .relatorios-page .table-wrap::-webkit-scrollbar-track {
+  background: #f1f4f8;
+  border-radius: 999px;
+}
+
+.gestao-shell .relatorios-page .table-wrap::-webkit-scrollbar-thumb {
+  background: #c4cfdd;
+  border: 2px solid #f1f4f8;
+  border-radius: 999px;
+}
+
+.gestao-shell .relatorios-page .table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #9eafc4;
+}
+
+@media (max-width: 900px) {
+  .gestao-shell .relatorios-page {
+    padding: 4px 0 24px !important;
+  }
+}

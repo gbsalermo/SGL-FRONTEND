@@ -1,0 +1,25 @@
+/*
+ * O layout legado bloqueia overflow horizontal da sidebar para evitar scroll.
+ * O painel de alertas precisa escapar desse recorte sem reabrir o overflow.
+ */
+.gestao-shell .gestao-alert-panel {
+  position: fixed !important;
+  top: 168px !important;
+  left: calc(var(--sidebar-width) + 12px) !important;
+}
+
+@media (max-width: 900px) {
+  .gestao-shell .gestao-alert-panel {
+    top: 96px !important;
+    right: 16px !important;
+    left: 16px !important;
+    width: auto !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .gestao-shell .gestao-alert-panel {
+    right: 10px !important;
+    left: 10px !important;
+  }
+}

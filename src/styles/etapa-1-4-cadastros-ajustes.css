@@ -1,0 +1,195 @@
+/*
+ * Ajuste de validação — Etapa 1.4 / Administração e Cadastros.
+ *
+ * A estrutura inicial foi aprovada, porém a interface ficou visualmente
+ * compacta em telas desktop largas. Este arquivo aumenta a escala percebida
+ * sem alterar comportamento, dados ou regras de negócio.
+ */
+
+body.sgl-light-active .gestao-main .admin-page .workspace {
+  grid-template-columns: 310px minmax(0, 1fr);
+  gap: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .admin-page .tabs-card {
+  gap: var(--sgl-space-3);
+  padding: var(--sgl-card-padding);
+}
+
+body.sgl-light-active .gestao-main .admin-page .tabs-card h2 {
+  margin-bottom: var(--sgl-space-2);
+  font-size: var(--sgl-font-section-title);
+}
+
+body.sgl-light-active .gestao-main .admin-page .tab-button {
+  min-height: 88px;
+  gap: var(--sgl-space-2);
+  padding: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .admin-page .tab-button strong {
+  font-size: 15px;
+}
+
+body.sgl-light-active .gestao-main .admin-page .tab-button small {
+  font-size: var(--sgl-font-label);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .admin-page .content-header {
+  min-height: 104px;
+  padding: var(--sgl-card-padding) var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .admin-page .content-header h2 {
+  font-size: 20px;
+}
+
+body.sgl-light-active .gestao-main .admin-page .content-header p {
+  margin-top: var(--sgl-space-2);
+  font-size: 15px;
+}
+
+body.sgl-light-active .gestao-main .admin-page .toolbar {
+  padding: var(--sgl-card-padding) var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .admin-page .search-field span {
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .admin-page .search-field input {
+  height: 44px;
+  min-height: 44px;
+  font-size: 15px;
+}
+
+body.sgl-light-active .gestao-main .admin-page .toggle-field {
+  min-height: 44px;
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .admin-page th {
+  height: 52px;
+  padding: var(--sgl-space-4);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .admin-page td {
+  height: 60px;
+  padding: var(--sgl-space-4);
+  font-size: 15px;
+}
+
+body.sgl-light-active .gestao-main .admin-page td strong {
+  font-size: 15px;
+}
+
+body.sgl-light-active .gestao-main .admin-page td small {
+  margin-top: var(--sgl-space-2);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .admin-page .status {
+  min-width: 76px;
+  min-height: 32px;
+  padding: var(--sgl-space-1) var(--sgl-space-3);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .admin-page .actions button {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .admin-page .permissions-table select {
+  height: 44px;
+  min-height: 44px;
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .admin-page .scope-note {
+  min-height: 52px;
+  align-items: center;
+  padding: var(--sgl-space-4);
+  font-size: 15px;
+}
+
+body.sgl-light-active .gestao-main .admin-page .modal {
+  width: min(880px, 96vw);
+}
+
+body.sgl-light-active .gestao-main .admin-page .modal > header {
+  min-height: 80px;
+  padding: var(--sgl-space-4) var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .admin-page .modal > header h2 {
+  font-size: 20px;
+}
+
+body.sgl-light-active .gestao-main .admin-page .modal-body {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-card-padding) var(--sgl-space-6) var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .admin-page .field input,
+body.sgl-light-active .gestao-main .admin-page .field select {
+  min-height: 44px;
+  height: 44px;
+  font-size: 15px;
+}
+
+body.sgl-light-active .gestao-main .admin-page .field textarea {
+  font-size: 15px;
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .admin-page .field small,
+body.sgl-light-active .gestao-main .admin-page .checkbox-grid label {
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .admin-page .form-section {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .admin-page .form-section h3 {
+  font-size: var(--sgl-font-card-title);
+}
+
+@media (max-width: 1100px) {
+  body.sgl-light-active .gestao-main .admin-page .workspace {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: var(--sgl-space-4);
+  }
+}
+
+@media (max-width: 760px) {
+  body.sgl-light-active .gestao-main .admin-page .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-light-active .gestao-main .admin-page .tabs-card {
+    padding: var(--sgl-space-4);
+  }
+
+  body.sgl-light-active .gestao-main .admin-page .tab-button {
+    min-height: 76px;
+  }
+
+  body.sgl-light-active .gestao-main .admin-page .content-header,
+  body.sgl-light-active .gestao-main .admin-page .toolbar {
+    padding-inline: var(--sgl-space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-light-active .gestao-main .admin-page .tab-button,
+  body.sgl-light-active .gestao-main .admin-page tbody tr,
+  body.sgl-light-active .gestao-main .admin-page .actions button {
+    transition: none;
+  }
+}

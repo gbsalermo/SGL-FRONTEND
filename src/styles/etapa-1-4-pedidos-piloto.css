@@ -1,0 +1,595 @@
+/*
+ * Etapa 1.4 — piloto visual de Pedidos.
+ *
+ * Aplica as decisões da Etapa 1.1 às telas de Pedidos das duas interfaces
+ * autenticadas sem alterar regras de negócio nem reescrever as Views.
+ *
+ * Escopo:
+ * - Gestão/Admin: PedidosGestaoView.vue
+ * - Solicitante: MeusPedidosView.vue
+ *
+ * O Dark Mode permanece fora da Etapa 1. Os seletores abaixo atuam somente
+ * no tema claro autenticado.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Gestão / Admin                                                              */
+/* -------------------------------------------------------------------------- */
+
+body.sgl-light-active .gestao-main .gestao-pedidos__breadcrumb {
+  margin-bottom: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos__header {
+  gap: var(--sgl-space-5);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos__header h1 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos__header p {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .secondary-action {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-4);
+  border: var(--sgl-border-width) solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .gestao-summary {
+  gap: var(--sgl-space-3);
+  margin: var(--sgl-space-5) 0 var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .gestao-summary article {
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .gestao-summary span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .gestao-summary strong {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-primary-dark);
+  font-size: 26px;
+}
+
+body.sgl-light-active .gestao-main .gestao-summary small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .gestao-filter-card {
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .gestao-filter-top {
+  gap: var(--sgl-space-3);
+}
+
+body.sgl-light-active .gestao-main .gestao-search,
+body.sgl-light-active .gestao-main .gestao-filter-grid label {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .gestao-search > span,
+body.sgl-light-active .gestao-main .gestao-filter-grid label > span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .gestao-search input,
+body.sgl-light-active .gestao-main .gestao-filter-grid input,
+body.sgl-light-active .gestao-main .gestao-filter-grid select {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  border: var(--sgl-border-width) solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .gestao-search input:focus-visible,
+body.sgl-light-active .gestao-main .gestao-filter-grid input:focus-visible,
+body.sgl-light-active .gestao-main .gestao-filter-grid select:focus-visible {
+  outline: var(--sgl-focus-width) solid var(--sgl-focus);
+  outline-offset: var(--sgl-focus-offset);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .filter-toggle {
+  min-width: 112px;
+  min-height: var(--sgl-control-height);
+  gap: var(--sgl-space-2);
+  padding: 0 var(--sgl-space-3);
+  border: var(--sgl-border-width) solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .filter-toggle::before {
+  content: '';
+  width: var(--sgl-icon-size);
+  height: var(--sgl-icon-size);
+  flex: 0 0 var(--sgl-icon-size);
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 5h16l-6.5 7.2v5.1L10.5 19v-6.8L4 5Z' fill='black'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 5h16l-6.5 7.2v5.1L10.5 19v-6.8L4 5Z' fill='black'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .filter-toggle strong {
+  display: none;
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .filter-toggle:hover {
+  border-color: var(--sgl-primary-light);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-primary);
+}
+
+body.sgl-light-active .gestao-main .gestao-filter-grid--advanced {
+  margin-top: var(--sgl-space-4);
+  padding-top: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .gestao-filter-footer {
+  margin-top: var(--sgl-space-4);
+  padding-top: var(--sgl-space-3);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .gestao-filter-footer button {
+  min-height: 32px;
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .gestao-table-wrap {
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .gestao-table th {
+  padding: var(--sgl-space-3);
+  color: var(--sgl-text-muted);
+  background: var(--sgl-surface-soft);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+body.sgl-light-active .gestao-main .gestao-table td {
+  min-height: var(--sgl-table-row-height);
+  padding: var(--sgl-space-3);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .gestao-table td strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .gestao-table td small {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .status-chip,
+body.sgl-light-active .gestao-main .gestao-pedidos .urgent-chip {
+  min-height: 24px;
+  padding: 0 var(--sgl-space-2);
+  border-radius: var(--sgl-radius-pill);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .neutral-copy {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .detail-button {
+  position: relative;
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  min-width: var(--sgl-icon-button-size);
+  min-height: var(--sgl-icon-button-size);
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary);
+  font-size: 0;
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .detail-button::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-right: 2.5px solid currentColor;
+  border-bottom: 2.5px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transform-origin: center;
+  transition: transform var(--sgl-transition-fast) ease;
+}
+
+body.sgl-light-active .gestao-main .gestao-table tr:has(+ .gestao-detail-row) .detail-button::before {
+  transform: rotate(225deg) translate(-2px, -2px);
+}
+
+body.sgl-light-active .gestao-main .gestao-pedidos .detail-button:hover {
+  border-color: var(--sgl-primary-light);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .gestao-main .gestao-detail {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-card-padding);
+}
+
+body.sgl-light-active .gestao-main .gestao-detail h3 {
+  margin-bottom: var(--sgl-space-3);
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-card-title);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .gestao-detail__item {
+  gap: var(--sgl-space-3);
+  padding: var(--sgl-space-3) 0;
+}
+
+body.sgl-light-active .gestao-main .quantity-card {
+  min-height: 56px;
+  gap: var(--sgl-space-1);
+  padding: var(--sgl-space-2) var(--sgl-space-3);
+  border-radius: var(--sgl-radius-control);
+}
+
+body.sgl-light-active .gestao-main .quantity-card strong,
+body.sgl-light-active .gestao-main .approval-quantity > span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .approval-quantity input {
+  min-height: 32px;
+  border-radius: var(--sgl-radius-control);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .delivered-lots > strong,
+body.sgl-light-active .gestao-main .delivered-lots > span,
+body.sgl-light-active .gestao-main .delivered-lot b,
+body.sgl-light-active .gestao-main .delivered-lot span {
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .gestao-detail__context p span,
+body.sgl-light-active .gestao-main .gestao-detail__context p strong {
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .gestao-actions-panel {
+  padding: var(--sgl-card-padding);
+  border-radius: var(--sgl-radius-surface);
+}
+
+body.sgl-light-active .gestao-main .gestao-actions-panel__heading p,
+body.sgl-light-active .gestao-main .operation-message {
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .action-observation textarea,
+body.sgl-light-active .gestao-main .justification-box textarea {
+  border-radius: var(--sgl-radius-control);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .action-button,
+body.sgl-light-active .gestao-main .justification-box button {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-4);
+  border-radius: var(--sgl-radius-control);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .action-button--deliver {
+  background: var(--sgl-primary);
+}
+
+body.sgl-light-active .gestao-main .action-button--approve {
+  background: var(--sgl-success);
+}
+
+body.sgl-light-active .gestao-main .action-button--reject,
+body.sgl-light-active .gestao-main .action-button--cancel {
+  border-color: var(--sgl-error);
+  background: var(--sgl-surface);
+  color: var(--sgl-error);
+}
+
+body.sgl-light-active .gestao-main .justification-box .confirm-danger {
+  border-color: var(--sgl-error);
+  background: var(--sgl-error);
+  color: #fff;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Solicitante / Usuário                                                       */
+/* -------------------------------------------------------------------------- */
+
+body.sgl-light-active .solicitante-main .pedidos-page .page-heading {
+  gap: var(--sgl-space-5);
+  margin-bottom: var(--sgl-space-5);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .breadcrumb {
+  margin-bottom: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .page-heading h1 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
+  letter-spacing: normal;
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .page-subtitle {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .primary-action {
+  min-height: var(--sgl-control-height);
+  gap: var(--sgl-space-2);
+  padding: 0 var(--sgl-space-4);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-primary);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+  box-shadow: none;
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .primary-action span {
+  font-size: var(--sgl-icon-size);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .summary-grid {
+  gap: var(--sgl-space-3);
+  margin-bottom: var(--sgl-space-4);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .summary-card {
+  min-height: 112px;
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .summary-card span {
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .summary-card strong {
+  margin: var(--sgl-space-2) 0 var(--sgl-space-1);
+  font-size: 26px;
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .summary-card small {
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .filter-surface {
+  gap: var(--sgl-space-3);
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-card-padding);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .search-control {
+  min-height: var(--sgl-control-height);
+  gap: var(--sgl-space-2);
+  padding: 0 var(--sgl-space-3);
+  border: var(--sgl-border-width) solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .search-control svg {
+  width: var(--sgl-icon-size);
+  height: var(--sgl-icon-size);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .search-control input {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .status-filter span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .status-filter select {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  border: var(--sgl-border-width) solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .table-surface {
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page table {
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page th,
+body.sgl-light-active .solicitante-main .pedidos-page td {
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page th {
+  color: var(--sgl-text-muted);
+  background: var(--sgl-surface-soft);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .table-primary {
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .table-secondary,
+body.sgl-light-active .solicitante-main .pedidos-page .product-summary small,
+body.sgl-light-active .solicitante-main .pedidos-page .more-products {
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .product-summary strong {
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .status-chip,
+body.sgl-light-active .solicitante-main .pedidos-page .urgent-status {
+  min-height: 24px;
+  padding: 0 var(--sgl-space-2);
+  border-radius: var(--sgl-radius-pill);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .actions-column {
+  width: 88px;
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .expand-button {
+  width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  min-width: var(--sgl-icon-button-size);
+  min-height: var(--sgl-icon-button-size);
+  border: var(--sgl-border-width) solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .expand-button svg {
+  width: var(--sgl-chevron-size);
+  height: var(--sgl-chevron-size);
+  stroke-width: 2.5;
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .expand-button:hover {
+  border-color: var(--sgl-primary-light);
+  background: var(--sgl-surface-soft);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .expanded-panel {
+  padding: var(--sgl-card-padding);
+  box-shadow: none;
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .expanded-heading > div > span,
+body.sgl-light-active .solicitante-main .pedidos-page .expanded-date {
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .expanded-heading > div > strong {
+  font-size: var(--sgl-font-card-title);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .expanded-section {
+  padding: var(--sgl-space-4);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .expanded-section h3 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+  letter-spacing: normal;
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .expanded-section p,
+body.sgl-light-active .solicitante-main .pedidos-page .material-item > div:first-child strong,
+body.sgl-light-active .solicitante-main .pedidos-page .material-item > div:first-child span,
+body.sgl-light-active .solicitante-main .pedidos-page .material-quantity span,
+body.sgl-light-active .solicitante-main .pedidos-page .material-quantity small,
+body.sgl-light-active .solicitante-main .pedidos-page .info-list dt,
+body.sgl-light-active .solicitante-main .pedidos-page .info-list dd {
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .material-quantity strong {
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .solicitante-main .pedidos-page .state-box {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-light-active .gestao-main .gestao-pedidos .secondary-action:hover,
+  body.sgl-light-active .solicitante-main .pedidos-page .primary-action:hover {
+    transform: translateY(-1px);
+  }
+}

@@ -1,0 +1,116 @@
+/*
+ * Ajustes finais da validação da Etapa 1.4 — Estoque.
+ *
+ * A janela de detalhes do lote recebe escala tipográfica e espaçamento
+ * maiores para favorecer leitura operacional sem alterar a estrutura ou lógica.
+ */
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-modal {
+  width: min(920px, 100%);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-body {
+  padding: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-highlight {
+  gap: var(--sgl-space-3);
+  margin-bottom: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-highlight > div {
+  padding: var(--sgl-space-4);
+  border-radius: var(--sgl-radius-surface);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-highlight span,
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-grid span,
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-history__heading > span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-highlight strong {
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-card-title);
+  line-height: var(--sgl-line-height-tight);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-highlight small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-grid {
+  margin-bottom: var(--sgl-space-4);
+  border-radius: var(--sgl-radius-surface);
+  overflow: hidden;
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-grid > div {
+  min-height: 72px;
+  padding: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-grid strong {
+  margin-top: var(--sgl-space-1);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-history {
+  margin-top: var(--sgl-space-4);
+  padding: var(--sgl-space-4);
+  border-radius: var(--sgl-radius-surface);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-history__heading {
+  gap: var(--sgl-space-3);
+  margin-bottom: var(--sgl-space-3);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-history__heading h3 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-card-title);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-history__heading p,
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-empty,
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-list article small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-list article {
+  min-height: 56px;
+  padding: var(--sgl-space-3) 0;
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-list article strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .estoque-detalhe .lot-output-list article > strong:last-child {
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-body);
+}
+
+@media (max-width: 720px) {
+  body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-body {
+    padding: var(--sgl-space-4);
+  }
+
+  body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-highlight,
+  body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-light-active .gestao-main .estoque-detalhe .lot-detail-grid > div {
+    min-height: auto;
+  }
+}

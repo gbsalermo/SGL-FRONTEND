@@ -1,0 +1,718 @@
+/*
+ * Etapa 1.4 — aplicação visual no bloco de Relatórios.
+ * Escopo: /relatorios, /relatorios/residuos e /relatorios/pessoas-laboratorio.
+ * Somente tema claro autenticado. Nenhuma regra de negócio é alterada.
+ */
+
+body.sgl-light-active .gestao-main .relatorios-exportacao-view,
+body.sgl-light-active .gestao-main .relatorios-page,
+body.sgl-light-active .gestao-main .relatorio-residuos-page,
+body.sgl-light-active .gestao-main .people-report-page {
+  color: var(--sgl-text);
+}
+
+/* Central de Relatórios */
+body.sgl-light-active .gestao-main .relatorios-page .relatorios-header {
+  margin-bottom: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorios-header h1 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
+  letter-spacing: 0;
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorios-header p {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorios-grid {
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .card,
+body.sgl-light-active .gestao-main .relatorio-especial-panel__titulo,
+body.sgl-light-active .gestao-main .relatorio-especial-panel .filter-card {
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorios-selector {
+  padding: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorios-selector h2,
+body.sgl-light-active .gestao-main .relatorios-page .card-title h2,
+body.sgl-light-active .gestao-main .relatorio-especial-panel__titulo h2 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-card-title);
+  font-weight: var(--sgl-font-weight-semibold);
+  line-height: var(--sgl-line-height-tight);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorios-selector h2 {
+  padding: 0 0 var(--sgl-space-3);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorios-lista {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorio-opcao,
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .relatorio-opcao--pessoas {
+  min-height: 76px;
+  gap: var(--sgl-space-3);
+  padding: var(--sgl-space-3);
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  box-shadow: none;
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorio-opcao:hover,
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .relatorio-opcao--pessoas:hover {
+  border-color: #B8CBEA;
+  background: #F7FAFF;
+  box-shadow: var(--sgl-shadow-level-1);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorio-opcao--ativo,
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .relatorio-opcao--especial-ativo {
+  border-color: var(--sgl-primary-light) !important;
+  background: #EEF5FF !important;
+  box-shadow: inset 3px 0 0 var(--sgl-primary-light) !important;
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorio-opcao__icone,
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .relatorio-opcao--pessoas .relatorio-opcao__icone {
+  width: var(--sgl-icon-button-size);
+  min-width: var(--sgl-icon-button-size);
+  height: var(--sgl-icon-button-size);
+  color: var(--sgl-text-muted);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorio-opcao__icone svg,
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .relatorio-opcao--pessoas .relatorio-opcao__icone svg {
+  width: var(--sgl-chevron-size);
+  height: var(--sgl-chevron-size);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorio-opcao__texto strong,
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .relatorio-opcao--pessoas .relatorio-opcao__texto strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .relatorio-opcao__texto small,
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .relatorio-opcao--pessoas .relatorio-opcao__texto small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .exportacao-info {
+  margin-top: var(--sgl-space-3);
+  padding: var(--sgl-space-3);
+  border-color: #B8CBEA;
+  border-radius: var(--sgl-radius-control);
+  background: #F7FAFF;
+  color: var(--sgl-primary-dark);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .exportacao-info__icone {
+  width: var(--sgl-icon-size);
+  height: var(--sgl-icon-size);
+  background: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .exportacao-info strong {
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .exportacao-info p {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .card-title {
+  min-height: 56px;
+  gap: var(--sgl-space-4);
+  padding: 0 var(--sgl-card-padding);
+  border-bottom-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .preview-gerado {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .filtros-body {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-card-padding);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .campo {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .campo label {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .campo select,
+body.sgl-light-active .gestao-main .relatorios-page .campo input,
+body.sgl-light-active .gestao-main .relatorio-especial-panel .filters select,
+body.sgl-light-active .gestao-main .relatorio-especial-panel .filters input {
+  height: var(--sgl-control-height);
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .periodo-inputs span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .filtros-indisponiveis {
+  color: var(--sgl-text-muted);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .filtros-indisponiveis strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .filtros-indisponiveis span {
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .filtros-actions {
+  gap: var(--sgl-space-2);
+  padding: var(--sgl-space-3) var(--sgl-card-padding);
+  border-top-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .btn,
+body.sgl-light-active .gestao-main .relatorio-especial-panel .btn,
+body.sgl-light-active .gestao-main .relatorio-residuos-page .btn,
+body.sgl-light-active .gestao-main .people-report-page .btn {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-4);
+  border-radius: var(--sgl-radius-control);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .btn svg {
+  width: var(--sgl-icon-size);
+  height: var(--sgl-icon-size);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .btn--primary,
+body.sgl-light-active .gestao-main .relatorio-especial-panel .btn--primary,
+body.sgl-light-active .gestao-main .relatorio-residuos-page .btn--primary,
+body.sgl-light-active .gestao-main .people-report-page .btn--primary {
+  border: 1px solid var(--sgl-primary);
+  background: var(--sgl-primary);
+  color: #fff;
+  box-shadow: none;
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .btn--ghost,
+body.sgl-light-active .gestao-main .relatorio-especial-panel .btn--ghost,
+body.sgl-light-active .gestao-main .relatorio-residuos-page .btn--ghost,
+body.sgl-light-active .gestao-main .people-report-page .btn--ghost {
+  border-color: var(--sgl-border-strong);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary-dark);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .preview-card {
+  min-height: 320px;
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .preview-empty {
+  min-height: 240px;
+  color: var(--sgl-text-muted);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .preview-empty strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-card-title);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .preview-empty p,
+body.sgl-light-active .gestao-main .relatorios-page .preview-message p {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page .preview-message--warning {
+  border-color: #FDE68A;
+  background: #FFFBEB;
+}
+
+body.sgl-light-active .gestao-main .relatorios-page th {
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page td {
+  min-height: var(--sgl-table-row-height);
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page td strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page td small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page tbody tr:hover {
+  background: #F8FAFD;
+}
+
+/* Relatórios especiais dentro da central */
+body.sgl-light-active .gestao-main .relatorio-especial-panel__titulo {
+  min-height: 56px;
+  padding: 0 var(--sgl-card-padding);
+  border-bottom: 0;
+  border-radius: var(--sgl-radius-surface) var(--sgl-radius-surface) 0 0;
+}
+
+body.sgl-light-active .gestao-main .relatorio-especial-panel .filter-card {
+  margin-bottom: var(--sgl-space-4);
+  padding: var(--sgl-card-padding);
+  border-top: 0;
+  border-radius: 0 0 var(--sgl-radius-surface) var(--sgl-radius-surface);
+}
+
+body.sgl-light-active .gestao-main .relatorio-especial-panel .filters label span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .relatorio-especial-panel .empty-state {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+}
+
+/* Rotas diretas de Resíduos e Pessoas por laboratório */
+body.sgl-light-active .gestao-main .relatorio-residuos-page .page-header,
+body.sgl-light-active .gestao-main .people-report-page .page-header {
+  gap: var(--sgl-space-6);
+  margin-bottom: var(--sgl-space-6);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .page-header p,
+body.sgl-light-active .gestao-main .people-report-page .page-header p {
+  margin-bottom: var(--sgl-space-2);
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  letter-spacing: .04em;
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .page-header h1,
+body.sgl-light-active .gestao-main .people-report-page .page-header h1 {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
+  letter-spacing: 0;
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .page-header span,
+body.sgl-light-active .gestao-main .people-report-page .page-header span {
+  margin-top: var(--sgl-space-2);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+/* O texto real continua no DOM para acessibilidade; a seta Unicode vira ícone gráfico. */
+body.sgl-light-active .gestao-main .relatorio-residuos-page .page-header > .btn--ghost,
+body.sgl-light-active .gestao-main .people-report-page .page-header > .btn--ghost {
+  position: relative;
+  min-width: 178px;
+  gap: var(--sgl-space-2);
+  font-size: 0;
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .page-header > .btn--ghost::before,
+body.sgl-light-active .gestao-main .people-report-page .page-header > .btn--ghost::before {
+  content: '';
+  width: var(--sgl-icon-size);
+  height: var(--sgl-icon-size);
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m15 6-6 6 6 6' fill='none' stroke='black' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m15 6-6 6 6 6' fill='none' stroke='black' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .page-header > .btn--ghost::after,
+body.sgl-light-active .gestao-main .people-report-page .page-header > .btn--ghost::after {
+  content: 'Voltar aos relatórios';
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .filter-card,
+body.sgl-light-active .gestao-main .relatorio-residuos-page .result-card,
+body.sgl-light-active .gestao-main .people-report-page .filter-card,
+body.sgl-light-active .gestao-main .people-report-page .result-card,
+body.sgl-light-active .gestao-main .people-report-page .lab-summary {
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: var(--sgl-shadow-level-0);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .filter-card,
+body.sgl-light-active .gestao-main .people-report-page .filter-card {
+  padding: var(--sgl-card-padding);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .filters,
+body.sgl-light-active .gestao-main .people-report-page .filters {
+  gap: var(--sgl-space-3);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .filters label,
+body.sgl-light-active .gestao-main .people-report-page .filters label {
+  gap: var(--sgl-space-2);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .filters label span,
+body.sgl-light-active .gestao-main .people-report-page .filters label span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .filters input,
+body.sgl-light-active .gestao-main .relatorio-residuos-page .filters select,
+body.sgl-light-active .gestao-main .people-report-page .filters select {
+  min-height: var(--sgl-control-height);
+  padding: 0 var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .filter-actions,
+body.sgl-light-active .gestao-main .people-report-page .filter-actions {
+  gap: var(--sgl-space-2);
+  margin-top: var(--sgl-space-4);
+}
+
+/* Exportações deixam de parecer ações destrutivas/sucesso. */
+body.sgl-light-active .gestao-main .relatorio-residuos-page .btn--pdf,
+body.sgl-light-active .gestao-main .people-report-page .btn--pdf {
+  border: 1px solid #F0B9B5;
+  background: var(--sgl-surface);
+  color: #B42318;
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .btn--xlsx,
+body.sgl-light-active .gestao-main .people-report-page .btn--xlsx {
+  border: 1px solid #B9DDC7;
+  background: var(--sgl-surface);
+  color: var(--sgl-success);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .feedback,
+body.sgl-light-active .gestao-main .people-report-page .feedback {
+  margin: var(--sgl-space-3) 0;
+  padding: var(--sgl-space-3) var(--sgl-space-4);
+  border-color: #FECACA;
+  border-radius: var(--sgl-radius-surface);
+  background: #FEF2F2;
+  color: #B42318;
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .summary-grid,
+body.sgl-light-active .gestao-main .people-report-page .metrics-grid {
+  gap: var(--sgl-space-3);
+  margin: var(--sgl-space-4) 0;
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .summary-grid article,
+body.sgl-light-active .gestao-main .people-report-page .metrics-grid article {
+  padding: var(--sgl-space-4);
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  box-shadow: none;
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .summary-grid span,
+body.sgl-light-active .gestao-main .people-report-page .metrics-grid span,
+body.sgl-light-active .gestao-main .people-report-page .lab-summary span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .summary-grid strong,
+body.sgl-light-active .gestao-main .people-report-page .metrics-grid strong {
+  color: var(--sgl-primary-dark);
+  font-size: 24px;
+}
+
+body.sgl-light-active .gestao-main .people-report-page .lab-summary {
+  margin-top: var(--sgl-space-4);
+}
+
+body.sgl-light-active .gestao-main .people-report-page .lab-summary > div {
+  padding: var(--sgl-card-padding);
+}
+
+body.sgl-light-active .gestao-main .people-report-page .lab-summary > div + div {
+  border-left-color: var(--sgl-border);
+  background: #F7FAFF;
+}
+
+body.sgl-light-active .gestao-main .people-report-page .lab-summary strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-card-title);
+}
+
+body.sgl-light-active .gestao-main .people-report-page .lab-summary small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .people-report-page .profiles-card b {
+  padding: 5px 8px;
+  background: #EEF5FF;
+  color: var(--sgl-primary-dark);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .result-card > header,
+body.sgl-light-active .gestao-main .people-report-page .result-card > header {
+  gap: var(--sgl-space-4);
+  padding: var(--sgl-space-4) var(--sgl-card-padding);
+  border-bottom-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .result-card > header strong,
+body.sgl-light-active .gestao-main .people-report-page .result-card > header strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-card-title);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .result-card > header span,
+body.sgl-light-active .gestao-main .people-report-page .result-card > header span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page th,
+body.sgl-light-active .gestao-main .people-report-page th {
+  padding: var(--sgl-space-3);
+  background: var(--sgl-surface-soft);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page td,
+body.sgl-light-active .gestao-main .people-report-page td {
+  min-height: var(--sgl-table-row-height);
+  padding: var(--sgl-space-3);
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  line-height: var(--sgl-line-height-body);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page td strong,
+body.sgl-light-active .gestao-main .people-report-page td strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page td small,
+body.sgl-light-active .gestao-main .people-report-page td small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .status,
+body.sgl-light-active .gestao-main .people-report-page .status,
+body.sgl-light-active .gestao-main .people-report-page .role {
+  min-height: 26px;
+  align-items: center;
+  padding: 0 9px;
+  border-radius: var(--sgl-radius-pill);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page tbody tr:hover,
+body.sgl-light-active .gestao-main .people-report-page tbody tr:hover {
+  background: #F8FAFD;
+}
+
+body.sgl-light-active .gestao-main .relatorio-residuos-page .empty,
+body.sgl-light-active .gestao-main .relatorio-residuos-page .empty-state,
+body.sgl-light-active .gestao-main .people-report-page .empty,
+body.sgl-light-active .gestao-main .people-report-page .empty-state {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
+}
+
+/* Barra de exportação da central */
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .exportacao-real {
+  min-height: 76px;
+  gap: var(--sgl-space-4);
+  margin: var(--sgl-space-6) 0 var(--sgl-space-8);
+  padding: var(--sgl-space-4) var(--sgl-card-padding);
+  border-color: var(--sgl-border);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+  color: var(--sgl-text-muted);
+}
+
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .exportacao-real__texto strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+}
+
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .exportacao-real__texto span,
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .exportacao-real__texto small {
+  font-size: var(--sgl-font-helper);
+}
+
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .export-btn {
+  min-width: 100px;
+  height: var(--sgl-control-height);
+  gap: var(--sgl-space-2);
+  padding: 0 var(--sgl-space-3);
+  border-color: var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+body.sgl-light-active .gestao-main .relatorios-exportacao-view .export-btn svg {
+  width: var(--sgl-icon-size);
+  height: var(--sgl-icon-size);
+}
+
+body.sgl-light-active .gestao-main .relatorios-page button:focus-visible,
+body.sgl-light-active .gestao-main .relatorios-page input:focus-visible,
+body.sgl-light-active .gestao-main .relatorios-page select:focus-visible,
+body.sgl-light-active .gestao-main .relatorio-residuos-page button:focus-visible,
+body.sgl-light-active .gestao-main .relatorio-residuos-page input:focus-visible,
+body.sgl-light-active .gestao-main .relatorio-residuos-page select:focus-visible,
+body.sgl-light-active .gestao-main .people-report-page button:focus-visible,
+body.sgl-light-active .gestao-main .people-report-page select:focus-visible {
+  outline: var(--sgl-focus-width) solid var(--sgl-focus);
+  outline-offset: var(--sgl-focus-offset);
+}
+
+@media (max-width: 1180px) {
+  body.sgl-light-active .gestao-main .relatorios-page .relatorios-grid {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  body.sgl-light-active .gestao-main .relatorio-residuos-page .summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  body.sgl-light-active .gestao-main .relatorios-page .relatorios-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-light-active .gestao-main .relatorios-page .relatorios-lista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.sgl-light-active .gestao-main .relatorio-residuos-page .page-header,
+  body.sgl-light-active .gestao-main .people-report-page .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.sgl-light-active .gestao-main .people-report-page .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  body.sgl-light-active .gestao-main .relatorios-page .relatorios-lista,
+  body.sgl-light-active .gestao-main .relatorio-residuos-page .summary-grid,
+  body.sgl-light-active .gestao-main .people-report-page .metrics-grid,
+  body.sgl-light-active .gestao-main .people-report-page .lab-summary {
+    grid-template-columns: 1fr;
+  }
+
+  body.sgl-light-active .gestao-main .people-report-page .lab-summary > div + div {
+    border-top: 1px solid var(--sgl-border);
+    border-left: 0;
+  }
+
+  body.sgl-light-active .gestao-main .relatorio-residuos-page .filter-actions,
+  body.sgl-light-active .gestao-main .people-report-page .filter-actions,
+  body.sgl-light-active .gestao-main .relatorio-residuos-page .export-actions,
+  body.sgl-light-active .gestao-main .people-report-page .export-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.sgl-light-active .gestao-main .relatorio-residuos-page .btn,
+  body.sgl-light-active .gestao-main .people-report-page .btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.sgl-light-active .gestao-main .relatorios-exportacao-view *,
+  body.sgl-light-active .gestao-main .relatorio-residuos-page *,
+  body.sgl-light-active .gestao-main .people-report-page * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
