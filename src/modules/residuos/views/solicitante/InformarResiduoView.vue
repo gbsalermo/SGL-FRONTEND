@@ -654,6 +654,8 @@ onMounted(carregarDados)
 .field input, .field select { min-height: 43px; padding: 0 11px; }
 .field textarea { resize: vertical; padding: 11px; line-height: 1.5; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: #2d6bc4; box-shadow: 0 0 0 3px rgb(45 107 196 / 9%); }
+.check-line { display: inline-flex; align-items: center; gap: 8px; color: #4b5f7b; font-size: 11px; font-weight: 700; }
+.check-line input { width: 16px; height: 16px; }
 .field small { color: #7c8a9d; font-size: 9px; line-height: 1.45; }
 .risk-level { max-width: 300px; margin-top: 0; }
 .risk-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: 16px; }
