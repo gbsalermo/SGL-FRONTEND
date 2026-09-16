@@ -181,7 +181,7 @@ const itensAtencao = computed<ItemAtencao[]>(() => {
       descricao: `${residuo.descricao} · ${residuo.laboratorioNome}`,
       detalhe: tempoDesde(residuo.dataRecebimento || residuo.dataInformacao),
       nivel: residuo.nivelRiscoInformado === 'ALTO' ? 'alto' : 'medio',
-      rota: `/residuos?filtro=pendentes-analise&residuo=${encodeURIComponent(residuo.id)}`,
+      rota: `/residuos?status=${encodeURIComponent(residuo.status)}&residuo=${encodeURIComponent(residuo.id)}`,
     })
   })
 
@@ -454,7 +454,7 @@ onMounted(carregarDashboard)
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9" /></svg></span>
         <span><small>Baixo estoque</small><strong>{{ estoquesBaixos.length }}</strong><em>Itens abaixo do mínimo</em></span>
       </button>
-      <button class="kpi-card kpi-card--purple" type="button" @click="abrir('/residuos?filtro=pendentes-analise')">
+      <button class="kpi-card kpi-card--purple" type="button" @click="abrir('/residuos')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.7 3h10.6A2 2 0 0 0 19 17l-5-9V3M8 14h8" /></svg></span>
         <span><small>Resíduos a analisar</small><strong>{{ residuosPendentesAnalise.length }}</strong><em>Pendentes ou em análise</em></span>
       </button>
