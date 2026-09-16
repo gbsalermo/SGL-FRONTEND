@@ -5,7 +5,10 @@ import { computed, onMounted, ref } from 'vue'
 import { residuoService } from '@/modules/residuos/services/residuoService'
 import type {
   ApiErrorResponse,
+  ClasseResiduoResponse,
   CriarResiduoRequest,
+  EstadoFisicoResiduo,
+  MedidaSegurancaResiduo,
   NivelRiscoResiduo,
   ProdutoResiduoResponse,
   ProjetoResiduoResponse,
@@ -47,6 +50,22 @@ const tiposRisco: Array<{ value: Exclude<TipoRiscoResiduo, 'NENHUM'>; label: str
   { value: 'PERIGO_AMBIENTAL', label: 'Perigo ambiental' },
 ]
 
+const estadosFisicos: Array<{ value: EstadoFisicoResiduo; label: string }> = [
+  { value: 'LIQUIDO', label: 'Líquido' },
+  { value: 'SOLIDO', label: 'Sólido' },
+  { value: 'SEMISSOLIDO', label: 'Semissólido' },
+  { value: 'GASOSO', label: 'Gasoso' },
+  { value: 'OUTRO', label: 'Outro' },
+]
+
+const medidasSeguranca: Array<{ value: MedidaSegurancaResiduo; label: string }> = [
+  { value: 'LUVAS', label: 'Luvas' },
+  { value: 'OCULOS_PROTECAO', label: 'Óculos de proteção' },
+  { value: 'PROTECAO_RESPIRATORIA', label: 'Proteção respiratória' },
+  { value: 'JALECO_AVENTAL', label: 'Jaleco / avental' },
+  { value: 'OUTRO', label: 'Outro' },
+]
+
 const unidadesMedida: Array<{ value: UnidadeMedidaResiduo; label: string }> = [
   { value: 'ML', label: 'mL' },
   { value: 'L', label: 'L' },
@@ -66,15 +85,22 @@ const unidadesMedida: Array<{ value: UnidadeMedidaResiduo; label: string }> = [
 const session = useSessionStore()
 const projetos = ref<ProjetoResiduoResponse[]>([])
 const produtos = ref<ProdutoResiduoResponse[]>([])
+const classesResiduo = ref<ClasseResiduoResponse[]>([])
 const projetoId = ref('')
 const descricao = ref('')
 const processoOrigem = ref('')
+const estadoFisico = ref<EstadoFisicoResiduo>('LIQUIDO')
+const tratamentoRealizado = ref(false)
+const descricaoTratamento = ref('')
 const recipiente = ref('')
 const quantidade = ref<number | null>(null)
 const unidadeMedida = ref<UnidadeMedidaResiduo>('ML')
 const nivelRiscoInformado = ref<NivelRiscoResiduo>('BAIXO')
 const riscosInformados = ref<TipoRiscoResiduo[]>([])
 const observacaoGerador = ref('')
+const classesInformadasIds = ref<string[]>([])
+const medidasSegurancaInformadas = ref<MedidaSegurancaResiduo[]>([])
+const observacaoSegurancaInformada = ref('')
 const componentes = ref<ComponenteForm[]>([novoComponente(true)])
 const carregandoDados = ref(false)
 const enviando = ref(false)
@@ -84,6 +110,15 @@ const resultado = ref<ResiduoResponse | null>(null)
 
 const usuario = computed(() => session.usuario)
 const podeAdicionarComponente = computed(() => componentes.value.length < 12)
+const medidasSugeridasProdutos = computed(() => {
+  const sugeridas = new Set<MedidaSegurancaResiduo>()
+  componentes.value
+    .filter((componente) => componente.origem === 'CATALOGO' && componente.produtoId)
+    .forEach((componente) => {
+      produtoSelecionado(componente.produtoId)?.medidasSegurancaRecomendadas?.forEach((medida) => sugeridas.add(medida))
+    })
+  return [...sugeridas]
+})
 
 function novoComponente(principal = false): ComponenteForm {
   return {
@@ -128,9 +163,10 @@ async function carregarDados() {
   erro.value = ''
   avisoDados.value = ''
 
-  const [projetosResult, produtosResult] = await Promise.allSettled([
+  const [projetosResult, produtosResult, classesResult] = await Promise.allSettled([
     residuoService.listarProjetosPorLaboratorio(laboratorioId),
     residuoService.listarProdutosAtivos(),
+    residuoService.listarClassesAtivas(),
   ])
 
   if (projetosResult.status === 'fulfilled') {
@@ -145,6 +181,14 @@ async function carregarDados() {
     avisoDados.value = avisoDados.value
       ? `${avisoDados.value} O catálogo de produtos também não pôde ser carregado; use componentes livres.`
       : 'O catálogo de produtos não pôde ser carregado. Você ainda pode informar componentes livremente.'
+  }
+
+  if (classesResult.status === 'fulfilled') {
+    classesResiduo.value = classesResult.value
+  } else {
+    avisoDados.value = avisoDados.value
+      ? `${avisoDados.value} As classes de resíduo não puderam ser carregadas.`
+      : 'As classes de resíduo não puderam ser carregadas.'
   }
 
   carregandoDados.value = false
@@ -182,16 +226,30 @@ function alterarNivelRisco() {
   if (nivelRiscoInformado.value === 'NENHUM') riscosInformados.value = []
 }
 
+function aplicarSugestoesSeguranca() {
+  medidasSegurancaInformadas.value = [...new Set([
+    ...medidasSegurancaInformadas.value,
+    ...medidasSugeridasProdutos.value,
+  ])]
+}
+
 function validarFormulario() {
   if (!usuario.value?.id || !usuario.value.laboratorioId) {
     throw new Error('Sessão sem usuário ou laboratório válido.')
   }
   if (!descricao.value.trim()) throw new Error('Informe uma descrição para o resíduo.')
   if (!processoOrigem.value.trim()) throw new Error('Informe o processo que originou o resíduo.')
+  if (tratamentoRealizado.value && !descricaoTratamento.value.trim()) {
+    throw new Error('Descreva o tratamento já realizado no resíduo.')
+  }
   if (!recipiente.value.trim()) throw new Error('Informe o recipiente utilizado.')
   if (!quantidade.value || Number(quantidade.value) <= 0) throw new Error('Informe uma quantidade maior que zero.')
   if (nivelRiscoInformado.value !== 'NENHUM' && riscosInformados.value.length === 0) {
     throw new Error('Selecione pelo menos um risco percebido ou marque o nível como Nenhum.')
+  }
+  if (classesInformadasIds.value.length === 0) throw new Error('Selecione pelo menos uma classe de resíduo.')
+  if (medidasSegurancaInformadas.value.includes('OUTRO') && !observacaoSegurancaInformada.value.trim()) {
+    throw new Error('Descreva a medida de segurança marcada como Outro.')
   }
   if (componentes.value.length === 0) throw new Error('Informe ao menos um componente do resíduo.')
 
@@ -220,12 +278,18 @@ function montarPayload(): CriarResiduoRequest {
     projetoId: projetoId.value || null,
     descricao: descricao.value.trim(),
     processoOrigem: processoOrigem.value.trim(),
+    estadoFisico: estadoFisico.value,
+    tratamentoRealizado: tratamentoRealizado.value,
+    descricaoTratamento: tratamentoRealizado.value ? descricaoTratamento.value.trim() : null,
     recipiente: recipiente.value.trim(),
     quantidade: Number(quantidade.value),
     unidadeMedida: unidadeMedida.value,
     nivelRiscoInformado: nivelRiscoInformado.value,
     riscosInformados: riscos,
     observacaoGerador: observacaoGerador.value.trim() || null,
+    classesInformadasIds: [...classesInformadasIds.value],
+    medidasSegurancaInformadas: [...medidasSegurancaInformadas.value],
+    observacaoSegurancaInformada: observacaoSegurancaInformada.value.trim() || null,
     componentes: componentes.value.map((componente) => ({
       produtoId: componente.origem === 'CATALOGO' ? componente.produtoId : null,
       nomeComponente: componente.origem === 'LIVRE' ? componente.nomeComponente.trim() : null,
@@ -255,12 +319,18 @@ function limparFormulario() {
   projetoId.value = ''
   descricao.value = ''
   processoOrigem.value = ''
+  estadoFisico.value = 'LIQUIDO'
+  tratamentoRealizado.value = false
+  descricaoTratamento.value = ''
   recipiente.value = ''
   quantidade.value = null
   unidadeMedida.value = 'ML'
   nivelRiscoInformado.value = 'BAIXO'
   riscosInformados.value = []
   observacaoGerador.value = ''
+  classesInformadasIds.value = []
+  medidasSegurancaInformadas.value = []
+  observacaoSegurancaInformada.value = ''
   componentes.value = [novoComponente(true)]
   erro.value = ''
   resultado.value = null
@@ -341,8 +411,8 @@ onMounted(carregarDados)
         </div>
 
         <label class="field">
-          <span>Processo de origem</span>
-          <textarea v-model="processoOrigem" rows="3" required placeholder="Descreva o procedimento, experimento ou atividade que gerou este resíduo..." />
+          <span>Procedência / uso do Resíduo</span>
+          <textarea v-model="processoOrigem" rows="3" required placeholder="Informe de qual processo, atividade ou uso surgiu o Resíduo..." />
         </label>
       </section>
 
@@ -371,6 +441,23 @@ onMounted(carregarDados)
             </select>
           </label>
         </div>
+
+        <div class="form-grid form-grid--two">
+          <label class="field">
+            <span>Estado físico</span>
+            <select v-model="estadoFisico" required>
+              <option v-for="item in estadosFisicos" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
+          </label>
+          <label class="check-line treatment-check">
+            <input v-model="tratamentoRealizado" type="checkbox" />
+            <span>Este resíduo já recebeu tratamento</span>
+          </label>
+        </div>
+        <label v-if="tratamentoRealizado" class="field">
+          <span>Tratamento realizado</span>
+          <textarea v-model="descricaoTratamento" rows="2" required placeholder="Descreva o tratamento aplicado..." />
+        </label>
       </section>
 
       <section class="form-section">
@@ -464,9 +551,49 @@ onMounted(carregarDados)
         </div>
       </section>
 
-      <section class="form-section form-section--last">
+      <section class="form-section">
         <div class="section-title">
           <span>5</span>
+          <div>
+            <h2>Classes e segurança</h2>
+            <p>Selecione as classes aplicáveis e registre as medidas de segurança consideradas para esta ocorrência.</p>
+          </div>
+        </div>
+
+        <div>
+          <strong class="field-group-title">Classes de Resíduo</strong>
+          <div class="risk-grid class-grid">
+            <label v-for="classe in classesResiduo" :key="classe.id" class="risk-option class-option">
+              <input v-model="classesInformadasIds" type="checkbox" :value="classe.id" />
+              <span><b>{{ classe.codigo }}</b> — {{ classe.descricao }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <div class="security-heading">
+            <strong class="field-group-title">Segurança / EPI</strong>
+            <button v-if="medidasSugeridasProdutos.length" type="button" class="suggest-action" @click="aplicarSugestoesSeguranca">Aplicar sugestões dos produtos</button>
+          </div>
+          <p v-if="medidasSugeridasProdutos.length" class="suggestion-copy">
+            Sugestões do catálogo: {{ medidasSugeridasProdutos.map((medida) => medidasSeguranca.find((item) => item.value === medida)?.label ?? medida).join(' · ') }}.
+          </p>
+          <div class="risk-grid">
+            <label v-for="medida in medidasSeguranca" :key="medida.value" class="risk-option">
+              <input v-model="medidasSegurancaInformadas" type="checkbox" :value="medida.value" />
+              <span>{{ medida.label }}</span>
+            </label>
+          </div>
+          <label class="field security-note">
+            <span>Orientação complementar <small>(obrigatória para Outro)</small></span>
+            <textarea v-model="observacaoSegurancaInformada" rows="2" placeholder="Descreva outras medidas ou cuidados relevantes..." />
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section form-section--last">
+        <div class="section-title">
+          <span>6</span>
           <div>
             <h2>Observações finais</h2>
             <p>Adicione qualquer informação que ajude a Gestão no recebimento e na conferência.</p>
@@ -533,6 +660,14 @@ onMounted(carregarDados)
 .risk-option { min-height: 42px; display: flex; align-items: center; gap: 9px; padding: 0 11px; border: 1px solid #d7dee8; border-radius: 7px; background: #fbfcfe; color: #344258; font-size: 10px; font-weight: 700; cursor: pointer; }
 .risk-option:has(input:checked) { border-color: #6c94d0; background: #eef5ff; color: #1d4f99; }
 .risk-option input { width: 15px; height: 15px; accent-color: #245eb6; }
+.field-group-title { display: block; margin-bottom: 9px; color: #334a6a; font-size: 11px; }
+.class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.class-option { align-items: flex-start; }
+.security-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.suggest-action { padding: 7px 10px; border: 1px solid #b8c9e4; border-radius: 6px; background: #f6f9ff; color: #28569d; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
+.suggestion-copy { margin: 0 0 10px; color: #657892; font-size: 10px; line-height: 1.5; }
+.security-note { margin-top: 10px; }
+.treatment-check { align-self: end; min-height: 44px; }
 .risk-none { margin-top: 14px; padding: 12px 14px; border-radius: 7px; background: #f4f7fb; color: #5f6f84; font-size: 10px; }
 .components-list { display: grid; gap: 12px; }
 .component-card { padding: 16px; border: 1px solid #dce3ec; border-radius: 9px; background: #fcfdff; }
