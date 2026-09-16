@@ -236,7 +236,10 @@ onMounted(carregar)
             <dl>
               <div><dt>Laboratório</dt><dd>{{ selecionado.laboratorioNome }}</dd></div>
               <div><dt>Projeto</dt><dd>{{ selecionado.projetoNome ?? 'Sem projeto' }}</dd></div>
-              <div><dt>Processo</dt><dd>{{ selecionado.processoOrigem }}</dd></div>
+              <div><dt>Procedência / uso</dt><dd>{{ selecionado.processoOrigem }}</dd></div>
+              <div><dt>Estado físico</dt><dd>{{ selecionado.estadoFisico ? formatarRisco(selecionado.estadoFisico) : 'Não informado em registro histórico' }}</dd></div>
+              <div><dt>Tratamento</dt><dd>{{ selecionado.tratamentoRealizado === null ? 'Não informado em registro histórico' : selecionado.tratamentoRealizado ? 'Sim' : 'Não' }}</dd></div>
+              <div v-if="selecionado.tratamentoRealizado"><dt>Tratamento realizado</dt><dd>{{ selecionado.descricaoTratamento }}</dd></div>
               <div><dt>Recipiente</dt><dd>{{ selecionado.recipiente }}</dd></div>
               <div><dt>Quantidade</dt><dd>{{ selecionado.quantidade }} {{ selecionado.unidadeMedida }}</dd></div>
             </dl>
@@ -253,6 +256,29 @@ onMounted(carregar)
               <span v-if="componente.principal">Principal</span>
               <p v-if="componente.concentracaoOuQuantidade">{{ componente.concentracaoOuQuantidade }}</p>
             </article>
+          </section>
+
+          <section class="risk-comparison">
+            <div>
+              <h3>Classes informadas</h3>
+              <strong>{{ selecionado.classesInformadas.map((classe) => classe.codigo).join(' · ') || 'Sem classe histórica' }}</strong>
+              <p>{{ selecionado.classesInformadas.map((classe) => classe.descricao).join(' · ') || 'Nenhuma classe registrada.' }}</p>
+              <div class="detail-note-block">
+                <span>Segurança / EPI informado</span>
+                <p>{{ selecionado.medidasSegurancaInformadas.length ? selecionado.medidasSegurancaInformadas.map(formatarRisco).join(' · ') : 'Nenhuma medida específica.' }}</p>
+                <p v-if="selecionado.observacaoSegurancaInformada">{{ selecionado.observacaoSegurancaInformada }}</p>
+              </div>
+            </div>
+            <div :class="{ muted: selecionado.classesConfirmadas.length === 0 }">
+              <h3>Classes confirmadas</h3>
+              <strong>{{ selecionado.classesConfirmadas.map((classe) => classe.codigo).join(' · ') || 'Aguardando análise' }}</strong>
+              <p>{{ selecionado.classesConfirmadas.map((classe) => classe.descricao).join(' · ') || 'Ainda não confirmadas.' }}</p>
+              <div class="detail-note-block">
+                <span>Segurança / EPI confirmado</span>
+                <p>{{ selecionado.medidasSegurancaConfirmadas.length ? selecionado.medidasSegurancaConfirmadas.map(formatarRisco).join(' · ') : 'Ainda não confirmado.' }}</p>
+                <p v-if="selecionado.observacaoSegurancaConfirmada">{{ selecionado.observacaoSegurancaConfirmada }}</p>
+              </div>
+            </div>
           </section>
 
           <section class="risk-comparison">
