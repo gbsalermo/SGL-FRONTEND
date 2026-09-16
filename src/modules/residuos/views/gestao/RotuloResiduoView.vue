@@ -85,7 +85,7 @@ onMounted(carregar)
 </script>
 
 <template>
-  <main class="rotulo-page">
+  <main class="rotulo-page" :class="{ 'rotulo-page--blocked': dados && !dados.impressaoPermitida }">
     <div class="rotulo-toolbar no-print">
       <button type="button" class="btn btn--ghost" @click="voltar">← Voltar para resíduos</button>
       <div>
@@ -350,6 +350,16 @@ onMounted(carregar)
   }
 
   .no-print { display: none !important; }
+
+  .rotulo-page--blocked .rotulo-canvas { display: none !important; }
+  .rotulo-page--blocked::after {
+    content: 'Impressão não autorizada: o Resíduo ainda não foi liberado pela Gestão.';
+    display: block;
+    padding: 20mm;
+    color: #111827;
+    font: 700 14pt Arial, sans-serif;
+    text-align: center;
+  }
 
   .rotulo-canvas {
     width: 190mm;
