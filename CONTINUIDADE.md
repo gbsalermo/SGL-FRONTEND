@@ -3,7 +3,7 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 11/09/2026  
+**Última atualização:** 16/09/2026  
 **Branch estável:** `main`  
 **Fase atual:** ajustes de pré-produção pós-aprovação funcional.  
 **Bloco atual:** planejamento consolidado → execução sequencial das etapas de pré-produção.  
@@ -319,7 +319,9 @@ O Código SGL existe desde o registro inicial. QR Code não integra o rótulo vi
 
 Pré-produção planejada:
 
-- Etapa 3: remover a sequência visual redundante de pendências/análise, ampliar os dados operacionais do Resíduo e separar geração/visualização da permissão de impressão;
+- Etapa 3.1: redundância visual de pendências/análise removida e validada;
+- Etapa 3.2: ampliar os dados operacionais, classes, segurança e responsabilidade do Resíduo;
+- Etapa 3.3: separar geração/visualização da permissão de impressão;
 - Etapa 4: cadastrar locais de armazenamento e liberar modelos de Resíduos padrão pela Gestão;
 - Etapa 10: consolidar padrão transversal de rótulos e templates adaptados de Produto, Resíduo e Solução, além do Documento de Auditoria de Entrada de Lote imprimível;
 - o Solicitante poderá escolher entre um Resíduo pré-cadastrado e preenchimento manual;
@@ -571,7 +573,7 @@ limpeza/revisão documental                            ✅ concluída
 planejamento dos ajustes                              ✅ consolidado
 Etapa 1 — refinamento visual global                   ✅ concluída
 Etapa 2 — Dark Mode definitivo                        ✅ concluída
-Etapa 3 — refinamentos do fluxo atual de Resíduos     ⏭ ATUAL / próxima implementação
+Etapa 3 — refinamentos do fluxo atual de Resíduos     🔧 ATUAL — 3.1 concluída / 3.2 próxima
 Etapa 4 — expansão operacional de Resíduos            ⏳
 Etapa 5 — Projetos + Atividades                       ⏳
 Etapa 6 — Estagiários + vínculos                      ⏳
@@ -635,4 +637,29 @@ docs/DECISAO_UNIDADES_CORPORATIVAS.md
 
 # 22. Regra final de retomada
 
-**O SGL está funcionalmente aprovado. As Etapas 1 e 2 da pré-produção foram concluídas. A retomada deve começar pela Etapa 3 — refinamentos do fluxo atual de Resíduos — seguindo `docs/PLANO_PRE_PRODUCAO.md` do backend. Não tratar a matriz de permissões como tarefa imediata até o encerramento desse bloco. Conferir `main`, router e Swagger antes de confiar em documentos históricos, e lembrar que alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto.**
+**O SGL está funcionalmente aprovado. As Etapas 1 e 2 da pré-produção foram concluídas. A Etapa 3 está em execução em `feat/etapa-3-residuos`: a 3.1 foi concluída e validada, e a próxima subetapa é a 3.2 — dados/classes/segurança/responsabilidade do Resíduo. Não tratar a matriz de permissões como tarefa imediata até o encerramento desse bloco. Conferir `main`, router e Swagger antes de confiar em documentos históricos, e lembrar que alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto.**
+
+---
+
+# 23. Fechamento da Etapa 3.1 — 16/09/2026
+
+A redundância visual da análise de Resíduos foi removida e validada.
+
+```text
+PENDENTES_ANALISE                  removido
+filtro=pendentes-analise          removido
+A receber → INFORMADO             preservado
+Em análise → EM_ANALISE           preservado
+KPI agregado do Dashboard         preservado
+navegação por status real         preservada
+backend/banco/contratos           sem alteração
+```
+
+Commits funcionais:
+
+```text
+11f420c  feat: remover redundância da análise de resíduos
+833c59d  feat: alinhar navegação do dashboard de resíduos
+```
+
+Próxima subetapa: **3.2 — dados/classes/segurança/responsabilidade do Resíduo**.
