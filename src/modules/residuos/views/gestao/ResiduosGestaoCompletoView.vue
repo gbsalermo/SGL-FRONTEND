@@ -15,7 +15,7 @@ import type {
 } from '@/modules/residuos/types/residuo'
 import { useSessionStore } from '@/stores/session'
 
-type FiltroResiduo = StatusResiduo | 'TODOS' | 'PENDENTES_ANALISE'
+type FiltroResiduo = StatusResiduo | 'TODOS'
 
 const session = useSessionStore()
 const router = useRouter()
@@ -65,7 +65,6 @@ const tiposRisco: Array<{ valor: TipoRiscoResiduo; rotulo: string }> = [
 
 const abas: Array<{ valor: FiltroResiduo; rotulo: string }> = [
   { valor: 'TODOS', rotulo: 'Todos' },
-  { valor: 'PENDENTES_ANALISE', rotulo: 'Pendentes de análise' },
   { valor: 'INFORMADO', rotulo: 'A receber' },
   { valor: 'EM_ANALISE', rotulo: 'Em análise' },
   { valor: 'LIBERADO_PARA_ARMAZENAMENTO', rotulo: 'Liberados' },
@@ -78,9 +77,7 @@ const residuoAlvo = computed(() => typeof route.query.residuo === 'string' ? rou
 const residuosFiltrados = computed(() => {
   const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
   return residuos.value.filter((residuo) => {
-    const statusOk = aba.value === 'TODOS'
-      || (aba.value === 'PENDENTES_ANALISE' && ['INFORMADO', 'EM_ANALISE'].includes(residuo.status))
-      || residuo.status === aba.value
+    const statusOk = aba.value === 'TODOS' || residuo.status === aba.value
     const buscaOk = !termo || [
       residuo.descricao,
       residuo.usuarioGeradorNome,
@@ -103,19 +100,10 @@ function quantidadeStatus(status: StatusResiduo) {
 
 function quantidadeFiltro(filtro: FiltroResiduo) {
   if (filtro === 'TODOS') return residuos.value.length
-  if (filtro === 'PENDENTES_ANALISE') {
-    return residuos.value.filter((residuo) => ['INFORMADO', 'EM_ANALISE'].includes(residuo.status)).length
-  }
   return quantidadeStatus(filtro)
 }
 
 function aplicarFiltroDaRota() {
-  const filtro = Array.isArray(route.query.filtro) ? route.query.filtro[0] : route.query.filtro
-  if (filtro === 'pendentes-analise') {
-    aba.value = 'PENDENTES_ANALISE'
-    return
-  }
-
   const status = Array.isArray(route.query.status) ? route.query.status[0] : route.query.status
   const statusValidos: StatusResiduo[] = [
     'INFORMADO',
@@ -411,7 +399,7 @@ function abrirRotulo(residuo: ResiduoResponse) {
 }
 
 watch(
-  () => [route.query.filtro, route.query.status],
+  () => route.query.status,
   aplicarFiltroDaRota,
   { immediate: true },
 )
