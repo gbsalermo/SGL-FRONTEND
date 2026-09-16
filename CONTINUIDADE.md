@@ -573,7 +573,7 @@ limpeza/revisão documental                            ✅ concluída
 planejamento dos ajustes                              ✅ consolidado
 Etapa 1 — refinamento visual global                   ✅ concluída
 Etapa 2 — Dark Mode definitivo                        ✅ concluída
-Etapa 3 — refinamentos do fluxo atual de Resíduos     🔧 ATUAL — 3.1 concluída / 3.2 próxima
+Etapa 3 — refinamentos do fluxo atual de Resíduos     🔧 ATUAL — 3.2 frontend implementada / validação manual pendente
 Etapa 4 — expansão operacional de Resíduos            ⏳
 Etapa 5 — Projetos + Atividades                       ⏳
 Etapa 6 — Estagiários + vínculos                      ⏳
@@ -637,7 +637,7 @@ docs/DECISAO_UNIDADES_CORPORATIVAS.md
 
 # 22. Regra final de retomada
 
-**O SGL está funcionalmente aprovado. As Etapas 1 e 2 da pré-produção foram concluídas. A Etapa 3 está em execução em `feat/etapa-3-residuos`: a 3.1 foi concluída e validada, e a próxima subetapa é a 3.2 — dados/classes/segurança/responsabilidade do Resíduo. Não tratar a matriz de permissões como tarefa imediata até o encerramento desse bloco. Conferir `main`, router e Swagger antes de confiar em documentos históricos, e lembrar que alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto.**
+**O SGL está funcionalmente aprovado. As Etapas 1 e 2 da pré-produção foram concluídas. A Etapa 3 está em execução em `feat/etapa-3-residuos`: a 3.1 foi concluída e validada, e a integração frontend da 3.2 foi implementada com validação manual pendente. Depois da validação, a próxima subetapa é a 3.3 — geração/visualização do rótulo separada da permissão de impressão. Não tratar a matriz de permissões como tarefa imediata até o encerramento desse bloco. Conferir `main`, router e Swagger antes de confiar em documentos históricos, e lembrar que alterações funcionais de backend serão implementadas manualmente pelo responsável do projeto.**
 
 ---
 
