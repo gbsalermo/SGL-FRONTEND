@@ -7,7 +7,9 @@ import { residuoService } from '@/modules/residuos/services/residuoService'
 import type {
   AnalisarResiduoRequest,
   ApiErrorResponse,
+  ClasseResiduoResponse,
   HistoricoResiduoResponse,
+  MedidaSegurancaResiduo,
   NivelRiscoResiduo,
   ResiduoResponse,
   StatusResiduo,
@@ -22,6 +24,7 @@ const router = useRouter()
 const route = useRoute()
 
 const residuos = ref<ResiduoResponse[]>([])
+const classesResiduo = ref<ClasseResiduoResponse[]>([])
 const carregando = ref(false)
 const enviando = ref(false)
 const erro = ref('')
@@ -44,9 +47,20 @@ const localArmazenamentoTemporario = ref('')
 const destinoFinalPrevisto = ref('')
 const dataPrevistaDespacho = ref('')
 const observacaoGestor = ref('')
+const classesConfirmadasIds = ref<string[]>([])
+const medidasSegurancaConfirmadas = ref<MedidaSegurancaResiduo[]>([])
+const observacaoSegurancaConfirmada = ref('')
 const localArmazenamentoConfirmacao = ref('')
 const destinoFinalConfirmado = ref('')
 const observacaoDespacho = ref('')
+
+const medidasSeguranca: Array<{ valor: MedidaSegurancaResiduo; rotulo: string }> = [
+  { valor: 'LUVAS', rotulo: 'Luvas' },
+  { valor: 'OCULOS_PROTECAO', rotulo: 'Óculos de proteção' },
+  { valor: 'PROTECAO_RESPIRATORIA', rotulo: 'Proteção respiratória' },
+  { valor: 'JALECO_AVENTAL', rotulo: 'Jaleco / avental' },
+  { valor: 'OUTRO', rotulo: 'Outro' },
+]
 
 const tiposRisco: Array<{ valor: TipoRiscoResiduo; rotulo: string }> = [
   { valor: 'NENHUM', rotulo: 'Nenhum' },
@@ -199,7 +213,12 @@ async function carregar() {
   carregando.value = true
   erro.value = ''
   try {
-    residuos.value = await residuoService.listarTodos()
+    const [residuosCarregados, classesCarregadas] = await Promise.all([
+      residuoService.listarTodos(),
+      residuoService.listarClassesAtivas(),
+    ])
+    residuos.value = residuosCarregados
+    classesResiduo.value = classesCarregadas
     if (selecionado.value) {
       selecionado.value = residuos.value.find((item) => item.id === selecionado.value?.id) ?? null
     }
@@ -279,6 +298,16 @@ function abrirAnalise(residuo: ResiduoResponse) {
   destinoFinalPrevisto.value = residuo.destinoFinalPrevisto ?? ''
   dataPrevistaDespacho.value = residuo.dataPrevistaDespacho ?? ''
   observacaoGestor.value = residuo.observacaoGestor ?? ''
+  const classesAtivas = new Set(classesResiduo.value.map((classe) => classe.id))
+  classesConfirmadasIds.value = (residuo.classesConfirmadas.length ? residuo.classesConfirmadas : residuo.classesInformadas)
+    .map((classe) => classe.classeId)
+    .filter((id) => classesAtivas.has(id))
+  medidasSegurancaConfirmadas.value = residuo.medidasSegurancaConfirmadas.length
+    ? [...residuo.medidasSegurancaConfirmadas]
+    : [...residuo.medidasSegurancaInformadas]
+  observacaoSegurancaConfirmada.value = residuo.observacaoSegurancaConfirmada
+    ?? residuo.observacaoSegurancaInformada
+    ?? ''
   erro.value = ''
   sucesso.value = ''
   analiseAberta.value = true
@@ -296,6 +325,10 @@ function alternarRisco(risco: TipoRiscoResiduo) {
 
 function validarAnalise() {
   if (!session.usuario?.id) throw new Error('Sessão sem usuário gestor válido.')
+  if (classesConfirmadasIds.value.length === 0) throw new Error('Confirme pelo menos uma classe de resíduo.')
+  if (medidasSegurancaConfirmadas.value.includes('OUTRO') && !observacaoSegurancaConfirmada.value.trim()) {
+    throw new Error('Descreva a medida de segurança marcada como Outro.')
+  }
   if (!localArmazenamentoTemporario.value.trim()) throw new Error('Informe o local de armazenamento temporário.')
   if (!destinoFinalPrevisto.value.trim()) throw new Error('Informe o destino final previsto.')
   if (riscosConfirmados.value.length === 0) throw new Error('Confirme pelo menos uma classificação de risco.')
@@ -311,6 +344,9 @@ async function confirmarAnalise() {
       usuarioGestorId: session.usuario.id,
       nivelRiscoConfirmado: nivelRiscoConfirmado.value,
       riscosConfirmados: riscosConfirmados.value,
+      classesConfirmadasIds: [...classesConfirmadasIds.value],
+      medidasSegurancaConfirmadas: [...medidasSegurancaConfirmadas.value],
+      observacaoSegurancaConfirmada: observacaoSegurancaConfirmada.value.trim() || null,
       localArmazenamentoTemporario: localArmazenamentoTemporario.value.trim(),
       destinoFinalPrevisto: destinoFinalPrevisto.value.trim(),
       dataPrevistaDespacho: dataPrevistaDespacho.value || null,
@@ -516,6 +552,15 @@ onMounted(carregar)
           </section>
 
           <section>
+            <h3>Caracterização</h3>
+            <dl class="details-list">
+              <div><dt>Estado físico</dt><dd>{{ selecionado.estadoFisico ? formatarEnum(selecionado.estadoFisico) : 'Não informado em registro histórico' }}</dd></div>
+              <div><dt>Tratamento realizado</dt><dd>{{ selecionado.tratamentoRealizado === null ? 'Não informado em registro histórico' : selecionado.tratamentoRealizado ? 'Sim' : 'Não' }}</dd></div>
+              <div v-if="selecionado.tratamentoRealizado"><dt>Descrição do tratamento</dt><dd>{{ selecionado.descricaoTratamento }}</dd></div>
+            </dl>
+          </section>
+
+          <section>
             <h3>Composição informada</h3>
             <div class="components-list">
               <article v-for="componente in selecionado.componentes" :key="componente.id">
@@ -526,6 +571,21 @@ onMounted(carregar)
                 <span v-if="componente.principal">Principal</span>
                 <p>{{ componente.concentracaoOuQuantidade ?? 'Quantidade/concentração não informada' }}</p>
               </article>
+            </div>
+          </section>
+
+          <section class="risk-section">
+            <div>
+              <span>CLASSES INFORMADAS</span>
+              <h3>{{ selecionado.classesInformadas.length ? selecionado.classesInformadas.map((classe) => classe.codigo).join(' · ') : 'Sem classificação histórica' }}</h3>
+              <p>{{ selecionado.classesInformadas.map((classe) => classe.descricao).join(' · ') || 'Nenhuma classe registrada.' }}</p>
+              <small>Segurança: {{ selecionado.medidasSegurancaInformadas.length ? selecionado.medidasSegurancaInformadas.map(formatarEnum).join(' · ') : 'Nenhuma medida específica' }}</small>
+            </div>
+            <div :class="{ pending: selecionado.classesConfirmadas.length === 0 }">
+              <span>CLASSES CONFIRMADAS</span>
+              <h3>{{ selecionado.classesConfirmadas.length ? selecionado.classesConfirmadas.map((classe) => classe.codigo).join(' · ') : 'Aguardando análise' }}</h3>
+              <p>{{ selecionado.classesConfirmadas.map((classe) => classe.descricao).join(' · ') || 'Ainda não confirmadas.' }}</p>
+              <small>Segurança: {{ selecionado.medidasSegurancaConfirmadas.length ? selecionado.medidasSegurancaConfirmadas.map(formatarEnum).join(' · ') : 'Ainda não confirmada.' }}</small>
             </div>
           </section>
 
@@ -597,7 +657,13 @@ onMounted(carregar)
         <header><div><span>ANÁLISE TÉCNICA</span><h2>Classificar e liberar resíduo</h2></div><button type="button" @click="fecharAnalise">×</button></header>
         <div class="modal-content analysis-content">
           <div class="declaration-reference">
-            <div><span>Informado pelo laboratório</span><strong>Risco {{ formatarEnum(selecionado.nivelRiscoInformado) }}</strong><p>{{ selecionado.riscosInformados.map(formatarEnum).join(' · ') }}</p></div>
+            <div>
+              <span>Informado pelo laboratório</span>
+              <strong>Risco {{ formatarEnum(selecionado.nivelRiscoInformado) }}</strong>
+              <p>{{ selecionado.riscosInformados.map(formatarEnum).join(' · ') }}</p>
+              <p>Classes: {{ selecionado.classesInformadas.map((classe) => classe.codigo).join(' · ') }}</p>
+              <p>Segurança: {{ selecionado.medidasSegurancaInformadas.length ? selecionado.medidasSegurancaInformadas.map(formatarEnum).join(' · ') : 'Nenhuma medida específica' }}</p>
+            </div>
             <p>A declaração original é histórica e não será sobrescrita.</p>
           </div>
           <div class="analysis-grid">
@@ -605,6 +671,12 @@ onMounted(carregar)
             <label class="field"><span>Data prevista de despacho <small>(opcional)</small></span><input v-model="dataPrevistaDespacho" type="date" :min="minDataDespacho" /></label>
           </div>
           <fieldset class="risk-fieldset"><legend>Riscos confirmados</legend><button v-for="risco in tiposRisco" :key="risco.valor" type="button" :class="{ selected: riscosConfirmados.includes(risco.valor) }" @click="alternarRisco(risco.valor)"><span class="checkmark">{{ riscosConfirmados.includes(risco.valor) ? '✓' : '' }}</span>{{ risco.rotulo }}</button></fieldset>
+
+          <fieldset class="risk-fieldset"><legend>Classes confirmadas</legend><button v-for="classe in classesResiduo" :key="classe.id" type="button" :class="{ selected: classesConfirmadasIds.includes(classe.id) }" @click="classesConfirmadasIds = classesConfirmadasIds.includes(classe.id) ? classesConfirmadasIds.filter((id) => id !== classe.id) : [...classesConfirmadasIds, classe.id]"><span class="checkmark">{{ classesConfirmadasIds.includes(classe.id) ? '✓' : '' }}</span>{{ classe.codigo }} — {{ classe.descricao }}</button></fieldset>
+
+          <fieldset class="risk-fieldset"><legend>Segurança / EPI confirmados</legend><button v-for="medida in medidasSeguranca" :key="medida.valor" type="button" :class="{ selected: medidasSegurancaConfirmadas.includes(medida.valor) }" @click="medidasSegurancaConfirmadas = medidasSegurancaConfirmadas.includes(medida.valor) ? medidasSegurancaConfirmadas.filter((item) => item !== medida.valor) : [...medidasSegurancaConfirmadas, medida.valor]"><span class="checkmark">{{ medidasSegurancaConfirmadas.includes(medida.valor) ? '✓' : '' }}</span>{{ medida.rotulo }}</button></fieldset>
+          <label class="field"><span>Orientação complementar de segurança <small>(obrigatória para Outro)</small></span><textarea v-model="observacaoSegurancaConfirmada" rows="3" /></label>
+
           <div class="analysis-grid">
             <label class="field"><span>Local de armazenamento temporário</span><input v-model="localArmazenamentoTemporario" /></label>
             <label class="field"><span>Destino final previsto</span><input v-model="destinoFinalPrevisto" /></label>
@@ -653,6 +725,10 @@ onMounted(carregar)
 .dispatch-action { background: #6b4fa1; }
 .label-action { background: #173d7a; }
 .storage-action:disabled, .dispatch-action:disabled { opacity: .55; cursor: default; }
+.details-list { display: grid; gap: 8px; margin: 0; }
+.details-list div { display: grid; grid-template-columns: 150px 1fr; gap: 12px; }
+.details-list dt { color: #7a879a; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+.details-list dd { margin: 0; color: #33465f; font-size: 11px; }
 .tracking-card { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 16px; border: 1px solid #d9e3f0; border-radius: 9px; background: #f8fbff; }
 .tracking-card span { display: block; color: #738198; font-size: 9px; font-weight: 800; text-transform: uppercase; }
 .tracking-card strong { display: block; margin-top: 5px; color: #17345e; font-size: 12px; line-height: 1.35; }
