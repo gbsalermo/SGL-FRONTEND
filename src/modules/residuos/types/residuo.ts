@@ -137,6 +137,9 @@ export interface RotuloResiduoResponse {
   residuoId: string
   codigoRastreio: string
   qrCodeConteudo: string | null
+  status: StatusResiduo
+  impressaoPermitida: boolean
+  classificacaoConfirmada: boolean
   descricao: string
   unidadeId: string
   unidadeNome: string
