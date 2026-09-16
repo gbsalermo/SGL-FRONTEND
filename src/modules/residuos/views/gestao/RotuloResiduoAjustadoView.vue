@@ -39,7 +39,11 @@ function normalizar() {
   larguraRotuloMm.value = Math.min(MAX, Math.max(MIN, Math.round(Number(larguraRotuloMm.value) || BASE_LARGURA)))
 }
 
-function imprimir() { normalizar(); window.print() }
+function imprimir() {
+  if (!dados.value?.impressaoPermitida) return
+  normalizar()
+  window.print()
+}
 function voltar() { router.push('/residuos') }
 onMounted(carregar)
 </script>
@@ -48,9 +52,18 @@ onMounted(carregar)
   <main class="print-page">
     <header class="toolbar no-print">
       <button type="button" @click="voltar">← Voltar</button>
-      <div><strong>Rótulo de resíduo</strong><span>A folha permanece A4; somente o rótulo muda de tamanho.</span></div>
-      <button class="primary" type="button" :disabled="!dados" @click="imprimir">Imprimir rótulo</button>
+      <div>
+        <strong>{{ dados?.impressaoPermitida ? 'Rótulo de resíduo' : 'Prévia do rótulo' }}</strong>
+        <span v-if="dados?.impressaoPermitida">A folha permanece A4; somente o rótulo muda de tamanho.</span>
+        <span v-else>Confira os dados disponíveis. A impressão será liberada após a análise técnica.</span>
+      </div>
+      <button class="primary" type="button" :disabled="!dados?.impressaoPermitida" @click="imprimir">Imprimir rótulo</button>
     </header>
+
+    <section v-if="dados && !dados.impressaoPermitida" class="preview-warning no-print">
+      <strong>Prévia — impressão bloqueada</strong>
+      <span>Status atual: {{ dados.status.replaceAll('_', ' ') }}. A identificação e o QR já pertencem ao Resíduo, mas a impressão física só é autorizada após a liberação.</span>
+    </section>
 
     <section class="controls no-print">
       <div class="presets">
@@ -74,12 +87,16 @@ onMounted(carregar)
 
 <style scoped>
 .print-page { min-height: 100vh; padding: 24px; background: #edf1f6; color: #15243b; }
-.toolbar, .controls { width: min(100%, 1120px); margin: 0 auto 14px; padding: 16px 18px; border: 1px solid #d9e1eb; border-radius: 11px; background: #fff; box-shadow: 0 10px 30px rgb(13 43 94 / 7%); }
+.toolbar, .controls, .preview-warning { width: min(100%, 1120px); margin: 0 auto 14px; padding: 16px 18px; border: 1px solid #d9e1eb; border-radius: 11px; background: #fff; box-shadow: 0 10px 30px rgb(13 43 94 / 7%); }
+.preview-warning { display: flex; flex-direction: column; gap: 4px; margin: 0 auto 14px; padding: 12px 16px; border: 1px solid #e5c773; border-radius: 9px; background: #fff9e8; color: #705814; }
+.preview-warning strong { font-size: 11px; text-transform: uppercase; }
+.preview-warning span { font-size: 10px; line-height: 1.45; }
 .toolbar { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; }
 .toolbar > div { display: flex; flex-direction: column; gap: 3px; }
 .toolbar span { color: #718096; font-size: 12px; }
 .toolbar button, .presets button { min-height: 40px; padding: 0 14px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #34445c; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
 .toolbar .primary { border: 0; background: #174da3; color: #fff; }
+.toolbar .primary:disabled { opacity: .45; cursor: not-allowed; }
 .controls { display: grid; gap: 14px; margin-bottom: 22px; }
 .presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .presets button { min-height: 54px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; }
