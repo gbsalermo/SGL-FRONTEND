@@ -105,6 +105,11 @@ const residuosFiltrados = computed(() => {
 
 const minDataDespacho = computed(() => new Date().toISOString().slice(0, 10))
 const podeVisualizarRotulo = computed(() => Boolean(selecionado.value))
+const eventoLiberacao = computed(() =>
+  [...historico.value]
+    .reverse()
+    .find((evento) => evento.acao === 'RISCO_CONFERIDO_E_RESIDUO_LIBERADO') ?? null,
+)
 
 function rotuloAcaoRotulo(status: StatusResiduo) {
   return ['INFORMADO', 'EM_ANALISE'].includes(status)
@@ -361,7 +366,7 @@ async function confirmarAnalise() {
     atualizarResiduo(atualizado)
     analiseAberta.value = false
     limparSelecaoOperacional()
-    sucesso.value = `Análise concluída. Código ${atualizado.codigoRastreio ?? 'gerado'} disponível para o rótulo.`
+    sucesso.value = 'Análise concluída. Impressão do rótulo liberada.'
   } catch (error) {
     erro.value = mensagemErro(error)
   } finally {
@@ -578,34 +583,31 @@ onMounted(carregar)
             </div>
           </section>
 
-          <section class="risk-section">
-            <div>
-              <span>CLASSES INFORMADAS</span>
-              <h3>{{ selecionado.classesInformadas.length ? selecionado.classesInformadas.map((classe) => classe.codigo).join(' · ') : 'Sem classificação histórica' }}</h3>
-              <p>{{ selecionado.classesInformadas.map((classe) => classe.descricao).join(' · ') || 'Nenhuma classe registrada.' }}</p>
-              <small>Segurança: {{ selecionado.medidasSegurancaInformadas.length ? selecionado.medidasSegurancaInformadas.map(formatarEnum).join(' · ') : 'Nenhuma medida específica' }}</small>
-            </div>
-            <div :class="{ pending: selecionado.classesConfirmadas.length === 0 }">
-              <span>CLASSES CONFIRMADAS</span>
-              <h3>{{ selecionado.classesConfirmadas.length ? selecionado.classesConfirmadas.map((classe) => classe.codigo).join(' · ') : 'Aguardando análise' }}</h3>
-              <p>{{ selecionado.classesConfirmadas.map((classe) => classe.descricao).join(' · ') || 'Ainda não confirmadas.' }}</p>
-              <small>Segurança: {{ selecionado.medidasSegurancaConfirmadas.length ? selecionado.medidasSegurancaConfirmadas.map(formatarEnum).join(' · ') : 'Ainda não confirmada.' }}</small>
-            </div>
-          </section>
+          <section class="comparison-section">
+            <article class="comparison-card comparison-card--original">
+              <header><span>INFORMADO PELO LABORATÓRIO</span><strong>{{ selecionado.usuarioGeradorNome }}</strong></header>
+              <dl>
+                <div><dt>Classes</dt><dd><b>{{ selecionado.classesInformadas.map((classe) => classe.codigo).join(' · ') || 'Sem classe histórica' }}</b><small>{{ selecionado.classesInformadas.map((classe) => classe.descricao).join(' · ') || 'Nenhuma classe registrada.' }}</small></dd></div>
+                <div><dt>Risco</dt><dd><b>Risco {{ formatarEnum(selecionado.nivelRiscoInformado) }}</b><small>{{ selecionado.riscosInformados.map(formatarEnum).join(' · ') || 'Nenhum risco específico' }}</small></dd></div>
+                <div><dt>Segurança / EPI</dt><dd>{{ selecionado.medidasSegurancaInformadas.length ? selecionado.medidasSegurancaInformadas.map(formatarEnum).join(' · ') : 'Nenhuma medida específica' }}</dd></div>
+                <div><dt>Observação</dt><dd>{{ selecionado.observacaoGerador ?? 'Sem observação do gerador.' }}</dd></div>
+              </dl>
+            </article>
 
-          <section class="risk-section">
-            <div>
-              <span>DECLARAÇÃO ORIGINAL</span>
-              <h3>Risco {{ formatarEnum(selecionado.nivelRiscoInformado) }}</h3>
-              <p>{{ selecionado.riscosInformados.map(formatarEnum).join(' · ') || 'Nenhum risco específico' }}</p>
-              <small>{{ selecionado.observacaoGerador ?? 'Sem observação do gerador.' }}</small>
-            </div>
-            <div :class="{ pending: !selecionado.nivelRiscoConfirmado }">
-              <span>CLASSIFICAÇÃO DA GESTÃO</span>
-              <h3>{{ selecionado.nivelRiscoConfirmado ? `Risco ${formatarEnum(selecionado.nivelRiscoConfirmado)}` : 'Aguardando análise' }}</h3>
-              <p>{{ selecionado.riscosConfirmados.length ? selecionado.riscosConfirmados.map(formatarEnum).join(' · ') : 'Nenhum risco confirmado ainda.' }}</p>
-              <small>{{ selecionado.observacaoGestor ?? 'A classificação técnica preserva a declaração original.' }}</small>
-            </div>
+            <article class="comparison-card comparison-card--approved" :class="{ pending: !selecionado.nivelRiscoConfirmado }">
+              <header><span>APROVADO PELA GESTÃO</span><strong>{{ selecionado.nivelRiscoConfirmado ? 'Classificação liberada' : 'Aguardando análise' }}</strong></header>
+              <dl>
+                <div><dt>Classes</dt><dd><b>{{ selecionado.classesConfirmadas.map((classe) => classe.codigo).join(' · ') || 'Aguardando confirmação' }}</b><small>{{ selecionado.classesConfirmadas.map((classe) => classe.descricao).join(' · ') || 'Ainda não confirmadas.' }}</small></dd></div>
+                <div><dt>Risco</dt><dd><b>{{ selecionado.nivelRiscoConfirmado ? `Risco ${formatarEnum(selecionado.nivelRiscoConfirmado)}` : 'Aguardando análise' }}</b><small>{{ selecionado.riscosConfirmados.length ? selecionado.riscosConfirmados.map(formatarEnum).join(' · ') : 'Nenhum risco confirmado ainda.' }}</small></dd></div>
+                <div><dt>Segurança / EPI</dt><dd>{{ selecionado.medidasSegurancaConfirmadas.length ? selecionado.medidasSegurancaConfirmadas.map(formatarEnum).join(' · ') : 'Ainda não confirmada.' }}</dd></div>
+                <div><dt>Observação técnica</dt><dd>{{ selecionado.observacaoGestor ?? 'Sem observação técnica.' }}</dd></div>
+              </dl>
+              <footer v-if="eventoLiberacao" class="approval-meta">
+                <span>Liberado por</span>
+                <strong>{{ eventoLiberacao.usuarioNome ?? 'Gestor não identificado' }}</strong>
+                <small>{{ formatarData(eventoLiberacao.dataHora) }}</small>
+              </footer>
+            </article>
           </section>
 
           <section v-if="selecionado.codigoRastreio" class="tracking-card">
@@ -686,7 +688,7 @@ onMounted(carregar)
             <label class="field"><span>Destino final previsto</span><input v-model="destinoFinalPrevisto" /></label>
           </div>
           <label class="field"><span>Observação técnica <small>(opcional)</small></span><textarea v-model="observacaoGestor" rows="4" /></label>
-          <p class="guidance guidance--warning">Ao confirmar, o resíduo é liberado para armazenamento e o código de rastreio do rótulo é gerado.</p>
+          <p class="guidance guidance--warning">Ao confirmar, o resíduo é liberado para armazenamento e a impressão do rótulo é autorizada. O código SGL já foi gerado no registro inicial.</p>
         </div>
         <footer><button class="secondary-action" type="button" @click="fecharAnalise">Cancelar</button><button class="analysis-action" type="button" :disabled="enviando" @click="confirmarAnalise">{{ enviando ? 'Salvando...' : 'Confirmar classificação' }}</button></footer>
       </section>
@@ -733,6 +735,23 @@ onMounted(carregar)
 .details-list div { display: grid; grid-template-columns: 150px 1fr; gap: 12px; }
 .details-list dt { color: #7a879a; font-size: 9px; font-weight: 800; text-transform: uppercase; }
 .details-list dd { margin: 0; color: #33465f; font-size: 11px; }
+.comparison-section { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.comparison-card { min-width: 0; display: flex; flex-direction: column; gap: 14px; padding: 16px; border: 1px solid #d9e3f0; border-radius: 10px; background: #f8fbff; }
+.comparison-card--approved { border-color: #c7dfcf; background: #f5fbf7; }
+.comparison-card.pending { border-color: #d9e3f0; background: #f8fafc; opacity: .82; }
+.comparison-card > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.comparison-card > header span { color: #738198; font-size: 9px; font-weight: 900; letter-spacing: .05em; }
+.comparison-card > header strong { color: #263b5b; font-size: 10px; text-align: right; }
+.comparison-card dl { display: grid; gap: 10px; margin: 0; }
+.comparison-card dl > div { display: grid; grid-template-columns: 105px 1fr; gap: 12px; padding-top: 10px; border-top: 1px solid rgb(164 180 202 / 25%); }
+.comparison-card dt { color: #7a879a; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+.comparison-card dd { margin: 0; color: #33465f; font-size: 11px; line-height: 1.45; }
+.comparison-card dd b, .comparison-card dd small { display: block; }
+.comparison-card dd small { margin-top: 3px; color: #6f7e92; font-size: 9px; }
+.approval-meta { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid #cfe0d4; }
+.approval-meta span { color: #738198; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+.approval-meta strong { color: #20583a; font-size: 10px; }
+.approval-meta small { color: #718096; font-size: 9px; }
 .tracking-card { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 16px; border: 1px solid #d9e3f0; border-radius: 9px; background: #f8fbff; }
 .tracking-card span { display: block; color: #738198; font-size: 9px; font-weight: 800; text-transform: uppercase; }
 .tracking-card strong { display: block; margin-top: 5px; color: #17345e; font-size: 12px; line-height: 1.35; }
@@ -755,5 +774,5 @@ onMounted(carregar)
 .drawer-actions--wrap { flex-wrap: wrap; }
 .field--spaced { margin-top: 15px; }
 @media (max-width: 1180px) { .metrics-grid--five { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 760px) { .metrics-grid--five, .tracking-card { grid-template-columns: 1fr; } .timeline-card > div { flex-direction: column; gap: 4px; } }
+@media (max-width: 760px) { .metrics-grid--five, .tracking-card, .comparison-section { grid-template-columns: 1fr; } .timeline-card > div { flex-direction: column; gap: 4px; } .approval-meta { grid-template-columns: 1fr; } }
 </style>
