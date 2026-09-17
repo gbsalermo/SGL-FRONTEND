@@ -13,9 +13,21 @@
 
 ---
 
-## Estado atual — 11/09/2026
+## Estado atual — 17/09/2026
 
-O primeiro protótipo do SGL foi **funcionalmente aprovado**. As Etapas 1 (padrão visual global) e 2 (Dark Mode definitivo) da pré-produção foram concluídas. A etapa atual é a **Etapa 3 — Refinamentos do fluxo atual de Resíduos**, anterior ao roadmap formal de matriz de permissões, congelamento, homologação final e segurança definitiva.
+O primeiro protótipo do SGL foi funcionalmente aprovado. As Etapas 1, 2 e 3 da pré-produção foram concluídas e validadas. A **Etapa 4 — Expansão operacional de Resíduos** foi iniciada na branch `feat/etapa-4-residuos`.
+
+Situação atual:
+
+```text
+Etapa 1 — padrão visual global                 ✅
+Etapa 2 — Dark Mode definitivo                 ✅
+Etapa 3 — refinamentos de Resíduos             ✅
+Etapa 4 — expansão operacional de Resíduos     🔧 atual
+  4.1 — locais de armazenamento                🔧 backend primeiro
+```
+
+O frontend da 4.1 só será implementado depois do contrato backend estar estabilizado.
 
 Estado consolidado:
 
@@ -28,9 +40,13 @@ Estoque / lotes                                   ✅
 Movimentações                                     ✅
 Relatórios / fiscalização                         ✅
 PDF/XLSX                                          ✅
-Resíduos — Solicitante e Gestão                   ✅
-Rótulos de Resíduo e Produto                      ✅
-Estagiários                                       ✅
+Resíduos — Solicitante e Gestão                   ✅ Etapa 3
+Classes de Resíduo em Cadastros                   ✅
+Segurança/EPI em Produto/Resíduo                  ✅
+Prévia antecipada do rótulo                       ✅
+Impressão condicionada à liberação                ✅
+Rótulos de Resíduo e Produto                      ✅ base funcional
+Estagiários                                       ✅ base atual
 Pessoas por laboratório                           ✅
 Administração / Cadastros                         ✅
 Dashboard Gestão                                  ✅
@@ -44,13 +60,11 @@ Autenticação/autorização definitiva               ⏳ etapa formal posterior
 Integração corporativa                            ⏳ etapa formal posterior
 ```
 
-> Para retomar o projeto, começar por [`CONTINUIDADE.md`](CONTINUIDADE.md), pelo plano canônico do backend `docs/PLANO_PRE_PRODUCAO.md`, pelo checkpoint `docs/CONTINUIDADE_ETAPA_3_2026-09-11.md`, por [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) e `src/router/index.ts`. Contratos HTTP pertencem ao Swagger/OpenAPI do backend.
+> Para retomar o projeto, começar por [`CONTINUIDADE.md`](CONTINUIDADE.md), pelo plano canônico do backend `docs/PLANO_PRE_PRODUCAO.md`, pelo handoff `docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`, pelo dossiê atual e por `src/router/index.ts`. Contratos HTTP pertencem ao Swagger/OpenAPI do backend.
 
 ---
 
 ## Papel do frontend
-
-A aplicação organiza três experiências:
 
 ```text
 SOLICITANTE
@@ -151,69 +165,30 @@ Fonte de verdade: `src/router/index.ts`.
 Rota inicial por perfil:
 
 ```text
-GESTOR / ADMINISTRADOR
-→ /dashboard
-
-TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO
-→ /inicio
+GESTOR / ADMINISTRADOR → /dashboard
+TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO → /inicio
 ```
 
 ---
 
 ## Sessão DEV e contexto de Unidade
 
-A sessão atual continua sendo um mecanismo de desenvolvimento, não autenticação de produção.
-
-Fluxo:
+A sessão atual continua sendo mecanismo de desenvolvimento, não autenticação de produção.
 
 ```text
 usuário informa identificador + senha
 → frontend consulta usuários existentes
 → resolve usuário ativo
-→ senha ainda não é validada por autenticação backend definitiva
-→ sessão é persistida em localStorage
-→ sessão expira após 5 horas
+→ sessão DEV em localStorage
+→ expiração em 5 horas
+→ interceptor envia X-SGL-Unidade-Id
 ```
 
-A sessão mantém informações como:
-
-```text
-perfil
-unidadeId
-unidadeNome
-unidadeSigla
-laboratorioId
-laboratorioNome
-```
-
-O interceptor HTTP usa `unidadeId` para enviar:
-
-```text
-X-SGL-Unidade-Id: <unidadeId>
-```
-
-O backend usa esse contexto para restringir dados por Unidade.
-
-**Importante:** isso é isolamento funcional de desenvolvimento. Como o header ainda é controlado pelo cliente, ele não substitui a futura autorização baseada em identidade autenticada.
+O backend usa esse contexto para restringir dados por Unidade. Como o header ainda é controlado pelo cliente, isso não substitui autorização baseada em identidade autenticada.
 
 ---
 
 ## Pedidos
-
-### Solicitante
-
-```text
-/pedidos/novo
-/meus-pedidos
-```
-
-### Gestão
-
-```text
-/pedidos
-```
-
-Regras que não devem ser duplicadas no frontend:
 
 ```text
 criação → não baixa estoque
@@ -236,27 +211,11 @@ Urgência não muda FIFO/FEFO.
 /estoque/lotes-vencendo
 ```
 
-Cobertura:
-
-- saldo consolidado;
-- estoque mínimo;
-- busca e filtros;
-- entrada de lote;
-- Código SGL;
-- embalagem e multiplicador;
-- fracionamento irreversível `false → true`;
-- validade;
-- descarte por vencimento;
-- histórico/rastreabilidade;
-- integração com dashboard, alertas e busca global.
-
-Lotes continuam pertencendo ao contexto de Estoque; não há motivo para criar uma área principal independente.
+Cobertura: saldo consolidado, estoque mínimo, lotes, validade, entrada, Código SGL, embalagem/multiplicador, fracionamento, descarte e rastreabilidade.
 
 ---
 
 ## Resíduos
-
-Decisão de domínio:
 
 ```text
 Produto != Resíduo
@@ -285,50 +244,35 @@ INFORMADO
 → DESPACHADO
 ```
 
-O Código SGL existe desde o registro inicial.
+A Etapa 3 consolidou:
 
-Rótulo:
+- Procedência/uso (`processoOrigem`);
+- estado físico e tratamento;
+- Classes de Resíduo;
+- Segurança/EPI;
+- sugestões de EPI vindas de Produtos;
+- análise comparativa em dois cards;
+- Gestor que liberou identificado pelo histórico;
+- armazenamento/despacho por Gestores diferentes;
+- Código SGL e QR técnico desde a criação;
+- prévia antes da liberação;
+- impressão bloqueada até liberação;
+- revisão de escala visual para 100% de zoom.
 
-```text
-/residuos/:id/rotulo
-```
-
-O visual atual não utiliza QR Code.
-
-Relatório:
-
-```text
-/relatorios/residuos
-```
-
-Modelos de resíduos pré-determinados permanecem possibilidade futura, não requisito atual.
-
----
-
-## Estagiários
+### QR e rótulo
 
 ```text
-/estagiarios
+Código SGL + QR técnico
+→ existem desde a criação
+
+Template físico atual
+→ pode não renderizar o QR visualmente
+
+Etapa 10
+→ padrão final/Zebra/ZPL/testes físicos
 ```
 
-Cobertura:
-
-```text
-listagem
-cadastro
-edição
-Unidade/Laboratório
-período
-tipo de vínculo
-encerramento com data efetiva
-indicadores de término/vencimento
-```
-
-Relatório complementar:
-
-```text
-/relatorios/pessoas-laboratorio
-```
+Não confundir existência do QR técnico no contrato com sua renderização no template visual atual.
 
 ---
 
@@ -340,91 +284,61 @@ Relatório complementar:
 
 Rota exclusiva de `ADMINISTRADOR`.
 
-Áreas:
+Áreas atuais:
 
 ```text
 Laboratórios
 Projetos
 Produtos
+Classes de Resíduo
 Permissões
-Resíduos — indicação futura/Em breve
 ```
 
-Decisões:
+Produtos possuem recomendações estruturadas de segurança. Classes de Resíduo possuem código, descrição, Unidade e ativação/inativação.
 
-- Unidade não tem CRUD manual normal;
-- usuário não é criado manualmente nessa central;
-- Permissões altera perfil de usuários existentes;
-- Produto representa catálogo-base, não estoque;
-- Laboratório respeita Unidade e responsável;
-- Projetos preservam histórico por ativação/inativação quando necessário.
+A Etapa 4 adicionará:
+
+```text
+4.1 Local de armazenamento de Resíduo
+4.2 Modelo de Resíduo
+```
 
 ---
 
-## Relatórios
+## Etapa 4.1 — impacto futuro no frontend
 
-Central:
-
-```text
-/relatorios
-```
-
-Cobertura:
+A modelagem backend já foi aprovada:
 
 ```text
-Estagiários
-Produtos
-Movimentações
-Resumo operacional
-Estoque e lotes
-Fiscalização
-Resíduos
-Pessoas por laboratório
+LocalArmazenamentoResiduo
+= catálogo por Unidade
+
+Residuo.localArmazenamentoResiduo
+= referência opcional
+
+Residuo.complementoLocalArmazenamento
+= complemento opcional
+
+Residuo.localArmazenamentoTemporario
+= snapshot textual histórico
 ```
 
-Pedidos entregues são recorte de Movimentações, não relatório separado.
-
-Prévia e exportação devem usar os mesmos filtros.
-
----
-
-## Dashboard, alertas, busca e aparência
-
-Dashboard da Gestão:
+Depois do backend estabilizado, o frontend terá:
 
 ```text
-/dashboard
+Administração/Cadastros
+→ CRUD de locais de armazenamento
+
+Gestão / análise
+→ selecionar local cadastrado
+→ complemento opcional
+→ ou modo manual
+
+Gestão / armazenamento
+→ manter ou corrigir local
 ```
 
-Indicadores operacionais incluem:
-
-```text
-pedidos pendentes/urgentes
-estoque baixo
-lotes vencidos
-lotes próximos do vencimento
-resíduos aguardando ação / em análise
-movimentações recentes
-resumo por laboratório
-```
-
-Dashboard do Solicitante:
-
-```text
-/inicio
-```
-
-Shell integrado:
-
-```text
-Alertas operacionais            ✅
-Busca global                    ✅
-Tema claro/escuro               ✅
-Persistência de preferência     ✅
-Responsividade                  ✅
-```
-
-A tela de login não deve ser alterada pelo tema das interfaces autenticadas sem decisão explícita.
+Nenhuma alteração de frontend da 4.1 deve ser antecipada antes do fechamento do contrato backend.
 
 ---
 
@@ -440,35 +354,25 @@ auditoria por identidade autenticada           ⏳
 integração corporativa                          ⏳
 ```
 
-Não tratar visibilidade de menu/rota como segurança de produção.
-
 ---
 
 ## Sequência de trabalho
 
-### Agora — pré-produção pós-aprovação
-
 ```text
 Etapa 1 — padrão visual global                 ✅
 Etapa 2 — Dark Mode definitivo                 ✅
-Etapa 3 — refinamentos do fluxo de Resíduos    🔧 atual
-Etapas 4 a 9                                   ⏳ sequenciais
+Etapa 3 — refinamentos do fluxo de Resíduos    ✅
+Etapa 4 — expansão operacional de Resíduos     🔧 atual
+Etapa 5 — Projetos + Atividades                ⏳
+Etapa 6 — Estagiários + vínculos               ⏳
+Etapa 7 — relatórios consolidados              ⏳
+Etapa 8 — unidades + Soluções                  ⏳
+Etapa 9 — Pedidos + Soluções                   ⏳
+Etapa 10 — rótulos + impressão operacional     ⏳
+Etapa 11 — Manual + delete lógico              ⏳
+Etapa 12 — testes automatizados frontend       ⏳
+Etapa 13 — revisão estrutural/legibilidade     ⏳
 ```
-
-### Depois — roadmap formal de produção
-
-```text
-1. matriz/diretrizes de permissões
-2. congelamento funcional
-3. homologação integrada final
-4. correção de falhas encontradas
-5. autenticação + autorização + auditoria definitiva
-6. integração corporativa / tenant confiável
-7. documentos/upload quando houver contrato
-8. refactors técnicos planejados
-```
-
-O roadmap formal continua válido; apenas começa após o bloco atual.
 
 ---
 
@@ -477,12 +381,12 @@ O roadmap formal continua válido; apenas começa após o bloco atual.
 | Documento | Uso |
 |---|---|
 | [`CONTINUIDADE.md`](CONTINUIDADE.md) | checkpoint e fase atual |
-| [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) | handoff consolidado |
 | [`docs/README.md`](docs/README.md) | índice e classificação documental |
-| [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) | rotas/telas |
-| [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) | jornadas |
-| [`docs/ROADMAP_INTERFACE_GESTAO.md`](docs/ROADMAP_INTERFACE_GESTAO.md) | roadmap formal posterior |
-| [`docs/FECHAMENTO_PRIMEIRO_PROTOTIPO.md`](docs/FECHAMENTO_PRIMEIRO_PROTOTIPO.md) | registro do fechamento/aprovação do protótipo |
+| [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) | handoff consolidado |
+| [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) | rotas/telas atuais |
+| [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) | jornadas atuais |
+
+Documentos de etapas anteriores permanecem como histórico e não definem o checkpoint atual.
 
 ---
 
@@ -503,5 +407,5 @@ npm run build
 
 <div align="center">
   <strong>SGL Frontend</strong><br/>
-  Sistema funcionalmente aprovado em preparação para o ciclo formal de produção.
+  Etapa 4 iniciada — frontend aguarda estabilização do backend da 4.1.
 </div>
