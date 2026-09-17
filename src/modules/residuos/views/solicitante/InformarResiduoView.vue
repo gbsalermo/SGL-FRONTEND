@@ -578,8 +578,8 @@ onMounted(carregarDados)
           <p v-if="medidasSugeridasProdutos.length" class="suggestion-copy">
             Sugestões do catálogo: {{ medidasSugeridasProdutos.map((medida) => medidasSeguranca.find((item) => item.value === medida)?.label ?? medida).join(' · ') }}.
           </p>
-          <div class="risk-grid">
-            <label v-for="medida in medidasSeguranca" :key="medida.value" class="risk-option">
+          <div class="risk-grid class-grid">
+            <label v-for="medida in medidasSeguranca" :key="medida.value" class="risk-option class-option">
               <input v-model="medidasSegurancaInformadas" type="checkbox" :value="medida.value" />
               <span>{{ medida.label }}</span>
             </label>
@@ -663,9 +663,10 @@ onMounted(carregarDados)
 .risk-option:has(input:checked) { border-color: #6c94d0; background: #eef5ff; color: #1d4f99; }
 .risk-option input { width: 15px; height: 15px; accent-color: #245eb6; }
 .field-group-title { display: block; margin-bottom: 9px; color: #334a6a; font-size: 11px; }
-.class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.class-option { align-items: flex-start; }
-.security-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+.class-grid .risk-option { height: 100%; }
+.class-option { align-items: center; }
+.security-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 8px; }
 .suggest-action { padding: 7px 10px; border: 1px solid #b8c9e4; border-radius: 6px; background: #f6f9ff; color: #28569d; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
 .suggestion-copy { margin: 0 0 10px; color: #657892; font-size: 10px; line-height: 1.5; }
 .security-note { margin-top: 10px; }
