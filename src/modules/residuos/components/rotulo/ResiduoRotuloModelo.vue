@@ -115,7 +115,7 @@ function unidadeLegivel(valor: string) {
           <strong>SGL — Sistema de Gestão de Laboratórios</strong>
           <span>{{ dados.laboratorioNome }}</span>
           <span>Gerador: {{ dados.geradorNome }}</span>
-          <span>Rotulagem: {{ formatarData(dados.dataRotulagem) }}</span>
+          <span>{{ dados.impressaoPermitida ? 'Rotulagem' : 'Prévia' }}: {{ dados.impressaoPermitida ? formatarData(dados.dataRotulagem) : 'não liberada para impressão' }}</span>
         </div>
       </header>
 

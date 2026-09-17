@@ -1,6 +1,8 @@
 import { http } from '@/services/http'
 import type {
   AlterarPerfilRequest,
+  ClasseResiduoCadastro,
+  ClasseResiduoRequest,
   LaboratorioCadastro,
   LaboratorioRequest,
   ProdutoCadastro,
@@ -59,6 +61,21 @@ export const cadastrosAdminService = {
 
   async atualizarProduto(id: string, payload: ProdutoRequest) {
     const { data } = await http.put<ProdutoCadastro>(`/v1/produtos/${id}`, payload)
+    return data
+  },
+
+  async listarClassesResiduo() {
+    const { data } = await http.get<ClasseResiduoCadastro[]>('/v1/classes-residuo')
+    return data
+  },
+
+  async criarClasseResiduo(payload: ClasseResiduoRequest) {
+    const { data } = await http.post<ClasseResiduoCadastro>('/v1/classes-residuo', payload)
+    return data
+  },
+
+  async atualizarClasseResiduo(id: string, payload: ClasseResiduoRequest) {
+    const { data } = await http.put<ClasseResiduoCadastro>(`/v1/classes-residuo/${id}`, payload)
     return data
   },
 

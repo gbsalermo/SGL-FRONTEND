@@ -62,6 +62,9 @@ export type TipoPerecivelCadastro = 'NENHUM' | 'QUIMICO' | 'MICROBIANO' | 'VEGET
 export type OrgaoFiscalizadorCadastro =
   | 'POLICIA_FEDERAL' | 'VIGILANCIA_SANITARIA' | 'ANVISA' | 'EXERCITO' | 'OUTRO'
 
+export type MedidaSegurancaCadastro =
+  | 'LUVAS' | 'OCULOS_PROTECAO' | 'PROTECAO_RESPIRATORIA' | 'JALECO_AVENTAL' | 'OUTRO'
+
 export interface ProdutoCadastro {
   id: string
   nome: string
@@ -79,6 +82,8 @@ export interface ProdutoCadastro {
   fiscalizado: boolean
   orgaosFiscalizadores: OrgaoFiscalizadorCadastro[]
   observacaoFiscalizacao: string | null
+  medidasSegurancaRecomendadas: MedidaSegurancaCadastro[]
+  observacaoSeguranca: string | null
   ativo: boolean
 }
 
@@ -98,6 +103,24 @@ export interface ProdutoRequest {
   fiscalizado: boolean
   orgaosFiscalizadores: OrgaoFiscalizadorCadastro[]
   observacaoFiscalizacao: string | null
+  medidasSegurancaRecomendadas: MedidaSegurancaCadastro[]
+  observacaoSeguranca: string | null
+  ativo: boolean
+}
+
+export interface ClasseResiduoCadastro {
+  id: string
+  unidadeId: string
+  unidadeNome: string
+  codigo: string
+  descricao: string
+  ativo: boolean
+}
+
+export interface ClasseResiduoRequest {
+  unidadeId: string
+  codigo: string
+  descricao: string
   ativo: boolean
 }
 

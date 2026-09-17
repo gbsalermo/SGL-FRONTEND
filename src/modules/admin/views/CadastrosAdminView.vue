@@ -6,8 +6,11 @@ import type { PerfilUsuario } from '@/modules/auth/types/session'
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
 import type {
   ApiErrorAdmin,
+  ClasseResiduoCadastro,
+  ClasseResiduoRequest,
   LaboratorioCadastro,
   LaboratorioRequest,
+  MedidaSegurancaCadastro,
   NivelRiscoCadastro,
   OrgaoFiscalizadorCadastro,
   ProdutoCadastro,
@@ -22,8 +25,8 @@ import type {
 } from '@/modules/admin/types/cadastros'
 import { useSessionStore } from '@/stores/session'
 
-type AbaCadastro = 'laboratorios' | 'projetos' | 'produtos' | 'permissoes'
-type ModalCadastro = 'laboratorio' | 'projeto' | 'produto' | null
+type AbaCadastro = 'laboratorios' | 'projetos' | 'produtos' | 'classes-residuo' | 'permissoes'
+type ModalCadastro = 'laboratorio' | 'projeto' | 'produto' | 'classe-residuo' | null
 
 interface LaboratorioForm {
   unidadeId: string
@@ -59,6 +62,15 @@ interface ProdutoForm {
   fiscalizado: boolean
   orgaosFiscalizadores: OrgaoFiscalizadorCadastro[]
   observacaoFiscalizacao: string
+  medidasSegurancaRecomendadas: MedidaSegurancaCadastro[]
+  observacaoSeguranca: string
+  ativo: boolean
+}
+
+interface ClasseResiduoForm {
+  unidadeId: string
+  codigo: string
+  descricao: string
   ativo: boolean
 }
 
@@ -68,6 +80,7 @@ const unidades = ref<UnidadeCadastro[]>([])
 const laboratorios = ref<LaboratorioCadastro[]>([])
 const projetos = ref<ProjetoCadastro[]>([])
 const produtos = ref<ProdutoCadastro[]>([])
+const classesResiduo = ref<ClasseResiduoCadastro[]>([])
 const usuarios = ref<UsuarioPermissao[]>([])
 const carregando = ref(false)
 const salvando = ref(false)
@@ -85,6 +98,7 @@ const erroModal = ref('')
 const laboratorioForm = ref<LaboratorioForm>(novoLaboratorio())
 const projetoForm = ref<ProjetoForm>(novoProjeto())
 const produtoForm = ref<ProdutoForm>(novoProduto())
+const classeResiduoForm = ref<ClasseResiduoForm>(novaClasseResiduo())
 const perfisEdicao = ref<Record<string, PerfilUsuario>>({})
 
 const perfis: Array<{ valor: PerfilUsuario; rotulo: string }> = [
@@ -108,11 +122,15 @@ const tiposPerecivel: TipoPerecivelCadastro[] = ['NENHUM', 'QUIMICO', 'MICROBIAN
 const orgaosFiscalizadores: OrgaoFiscalizadorCadastro[] = [
   'POLICIA_FEDERAL', 'VIGILANCIA_SANITARIA', 'ANVISA', 'EXERCITO', 'OUTRO',
 ]
+const medidasSeguranca: MedidaSegurancaCadastro[] = [
+  'LUVAS', 'OCULOS_PROTECAO', 'PROTECAO_RESPIRATORIA', 'JALECO_AVENTAL', 'OUTRO',
+]
 
 const abas: Array<{ id: AbaCadastro; titulo: string; descricao: string }> = [
   { id: 'laboratorios', titulo: 'Laboratórios', descricao: 'Estrutura, unidade e responsável' },
   { id: 'projetos', titulo: 'Projetos', descricao: 'Projetos vinculados aos laboratórios' },
   { id: 'produtos', titulo: 'Produtos', descricao: 'Catálogo-base de materiais do SGL' },
+  { id: 'classes-residuo', titulo: 'Classes de resíduo', descricao: 'Classificações disponíveis para a Unidade' },
   { id: 'permissoes', titulo: 'Permissões', descricao: 'Perfis de acesso dos usuários existentes' },
 ]
 
@@ -137,6 +155,12 @@ const produtosFiltrados = computed(() => produtos.value.filter((item) => {
   return bateBusca && (mostrarInativos.value || item.ativo)
 }))
 
+const classesResiduoFiltradas = computed(() => classesResiduo.value.filter((item) => {
+  const bateBusca = !termoBusca.value || [item.codigo, item.descricao, item.unidadeNome]
+    .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termoBusca.value))
+  return bateBusca && (mostrarInativos.value || item.ativo)
+}))
+
 const usuariosFiltrados = computed(() => usuarios.value.filter((item) => {
   if (!termoBusca.value) return true
   return [item.nome, item.email, item.unidadeNome ?? '', item.laboratorioNome ?? '', rotuloPerfil(item.perfil)]
@@ -154,6 +178,7 @@ const resumo = computed(() => ({
   laboratorios: laboratorios.value.filter((item) => item.ativo).length,
   projetos: projetos.value.filter((item) => item.ativo).length,
   produtos: produtos.value.filter((item) => item.ativo).length,
+  classesResiduo: classesResiduo.value.filter((item) => item.ativo).length,
   usuarios: usuarios.value.filter((item) => item.ativo).length,
 }))
 
@@ -170,8 +195,13 @@ function novoProduto(): ProdutoForm {
     nome: '', descricao: '', codigoReferencia: '', unidadeMedida: 'UNIDADE', localizacaoFisica: '',
     risco: 'NENHUM', tipoRisco: 'NENHUM', descricaoRisco: '', perecivel: false,
     tipoPerecivel: 'NENHUM', condicoesArmazenamento: '', unidadeArmazenamento: '',
-    fiscalizado: false, orgaosFiscalizadores: [], observacaoFiscalizacao: '', ativo: true,
+    fiscalizado: false, orgaosFiscalizadores: [], observacaoFiscalizacao: '',
+    medidasSegurancaRecomendadas: [], observacaoSeguranca: '', ativo: true,
   }
+}
+
+function novaClasseResiduo(): ClasseResiduoForm {
+  return { unidadeId: session.usuario?.unidadeId ?? '', codigo: '', descricao: '', ativo: true }
 }
 
 function mensagemErro(error: unknown, fallback = 'Não foi possível concluir a operação.') {
@@ -228,6 +258,9 @@ function abrirNovo() {
   } else if (aba.value === 'produtos') {
     produtoForm.value = novoProduto()
     modal.value = 'produto'
+  } else if (aba.value === 'classes-residuo') {
+    classeResiduoForm.value = novaClasseResiduo()
+    modal.value = 'classe-residuo'
   }
 }
 
@@ -277,10 +310,19 @@ function editarProduto(item: ProdutoCadastro) {
     fiscalizado: item.fiscalizado,
     orgaosFiscalizadores: [...item.orgaosFiscalizadores],
     observacaoFiscalizacao: item.observacaoFiscalizacao ?? '',
+    medidasSegurancaRecomendadas: [...item.medidasSegurancaRecomendadas],
+    observacaoSeguranca: item.observacaoSeguranca ?? '',
     ativo: item.ativo,
   }
   erroModal.value = ''
   modal.value = 'produto'
+}
+
+function editarClasseResiduo(item: ClasseResiduoCadastro) {
+  idEdicao.value = item.id
+  classeResiduoForm.value = { unidadeId: item.unidadeId, codigo: item.codigo, descricao: item.descricao, ativo: item.ativo }
+  erroModal.value = ''
+  modal.value = 'classe-residuo'
 }
 
 function fecharModal() {
@@ -313,6 +355,13 @@ function alternarOrgao(orgao: OrgaoFiscalizadorCadastro, marcado: boolean) {
   if (marcado) atual.add(orgao)
   else atual.delete(orgao)
   produtoForm.value.orgaosFiscalizadores = [...atual]
+}
+
+function alternarMedidaSeguranca(medida: MedidaSegurancaCadastro, marcado: boolean) {
+  const atual = new Set(produtoForm.value.medidasSegurancaRecomendadas)
+  if (marcado) atual.add(medida)
+  else atual.delete(medida)
+  produtoForm.value.medidasSegurancaRecomendadas = [...atual]
 }
 
 async function salvarLaboratorio() {
@@ -383,6 +432,10 @@ async function salvarProduto() {
     erroModal.value = 'Selecione ao menos um órgão fiscalizador.'
     return
   }
+  if (produtoForm.value.medidasSegurancaRecomendadas.includes('OUTRO') && !produtoForm.value.observacaoSeguranca.trim()) {
+    erroModal.value = 'Descreva a medida de segurança marcada como Outro.'
+    return
+  }
   const payload: ProdutoRequest = {
     nome: produtoForm.value.nome.trim(),
     descricao: produtoForm.value.descricao.trim() || null,
@@ -399,6 +452,8 @@ async function salvarProduto() {
     fiscalizado: produtoForm.value.fiscalizado,
     orgaosFiscalizadores: [...produtoForm.value.orgaosFiscalizadores],
     observacaoFiscalizacao: produtoForm.value.observacaoFiscalizacao.trim() || null,
+    medidasSegurancaRecomendadas: [...produtoForm.value.medidasSegurancaRecomendadas],
+    observacaoSeguranca: produtoForm.value.observacaoSeguranca.trim() || null,
     ativo: produtoForm.value.ativo,
   }
   salvando.value = true
@@ -406,6 +461,31 @@ async function salvarProduto() {
     if (idEdicao.value) await cadastrosAdminService.atualizarProduto(idEdicao.value, payload)
     else await cadastrosAdminService.criarProduto(payload)
     sucesso.value = idEdicao.value ? 'Produto atualizado.' : 'Produto cadastrado.'
+    fecharModalForcado()
+    await carregar()
+  } catch (error) {
+    erroModal.value = mensagemErro(error)
+  } finally {
+    salvando.value = false
+  }
+}
+
+async function salvarClasseResiduo() {
+  if (!classeResiduoForm.value.unidadeId || !classeResiduoForm.value.codigo.trim() || !classeResiduoForm.value.descricao.trim()) {
+    erroModal.value = 'Informe unidade, código e descrição da classe.'
+    return
+  }
+  const payload: ClasseResiduoRequest = {
+    unidadeId: classeResiduoForm.value.unidadeId,
+    codigo: classeResiduoForm.value.codigo.trim(),
+    descricao: classeResiduoForm.value.descricao.trim(),
+    ativo: classeResiduoForm.value.ativo,
+  }
+  salvando.value = true
+  try {
+    if (idEdicao.value) await cadastrosAdminService.atualizarClasseResiduo(idEdicao.value, payload)
+    else await cadastrosAdminService.criarClasseResiduo(payload)
+    sucesso.value = idEdicao.value ? 'Classe de resíduo atualizada.' : 'Classe de resíduo cadastrada.'
     fecharModalForcado()
     await carregar()
   } catch (error) {
@@ -483,9 +563,27 @@ async function alternarProduto(item: ProdutoCadastro) {
       fiscalizado: item.fiscalizado,
       orgaosFiscalizadores: [...item.orgaosFiscalizadores],
       observacaoFiscalizacao: item.observacaoFiscalizacao,
+      medidasSegurancaRecomendadas: [...item.medidasSegurancaRecomendadas],
+      observacaoSeguranca: item.observacaoSeguranca,
       ativo: !item.ativo,
     })
     sucesso.value = `Produto ${item.ativo ? 'inativado' : 'reativado'}.`
+    await carregar()
+  } catch (error) {
+    erro.value = mensagemErro(error)
+  } finally {
+    alterandoStatus.value = null
+  }
+}
+
+async function alternarClasseResiduo(item: ClasseResiduoCadastro) {
+  alterandoStatus.value = item.id
+  erro.value = ''
+  try {
+    await cadastrosAdminService.atualizarClasseResiduo(item.id, {
+      unidadeId: item.unidadeId, codigo: item.codigo, descricao: item.descricao, ativo: !item.ativo,
+    })
+    sucesso.value = `Classe ${item.ativo ? 'inativada' : 'reativada'}.`
     await carregar()
   } catch (error) {
     erro.value = mensagemErro(error)
@@ -516,17 +614,19 @@ async function carregar() {
   carregando.value = true
   erro.value = ''
   try {
-    const [units, labs, projects, products, users] = await Promise.all([
+    const [units, labs, projects, products, residueClasses, users] = await Promise.all([
       cadastrosAdminService.listarUnidades(),
       cadastrosAdminService.listarLaboratorios(),
       cadastrosAdminService.listarProjetos(),
       cadastrosAdminService.listarProdutos(),
+      cadastrosAdminService.listarClassesResiduo(),
       cadastrosAdminService.listarUsuarios(),
     ])
     unidades.value = [...units].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     laboratorios.value = [...labs].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     projetos.value = [...projects].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     produtos.value = [...products].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+    classesResiduo.value = [...residueClasses].sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
     usuarios.value = [...users].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     perfisEdicao.value = Object.fromEntries(usuarios.value.map((usuario) => [usuario.id, usuario.perfil]))
   } catch (error) {
@@ -556,6 +656,7 @@ onMounted(carregar)
       <article><span>Laboratórios ativos</span><strong>{{ resumo.laboratorios }}</strong></article>
       <article><span>Projetos ativos</span><strong>{{ resumo.projetos }}</strong></article>
       <article><span>Produtos ativos</span><strong>{{ resumo.produtos }}</strong></article>
+      <article><span>Classes ativas</span><strong>{{ resumo.classesResiduo }}</strong></article>
       <article><span>Usuários ativos</span><strong>{{ resumo.usuarios }}</strong><small>vindos do cadastro institucional</small></article>
     </section>
 
@@ -590,10 +691,11 @@ onMounted(carregar)
             <p v-if="aba === 'laboratorios'">Cadastre a estrutura dos laboratórios e defina o responsável institucional.</p>
             <p v-else-if="aba === 'projetos'">Mantenha os projetos associados aos laboratórios.</p>
             <p v-else-if="aba === 'produtos'">Mantenha o catálogo de produtos; estoque e lotes continuam em suas áreas operacionais.</p>
+            <p v-else-if="aba === 'classes-residuo'">Mantenha as classes disponíveis para classificação de resíduos nesta Unidade.</p>
             <p v-else>Usuários são criados pelo fluxo institucional. Aqui é alterado somente o perfil de acesso.</p>
           </div>
           <button v-if="aba !== 'permissoes'" class="btn btn--primary" type="button" @click="abrirNovo">
-            + Novo {{ aba === 'laboratorios' ? 'laboratório' : aba === 'projetos' ? 'projeto' : 'produto' }}
+            + Novo {{ aba === 'laboratorios' ? 'laboratório' : aba === 'projetos' ? 'projeto' : aba === 'produtos' ? 'produto' : 'classe' }}
           </button>
         </header>
 
@@ -670,6 +772,22 @@ onMounted(carregar)
           </table>
         </div>
 
+        <div v-else-if="aba === 'classes-residuo'" class="table-wrap">
+          <table>
+            <thead><tr><th>Situação</th><th>Código</th><th>Descrição</th><th>Unidade</th><th></th></tr></thead>
+            <tbody>
+              <tr v-for="item in classesResiduoFiltradas" :key="item.id">
+                <td><span class="status" :class="item.ativo ? 'status--active' : 'status--inactive'">{{ item.ativo ? 'Ativa' : 'Inativa' }}</span></td>
+                <td><strong>{{ item.codigo }}</strong></td>
+                <td>{{ item.descricao }}</td>
+                <td>{{ item.unidadeNome }}</td>
+                <td class="actions"><button type="button" @click="editarClasseResiduo(item)">Editar</button><button type="button" :disabled="alterandoStatus === item.id" @click="alternarClasseResiduo(item)">{{ item.ativo ? 'Inativar' : 'Reativar' }}</button></td>
+              </tr>
+              <tr v-if="classesResiduoFiltradas.length === 0"><td colspan="5" class="empty-table">Nenhuma classe de resíduo encontrada.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
         <div v-else class="table-wrap">
           <table class="permissions-table">
             <thead><tr><th>Usuário</th><th>Unidade / laboratório</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
@@ -707,7 +825,7 @@ onMounted(carregar)
         <header>
           <div>
             <span>{{ idEdicao ? 'EDIÇÃO' : 'NOVO CADASTRO' }}</span>
-            <h2>{{ modal === 'laboratorio' ? 'Laboratório' : modal === 'projeto' ? 'Projeto' : 'Produto' }}</h2>
+            <h2>{{ modal === 'laboratorio' ? 'Laboratório' : modal === 'projeto' ? 'Projeto' : modal === 'produto' ? 'Produto' : 'Classe de resíduo' }}</h2>
           </div>
           <button type="button" aria-label="Fechar" @click="fecharModal">×</button>
         </header>
@@ -738,7 +856,7 @@ onMounted(carregar)
           <footer class="modal-actions"><button class="btn btn--ghost" type="button" :disabled="salvando" @click="fecharModal">Cancelar</button><button class="btn btn--primary" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar projeto' }}</button></footer>
         </form>
 
-        <form v-else class="modal-body product-form" @submit.prevent="salvarProduto">
+        <form v-else-if="modal === 'produto'" class="modal-body product-form" @submit.prevent="salvarProduto">
           <section class="form-section">
             <h3>Identificação</h3>
             <div class="form-grid">
@@ -777,8 +895,27 @@ onMounted(carregar)
             </div>
           </section>
 
+          <section class="form-section">
+            <h3>Segurança recomendada</h3>
+            <p class="form-hint">Estas medidas serão sugestões quando o Produto for usado como componente de um Resíduo.</p>
+            <div class="checkbox-grid">
+              <label v-for="medida in medidasSeguranca" :key="medida"><input type="checkbox" :checked="produtoForm.medidasSegurancaRecomendadas.includes(medida)" @change="alternarMedidaSeguranca(medida, ($event.target as HTMLInputElement).checked)" /><span>{{ rotuloEnum(medida) }}</span></label>
+            </div>
+            <label class="field"><span>Orientação complementar</span><textarea v-model="produtoForm.observacaoSeguranca" rows="2" placeholder="Obrigatória quando Outro estiver marcado." /></label>
+          </section>
+
           <label class="check-line"><input v-model="produtoForm.ativo" type="checkbox" /><span>Produto ativo no catálogo</span></label>
           <footer class="modal-actions"><button class="btn btn--ghost" type="button" :disabled="salvando" @click="fecharModal">Cancelar</button><button class="btn btn--primary" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar produto' }}</button></footer>
+        </form>
+
+        <form v-else class="modal-body" @submit.prevent="salvarClasseResiduo">
+          <div class="form-grid">
+            <label class="field"><span>Unidade *</span><select v-model="classeResiduoForm.unidadeId" required><option value="">Selecione...</option><option v-for="unidade in unidades" :key="unidade.id" :value="unidade.id">{{ unidade.sigla ? `${unidade.sigla} — ${unidade.nome}` : unidade.nome }}</option></select></label>
+            <label class="field"><span>Código *</span><input v-model="classeResiduoForm.codigo" required placeholder="Ex.: A" /></label>
+          </div>
+          <label class="field"><span>Descrição *</span><textarea v-model="classeResiduoForm.descricao" rows="4" required /></label>
+          <label class="check-line"><input v-model="classeResiduoForm.ativo" type="checkbox" /><span>Classe ativa</span></label>
+          <footer class="modal-actions"><button class="btn btn--ghost" type="button" :disabled="salvando" @click="fecharModal">Cancelar</button><button class="btn btn--primary" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar classe' }}</button></footer>
         </form>
       </section>
     </div>
@@ -791,7 +928,7 @@ onMounted(carregar)
 .eyebrow { margin: 0 0 7px; color: #2459bd; font-size: 10px; font-weight: 900; letter-spacing: .08em; }
 .page-header h1 { margin: 0; color: #0e2140; font-size: 31px; line-height: 1.1; }
 .page-header span { display: block; margin-top: 7px; color: #6d7c91; font-size: 12px; }
-.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; margin-bottom: 12px; }
+.summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 11px; margin-bottom: 12px; }
 .summary-grid article { padding: 15px 17px; border: 1px solid #dde5ef; border-radius: 9px; background: #fff; }
 .summary-grid span { display: block; color: #728096; font-size: 9px; font-weight: 850; text-transform: uppercase; }
 .summary-grid strong { display: block; margin-top: 5px; color: #17345e; font-size: 24px; }
@@ -858,6 +995,7 @@ td small { margin-top: 3px; color: #8491a3; font-size: 8.5px; }
 .field small { color: #8490a1; font-size: 8.5px; }
 .form-section { display: grid; gap: 11px; padding: 13px; border: 1px solid #e1e7ef; border-radius: 8px; background: #fcfdff; }
 .form-section h3 { margin: 0; color: #263b5b; font-size: 11px; }
+.form-hint { margin: 0; color: #718097; font-size: 9px; line-height: 1.45; }
 .split-section { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .split-section > div { display: grid; align-content: start; gap: 10px; }
 .checkbox-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
