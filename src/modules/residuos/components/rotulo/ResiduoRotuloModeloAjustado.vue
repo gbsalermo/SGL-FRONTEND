@@ -33,13 +33,13 @@ function unidadeLegivel(valor: string) { return ({ ML:'mL',L:'L',MG:'mg',G:'g',K
           <span class="unit-line">Unidade: {{ dados.unidadeSigla }} — {{ dados.unidadeNome }}</span>
           <span>Laboratório: {{ dados.laboratorioNome }}</span>
           <span>Gerador: {{ dados.geradorNome }}</span>
-          <span>Rotulagem: {{ formatarData(dados.dataRotulagem) }}</span>
+          <span>{{ dados.impressaoPermitida ? 'Rotulagem' : 'Prévia' }}: {{ dados.impressaoPermitida ? formatarData(dados.dataRotulagem) : 'não liberada para impressão' }}</span>
         </div>
       </header>
       <div class="label-body">
         <aside class="hazards"><p>PICTOGRAMAS</p><div v-if="riscosVisiveis.length" class="hazard-grid"><div v-for="risco in riscosVisiveis" :key="risco" class="hazard-item"><img v-if="caminhoPictogramaResiduo(risco) && !pictogramaFalhou(risco)" :src="caminhoPictogramaResiduo(risco) ?? undefined" :alt="rotuloRiscoResiduo(risco)" @error="registrarErroPictograma(risco)" /><div v-else class="hazard-fallback">!</div><small>{{ rotuloRiscoResiduo(risco) }}</small></div></div><div v-else class="no-hazard">Sem pictograma aplicável</div></aside>
         <section class="information">
-          <div class="risk-heading"><span>NÍVEL DE RISCO CONFIRMADO</span><h3>{{ rotuloNivelRisco(dados.nivelRisco) }}</h3><p>{{ riscosVisiveis.length ? riscosVisiveis.map(rotuloRiscoResiduo).join(' · ') : 'Nenhum risco específico confirmado.' }}</p></div>
+          <div class="risk-heading"><span>{{ dados.classificacaoConfirmada ? 'NÍVEL DE RISCO CONFIRMADO' : 'NÍVEL DE RISCO INFORMADO — PRÉVIA' }}</span><h3>{{ rotuloNivelRisco(dados.nivelRisco) }}</h3><p>{{ riscosVisiveis.length ? riscosVisiveis.map(rotuloRiscoResiduo).join(' · ') : dados.classificacaoConfirmada ? 'Nenhum risco específico confirmado.' : 'Nenhum risco específico informado.' }}</p></div>
           <div class="composition"><h4>Composição informada</h4><p>{{ composicao }}</p></div>
           <div class="info-grid"><div><h4>Processo de origem</h4><p>{{ dados.processoOrigem }}</p></div><div><h4>Recipiente</h4><p>{{ dados.recipiente }}</p></div><div><h4>Armazenamento temporário</h4><p>{{ dados.localArmazenamentoTemporario || 'Não informado' }}</p></div><div><h4>Destino previsto</h4><p>{{ dados.destinoFinalPrevisto || 'Não informado' }}</p></div></div>
           <p v-if="dados.dataPrevistaDespacho" class="dispatch-date">Despacho previsto: <strong>{{ formatarData(dados.dataPrevistaDespacho) }}</strong></p>

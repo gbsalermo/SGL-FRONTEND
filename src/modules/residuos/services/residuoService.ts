@@ -2,6 +2,7 @@ import { http } from '@/services/http'
 import type {
   AnalisarResiduoRequest,
   ArmazenarResiduoRequest,
+  ClasseResiduoResponse,
   CriarResiduoRequest,
   DespacharResiduoRequest,
   HistoricoResiduoResponse,
@@ -71,6 +72,11 @@ export const residuoService = {
   async buscarDadosRotulo(id: string) {
     const { data } = await http.get<RotuloResiduoResponse>(`/v1/residuos/${id}/rotulo`)
     return data
+  },
+
+  async listarClassesAtivas() {
+    const { data } = await http.get<ClasseResiduoResponse[]>('/v1/classes-residuo/ativos')
+    return data.sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
   },
 
   async listarProjetosPorLaboratorio(laboratorioId: string) {

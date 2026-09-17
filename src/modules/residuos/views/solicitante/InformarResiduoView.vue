@@ -5,7 +5,10 @@ import { computed, onMounted, ref } from 'vue'
 import { residuoService } from '@/modules/residuos/services/residuoService'
 import type {
   ApiErrorResponse,
+  ClasseResiduoResponse,
   CriarResiduoRequest,
+  EstadoFisicoResiduo,
+  MedidaSegurancaResiduo,
   NivelRiscoResiduo,
   ProdutoResiduoResponse,
   ProjetoResiduoResponse,
@@ -47,6 +50,22 @@ const tiposRisco: Array<{ value: Exclude<TipoRiscoResiduo, 'NENHUM'>; label: str
   { value: 'PERIGO_AMBIENTAL', label: 'Perigo ambiental' },
 ]
 
+const estadosFisicos: Array<{ value: EstadoFisicoResiduo; label: string }> = [
+  { value: 'LIQUIDO', label: 'Líquido' },
+  { value: 'SOLIDO', label: 'Sólido' },
+  { value: 'SEMISSOLIDO', label: 'Semissólido' },
+  { value: 'GASOSO', label: 'Gasoso' },
+  { value: 'OUTRO', label: 'Outro' },
+]
+
+const medidasSeguranca: Array<{ value: MedidaSegurancaResiduo; label: string }> = [
+  { value: 'LUVAS', label: 'Luvas' },
+  { value: 'OCULOS_PROTECAO', label: 'Óculos de proteção' },
+  { value: 'PROTECAO_RESPIRATORIA', label: 'Proteção respiratória' },
+  { value: 'JALECO_AVENTAL', label: 'Jaleco / avental' },
+  { value: 'OUTRO', label: 'Outro' },
+]
+
 const unidadesMedida: Array<{ value: UnidadeMedidaResiduo; label: string }> = [
   { value: 'ML', label: 'mL' },
   { value: 'L', label: 'L' },
@@ -66,15 +85,22 @@ const unidadesMedida: Array<{ value: UnidadeMedidaResiduo; label: string }> = [
 const session = useSessionStore()
 const projetos = ref<ProjetoResiduoResponse[]>([])
 const produtos = ref<ProdutoResiduoResponse[]>([])
+const classesResiduo = ref<ClasseResiduoResponse[]>([])
 const projetoId = ref('')
 const descricao = ref('')
 const processoOrigem = ref('')
+const estadoFisico = ref<EstadoFisicoResiduo>('LIQUIDO')
+const tratamentoRealizado = ref(false)
+const descricaoTratamento = ref('')
 const recipiente = ref('')
 const quantidade = ref<number | null>(null)
 const unidadeMedida = ref<UnidadeMedidaResiduo>('ML')
 const nivelRiscoInformado = ref<NivelRiscoResiduo>('BAIXO')
 const riscosInformados = ref<TipoRiscoResiduo[]>([])
 const observacaoGerador = ref('')
+const classesInformadasIds = ref<string[]>([])
+const medidasSegurancaInformadas = ref<MedidaSegurancaResiduo[]>([])
+const observacaoSegurancaInformada = ref('')
 const componentes = ref<ComponenteForm[]>([novoComponente(true)])
 const carregandoDados = ref(false)
 const enviando = ref(false)
@@ -84,6 +110,15 @@ const resultado = ref<ResiduoResponse | null>(null)
 
 const usuario = computed(() => session.usuario)
 const podeAdicionarComponente = computed(() => componentes.value.length < 12)
+const medidasSugeridasProdutos = computed(() => {
+  const sugeridas = new Set<MedidaSegurancaResiduo>()
+  componentes.value
+    .filter((componente) => componente.origem === 'CATALOGO' && componente.produtoId)
+    .forEach((componente) => {
+      produtoSelecionado(componente.produtoId)?.medidasSegurancaRecomendadas?.forEach((medida) => sugeridas.add(medida))
+    })
+  return [...sugeridas]
+})
 
 function novoComponente(principal = false): ComponenteForm {
   return {
@@ -128,9 +163,10 @@ async function carregarDados() {
   erro.value = ''
   avisoDados.value = ''
 
-  const [projetosResult, produtosResult] = await Promise.allSettled([
+  const [projetosResult, produtosResult, classesResult] = await Promise.allSettled([
     residuoService.listarProjetosPorLaboratorio(laboratorioId),
     residuoService.listarProdutosAtivos(),
+    residuoService.listarClassesAtivas(),
   ])
 
   if (projetosResult.status === 'fulfilled') {
@@ -145,6 +181,14 @@ async function carregarDados() {
     avisoDados.value = avisoDados.value
       ? `${avisoDados.value} O catálogo de produtos também não pôde ser carregado; use componentes livres.`
       : 'O catálogo de produtos não pôde ser carregado. Você ainda pode informar componentes livremente.'
+  }
+
+  if (classesResult.status === 'fulfilled') {
+    classesResiduo.value = classesResult.value
+  } else {
+    avisoDados.value = avisoDados.value
+      ? `${avisoDados.value} As classes de resíduo não puderam ser carregadas.`
+      : 'As classes de resíduo não puderam ser carregadas.'
   }
 
   carregandoDados.value = false
@@ -182,16 +226,30 @@ function alterarNivelRisco() {
   if (nivelRiscoInformado.value === 'NENHUM') riscosInformados.value = []
 }
 
+function aplicarSugestoesSeguranca() {
+  medidasSegurancaInformadas.value = [...new Set([
+    ...medidasSegurancaInformadas.value,
+    ...medidasSugeridasProdutos.value,
+  ])]
+}
+
 function validarFormulario() {
   if (!usuario.value?.id || !usuario.value.laboratorioId) {
     throw new Error('Sessão sem usuário ou laboratório válido.')
   }
   if (!descricao.value.trim()) throw new Error('Informe uma descrição para o resíduo.')
   if (!processoOrigem.value.trim()) throw new Error('Informe o processo que originou o resíduo.')
+  if (tratamentoRealizado.value && !descricaoTratamento.value.trim()) {
+    throw new Error('Descreva o tratamento já realizado no resíduo.')
+  }
   if (!recipiente.value.trim()) throw new Error('Informe o recipiente utilizado.')
   if (!quantidade.value || Number(quantidade.value) <= 0) throw new Error('Informe uma quantidade maior que zero.')
   if (nivelRiscoInformado.value !== 'NENHUM' && riscosInformados.value.length === 0) {
     throw new Error('Selecione pelo menos um risco percebido ou marque o nível como Nenhum.')
+  }
+  if (classesInformadasIds.value.length === 0) throw new Error('Selecione pelo menos uma classe de resíduo.')
+  if (medidasSegurancaInformadas.value.includes('OUTRO') && !observacaoSegurancaInformada.value.trim()) {
+    throw new Error('Descreva a medida de segurança marcada como Outro.')
   }
   if (componentes.value.length === 0) throw new Error('Informe ao menos um componente do resíduo.')
 
@@ -220,12 +278,18 @@ function montarPayload(): CriarResiduoRequest {
     projetoId: projetoId.value || null,
     descricao: descricao.value.trim(),
     processoOrigem: processoOrigem.value.trim(),
+    estadoFisico: estadoFisico.value,
+    tratamentoRealizado: tratamentoRealizado.value,
+    descricaoTratamento: tratamentoRealizado.value ? descricaoTratamento.value.trim() : null,
     recipiente: recipiente.value.trim(),
     quantidade: Number(quantidade.value),
     unidadeMedida: unidadeMedida.value,
     nivelRiscoInformado: nivelRiscoInformado.value,
     riscosInformados: riscos,
     observacaoGerador: observacaoGerador.value.trim() || null,
+    classesInformadasIds: [...classesInformadasIds.value],
+    medidasSegurancaInformadas: [...medidasSegurancaInformadas.value],
+    observacaoSegurancaInformada: observacaoSegurancaInformada.value.trim() || null,
     componentes: componentes.value.map((componente) => ({
       produtoId: componente.origem === 'CATALOGO' ? componente.produtoId : null,
       nomeComponente: componente.origem === 'LIVRE' ? componente.nomeComponente.trim() : null,
@@ -255,12 +319,18 @@ function limparFormulario() {
   projetoId.value = ''
   descricao.value = ''
   processoOrigem.value = ''
+  estadoFisico.value = 'LIQUIDO'
+  tratamentoRealizado.value = false
+  descricaoTratamento.value = ''
   recipiente.value = ''
   quantidade.value = null
   unidadeMedida.value = 'ML'
   nivelRiscoInformado.value = 'BAIXO'
   riscosInformados.value = []
   observacaoGerador.value = ''
+  classesInformadasIds.value = []
+  medidasSegurancaInformadas.value = []
+  observacaoSegurancaInformada.value = ''
   componentes.value = [novoComponente(true)]
   erro.value = ''
   resultado.value = null
@@ -341,8 +411,8 @@ onMounted(carregarDados)
         </div>
 
         <label class="field">
-          <span>Processo de origem</span>
-          <textarea v-model="processoOrigem" rows="3" required placeholder="Descreva o procedimento, experimento ou atividade que gerou este resíduo..." />
+          <span>Procedência / uso do Resíduo</span>
+          <textarea v-model="processoOrigem" rows="3" required placeholder="Informe de qual processo, atividade ou uso surgiu o Resíduo..." />
         </label>
       </section>
 
@@ -371,6 +441,23 @@ onMounted(carregarDados)
             </select>
           </label>
         </div>
+
+        <div class="form-grid form-grid--two">
+          <label class="field">
+            <span>Estado físico</span>
+            <select v-model="estadoFisico" required>
+              <option v-for="item in estadosFisicos" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
+          </label>
+          <label class="check-line treatment-check">
+            <input v-model="tratamentoRealizado" type="checkbox" />
+            <span>Este resíduo já recebeu tratamento</span>
+          </label>
+        </div>
+        <label v-if="tratamentoRealizado" class="field">
+          <span>Tratamento realizado</span>
+          <textarea v-model="descricaoTratamento" rows="2" required placeholder="Descreva o tratamento aplicado..." />
+        </label>
       </section>
 
       <section class="form-section">
@@ -464,9 +551,49 @@ onMounted(carregarDados)
         </div>
       </section>
 
-      <section class="form-section form-section--last">
+      <section class="form-section">
         <div class="section-title">
           <span>5</span>
+          <div>
+            <h2>Classes e segurança</h2>
+            <p>Selecione as classes aplicáveis e registre as medidas de segurança consideradas para esta ocorrência.</p>
+          </div>
+        </div>
+
+        <div>
+          <strong class="field-group-title">Classes de Resíduo</strong>
+          <div class="risk-grid class-grid">
+            <label v-for="classe in classesResiduo" :key="classe.id" class="risk-option class-option">
+              <input v-model="classesInformadasIds" type="checkbox" :value="classe.id" />
+              <span><b>{{ classe.codigo }}</b> — {{ classe.descricao }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <div class="security-heading">
+            <strong class="field-group-title">Segurança / EPI</strong>
+            <button v-if="medidasSugeridasProdutos.length" type="button" class="suggest-action" @click="aplicarSugestoesSeguranca">Aplicar sugestões dos produtos</button>
+          </div>
+          <p v-if="medidasSugeridasProdutos.length" class="suggestion-copy">
+            Sugestões do catálogo: {{ medidasSugeridasProdutos.map((medida) => medidasSeguranca.find((item) => item.value === medida)?.label ?? medida).join(' · ') }}.
+          </p>
+          <div class="risk-grid class-grid">
+            <label v-for="medida in medidasSeguranca" :key="medida.value" class="risk-option class-option">
+              <input v-model="medidasSegurancaInformadas" type="checkbox" :value="medida.value" />
+              <span>{{ medida.label }}</span>
+            </label>
+          </div>
+          <label class="field security-note">
+            <span>Orientação complementar <small>(obrigatória para Outro)</small></span>
+            <textarea v-model="observacaoSegurancaInformada" rows="2" placeholder="Descreva outras medidas ou cuidados relevantes..." />
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section form-section--last">
+        <div class="section-title">
+          <span>6</span>
           <div>
             <h2>Observações finais</h2>
             <p>Adicione qualquer informação que ajude a Gestão no recebimento e na conferência.</p>
@@ -493,84 +620,95 @@ onMounted(carregarDados)
 </template>
 
 <style scoped>
-.residuo-page { max-width: 1180px; margin: 0 auto; }
-.page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
-.breadcrumb { margin: 0 0 7px; color: var(--sgl-primary); font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-.page-heading h1 { margin: 0; color: #17213a; font-size: clamp(28px, 3vw, 36px); letter-spacing: -.03em; }
-.page-heading p:not(.breadcrumb) { max-width: 760px; margin: 8px 0 0; color: var(--sgl-text-muted); font-size: 13px; line-height: 1.6; }
-.context-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
-.context-grid article { min-width: 0; padding: 15px 17px; border: 1px solid var(--sgl-border); border-radius: 9px; background: #fff; box-shadow: 0 8px 24px rgb(25 47 82 / 5%); }
+.residuo-page { width: min(100%, 1360px); max-width: 1360px; margin: 0 auto; }
+.page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 26px; margin-bottom: 24px; }
+.breadcrumb { margin: 0 0 8px; color: var(--sgl-primary); font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.page-heading h1 { margin: 0; color: #17213a; font-size: clamp(32px, 3vw, 42px); letter-spacing: -.03em; }
+.page-heading p:not(.breadcrumb) { max-width: 900px; margin: 9px 0 0; color: var(--sgl-text-muted); font-size: 14px; line-height: 1.6; }
+.context-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+.context-grid article { min-width: 0; padding: 18px 20px; border: 1px solid var(--sgl-border); border-radius: 10px; background: #fff; box-shadow: 0 8px 24px rgb(25 47 82 / 5%); }
 .context-grid span, .context-grid strong, .context-grid small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.context-grid span { color: var(--sgl-text-muted); font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-.context-grid strong { margin-top: 5px; color: #1b2941; font-size: 13px; }
-.context-grid small { margin-top: 3px; color: #718096; font-size: 10px; }
+.context-grid span { color: var(--sgl-text-muted); font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.context-grid strong { margin-top: 6px; color: #1b2941; font-size: 15px; }
+.context-grid small { margin-top: 4px; color: #718096; font-size: 11px; }
 .residuo-form, .success-surface { overflow: hidden; border: 1px solid var(--sgl-border); border-radius: 12px; background: #fff; box-shadow: 0 16px 44px rgb(30 54 88 / 7%); }
-.form-section { padding: 24px 26px; border-bottom: 1px solid #edf1f5; }
+.form-section { padding: 30px 32px; border-bottom: 1px solid #edf1f5; }
 .form-section--last { border-bottom: 0; }
-.section-title, .section-title__copy { display: flex; align-items: flex-start; gap: 12px; }
-.section-title { margin-bottom: 19px; }
-.section-title > span, .section-title__copy > span { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 8px; background: #eaf1ff; color: #1b55ad; font-size: 12px; font-weight: 900; }
-.section-title h2 { margin: 0; color: #1b2941; font-size: 16px; }
-.section-title p { margin: 4px 0 0; color: #718096; font-size: 11px; line-height: 1.5; }
-.section-title--action { justify-content: space-between; gap: 20px; }
-.add-component { min-height: 38px; padding: 0 13px; border: 1px solid #b9c7db; border-radius: 7px; background: #fff; color: #244b82; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
+.section-title, .section-title__copy { display: flex; align-items: flex-start; gap: 14px; }
+.section-title { margin-bottom: 23px; }
+.section-title > span, .section-title__copy > span { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 8px; background: #eaf1ff; color: #1b55ad; font-size: 13px; font-weight: 900; }
+.section-title h2 { margin: 0; color: #1b2941; font-size: 18px; }
+.section-title p { margin: 5px 0 0; color: #718096; font-size: 12.5px; line-height: 1.55; }
+.section-title--action { justify-content: space-between; gap: 22px; }
+.add-component { min-height: 42px; padding: 0 15px; border: 1px solid #b9c7db; border-radius: 7px; background: #fff; color: #244b82; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
 .add-component:hover:not(:disabled) { border-color: #2d6bc4; background: #f5f9ff; }
 .add-component:disabled { opacity: .45; cursor: not-allowed; }
-.form-grid { display: grid; gap: 14px; }
+.form-grid { display: grid; gap: 16px; }
 .form-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.form-grid--quantity { grid-template-columns: minmax(0, 2fr) minmax(140px, .7fr) minmax(140px, .7fr); }
-.field { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
+.form-grid--quantity { grid-template-columns: minmax(0, 2fr) minmax(160px, .7fr) minmax(160px, .7fr); }
+.field { display: flex; flex-direction: column; gap: 8px; margin-top: 17px; }
 .form-grid > .field { margin-top: 0; }
-.field > span { color: #344258; font-size: 11px; font-weight: 800; }
-.field > span small { color: #8a97a8; font-size: 9px; font-weight: 600; }
-.field input, .field select, .field textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1f2d43; font: inherit; font-size: 12px; outline: 0; transition: border-color 160ms ease, box-shadow 160ms ease; }
-.field input, .field select { min-height: 43px; padding: 0 11px; }
-.field textarea { resize: vertical; padding: 11px; line-height: 1.5; }
+.field > span { color: #344258; font-size: 12.5px; font-weight: 800; }
+.field > span small { color: #8a97a8; font-size: 10.5px; font-weight: 600; }
+.field input, .field select, .field textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1f2d43; font: inherit; font-size: 13.5px; outline: 0; transition: border-color 160ms ease, box-shadow 160ms ease; }
+.field input, .field select { min-height: 48px; padding: 0 13px; }
+.field textarea { resize: vertical; padding: 13px; line-height: 1.55; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: #2d6bc4; box-shadow: 0 0 0 3px rgb(45 107 196 / 9%); }
-.field small { color: #7c8a9d; font-size: 9px; line-height: 1.45; }
-.risk-level { max-width: 300px; margin-top: 0; }
-.risk-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: 16px; }
-.risk-option { min-height: 42px; display: flex; align-items: center; gap: 9px; padding: 0 11px; border: 1px solid #d7dee8; border-radius: 7px; background: #fbfcfe; color: #344258; font-size: 10px; font-weight: 700; cursor: pointer; }
+.check-line { display: inline-flex; align-items: center; gap: 9px; color: #4b5f7b; font-size: 12.5px; font-weight: 700; }
+.check-line input { width: 17px; height: 17px; }
+.field small { color: #7c8a9d; font-size: 10.5px; line-height: 1.45; }
+.risk-level { max-width: 340px; margin-top: 0; }
+.risk-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; margin-top: 18px; }
+.risk-option { min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 8px 14px; border: 1px solid #d7dee8; border-radius: 7px; background: #fbfcfe; color: #344258; font-size: 11.5px; font-weight: 700; cursor: pointer; }
 .risk-option:has(input:checked) { border-color: #6c94d0; background: #eef5ff; color: #1d4f99; }
-.risk-option input { width: 15px; height: 15px; accent-color: #245eb6; }
-.risk-none { margin-top: 14px; padding: 12px 14px; border-radius: 7px; background: #f4f7fb; color: #5f6f84; font-size: 10px; }
-.components-list { display: grid; gap: 12px; }
-.component-card { padding: 16px; border: 1px solid #dce3ec; border-radius: 9px; background: #fcfdff; }
-.component-card__header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 13px; }
-.component-card__header > div { display: flex; align-items: center; gap: 9px; }
-.component-card__header span { color: #536277; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-.component-card__header strong { padding: 4px 7px; border-radius: 999px; background: #e8f7ee; color: #137145; font-size: 8px; text-transform: uppercase; }
-.remove-component { border: 0; background: transparent; color: #b42318; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
-.origin-switch { display: inline-flex; overflow: hidden; margin-bottom: 14px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; }
-.origin-switch button { min-height: 36px; padding: 0 12px; border: 0; border-right: 1px solid #dbe2eb; background: transparent; color: #66758a; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
+.risk-option input { width: 16px; height: 16px; flex: 0 0 auto; accent-color: #245eb6; }
+.field-group-title { display: block; margin-bottom: 10px; color: #334a6a; font-size: 12.5px; }
+.class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+.class-grid .risk-option { height: 100%; }
+.class-option { align-items: center; }
+.security-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 22px 0 9px; }
+.suggest-action { padding: 8px 12px; border: 1px solid #b8c9e4; border-radius: 6px; background: #f6f9ff; color: #28569d; font: inherit; font-size: 11.5px; font-weight: 800; cursor: pointer; }
+.suggestion-copy { margin: 0 0 12px; color: #657892; font-size: 11px; line-height: 1.5; }
+.security-note { margin-top: 13px; }
+.treatment-check { align-self: end; min-height: 48px; }
+.risk-none { margin-top: 16px; padding: 14px 16px; border-radius: 7px; background: #f4f7fb; color: #5f6f84; font-size: 11.5px; }
+.components-list { display: grid; gap: 14px; }
+.component-card { padding: 20px; border: 1px solid #dce3ec; border-radius: 9px; background: #fcfdff; }
+.component-card__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
+.component-card__header > div { display: flex; align-items: center; gap: 10px; }
+.component-card__header span { color: #536277; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.component-card__header strong { padding: 5px 8px; border-radius: 999px; background: #e8f7ee; color: #137145; font-size: 9px; text-transform: uppercase; }
+.remove-component { border: 0; background: transparent; color: #b42318; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
+.origin-switch { display: inline-flex; overflow: hidden; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; }
+.origin-switch button { min-height: 40px; padding: 0 14px; border: 0; border-right: 1px solid #dbe2eb; background: transparent; color: #66758a; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
 .origin-switch button:last-child { border-right: 0; }
 .origin-switch button.active { background: #174d9d; color: #fff; }
-.component-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(220px, .8fr); gap: 14px; }
-.component-observation { margin-top: 12px; }
-.principal-action { min-height: 35px; display: inline-flex; align-items: center; gap: 8px; margin-top: 13px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #58677c; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
+.component-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(240px, .8fr); gap: 16px; }
+.component-observation { margin-top: 14px; }
+.principal-action { min-height: 40px; display: inline-flex; align-items: center; gap: 9px; margin-top: 15px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #58677c; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
 .principal-action.active { border-color: #9ccdb2; background: #f0faf4; color: #167247; }
-.principal-indicator { width: 17px; height: 17px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: 9px; }
-.notice { margin: 18px 26px 0; padding: 12px 14px; border-radius: 7px; font-size: 10px; line-height: 1.5; }
+.principal-indicator { width: 18px; height: 18px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: 10px; }
+.notice { margin: 20px 32px 0; padding: 14px 16px; border-radius: 7px; font-size: 11.5px; line-height: 1.5; }
 .notice--error { border: 1px solid #f1b7b3; background: #fff3f2; color: #9f2018; }
 .notice--warning { border: 1px solid #ead8a6; background: #fffaf0; color: #7a5b12; }
-.form-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 26px; background: #f8fafc; }
-.form-footer > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.form-footer strong { color: #344258; font-size: 10px; }
-.form-footer span { color: #718096; font-size: 10px; }
-.submit-action { min-width: 160px; min-height: 43px; padding: 0 18px; border: 0; border-radius: 7px; background: linear-gradient(135deg, #174d9d, #2b67c0); color: #fff; font: inherit; font-size: 11px; font-weight: 850; cursor: pointer; box-shadow: 0 7px 18px rgb(29 83 166 / 19%); }
+.form-footer { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 24px 32px; background: #f8fafc; }
+.form-footer > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.form-footer strong { color: #344258; font-size: 11.5px; }
+.form-footer span { color: #718096; font-size: 11.5px; }
+.submit-action { min-width: 180px; min-height: 48px; padding: 0 20px; border: 0; border-radius: 7px; background: linear-gradient(135deg, #174d9d, #2b67c0); color: #fff; font: inherit; font-size: 12.5px; font-weight: 850; cursor: pointer; box-shadow: 0 7px 18px rgb(29 83 166 / 19%); }
 .submit-action:hover:not(:disabled) { filter: brightness(1.05); }
 .submit-action:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; }
-.success-surface { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 24px; border-color: #bbdfca; background: linear-gradient(135deg, #fbfffc, #f4fbf7); }
-.success-icon { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: #157347; color: #fff; font-size: 22px; font-weight: 900; }
-.success-copy > span { color: #157347; font-size: 9px; font-weight: 900; letter-spacing: .08em; }
-.success-copy h2 { margin: 4px 0 5px; color: #173a2a; font-size: 20px; }
-.success-copy p { margin: 0; color: #5f7468; font-size: 11px; line-height: 1.5; }
-.success-meta { display: grid; grid-template-columns: 2fr 1fr .5fr; gap: 8px; margin-top: 14px; }
-.success-meta div { min-width: 0; padding: 9px 10px; border-radius: 6px; background: rgb(255 255 255 / 72%); }
+.success-surface { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 20px; padding: 28px; border-color: #bbdfca; background: linear-gradient(135deg, #fbfffc, #f4fbf7); }
+.success-icon { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%; background: #157347; color: #fff; font-size: 24px; font-weight: 900; }
+.success-copy > span { color: #157347; font-size: 10px; font-weight: 900; letter-spacing: .08em; }
+.success-copy h2 { margin: 4px 0 6px; color: #173a2a; font-size: 22px; }
+.success-copy p { margin: 0; color: #5f7468; font-size: 12px; line-height: 1.55; }
+.success-meta { display: grid; grid-template-columns: 2fr 1fr .5fr; gap: 10px; margin-top: 16px; }
+.success-meta div { min-width: 0; padding: 10px 12px; border-radius: 6px; background: rgb(255 255 255 / 72%); }
 .success-meta small, .success-meta strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.success-meta small { color: #759080; font-size: 8px; text-transform: uppercase; }
-.success-meta strong { margin-top: 3px; color: #244a37; font-size: 10px; }
-.success-surface > button { min-height: 40px; padding: 0 14px; border: 1px solid #94c4a8; border-radius: 7px; background: #fff; color: #176c46; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; }
+.success-meta small { color: #759080; font-size: 9px; text-transform: uppercase; }
+.success-meta strong { margin-top: 4px; color: #244a37; font-size: 11px; }
+.success-surface > button { min-height: 44px; padding: 0 16px; border: 1px solid #94c4a8; border-radius: 7px; background: #fff; color: #176c46; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
 @media (max-width: 900px) {
   .form-grid--two, .form-grid--quantity, .component-grid { grid-template-columns: 1fr; }
   .risk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -579,12 +717,12 @@ onMounted(carregarDados)
 }
 @media (max-width: 620px) {
   .context-grid, .risk-grid { grid-template-columns: 1fr; }
-  .form-section { padding: 20px 16px; }
+  .form-section { padding: 22px 18px; }
   .section-title--action, .form-footer { align-items: stretch; flex-direction: column; }
   .add-component, .submit-action { width: 100%; }
-  .notice { margin-inline: 16px; }
-  .form-footer { padding: 18px 16px; }
-  .success-surface { grid-template-columns: 1fr; padding: 20px; }
+  .notice { margin-inline: 18px; }
+  .form-footer { padding: 20px 18px; }
+  .success-surface { grid-template-columns: 1fr; padding: 22px; }
   .success-meta { grid-template-columns: 1fr; }
   .origin-switch { width: 100%; }
   .origin-switch button { flex: 1; }

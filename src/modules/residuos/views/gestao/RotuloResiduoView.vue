@@ -72,6 +72,7 @@ function normalizarLargura() {
 }
 
 function imprimir() {
+  if (!dados.value?.impressaoPermitida) return
   normalizarLargura()
   window.print()
 }
@@ -84,14 +85,14 @@ onMounted(carregar)
 </script>
 
 <template>
-  <main class="rotulo-page">
+  <main class="rotulo-page" :class="{ 'rotulo-page--blocked': dados && !dados.impressaoPermitida }">
     <div class="rotulo-toolbar no-print">
       <button type="button" class="btn btn--ghost" @click="voltar">← Voltar para resíduos</button>
       <div>
-        <strong>Pré-visualização do rótulo</strong>
-        <span>Confira os dados e os pictogramas antes da impressão.</span>
+        <strong>{{ dados?.impressaoPermitida ? 'Rótulo de resíduo' : 'Prévia do rótulo' }}</strong>
+        <span>{{ dados?.impressaoPermitida ? 'Confira os dados e os pictogramas antes da impressão.' : 'A impressão será liberada após a análise técnica.' }}</span>
       </div>
-      <button type="button" class="btn btn--print" :disabled="!dados" @click="imprimir">Imprimir rótulo</button>
+      <button type="button" class="btn btn--print" :disabled="!dados?.impressaoPermitida" @click="imprimir">Imprimir rótulo</button>
     </div>
 
     <section class="size-control no-print" aria-label="Controle do tamanho do rótulo">
@@ -349,6 +350,16 @@ onMounted(carregar)
   }
 
   .no-print { display: none !important; }
+
+  .rotulo-page--blocked .rotulo-canvas { display: none !important; }
+  .rotulo-page--blocked::after {
+    content: 'Impressão não autorizada: o Resíduo ainda não foi liberado pela Gestão.';
+    display: block;
+    padding: 20mm;
+    color: #111827;
+    font: 700 14pt Arial, sans-serif;
+    text-align: center;
+  }
 
   .rotulo-canvas {
     width: 190mm;
