@@ -3,71 +3,44 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Atualizado em:** 11/09/2026  
-**Estado:** primeiro protótipo funcional aprovado; Etapas 1 e 2 da pré-produção concluídas; Etapa 3 — Resíduos — em andamento.
+**Atualizado em:** 17/09/2026  
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2 e 3 concluídas; Etapa 4 iniciada; 4.1 em andamento.  
+**Branch atual:** `feat/etapa-4-residuos`.
 
-Este documento resume o estado real do frontend para retomada humana ou por IA. O objetivo é evitar reconstrução de módulos já aprovados e impedir que roadmaps antigos sejam tratados como tarefa imediata.
+Este documento resume o estado real do frontend para retomada humana ou por IA.
 
-## Checkpoint atual — 11/09/2026
+## Checkpoint atual
 
 ```text
 Etapa 1 — padrão visual global              ✅ concluída
 Etapa 2 — Dark Mode definitivo              ✅ concluída
-Etapa 3 — refinamentos do fluxo de Resíduos 🔧 atual
+Etapa 3 — refinamentos do fluxo de Resíduos ✅ concluída e validada
+Etapa 4 — expansão operacional de Resíduos  🔧 em andamento
+  4.1 — locais de armazenamento             🔧 backend primeiro
 ```
 
-Próxima subetapa: **3.1 — remover redundância visual de análise**. O plano canônico está no backend em `docs/PLANO_PRE_PRODUCAO.md` e o checkpoint específico em `docs/CONTINUIDADE_ETAPA_3_2026-09-11.md`.
-
-Dark Mode definitivo: fonte única em `src/services/themeService.ts`, tokens consolidados, Vuetify/DOM sincronizados e Login/404/rótulos de impressão preservados em Light.
-
----
+O plano canônico está no backend em `docs/PLANO_PRE_PRODUCAO.md` e o handoff atual em `docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`.
 
 ---
 
 # 1. Ordem de precedência
 
 ```text
-1. código da main
-2. Swagger/OpenAPI do backend para contratos HTTP
+1. código da main / branch atual validada
+2. Swagger/OpenAPI do backend
 3. ../CONTINUIDADE.md
-4. este DOSSIE_PROJETO_SGL.md
-5. documentos específicos de decisão/módulo
-6. documentos de etapas antigas e snapshots históricos
+4. backend: docs/PLANO_PRE_PRODUCAO.md
+5. backend: docs/CONTINUIDADE_ETAPA_4_2026-09-17.md
+6. este DOSSIE_PROJETO_SGL.md
+7. documentos específicos de decisão/módulo
+8. documentos históricos
 ```
 
 Fonte de rotas: `src/router/index.ts`.
 
 ---
 
-# 2. Fase atual
-
-O primeiro protótipo foi funcionalmente aprovado.
-
-Antes do roadmap formal de produção, o projeto passa por um bloco de pré-produção:
-
-```text
-1. limpeza, revisão e atualização documental
-2. levantamento dos ajustes de pré-produção
-3. implementação/refinamento dos ajustes
-4. validação e estabilização do bloco
-```
-
-Depois:
-
-```text
-matriz de permissões
-→ congelamento funcional
-→ homologação integrada final
-→ autenticação/autorização/auditoria definitiva
-→ integração corporativa
-→ demais etapas formais de produção
-```
-
-A matriz de permissões permanece válida, mas não é a tarefa imediata enquanto a pré-produção atual estiver aberta.
-
----
-
-# 3. Stack
+# 2. Stack
 
 ```text
 Vue 3.5
@@ -91,7 +64,7 @@ Diretrizes:
 
 ---
 
-# 4. Estado executivo
+# 3. Estado executivo
 
 ```text
 Login visual / sessão DEV                         ✅
@@ -101,9 +74,13 @@ Estoque / lotes                                   ✅
 Movimentações                                     ✅
 Relatórios / fiscalização                         ✅
 PDF/XLSX                                          ✅
-Resíduos Solicitante/Gestão                       ✅
-Rótulos Produto/Resíduo                           ✅
-Estagiários                                       ✅
+Resíduos Solicitante/Gestão                       ✅ Etapa 3 concluída
+Classes de Resíduo                                ✅
+Segurança/EPI                                     ✅
+Prévia antecipada do rótulo                       ✅
+Impressão condicionada à liberação                ✅
+Rótulos Produto/Resíduo                           ✅ base funcional
+Estagiários                                       ✅ base atual
 Pessoas por laboratório                           ✅
 Administração/Cadastros                           ✅
 Dashboard Gestão                                  ✅
@@ -119,9 +96,7 @@ Integração corporativa                            ⏳
 
 ---
 
-# 5. Perfis e experiências
-
-Perfis atuais:
+# 4. Perfis e experiências
 
 ```text
 ADMINISTRADOR
@@ -132,17 +107,12 @@ PESQUISADOR
 ESTAGIARIO
 ```
 
-Agrupamento de navegação:
+Agrupamento:
 
 ```text
-GESTÃO
-→ GESTOR + ADMINISTRADOR
-
-ADMINISTRAÇÃO
-→ ADMINISTRADOR
-
-SOLICITANTE
-→ TECNICO + ANALISTA + PESQUISADOR + ESTAGIARIO
+GESTÃO → GESTOR + ADMINISTRADOR
+ADMINISTRAÇÃO → ADMINISTRADOR
+SOLICITANTE → TECNICO + ANALISTA + PESQUISADOR + ESTAGIARIO
 ```
 
 Rota inicial:
@@ -152,11 +122,11 @@ GESTOR / ADMINISTRADOR → /dashboard
 TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO → /inicio
 ```
 
-Guardas do router são controle de UX e navegação; não substituem autorização real no backend.
+Guardas de router são UX/navegação e não substituem autorização real no backend.
 
 ---
 
-# 6. Rotas atuais
+# 5. Rotas atuais
 
 ```text
 /login
@@ -194,76 +164,19 @@ SISTEMA
 
 ---
 
-# 7. Sessão DEV
+# 6. Sessão DEV e multitenancy
 
-Fluxo atual:
-
-```text
-identificador + senha preenchida
-→ frontend consulta usuários existentes
-→ resolve usuário ativo
-→ senha ainda não é validada por autenticação definitiva
-→ sessão é persistida em localStorage
-→ expiração automática em 5 horas
-```
-
-A sessão possui dados como:
-
-```text
-id
-nome
-email
-perfil
-unidadeId
-unidadeNome
-unidadeSigla
-laboratorioId
-laboratorioNome
-ativo
-```
-
-Essa sessão existe para desenvolvimento e validação funcional.
-
----
-
-# 8. Multitenancy por Unidade
-
-`src/services/http.ts` lê `unidadeId` da sessão e envia:
+A sessão DEV expira em 5h e mantém contexto de Unidade/Laboratório. `src/services/http.ts` envia:
 
 ```text
 X-SGL-Unidade-Id: <unidadeId>
 ```
 
-O backend usa esse header para montar o `TenantContext` e restringir consultas/serviços à Unidade corrente.
-
-Interpretação correta:
-
-```text
-isolamento funcional por Unidade              ✅
-validação de cenários multitenant              ✅
-fronteira definitiva de segurança              ❌
-```
-
-O cliente ainda controla o header. Na produção, Unidade/tenant deverá ser derivado de identidade autenticada confiável.
-
-A interface exibe a sigla da Unidade no perfil da Gestão/Administração.
+O backend usa o header para `TenantContext` e isolamento funcional. Isso não é fronteira definitiva de segurança.
 
 ---
 
-# 9. Pedidos
-
-Solicitante:
-
-```text
-/pedidos/novo
-/meus-pedidos
-```
-
-Gestão:
-
-```text
-/pedidos
-```
+# 7. Pedidos e Estoque
 
 Regras oficiais permanecem no backend:
 
@@ -277,59 +190,11 @@ não perecível → FIFO
 urgência → não altera FIFO/FEFO
 ```
 
-O frontend deve refletir estados e ações permitidas sem recriar a regra de estoque.
+Lotes continuam contextuais a Estoque e não viram módulo principal separado.
 
 ---
 
-# 10. Estoque e Lotes
-
-Rotas:
-
-```text
-/estoque
-/estoque/:id
-/estoque/lotes-vencendo
-```
-
-Cobertura:
-
-- saldo consolidado e estoque mínimo;
-- entrada de lote;
-- validade;
-- Código SGL;
-- embalagem e multiplicador;
-- fracionamento;
-- descarte;
-- rastreabilidade/histórico;
-- filtros;
-- integração com dashboard, busca e alertas.
-
-Lote continua contextual a Estoque e não deve virar item principal separado sem nova decisão de produto.
-
----
-
-# 11. Movimentações
-
-```text
-/movimentacoes
-```
-
-Funções:
-
-```text
-histórico
-rastreabilidade
-auditoria operacional
-filtros
-```
-
-Pedidos entregues continuam sendo um recorte de Movimentações, não relatório independente.
-
----
-
-# 12. Resíduos
-
-Decisão:
+# 8. Resíduos — estado final da Etapa 3
 
 ```text
 Produto != Resíduo
@@ -362,138 +227,161 @@ INFORMADO
 → DESPACHADO
 ```
 
-Composição pode referenciar Produto para rastreabilidade sem movimentar estoque automaticamente.
+A Etapa 3 consolidou:
 
-O Código SGL existe desde o registro inicial. QR Code não integra o rótulo visual atual.
+- `processoOrigem` como Procedência/uso;
+- estado físico;
+- tratamento;
+- Classes de Resíduo informadas/confirmadas;
+- Segurança/EPI informada/confirmada;
+- sugestões vindas de Produto;
+- comparação informado x aprovado;
+- Gestor que liberou via histórico;
+- armazenamento/despacho por Gestores diferentes;
+- Código SGL e QR técnico desde a criação;
+- prévia disponível em `INFORMADO` e `EM_ANALISE`;
+- impressão bloqueada até `LIBERADO_PARA_ARMAZENAMENTO`;
+- ajuste de escala para uso em 100% de zoom.
 
-Modelos de Resíduos pré-cadastrados estão planejados para a Etapa 4; a Etapa 3 atual refina o fluxo já existente.
-
----
-
-# 13. Estagiários
-
-```text
-/estagiarios
-```
-
-Cobertura:
-
-```text
-listagem
-cadastro
-edição
-Unidade/Laboratório
-período
-tipo de vínculo
-encerramento com data efetiva
-indicadores de término/vencimento
-```
-
-Relatório complementar:
+### QR técnico x template visual
 
 ```text
-/relatorios/pessoas-laboratorio
+QR técnico
+→ existe no contrato/identificação
+
+Template físico atual
+→ pode não renderizar o QR visualmente
+
+Etapa 10
+→ template final/Zebra/ZPL/testes físicos
 ```
 
 ---
 
-# 14. Administração / Cadastros
+# 9. Administração / Cadastros
+
+Rota:
 
 ```text
 /administracao/cadastros
 ```
 
-Exclusivo de `ADMINISTRADOR`.
-
-Áreas:
+Áreas atuais:
 
 ```text
 Laboratórios
 Projetos
 Produtos
+Classes de Resíduo
 Permissões
-Resíduos — indicação futura/Em breve
 ```
 
-Decisões:
+Não há CRUD manual normal de Unidade nem criação manual de Usuário.
 
-- Unidade não possui CRUD manual normal;
-- usuário não é criado manualmente pela central;
-- Administração altera perfil de usuários existentes;
-- Produto representa catálogo, não estoque;
-- responsável de Laboratório deve pertencer à mesma Unidade;
-- histórico relevante é preservado por ativação/inativação quando aplicável;
-- `ESTAGIARIO` com vínculo ativo não deve perder o perfil antes do encerramento.
+Classes de Resíduo já são cadastro funcional por Unidade com ativação/inativação.
 
 ---
 
-# 15. Relatórios
+# 10. Etapa 4.1 — impacto planejado no frontend
+
+A modelagem backend foi fechada:
 
 ```text
-Estagiários
-Produtos
-Movimentações
-Resumo operacional
-Estoque e lotes
-Fiscalização
-Resíduos
-Pessoas por laboratório
+LocalArmazenamentoResiduo
+= catálogo mutável por Unidade
+
+Residuo.localArmazenamentoResiduo
+= referência opcional ao catálogo
+
+Residuo.complementoLocalArmazenamento
+= complemento opcional
+
+Residuo.localArmazenamentoTemporario
+= snapshot textual histórico
 ```
 
-Prévia, PDF e XLSX devem usar a mesma consulta e os mesmos filtros.
+Sequência:
+
+```text
+4.1-A backend: V16 + entidade + repository
+4.1-B backend: CRUD + tenant
+4.1-C backend: análise/liberação
+4.1-D backend: confirmação física/correção
+4.1-E revisão backend
+4.1-F frontend Administração/Cadastros
+4.1-G frontend Gestão
+4.1-H regressão integrada
+```
+
+O frontend só começa funcionalmente na **4.1-F**, depois do contrato backend estabilizado.
+
+### 4.1-F — Administração/Cadastros
+
+Adicionar manutenção de locais de armazenamento por Unidade, com ativos/inativos.
+
+### 4.1-G — Gestão
+
+Na análise e confirmação física:
+
+```text
+selecionar local cadastrado
++ complemento opcional
+OU
+usar modo manual
+```
+
+O frontend não deve permitir payload ambíguo com catálogo + manual simultaneamente.
 
 ---
 
-# 16. Dashboard Gestão
+# 11. Etapas 4.2–4.4
 
 ```text
-/dashboard
+4.2 Modelos de Resíduo
+4.3 modelo x preenchimento manual
+4.4 correções administrativas do ciclo
 ```
 
-Indicadores operacionais atuais:
-
-```text
-pedidos pendentes
-pedidos urgentes
-estoque baixo
-lotes vencidos
-lotes vencendo em 7/30 dias
-resíduos INFORMADO/EM_ANALISE
-movimentações recentes
-resumo por laboratório
-```
-
-Cards e alertas direcionam para o contexto operacional correspondente quando possível.
+Não antecipar essas subetapas durante a 4.1.
 
 ---
 
-# 17. Dashboard Solicitante
+# 12. Estagiários, Projetos e Relatórios futuros
 
-```text
-/inicio
-```
+Etapa 5 estabiliza Projetos/Atividades e Código SEG.
 
-Apresenta contexto útil ao solicitante sem expor controles de Gestão/Administração.
+Etapa 6 evolui Estagiários com Orientador, Projeto/Atividade, Bolsa separada de Curso/Formação, Cultura/área temática, treinamento de segurança e histórico de prorrogações.
 
----
-
-# 18. Shell, busca, alertas e tema
-
-Integrado:
-
-```text
-Alertas operacionais            ✅
-Busca global                    ✅
-Tema claro/escuro               ✅
-Persistência de preferência     ✅
-Responsividade                  ✅
-```
-
-Decisão visual importante: o tema das interfaces autenticadas não deve modificar automaticamente a tela de login. A tela de login permanece independente salvo nova decisão explícita.
+Etapa 7 consome Etapas 5/6 em relatórios consolidados.
 
 ---
 
-# 19. Segurança
+# 13. Unidades, Soluções e Pedidos
+
+Etapa 8:
+
+- separar unidade de medida de apresentação física;
+- `1 L = 1000 mL`;
+- `1 kg = 1000 g`;
+- não converter massa/volume sem densidade;
+- estabilizar domínio de Soluções.
+
+Etapa 9 integra Soluções aos Pedidos com aprovação atômica dos componentes.
+
+---
+
+# 14. Rótulos, Manual, testes e refactor
+
+```text
+Etapa 10 — padrão-base de rótulos + Zebra/ZPL
+Etapa 11 — Manual + avaliação de delete lógico
+Etapa 12 — Vitest + Vue Test Utils + Cypress
+Etapa 13 — revisão estrutural/legibilidade
+```
+
+---
+
+# 15. Segurança
 
 ```text
 guardas de rota por perfil                    ✅ UX
@@ -505,73 +393,8 @@ auditoria por identidade autenticada           ⏳
 integração corporativa                          ⏳
 ```
 
-Não tratar menu oculto, rota protegida no client ou Unidade em localStorage como mecanismo de segurança de produção.
-
 ---
 
-# 20. Unidade corporativa
+# 16. Regra de retomada
 
-A decisão futura é que Unidade seja institucional, não um cadastro livre do usuário.
-
-Fluxo esperado:
-
-```text
-login/integração corporativa
-→ identidade institucional
-→ Unidade resolvida de forma confiável
-→ sessão/token recebe contexto institucional
-→ frontend apenas consome o contexto
-```
-
-Detalhes: `DECISAO_UNIDADES_CORPORATIVAS.md`.
-
----
-
-# 21. Documentos/upload
-
-Upload/download real ainda depende de contrato backend definitivo.
-
-Contextos potenciais:
-
-```text
-Pedido
-Produto
-Lote
-```
-
-Não inventar persistência documental apenas no frontend.
-
----
-
-# 22. Roadmap formal posterior
-
-Depois da pré-produção atual:
-
-```text
-1. matriz/diretrizes de permissões
-2. congelamento funcional
-3. homologação integrada final
-4. correção de falhas encontradas
-5. autenticação + autorização + auditoria definitiva
-6. integração corporativa / tenant confiável
-7. documentos/upload quando houver contrato
-8. refactors técnicos planejados
-```
-
-O documento `ROADMAP_INTERFACE_GESTAO.md` registra esse bloco posterior. O primeiro protótipo já foi aprovado e `FECHAMENTO_PRIMEIRO_PROTOTIPO.md` deve ser lido como registro de fechamento, não como gate atual.
-
----
-
-# 23. Regra de retomada
-
-```text
-1. ler ../CONTINUIDADE.md
-2. conferir a main
-3. conferir src/router/index.ts
-4. validar contratos no Swagger
-5. consultar este dossiê
-6. abrir o documento específico da área
-7. distinguir decisão atual de histórico
-```
-
-**O SGL está funcionalmente aprovado e em pré-produção pós-aprovação. Não tratar afirmações antigas de “matriz de permissões = próximo passo” como estado atual; essa etapa pertence ao roadmap formal posterior.**
+**A Etapa 4 já foi iniciada. O backend está entrando na 4.1-A. O frontend deve aguardar o fechamento do contrato backend na 4.1-E e então seguir para 4.1-F e 4.1-G, preservando as decisões visuais já aprovadas e sem antecipar 4.2–4.4.**
