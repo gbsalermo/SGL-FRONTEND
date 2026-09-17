@@ -5,11 +5,13 @@
 **Backend:** `gbsalermo/Sistema-SGL`  
 **Última atualização:** 17/09/2026  
 **Branch estável:** `main`  
-**Branch recém-concluída:** `feat/etapa-3-residuos`  
+**Branch atual de trabalho:** `feat/etapa-4-residuos`  
 **Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
-**Próxima etapa:** Etapa 4 — expansão operacional de Resíduos  
+**Etapa atual:** Etapa 4 — expansão operacional de Resíduos 🔧  
+**Subetapa atual:** 4.1 — locais de armazenamento cadastráveis  
+**Situação do frontend:** aguardando estabilização do contrato backend da 4.1  
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
-**Handoff da próxima etapa:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
+**Handoff atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
 
 Este é o checkpoint principal para retomada do frontend. Contratos HTTP devem ser confirmados no Swagger/OpenAPI do backend.
 
@@ -32,15 +34,10 @@ Regra especial:
 - backend funcional é implementado manualmente pelo responsável do projeto;
 - IA pode analisar/modelar/orientar/revisar;
 - frontend e documentação podem ser alterados diretamente quando autorizado;
+- frontend da subetapa só deve começar depois do contrato backend correspondente estar definido;
 - não antecipar etapas futuras.
 
-Antes da Etapa 4, confirmar que a Etapa 3 foi integrada à `main` nos dois repositórios e criar branch nova a partir da `main` atualizada.
-
-Branch sugerida:
-
-```text
-feat/etapa-4-residuos
-```
+A Etapa 3 já foi integrada à `main` nos dois repositórios. A branch `feat/etapa-4-residuos` já foi criada a partir da `main` atualizada.
 
 ---
 
@@ -134,17 +131,7 @@ PESQUISADOR
 ESTAGIARIO
 ```
 
-A sessão DEV contém:
-
-```text
-unidadeId
-unidadeNome
-unidadeSigla
-laboratorioId
-laboratorioNome
-```
-
-O interceptor envia:
+A sessão DEV contém contexto de Unidade/Laboratório e o interceptor envia:
 
 ```text
 X-SGL-Unidade-Id: <unidadeId>
@@ -156,20 +143,6 @@ Esse mecanismo garante contexto funcional de Unidade em desenvolvimento, mas nã
 
 # 5. Resíduos — estado final da Etapa 3
 
-Rotas:
-
-```text
-Solicitante
-/residuos/novo
-/meus-residuos
-
-Gestão
-/residuos
-
-Rótulo
-/residuos/:id/rotulo
-```
-
 Fluxo:
 
 ```text
@@ -180,9 +153,9 @@ INFORMADO
 → DESPACHADO
 ```
 
-## Formulário do Solicitante
+## Solicitante
 
-A tela `InformarResiduoView.vue` já cobre:
+A tela `InformarResiduoView.vue` cobre:
 
 - projeto opcional;
 - descrição;
@@ -198,44 +171,23 @@ A tela `InformarResiduoView.vue` já cobre:
 - sugestões de EPI a partir dos Produtos associados;
 - observação final.
 
-O formulário teve escala visual aumentada para uso natural em **100% de zoom**, incluindo maior largura útil, tipografia, campos e espaçamentos.
-
-Classes e EPI usam grade visual alinhada.
+O formulário foi revisado para uso natural em 100% de zoom. Classes e EPI usam grade visual alinhada.
 
 ## Gestão
 
-A Gestão confirma:
+A Gestão confirma riscos, Classes, Segurança/EPI, armazenamento temporário, destino previsto e observações técnicas.
 
-- riscos;
-- Classes de Resíduo;
-- Segurança/EPI;
-- armazenamento temporário;
-- destino previsto;
-- observações técnicas.
-
-A visualização dos detalhes foi consolidada em **dois cards comparativos**:
+A visualização dos detalhes foi consolidada em dois cards:
 
 ```text
 Informado pelo laboratório
-→ classes
-→ risco
-→ segurança/EPI
-→ observação original
-
+vs
 Aprovado pela Gestão
-→ classes confirmadas
-→ risco confirmado
-→ segurança/EPI confirmada
-→ observação técnica
-→ Gestor que liberou
-→ data/hora da liberação
 ```
 
 O Gestor que liberou é obtido do histórico pelo evento `RISCO_CONFERIDO_E_RESIDUO_LIBERADO`.
 
-## Responsabilidade
-
-A validação final confirmou que armazenamento e despacho podem ser executados por outro Gestor, mantendo rastreabilidade correta.
+Armazenamento e despacho podem ser executados por outro Gestor, mantendo rastreabilidade correta.
 
 ---
 
@@ -255,7 +207,13 @@ LIBERADO_PARA_ARMAZENAMENTO ou posterior
 
 O texto da análise deixa claro que a confirmação **autoriza a impressão**, e não gera o Código SGL.
 
-A tela bloqueia o botão e também evita impressão operacional pelo navegador antes da liberação.
+Distinção importante:
+
+```text
+QR técnico no contrato/identificação
+≠
+QR obrigatoriamente renderizado no template físico atual
+```
 
 Template final/Zebra continuam na Etapa 10.
 
@@ -285,87 +243,70 @@ Produtos possuem recomendações estruturadas de segurança.
 
 Classes de Resíduo possuem código, descrição, Unidade e ativação/inativação.
 
-A Etapa 4 adicionará locais de armazenamento e Modelos de Resíduo.
+A Etapa 4 adicionará:
+
+```text
+4.1 locais de armazenamento
+4.2 Modelos de Resíduo
+```
 
 ---
 
-# 8. Etapa 3 — fechamento
+# 8. Etapa 4.1 — estado atual
 
-Validada em 17/09/2026.
+A modelagem backend já foi aprovada:
 
 ```text
-3.1 redundância de análise                       ✅
-3.2 dados/classes/segurança/responsabilidade     ✅
-3.3 prévia x permissão de impressão              ✅
+LocalArmazenamentoResiduo
+= catálogo mutável por Unidade
+
+Residuo.localArmazenamentoResiduo
+= referência opcional ao catálogo
+
+Residuo.complementoLocalArmazenamento
+= complemento opcional da ocorrência
+
+Residuo.localArmazenamentoTemporario
+= snapshot textual histórico completo
 ```
 
-Validações finais incluíram:
+Regras que o frontend deverá respeitar quando o contrato backend estiver fechado:
 
-- criação;
-- análise/liberação;
-- armazenamento;
-- despacho;
-- uso de Gestores diferentes;
-- histórico;
-- classes e EPI;
-- comparação informado/aprovado;
-- prévia antes da liberação;
-- bloqueio/liberação da impressão;
-- Gestor que liberou;
-- tamanho/legibilidade da tela.
+- selecionar local cadastrado;
+- complemento opcional;
+- modo manual alternativo;
+- não enviar simultaneamente modo catálogo e manual;
+- listar apenas locais ativos para novas seleções;
+- preservar visualização de resíduos antigos mesmo se cadastro for inativado/renomeado;
+- análise define local planejado;
+- confirmação física pode manter ou corrigir.
 
-**Etapa 3 encerrada.**
+Sequência da 4.1:
+
+```text
+4.1-A backend: V16 + entidade + repository       ⏭ próxima implementação
+4.1-B backend: CRUD + tenant                     ⏳
+4.1-C backend: análise/liberação                 ⏳
+4.1-D backend: confirmação física/correção       ⏳
+4.1-E revisão backend                            ⏳
+4.1-F frontend Administração/Cadastros           ⏳
+4.1-G frontend Gestão                            ⏳
+4.1-H regressão e fechamento                    ⏳
+```
+
+**Não alterar o frontend da 4.1 antes da 4.1-E.**
 
 ---
 
-# 9. Etapa 4 — próxima etapa
-
-Ordem prevista:
+# 9. Etapas 4.2–4.4 — futuras
 
 ```text
-4.1 Locais de armazenamento cadastráveis
-→ 4.2 Modelos de Resíduo pré-cadastrados
-→ 4.3 Escolha modelo x preenchimento manual
-→ 4.4 Correções administrativas do ciclo
+4.2 Modelos de Resíduo pré-cadastrados
+4.3 escolha modelo x preenchimento manual
+4.4 correções administrativas do ciclo
 ```
 
-Frontend só deve ser fechado depois das regras de backend/domínio de cada subetapa estarem definidas.
-
-## 4.1
-
-Esperado no frontend:
-
-- escolher local cadastrado;
-- permitir complemento livre;
-- manter caminho manual quando permitido;
-- não perder histórico se o cadastro do local mudar.
-
-## 4.2 / 4.3
-
-Na Administração, Gestão poderá manter modelos reutilizáveis.
-
-Na criação:
-
-```text
-usar modelo
-ou
-preencher manualmente
-```
-
-Selecionar modelo deve preencher sugestões, sem transformar o Resíduo real em referência viva ao modelo.
-
-## 4.4
-
-Avaliar ações de Administrador:
-
-```text
-Cancelar Resíduo
-Retornar para análise/liberação
-```
-
-Sempre com justificativa e histórico. Regras de status precisam ser fechadas antes da implementação.
-
-Delete lógico geral continua na Etapa 11.
+Na 4.4, avaliar cancelamento/retorno com justificativa e histórico. Delete lógico geral continua na Etapa 11.
 
 ---
 
@@ -383,15 +324,6 @@ Etapa 12 — testes automatizados frontend
 Etapa 13 — revisão estrutural e legibilidade
 ```
 
-Etapa 12:
-
-```text
-Vitest + Vue Test Utils
-Cypress
-```
-
-Etapa 13 revisará classes grandes como `Residuo` no backend, Services, DTOs e Controllers, sem alterar comportamento e com reexecução dos testes.
-
 ---
 
 # 11. Situação atual
@@ -400,7 +332,8 @@ Etapa 13 revisará classes grandes como `Residuo` no backend, Services, DTOs e C
 Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
-Etapa 4 — expansão operacional de Resíduos            ⏭ próxima
+Etapa 4 — expansão operacional de Resíduos            🔧 em andamento
+  4.1 — locais de armazenamento                       🔧 backend primeiro
 Etapas 5 a 13                                         ⏳
 ```
 
@@ -408,4 +341,4 @@ Etapas 5 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**A Etapa 3 está concluída e validada. A próxima janela deve confirmar que a branch `feat/etapa-3-residuos` foi integrada à `main` nos dois repositórios. Depois, criar `feat/etapa-4-residuos` a partir da `main` atualizada e começar pela 4.1 — locais de armazenamento cadastráveis. Antes de alterar o frontend, fechar a modelagem e os contratos necessários no backend. Ler o handoff `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`.**
+**A Etapa 4 já foi iniciada. O backend está começando pela 4.1-A. O frontend deve permanecer sem mudanças funcionais da 4.1 até que o contrato backend esteja estabilizado na 4.1-E; depois iniciar 4.1-F e 4.1-G.**
