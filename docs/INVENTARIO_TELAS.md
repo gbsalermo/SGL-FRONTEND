@@ -1,11 +1,11 @@
 # Inventário de Telas — SGL Frontend
 
-**Atualizado em:** 04/09/2026  
+**Atualizado em:** 17/09/2026  
 **Fonte de rotas reais:** `src/router/index.ts`  
 **Fonte de contratos:** Swagger/OpenAPI do backend  
 **Checkpoint:** `../CONTINUIDADE.md`
 
-Este documento registra a cobertura real da aplicação no estado funcional aprovado.
+Este documento registra a cobertura real da aplicação no estado funcional aprovado e o impacto planejado apenas quando já fechado pelo roadmap atual.
 
 ---
 
@@ -30,8 +30,10 @@ Decisões:
 7. Dashboard existe para Gestão e Solicitante.
 8. Rótulos de Produto e Resíduo possuem rotas próprias imprimíveis.
 9. 404 de rota é diferente de recurso da API não encontrado.
-10. Documentos/upload aguardam contrato real e não possuem tela funcional definitiva.
-11. O contexto de Unidade é enviado ao backend por `X-SGL-Unidade-Id` durante a fase DEV.
+10. Documentos/upload aguardam contrato real.
+11. O contexto de Unidade é enviado por `X-SGL-Unidade-Id` durante a fase DEV.
+12. Classes de Resíduo já são cadastro funcional em Administração.
+13. Locais de armazenamento serão adicionados à mesma central na Etapa 4.1-F, após fechamento do backend.
 
 ---
 
@@ -77,24 +79,21 @@ Decisões:
 
 | Rota | Tela | Estado |
 |---|---|---:|
-| `/residuos/:id/rotulo` | Rótulo imprimível de Resíduo | ✅ |
-| `/produtos/:id/rotulo` | Rótulo imprimível de Produto | ✅ |
+| `/residuos/:id/rotulo` | Prévia/rótulo de Resíduo | ✅ |
+| `/produtos/:id/rotulo` | Rótulo de Produto | ✅ |
 
 ---
 
 # 3. Rota inicial por perfil
 
 ```text
-GESTOR / ADMINISTRADOR
-→ /dashboard
-
-TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO
-→ /inicio
+GESTOR / ADMINISTRADOR → /dashboard
+TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO → /inicio
 ```
 
 Se não autenticado, rota protegida redireciona para `/login`.
 
-Se a sessão DEV expirar, o router redireciona para:
+Se a sessão DEV expirar:
 
 ```text
 /login?motivo=sessao-expirada
@@ -111,8 +110,6 @@ Se a sessão DEV expirar, o router redireciona para:
 Estado visual: ✅  
 Autenticação real: ⏳
 
-Fluxo atual:
-
 ```text
 identificador + senha preenchidos
 → consulta usuários existentes
@@ -121,9 +118,7 @@ identificador + senha preenchidos
 → expiração em 5h
 ```
 
-Senha ainda não é validada pelo backend de autenticação definitivo.
-
-A sessão mantém o contexto institucional do usuário, incluindo Unidade e Laboratório. O interceptor HTTP envia `X-SGL-Unidade-Id` para suportar o isolamento funcional atual.
+A sessão mantém contexto institucional e o interceptor envia `X-SGL-Unidade-Id`.
 
 ---
 
@@ -133,7 +128,7 @@ A sessão mantém o contexto institucional do usuário, incluindo Unidade e Labo
 /inicio
 ```
 
-Função: página inicial do usuário comum, com resumo útil ao próprio contexto e sem ações de Gestão/Administração.
+Página inicial do usuário comum, com resumo próprio e sem ações de Gestão/Administração.
 
 ---
 
@@ -146,31 +141,10 @@ Função: página inicial do usuário comum, com resumo útil ao próprio contex
 /meus-pedidos
 ```
 
-Cobertura:
-
-```text
-criar solicitação
-selecionar materiais
-quantidade / forma de retirada
-urgência conforme contrato
-acompanhar status
-```
-
 ## Gestão
 
 ```text
 /pedidos
-```
-
-Cobertura:
-
-```text
-fila/filtros
-pedido urgente
-aprovação
-rejeição
-entrega
-cancelamento conforme estado
 ```
 
 Regras de baixa/FIFO/FEFO pertencem ao backend.
@@ -191,7 +165,6 @@ Cobertura:
 saldo
 mínimo
 busca/filtros
-situação
 entrada de lote
 Código SGL
 apresentação física
@@ -201,14 +174,6 @@ validade
 edição segura
 descarte
 histórico/rastreabilidade
-filtro por embalagem
-contexto vindo de dashboard/alertas/busca
-```
-
-Código SGL de lote:
-
-```text
-LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
 ```
 
 ---
@@ -219,14 +184,7 @@ LOT-<CODIGO_REFERENCIA_PRODUTO>-<SEQUENCIAL>
 /movimentacoes
 ```
 
-Função:
-
-```text
-histórico operacional
-auditoria operacional
-rastreabilidade
-filtros
-```
+Função: histórico operacional, auditoria, rastreabilidade e filtros.
 
 ---
 
@@ -239,6 +197,23 @@ filtros
 /meus-residuos
 ```
 
+Cobertura após Etapa 3:
+
+```text
+projeto opcional
+descrição
+procedência/uso
+recipiente
+quantidade/unidade
+estado físico
+tratamento
+riscos informados
+composição
+Classes de Resíduo
+Segurança/EPI
+observação
+```
+
 ## Gestão
 
 ```text
@@ -248,12 +223,13 @@ filtros
 Cobertura:
 
 ```text
-informar
-acompanhar
 receber
 analisar/classificar
-Código SGL
-rótulo
+confirmar Classes
+confirmar Segurança/EPI
+comparar informado x aprovado
+identificar Gestor que liberou
+pré-visualizar rótulo
 armazenar
 despachar
 histórico
@@ -275,7 +251,18 @@ DESPACHADO
 /residuos/:id/rotulo
 ```
 
-Sem QR visual na implementação atual.
+Regra:
+
+```text
+INFORMADO / EM_ANALISE
+→ prévia ✅
+→ impressão ❌
+
+LIBERADO_PARA_ARMAZENAMENTO ou posterior
+→ impressão ✅
+```
+
+Código SGL e QR técnico existem desde a criação. O template físico atual pode não renderizar o QR visualmente; isso não significa ausência do QR técnico no contrato.
 
 ---
 
@@ -285,18 +272,7 @@ Sem QR visual na implementação atual.
 /estagiarios
 ```
 
-Cobertura:
-
-```text
-listar
-cadastrar
-editar
-Unidade/Laboratório
-período
-tipo de vínculo
-encerrar
-indicadores de prazo
-```
+Cobertura: listar, cadastrar, editar, Unidade/Laboratório, período, tipo de vínculo, encerrar e indicadores de prazo.
 
 ---
 
@@ -308,23 +284,26 @@ indicadores de prazo
 
 Acesso: `ADMINISTRADOR`.
 
-Áreas:
+Áreas atuais:
 
 ```text
 Laboratórios
 Projetos
 Produtos
+Classes de Resíduo
 Permissões
-Resíduos — Em breve
 ```
 
-Não há:
+Não há CRUD manual normal de Unidade, cadastro manual de Usuário nem módulo operacional paralelo `/produtos`.
+
+### Evolução planejada na Etapa 4
 
 ```text
-CRUD manual normal de Unidade
-cadastro manual de Usuário
-módulo operacional paralelo /produtos
+4.1-F → Locais de armazenamento de Resíduo
+4.2/4.3 → Modelos de Resíduo e uso no formulário
 ```
+
+Essas áreas ainda não estão implementadas neste checkpoint.
 
 ---
 
@@ -334,44 +313,19 @@ módulo operacional paralelo /produtos
 /produtos/:id/rotulo
 ```
 
-Tela imprimível, contextual ao catálogo, com indicação de fiscalização quando aplicável.
+Tela imprimível contextual ao catálogo, com indicação de fiscalização quando aplicável.
 
 ---
 
 # 13. Relatórios
 
-## Central
-
 ```text
 /relatorios
-```
-
-Cobertura:
-
-```text
-Estagiários
-Produtos
-Movimentações
-Resumo operacional
-Estoque e lotes
-Fiscalização
-Resíduos
-Pessoas por laboratório
-```
-
-## Resíduos
-
-```text
 /relatorios/residuos
-```
-
-## Pessoas por laboratório
-
-```text
 /relatorios/pessoas-laboratorio
 ```
 
-Ambos suportam exportações conforme contratos backend.
+Prévia e exportações seguem contratos backend.
 
 ---
 
@@ -384,18 +338,13 @@ Ambos suportam exportações conforme contratos backend.
 Cobertura:
 
 ```text
-pedidos pendentes
-pedidos urgentes
+pedidos pendentes/urgentes
 estoque baixo
-lotes vencidos
-lotes vencendo
-resíduos pendentes de análise
+lotes vencidos/vencendo
+resíduos pendentes de ação
 movimentações recentes
 resumo por laboratório
-resumo rápido
 ```
-
-Ações relevantes direcionam para rotas operacionais com query/alvo quando suportado.
 
 ---
 
@@ -410,49 +359,39 @@ Sidebar responsiva       ✅
 Topbar                    ✅
 ```
 
-Esses recursos não devem ser inventariados como páginas separadas.
-
 A tela de login permanece independente do tema das interfaces autenticadas, salvo nova decisão explícita.
 
 ---
 
-# 16. Telas não implementadas / futuras
+# 16. Telas ainda não implementadas / futuras
+
+## Etapa 4.1 — locais de armazenamento
+
+Não há rota própria planejada. O cadastro deverá entrar em `/administracao/cadastros` e a seleção/correção no fluxo existente de `/residuos`.
+
+## Etapa 4.2/4.3 — Modelos de Resíduo
+
+Ainda não implementados. Devem aparecer na Administração e no fluxo de Informar Resíduo somente após o domínio backend estar definido.
 
 ## Documentos/upload
 
-Não há tela funcional definitiva porque o contrato backend de persistência documental ainda não foi fechado.
-
-## Resíduos pré-determinados
-
-Aparecem apenas como **Em breve** dentro de Administração/Informar Resíduo. Não possuem rota própria nem contrato operacional atual.
+Sem tela funcional definitiva enquanto contrato backend não estiver fechado.
 
 ## Autenticação definitiva
 
-Não é apenas uma nova tela; envolve backend, sessão segura, autorização e integração corporativa.
+Envolve backend, sessão segura, autorização e integração corporativa; não é apenas uma tela nova.
 
 ---
 
 # 17. Fase atual
 
-O primeiro protótipo foi funcionalmente aprovado.
-
-O trabalho imediato não é criar novas rotas nem iniciar a matriz de permissões. A sequência atual é:
-
 ```text
-limpeza/revisão documental
-→ planejamento dos ajustes de pré-produção
-→ implementação/refinamento
-→ estabilização do bloco
+Etapa 1 ✅
+Etapa 2 ✅
+Etapa 3 ✅
+Etapa 4 🔧
+  4.1 backend em andamento
+  frontend aguarda 4.1-E
 ```
 
-Depois, o roadmap formal retoma:
-
-```text
-matriz de permissões
-→ congelamento funcional
-→ homologação integrada final
-→ segurança definitiva
-→ integração corporativa
-```
-
-Este inventário deve ser atualizado quando uma rota/tela real mudar, não para registrar planejamento abstrato.
+O planejamento vigente está em `../CONTINUIDADE.md` e no handoff da Etapa 4 do backend.
