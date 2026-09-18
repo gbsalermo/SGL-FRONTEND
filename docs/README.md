@@ -49,9 +49,11 @@ Pré-produção pós-aprovação                   🔧 em andamento
 Etapa 1 — padrão visual global               ✅ concluída
 Etapa 2 — Dark Mode definitivo               ✅ concluída
 Etapa 3 — refinamentos de Resíduos           ✅ concluída e validada
-Etapa 4 — expansão operacional de Resíduos   🔧 iniciada
-  4.1 — locais de armazenamento              ✅ concluída
-  4.2 — Modelos de Resíduo                   🔧 atual
+Etapa 4 — expansão operacional de Resíduos   ✅ implementada; validação pendente
+  4.1 — locais de armazenamento              ✅
+  4.2 — Modelos de Resíduo                   ✅
+  4.3 — modelo ou preenchimento manual       ✅
+  4.4 — correções administrativas            ✅
 Etapas 5 a 13                                ⏳
 Matriz formal de permissões                  ⏳ após a pré-produção atual
 Congelamento/homologação final               ⏳ posterior
@@ -65,9 +67,9 @@ Integração corporativa                       ⏳ posterior
 
 | Documento | Papel | Estado |
 |---|---|---|
-| `../CONTINUIDADE.md` | checkpoint, fase atual e regra de retomada | **ATUAL — Etapa 4.2** |
-| `../README.md` | visão rápida e execução | **ATUAL — Etapa 4.2** |
-| `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL — Etapa 4.2** |
+| `../CONTINUIDADE.md` | checkpoint, fase atual e regra de retomada | **ATUAL — fechamento da Etapa 4** |
+| `../README.md` | visão rápida e execução | **ATUAL — fechamento da Etapa 4** |
+| `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL — fechamento da Etapa 4** |
 | `INVENTARIO_TELAS.md` | inventário de rotas/telas atuais | **ATUAL** |
 | `FLUXOS_NAVEGACAO.md` | jornadas atuais | **ATUAL** |
 | `PADRAO_VISUAL_PRE_PRODUCAO.md` | padrão visual aprovado na Etapa 1 | **REFERÊNCIA VIGENTE** |
@@ -108,7 +110,9 @@ Se um documento histórico disser que `Classes de Resíduo`, Administração, Re
 - usuário não é criado manualmente em Cadastros; Permissões altera perfis existentes;
 - `Produto != Resíduo`;
 - Classes de Resíduo já existem em Cadastros;
-- modelos pré-cadastrados de Resíduo pertencem à Etapa 4.2;
+- Modelos de Resíduo estão implementados por Unidade e são independentes das ocorrências reais;
+- o Solicitante pode usar modelo ou preenchimento manual;
+- Administrador pode cancelar/retornar etapa com justificativa e histórico;
 - sessão atual é DEV e expira em 5h;
 - o tema claro/escuro pertence às interfaces autenticadas e não altera Login sem decisão explícita;
 - o frontend envia `X-SGL-Unidade-Id` a partir da sessão DEV;
