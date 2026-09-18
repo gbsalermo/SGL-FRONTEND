@@ -206,6 +206,10 @@ function alternarItem<T>(lista: T[], item: T, marcado: boolean) {
   return [...set]
 }
 
+function eventoMarcado(event: Event) {
+  return event.target instanceof HTMLInputElement && event.target.checked
+}
+
 function adicionarComponente() {
   form.value.componentes.push(novoComponente(false))
 }
@@ -404,7 +408,7 @@ onMounted(carregar)
               <input
                 type="checkbox"
                 :checked="form.riscos.includes(item)"
-                @change="form.riscos = alternarItem(form.riscos, item, ($event.target as HTMLInputElement).checked)"
+                @change="form.riscos = alternarItem(form.riscos, item, eventoMarcado($event))"
               />
               {{ rotuloEnum(item) }}
             </label>
@@ -416,7 +420,7 @@ onMounted(carregar)
               <input
                 type="checkbox"
                 :checked="form.classesIds.includes(classe.id)"
-                @change="form.classesIds = alternarItem(form.classesIds, classe.id, ($event.target as HTMLInputElement).checked)"
+                @change="form.classesIds = alternarItem(form.classesIds, classe.id, eventoMarcado($event))"
               />
               {{ classe.codigo }} — {{ classe.descricao }}
             </label>
@@ -428,7 +432,7 @@ onMounted(carregar)
               <input
                 type="checkbox"
                 :checked="form.medidasSeguranca.includes(item)"
-                @change="form.medidasSeguranca = alternarItem(form.medidasSeguranca, item, ($event.target as HTMLInputElement).checked)"
+                @change="form.medidasSeguranca = alternarItem(form.medidasSeguranca, item, eventoMarcado($event))"
               />
               {{ rotuloEnum(item) }}
             </label>
