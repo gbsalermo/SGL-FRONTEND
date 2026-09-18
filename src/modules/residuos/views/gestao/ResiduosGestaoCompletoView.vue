@@ -32,6 +32,7 @@ const locaisArmazenamento = ref<LocalArmazenamentoResiduoResponse[]>([])
 const carregando = ref(false)
 const enviando = ref(false)
 const erro = ref('')
+const erroAnalise = ref('')
 const sucesso = ref('')
 const busca = ref('')
 const aba = ref<FiltroResiduo>('TODOS')
@@ -214,6 +215,7 @@ function fecharRecebimento() {
 function fecharAnalise() {
   if (enviando.value) return
   analiseAberta.value = false
+  erroAnalise.value = ''
   limparSelecaoOperacional()
 }
 
@@ -348,6 +350,7 @@ function abrirAnalise(residuo: ResiduoResponse) {
     ?? residuo.observacaoSegurancaInformada
     ?? ''
   erro.value = ''
+  erroAnalise.value = ''
   sucesso.value = ''
   analiseAberta.value = true
 }
@@ -381,6 +384,7 @@ function validarAnalise() {
 async function confirmarAnalise() {
   if (!selecionado.value || !session.usuario?.id) return
   erro.value = ''
+  erroAnalise.value = ''
   sucesso.value = ''
   try {
     validarAnalise()
@@ -411,7 +415,7 @@ async function confirmarAnalise() {
     limparSelecaoOperacional()
     sucesso.value = 'Análise concluída. Impressão do rótulo liberada.'
   } catch (error) {
-    erro.value = mensagemErro(error)
+    erroAnalise.value = mensagemErro(error)
   } finally {
     enviando.value = false
   }
@@ -639,12 +643,14 @@ onMounted(carregar)
           <section>
             <h3>Composição informada</h3>
             <div class="components-list">
-              <article v-for="componente in selecionado.componentes" :key="componente.id">
-                <div>
-                  <strong>{{ componente.nomeComponente }}</strong>
-                  <small>{{ componente.produtoNomeCatalogo ? `Catálogo · ${componente.produtoNomeCatalogo}` : 'Componente livre' }}</small>
+              <article v-for="componente in selecionado.componentes" :key="componente.id" class="component-item">
+                <div class="component-item__header">
+                  <div class="component-item__identity">
+                    <strong>{{ componente.nomeComponente }}</strong>
+                    <small>{{ componente.produtoNomeCatalogo ? `Catálogo · ${componente.produtoNomeCatalogo}` : 'Componente livre' }}</small>
+                  </div>
+                  <span v-if="componente.principal" class="component-principal">Principal</span>
                 </div>
-                <span v-if="componente.principal">Principal</span>
                 <p>{{ componente.concentracaoOuQuantidade ?? 'Quantidade/concentração não informada' }}</p>
               </article>
             </div>
@@ -729,6 +735,7 @@ onMounted(carregar)
       <section class="modal-card modal-card--large" role="dialog" aria-modal="true" aria-label="Analisar e classificar resíduo">
         <header><div><span>ANÁLISE TÉCNICA</span><h2>Classificar e liberar resíduo</h2></div><button type="button" @click="fecharAnalise">×</button></header>
         <div class="modal-content analysis-content">
+          <div v-if="erroAnalise" class="feedback feedback--error modal-operation-error">{{ erroAnalise }}</div>
           <div class="declaration-reference">
             <div>
               <span>Informado pelo laboratório</span>
@@ -857,6 +864,14 @@ onMounted(carregar)
 .dispatch-action { background: #6b4fa1; }
 .label-action { background: #173d7a; }
 .storage-action:disabled, .dispatch-action:disabled { opacity: .55; cursor: default; }
+.component-item { display: grid; gap: 8px !important; }
+.component-item__header { min-width: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.component-item__identity { min-width: 0; flex: 1; }
+.component-item__identity strong, .component-item__identity small { display: block; }
+.component-item__identity strong { overflow-wrap: anywhere; }
+.component-principal { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 24px; padding: 3px 8px; border: 1px solid var(--sgl-primary); border-radius: 999px; background: var(--sgl-surface-soft); color: var(--sgl-primary); font-size: 8px; font-weight: 900; letter-spacing: .03em; text-transform: uppercase; }
+.component-item > p { margin: 0; }
+.modal-operation-error { margin: 0; }
 .details-list { display: grid; gap: 8px; margin: 0; }
 .details-list div { display: grid; grid-template-columns: 150px 1fr; gap: 12px; }
 .details-list dt { color: #7a879a; font-size: 9px; font-weight: 800; text-transform: uppercase; }
