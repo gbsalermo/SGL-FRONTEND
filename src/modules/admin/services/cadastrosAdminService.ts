@@ -5,6 +5,8 @@ import type {
   ClasseResiduoRequest,
   LaboratorioCadastro,
   LaboratorioRequest,
+  LocalArmazenamentoResiduoCadastro,
+  LocalArmazenamentoResiduoRequest,
   ProdutoCadastro,
   ProdutoRequest,
   ProjetoCadastro,
@@ -76,6 +78,21 @@ export const cadastrosAdminService = {
 
   async atualizarClasseResiduo(id: string, payload: ClasseResiduoRequest) {
     const { data } = await http.put<ClasseResiduoCadastro>(`/v1/classes-residuo/${id}`, payload)
+    return data
+  },
+
+  async listarLocaisArmazenamentoResiduo() {
+    const { data } = await http.get<LocalArmazenamentoResiduoCadastro[]>('/v1/locais-armazenamento-residuo')
+    return data
+  },
+
+  async criarLocalArmazenamentoResiduo(payload: LocalArmazenamentoResiduoRequest) {
+    const { data } = await http.post<LocalArmazenamentoResiduoCadastro>('/v1/locais-armazenamento-residuo', payload)
+    return data
+  },
+
+  async atualizarLocalArmazenamentoResiduo(id: string, payload: LocalArmazenamentoResiduoRequest) {
+    const { data } = await http.put<LocalArmazenamentoResiduoCadastro>(`/v1/locais-armazenamento-residuo/${id}`, payload)
     return data
   },
 
