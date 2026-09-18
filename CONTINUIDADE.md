@@ -15,6 +15,8 @@
 
 Este é o checkpoint principal para retomada do frontend. Contratos HTTP devem ser confirmados no Swagger/OpenAPI do backend.
 
+**Sincronização documental:** auditada em 18/09/2026 junto ao backend. Documentos vigentes apontam para a 4.2; registros de etapas anteriores permanecem históricos.
+
 ---
 
 # 1. Regra de trabalho
