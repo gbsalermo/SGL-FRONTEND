@@ -124,6 +124,20 @@ export interface ClasseResiduoRequest {
   ativo: boolean
 }
 
+export interface LocalArmazenamentoResiduoCadastro {
+  id: string
+  unidadeId: string
+  unidadeNome: string
+  nome: string
+  ativo: boolean
+}
+
+export interface LocalArmazenamentoResiduoRequest {
+  unidadeId: string
+  nome: string
+  ativo: boolean
+}
+
 export interface UsuarioPermissao extends UsuarioSessao {}
 
 export interface AlterarPerfilRequest {
