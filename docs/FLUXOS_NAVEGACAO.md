@@ -33,7 +33,7 @@ Decisões:
 10. 404 de rota e recurso da API não encontrado são situações diferentes.
 11. O contexto de Unidade da sessão DEV é propagado à API.
 12. Classes de Resíduo já fazem parte de Administração/Cadastros.
-13. Locais de armazenamento entrarão na central de Cadastros e no fluxo de Gestão na Etapa 4.1, sem rota principal nova.
+13. Locais de armazenamento foram integrados à central de Cadastros e ao fluxo de Gestão na Etapa 4.1, sem rota principal nova.
 
 ---
 
@@ -438,7 +438,8 @@ Etapa 3 ✅
 Etapa 4 🔧
   4.1 backend ✅
   4.1-F/G frontend ✅
-  4.1-H regressão ⏭
+  4.1-H regressão ✅
+  4.2 Modelos de Resíduo 🔧
 ```
 
 O planejamento vigente está em `../CONTINUIDADE.md` e no handoff da Etapa 4 do backend.
