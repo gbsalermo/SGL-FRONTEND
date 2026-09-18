@@ -4,7 +4,7 @@
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
 **Atualizado em:** 18/09/2026  
-**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2 e 3 concluídas; Etapa 4 em andamento; 4.1 concluída; 4.2 atual.  
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2 e 3 concluídas; Etapa 4 implementada e aguardando validação integrada.  
 **Branch atual:** `feat/etapa-4-residuos`.
 
 Este documento resume o estado real do frontend para retomada humana ou por IA.
@@ -15,9 +15,11 @@ Este documento resume o estado real do frontend para retomada humana ou por IA.
 Etapa 1 — padrão visual global              ✅ concluída
 Etapa 2 — Dark Mode definitivo              ✅ concluída
 Etapa 3 — refinamentos do fluxo de Resíduos ✅ concluída e validada
-Etapa 4 — expansão operacional de Resíduos  🔧 em andamento
-  4.1 — locais de armazenamento             ✅ concluída
-  4.2 — Modelos de Resíduo                  🔧 atual
+Etapa 4 — expansão operacional de Resíduos  ✅ implementada; validação pendente
+  4.1 — locais de armazenamento             ✅
+  4.2 — Modelos de Resíduo                  ✅
+  4.3 — modelo ou preenchimento manual      ✅
+  4.4 — correções administrativas           ✅
 ```
 
 O plano canônico está no backend em `docs/PLANO_PRE_PRODUCAO.md` e o handoff atual em `docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`.
@@ -75,7 +77,10 @@ Estoque / lotes                                   ✅
 Movimentações                                     ✅
 Relatórios / fiscalização                         ✅
 PDF/XLSX                                          ✅
-Resíduos Solicitante/Gestão                       ✅ Etapa 3 concluída
+Resíduos Solicitante/Gestão                       ✅ Etapa 4 implementada
+Modelos de Resíduo / Administração                ✅
+Modelo ou preenchimento manual                    ✅
+Cancelamento/retorno administrativo               ✅
 Classes de Resíduo                                ✅
 Segurança/EPI                                     ✅
 Prévia antecipada do rótulo                       ✅
