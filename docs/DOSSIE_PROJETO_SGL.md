@@ -403,4 +403,4 @@ integração corporativa                          ⏳
 
 # 16. Regra de retomada
 
-**A Etapa 4 está em andamento. A 4.1 foi concluída e validada. O próximo passo é a 4.2 — Modelos de Resíduo, preservando as decisões visuais já aprovadas.**
+**A Etapa 4 está implementada na branch. Executar o build/type-check e o roteiro integrado `backend/docs/VALIDACAO_ETAPA_4.md`; passando, integrar à `main` e iniciar a Etapa 5.**
