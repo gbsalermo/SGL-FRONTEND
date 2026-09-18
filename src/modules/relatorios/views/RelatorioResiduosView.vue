@@ -94,6 +94,7 @@ function statusRotulo(valor: StatusResiduo) {
     INFORMADO: 'A receber', EM_ANALISE: 'Em análise',
     LIBERADO_PARA_ARMAZENAMENTO: 'Liberado',
     ARMAZENADO_TEMPORARIAMENTE: 'Armazenado', DESPACHADO: 'Despachado',
+    CANCELADO: 'Cancelado',
   }
   return mapa[valor]
 }
@@ -141,7 +142,7 @@ onMounted(async () => {
 
     <section class="filter-card">
       <div class="filters">
-        <label><span>Status</span><select v-model="status"><option value="">Todos</option><option value="INFORMADO">A receber</option><option value="EM_ANALISE">Em análise</option><option value="LIBERADO_PARA_ARMAZENAMENTO">Liberados</option><option value="ARMAZENADO_TEMPORARIAMENTE">Armazenados</option><option value="DESPACHADO">Despachados</option></select></label>
+        <label><span>Status</span><select v-model="status"><option value="">Todos</option><option value="INFORMADO">A receber</option><option value="EM_ANALISE">Em análise</option><option value="LIBERADO_PARA_ARMAZENAMENTO">Liberados</option><option value="ARMAZENADO_TEMPORARIAMENTE">Armazenados</option><option value="DESPACHADO">Despachados</option><option value="CANCELADO">Cancelados</option></select></label>
         <label><span>Laboratório</span><select v-model="laboratorioId"><option value="">Todos</option><option v-for="lab in laboratorios" :key="lab.id" :value="lab.id">{{ lab.nome }}</option></select></label>
         <label><span>Nível de risco</span><select v-model="nivelRisco"><option value="">Todos</option><option value="NENHUM">Nenhum</option><option value="BAIXO">Baixo</option><option value="MEDIO">Médio</option><option value="ALTO">Alto</option></select></label>
         <label><span>Data inicial</span><input v-model="dataInicio" type="date" /></label>
@@ -163,6 +164,7 @@ onMounted(async () => {
         <article><span>Liberados</span><strong>{{ resultado.liberados }}</strong></article>
         <article><span>Armazenados</span><strong>{{ resultado.armazenados }}</strong></article>
         <article><span>Despachados</span><strong>{{ resultado.despachados }}</strong></article>
+        <article><span>Cancelados</span><strong>{{ resultado.cancelados }}</strong></article>
         <article><span>Alto risco</span><strong>{{ resultado.altoRisco }}</strong></article>
       </section>
 
