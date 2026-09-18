@@ -1,6 +1,6 @@
 # Fluxos e Navegação — SGL Frontend
 
-**Atualizado em:** 17/09/2026  
+**Atualizado em:** 18/09/2026  
 **Rotas reais:** `src/router/index.ts`  
 **Estado/planejamento:** `../CONTINUIDADE.md`
 
@@ -307,7 +307,7 @@ Residuo.localArmazenamentoTemporario
 = snapshot textual histórico
 ```
 
-Quando o backend estiver fechado:
+Fluxo administrativo implementado:
 
 ```text
 ADMINISTRADOR
