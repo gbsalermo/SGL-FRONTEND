@@ -289,7 +289,7 @@ Código SGL e QR técnico existem desde a criação. O template físico atual po
 
 ---
 
-# 12. Etapa 4.1 — fluxo planejado após contrato backend
+# 12. Etapa 4.1 — fluxo implementado
 
 A modelagem já aprovada é:
 
@@ -339,7 +339,7 @@ LIBERADO_PARA_ARMAZENAMENTO
 
 O frontend não deve enviar catálogo e texto manual simultaneamente.
 
-A implementação frontend da 4.1 só começa após a revisão backend da 4.1-E.
+A revisão backend da 4.1-E foi concluída e o fluxo frontend descrito acima está implementado nas 4.1-F/G.
 
 ---
 
@@ -436,8 +436,9 @@ Etapa 1 ✅
 Etapa 2 ✅
 Etapa 3 ✅
 Etapa 4 🔧
-  4.1 backend em andamento
-  frontend aguarda 4.1-E
+  4.1 backend ✅
+  4.1-F/G frontend ✅
+  4.1-H regressão ⏭
 ```
 
 O planejamento vigente está em `../CONTINUIDADE.md` e no handoff da Etapa 4 do backend.
