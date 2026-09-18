@@ -33,7 +33,10 @@ Decisões:
 10. Documentos/upload aguardam contrato real.
 11. O contexto de Unidade é enviado por `X-SGL-Unidade-Id` durante a fase DEV.
 12. Classes de Resíduo já são cadastro funcional em Administração.
-13. Locais de armazenamento foram adicionados à mesma central na Etapa 4.1-F e integrados à Gestão na 4.1-G.
+13. Locais de armazenamento foram adicionados à central na Etapa 4.1.
+14. Modelos de Resíduo possuem rota administrativa própria dentro de Cadastros desde a 4.2.
+15. Informar Resíduo aceita modelo pré-cadastrado ou preenchimento manual desde a 4.3.
+16. A Central de Resíduos permite cancelamento/retorno administrativo com justificativa desde a 4.4.
 
 ---
 
@@ -72,6 +75,7 @@ Decisões:
 | `/relatorios/residuos` | Relatório de Resíduos | ✅ |
 | `/relatorios/pessoas-laboratorio` | Pessoas por laboratório | ✅ |
 | `/administracao/cadastros` | Administração/Cadastros | ✅ ADMIN |
+| `/administracao/cadastros/modelos-residuo` | Modelos de Resíduo | ✅ ADMIN — Etapa 4.2 |
 | `/solicitacoes/novo` | Nova solicitação na experiência Gestão | ✅ |
 | `/solicitacoes/meus-pedidos` | Solicitações próprias da Gestão | ✅ |
 
@@ -197,7 +201,7 @@ Função: histórico operacional, auditoria, rastreabilidade e filtros.
 /meus-residuos
 ```
 
-Cobertura após Etapa 3:
+Cobertura após Etapa 4:
 
 ```text
 projeto opcional
@@ -212,6 +216,8 @@ composição
 Classes de Resíduo
 Segurança/EPI
 observação
+modelo pré-cadastrado opcional
+preenchimento manual preservado
 ```
 
 ## Gestão
@@ -233,6 +239,8 @@ pré-visualizar rótulo
 armazenar
 despachar
 histórico
+cancelar administrativamente
+retornar uma etapa administrativamente
 ```
 
 Status:
@@ -243,6 +251,7 @@ EM_ANALISE
 LIBERADO_PARA_ARMAZENAMENTO
 ARMAZENADO_TEMPORARIAMENTE
 DESPACHADO
+CANCELADO
 ```
 
 ## Rótulo
