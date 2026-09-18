@@ -358,6 +358,7 @@ onMounted(carregar)
 .status-pill[data-status='LIBERADO_PARA_ARMAZENAMENTO'] { background: #e8f7ee; color: #16743a; }
 .status-pill[data-status='ARMAZENADO_TEMPORARIAMENTE'] { background: #e9f7f7; color: #126d73; }
 .status-pill[data-status='DESPACHADO'] { background: #eef1f5; color: #48576d; }
+.status-pill[data-status='CANCELADO'] { background: #fff0ef; color: #a8322a; }
 .card-main h2 { margin: 10px 0 5px; font-size: 16px; }
 .card-main > p { margin: 0; color: #63738c; font-size: 12px; }
 .card-meta { display: flex; flex-wrap: wrap; gap: 7px 16px; margin-top: 13px; color: #596b85; font-size: 10px; }
