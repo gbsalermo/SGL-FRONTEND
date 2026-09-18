@@ -1,6 +1,6 @@
 # Documentação — SGL Frontend
 
-**Atualizado em:** 17/09/2026
+**Atualizado em:** 18/09/2026
 
 Este índice separa documentação vigente, decisões de produto, referências visuais e registros históricos. O objetivo é evitar que uma etapa antiga seja interpretada como planejamento atual.
 
@@ -135,7 +135,7 @@ Residuo.localArmazenamentoTemporario
 = snapshot textual histórico
 ```
 
-Impacto planejado no frontend após estabilização do backend:
+Implementação entregue no frontend:
 
 ```text
 4.1-F Administração/Cadastros
