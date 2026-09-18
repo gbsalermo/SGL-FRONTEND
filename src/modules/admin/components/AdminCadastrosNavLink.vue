@@ -63,6 +63,8 @@ async function aplicarContextoBuscaGlobal() {
     laboratorios: 'Laboratórios',
     projetos: 'Projetos',
     produtos: 'Produtos',
+    'classes-residuo': 'Classes de resíduo',
+    'locais-armazenamento': 'Locais de armazenamento',
     usuarios: 'Permissões',
     permissoes: 'Permissões',
   }
