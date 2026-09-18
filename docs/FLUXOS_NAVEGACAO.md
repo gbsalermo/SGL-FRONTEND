@@ -33,7 +33,10 @@ Decisões:
 10. 404 de rota e recurso da API não encontrado são situações diferentes.
 11. O contexto de Unidade da sessão DEV é propagado à API.
 12. Classes de Resíduo já fazem parte de Administração/Cadastros.
-13. Locais de armazenamento foram integrados à central de Cadastros e ao fluxo de Gestão na Etapa 4.1, sem rota principal nova.
+13. Locais de armazenamento foram integrados à central de Cadastros e ao fluxo de Gestão na Etapa 4.1.
+14. Modelos de Resíduo possuem manutenção administrativa própria na Etapa 4.2.
+15. Informar Resíduo aceita modelo ou preenchimento manual na Etapa 4.3.
+16. Administrador pode cancelar ou retornar uma etapa com justificativa na Etapa 4.4.
 
 ---
 
@@ -62,6 +65,7 @@ GESTÃO / ADMIN
 /relatorios/residuos
 /relatorios/pessoas-laboratorio
 /administracao/cadastros
+/administracao/cadastros/modelos-residuo
 /solicitacoes/novo
 /solicitacoes/meus-pedidos
 
@@ -443,3 +447,41 @@ Etapa 4 🔧
 ```
 
 O planejamento vigente está em `../CONTINUIDADE.md` e no handoff da Etapa 4 do backend.
+
+---
+
+## Modelos de Resíduo — Etapa 4.2
+
+```text
+ADMIN
+→ /administracao/cadastros
+→ Modelos de resíduo
+→ /administracao/cadastros/modelos-residuo
+→ criar / editar / inativar
+```
+
+## Informar por modelo — Etapa 4.3
+
+```text
+SOLICITANTE
+→ /residuos/novo
+→ selecionar Modelo pré-cadastrado
+   OU Preencher manualmente
+→ revisar dados
+→ informar quantidade/projeto da ocorrência
+→ enviar
+```
+
+## Correções administrativas — Etapa 4.4
+
+```text
+ADMIN
+→ /residuos
+→ abrir ocorrência
+→ Retornar etapa OU Cancelar resíduo
+→ justificar
+→ confirmar
+→ histórico atualizado
+```
+
+`CANCELADO` permanece consultável em Gestão, Meus Resíduos e Relatórios, mas não conta como ocorrência ativa.
