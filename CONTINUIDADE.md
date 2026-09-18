@@ -8,8 +8,8 @@
 **Branch atual de trabalho:** `feat/etapa-4-residuos`  
 **Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
 **Etapa atual:** Etapa 4 — expansão operacional de Resíduos 🔧  
-**Subetapa atual:** 4.2 — Modelos de Resíduo pré-cadastrados  
-**Situação do frontend:** 4.1 concluída e validada; 4.2 é o próximo foco  
+**Subetapa atual:** 4.2-A — contrato/modelagem de ModeloResiduo  
+**Situação do frontend:** 4.1 concluída; frontend da 4.2 aguarda aprovação da 4.2-A no backend  
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
 
@@ -296,7 +296,7 @@ Sequência da 4.1:
 4.1-H regressão e fechamento                    ✅
 ```
 
-**Frontend da 4.1 implementado e validado. A próxima frente é a 4.2 — Modelos de Resíduo.**
+**Frontend da 4.1 implementado e validado. A 4.2-A está em revisão no backend; nenhuma mudança funcional de frontend deve ser feita antes da 4.2-E.**
 
 ---
 
@@ -344,4 +344,4 @@ Etapas 5 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**A Etapa 4 segue na branch `feat/etapa-4-residuos`. A 4.1 foi concluída e validada. Próximo passo: 4.2 — Modelos de Resíduo.**
+**A Etapa 4 segue na branch `feat/etapa-4-residuos`. A 4.1 foi concluída. A 4.2-A está em revisão no backend; o frontend permanece sem mudanças funcionais até a 4.2-E.**
