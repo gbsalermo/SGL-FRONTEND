@@ -529,6 +529,60 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .field small {
   font-size: var(--sgl-font-helper) !important;
 }
 
+/* Escala tipográfica única dos modais da Central de Resíduos. */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-content {
+  font-size: var(--sgl-font-body) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .selected-summary strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .declaration-reference strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .planned-location strong {
+  font-size: var(--sgl-font-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .selected-summary span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card > header span {
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .guidance,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .declaration-reference div p,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .declaration-reference > p {
+  font-size: var(--sgl-font-label) !important;
+  line-height: var(--sgl-line-height-body) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .risk-fieldset button,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice__modes label {
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice__label,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .planned-location span {
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-semibold) !important;
+  text-transform: none !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card > header span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dt,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dd small,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta small {
+  font-size: var(--sgl-font-helper) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card > header strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dd,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta strong {
+  font-size: var(--sgl-font-label) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .component-principal {
+  font-size: var(--sgl-font-helper) !important;
+}
+
 body.sgl-dark-active .gestao-main .residuos-gestao-page .field input,
 body.sgl-dark-active .gestao-main .residuos-gestao-page .field select,
 body.sgl-dark-active .gestao-main .residuos-gestao-page .field textarea {
