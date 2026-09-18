@@ -12,7 +12,7 @@ export type EstadoFisicoResiduo = 'LIQUIDO' | 'SOLIDO' | 'SEMISSOLIDO' | 'GASOSO
 export type MedidaSegurancaResiduo =
   | 'LUVAS' | 'OCULOS_PROTECAO' | 'PROTECAO_RESPIRATORIA' | 'JALECO_AVENTAL' | 'OUTRO'
 
-export type StatusResiduo = 'INFORMADO' | 'EM_ANALISE' | 'LIBERADO_PARA_ARMAZENAMENTO' | 'ARMAZENADO_TEMPORARIAMENTE' | 'DESPACHADO'
+export type StatusResiduo = 'INFORMADO' | 'EM_ANALISE' | 'LIBERADO_PARA_ARMAZENAMENTO' | 'ARMAZENADO_TEMPORARIAMENTE' | 'DESPACHADO' | 'CANCELADO'
 
 export interface ClasseResiduoResponse {
   id: string
@@ -95,6 +95,14 @@ export interface CriarResiduoRequest {
   classesInformadasIds: string[]
   medidasSegurancaInformadas: MedidaSegurancaResiduo[]
   observacaoSegurancaInformada: string | null
+}
+
+export type AcaoAdministrativaResiduo = 'CANCELAR' | 'RETORNAR_ETAPA'
+
+export interface AdministrarResiduoRequest {
+  usuarioAdministradorId: string
+  acao: AcaoAdministrativaResiduo
+  justificativa: string
 }
 
 export interface ReceberResiduoRequest { usuarioGestorId: string; observacao: string | null }
