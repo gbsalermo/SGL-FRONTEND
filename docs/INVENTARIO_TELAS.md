@@ -1,6 +1,6 @@
 # Inventário de Telas — SGL Frontend
 
-**Atualizado em:** 17/09/2026  
+**Atualizado em:** 18/09/2026  
 **Fonte de rotas reais:** `src/router/index.ts`  
 **Fonte de contratos:** Swagger/OpenAPI do backend  
 **Checkpoint:** `../CONTINUIDADE.md`
@@ -363,9 +363,9 @@ A tela de login permanece independente do tema das interfaces autenticadas, salv
 
 ---
 
-# 16. Telas ainda não implementadas / futuras
+# 16. Evoluções da Etapa 4 e telas futuras
 
-## Etapa 4.1 — locais de armazenamento
+## Etapa 4.1 — locais de armazenamento ✅
 
 Não há rota própria. O cadastro foi integrado em `/administracao/cadastros` e a seleção/correção foi integrada ao fluxo existente de `/residuos`.
 
