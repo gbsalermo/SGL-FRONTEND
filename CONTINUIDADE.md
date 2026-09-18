@@ -3,7 +3,7 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 17/09/2026  
+**Última atualização:** 18/09/2026  
 **Branch estável:** `main`  
 **Branch atual de trabalho:** `feat/etapa-4-residuos`  
 **Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
@@ -236,6 +236,7 @@ Laboratórios
 Projetos
 Produtos
 Classes de Resíduo
+Locais de armazenamento
 Permissões
 ```
 
@@ -243,18 +244,17 @@ Produtos possuem recomendações estruturadas de segurança.
 
 Classes de Resíduo possuem código, descrição, Unidade e ativação/inativação.
 
-A Etapa 4 adicionará:
+A Etapa 4 já adicionou os locais de armazenamento na 4.1. A subetapa atual adicionará:
 
 ```text
-4.1 locais de armazenamento
 4.2 Modelos de Resíduo
 ```
 
 ---
 
-# 8. Etapa 4.1 — estado atual
+# 8. Etapa 4.1 — concluída ✅
 
-A modelagem backend já foi aprovada:
+A modelagem implementada e validada é:
 
 ```text
 LocalArmazenamentoResiduo
@@ -270,7 +270,7 @@ Residuo.localArmazenamentoTemporario
 = snapshot textual histórico completo
 ```
 
-Regras que o frontend deverá respeitar quando o contrato backend estiver fechado:
+Regras implementadas e validadas no frontend:
 
 - selecionar local cadastrado;
 - complemento opcional;
@@ -298,7 +298,7 @@ Sequência da 4.1:
 
 ---
 
-# 9. Etapas 4.2–4.4 — futuras
+# 9. Etapas 4.2–4.4 — sequência atual
 
 ```text
 4.2 Modelos de Resíduo pré-cadastrados
