@@ -430,6 +430,62 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .timeline-card {
   color: var(--sgl-text-muted) !important;
 }
 
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .planned-location {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved {
+  border-color: #34766d !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card.pending {
+  opacity: 1 !important;
+  background: var(--sgl-surface-soft) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card > header span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dt,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dd small,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice__label,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice__modes label,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .planned-location span {
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card > header strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dd,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dd b,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .planned-location strong {
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dl > div {
+  border-color: var(--sgl-border) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta {
+  border-color: var(--sgl-border) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta small {
+  color: var(--sgl-text-muted) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta strong {
+  color: #7ed7bd !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .component-principal {
+  border-color: #5489dc !important;
+  background: #142a49 !important;
+  color: #a9cbff !important;
+}
+
 body.sgl-dark-active .gestao-main .residuos-gestao-page .risk-section > div:first-child {
   border-color: #574273 !important;
   background: #18172a !important;
