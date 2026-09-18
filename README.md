@@ -24,10 +24,11 @@ Etapa 1 — padrão visual global                 ✅
 Etapa 2 — Dark Mode definitivo                 ✅
 Etapa 3 — refinamentos de Resíduos             ✅
 Etapa 4 — expansão operacional de Resíduos     🔧 atual
-  4.1 — locais de armazenamento                🔧 validação final
+  4.1 — locais de armazenamento                ✅ concluída
+  4.2 — Modelos de Resíduo                     🔧 atual
 ```
 
-O backend e o frontend funcional da 4.1 estão implementados; falta a regressão integrada da 4.1-H.
+A 4.1 foi concluída e validada. O próximo foco é a 4.2 — Modelos de Resíduo.
 
 Estado consolidado:
 
@@ -338,7 +339,7 @@ Gestão / armazenamento
 → manter ou corrigir local
 ```
 
-O contrato backend foi fechado na 4.1-E. Administração/Cadastros e Gestão já consomem o catálogo estruturado de locais; a etapa agora aguarda regressão integrada.
+O contrato backend foi fechado na 4.1-E, o frontend foi integrado nas 4.1-F/G e a regressão funcional foi aprovada na 4.1-H.
 
 ---
 
@@ -407,5 +408,5 @@ npm run build
 
 <div align="center">
   <strong>SGL Frontend</strong><br/>
-  Etapa 4 em andamento — 4.1-F/G implementadas; 4.1-H é a próxima validação.
+  Etapa 4 em andamento — 4.1 concluída; 4.2 é a próxima implementação.
 </div>
