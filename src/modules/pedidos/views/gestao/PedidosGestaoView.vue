@@ -188,6 +188,23 @@ async function aprovar(pedido: PedidoResponse) {
   if (!aprovadorId) return void (erroAcao.value = 'Usuário aprovador não identificado na sessão.')
 
   const itens = pedido.itens.map((item) => ({ itemId: item.id, quantidadeAprovada: Number(quantidadesAprovadas.value[item.id]) }))
+
+  // Correção de bug: quando o item não é UNITARIO, "multiplicadorSolicitado"
+  // é obrigatório para a conta de resto (%) fazer sentido. Antes, se esse
+  // campo viesse nulo/indefinido da API, "quantidade % undefined" resultava
+  // em NaN, o que sempre marcava o item como inválido — mas com a MESMA
+  // mensagem genérica usada para quantidade errada, confundindo quem está
+  // aprovando (parecia um erro de digitação do usuário, quando na verdade é
+  // um dado incompleto vindo do backend).
+  const itemComEmbalagemIncompleta = pedido.itens.find(
+    (item) => item.tipoEmbalagemSolicitada !== 'UNITARIO'
+      && (item.multiplicadorSolicitado === null || item.multiplicadorSolicitado === undefined || item.multiplicadorSolicitado <= 0),
+  )
+  if (itemComEmbalagemIncompleta) {
+    erroAcao.value = `O item "${itemComEmbalagemIncompleta.produtoNome}" está com a embalagem solicitada incompleta (sem multiplicador definido) e não pode ser aprovado. Contate o suporte.`
+    return
+  }
+
   const invalido = itens.some((aprovacao, index) => {
     const item = pedido.itens[index]!
     if (!Number.isInteger(aprovacao.quantidadeAprovada) || aprovacao.quantidadeAprovada < 1 || aprovacao.quantidadeAprovada > item.quantidadeSolicitada) return true
