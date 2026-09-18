@@ -186,4 +186,4 @@ Antes de implementar algo novo:
 8. distinguir decisão atual de registro histórico
 ```
 
-Na situação atual, a 4.1 está concluída e validada. O frontend aguarda a definição funcional da 4.2 antes de novas mudanças.
+Na situação atual, a 4.2-A está em revisão no backend. O contrato canônico está em `gbsalermo/Sistema-SGL/docs/ETAPA_4_2_MODELO_RESIDUO.md`; nenhuma mudança funcional de frontend deve ocorrer antes da 4.2-E.
