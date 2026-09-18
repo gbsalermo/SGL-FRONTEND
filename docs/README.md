@@ -50,7 +50,8 @@ Etapa 1 — padrão visual global               ✅ concluída
 Etapa 2 — Dark Mode definitivo               ✅ concluída
 Etapa 3 — refinamentos de Resíduos           ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos   🔧 iniciada
-  4.1 — locais de armazenamento              🔧 regressão final
+  4.1 — locais de armazenamento              ✅ concluída
+  4.2 — Modelos de Resíduo                   🔧 atual
 Etapas 5 a 13                                ⏳
 Matriz formal de permissões                  ⏳ após a pré-produção atual
 Congelamento/homologação final               ⏳ posterior
@@ -64,9 +65,9 @@ Integração corporativa                       ⏳ posterior
 
 | Documento | Papel | Estado |
 |---|---|---|
-| `../CONTINUIDADE.md` | checkpoint, fase atual e regra de retomada | **ATUAL — Etapa 4.1** |
-| `../README.md` | visão rápida e execução | **ATUAL — Etapa 4.1** |
-| `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL — Etapa 4.1** |
+| `../CONTINUIDADE.md` | checkpoint, fase atual e regra de retomada | **ATUAL — Etapa 4.2** |
+| `../README.md` | visão rápida e execução | **ATUAL — Etapa 4.2** |
+| `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL — Etapa 4.2** |
 | `INVENTARIO_TELAS.md` | inventário de rotas/telas atuais | **ATUAL** |
 | `FLUXOS_NAVEGACAO.md` | jornadas atuais | **ATUAL** |
 | `PADRAO_VISUAL_PRE_PRODUCAO.md` | padrão visual aprovado na Etapa 1 | **REFERÊNCIA VIGENTE** |
@@ -118,7 +119,7 @@ Se um documento histórico disser que `Classes de Resíduo`, Administração, Re
 
 ---
 
-## Etapa 4.1 — backend e frontend implementados
+## Etapa 4.1 — concluída ✅
 
 ```text
 LocalArmazenamentoResiduo
@@ -146,7 +147,7 @@ Impacto planejado no frontend após estabilização do backend:
 → corrigir local na confirmação física
 ```
 
-A 4.1-E foi fechada. As 4.1-F e 4.1-G estão implementadas; resta a 4.1-H para build, regressão integrada e fechamento.
+A 4.1-E foi fechada, as 4.1-F/G foram implementadas e a 4.1-H foi validada. A próxima frente é a 4.2 — Modelos de Resíduo.
 
 ---
 
@@ -185,4 +186,4 @@ Antes de implementar algo novo:
 8. distinguir decisão atual de registro histórico
 ```
 
-Na situação atual, o frontend da 4.1 já está implementado e aguarda apenas a regressão integrada da 4.1-H.
+Na situação atual, a 4.1 está concluída e validada. O frontend aguarda a definição funcional da 4.2 antes de novas mudanças.
