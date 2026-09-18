@@ -15,7 +15,7 @@
 
 ## Estado atual — 18/09/2026
 
-O primeiro protótipo do SGL foi funcionalmente aprovado. As Etapas 1, 2 e 3 da pré-produção foram concluídas e validadas. A **Etapa 4 — Expansão operacional de Resíduos** foi iniciada na branch `feat/etapa-4-residuos`.
+O primeiro protótipo do SGL foi funcionalmente aprovado. As Etapas 1, 2 e 3 da pré-produção foram concluídas e validadas. A **Etapa 4 — Expansão operacional de Resíduos** está implementada na branch `feat/etapa-4-residuos` e aguarda validação integrada antes do merge.
 
 Situação atual:
 
@@ -23,12 +23,14 @@ Situação atual:
 Etapa 1 — padrão visual global                 ✅
 Etapa 2 — Dark Mode definitivo                 ✅
 Etapa 3 — refinamentos de Resíduos             ✅
-Etapa 4 — expansão operacional de Resíduos     🔧 atual
-  4.1 — locais de armazenamento                ✅ concluída
-  4.2 — Modelos de Resíduo                     🔧 atual
+Etapa 4 — expansão operacional de Resíduos     ✅ implementada
+  4.1 — locais de armazenamento                ✅
+  4.2 — Modelos de Resíduo                     ✅
+  4.3 — modelo ou preenchimento manual         ✅
+  4.4 — correções administrativas              ✅
 ```
 
-A 4.1 foi concluída e validada. O próximo foco é a 4.2 — Modelos de Resíduo.
+A implementação da Etapa 4 foi concluída. Antes do merge, executar o roteiro `backend/docs/VALIDACAO_ETAPA_4.md`; a Etapa 5 começa somente após essa validação.
 
 Estado consolidado:
 
@@ -44,7 +46,10 @@ PDF/XLSX                                          ✅
 Resíduos — Solicitante e Gestão                   ✅ Etapa 3
 Classes de Resíduo em Cadastros                   ✅
 Locais de armazenamento em Cadastros/Gestão       ✅ Etapa 4.1
-Segurança/EPI em Produto/Resíduo                  ✅
+Modelos de Resíduo em Administração                ✅ Etapa 4.2
+Modelo ou preenchimento manual                     ✅ Etapa 4.3
+Correções administrativas do ciclo                 ✅ Etapa 4.4
+Segurança/EPI em Produto/Resíduo                   ✅
 Prévia antecipada do rótulo                       ✅
 Impressão condicionada à liberação                ✅
 Rótulos de Resíduo e Produto                      ✅ base funcional
@@ -409,5 +414,5 @@ npm run build
 
 <div align="center">
   <strong>SGL Frontend</strong><br/>
-  Etapa 4 em andamento — 4.1 concluída; 4.2 é a próxima implementação.
+  Etapa 4 implementada — validação integrada pendente antes do merge e da Etapa 5.
 </div>
