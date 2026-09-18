@@ -4,7 +4,7 @@
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
 **Atualizado em:** 17/09/2026  
-**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2 e 3 concluídas; Etapa 4 iniciada; 4.1 em andamento.  
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2 e 3 concluídas; Etapa 4 em andamento; 4.1 concluída; 4.2 atual.  
 **Branch atual:** `feat/etapa-4-residuos`.
 
 Este documento resume o estado real do frontend para retomada humana ou por IA.
@@ -16,7 +16,8 @@ Etapa 1 — padrão visual global              ✅ concluída
 Etapa 2 — Dark Mode definitivo              ✅ concluída
 Etapa 3 — refinamentos do fluxo de Resíduos ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos  🔧 em andamento
-  4.1 — locais de armazenamento             🔧 backend primeiro
+  4.1 — locais de armazenamento             ✅ concluída
+  4.2 — Modelos de Resíduo                  🔧 atual
 ```
 
 O plano canônico está no backend em `docs/PLANO_PRE_PRODUCAO.md` e o handoff atual em `docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`.
@@ -282,7 +283,7 @@ Classes de Resíduo já são cadastro funcional por Unidade com ativação/inati
 
 ---
 
-# 10. Etapa 4.1 — impacto planejado no frontend
+# 10. Etapa 4.1 — implementação concluída no frontend
 
 A modelagem backend foi fechada:
 
@@ -303,17 +304,17 @@ Residuo.localArmazenamentoTemporario
 Sequência:
 
 ```text
-4.1-A backend: V16 + entidade + repository
-4.1-B backend: CRUD + tenant
-4.1-C backend: análise/liberação
-4.1-D backend: confirmação física/correção
-4.1-E revisão backend
-4.1-F frontend Administração/Cadastros
-4.1-G frontend Gestão
-4.1-H regressão integrada
+4.1-A backend: V16 + entidade + repository ✅
+4.1-B backend: CRUD + tenant ✅
+4.1-C backend: análise/liberação ✅
+4.1-D backend: confirmação física/correção ✅
+4.1-E revisão backend ✅
+4.1-F frontend Administração/Cadastros ✅
+4.1-G frontend Gestão ✅
+4.1-H regressão integrada ✅
 ```
 
-O frontend só começa funcionalmente na **4.1-F**, depois do contrato backend estabilizado.
+O frontend da 4.1 foi implementado após a estabilização do contrato backend e validado funcionalmente.
 
 ### 4.1-F — Administração/Cadastros
 
@@ -342,7 +343,7 @@ O frontend não deve permitir payload ambíguo com catálogo + manual simultanea
 4.4 correções administrativas do ciclo
 ```
 
-Não antecipar essas subetapas durante a 4.1.
+A 4.1 foi concluída; a sequência atual inicia pela 4.2.
 
 ---
 
@@ -397,4 +398,4 @@ integração corporativa                          ⏳
 
 # 16. Regra de retomada
 
-**A Etapa 4 já foi iniciada. O backend está entrando na 4.1-A. O frontend deve aguardar o fechamento do contrato backend na 4.1-E e então seguir para 4.1-F e 4.1-G, preservando as decisões visuais já aprovadas e sem antecipar 4.2–4.4.**
+**A Etapa 4 está em andamento. A 4.1 foi concluída e validada. O próximo passo é a 4.2 — Modelos de Resíduo, preservando as decisões visuais já aprovadas.**
