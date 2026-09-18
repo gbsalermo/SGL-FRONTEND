@@ -392,7 +392,8 @@ Etapa 3 ✅
 Etapa 4 🔧
   4.1 backend ✅
   4.1-F/G frontend ✅
-  4.1-H regressão ⏭
+  4.1-H regressão ✅
+  4.2 Modelos de Resíduo 🔧
 ```
 
 O planejamento vigente está em `../CONTINUIDADE.md` e no handoff da Etapa 4 do backend.
