@@ -33,7 +33,7 @@ Decisões:
 10. Documentos/upload aguardam contrato real.
 11. O contexto de Unidade é enviado por `X-SGL-Unidade-Id` durante a fase DEV.
 12. Classes de Resíduo já são cadastro funcional em Administração.
-13. Locais de armazenamento serão adicionados à mesma central na Etapa 4.1-F, após fechamento do backend.
+13. Locais de armazenamento foram adicionados à mesma central na Etapa 4.1-F e integrados à Gestão na 4.1-G.
 
 ---
 
@@ -296,10 +296,10 @@ Permissões
 
 Não há CRUD manual normal de Unidade, cadastro manual de Usuário nem módulo operacional paralelo `/produtos`.
 
-### Evolução planejada na Etapa 4
+### Evolução implementada na Etapa 4
 
 ```text
-4.1-F → Locais de armazenamento de Resíduo
+4.1-F → Locais de armazenamento de Resíduo ✅
 4.2/4.3 → Modelos de Resíduo e uso no formulário
 ```
 
@@ -367,7 +367,7 @@ A tela de login permanece independente do tema das interfaces autenticadas, salv
 
 ## Etapa 4.1 — locais de armazenamento
 
-Não há rota própria planejada. O cadastro deverá entrar em `/administracao/cadastros` e a seleção/correção no fluxo existente de `/residuos`.
+Não há rota própria. O cadastro foi integrado em `/administracao/cadastros` e a seleção/correção foi integrada ao fluxo existente de `/residuos`.
 
 ## Etapa 4.2/4.3 — Modelos de Resíduo
 
@@ -390,8 +390,9 @@ Etapa 1 ✅
 Etapa 2 ✅
 Etapa 3 ✅
 Etapa 4 🔧
-  4.1 backend em andamento
-  frontend aguarda 4.1-E
+  4.1 backend ✅
+  4.1-F/G frontend ✅
+  4.1-H regressão ⏭
 ```
 
 O planejamento vigente está em `../CONTINUIDADE.md` e no handoff da Etapa 4 do backend.
