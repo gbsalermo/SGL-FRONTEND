@@ -9,6 +9,7 @@ import type {
   ApiErrorResponse,
   ClasseResiduoResponse,
   HistoricoResiduoResponse,
+  LocalArmazenamentoResiduoResponse,
   MedidaSegurancaResiduo,
   NivelRiscoResiduo,
   ResiduoResponse,
@@ -18,6 +19,8 @@ import type {
 import { useSessionStore } from '@/stores/session'
 
 type FiltroResiduo = StatusResiduo | 'TODOS'
+type ModoLocalAnalise = 'CATALOGO' | 'MANUAL'
+type ModoLocalConfirmacao = 'MANTER' | 'CATALOGO' | 'MANUAL'
 
 const session = useSessionStore()
 const router = useRouter()
@@ -25,6 +28,7 @@ const route = useRoute()
 
 const residuos = ref<ResiduoResponse[]>([])
 const classesResiduo = ref<ClasseResiduoResponse[]>([])
+const locaisArmazenamento = ref<LocalArmazenamentoResiduoResponse[]>([])
 const carregando = ref(false)
 const enviando = ref(false)
 const erro = ref('')
@@ -43,6 +47,9 @@ const despachoAberto = ref(false)
 const observacaoRecebimento = ref('')
 const nivelRiscoConfirmado = ref<NivelRiscoResiduo>('BAIXO')
 const riscosConfirmados = ref<TipoRiscoResiduo[]>([])
+const modoLocalAnalise = ref<ModoLocalAnalise>('CATALOGO')
+const localArmazenamentoResiduoId = ref('')
+const complementoLocalArmazenamento = ref('')
 const localArmazenamentoTemporario = ref('')
 const destinoFinalPrevisto = ref('')
 const dataPrevistaDespacho = ref('')
@@ -50,6 +57,9 @@ const observacaoGestor = ref('')
 const classesConfirmadasIds = ref<string[]>([])
 const medidasSegurancaConfirmadas = ref<MedidaSegurancaResiduo[]>([])
 const observacaoSegurancaConfirmada = ref('')
+const modoLocalConfirmacao = ref<ModoLocalConfirmacao>('MANTER')
+const localArmazenamentoConfirmacaoId = ref('')
+const complementoLocalConfirmacao = ref('')
 const localArmazenamentoConfirmacao = ref('')
 const destinoFinalConfirmado = ref('')
 const observacaoDespacho = ref('')
@@ -179,6 +189,7 @@ function acaoHistorico(acao: string) {
     RECEBIDO_PELA_GESTAO: 'Recebido pela Gestão',
     RISCO_CONFERIDO_E_RESIDUO_LIBERADO: 'Classificação concluída e resíduo liberado',
     ARMAZENAMENTO_TEMPORARIO_CONFIRMADO: 'Armazenamento temporário confirmado',
+    ARMAZENAMENTO_TEMPORARIO_CORRIGIDO: 'Local de armazenamento corrigido na confirmação física',
     DESPACHO_CONFIRMADO: 'Despacho e destinação confirmados',
   }
   return mapa[acao] ?? formatarEnum(acao)
@@ -222,12 +233,14 @@ async function carregar() {
   carregando.value = true
   erro.value = ''
   try {
-    const [residuosCarregados, classesCarregadas] = await Promise.all([
+    const [residuosCarregados, classesCarregadas, locaisCarregados] = await Promise.all([
       residuoService.listarTodos(),
       residuoService.listarClassesAtivas(),
+      residuoService.listarLocaisArmazenamentoAtivos(),
     ])
     residuos.value = residuosCarregados
     classesResiduo.value = classesCarregadas
+    locaisArmazenamento.value = locaisCarregados
     if (selecionado.value) {
       selecionado.value = residuos.value.find((item) => item.id === selecionado.value?.id) ?? null
     }
@@ -303,7 +316,24 @@ function abrirAnalise(residuo: ResiduoResponse) {
   selecionado.value = residuo
   nivelRiscoConfirmado.value = residuo.nivelRiscoConfirmado ?? residuo.nivelRiscoInformado
   riscosConfirmados.value = residuo.riscosConfirmados.length ? [...residuo.riscosConfirmados] : [...residuo.riscosInformados]
-  localArmazenamentoTemporario.value = residuo.localArmazenamentoTemporario ?? ''
+
+  if (residuo.localArmazenamentoResiduoId) {
+    modoLocalAnalise.value = 'CATALOGO'
+    localArmazenamentoResiduoId.value = residuo.localArmazenamentoResiduoId
+    complementoLocalArmazenamento.value = residuo.complementoLocalArmazenamento ?? ''
+    localArmazenamentoTemporario.value = ''
+  } else if (residuo.localArmazenamentoTemporario) {
+    modoLocalAnalise.value = 'MANUAL'
+    localArmazenamentoResiduoId.value = ''
+    complementoLocalArmazenamento.value = ''
+    localArmazenamentoTemporario.value = residuo.localArmazenamentoTemporario
+  } else {
+    modoLocalAnalise.value = locaisArmazenamento.value.length ? 'CATALOGO' : 'MANUAL'
+    localArmazenamentoResiduoId.value = ''
+    complementoLocalArmazenamento.value = ''
+    localArmazenamentoTemporario.value = ''
+  }
+
   destinoFinalPrevisto.value = residuo.destinoFinalPrevisto ?? ''
   dataPrevistaDespacho.value = residuo.dataPrevistaDespacho ?? ''
   observacaoGestor.value = residuo.observacaoGestor ?? ''
@@ -338,7 +368,12 @@ function validarAnalise() {
   if (medidasSegurancaConfirmadas.value.includes('OUTRO') && !observacaoSegurancaConfirmada.value.trim()) {
     throw new Error('Descreva a medida de segurança marcada como Outro.')
   }
-  if (!localArmazenamentoTemporario.value.trim()) throw new Error('Informe o local de armazenamento temporário.')
+  if (modoLocalAnalise.value === 'CATALOGO' && !localArmazenamentoResiduoId.value) {
+    throw new Error('Selecione um local de armazenamento cadastrado.')
+  }
+  if (modoLocalAnalise.value === 'MANUAL' && !localArmazenamentoTemporario.value.trim()) {
+    throw new Error('Informe o local de armazenamento temporário.')
+  }
   if (!destinoFinalPrevisto.value.trim()) throw new Error('Informe o destino final previsto.')
   if (riscosConfirmados.value.length === 0) throw new Error('Confirme pelo menos uma classificação de risco.')
 }
@@ -356,7 +391,15 @@ async function confirmarAnalise() {
       classesConfirmadasIds: [...classesConfirmadasIds.value],
       medidasSegurancaConfirmadas: [...medidasSegurancaConfirmadas.value],
       observacaoSegurancaConfirmada: observacaoSegurancaConfirmada.value.trim() || null,
-      localArmazenamentoTemporario: localArmazenamentoTemporario.value.trim(),
+      localArmazenamentoResiduoId: modoLocalAnalise.value === 'CATALOGO'
+        ? localArmazenamentoResiduoId.value || null
+        : null,
+      complementoLocalArmazenamento: modoLocalAnalise.value === 'CATALOGO'
+        ? complementoLocalArmazenamento.value.trim() || null
+        : null,
+      localArmazenamentoTemporario: modoLocalAnalise.value === 'MANUAL'
+        ? localArmazenamentoTemporario.value.trim() || null
+        : null,
       destinoFinalPrevisto: destinoFinalPrevisto.value.trim(),
       dataPrevistaDespacho: dataPrevistaDespacho.value || null,
       observacaoGestor: observacaoGestor.value.trim() || null,
@@ -376,7 +419,10 @@ async function confirmarAnalise() {
 
 function abrirArmazenamento(residuo: ResiduoResponse) {
   selecionado.value = residuo
-  localArmazenamentoConfirmacao.value = residuo.localArmazenamentoTemporario ?? ''
+  modoLocalConfirmacao.value = 'MANTER'
+  localArmazenamentoConfirmacaoId.value = ''
+  complementoLocalConfirmacao.value = ''
+  localArmazenamentoConfirmacao.value = ''
   erro.value = ''
   sucesso.value = ''
   armazenamentoAberto.value = true
@@ -384,18 +430,39 @@ function abrirArmazenamento(residuo: ResiduoResponse) {
 
 async function confirmarArmazenamento() {
   if (!selecionado.value || !session.usuario?.id) return
+
+  if (modoLocalConfirmacao.value === 'CATALOGO' && !localArmazenamentoConfirmacaoId.value) {
+    erro.value = 'Selecione o novo local cadastrado.'
+    return
+  }
+
+  if (modoLocalConfirmacao.value === 'MANUAL' && !localArmazenamentoConfirmacao.value.trim()) {
+    erro.value = 'Informe o novo local físico.'
+    return
+  }
+
   enviando.value = true
   erro.value = ''
   sucesso.value = ''
   try {
     const atualizado = await residuoService.armazenar(selecionado.value.id, {
       usuarioGestorId: session.usuario.id,
-      localArmazenamentoTemporario: localArmazenamentoConfirmacao.value.trim() || null,
+      localArmazenamentoResiduoId: modoLocalConfirmacao.value === 'CATALOGO'
+        ? localArmazenamentoConfirmacaoId.value || null
+        : null,
+      complementoLocalArmazenamento: modoLocalConfirmacao.value === 'CATALOGO'
+        ? complementoLocalConfirmacao.value.trim() || null
+        : null,
+      localArmazenamentoTemporario: modoLocalConfirmacao.value === 'MANUAL'
+        ? localArmazenamentoConfirmacao.value.trim() || null
+        : null,
     })
     atualizarResiduo(atualizado)
     armazenamentoAberto.value = false
     limparSelecaoOperacional()
-    sucesso.value = 'Armazenamento temporário confirmado.'
+    sucesso.value = modoLocalConfirmacao.value === 'MANTER'
+      ? 'Armazenamento temporário confirmado.'
+      : 'Armazenamento confirmado com correção do local físico.'
   } catch (error) {
     erro.value = mensagemErro(error)
   } finally {
@@ -683,10 +750,35 @@ onMounted(carregar)
           <fieldset class="risk-fieldset"><legend>Segurança / EPI confirmados</legend><button v-for="medida in medidasSeguranca" :key="medida.valor" type="button" :class="{ selected: medidasSegurancaConfirmadas.includes(medida.valor) }" @click="medidasSegurancaConfirmadas = medidasSegurancaConfirmadas.includes(medida.valor) ? medidasSegurancaConfirmadas.filter((item) => item !== medida.valor) : [...medidasSegurancaConfirmadas, medida.valor]"><span class="checkmark">{{ medidasSegurancaConfirmadas.includes(medida.valor) ? '✓' : '' }}</span>{{ medida.rotulo }}</button></fieldset>
           <label class="field"><span>Orientação complementar de segurança <small>(obrigatória para Outro)</small></span><textarea v-model="observacaoSegurancaConfirmada" rows="3" /></label>
 
-          <div class="analysis-grid">
-            <label class="field"><span>Local de armazenamento temporário</span><input v-model="localArmazenamentoTemporario" /></label>
-            <label class="field"><span>Destino final previsto</span><input v-model="destinoFinalPrevisto" /></label>
-          </div>
+          <section class="storage-choice">
+            <span class="storage-choice__label">Local de armazenamento temporário</span>
+            <div class="storage-choice__modes">
+              <label><input v-model="modoLocalAnalise" type="radio" value="CATALOGO" /><span>Local cadastrado</span></label>
+              <label><input v-model="modoLocalAnalise" type="radio" value="MANUAL" /><span>Informar manualmente</span></label>
+            </div>
+
+            <div v-if="modoLocalAnalise === 'CATALOGO'" class="analysis-grid">
+              <label class="field">
+                <span>Local cadastrado</span>
+                <select v-model="localArmazenamentoResiduoId">
+                  <option value="">Selecione...</option>
+                  <option v-for="local in locaisArmazenamento" :key="local.id" :value="local.id">{{ local.nome }}</option>
+                </select>
+                <small v-if="locaisArmazenamento.length === 0">Nenhum local ativo cadastrado. Use a opção manual.</small>
+              </label>
+              <label class="field">
+                <span>Complemento <small>(opcional)</small></span>
+                <input v-model="complementoLocalArmazenamento" maxlength="150" placeholder="Ex.: Prateleira B2" />
+              </label>
+            </div>
+
+            <label v-else class="field">
+              <span>Local manual</span>
+              <input v-model="localArmazenamentoTemporario" maxlength="255" placeholder="Descreva o local físico" />
+            </label>
+          </section>
+
+          <label class="field"><span>Destino final previsto</span><input v-model="destinoFinalPrevisto" /></label>
           <label class="field"><span>Observação técnica <small>(opcional)</small></span><textarea v-model="observacaoGestor" rows="4" /></label>
           <p class="guidance guidance--warning">Ao confirmar, o resíduo é liberado para armazenamento e a impressão do rótulo é autorizada. O código SGL já foi gerado no registro inicial.</p>
         </div>
@@ -699,8 +791,42 @@ onMounted(carregar)
         <header><div><span>ARMAZENAMENTO</span><h2>Confirmar armazenamento temporário</h2></div><button type="button" @click="fecharArmazenamento">×</button></header>
         <div class="modal-content">
           <div class="selected-summary"><strong>{{ selecionado.codigoRastreio }}</strong><span>{{ selecionado.descricao }}</span></div>
-          <label class="field"><span>Local de armazenamento</span><input v-model="localArmazenamentoConfirmacao" placeholder="Local físico do recipiente" /></label>
-          <p class="guidance">Confirme o local físico onde o recipiente rotulado foi armazenado. É possível corrigir o local definido na análise.</p>
+
+          <div class="planned-location">
+            <span>Local planejado</span>
+            <strong>{{ selecionado.localArmazenamentoTemporario ?? 'Não definido' }}</strong>
+          </div>
+
+          <section class="storage-choice">
+            <span class="storage-choice__label">Confirmação do local físico</span>
+            <div class="storage-choice__modes storage-choice__modes--vertical">
+              <label><input v-model="modoLocalConfirmacao" type="radio" value="MANTER" /><span>Manter o local planejado</span></label>
+              <label><input v-model="modoLocalConfirmacao" type="radio" value="CATALOGO" /><span>Corrigir para outro local cadastrado</span></label>
+              <label><input v-model="modoLocalConfirmacao" type="radio" value="MANUAL" /><span>Corrigir manualmente</span></label>
+            </div>
+
+            <div v-if="modoLocalConfirmacao === 'CATALOGO'" class="analysis-grid">
+              <label class="field">
+                <span>Novo local cadastrado</span>
+                <select v-model="localArmazenamentoConfirmacaoId">
+                  <option value="">Selecione...</option>
+                  <option v-for="local in locaisArmazenamento" :key="local.id" :value="local.id">{{ local.nome }}</option>
+                </select>
+                <small v-if="locaisArmazenamento.length === 0">Nenhum local ativo cadastrado.</small>
+              </label>
+              <label class="field">
+                <span>Complemento <small>(opcional)</small></span>
+                <input v-model="complementoLocalConfirmacao" maxlength="150" placeholder="Ex.: Estante A1" />
+              </label>
+            </div>
+
+            <label v-else-if="modoLocalConfirmacao === 'MANUAL'" class="field">
+              <span>Novo local físico</span>
+              <input v-model="localArmazenamentoConfirmacao" maxlength="255" placeholder="Descreva o local físico real" />
+            </label>
+          </section>
+
+          <p class="guidance">Se o recipiente foi armazenado onde estava previsto, apenas mantenha o local planejado. Correções ficam registradas no histórico.</p>
         </div>
         <footer><button class="secondary-action" type="button" @click="fecharArmazenamento">Cancelar</button><button class="storage-action" type="button" :disabled="enviando" @click="confirmarArmazenamento">{{ enviando ? 'Confirmando...' : 'Confirmar armazenamento' }}</button></footer>
       </section>
@@ -773,6 +899,15 @@ onMounted(carregar)
 .timeline-card small { display: block; margin-top: 7px; color: #7c899b; font-size: 9px; line-height: 1.45; }
 .drawer-actions--wrap { flex-wrap: wrap; }
 .field--spaced { margin-top: 15px; }
+.storage-choice { display: grid; gap: 10px; padding: 12px; border: 1px solid #dce4ee; border-radius: 8px; background: #fbfcfe; }
+.storage-choice__label { color: #405169; font-size: 9px; font-weight: 850; text-transform: uppercase; }
+.storage-choice__modes { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.storage-choice__modes--vertical { align-items: flex-start; flex-direction: column; }
+.storage-choice__modes label { display: inline-flex; align-items: center; gap: 6px; color: #526178; font-size: 10px; cursor: pointer; }
+.storage-choice__modes input { margin: 0; }
+.planned-location { display: grid; gap: 4px; padding: 11px 12px; border: 1px solid #cfe0d4; border-radius: 8px; background: #f5fbf7; }
+.planned-location span { color: #648070; font-size: 8.5px; font-weight: 850; text-transform: uppercase; }
+.planned-location strong { color: #20583a; font-size: 11px; line-height: 1.4; }
 @media (max-width: 1180px) { .metrics-grid--five { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .metrics-grid--five, .tracking-card, .comparison-section { grid-template-columns: 1fr; } .timeline-card > div { flex-direction: column; gap: 4px; } .approval-meta { grid-template-columns: 1fr; } }
 </style>
