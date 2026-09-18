@@ -3,7 +3,7 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Atualizado em:** 17/09/2026  
+**Atualizado em:** 18/09/2026  
 **Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2 e 3 concluídas; Etapa 4 em andamento; 4.1 concluída; 4.2 atual.  
 **Branch atual:** `feat/etapa-4-residuos`.
 
@@ -316,11 +316,11 @@ Sequência:
 
 O frontend da 4.1 foi implementado após a estabilização do contrato backend e validado funcionalmente.
 
-### 4.1-F — Administração/Cadastros
+### 4.1-F — Administração/Cadastros ✅
 
-Adicionar manutenção de locais de armazenamento por Unidade, com ativos/inativos.
+Manutenção de locais de armazenamento por Unidade implementada, com criação, edição e ativação/inativação.
 
-### 4.1-G — Gestão
+### 4.1-G — Gestão ✅
 
 Na análise e confirmação física:
 
