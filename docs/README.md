@@ -50,7 +50,7 @@ Etapa 1 — padrão visual global               ✅ concluída
 Etapa 2 — Dark Mode definitivo               ✅ concluída
 Etapa 3 — refinamentos de Resíduos           ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos   🔧 iniciada
-  4.1 — locais de armazenamento              🔧 backend primeiro
+  4.1 — locais de armazenamento              🔧 regressão final
 Etapas 5 a 13                                ⏳
 Matriz formal de permissões                  ⏳ após a pré-produção atual
 Congelamento/homologação final               ⏳ posterior
@@ -118,7 +118,7 @@ Se um documento histórico disser que `Classes de Resíduo`, Administração, Re
 
 ---
 
-## Etapa 4.1 — decisão já fechada no backend
+## Etapa 4.1 — backend e frontend implementados
 
 ```text
 LocalArmazenamentoResiduo
@@ -146,7 +146,7 @@ Impacto planejado no frontend após estabilização do backend:
 → corrigir local na confirmação física
 ```
 
-Não iniciar implementação frontend da 4.1 antes do fechamento da 4.1-E no backend.
+A 4.1-E foi fechada. As 4.1-F e 4.1-G estão implementadas; resta a 4.1-H para build, regressão integrada e fechamento.
 
 ---
 
@@ -185,4 +185,4 @@ Antes de implementar algo novo:
 8. distinguir decisão atual de registro histórico
 ```
 
-Na situação atual, o frontend aguarda a estabilização do backend da 4.1 antes de iniciar mudanças funcionais.
+Na situação atual, o frontend da 4.1 já está implementado e aguarda apenas a regressão integrada da 4.1-H.
