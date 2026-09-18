@@ -8,8 +8,8 @@
 **Branch atual de trabalho:** `feat/etapa-4-residuos`  
 **Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
 **Etapa atual:** Etapa 4 — expansão operacional de Resíduos 🔧  
-**Subetapa atual:** 4.1 — locais de armazenamento cadastráveis  
-**Situação do frontend:** 4.1-F e 4.1-G implementadas; 4.1-H aguardando validação integrada  
+**Subetapa atual:** 4.2 — Modelos de Resíduo pré-cadastrados  
+**Situação do frontend:** 4.1 concluída e validada; 4.2 é o próximo foco  
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
 
@@ -291,10 +291,10 @@ Sequência da 4.1:
 4.1-E revisão backend                            ✅
 4.1-F frontend Administração/Cadastros           ✅
 4.1-G frontend Gestão                            ✅
-4.1-H regressão e fechamento                    ⏭ próxima
+4.1-H regressão e fechamento                    ✅
 ```
 
-**Frontend da 4.1 implementado após fechamento da 4.1-E. Falta apenas a regressão integrada da 4.1-H.**
+**Frontend da 4.1 implementado e validado. A próxima frente é a 4.2 — Modelos de Resíduo.**
 
 ---
 
@@ -333,7 +333,8 @@ Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            🔧 em andamento
-  4.1 — locais de armazenamento                       🔧 validação final
+  4.1 — locais de armazenamento                       ✅ concluída
+  4.2 — Modelos de Resíduo                            🔧 atual
 Etapas 5 a 13                                         ⏳
 ```
 
@@ -341,4 +342,4 @@ Etapas 5 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**A Etapa 4 segue na branch `feat/etapa-4-residuos`. Backend 4.1-A–E e frontend 4.1-F/G estão implementados. Próximo passo: 4.1-H — build, regressão integrada e fechamento da 4.1.**
+**A Etapa 4 segue na branch `feat/etapa-4-residuos`. A 4.1 foi concluída e validada. Próximo passo: 4.2 — Modelos de Resíduo.**
