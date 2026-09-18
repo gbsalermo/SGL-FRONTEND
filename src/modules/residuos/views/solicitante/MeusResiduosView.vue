@@ -30,13 +30,14 @@ const statusOpcoes: Array<{ valor: FiltroStatusResiduo; rotulo: string }> = [
   { valor: 'LIBERADO_PARA_ARMAZENAMENTO', rotulo: 'Liberados' },
   { valor: 'ARMAZENADO_TEMPORARIAMENTE', rotulo: 'Armazenados' },
   { valor: 'DESPACHADO', rotulo: 'Despachados' },
+  { valor: 'CANCELADO', rotulo: 'Cancelados' },
 ]
 
 const residuosFiltrados = computed(() => {
   const termo = busca.value.trim().toLowerCase()
   return residuos.value.filter((residuo) => {
     const statusOk = statusFiltro.value === 'TODOS'
-      || (statusFiltro.value === 'ATIVOS' && residuo.status !== 'DESPACHADO')
+      || (statusFiltro.value === 'ATIVOS' && !['DESPACHADO', 'CANCELADO'].includes(residuo.status))
       || residuo.status === statusFiltro.value
     const buscaOk = !termo || [
       residuo.descricao,
@@ -62,6 +63,7 @@ function statusRotulo(status: StatusResiduo) {
     LIBERADO_PARA_ARMAZENAMENTO: 'Liberado',
     ARMAZENADO_TEMPORARIAMENTE: 'Armazenado',
     DESPACHADO: 'Despachado',
+    CANCELADO: 'Cancelado',
   }
   return mapa[status]
 }
@@ -91,6 +93,7 @@ function aplicarStatusDaRota() {
     'LIBERADO_PARA_ARMAZENAMENTO',
     'ARMAZENADO_TEMPORARIAMENTE',
     'DESPACHADO',
+    'CANCELADO',
   ]
   statusFiltro.value = validos.includes(valor as FiltroStatusResiduo) ? valor as FiltroStatusResiduo : 'TODOS'
 }
