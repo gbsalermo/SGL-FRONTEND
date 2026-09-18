@@ -69,7 +69,7 @@ const residuosPendentesAnalise = computed(() =>
 )
 
 const residuosAtivos = computed(() =>
-  residuos.value.filter((residuo) => residuo.status !== 'DESPACHADO'),
+  residuos.value.filter((residuo) => !['DESPACHADO', 'CANCELADO'].includes(residuo.status)),
 )
 
 const lotesVencidos = computed(() =>
