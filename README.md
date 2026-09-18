@@ -13,7 +13,7 @@
 
 ---
 
-## Estado atual — 17/09/2026
+## Estado atual — 18/09/2026
 
 O primeiro protótipo do SGL foi funcionalmente aprovado. As Etapas 1, 2 e 3 da pré-produção foram concluídas e validadas. A **Etapa 4 — Expansão operacional de Resíduos** foi iniciada na branch `feat/etapa-4-residuos`.
 
@@ -43,6 +43,7 @@ Relatórios / fiscalização                         ✅
 PDF/XLSX                                          ✅
 Resíduos — Solicitante e Gestão                   ✅ Etapa 3
 Classes de Resíduo em Cadastros                   ✅
+Locais de armazenamento em Cadastros/Gestão       ✅ Etapa 4.1
 Segurança/EPI em Produto/Resíduo                  ✅
 Prévia antecipada do rótulo                       ✅
 Impressão condicionada à liberação                ✅
@@ -292,23 +293,23 @@ Laboratórios
 Projetos
 Produtos
 Classes de Resíduo
+Locais de armazenamento
 Permissões
 ```
 
 Produtos possuem recomendações estruturadas de segurança. Classes de Resíduo possuem código, descrição, Unidade e ativação/inativação.
 
-A Etapa 4 adicionará:
+A Etapa 4 já entregou os locais de armazenamento na 4.1. A implementação atual é:
 
 ```text
-4.1 Local de armazenamento de Resíduo
 4.2 Modelo de Resíduo
 ```
 
 ---
 
-## Etapa 4.1 — implementação atual no frontend
+## Etapa 4.1 — implementação concluída no frontend
 
-A modelagem backend já foi aprovada:
+A modelagem backend implementada é:
 
 ```text
 LocalArmazenamentoResiduo
@@ -324,7 +325,7 @@ Residuo.localArmazenamentoTemporario
 = snapshot textual histórico
 ```
 
-Depois do backend estabilizado, o frontend terá:
+O frontend implementado possui:
 
 ```text
 Administração/Cadastros
