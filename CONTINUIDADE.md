@@ -9,7 +9,7 @@
 **Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
 **Etapa atual:** Etapa 4 — expansão operacional de Resíduos 🔧  
 **Subetapa atual:** 4.1 — locais de armazenamento cadastráveis  
-**Situação do frontend:** aguardando estabilização do contrato backend da 4.1  
+**Situação do frontend:** 4.1-F e 4.1-G implementadas; 4.1-H aguardando validação integrada  
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
 
@@ -284,17 +284,17 @@ Regras que o frontend deverá respeitar quando o contrato backend estiver fechad
 Sequência da 4.1:
 
 ```text
-4.1-A backend: V16 + entidade + repository       ⏭ próxima implementação
-4.1-B backend: CRUD + tenant                     ⏳
-4.1-C backend: análise/liberação                 ⏳
-4.1-D backend: confirmação física/correção       ⏳
-4.1-E revisão backend                            ⏳
-4.1-F frontend Administração/Cadastros           ⏳
-4.1-G frontend Gestão                            ⏳
-4.1-H regressão e fechamento                    ⏳
+4.1-A backend: V16 + entidade + repository       ✅
+4.1-B backend: CRUD + tenant                     ✅
+4.1-C backend: análise/liberação                 ✅
+4.1-D backend: confirmação física/correção       ✅
+4.1-E revisão backend                            ✅
+4.1-F frontend Administração/Cadastros           ✅
+4.1-G frontend Gestão                            ✅
+4.1-H regressão e fechamento                    ⏭ próxima
 ```
 
-**Não alterar o frontend da 4.1 antes da 4.1-E.**
+**Frontend da 4.1 implementado após fechamento da 4.1-E. Falta apenas a regressão integrada da 4.1-H.**
 
 ---
 
@@ -333,7 +333,7 @@ Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            🔧 em andamento
-  4.1 — locais de armazenamento                       🔧 backend primeiro
+  4.1 — locais de armazenamento                       🔧 validação final
 Etapas 5 a 13                                         ⏳
 ```
 
@@ -341,4 +341,4 @@ Etapas 5 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**A Etapa 4 já foi iniciada. O backend está começando pela 4.1-A. O frontend deve permanecer sem mudanças funcionais da 4.1 até que o contrato backend esteja estabilizado na 4.1-E; depois iniciar 4.1-F e 4.1-G.**
+**A Etapa 4 segue na branch `feat/etapa-4-residuos`. Backend 4.1-A–E e frontend 4.1-F/G estão implementados. Próximo passo: 4.1-H — build, regressão integrada e fechamento da 4.1.**
