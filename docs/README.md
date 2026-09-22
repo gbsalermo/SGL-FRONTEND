@@ -65,6 +65,7 @@ Integração corporativa                       ⏳ posterior
 | `PADRAO_VISUAL_PRE_PRODUCAO.md` | decisões concretas da Etapa 1.1: dimensões, tipografia, cards, ícones, filtros, setas, botões e estados | **DECISÃO VIGENTE — Etapa 1 concluída** |
 | `../README.md` | visão rápida e execução | **ATUAL** |
 | `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL** |
+| backend: `docs/VALIDACAO_ETAPA_4.md` | roteiro integrado de validação após reconciliação | **REFERÊNCIA ATUAL — 22/09** |
 | `INVENTARIO_TELAS.md` | inventário de rotas/telas | **REFERÊNCIA VIGENTE** |
 | `FLUXOS_NAVEGACAO.md` | jornadas atuais | **REFERÊNCIA VIGENTE** |
 | `ETAPA_CADASTROS_ADMIN.md` | decisões de Administração/Cadastros | **DECISÃO VIGENTE** |
