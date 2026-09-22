@@ -3,15 +3,18 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 17/09/2026  
-**Branch estável:** `main`  
-**Branch recém-concluída:** `feat/etapa-3-residuos`  
+**Última atualização:** 22/09/2026  
+**Branch estável:** `main` do GitLab institucional  
+**Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
+**Branch atual de reconciliação:** `collab/etapa-4-residuos-reconcile`  
 **Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
-**Próxima etapa:** Etapa 4 — expansão operacional de Resíduos  
+**Etapa atual:** Etapa 4 — implementação histórica concluída, reconciliação com a `main` corrigida pelo supervisor e revalidação em andamento  
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da próxima etapa:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
 
 Este é o checkpoint principal para retomada do frontend. Contratos HTTP devem ser confirmados no Swagger/OpenAPI do backend.
+
+> **Infraestrutura Git obrigatória:** ler `docs/SINCRONIZACAO_GITLAB_GITHUB.md` antes de alterar branches. GitLab é a fonte canônica de `main`; GitHub espelha `main` e recebe a colaboração em `collab/*`. Não usar `--force` e não editar `GitHub/main` diretamente.
 
 ---
 
@@ -34,13 +37,15 @@ Regra especial:
 - frontend e documentação podem ser alterados diretamente quando autorizado;
 - não antecipar etapas futuras.
 
-Antes da Etapa 4, confirmar que a Etapa 3 foi integrada à `main` nos dois repositórios e criar branch nova a partir da `main` atualizada.
+A Etapa 4 já possui implementação histórica em `feat/etapa-4-residuos`, porém essa branch é anterior às correções recentes do supervisor. Ela serve apenas como fonte para port seletivo.
 
-Branch sugerida:
+Branch atual:
 
 ```text
-feat/etapa-4-residuos
+collab/etapa-4-residuos-reconcile
 ```
+
+Antes de alterações visuais/contratuais, atualizar a branch com `gitlab/main` quando for fast-forward possível e confirmar o contrato reconciliado no backend.
 
 ---
 
@@ -318,9 +323,11 @@ Validações finais incluíram:
 
 ---
 
-# 9. Etapa 4 — próxima etapa
+# 9. Etapa 4 — em reconciliação
 
-Ordem prevista:
+A implementação histórica dos blocos 4.1–4.4 existe na branch antiga, mas ainda precisa ser portada para a base atual. O frontend só deve ser reconciliado depois que cada contrato correspondente do backend estiver estável.
+
+Ordem de reconciliação:
 
 ```text
 4.1 Locais de armazenamento cadastráveis
@@ -400,7 +407,7 @@ Etapa 13 revisará classes grandes como `Residuo` no backend, Services, DTOs e C
 Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
-Etapa 4 — expansão operacional de Resíduos            ⏭ próxima
+Etapa 4 — expansão operacional de Resíduos            🔧 reconciliação + revalidação
 Etapas 5 a 13                                         ⏳
 ```
 
@@ -408,4 +415,4 @@ Etapas 5 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**A Etapa 3 está concluída e validada. A próxima janela deve confirmar que a branch `feat/etapa-3-residuos` foi integrada à `main` nos dois repositórios. Depois, criar `feat/etapa-4-residuos` a partir da `main` atualizada e começar pela 4.1 — locais de armazenamento cadastráveis. Antes de alterar o frontend, fechar a modelagem e os contratos necessários no backend. Ler o handoff `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`.**
+**A Etapa 3 está concluída e validada. Em 22/09/2026 os `main` foram reconciliados e a sincronização GitLab/GitHub foi automatizada. A Etapa 4 continua em `collab/etapa-4-residuos-reconcile`; a antiga `feat/etapa-4-residuos` é somente referência. Ler `docs/SINCRONIZACAO_GITLAB_GITHUB.md` e o handoff canônico do backend antes de portar qualquer tela. Backend/contratos devem ser reconciliados antes do frontend de cada bloco.**
