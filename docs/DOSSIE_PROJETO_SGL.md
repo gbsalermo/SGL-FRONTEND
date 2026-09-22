@@ -3,24 +3,69 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Atualizado em:** 11/09/2026  
-**Estado:** primeiro protótipo funcional aprovado; Etapas 1 e 2 da pré-produção concluídas; Etapa 3 — Resíduos — em andamento.
+**Atualizado em:** 22/09/2026  
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2 e 3 concluídas; Etapa 4 possui implementação histórica e está em reconciliação sobre a `main` atual antes da revalidação.
 
 Este documento resume o estado real do frontend para retomada humana ou por IA. O objetivo é evitar reconstrução de módulos já aprovados e impedir que roadmaps antigos sejam tratados como tarefa imediata.
 
-## Checkpoint atual — 11/09/2026
+## Checkpoint atual — 22/09/2026
 
 ```text
 Etapa 1 — padrão visual global              ✅ concluída
 Etapa 2 — Dark Mode definitivo              ✅ concluída
-Etapa 3 — refinamentos do fluxo de Resíduos 🔧 atual
+Etapa 3 — refinamentos do fluxo de Resíduos ✅ concluída e validada
+Etapa 4 — expansão operacional de Resíduos  🔧 reconciliação + revalidação
 ```
 
-Próxima subetapa: **3.1 — remover redundância visual de análise**. O plano canônico está no backend em `docs/PLANO_PRE_PRODUCAO.md` e o checkpoint específico em `docs/CONTINUIDADE_ETAPA_3_2026-09-11.md`.
+Retomada imediata: atualizar `collab/etapa-4-residuos-reconcile` com a `gitlab/main`, portar seletivamente a implementação antiga de `feat/etapa-4-residuos` e só então executar a validação integrada. O plano e o handoff canônicos ficam no backend.
 
 Dark Mode definitivo: fonte única em `src/services/themeService.ts`, tokens consolidados, Vuetify/DOM sincronizados e Login/404/rótulos de impressão preservados em Light.
 
 ---
+
+# 0. Infraestrutura Git e sincronização — obrigatório
+
+Documento detalhado:
+
+`docs/SINCRONIZACAO_GITLAB_GITHUB.md`
+
+Arquitetura:
+
+```text
+GitLab/main = fonte canônica
+
+GitLab/main
+    ↓ automático a cada 15 min / manual
+GitHub/main
+
+GitHub/collab/*
+    ↓ automático em cada push
+GitLab/collab/*
+    ↓ Merge Request
+GitLab/main
+```
+
+Regras:
+
+- o supervisor trabalha no GitLab e pode avançar a `main`;
+- `GitHub/main` é espelho;
+- usuário/IA colaboram em `GitHub/collab/*`;
+- integração final ocorre por MR no GitLab;
+- não usar `--force`;
+- divergência faz os workflows falharem;
+- remotes locais esperados: `github` e `gitlab`;
+- a antiga configuração `origin` com múltiplos push URLs foi removida;
+- o secret `GITLAB_PUSH_TOKEN` existe no GitHub Actions, mas seu valor nunca deve ser documentado.
+
+Workflows frontend:
+
+```text
+.github/workflows/sync-collab-to-gitlab.yml
+.github/workflows/sync-gitlab-main-to-github.yml
+```
+
+Os dois sentidos foram testados com sucesso em 22/09/2026.
+
 
 ---
 
@@ -30,12 +75,15 @@ Dark Mode definitivo: fonte única em `src/services/themeService.ts`, tokens con
 1. código da main
 2. Swagger/OpenAPI do backend para contratos HTTP
 3. ../CONTINUIDADE.md
-4. este DOSSIE_PROJETO_SGL.md
-5. documentos específicos de decisão/módulo
-6. documentos de etapas antigas e snapshots históricos
+4. SINCRONIZACAO_GITLAB_GITHUB.md para Git/remotes
+5. este DOSSIE_PROJETO_SGL.md
+6. documentos específicos de decisão/módulo
+7. documentos de etapas antigas e snapshots históricos
 ```
 
 Fonte de rotas: `src/router/index.ts`.
+
+A branch operacional da Etapa 4 é `collab/etapa-4-residuos-reconcile`. A antiga `feat/etapa-4-residuos` contém a UI histórica dos blocos 4.1–4.4 e deve ser usada apenas como referência para port seletivo.
 
 ---
 
@@ -366,7 +414,7 @@ Composição pode referenciar Produto para rastreabilidade sem movimentar estoqu
 
 O Código SGL existe desde o registro inicial. QR Code não integra o rótulo visual atual.
 
-Modelos de Resíduos pré-cadastrados estão planejados para a Etapa 4; a Etapa 3 atual refina o fluxo já existente.
+Modelos de Resíduos pré-cadastrados fazem parte da implementação histórica da Etapa 4 e serão reconciliados com o backend atual antes da revalidação.
 
 ---
 
