@@ -229,6 +229,12 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .meus-residuos-page
   color: #c2cedd !important;
 }
 
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .meus-residuos-page .status-pill[data-status='CANCELADO'] {
+  border: 1px solid #8e3b49 !important;
+  background: #251821 !important;
+  color: #ff6677 !important;
+}
+
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .meus-residuos-page .residuo-card--target {
   background: #112743 !important;
   box-shadow:
