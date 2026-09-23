@@ -232,6 +232,8 @@ function limparDadosPreenchidosPorModelo() {
 }
 
 function selecionarModoPreenchimento(modo: ModoPreenchimento) {
+  if (modo === modoPreenchimento.value) return
+
   modoPreenchimento.value = modo
 
   if (modo === 'MANUAL') {
