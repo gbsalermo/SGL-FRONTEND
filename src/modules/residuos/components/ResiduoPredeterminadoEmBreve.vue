@@ -5,15 +5,12 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 const alvoCadastrosDisponivel = ref(false)
-const alvoInformarResiduoDisponivel = ref(false)
 let observer: MutationObserver | null = null
 
 function atualizarAlvos() {
   alvoCadastrosDisponivel.value = route.path === '/administracao/cadastros'
     && Boolean(document.querySelector('.tabs-card'))
 
-  alvoInformarResiduoDisponivel.value = route.path === '/residuos/novo'
-    && Boolean(document.querySelector('.components-list'))
 }
 
 watch(() => route.path, async () => {
@@ -48,40 +45,6 @@ onBeforeUnmount(() => observer?.disconnect())
     </button>
   </Teleport>
 
-  <Teleport v-if="alvoInformarResiduoDisponivel" to=".components-list">
-    <article class="residuo-modelo-user-card" aria-disabled="true">
-      <header>
-        <div>
-          <span>MODELO DE RESÍDUO</span>
-          <h3>Resíduo pré-cadastrado</h3>
-        </div>
-        <strong>EM BREVE</strong>
-      </header>
-
-      <div class="residuo-modelo-user-card__body">
-        <label>
-          <span>Resíduo definido pela Gestão</span>
-          <select disabled>
-            <option>Selecione um modelo de resíduo...</option>
-          </select>
-        </label>
-
-        <div class="residuo-modelo-user-card__rule">
-          <strong>Regra planejada</strong>
-          <span>
-            O modelo de resíduo será uma definição reutilizável para pré-preencher a ocorrência.
-            Produtos do catálogo continuarão sendo referências opcionais dos componentes e não serão substituídos pelo modelo.
-          </span>
-        </div>
-      </div>
-
-      <p>
-        Quando ativado, o Solicitante poderá escolher um modelo cadastrado pela Gestão ou informar o resíduo manualmente.
-        O modelo poderá preencher dados padrão como descrição, processo de origem, recipiente, riscos, composição e observações,
-        enquanto os dados específicos da ocorrência continuarão sendo registrados no novo Resíduo.
-      </p>
-    </article>
-  </Teleport>
 </template>
 
 <style>
@@ -127,126 +90,4 @@ onBeforeUnmount(() => observer?.disconnect())
   line-height: 1.35;
 }
 
-.residuo-modelo-user-card {
-  order: -1;
-  padding: 15px 16px;
-  border: 1px dashed #b9c7db;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #fbfcfe, #f6f9fd);
-  color: #40516a;
-}
-
-.residuo-modelo-user-card > header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 13px;
-}
-
-.residuo-modelo-user-card > header span {
-  display: block;
-  color: #6e7e94;
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .08em;
-}
-
-.residuo-modelo-user-card > header h3 {
-  margin: 4px 0 0;
-  color: #263952;
-  font-size: 13px;
-}
-
-.residuo-modelo-user-card > header > strong {
-  padding: 4px 7px;
-  border-radius: 999px;
-  background: #e9edf3;
-  color: #6d798b;
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .05em;
-}
-
-.residuo-modelo-user-card__body {
-  display: grid;
-  grid-template-columns: minmax(220px, .8fr) minmax(0, 1.2fr);
-  gap: 12px;
-  align-items: stretch;
-}
-
-.residuo-modelo-user-card label {
-  display: grid;
-  gap: 6px;
-}
-
-.residuo-modelo-user-card label > span {
-  color: #45566f;
-  font-size: 9px;
-  font-weight: 800;
-}
-
-.residuo-modelo-user-card select {
-  width: 100%;
-  min-height: 40px;
-  padding: 0 10px;
-  border: 1px solid #d5dde8;
-  border-radius: 7px;
-  background: #f1f4f8;
-  color: #8a97a8;
-  font: inherit;
-  font-size: 10px;
-  cursor: not-allowed;
-}
-
-.residuo-modelo-user-card__rule {
-  display: grid;
-  gap: 4px;
-  padding: 10px 12px;
-  border-radius: 7px;
-  background: #eef4fc;
-}
-
-.residuo-modelo-user-card__rule strong {
-  color: #31588d;
-  font-size: 9px;
-}
-
-.residuo-modelo-user-card__rule span {
-  color: #5d6f87;
-  font-size: 9px;
-  line-height: 1.45;
-}
-
-.residuo-modelo-user-card > p {
-  margin: 11px 0 0;
-  color: #718096;
-  font-size: 9px;
-  line-height: 1.5;
-}
-
-body.sgl-dark-active .residuo-modelo-admin-tab {
-  border-color: var(--sgl-border);
-  background: var(--sgl-surface);
-  color: var(--sgl-text);
-}
-
-body.sgl-dark-active .residuo-modelo-admin-tab__topline strong {
-  color: var(--sgl-text);
-}
-
-body.sgl-dark-active .residuo-modelo-admin-tab__description {
-  color: var(--sgl-text-muted);
-}
-
-body.sgl-dark-active .residuo-modelo-admin-tab--active:hover {
-  border-color: var(--sgl-primary-light);
-  background: #17345d;
-}
-
-@media (max-width: 760px) {
-  .residuo-modelo-user-card__body {
-    grid-template-columns: 1fr;
-  }
-}
 </style>
