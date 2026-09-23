@@ -31,6 +31,37 @@ export interface LocalArmazenamentoResiduoResponse {
   ativo: boolean
 }
 
+export interface ComponenteModeloResiduoResponse {
+  id: string
+  produtoId: string | null
+  produtoNome: string | null
+  nomeComponente: string
+  principal: boolean
+  concentracaoOuQuantidade: string | null
+  observacao: string | null
+}
+
+export interface ModeloResiduoResponse {
+  id: string
+  unidadeId: string
+  unidadeNome: string
+  nome: string
+  descricao: string
+  processoOrigem: string
+  estadoFisico: EstadoFisicoResiduo
+  tratamentoRealizado: boolean
+  descricaoTratamento: string | null
+  recipiente: string
+  unidadeMedida: UnidadeMedidaResiduo
+  nivelRisco: NivelRiscoResiduo
+  riscos: TipoRiscoResiduo[]
+  classes: ClasseResiduoResponse[]
+  medidasSeguranca: MedidaSegurancaResiduo[]
+  observacaoSeguranca: string | null
+  componentes: ComponenteModeloResiduoResponse[]
+  ativo: boolean
+}
+
 export interface ClasseResiduoSnapshotResponse {
   classeId: string
   codigo: string
