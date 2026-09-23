@@ -7,6 +7,7 @@ import type {
   DespacharResiduoRequest,
   HistoricoResiduoResponse,
   LocalArmazenamentoResiduoResponse,
+  ModeloResiduoResponse,
   ProdutoResiduoResponse,
   ProjetoResiduoResponse,
   ReceberResiduoRequest,
@@ -82,6 +83,11 @@ export const residuoService = {
 
   async listarLocaisArmazenamentoAtivos() {
     const { data } = await http.get<LocalArmazenamentoResiduoResponse[]>('/v1/locais-armazenamento-residuo/ativos')
+    return data.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  },
+
+  async listarModelosResiduoAtivos() {
+    const { data } = await http.get<ModeloResiduoResponse[]>('/v1/modelos-residuo/ativos')
     return data.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
   },
 
