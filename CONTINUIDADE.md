@@ -9,7 +9,7 @@
 **Branch atual de reconciliação:** `collab/etapa-4-residuos-reconcile`  
 **Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
 **Etapa atual:** Etapa 4 — implementação histórica concluída, reconciliação com a `main` corrigida pelo supervisor e revalidação em andamento  
-**Bloco atual da Etapa 4:** 4.3 — Uso de modelo ou preenchimento manual
+**Bloco atual da Etapa 4:** 4.4 — Correções administrativas do ciclo de vida
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da próxima etapa:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
 
