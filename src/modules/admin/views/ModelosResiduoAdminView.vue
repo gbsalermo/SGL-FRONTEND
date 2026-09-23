@@ -19,7 +19,10 @@ import type {
 } from '@/modules/admin/types/cadastros'
 import { useSessionStore } from '@/stores/session'
 
+type OrigemComponente = 'CATALOGO' | 'LIVRE'
+
 interface ComponenteForm {
+  origem: OrigemComponente
   produtoId: string
   nomeComponente: string
   principal: boolean
@@ -54,6 +57,7 @@ const produtos = ref<ProdutoCadastro[]>([])
 const carregando = ref(false)
 const salvando = ref(false)
 const erro = ref('')
+const erroEditor = ref('')
 const sucesso = ref('')
 const busca = ref('')
 const mostrarInativos = ref(false)
@@ -90,6 +94,7 @@ const modelosFiltrados = computed(() => {
 
 function novoComponente(principal = false): ComponenteForm {
   return {
+    origem: 'LIVRE',
     produtoId: '',
     nomeComponente: '',
     principal,
@@ -157,7 +162,7 @@ async function carregar() {
 function abrirNovo() {
   idEdicao.value = null
   form.value = novoForm()
-  erro.value = ''
+  erroEditor.value = ''
   sucesso.value = ''
   editorAberto.value = true
 }
@@ -179,8 +184,9 @@ function editar(modelo: ModeloResiduoCadastro) {
     medidasSeguranca: [...modelo.medidasSeguranca],
     observacaoSeguranca: modelo.observacaoSeguranca ?? '',
     componentes: modelo.componentes.map((componente) => ({
+      origem: componente.produtoId ? 'CATALOGO' : 'LIVRE',
       produtoId: componente.produtoId ?? '',
-      nomeComponente: componente.nomeComponente,
+      nomeComponente: componente.produtoId ? '' : componente.nomeComponente,
       principal: componente.principal,
       concentracaoOuQuantidade: componente.concentracaoOuQuantidade ?? '',
       observacao: componente.observacao ?? '',
@@ -188,7 +194,7 @@ function editar(modelo: ModeloResiduoCadastro) {
     ativo: modelo.ativo,
   }
   if (form.value.componentes.length === 0) form.value.componentes = [novoComponente(true)]
-  erro.value = ''
+  erroEditor.value = ''
   sucesso.value = ''
   editorAberto.value = true
 }
@@ -197,6 +203,7 @@ function fecharEditor() {
   if (salvando.value) return
   editorAberto.value = false
   idEdicao.value = null
+  erroEditor.value = ''
 }
 
 function alternarItem<T>(lista: T[], item: T, marcado: boolean) {
@@ -208,6 +215,16 @@ function alternarItem<T>(lista: T[], item: T, marcado: boolean) {
 
 function eventoMarcado(event: Event) {
   return event.target instanceof HTMLInputElement && event.target.checked
+}
+
+function selecionarOrigem(componente: ComponenteForm, origem: OrigemComponente) {
+  componente.origem = origem
+  if (origem === 'CATALOGO') {
+    componente.nomeComponente = ''
+  } else {
+    componente.produtoId = ''
+  }
+  erroEditor.value = ''
 }
 
 function adicionarComponente() {
@@ -244,16 +261,19 @@ function validar() {
   }
   if (form.value.componentes.length === 0) throw new Error('Informe pelo menos um componente.')
   for (const componente of form.value.componentes) {
-    if (!componente.produtoId && !componente.nomeComponente.trim()) {
-      throw new Error('Todo componente precisa de um produto ou nome livre.')
+    if (componente.origem === 'CATALOGO' && !componente.produtoId) {
+      throw new Error('Selecione o produto do catálogo de cada componente configurado como catálogo.')
+    }
+    if (componente.origem === 'LIVRE' && !componente.nomeComponente.trim()) {
+      throw new Error('Informe o nome de cada componente livre.')
     }
   }
 }
 
 function payload(): ModeloResiduoRequest {
   const componentes: ComponenteModeloResiduoRequest[] = form.value.componentes.map((item) => ({
-    produtoId: item.produtoId || null,
-    nomeComponente: item.nomeComponente.trim() || null,
+    produtoId: item.origem === 'CATALOGO' ? item.produtoId : null,
+    nomeComponente: item.origem === 'LIVRE' ? item.nomeComponente.trim() : null,
     principal: item.principal,
     concentracaoOuQuantidade: item.concentracaoOuQuantidade.trim() || null,
     observacao: item.observacao.trim() || null,
@@ -280,7 +300,7 @@ function payload(): ModeloResiduoRequest {
 }
 
 async function salvar() {
-  erro.value = ''
+  erroEditor.value = ''
   sucesso.value = ''
   try {
     validar()
@@ -296,7 +316,7 @@ async function salvar() {
     idEdicao.value = null
     await carregar()
   } catch (error) {
-    erro.value = mensagemErro(error)
+    erroEditor.value = mensagemErro(error)
   } finally {
     salvando.value = false
   }
@@ -387,6 +407,8 @@ onMounted(carregar)
         </header>
 
         <div class="editor-body">
+          <div v-if="erroEditor" class="feedback error editor-feedback">{{ erroEditor }}</div>
+
           <div class="grid two">
             <label><span>Nome</span><input v-model="form.nome" maxlength="150" required /></label>
             <label><span>Estado físico</span><select v-model="form.estadoFisico"><option v-for="item in estadosFisicos" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select></label>
@@ -442,21 +464,73 @@ onMounted(carregar)
           <label><span>Orientação complementar de segurança</span><textarea v-model="form.observacaoSeguranca" rows="2" maxlength="1000" /></label>
 
           <section class="components">
-            <header><div><strong>Componentes padrão</strong><small>Produto é opcional; texto livre continua permitido.</small></div><button class="ghost" type="button" @click="adicionarComponente">+ Componente</button></header>
+            <header>
+              <div>
+                <strong>Componentes padrão</strong>
+                <small>Para cada componente, escolha um Produto do catálogo ou informe um Componente livre.</small>
+              </div>
+              <button class="ghost" type="button" @click="adicionarComponente">+ Componente</button>
+            </header>
+
             <article v-for="(componente, index) in form.componentes" :key="index">
-              <div class="grid two">
-                <label><span>Produto do catálogo <small>(opcional)</small></span><select v-model="componente.produtoId"><option value="">Sem produto vinculado</option><option v-for="produto in produtos" :key="produto.id" :value="produto.id">{{ produto.nome }}</option></select></label>
-                <label><span>Nome do componente</span><input v-model="componente.nomeComponente" maxlength="255" placeholder="Preenchido automaticamente pelo backend se usar produto" /></label>
+              <div class="component-card-header">
+                <div>
+                  <span>Componente {{ index + 1 }}</span>
+                  <strong v-if="componente.principal">Principal</strong>
+                </div>
+                <button v-if="form.componentes.length > 1" class="danger-link remove-component" type="button" @click="removerComponente(index)">Remover</button>
               </div>
-              <div class="grid two">
-                <label><span>Concentração / quantidade</span><input v-model="componente.concentracaoOuQuantidade" maxlength="100" /></label>
-                <label><span>Observação</span><input v-model="componente.observacao" maxlength="500" /></label>
+
+              <div class="origin-switch" role="group" aria-label="Origem do componente">
+                <button
+                  type="button"
+                  :class="{ active: componente.origem === 'CATALOGO' }"
+                  @click="selecionarOrigem(componente, 'CATALOGO')"
+                >
+                  Produto do catálogo
+                </button>
+                <button
+                  type="button"
+                  :class="{ active: componente.origem === 'LIVRE' }"
+                  @click="selecionarOrigem(componente, 'LIVRE')"
+                >
+                  Componente livre
+                </button>
               </div>
+
+              <div class="grid two">
+                <label v-if="componente.origem === 'CATALOGO'">
+                  <span>Produto</span>
+                  <select v-model="componente.produtoId" required @change="erroEditor = ''">
+                    <option value="" disabled>Selecione um produto</option>
+                    <option v-for="produto in produtos" :key="produto.id" :value="produto.id">
+                      {{ produto.nome }}{{ produto.codigoReferencia ? ` · ${produto.codigoReferencia}` : '' }}
+                    </option>
+                  </select>
+                  <small>O produto é apenas referência para a composição e não movimenta estoque.</small>
+                </label>
+
+                <label v-else>
+                  <span>Nome do componente</span>
+                  <input v-model="componente.nomeComponente" maxlength="255" required placeholder="Ex.: Solução tampão residual" @input="erroEditor = ''" />
+                  <small>Use texto livre quando o material não existir no catálogo.</small>
+                </label>
+
+                <label>
+                  <span>Concentração / quantidade <small>(opcional)</small></span>
+                  <input v-model="componente.concentracaoOuQuantidade" maxlength="100" placeholder="Ex.: aprox. 100 mL ou 70%" />
+                </label>
+              </div>
+
+              <label>
+                <span>Observação <small>(opcional)</small></span>
+                <input v-model="componente.observacao" maxlength="500" placeholder="Informações complementares sobre este componente..." />
+              </label>
+
               <div class="component-actions">
                 <button type="button" :class="{ selected: componente.principal }" @click="definirPrincipal(index)">
-                  {{ componente.principal ? '✓ Principal' : 'Definir principal' }}
+                  {{ componente.principal ? '✓ Componente principal' : 'Definir como principal' }}
                 </button>
-                <button v-if="form.componentes.length > 1" class="danger-link" type="button" @click="removerComponente(index)">Remover</button>
               </div>
             </article>
           </section>
@@ -484,6 +558,7 @@ onMounted(carregar)
 .notice { border: 1px solid #cfe0f5; background: #f4f8ff; color: #355779; }
 .feedback.success { border: 1px solid #b9dfc8; background: #f2fbf5; color: #17663f; }
 .feedback.error { border: 1px solid #efb9b5; background: #fff3f2; color: #9d251d; }
+.editor-feedback { margin: 0; }
 .workspace { border: 1px solid var(--sgl-border); border-radius: 12px; background: var(--sgl-surface, #fff); overflow: hidden; }
 .toolbar { display: flex; align-items: end; gap: 14px; padding: 16px; border-bottom: 1px solid var(--sgl-border); }
 .toolbar label:first-child { flex: 1; }
@@ -521,10 +596,20 @@ fieldset { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; padding: 13
 legend { padding: 0 6px; font-size: 11px; font-weight: 850; }
 .components { display: grid; gap: 10px; }
 .components > header small { display: block; margin-top: 3px; color: var(--sgl-text-muted); }
-.components article { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--sgl-border); border-radius: 8px; }
+.components article { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--sgl-border); border-radius: 8px; }
+.component-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.component-card-header > div { display: flex; align-items: center; gap: 9px; }
+.component-card-header > div > span { color: var(--sgl-text-muted); font-size: 10px; font-weight: 850; text-transform: uppercase; }
+.component-card-header > div > strong { padding: 4px 7px; border-radius: 999px; background: #e8f7ee; color: #137145; font-size: 8px; text-transform: uppercase; }
+.origin-switch { display: inline-flex; justify-self: start; overflow: hidden; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; }
+.origin-switch button { min-height: 38px; padding: 0 13px; border: 0; border-right: 1px solid #dbe2eb; background: transparent; color: #66758a; font: inherit; font-size: 10.5px; font-weight: 800; cursor: pointer; }
+.origin-switch button:last-child { border-right: 0; }
+.origin-switch button.active { background: #174d9d; color: #fff; }
+.components label small { color: var(--sgl-text-muted); font-size: 9px; line-height: 1.4; }
 .component-actions { display: flex; gap: 10px; }
 .component-actions button { border: 1px solid #cbd5e1; background: transparent; color: inherit; }
 .component-actions button.selected { border-color: #9acdaf; background: #f0faf4; color: #176b43; }
+.remove-component { min-height: auto !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
 .danger-link { color: #a22e26 !important; }
 @media (max-width: 820px) {
   .page-header, .toolbar { align-items: stretch; flex-direction: column; }
@@ -595,10 +680,26 @@ body.sgl-dark-active .models-page .danger {
   color: #ff6677;
 }
 
-body.sgl-dark-active .models-page .component-actions button.selected {
+body.sgl-dark-active .models-page .component-actions button.selected,
+body.sgl-dark-active .models-page .component-card-header > div > strong {
   border-color: #2d674d;
   background: #163629;
   color: #72dba8;
+}
+
+body.sgl-dark-active .models-page .origin-switch {
+  border-color: var(--sgl-border-strong);
+  background: var(--sgl-surface-elevated);
+}
+
+body.sgl-dark-active .models-page .origin-switch button {
+  border-right-color: var(--sgl-border);
+  color: var(--sgl-text-muted);
+}
+
+body.sgl-dark-active .models-page .origin-switch button.active {
+  background: #2456c4;
+  color: #fff;
 }
 
 body.sgl-dark-active .models-page .backdrop {
