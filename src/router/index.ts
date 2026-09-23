@@ -143,6 +143,12 @@ export const router = createRouter({
           meta: { requiresSession: true, perfis: PERFIS_ADMIN },
         },
         {
+          path: 'administracao/cadastros/modelos-residuo',
+          name: 'admin-modelos-residuo',
+          component: () => import('@/modules/admin/views/ModelosResiduoAdminView.vue'),
+          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+        },
+        {
           path: 'solicitacoes/novo',
           name: 'gestao-novo-pedido',
           component: () => import('@/modules/pedidos/views/solicitante/NovoPedidoView.vue'),
