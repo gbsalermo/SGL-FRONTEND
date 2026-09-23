@@ -760,6 +760,12 @@ body.sgl-light-active .gestao-main .residuos-gestao-page .status-pill {
   font-size: var(--sgl-font-helper);
 }
 
+body.sgl-light-active .gestao-main .residuos-gestao-page .status-pill[data-status='CANCELADO'] {
+  border-color: #efb4b4;
+  background: #fff0f0;
+  color: #b42318;
+}
+
 body.sgl-light-active .gestao-main .residuos-gestao-page .primary-action,
 body.sgl-light-active .gestao-main .residuos-gestao-page .analysis-action,
 body.sgl-light-active .gestao-main .residuos-gestao-page .storage-action,
