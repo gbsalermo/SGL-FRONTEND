@@ -232,6 +232,7 @@ function aplicarSugestoesSeguranca() {
     ...medidasSegurancaInformadas.value,
     ...medidasSugeridasProdutos.value,
   ])]
+  if (medidasSegurancaInformadas.value.length > 0) limparErroFormulario('seguranca')
 }
 
 function limparErroFormulario(campo: string) {
@@ -262,6 +263,10 @@ function validarFormulario() {
     erros.classes = classesResiduo.value.length === 0
       ? 'Nenhuma classe de resíduo está disponível para esta Unidade.'
       : 'Selecione pelo menos uma classe de resíduo.'
+  }
+
+  if (medidasSegurancaInformadas.value.length === 0) {
+    erros.seguranca = 'Selecione pelo menos uma medida de Segurança / EPI.'
   }
 
   if (medidasSegurancaInformadas.value.includes('OUTRO') && !observacaoSegurancaInformada.value.trim()) {
@@ -610,12 +615,22 @@ onMounted(carregarDados)
           <p v-if="medidasSugeridasProdutos.length" class="suggestion-copy">
             Sugestões do catálogo: {{ medidasSugeridasProdutos.map((medida) => medidasSeguranca.find((item) => item.value === medida)?.label ?? medida).join(' · ') }}.
           </p>
-          <div class="risk-grid class-grid">
+          <div
+            class="risk-grid class-grid validation-box"
+            :class="{ 'validation-box--error': errosFormulario.seguranca }"
+            :data-form-error="Boolean(errosFormulario.seguranca)"
+          >
             <label v-for="medida in medidasSeguranca" :key="medida.value" class="risk-option class-option">
-              <input v-model="medidasSegurancaInformadas" type="checkbox" :value="medida.value" />
+              <input
+                v-model="medidasSegurancaInformadas"
+                type="checkbox"
+                :value="medida.value"
+                @change="limparErroFormulario('seguranca')"
+              />
               <span>{{ medida.label }}</span>
             </label>
           </div>
+          <p v-if="errosFormulario.seguranca" class="inline-error">{{ errosFormulario.seguranca }}</p>
           <label class="field security-note">
             <span>Orientação complementar <small>(obrigatória para Outro)</small></span>
             <textarea
