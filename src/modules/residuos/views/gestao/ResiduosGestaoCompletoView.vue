@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { residuoService } from '@/modules/residuos/services/residuoService'
 import type {
+  AcaoAdministrativaResiduo,
   AnalisarResiduoRequest,
   ApiErrorResponse,
   ClasseResiduoResponse,
@@ -47,6 +48,10 @@ const recebimentoAberto = ref(false)
 const analiseAberta = ref(false)
 const armazenamentoAberto = ref(false)
 const despachoAberto = ref(false)
+const administracaoAberta = ref(false)
+const acaoAdministrativa = ref<AcaoAdministrativaResiduo>('RETORNAR_ETAPA')
+const justificativaAdministrativa = ref('')
+const erroAdministracao = ref('')
 
 const observacaoRecebimento = ref('')
 const nivelRiscoConfirmado = ref<NivelRiscoResiduo>('BAIXO')
@@ -98,9 +103,11 @@ const abas: Array<{ valor: FiltroResiduo; rotulo: string }> = [
   { valor: 'LIBERADO_PARA_ARMAZENAMENTO', rotulo: 'Liberados' },
   { valor: 'ARMAZENADO_TEMPORARIAMENTE', rotulo: 'Armazenados' },
   { valor: 'DESPACHADO', rotulo: 'Despachados' },
+  { valor: 'CANCELADO', rotulo: 'Cancelados' },
 ]
 
 const residuoAlvo = computed(() => typeof route.query.residuo === 'string' ? route.query.residuo : '')
+const ehAdministrador = computed(() => session.usuario?.perfil === 'ADMINISTRADOR')
 
 const residuosFiltrados = computed(() => {
   const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
@@ -126,7 +133,7 @@ const eventoLiberacao = computed(() =>
 )
 
 function rotuloAcaoRotulo(status: StatusResiduo) {
-  return ['INFORMADO', 'EM_ANALISE'].includes(status)
+  return ['INFORMADO', 'EM_ANALISE', 'CANCELADO'].includes(status)
     ? 'Visualizar prévia do rótulo'
     : 'Visualizar rótulo'
 }
@@ -148,6 +155,7 @@ function aplicarFiltroDaRota() {
     'LIBERADO_PARA_ARMAZENAMENTO',
     'ARMAZENADO_TEMPORARIAMENTE',
     'DESPACHADO',
+    'CANCELADO',
   ]
   if (status && statusValidos.includes(status as StatusResiduo)) {
     aba.value = status as StatusResiduo
@@ -171,6 +179,7 @@ function statusRotulo(status: StatusResiduo) {
     LIBERADO_PARA_ARMAZENAMENTO: 'Liberado',
     ARMAZENADO_TEMPORARIAMENTE: 'Armazenado',
     DESPACHADO: 'Despachado',
+    CANCELADO: 'Cancelado',
   }
   return mapa[status]
 }
@@ -195,6 +204,8 @@ function acaoHistorico(acao: string) {
     ARMAZENAMENTO_TEMPORARIO_CONFIRMADO: 'Armazenamento temporário confirmado',
     ARMAZENAMENTO_TEMPORARIO_CORRIGIDO: 'Local de armazenamento corrigido na confirmação física',
     DESPACHO_CONFIRMADO: 'Despacho e destinação confirmados',
+    RESIDUO_CANCELADO_ADMINISTRATIVAMENTE: 'Resíduo cancelado administrativamente',
+    RETORNO_ADMINISTRATIVO_DE_ETAPA: 'Resíduo retornado para a etapa anterior',
   }
   return mapa[acao] ?? formatarEnum(acao)
 }
@@ -232,6 +243,13 @@ function fecharDespacho() {
   if (enviando.value) return
   despachoAberto.value = false
   limparSelecaoOperacional()
+}
+
+function fecharAdministracao() {
+  if (enviando.value) return
+  administracaoAberta.value = false
+  justificativaAdministrativa.value = ''
+  erroAdministracao.value = ''
 }
 
 async function carregar() {
@@ -547,6 +565,49 @@ async function confirmarDespacho() {
   }
 }
 
+function abrirAdministracao(residuo: ResiduoResponse, acao: AcaoAdministrativaResiduo) {
+  selecionado.value = residuo
+  acaoAdministrativa.value = acao
+  justificativaAdministrativa.value = ''
+  erroAdministracao.value = ''
+  erro.value = ''
+  sucesso.value = ''
+  administracaoAberta.value = true
+}
+
+async function confirmarAdministracao() {
+  if (!selecionado.value || !session.usuario?.id || !ehAdministrador.value) return
+
+  if (!justificativaAdministrativa.value.trim()) {
+    erroAdministracao.value = 'Informe a justificativa da correção administrativa.'
+    return
+  }
+
+  enviando.value = true
+  erroAdministracao.value = ''
+  try {
+    const atualizado = await residuoService.administrar(selecionado.value.id, {
+      usuarioAdministradorId: session.usuario.id,
+      acao: acaoAdministrativa.value,
+      justificativa: justificativaAdministrativa.value.trim(),
+    })
+
+    atualizarResiduo(atualizado)
+    selecionado.value = atualizado
+    administracaoAberta.value = false
+    justificativaAdministrativa.value = ''
+    await carregarHistorico(atualizado.id)
+
+    sucesso.value = acaoAdministrativa.value === 'CANCELAR'
+      ? 'Resíduo cancelado administrativamente. A justificativa foi registrada no histórico.'
+      : 'Resíduo retornado para a etapa anterior. A justificativa foi registrada no histórico.'
+  } catch (error) {
+    erroAdministracao.value = mensagemErro(error)
+  } finally {
+    enviando.value = false
+  }
+}
+
 function abrirRotulo(residuo: ResiduoResponse) {
   router.push(`/residuos/${residuo.id}/rotulo`)
 }
@@ -575,12 +636,13 @@ onMounted(carregar)
       <button class="secondary-action" type="button" :disabled="carregando" @click="carregar">Atualizar dados</button>
     </header>
 
-    <div class="metrics-grid metrics-grid--five">
+    <div class="metrics-grid metrics-grid--six">
       <article><span>A receber</span><strong>{{ quantidadeStatus('INFORMADO') }}</strong><small>aguardando conferência física</small></article>
       <article><span>Em análise</span><strong>{{ quantidadeStatus('EM_ANALISE') }}</strong><small>prévia disponível · impressão bloqueada</small></article>
       <article><span>Liberados</span><strong>{{ quantidadeStatus('LIBERADO_PARA_ARMAZENAMENTO') }}</strong><small>rótulo disponível</small></article>
       <article><span>Armazenados</span><strong>{{ quantidadeStatus('ARMAZENADO_TEMPORARIAMENTE') }}</strong><small>aguardando destinação</small></article>
       <article><span>Despachados</span><strong>{{ quantidadeStatus('DESPACHADO') }}</strong><small>ciclo concluído</small></article>
+      <article><span>Cancelados</span><strong>{{ quantidadeStatus('CANCELADO') }}</strong><small>encerrados administrativamente</small></article>
     </div>
 
     <div v-if="sucesso" class="feedback feedback--success">{{ sucesso }}</div>
@@ -644,7 +706,7 @@ onMounted(carregar)
       </div>
     </section>
 
-    <div v-if="selecionado && !recebimentoAberto && !analiseAberta && !armazenamentoAberto && !despachoAberto" class="drawer-backdrop" @click.self="fecharDetalhes">
+    <div v-if="selecionado && !recebimentoAberto && !analiseAberta && !armazenamentoAberto && !despachoAberto && !administracaoAberta" class="drawer-backdrop" @click.self="fecharDetalhes">
       <aside class="detail-drawer">
         <header>
           <div>
@@ -751,6 +813,22 @@ onMounted(carregar)
             <button v-if="selecionado.status === 'EM_ANALISE'" class="analysis-action" type="button" @click="abrirAnalise(selecionado)">Analisar e classificar</button>
             <button v-if="selecionado.status === 'LIBERADO_PARA_ARMAZENAMENTO'" class="storage-action" type="button" @click="abrirArmazenamento(selecionado)">Confirmar armazenamento</button>
             <button v-if="selecionado.status === 'ARMAZENADO_TEMPORARIAMENTE'" class="dispatch-action" type="button" @click="abrirDespacho(selecionado)">Confirmar despacho</button>
+            <button
+              v-if="ehAdministrador && !['INFORMADO', 'CANCELADO'].includes(selecionado.status)"
+              class="admin-return-action"
+              type="button"
+              @click="abrirAdministracao(selecionado, 'RETORNAR_ETAPA')"
+            >
+              Retornar etapa
+            </button>
+            <button
+              v-if="ehAdministrador && !['DESPACHADO', 'CANCELADO'].includes(selecionado.status)"
+              class="admin-cancel-action"
+              type="button"
+              @click="abrirAdministracao(selecionado, 'CANCELAR')"
+            >
+              Cancelar resíduo
+            </button>
           </div>
         </div>
       </aside>
@@ -881,6 +959,53 @@ onMounted(carregar)
       </section>
     </div>
 
+    <div v-if="administracaoAberta && selecionado" class="modal-backdrop" @click.self="fecharAdministracao">
+      <section class="modal-card" role="dialog" aria-modal="true" aria-label="Correção administrativa do resíduo">
+        <header>
+          <div>
+            <span>ADMINISTRAÇÃO DO CICLO</span>
+            <h2>{{ acaoAdministrativa === 'CANCELAR' ? 'Cancelar resíduo' : 'Retornar etapa operacional' }}</h2>
+          </div>
+          <button type="button" @click="fecharAdministracao">×</button>
+        </header>
+        <div class="modal-content">
+          <div class="selected-summary">
+            <strong>{{ selecionado.codigoRastreio ?? selecionado.id }}</strong>
+            <span>{{ selecionado.descricao }} · {{ statusRotulo(selecionado.status) }}</span>
+          </div>
+          <p class="guidance guidance--warning">
+            {{ acaoAdministrativa === 'CANCELAR'
+              ? 'O cancelamento encerra este registro operacional. Resíduos já despachados precisam retornar uma etapa antes de serem cancelados.'
+              : 'O resíduo voltará exatamente uma etapa do ciclo. O histórico permanece preservado e a justificativa será auditável.' }}
+          </p>
+          <label class="field">
+            <span>Justificativa administrativa</span>
+            <textarea
+              v-model="justificativaAdministrativa"
+              maxlength="1000"
+              rows="4"
+              required
+              :class="{ 'input--error': erroAdministracao }"
+              placeholder="Explique por que esta correção é necessária..."
+              @input="erroAdministracao = ''"
+            />
+            <small v-if="erroAdministracao" class="inline-error">{{ erroAdministracao }}</small>
+          </label>
+        </div>
+        <footer>
+          <button class="secondary-action" type="button" @click="fecharAdministracao">Voltar</button>
+          <button
+            :class="acaoAdministrativa === 'CANCELAR' ? 'admin-cancel-action' : 'admin-return-action'"
+            type="button"
+            :disabled="enviando"
+            @click="confirmarAdministracao"
+          >
+            {{ enviando ? 'Aplicando...' : acaoAdministrativa === 'CANCELAR' ? 'Confirmar cancelamento' : 'Confirmar retorno' }}
+          </button>
+        </footer>
+      </section>
+    </div>
+
     <div v-if="despachoAberto && selecionado" class="modal-backdrop" @click.self="fecharDespacho">
       <section class="modal-card" role="dialog" aria-modal="true" aria-label="Confirmar despacho">
         <header><div><span>DESPACHO</span><h2>Confirmar destinação do resíduo</h2></div><button type="button" @click="fecharDespacho">×</button></header>
@@ -898,14 +1023,16 @@ onMounted(carregar)
 
 <style scoped>
 .residuos-completo { max-width: 1500px; margin: 0 auto; color: #16243b; }
-.metrics-grid--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.metrics-grid--six { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .residuo-alvo { background: #fbf8ff !important; box-shadow: inset 4px 0 0 #7446df; animation: destaque-residuo 900ms ease-out; }
 @keyframes destaque-residuo { from { background: #eee5ff; } to { background: #fbf8ff; } }
-.storage-action, .dispatch-action, .label-action { min-height: 40px; padding: 0 14px; border: 0; border-radius: 7px; color: #fff; font: inherit; font-size: 11px; font-weight: 850; cursor: pointer; }
+.storage-action, .dispatch-action, .label-action, .admin-return-action, .admin-cancel-action { min-height: 40px; padding: 0 14px; border: 0; border-radius: 7px; color: #fff; font: inherit; font-size: 11px; font-weight: 850; cursor: pointer; }
 .storage-action { background: #0f766e; }
 .dispatch-action { background: #6b4fa1; }
 .label-action { background: #173d7a; }
-.storage-action:disabled, .dispatch-action:disabled { opacity: .55; cursor: default; }
+.admin-return-action { background: #b7791f; }
+.admin-cancel-action { background: #b42318; }
+.storage-action:disabled, .dispatch-action:disabled, .admin-return-action:disabled, .admin-cancel-action:disabled { opacity: .55; cursor: default; }
 .component-item { display: grid; gap: 8px !important; }
 .component-item__header { min-width: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .component-item__identity { min-width: 0; flex: 1; }
@@ -968,6 +1095,6 @@ onMounted(carregar)
 .planned-location { display: grid; gap: 4px; padding: 11px 12px; border: 1px solid #cfe0d4; border-radius: 8px; background: #f5fbf7; }
 .planned-location span { color: #648070; font-size: var(--sgl-font-label); font-weight: 700; text-transform: none; }
 .planned-location strong { color: #20583a; font-size: var(--sgl-font-body); line-height: var(--sgl-line-height-body); }
-@media (max-width: 1180px) { .metrics-grid--five { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 760px) { .metrics-grid--five, .tracking-card, .comparison-section { grid-template-columns: 1fr; } .timeline-card > div { flex-direction: column; gap: 4px; } .approval-meta { grid-template-columns: 1fr; } }
+@media (max-width: 1180px) { .metrics-grid--six { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .metrics-grid--six, .tracking-card, .comparison-section { grid-template-columns: 1fr; } .timeline-card > div { flex-direction: column; gap: 4px; } .approval-meta { grid-template-columns: 1fr; } }
 </style>
