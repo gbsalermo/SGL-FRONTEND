@@ -975,3 +975,24 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page butto
     transition: none !important;
   }
 }
+
+/* Validações locais — Informar resíduo */
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .validation-box--error {
+  border-color: #713845 !important;
+  background: #251821 !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .inline-error {
+  color: #ff9aa5 !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .input--error {
+  border-color: #d95a69 !important;
+  box-shadow: 0 0 0 3px rgb(217 90 105 / 12%) !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .inline-warning {
+  border-color: #765d2a !important;
+  background: #302716 !important;
+  color: #ecd69f !important;
+}
