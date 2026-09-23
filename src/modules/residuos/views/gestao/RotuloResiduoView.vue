@@ -30,6 +30,16 @@ const alturaRotuloMm = computed(() =>
   Math.round((larguraRotuloMm.value / LARGURA_BASE_MM) * ALTURA_BASE_MM * 10) / 10,
 )
 
+const mensagemImpressao = computed(() => {
+  if (dados.value?.status === 'CANCELADO') {
+    return 'Este resíduo foi cancelado administrativamente. A impressão do rótulo permanece bloqueada.'
+  }
+
+  return dados.value?.impressaoPermitida
+    ? 'Confira os dados e os pictogramas antes da impressão.'
+    : 'A impressão será liberada após a análise técnica.'
+})
+
 function mensagemErro(error: unknown) {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
     return error.response?.data?.message ?? 'Não foi possível carregar o rótulo.'
@@ -90,7 +100,7 @@ onMounted(carregar)
       <button type="button" class="btn btn--ghost" @click="voltar">← Voltar para resíduos</button>
       <div>
         <strong>{{ dados?.impressaoPermitida ? 'Rótulo de resíduo' : 'Prévia do rótulo' }}</strong>
-        <span>{{ dados?.impressaoPermitida ? 'Confira os dados e os pictogramas antes da impressão.' : 'A impressão será liberada após a análise técnica.' }}</span>
+        <span>{{ mensagemImpressao }}</span>
       </div>
       <button type="button" class="btn btn--print" :disabled="!dados?.impressaoPermitida" @click="imprimir">Imprimir rótulo</button>
     </div>
