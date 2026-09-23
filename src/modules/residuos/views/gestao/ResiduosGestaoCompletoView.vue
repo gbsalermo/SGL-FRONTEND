@@ -33,6 +33,9 @@ const carregando = ref(false)
 const enviando = ref(false)
 const erro = ref('')
 const erroAnalise = ref('')
+const errosAnalise = ref<Record<string, string>>({})
+const erroArmazenamento = ref('')
+const erroDespacho = ref('')
 const sucesso = ref('')
 const busca = ref('')
 const aba = ref<FiltroResiduo>('TODOS')
@@ -351,6 +354,7 @@ function abrirAnalise(residuo: ResiduoResponse) {
     ?? ''
   erro.value = ''
   erroAnalise.value = ''
+  errosAnalise.value = {}
   sucesso.value = ''
   analiseAberta.value = true
 }
@@ -365,20 +369,44 @@ function alternarRisco(risco: TipoRiscoResiduo) {
   if (risco !== 'NENHUM' && !existe) riscosConfirmados.value = riscosConfirmados.value.filter((item) => item !== 'NENHUM')
 }
 
+function limparErroAnalise(campo: string) {
+  if (!errosAnalise.value[campo]) return
+  const atualizados = { ...errosAnalise.value }
+  delete atualizados[campo]
+  errosAnalise.value = atualizados
+}
+
 function validarAnalise() {
   if (!session.usuario?.id) throw new Error('Sessão sem usuário gestor válido.')
-  if (classesConfirmadasIds.value.length === 0) throw new Error('Confirme pelo menos uma classe de resíduo.')
+
+  const erros: Record<string, string> = {}
+
+  if (classesConfirmadasIds.value.length === 0) {
+    erros.classes = 'Confirme pelo menos uma classe de resíduo.'
+  }
+
   if (medidasSegurancaConfirmadas.value.includes('OUTRO') && !observacaoSegurancaConfirmada.value.trim()) {
-    throw new Error('Descreva a medida de segurança marcada como Outro.')
+    erros.segurancaOutro = 'Descreva a medida de segurança marcada como Outro.'
   }
+
   if (modoLocalAnalise.value === 'CATALOGO' && !localArmazenamentoResiduoId.value) {
-    throw new Error('Selecione um local de armazenamento cadastrado.')
+    erros.local = 'Selecione um local de armazenamento cadastrado.'
   }
+
   if (modoLocalAnalise.value === 'MANUAL' && !localArmazenamentoTemporario.value.trim()) {
-    throw new Error('Informe o local de armazenamento temporário.')
+    erros.local = 'Informe o local de armazenamento temporário.'
   }
-  if (!destinoFinalPrevisto.value.trim()) throw new Error('Informe o destino final previsto.')
-  if (riscosConfirmados.value.length === 0) throw new Error('Confirme pelo menos uma classificação de risco.')
+
+  if (!destinoFinalPrevisto.value.trim()) {
+    erros.destino = 'Informe o destino final previsto.'
+  }
+
+  if (riscosConfirmados.value.length === 0) {
+    erros.riscos = 'Confirme pelo menos uma classificação de risco.'
+  }
+
+  errosAnalise.value = erros
+  return Object.keys(erros).length === 0
 }
 
 async function confirmarAnalise() {
@@ -387,7 +415,8 @@ async function confirmarAnalise() {
   erroAnalise.value = ''
   sucesso.value = ''
   try {
-    validarAnalise()
+    errosAnalise.value = {}
+    if (!validarAnalise()) return
     const payload: AnalisarResiduoRequest = {
       usuarioGestorId: session.usuario.id,
       nivelRiscoConfirmado: nivelRiscoConfirmado.value,
@@ -428,6 +457,7 @@ function abrirArmazenamento(residuo: ResiduoResponse) {
   complementoLocalConfirmacao.value = ''
   localArmazenamentoConfirmacao.value = ''
   erro.value = ''
+  erroArmazenamento.value = ''
   sucesso.value = ''
   armazenamentoAberto.value = true
 }
@@ -436,17 +466,18 @@ async function confirmarArmazenamento() {
   if (!selecionado.value || !session.usuario?.id) return
 
   if (modoLocalConfirmacao.value === 'CATALOGO' && !localArmazenamentoConfirmacaoId.value) {
-    erro.value = 'Selecione o novo local cadastrado.'
+    erroArmazenamento.value = 'Selecione o novo local cadastrado.'
     return
   }
 
   if (modoLocalConfirmacao.value === 'MANUAL' && !localArmazenamentoConfirmacao.value.trim()) {
-    erro.value = 'Informe o novo local físico.'
+    erroArmazenamento.value = 'Informe o novo local físico.'
     return
   }
 
   enviando.value = true
   erro.value = ''
+  erroArmazenamento.value = ''
   sucesso.value = ''
   try {
     const atualizado = await residuoService.armazenar(selecionado.value.id, {
@@ -468,7 +499,7 @@ async function confirmarArmazenamento() {
       ? 'Armazenamento temporário confirmado.'
       : 'Armazenamento confirmado com correção do local físico.'
   } catch (error) {
-    erro.value = mensagemErro(error)
+    erroArmazenamento.value = mensagemErro(error)
   } finally {
     enviando.value = false
   }
@@ -479,6 +510,7 @@ function abrirDespacho(residuo: ResiduoResponse) {
   destinoFinalConfirmado.value = residuo.destinoFinalConfirmado ?? residuo.destinoFinalPrevisto ?? ''
   observacaoDespacho.value = ''
   erro.value = ''
+  erroDespacho.value = ''
   sucesso.value = ''
   despachoAberto.value = true
 }
@@ -486,12 +518,13 @@ function abrirDespacho(residuo: ResiduoResponse) {
 async function confirmarDespacho() {
   if (!selecionado.value || !session.usuario?.id) return
   if (!destinoFinalConfirmado.value.trim()) {
-    erro.value = 'Informe o destino final confirmado.'
+    erroDespacho.value = 'Informe o destino final confirmado.'
     return
   }
 
   enviando.value = true
   erro.value = ''
+  erroDespacho.value = ''
   sucesso.value = ''
   try {
     const atualizado = await residuoService.despachar(selecionado.value.id, {
@@ -504,7 +537,7 @@ async function confirmarDespacho() {
     limparSelecaoOperacional()
     sucesso.value = 'Despacho confirmado. O ciclo operacional do resíduo foi encerrado.'
   } catch (error) {
-    erro.value = mensagemErro(error)
+    erroDespacho.value = mensagemErro(error)
   } finally {
     enviando.value = false
   }
@@ -750,14 +783,16 @@ onMounted(carregar)
             <label class="field"><span>Nível de risco confirmado</span><select v-model="nivelRiscoConfirmado"><option value="NENHUM">Nenhum</option><option value="BAIXO">Baixo</option><option value="MEDIO">Médio</option><option value="ALTO">Alto</option></select></label>
             <label class="field"><span>Data prevista de despacho <small>(opcional)</small></span><input v-model="dataPrevistaDespacho" type="date" :min="minDataDespacho" /></label>
           </div>
-          <fieldset class="risk-fieldset"><legend>Riscos confirmados</legend><button v-for="risco in tiposRisco" :key="risco.valor" type="button" :class="{ selected: riscosConfirmados.includes(risco.valor) }" @click="alternarRisco(risco.valor)"><span class="checkmark">{{ riscosConfirmados.includes(risco.valor) ? '✓' : '' }}</span>{{ risco.rotulo }}</button></fieldset>
+          <fieldset class="risk-fieldset" :class="{ 'validation-box--error': errosAnalise.riscos }"><legend>Riscos confirmados</legend><button v-for="risco in tiposRisco" :key="risco.valor" type="button" :class="{ selected: riscosConfirmados.includes(risco.valor) }" @click="alternarRisco(risco.valor); limparErroAnalise('riscos')"><span class="checkmark">{{ riscosConfirmados.includes(risco.valor) ? '✓' : '' }}</span>{{ risco.rotulo }}</button></fieldset>
+          <p v-if="errosAnalise.riscos" class="inline-error">{{ errosAnalise.riscos }}</p>
 
-          <fieldset class="risk-fieldset"><legend>Classes confirmadas</legend><button v-for="classe in classesResiduo" :key="classe.id" type="button" :class="{ selected: classesConfirmadasIds.includes(classe.id) }" @click="classesConfirmadasIds = classesConfirmadasIds.includes(classe.id) ? classesConfirmadasIds.filter((id) => id !== classe.id) : [...classesConfirmadasIds, classe.id]"><span class="checkmark">{{ classesConfirmadasIds.includes(classe.id) ? '✓' : '' }}</span>{{ classe.codigo }} — {{ classe.descricao }}</button></fieldset>
+          <fieldset class="risk-fieldset" :class="{ 'validation-box--error': errosAnalise.classes }"><legend>Classes confirmadas</legend><button v-for="classe in classesResiduo" :key="classe.id" type="button" :class="{ selected: classesConfirmadasIds.includes(classe.id) }" @click="classesConfirmadasIds = classesConfirmadasIds.includes(classe.id) ? classesConfirmadasIds.filter((id) => id !== classe.id) : [...classesConfirmadasIds, classe.id]; limparErroAnalise('classes')"><span class="checkmark">{{ classesConfirmadasIds.includes(classe.id) ? '✓' : '' }}</span>{{ classe.codigo }} — {{ classe.descricao }}</button></fieldset>
+          <p v-if="errosAnalise.classes" class="inline-error">{{ errosAnalise.classes }}</p>
 
           <fieldset class="risk-fieldset"><legend>Segurança / EPI confirmados</legend><button v-for="medida in medidasSeguranca" :key="medida.valor" type="button" :class="{ selected: medidasSegurancaConfirmadas.includes(medida.valor) }" @click="medidasSegurancaConfirmadas = medidasSegurancaConfirmadas.includes(medida.valor) ? medidasSegurancaConfirmadas.filter((item) => item !== medida.valor) : [...medidasSegurancaConfirmadas, medida.valor]"><span class="checkmark">{{ medidasSegurancaConfirmadas.includes(medida.valor) ? '✓' : '' }}</span>{{ medida.rotulo }}</button></fieldset>
-          <label class="field"><span>Orientação complementar de segurança <small>(obrigatória para Outro)</small></span><textarea v-model="observacaoSegurancaConfirmada" rows="3" /></label>
+          <label class="field"><span>Orientação complementar de segurança <small>(obrigatória para Outro)</small></span><textarea v-model="observacaoSegurancaConfirmada" rows="3" :class="{ 'input--error': errosAnalise.segurancaOutro }" @input="limparErroAnalise('segurancaOutro')" /><small v-if="errosAnalise.segurancaOutro" class="inline-error">{{ errosAnalise.segurancaOutro }}</small></label>
 
-          <section class="storage-choice">
+          <section class="storage-choice" :class="{ 'validation-box--error': errosAnalise.local }">
             <span class="storage-choice__label">Local de armazenamento temporário</span>
             <div class="storage-choice__modes">
               <label><input v-model="modoLocalAnalise" type="radio" value="CATALOGO" /><span>Local cadastrado</span></label>
@@ -767,7 +802,7 @@ onMounted(carregar)
             <div v-if="modoLocalAnalise === 'CATALOGO'" class="analysis-grid">
               <label class="field">
                 <span>Local cadastrado</span>
-                <select v-model="localArmazenamentoResiduoId">
+                <select v-model="localArmazenamentoResiduoId" @change="limparErroAnalise('local')">
                   <option value="">Selecione...</option>
                   <option v-for="local in locaisArmazenamento" :key="local.id" :value="local.id">{{ local.nome }}</option>
                 </select>
@@ -781,11 +816,12 @@ onMounted(carregar)
 
             <label v-else class="field">
               <span>Local manual</span>
-              <input v-model="localArmazenamentoTemporario" maxlength="255" placeholder="Descreva o local físico" />
+              <input v-model="localArmazenamentoTemporario" maxlength="255" placeholder="Descreva o local físico" @input="limparErroAnalise('local')" />
             </label>
+            <p v-if="errosAnalise.local" class="inline-error">{{ errosAnalise.local }}</p>
           </section>
 
-          <label class="field"><span>Destino final previsto</span><input v-model="destinoFinalPrevisto" /></label>
+          <label class="field"><span>Destino final previsto</span><input v-model="destinoFinalPrevisto" :class="{ 'input--error': errosAnalise.destino }" @input="limparErroAnalise('destino')" /><small v-if="errosAnalise.destino" class="inline-error">{{ errosAnalise.destino }}</small></label>
           <label class="field"><span>Observação técnica <small>(opcional)</small></span><textarea v-model="observacaoGestor" rows="4" /></label>
           <p class="guidance guidance--warning">Ao confirmar, o resíduo é liberado para armazenamento e a impressão do rótulo é autorizada. O código SGL já foi gerado no registro inicial.</p>
         </div>
@@ -804,7 +840,7 @@ onMounted(carregar)
             <strong>{{ selecionado.localArmazenamentoTemporario ?? 'Não definido' }}</strong>
           </div>
 
-          <section class="storage-choice">
+          <section class="storage-choice" :class="{ 'validation-box--error': erroArmazenamento }">
             <span class="storage-choice__label">Confirmação do local físico</span>
             <div class="storage-choice__modes storage-choice__modes--vertical">
               <label><input v-model="modoLocalConfirmacao" type="radio" value="MANTER" /><span>Manter o local planejado</span></label>
@@ -815,7 +851,7 @@ onMounted(carregar)
             <div v-if="modoLocalConfirmacao === 'CATALOGO'" class="analysis-grid">
               <label class="field">
                 <span>Novo local cadastrado</span>
-                <select v-model="localArmazenamentoConfirmacaoId">
+                <select v-model="localArmazenamentoConfirmacaoId" @change="erroArmazenamento = ''">
                   <option value="">Selecione...</option>
                   <option v-for="local in locaisArmazenamento" :key="local.id" :value="local.id">{{ local.nome }}</option>
                 </select>
@@ -829,8 +865,9 @@ onMounted(carregar)
 
             <label v-else-if="modoLocalConfirmacao === 'MANUAL'" class="field">
               <span>Novo local físico</span>
-              <input v-model="localArmazenamentoConfirmacao" maxlength="255" placeholder="Descreva o local físico real" />
+              <input v-model="localArmazenamentoConfirmacao" maxlength="255" placeholder="Descreva o local físico real" @input="erroArmazenamento = ''" />
             </label>
+            <p v-if="erroArmazenamento" class="inline-error">{{ erroArmazenamento }}</p>
           </section>
 
           <p class="guidance">Se o recipiente foi armazenado onde estava previsto, apenas mantenha o local planejado. Correções ficam registradas no histórico.</p>
@@ -844,7 +881,7 @@ onMounted(carregar)
         <header><div><span>DESPACHO</span><h2>Confirmar destinação do resíduo</h2></div><button type="button" @click="fecharDespacho">×</button></header>
         <div class="modal-content">
           <div class="selected-summary"><strong>{{ selecionado.codigoRastreio }}</strong><span>{{ selecionado.descricao }}</span></div>
-          <label class="field"><span>Destino final confirmado</span><input v-model="destinoFinalConfirmado" placeholder="Empresa, unidade ou destino responsável" /></label>
+          <label class="field"><span>Destino final confirmado</span><input v-model="destinoFinalConfirmado" :class="{ 'input--error': erroDespacho }" placeholder="Empresa, unidade ou destino responsável" @input="erroDespacho = ''" /><small v-if="erroDespacho" class="inline-error">{{ erroDespacho }}</small></label>
           <label class="field field--spaced"><span>Observação <small>(opcional)</small></span><textarea v-model="observacaoDespacho" rows="4" /></label>
           <p class="guidance guidance--warning">O despacho encerra o ciclo operacional do resíduo no SGL e fica registrado no histórico.</p>
         </div>
@@ -914,6 +951,9 @@ onMounted(carregar)
 .timeline-card small { display: block; margin-top: 7px; color: #7c899b; font-size: 9px; line-height: 1.45; }
 .drawer-actions--wrap { flex-wrap: wrap; }
 .field--spaced { margin-top: 15px; }
+.validation-box--error { border-color: #e4a39f !important; background: #fff8f7 !important; }
+.inline-error { display: block; margin: 7px 0 0; color: #a82820; font-size: 9.5px; font-weight: 800; line-height: 1.45; }
+.input--error { border-color: #d97068 !important; box-shadow: 0 0 0 3px rgb(196 60 49 / 8%) !important; }
 .storage-choice { display: grid; gap: 10px; padding: 12px; border: 1px solid #dce4ee; border-radius: 8px; background: #fbfcfe; }
 .storage-choice__label { color: #405169; font-size: var(--sgl-font-label); font-weight: 700; text-transform: none; }
 .storage-choice__modes { display: flex; flex-wrap: wrap; gap: 8px 14px; }
