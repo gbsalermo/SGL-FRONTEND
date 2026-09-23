@@ -132,6 +132,22 @@ const eventoLiberacao = computed(() =>
     .find((evento) => evento.acao === 'RISCO_CONFERIDO_E_RESIDUO_LIBERADO') ?? null,
 )
 
+const classificacaoGestaoVigente = computed(() => {
+  if (!selecionado.value?.nivelRiscoConfirmado) return false
+  return [
+    'LIBERADO_PARA_ARMAZENAMENTO',
+    'ARMAZENADO_TEMPORARIAMENTE',
+    'DESPACHADO',
+  ].includes(selecionado.value.status)
+})
+
+const situacaoClassificacaoGestao = computed(() => {
+  if (!selecionado.value?.nivelRiscoConfirmado) return 'Aguardando análise'
+  if (selecionado.value.status === 'CANCELADO') return 'Classificação histórica'
+  if (classificacaoGestaoVigente.value) return 'Classificação liberada'
+  return 'Em reavaliação'
+})
+
 function rotuloAcaoRotulo(status: StatusResiduo) {
   return ['INFORMADO', 'EM_ANALISE', 'CANCELADO'].includes(status)
     ? 'Visualizar prévia do rótulo'
@@ -766,16 +782,19 @@ onMounted(carregar)
               </dl>
             </article>
 
-            <article class="comparison-card comparison-card--approved" :class="{ pending: !selecionado.nivelRiscoConfirmado }">
-              <header><span>APROVADO PELA GESTÃO</span><strong>{{ selecionado.nivelRiscoConfirmado ? 'Classificação liberada' : 'Aguardando análise' }}</strong></header>
+            <article class="comparison-card comparison-card--approved" :class="{ pending: !classificacaoGestaoVigente }">
+              <header>
+                <span>{{ classificacaoGestaoVigente ? 'APROVADO PELA GESTÃO' : selecionado.nivelRiscoConfirmado ? 'ÚLTIMA CLASSIFICAÇÃO DA GESTÃO' : 'ANÁLISE DA GESTÃO' }}</span>
+                <strong>{{ situacaoClassificacaoGestao }}</strong>
+              </header>
               <dl>
                 <div><dt>Classes</dt><dd><b>{{ selecionado.classesConfirmadas.map((classe) => classe.codigo).join(' · ') || 'Aguardando confirmação' }}</b><small>{{ selecionado.classesConfirmadas.map((classe) => classe.descricao).join(' · ') || 'Ainda não confirmadas.' }}</small></dd></div>
                 <div><dt>Risco</dt><dd><b>{{ selecionado.nivelRiscoConfirmado ? `Risco ${formatarEnum(selecionado.nivelRiscoConfirmado)}` : 'Aguardando análise' }}</b><small>{{ selecionado.riscosConfirmados.length ? selecionado.riscosConfirmados.map(formatarEnum).join(' · ') : 'Nenhum risco confirmado ainda.' }}</small></dd></div>
                 <div><dt>Segurança / EPI</dt><dd>{{ selecionado.medidasSegurancaConfirmadas.length ? selecionado.medidasSegurancaConfirmadas.map(formatarEnum).join(' · ') : 'Ainda não confirmada.' }}</dd></div>
                 <div><dt>Observação técnica</dt><dd>{{ selecionado.observacaoGestor ?? 'Sem observação técnica.' }}</dd></div>
               </dl>
-              <footer v-if="eventoLiberacao" class="approval-meta">
-                <span>Liberado por</span>
+              <footer v-if="eventoLiberacao && selecionado.nivelRiscoConfirmado" class="approval-meta">
+                <span>{{ classificacaoGestaoVigente ? 'Liberado por' : 'Última liberação por' }}</span>
                 <strong>{{ eventoLiberacao.usuarioNome ?? 'Gestor não identificado' }}</strong>
                 <small>{{ formatarData(eventoLiberacao.dataHora) }}</small>
               </footer>
