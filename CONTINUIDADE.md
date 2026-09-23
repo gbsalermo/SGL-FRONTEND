@@ -9,7 +9,7 @@
 **Branch atual de reconciliação:** `collab/etapa-4-residuos-reconcile`  
 **Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
 **Etapa atual:** Etapa 4 — implementação histórica concluída, reconciliação com a `main` corrigida pelo supervisor e revalidação em andamento  
-**Bloco atual da Etapa 4:** 4.4 — Correções administrativas do ciclo de vida
+**Bloco atual da Etapa 4:** 4.4 — Correções administrativas do ciclo de vida — implementado, validação funcional pendente
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da próxima etapa:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
 
@@ -417,3 +417,15 @@ Etapas 5 a 13                                         ⏳
 # 12. Regra final de retomada
 
 **A Etapa 3 está concluída e validada. Em 22/09/2026 os `main` foram reconciliados e a sincronização GitLab/GitHub foi automatizada. A Etapa 4 continua em `collab/etapa-4-residuos-reconcile`; a antiga `feat/etapa-4-residuos` é somente referência. Ler `docs/SINCRONIZACAO_GITLAB_GITHUB.md` e o handoff canônico do backend antes de portar qualquer tela. Backend/contratos devem ser reconciliados antes do frontend de cada bloco.**
+
+### Estado frontend do 4.4
+
+Implementado na branch de reconciliação:
+- status `CANCELADO` nas telas de Gestão, Solicitante e Relatórios;
+- ações `Retornar etapa` e `Cancelar resíduo` visíveis apenas para Administrador;
+- modal com justificativa obrigatória e erro local;
+- histórico apresenta cancelamento e retorno administrativo;
+- cancelados deixam de contar como resíduos ativos;
+- dark mode integrado aos novos estados e ações.
+
+Validação funcional integrada ainda pendente antes do fechamento da Etapa 4.
