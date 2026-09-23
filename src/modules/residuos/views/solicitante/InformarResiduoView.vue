@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 
 import { residuoService } from '@/modules/residuos/services/residuoService'
 import type {
@@ -105,6 +105,7 @@ const componentes = ref<ComponenteForm[]>([novoComponente(true)])
 const carregandoDados = ref(false)
 const enviando = ref(false)
 const erro = ref('')
+const errosFormulario = ref<Record<string, string>>({})
 const avisoDados = ref('')
 const resultado = ref<ResiduoResponse | null>(null)
 
@@ -233,38 +234,48 @@ function aplicarSugestoesSeguranca() {
   ])]
 }
 
+function limparErroFormulario(campo: string) {
+  if (!errosFormulario.value[campo]) return
+  const atualizados = { ...errosFormulario.value }
+  delete atualizados[campo]
+  errosFormulario.value = atualizados
+}
+
+async function focarPrimeiroErroFormulario() {
+  await nextTick()
+  document.querySelector<HTMLElement>('[data-form-error="true"]')
+    ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
 function validarFormulario() {
   if (!usuario.value?.id || !usuario.value.laboratorioId) {
     throw new Error('Sessão sem usuário ou laboratório válido.')
   }
-  if (!descricao.value.trim()) throw new Error('Informe uma descrição para o resíduo.')
-  if (!processoOrigem.value.trim()) throw new Error('Informe o processo que originou o resíduo.')
-  if (tratamentoRealizado.value && !descricaoTratamento.value.trim()) {
-    throw new Error('Descreva o tratamento já realizado no resíduo.')
-  }
-  if (!recipiente.value.trim()) throw new Error('Informe o recipiente utilizado.')
-  if (!quantidade.value || Number(quantidade.value) <= 0) throw new Error('Informe uma quantidade maior que zero.')
+
+  const erros: Record<string, string> = {}
+
   if (nivelRiscoInformado.value !== 'NENHUM' && riscosInformados.value.length === 0) {
-    throw new Error('Selecione pelo menos um risco percebido ou marque o nível como Nenhum.')
+    erros.riscos = 'Selecione pelo menos um risco percebido ou marque o nível como Nenhum.'
   }
-  if (classesInformadasIds.value.length === 0) throw new Error('Selecione pelo menos uma classe de resíduo.')
+
+  if (classesInformadasIds.value.length === 0) {
+    erros.classes = classesResiduo.value.length === 0
+      ? 'Nenhuma classe de resíduo está disponível para esta Unidade.'
+      : 'Selecione pelo menos uma classe de resíduo.'
+  }
+
   if (medidasSegurancaInformadas.value.includes('OUTRO') && !observacaoSegurancaInformada.value.trim()) {
-    throw new Error('Descreva a medida de segurança marcada como Outro.')
-  }
-  if (componentes.value.length === 0) throw new Error('Informe ao menos um componente do resíduo.')
-
-  for (const componente of componentes.value) {
-    if (componente.origem === 'CATALOGO' && !componente.produtoId) {
-      throw new Error('Selecione o produto de todos os componentes vinculados ao catálogo.')
-    }
-    if (componente.origem === 'LIVRE' && !componente.nomeComponente.trim()) {
-      throw new Error('Informe o nome de todos os componentes livres.')
-    }
+    erros.segurancaOutro = 'Descreva a medida de segurança marcada como Outro.'
   }
 
-  if (!componentes.value.some((componente) => componente.principal)) {
-    throw new Error('Defina um componente principal para o resíduo.')
+  errosFormulario.value = erros
+
+  if (Object.keys(erros).length > 0) {
+    void focarPrimeiroErroFormulario()
+    return false
   }
+
+  return true
 }
 
 function montarPayload(): CriarResiduoRequest {
@@ -304,7 +315,8 @@ async function enviarResiduo() {
   erro.value = ''
 
   try {
-    validarFormulario()
+    errosFormulario.value = {}
+    if (!validarFormulario()) return
     enviando.value = true
     resultado.value = await residuoService.criar(montarPayload())
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -333,6 +345,7 @@ function limparFormulario() {
   observacaoSegurancaInformada.value = ''
   componentes.value = [novoComponente(true)]
   erro.value = ''
+  errosFormulario.value = {}
   resultado.value = null
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -476,13 +489,19 @@ onMounted(carregarDados)
           </select>
         </label>
 
-        <div v-if="nivelRiscoInformado !== 'NENHUM'" class="risk-grid">
+        <div
+          v-if="nivelRiscoInformado !== 'NENHUM'"
+          class="risk-grid"
+          :class="{ 'validation-box--error': errosFormulario.riscos }"
+          :data-form-error="Boolean(errosFormulario.riscos)"
+        >
           <label v-for="risco in tiposRisco" :key="risco.value" class="risk-option">
-            <input v-model="riscosInformados" type="checkbox" :value="risco.value" />
+            <input v-model="riscosInformados" type="checkbox" :value="risco.value" @change="limparErroFormulario('riscos')" />
             <span>{{ risco.label }}</span>
           </label>
         </div>
-        <div v-else class="risk-none">Você informou que não percebe risco específico. O backend registrará essa declaração como <strong>NENHUM</strong>.</div>
+        <p v-if="errosFormulario.riscos" class="inline-error">{{ errosFormulario.riscos }}</p>
+        <div v-else-if="nivelRiscoInformado === 'NENHUM'" class="risk-none">Você informou que não percebe risco específico. O backend registrará essa declaração como <strong>NENHUM</strong>.</div>
       </section>
 
       <section class="form-section">
@@ -562,12 +581,25 @@ onMounted(carregarDados)
 
         <div>
           <strong class="field-group-title">Classes de Resíduo</strong>
-          <div class="risk-grid class-grid">
+          <div
+            class="risk-grid class-grid validation-box"
+            :class="{ 'validation-box--error': errosFormulario.classes }"
+            :data-form-error="Boolean(errosFormulario.classes)"
+          >
             <label v-for="classe in classesResiduo" :key="classe.id" class="risk-option class-option">
-              <input v-model="classesInformadasIds" type="checkbox" :value="classe.id" />
+              <input
+                v-model="classesInformadasIds"
+                type="checkbox"
+                :value="classe.id"
+                @change="limparErroFormulario('classes')"
+              />
               <span><b>{{ classe.codigo }}</b> — {{ classe.descricao }}</span>
             </label>
+            <p v-if="!carregandoDados && classesResiduo.length === 0" class="inline-warning">
+              Nenhuma classe de resíduo cadastrada para esta Unidade.
+            </p>
           </div>
+          <p v-if="errosFormulario.classes" class="inline-error">{{ errosFormulario.classes }}</p>
         </div>
 
         <div>
@@ -586,7 +618,15 @@ onMounted(carregarDados)
           </div>
           <label class="field security-note">
             <span>Orientação complementar <small>(obrigatória para Outro)</small></span>
-            <textarea v-model="observacaoSegurancaInformada" rows="2" placeholder="Descreva outras medidas ou cuidados relevantes..." />
+            <textarea
+              v-model="observacaoSegurancaInformada"
+              rows="2"
+              placeholder="Descreva outras medidas ou cuidados relevantes..."
+              :class="{ 'input--error': errosFormulario.segurancaOutro }"
+              :data-form-error="Boolean(errosFormulario.segurancaOutro)"
+              @input="limparErroFormulario('segurancaOutro')"
+            />
+            <small v-if="errosFormulario.segurancaOutro" class="inline-error">{{ errosFormulario.segurancaOutro }}</small>
           </label>
         </div>
       </section>
@@ -662,6 +702,11 @@ onMounted(carregarDados)
 .risk-option { min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 8px 14px; border: 1px solid #d7dee8; border-radius: 7px; background: #fbfcfe; color: #344258; font-size: 11.5px; font-weight: 700; cursor: pointer; }
 .risk-option:has(input:checked) { border-color: #6c94d0; background: #eef5ff; color: #1d4f99; }
 .risk-option input { width: 16px; height: 16px; flex: 0 0 auto; accent-color: #245eb6; }
+.validation-box { padding: 8px; border: 1px solid transparent; border-radius: 9px; }
+.validation-box--error { border-color: #e4a39f; background: #fff8f7; }
+.inline-error { margin: 7px 0 0; color: #a82820; font-size: 10.5px; font-weight: 750; line-height: 1.45; }
+.inline-warning { grid-column: 1 / -1; margin: 0; padding: 12px 14px; border: 1px solid #ead8a6; border-radius: 7px; background: #fffaf0; color: #7a5b12; font-size: 11px; line-height: 1.45; }
+.input--error { border-color: #d97068 !important; box-shadow: 0 0 0 3px rgb(196 60 49 / 8%) !important; }
 .field-group-title { display: block; margin-bottom: 10px; color: #334a6a; font-size: 12.5px; }
 .class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
 .class-grid .risk-option { height: 100%; }
