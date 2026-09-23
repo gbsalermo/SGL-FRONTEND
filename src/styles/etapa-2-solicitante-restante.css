@@ -678,6 +678,12 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .noti
   color: #ecd69f !important;
 }
 
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .notice--model {
+  border-color: #315b86;
+  background: #11243a;
+  color: #9fc8f5;
+}
+
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .form-footer {
   border-top: 1px solid #263a54 !important;
   background: #101d30 !important;
