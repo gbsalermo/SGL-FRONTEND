@@ -30,13 +30,14 @@ const statusOpcoes: Array<{ valor: FiltroStatusResiduo; rotulo: string }> = [
   { valor: 'LIBERADO_PARA_ARMAZENAMENTO', rotulo: 'Liberados' },
   { valor: 'ARMAZENADO_TEMPORARIAMENTE', rotulo: 'Armazenados' },
   { valor: 'DESPACHADO', rotulo: 'Despachados' },
+  { valor: 'CANCELADO', rotulo: 'Cancelados' },
 ]
 
 const residuosFiltrados = computed(() => {
   const termo = busca.value.trim().toLowerCase()
   return residuos.value.filter((residuo) => {
     const statusOk = statusFiltro.value === 'TODOS'
-      || (statusFiltro.value === 'ATIVOS' && residuo.status !== 'DESPACHADO')
+      || (statusFiltro.value === 'ATIVOS' && !['DESPACHADO', 'CANCELADO'].includes(residuo.status))
       || residuo.status === statusFiltro.value
     const buscaOk = !termo || [
       residuo.descricao,
@@ -62,6 +63,7 @@ function statusRotulo(status: StatusResiduo) {
     LIBERADO_PARA_ARMAZENAMENTO: 'Liberado',
     ARMAZENADO_TEMPORARIAMENTE: 'Armazenado',
     DESPACHADO: 'Despachado',
+    CANCELADO: 'Cancelado',
   }
   return mapa[status]
 }
@@ -91,6 +93,7 @@ function aplicarStatusDaRota() {
     'LIBERADO_PARA_ARMAZENAMENTO',
     'ARMAZENADO_TEMPORARIAMENTE',
     'DESPACHADO',
+    'CANCELADO',
   ]
   statusFiltro.value = validos.includes(valor as FiltroStatusResiduo) ? valor as FiltroStatusResiduo : 'TODOS'
 }
@@ -354,6 +357,7 @@ onMounted(carregar)
 .status-pill[data-status='EM_ANALISE'] { background: #fff7db; color: #8a6200; }
 .status-pill[data-status='LIBERADO_PARA_ARMAZENAMENTO'] { background: #e8f7ee; color: #16743a; }
 .status-pill[data-status='ARMAZENADO_TEMPORARIAMENTE'] { background: #e9f7f7; color: #126d73; }
+.status-pill[data-status='CANCELADO'] { background: #fff0f0; color: #b42318; }
 .status-pill[data-status='DESPACHADO'] { background: #eef1f5; color: #48576d; }
 .card-main h2 { margin: 10px 0 5px; font-size: 16px; }
 .card-main > p { margin: 0; color: #63738c; font-size: 12px; }
