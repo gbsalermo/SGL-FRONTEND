@@ -508,6 +508,35 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .resi
   box-shadow: 0 12px 30px rgb(0 5 14 / 14%) !important;
 }
 
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-picker {
+  border-color: #315071;
+  background: #111f33;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-picker__intro strong {
+  color: #d7e6fb;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-picker__intro p,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-picker__empty {
+  color: #8fa1b8;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-mode-switch {
+  border-color: #35506f;
+  background: #0f1c2d;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-mode-switch button {
+  border-right-color: #29415f;
+  color: #9fb0c5;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-mode-switch button.active {
+  background: #2456c4;
+  color: #fff;
+}
+
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .form-section {
   border-color: #263a54 !important;
 }
