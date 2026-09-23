@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
+const router = useRouter()
 const alvoCadastrosDisponivel = ref(false)
 const alvoInformarResiduoDisponivel = ref(false)
 let observer: MutationObserver | null = null
@@ -33,15 +34,13 @@ onBeforeUnmount(() => observer?.disconnect())
 <template>
   <Teleport v-if="alvoCadastrosDisponivel" to=".tabs-card">
     <button
-      class="residuo-modelo-admin-tab"
+      class="residuo-modelo-admin-tab residuo-modelo-admin-tab--active"
       type="button"
-      disabled
-      aria-disabled="true"
-      title="Opção em estudo: modelos de resíduos recorrentes cadastrados pela Gestão"
+      title="Administrar modelos de resíduos"
+      @click="router.push('/administracao/cadastros/modelos-residuo')"
     >
       <span class="residuo-modelo-admin-tab__topline">
         <strong>Resíduos</strong>
-        <small>EM BREVE</small>
       </span>
       <span class="residuo-modelo-admin-tab__description">
         Modelos completos com origem, recipiente, riscos, composição e observações.
@@ -92,14 +91,22 @@ onBeforeUnmount(() => observer?.disconnect())
   display: grid;
   gap: 3px;
   padding: 11px 12px;
-  border: 1px dashed #d6dee9;
+  border: 1px solid #e0e6ef;
   border-radius: 7px;
-  background: #fafbfc;
-  color: #536178;
+  background: #fff;
+  color: #2b3d59;
   font: inherit;
   text-align: left;
-  cursor: not-allowed;
-  opacity: .78;
+}
+
+.residuo-modelo-admin-tab--active {
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease;
+}
+
+.residuo-modelo-admin-tab--active:hover {
+  border-color: #4b7fe4;
+  background: #f4f8ff;
 }
 
 .residuo-modelo-admin-tab__topline {
@@ -112,17 +119,6 @@ onBeforeUnmount(() => observer?.disconnect())
 .residuo-modelo-admin-tab__topline strong {
   color: #41516a;
   font-size: 12px;
-}
-
-.residuo-modelo-admin-tab__topline small {
-  margin: 0;
-  padding: 3px 6px;
-  border-radius: 999px;
-  background: #eef1f5;
-  color: #758196;
-  font-size: 7px;
-  font-weight: 900;
-  letter-spacing: .05em;
 }
 
 .residuo-modelo-admin-tab__description {
