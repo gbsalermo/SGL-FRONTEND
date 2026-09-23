@@ -102,6 +102,12 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nt
 body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(5) strong {
   color: #7ed6d0 !important;
 }
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(6) {
+  border-color: #713845 !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(6) strong {
+  color: #ff6677 !important;
+}
 
 /* Feedback */
 body.sgl-dark-active .gestao-main .residuos-gestao-page .feedback {
@@ -282,6 +288,11 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill[data-status
   background: #153438 !important;
   color: #83ddd8 !important;
 }
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill[data-status='CANCELADO'] {
+  border-color: #8e3b49 !important;
+  background: #251821 !important;
+  color: #ff6677 !important;
+}
 
 /* Ações */
 body.sgl-dark-active .gestao-main .residuos-gestao-page :where(
@@ -326,6 +337,16 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .label-action {
   border: 1px solid var(--sgl-border-strong) !important;
   background: var(--sgl-surface-elevated) !important;
   color: #dbe8f8 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .admin-return-action {
+  background: #b7791f !important;
+  color: #fff !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .admin-cancel-action {
+  background: #c23b31 !important;
+  color: #fff !important;
 }
 
 /* Drawers e modais */
