@@ -563,15 +563,28 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .state-box--error {
 
 /* Validações locais dos modais da Gestão */
 body.sgl-dark-active .gestao-main .residuos-gestao-page .validation-box--error {
-  border-color: #713845 !important;
-  background: #251821 !important;
+  border: 1px solid #6f3c48 !important;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px rgb(111 60 72 / 12%) !important;
+  border-radius: 9px !important;
+  padding: 8px !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .validation-box--error .risk-fieldset button,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .validation-box--error .risk-option {
+  border-color: #4b3a47 !important;
+  background: var(--sgl-surface-elevated) !important;
 }
 
 body.sgl-dark-active .gestao-main .residuos-gestao-page .inline-error {
+  margin-top: 7px !important;
   color: #ff9aa5 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
 }
 
 body.sgl-dark-active .gestao-main .residuos-gestao-page .input--error {
-  border-color: #d95a69 !important;
-  box-shadow: 0 0 0 3px rgb(217 90 105 / 12%) !important;
+  border-color: #c95867 !important;
+  box-shadow: 0 0 0 2px rgb(201 88 103 / 10%) !important;
 }
