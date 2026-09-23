@@ -23,6 +23,14 @@ export interface ClasseResiduoResponse {
   ativo: boolean
 }
 
+export interface LocalArmazenamentoResiduoResponse {
+  id: string
+  unidadeId: string
+  unidadeNome: string
+  nome: string
+  ativo: boolean
+}
+
 export interface ClasseResiduoSnapshotResponse {
   classeId: string
   codigo: string
@@ -67,13 +75,20 @@ export interface AnalisarResiduoRequest {
   classesConfirmadasIds: string[]
   medidasSegurancaConfirmadas: MedidaSegurancaResiduo[]
   observacaoSegurancaConfirmada: string | null
-  localArmazenamentoTemporario: string
+  localArmazenamentoResiduoId: string | null
+  complementoLocalArmazenamento: string | null
+  localArmazenamentoTemporario: string | null
   destinoFinalPrevisto: string
   dataPrevistaDespacho: string | null
   observacaoGestor: string | null
 }
 
-export interface ArmazenarResiduoRequest { usuarioGestorId: string; localArmazenamentoTemporario: string | null }
+export interface ArmazenarResiduoRequest {
+  usuarioGestorId: string
+  localArmazenamentoResiduoId: string | null
+  complementoLocalArmazenamento: string | null
+  localArmazenamentoTemporario: string | null
+}
 export interface DespacharResiduoRequest { usuarioGestorId: string; destinoFinalConfirmado: string; observacao: string | null }
 
 export interface ComponenteResiduoResponse {
@@ -118,6 +133,8 @@ export interface ResiduoResponse {
   observacaoSegurancaConfirmada: string | null
   observacaoGerador: string | null
   observacaoGestor: string | null
+  localArmazenamentoResiduoId: string | null
+  complementoLocalArmazenamento: string | null
   localArmazenamentoTemporario: string | null
   destinoFinalPrevisto: string | null
   destinoFinalConfirmado: string | null
