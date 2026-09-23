@@ -385,6 +385,10 @@ function validarAnalise() {
     erros.classes = 'Confirme pelo menos uma classe de resíduo.'
   }
 
+  if (medidasSegurancaConfirmadas.value.length === 0) {
+    erros.seguranca = 'Confirme pelo menos uma medida de Segurança / EPI.'
+  }
+
   if (medidasSegurancaConfirmadas.value.includes('OUTRO') && !observacaoSegurancaConfirmada.value.trim()) {
     erros.segurancaOutro = 'Descreva a medida de segurança marcada como Outro.'
   }
@@ -789,7 +793,8 @@ onMounted(carregar)
           <fieldset class="risk-fieldset" :class="{ 'validation-box--error': errosAnalise.classes }"><legend>Classes confirmadas</legend><button v-for="classe in classesResiduo" :key="classe.id" type="button" :class="{ selected: classesConfirmadasIds.includes(classe.id) }" @click="classesConfirmadasIds = classesConfirmadasIds.includes(classe.id) ? classesConfirmadasIds.filter((id) => id !== classe.id) : [...classesConfirmadasIds, classe.id]; limparErroAnalise('classes')"><span class="checkmark">{{ classesConfirmadasIds.includes(classe.id) ? '✓' : '' }}</span>{{ classe.codigo }} — {{ classe.descricao }}</button></fieldset>
           <p v-if="errosAnalise.classes" class="inline-error">{{ errosAnalise.classes }}</p>
 
-          <fieldset class="risk-fieldset"><legend>Segurança / EPI confirmados</legend><button v-for="medida in medidasSeguranca" :key="medida.valor" type="button" :class="{ selected: medidasSegurancaConfirmadas.includes(medida.valor) }" @click="medidasSegurancaConfirmadas = medidasSegurancaConfirmadas.includes(medida.valor) ? medidasSegurancaConfirmadas.filter((item) => item !== medida.valor) : [...medidasSegurancaConfirmadas, medida.valor]"><span class="checkmark">{{ medidasSegurancaConfirmadas.includes(medida.valor) ? '✓' : '' }}</span>{{ medida.rotulo }}</button></fieldset>
+          <fieldset class="risk-fieldset" :class="{ 'validation-box--error': errosAnalise.seguranca }"><legend>Segurança / EPI confirmados</legend><button v-for="medida in medidasSeguranca" :key="medida.valor" type="button" :class="{ selected: medidasSegurancaConfirmadas.includes(medida.valor) }" @click="medidasSegurancaConfirmadas = medidasSegurancaConfirmadas.includes(medida.valor) ? medidasSegurancaConfirmadas.filter((item) => item !== medida.valor) : [...medidasSegurancaConfirmadas, medida.valor]; limparErroAnalise('seguranca')"><span class="checkmark">{{ medidasSegurancaConfirmadas.includes(medida.valor) ? '✓' : '' }}</span>{{ medida.rotulo }}</button></fieldset>
+          <p v-if="errosAnalise.seguranca" class="inline-error">{{ errosAnalise.seguranca }}</p>
           <label class="field"><span>Orientação complementar de segurança <small>(obrigatória para Outro)</small></span><textarea v-model="observacaoSegurancaConfirmada" rows="3" :class="{ 'input--error': errosAnalise.segurancaOutro }" @input="limparErroAnalise('segurancaOutro')" /><small v-if="errosAnalise.segurancaOutro" class="inline-error">{{ errosAnalise.segurancaOutro }}</small></label>
 
           <section class="storage-choice" :class="{ 'validation-box--error': errosAnalise.local }">
