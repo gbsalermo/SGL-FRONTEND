@@ -112,6 +112,7 @@ const enviando = ref(false)
 const erro = ref('')
 const errosFormulario = ref<Record<string, string>>({})
 const avisoDados = ref('')
+const avisoModelo = ref('')
 const resultado = ref<ResiduoResponse | null>(null)
 
 const usuario = computed(() => session.usuario)
@@ -213,15 +214,38 @@ function produtoSelecionado(produtoId: string) {
   return produtos.value.find((produto) => produto.id === produtoId)
 }
 
+function limparDadosPreenchidosPorModelo() {
+  descricao.value = ''
+  processoOrigem.value = ''
+  estadoFisico.value = 'LIQUIDO'
+  tratamentoRealizado.value = false
+  descricaoTratamento.value = ''
+  recipiente.value = ''
+  unidadeMedida.value = 'ML'
+  nivelRiscoInformado.value = 'BAIXO'
+  riscosInformados.value = []
+  classesInformadasIds.value = []
+  medidasSegurancaInformadas.value = []
+  observacaoSegurancaInformada.value = ''
+  componentes.value = [novoComponente(true)]
+  errosFormulario.value = {}
+}
+
 function selecionarModoPreenchimento(modo: ModoPreenchimento) {
   modoPreenchimento.value = modo
+
   if (modo === 'MANUAL') {
     modeloResiduoId.value = ''
+    avisoModelo.value = ''
+    limparDadosPreenchidosPorModelo()
   }
 }
 
 function aplicarModeloSelecionado() {
-  if (!modeloResiduoId.value) return
+  if (!modeloResiduoId.value) {
+    avisoModelo.value = ''
+    return
+  }
 
   const modelo = modelosResiduo.value.find((item) => item.id === modeloResiduoId.value)
   if (!modelo) return
@@ -269,7 +293,7 @@ function aplicarModeloSelecionado() {
   }
 
   errosFormulario.value = {}
-  avisoDados.value = `Modelo "${modelo.nome}" aplicado. Revise os dados e informe os valores específicos desta ocorrência antes de enviar.`
+  avisoModelo.value = `Modelo "${modelo.nome}" aplicado. Revise os dados e informe os valores específicos desta ocorrência antes de enviar.`
 }
 
 function selecionarOrigem(componente: ComponenteForm, origem: OrigemComponente) {
@@ -426,6 +450,7 @@ function limparFormulario() {
   componentes.value = [novoComponente(true)]
   erro.value = ''
   errosFormulario.value = {}
+  avisoModelo.value = ''
   resultado.value = null
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -477,6 +502,7 @@ onMounted(carregarDados)
 
     <form v-else class="residuo-form" @submit.prevent="enviarResiduo">
       <div v-if="avisoDados" class="notice notice--warning">{{ avisoDados }}</div>
+      <div v-if="avisoModelo" class="notice notice--model">{{ avisoModelo }}</div>
       <div v-if="erro" class="notice notice--error">{{ erro }}</div>
 
       <section class="model-picker">
@@ -883,6 +909,7 @@ onMounted(carregarDados)
 .notice { margin: 20px 32px 0; padding: 14px 16px; border-radius: 7px; font-size: 11.5px; line-height: 1.5; }
 .notice--error { border: 1px solid #f1b7b3; background: #fff3f2; color: #9f2018; }
 .notice--warning { border: 1px solid #ead8a6; background: #fffaf0; color: #7a5b12; }
+.notice--model { border: 1px solid #b9d5ef; background: #f3f8ff; color: #28568f; }
 .form-footer { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 24px 32px; background: #f8fafc; }
 .form-footer > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .form-footer strong { color: #344258; font-size: 11.5px; }
