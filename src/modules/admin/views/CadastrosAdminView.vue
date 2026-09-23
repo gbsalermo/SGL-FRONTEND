@@ -740,9 +740,14 @@ onMounted(carregar)
         <h1>Cadastros do SGL</h1>
         <span>Manutenção dos dados-base usados pelos fluxos do sistema.</span>
       </div>
-      <button class="btn btn--ghost" type="button" :disabled="carregando" @click="carregar">
-        {{ carregando ? 'Atualizando...' : 'Atualizar dados' }}
-      </button>
+      <div class="page-header__actions">
+        <RouterLink class="btn btn--primary models-link" to="/administracao/cadastros/modelos-residuo">
+          Modelos de resíduo
+        </RouterLink>
+        <button class="btn btn--ghost" type="button" :disabled="carregando" @click="carregar">
+          {{ carregando ? 'Atualizando...' : 'Atualizar dados' }}
+        </button>
+      </div>
     </header>
 
     <section class="summary-grid">
@@ -1046,6 +1051,8 @@ onMounted(carregar)
 </template>
 
 <style scoped>
+.page-header__actions { display: flex; align-items: center; gap: 10px; }
+.models-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 .admin-page { max-width: 1500px; margin: 0 auto; color: #1b2940; }
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
 .eyebrow { margin: 0 0 7px; color: #2459bd; font-size: 10px; font-weight: 900; letter-spacing: .08em; }
