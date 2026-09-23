@@ -560,3 +560,18 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .state-box--error {
   background: #2B1A23 !important;
   color: #FF9AA5 !important;
 }
+
+/* Validações locais dos modais da Gestão */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .validation-box--error {
+  border-color: #713845 !important;
+  background: #251821 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .inline-error {
+  color: #ff9aa5 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .input--error {
+  border-color: #d95a69 !important;
+  box-shadow: 0 0 0 3px rgb(217 90 105 / 12%) !important;
+}
