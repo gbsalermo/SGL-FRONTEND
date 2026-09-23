@@ -225,6 +225,25 @@ onBeforeUnmount(() => observer?.disconnect())
   line-height: 1.5;
 }
 
+body.sgl-dark-active .residuo-modelo-admin-tab {
+  border-color: var(--sgl-border);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+}
+
+body.sgl-dark-active .residuo-modelo-admin-tab__topline strong {
+  color: var(--sgl-text);
+}
+
+body.sgl-dark-active .residuo-modelo-admin-tab__description {
+  color: var(--sgl-text-muted);
+}
+
+body.sgl-dark-active .residuo-modelo-admin-tab--active:hover {
+  border-color: var(--sgl-primary-light);
+  background: #17345d;
+}
+
 @media (max-width: 760px) {
   .residuo-modelo-user-card__body {
     grid-template-columns: 1fr;
