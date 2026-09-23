@@ -12,6 +12,7 @@ export interface RelatorioResiduosResponse {
   liberados: number
   armazenados: number
   despachados: number
+  cancelados: number
   altoRisco: number
   itens: ResiduoResponse[]
 }
