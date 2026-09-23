@@ -32,7 +32,7 @@ const primeiroNome = computed(() => session.usuario?.nome?.trim().split(/\s+/)[0
 const pedidosPendentes = computed(() => pedidos.value.filter((pedido) => pedido.status === 'PENDENTE'))
 const pedidosAprovados = computed(() => pedidos.value.filter((pedido) => pedido.status === 'APROVADO'))
 const pedidosEntregues = computed(() => pedidos.value.filter((pedido) => pedido.status === 'ENTREGUE'))
-const residuosAtivos = computed(() => residuos.value.filter((residuo) => residuo.status !== 'DESPACHADO'))
+const residuosAtivos = computed(() => residuos.value.filter((residuo) => !['DESPACHADO', 'CANCELADO'].includes(residuo.status)))
 
 const pedidoMaisRecente = computed(() =>
   [...pedidos.value].sort(
@@ -281,12 +281,14 @@ function indiceEtapaResiduo(status: StatusResiduo) {
     LIBERADO_PARA_ARMAZENAMENTO: 2,
     ARMAZENADO_TEMPORARIAMENTE: 3,
     DESPACHADO: 4,
+    CANCELADO: 0,
   }
   return mapa[status]
 }
 
 function estadoEtapaResiduo(residuo: ResiduoResponse, indice: number) {
   const atual = indiceEtapaResiduo(residuo.status)
+  if (residuo.status === 'CANCELADO') return 'error'
   if (residuo.status === 'DESPACHADO') return indice <= atual ? 'done' : 'pending'
   if (indice < atual) return 'done'
   if (indice === atual) return 'current'
@@ -316,6 +318,7 @@ function mensagemResiduo(residuo: ResiduoResponse) {
     LIBERADO_PARA_ARMAZENAMENTO: 'A análise foi concluída e o resíduo está liberado para armazenamento temporário.',
     ARMAZENADO_TEMPORARIAMENTE: 'O resíduo está armazenado temporariamente e aguarda a destinação final.',
     DESPACHADO: 'O resíduo foi despachado e o fluxo de destinação foi concluído.',
+    CANCELADO: 'O resíduo foi cancelado administrativamente. Consulte os detalhes para acompanhar a situação.',
   }
   return mapa[residuo.status]
 }
