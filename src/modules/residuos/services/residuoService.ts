@@ -1,5 +1,6 @@
 import { http } from '@/services/http'
 import type {
+  AdministrarResiduoRequest,
   AnalisarResiduoRequest,
   ArmazenarResiduoRequest,
   ClasseResiduoResponse,
@@ -63,6 +64,11 @@ export const residuoService = {
 
   async despachar(id: string, payload: DespacharResiduoRequest) {
     const { data } = await http.put<ResiduoResponse>(`/v1/residuos/${id}/despachar`, payload)
+    return data
+  },
+
+  async administrar(id: string, payload: AdministrarResiduoRequest) {
+    const { data } = await http.put<ResiduoResponse>(`/v1/residuos/${id}/administrar`, payload)
     return data
   },
 
