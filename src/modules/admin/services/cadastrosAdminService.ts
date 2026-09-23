@@ -7,6 +7,8 @@ import type {
   LaboratorioRequest,
   LocalArmazenamentoResiduoCadastro,
   LocalArmazenamentoResiduoRequest,
+  ModeloResiduoCadastro,
+  ModeloResiduoRequest,
   ProdutoCadastro,
   ProdutoRequest,
   ProjetoCadastro,
@@ -94,6 +96,25 @@ export const cadastrosAdminService = {
   async atualizarLocalArmazenamentoResiduo(id: string, payload: LocalArmazenamentoResiduoRequest) {
     const { data } = await http.put<LocalArmazenamentoResiduoCadastro>(`/v1/locais-armazenamento-residuo/${id}`, payload)
     return data
+  },
+
+  async listarModelosResiduo() {
+    const { data } = await http.get<ModeloResiduoCadastro[]>('/v1/modelos-residuo')
+    return data
+  },
+
+  async criarModeloResiduo(payload: ModeloResiduoRequest) {
+    const { data } = await http.post<ModeloResiduoCadastro>('/v1/modelos-residuo', payload)
+    return data
+  },
+
+  async atualizarModeloResiduo(id: string, payload: ModeloResiduoRequest) {
+    const { data } = await http.put<ModeloResiduoCadastro>(`/v1/modelos-residuo/${id}`, payload)
+    return data
+  },
+
+  async inativarModeloResiduo(id: string) {
+    await http.delete(`/v1/modelos-residuo/${id}`)
   },
 
   async listarUsuarios() {
