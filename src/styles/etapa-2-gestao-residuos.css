@@ -478,6 +478,20 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card {
   color: var(--sgl-text) !important;
 }
 
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice__label {
+  color: #c9d5e5 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice__modes label {
+  color: var(--sgl-text-muted) !important;
+}
+
 body.sgl-dark-active .gestao-main .residuos-gestao-page .field {
   gap: var(--sgl-space-2) !important;
 }
