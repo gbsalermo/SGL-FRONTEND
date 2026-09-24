@@ -1,6 +1,6 @@
 # Documentação — SGL Frontend
 
-**Atualizado em:** 22/09/2026
+**Atualizado em:** 24/09/2026
 
 Este índice separa documentação vigente, decisões de produto, referências visuais e registros históricos. O objetivo é evitar que uma etapa antiga seja interpretada como planejamento atual.
 
@@ -47,7 +47,7 @@ Pré-produção pós-aprovação                   🔧 em andamento
 Etapa 1 — padrão visual global               ✅ concluída
 Etapa 2 — Dark Mode definitivo               ✅ concluída
 Etapa 3 — refinamentos de Resíduos           ✅ concluída e validada
-Etapa 4 — expansão operacional de Resíduos   🔧 reconciliação + revalidação
+Etapa 4 — expansão operacional de Resíduos   ✅ concluída e validada
 Matriz formal de permissões                  ⏳ após a pré-produção atual
 Congelamento/homologação final               ⏳ posterior
 Autenticação definitiva                      ⏳ posterior
@@ -65,7 +65,7 @@ Integração corporativa                       ⏳ posterior
 | `PADRAO_VISUAL_PRE_PRODUCAO.md` | decisões concretas da Etapa 1.1: dimensões, tipografia, cards, ícones, filtros, setas, botões e estados | **DECISÃO VIGENTE — Etapa 1 concluída** |
 | `../README.md` | visão rápida e execução | **ATUAL** |
 | `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL** |
-| backend: `docs/VALIDACAO_ETAPA_4.md` | roteiro integrado de validação após reconciliação | **REFERÊNCIA ATUAL — 22/09** |
+| backend: `docs/VALIDACAO_ETAPA_4.md` | bateria executada e critérios de fechamento da Etapa 4 | **FECHADO — 24/09** |
 | `INVENTARIO_TELAS.md` | inventário de rotas/telas | **REFERÊNCIA VIGENTE** |
 | `FLUXOS_NAVEGACAO.md` | jornadas atuais | **REFERÊNCIA VIGENTE** |
 | `ETAPA_CADASTROS_ADMIN.md` | decisões de Administração/Cadastros | **DECISÃO VIGENTE** |
@@ -160,7 +160,7 @@ Se um documento histórico disser que Administração, Resíduos, Dashboard, Ale
 - Administração usa `/administracao/cadastros` e é exclusiva de `ADMINISTRADOR`;
 - usuário não é criado manualmente em Cadastros; permissões alteram perfis existentes;
 - `Produto != Resíduo`;
-- modelos pré-cadastrados de Resíduo fazem parte da Etapa 4 da pré-produção;
+- modelos pré-cadastrados de Resíduo foram implementados e validados na Etapa 4;
 - QR Code não integra o rótulo visual atual;
 - sessão atual é DEV e expira em 5h;
 - o tema claro/escuro pertence às interfaces autenticadas e não deve alterar a tela de login sem decisão explícita;
@@ -178,8 +178,9 @@ planejamento de pré-produção                 ✅
 → Etapa 1 padrão visual                     ✅
 → Etapa 2 Dark Mode definitivo              ✅
 → Etapa 3 refinamentos de Resíduos          ✅
-→ Etapa 4 reconciliação + revalidação        🔧
-→ Etapas 5 a 9
+→ Etapa 4 expansão operacional de Resíduos  ✅
+→ Etapa 5 Projetos e Atividades              ⏭
+→ Etapas 6 a 9
 → estabilização do bloco
 ```
 
