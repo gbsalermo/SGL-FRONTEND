@@ -77,6 +77,13 @@ export const residuoService = {
     return data
   },
 
+  async buscarHistoricoPorGerador(usuarioGeradorId: string) {
+    const { data } = await http.get<HistoricoResiduoResponse[]>('/v1/residuos/historico/por-gerador', {
+      params: { usuarioGeradorId },
+    })
+    return data
+  },
+
   async buscarDadosRotulo(id: string) {
     const { data } = await http.get<RotuloResiduoResponse>(`/v1/residuos/${id}/rotulo`)
     return data
