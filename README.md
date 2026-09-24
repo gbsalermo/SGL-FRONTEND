@@ -15,7 +15,7 @@
 
 ## Estado atual — 24/09/2026
 
-O primeiro protótipo do SGL foi **funcionalmente aprovado**. As **Etapas 1, 2, 3 e 4 da pré-produção foram concluídas e validadas**. A próxima etapa canônica é a **Etapa 5 — Projetos e Atividades**.
+O primeiro protótipo do SGL foi **funcionalmente aprovado**. As **Etapas 1, 2, 3 e 4 da pré-produção foram concluídas e validadas**. A **Etapa 5 — Projetos e Atividades** está em andamento; o backend está no **5.1 — Projeto base**.
 
 Estado consolidado:
 
@@ -453,7 +453,7 @@ Etapa 1 — padrão visual global                 ✅
 Etapa 2 — Dark Mode definitivo                 ✅
 Etapa 3 — refinamentos do fluxo de Resíduos    ✅
 Etapa 4 — expansão operacional de Resíduos     ✅
-Etapa 5 — Projetos e Atividades                ⏭ próxima
+Etapa 5 — Projetos e Atividades                🔧 atual — 5.1 backend
 Etapas 6 a 13                                  ⏳ sequenciais
 ```
 
