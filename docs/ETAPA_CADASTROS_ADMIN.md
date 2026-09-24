@@ -110,75 +110,64 @@ As regras de fiscalização continuam as definidas anteriormente:
 - `fiscalizado=true` exige ao menos um órgão;
 - fiscalização não é inferida automaticamente por risco ou perecibilidade.
 
-### Resíduos pré-determinados — opção em estudo
+### Modelos de Resíduo — implementado na Etapa 4
 
-A central exibe uma opção **Resíduos — em breve**, deliberadamente inativa neste protótipo.
+A central de Administração agora expõe **Resíduos** como área funcional para cadastro de modelos reutilizáveis.
 
-A ideia é permitir que a Gestão cadastre modelos de resíduos recorrentes. O usuário poderia selecionar um modelo já conhecido em **Informar resíduo**, evitando redigitar informações repetitivas.
-
-Se a funcionalidade for ativada, o cadastro do modelo deverá armazenar os dados que hoje são informados manualmente no fluxo de resíduo:
+O modelo pode armazenar:
 
 ```text
 nome/identificação do modelo
 descrição do resíduo
 processo de origem
 recipiente padrão
-quantidade padrão ou referência de quantidade
 unidade de medida
 nível de risco sugerido
 riscos sugeridos
+Classes de Resíduo
+Segurança / EPI
+tratamento padrão
 composição
-  ├── produtos do catálogo, quando aplicável
-  ├── componentes livres, quando aplicável
+  ├── Produto do catálogo, quando aplicável
+  ├── componente livre, quando aplicável
   ├── componente principal
-  ├── concentração/quantidade do componente
-  └── observação do componente
-observação padrão do gerador
+  ├── concentração/quantidade
+  └── observação
 ativo/inativo
 ```
 
-A quantidade efetiva deve continuar editável no registro real, porque a quantidade gerada pode variar mesmo quando o tipo de resíduo é recorrente.
+Regras validadas:
 
-Projeto, laboratório e usuário gerador continuam sendo contexto do registro real e não devem ser engessados pelo modelo global, salvo decisão futura de criar modelos restritos por laboratório.
+- `ModeloResiduo` é definição reutilizável; `Residuo` é ocorrência real independente;
+- alterar o modelo futuramente não modifica Resíduos históricos;
+- quantidade, Projeto e observações da ocorrência continuam específicos do registro real;
+- o modelo não movimenta estoque;
+- Produto do catálogo é referência de composição;
+- o usuário pode escolher **Preenchimento manual** ou **Usar modelo**;
+- o modelo pré-preenche dados, mas todos permanecem editáveis antes do envio;
+- a análise técnica da Gestão continua obrigatória;
+- inativos permanecem administráveis, mas não aparecem para novas ocorrências.
 
-O modelo **não movimenta estoque**. Referências a Produto continuam sendo apenas informativas para composição do resíduo.
-
-A seleção do modelo também não elimina a análise da Gestão: os riscos carregados pelo modelo funcionam como preenchimento inicial e a classificação confirmada continua ocorrendo no fluxo normal.
-
-Regra planejada para **Informar resíduo**, somente se esta opção for ativada:
-
-```text
-produto do catálogo OU resíduo pré-cadastrado
-→ pelo menos um dos dois deve estar selecionado
-
-se resíduo pré-cadastrado for selecionado
-→ produto passa a ser opcional
-
-se produto for selecionado
-→ resíduo pré-cadastrado passa a ser opcional
-```
-
-Componentes livres podem complementar a composição, mas não substituem essa regra mínima se a funcionalidade futura for confirmada.
-
-No protótipo atual a opção permanece desabilitada e **nenhuma validação existente é alterada**.
 
 ## Interface
 
-A central usa quatro áreas funcionais e uma opção planejada:
+A central usa áreas funcionais ativas:
 
 ```text
 Laboratórios
 Projetos
 Produtos
+Classes de resíduo
+Locais de armazenamento
 Permissões
-Resíduos — em breve / inativo
+Resíduos — Modelos de Resíduo
 ```
 
 Cada cadastro funcional tem busca, consulta de ativos, opção de mostrar inativos, criação, edição e ativação/inativação.
 
 Não há CRUD de Usuários e não há CRUD de Unidades.
 
-Na tela **Informar resíduo**, a opção de resíduo pré-cadastrado também aparece visualmente como **Em breve**, próxima da composição/produtos, acompanhada da regra futura Produto ou Resíduo. Ela permanece sem ação neste protótipo.
+Na tela **Informar resíduo**, o usuário escolhe entre **Preenchimento manual** e **Usar modelo**. Ao usar modelo, os dados recorrentes são pré-preenchidos e continuam editáveis.
 
 ## Segurança do frontend
 
@@ -206,6 +195,8 @@ A autorização definitiva no backend continua vinculada à futura etapa de aute
 13. alteração de perfil usa somente PUT /usuarios/{id}/perfil
 14. perfil da sessão atual não pode ser alterado pela própria tela
 15. ESTAGIARIO com estágio ativo não pode perder esse perfil
-16. Cadastros mostra Resíduos com indicação Em breve e sem ação
-17. Informar resíduo mostra a opção futura de modelo pré-cadastrado sem alterar o fluxo atual
+16. Cadastros permite administrar Modelos de Resíduo
+17. modelo inativo não aparece para nova ocorrência
+18. Informar resíduo permite Manual ou Modelo
+19. modelo pré-preenche sem criar vínculo vivo com o Resíduo
 ```
