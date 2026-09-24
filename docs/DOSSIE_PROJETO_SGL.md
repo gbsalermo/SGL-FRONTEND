@@ -3,21 +3,22 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Atualizado em:** 22/09/2026  
-**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2 e 3 concluídas; Etapa 4 possui implementação histórica e está em reconciliação sobre a `main` atual antes da revalidação.
+**Atualizado em:** 24/09/2026  
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2, 3 e 4 concluídas e validadas; Etapa 5 — Projetos e Atividades é a próxima.
 
 Este documento resume o estado real do frontend para retomada humana ou por IA. O objetivo é evitar reconstrução de módulos já aprovados e impedir que roadmaps antigos sejam tratados como tarefa imediata.
 
-## Checkpoint atual — 22/09/2026
+## Checkpoint atual — 24/09/2026
 
 ```text
 Etapa 1 — padrão visual global              ✅ concluída
 Etapa 2 — Dark Mode definitivo              ✅ concluída
 Etapa 3 — refinamentos do fluxo de Resíduos ✅ concluída e validada
-Etapa 4 — expansão operacional de Resíduos  🔧 reconciliação + revalidação
+Etapa 4 — expansão operacional de Resíduos  ✅ concluída e validada
+Etapa 5 — Projetos e Atividades             ⏭ próxima
 ```
 
-Retomada imediata: atualizar `collab/etapa-4-residuos-reconcile` com a `gitlab/main`, portar seletivamente a implementação antiga de `feat/etapa-4-residuos` e só então executar a validação integrada. O plano e o handoff canônicos ficam no backend.
+Retomada imediata: após integrar `collab/etapa-4-residuos-reconcile` no GitLab, criar a branch da Etapa 5 a partir da `gitlab/main` atualizada. O plano canônico permanece no backend.
 
 Dark Mode definitivo: fonte única em `src/services/themeService.ts`, tokens consolidados, Vuetify/DOM sincronizados e Login/404/rótulos de impressão preservados em Light.
 
@@ -83,7 +84,7 @@ Os dois sentidos foram testados com sucesso em 22/09/2026.
 
 Fonte de rotas: `src/router/index.ts`.
 
-A branch operacional da Etapa 4 é `collab/etapa-4-residuos-reconcile`. A antiga `feat/etapa-4-residuos` contém a UI histórica dos blocos 4.1–4.4 e deve ser usada apenas como referência para port seletivo.
+A Etapa 4 foi concluída na branch `collab/etapa-4-residuos-reconcile`. Após o merge, ela passa a ser referência histórica de fechamento; a antiga `feat/etapa-4-residuos` também permanece apenas como referência histórica.
 
 ---
 
@@ -414,7 +415,7 @@ Composição pode referenciar Produto para rastreabilidade sem movimentar estoqu
 
 O Código SGL existe desde o registro inicial. QR Code não integra o rótulo visual atual.
 
-Modelos de Resíduos pré-cadastrados fazem parte da implementação histórica da Etapa 4 e serão reconciliados com o backend atual antes da revalidação.
+Modelos de Resíduos pré-cadastrados foram reconciliados, integrados ao fluxo Manual/Modelo e validados na Etapa 4.
 
 ---
 
@@ -459,8 +460,10 @@ Exclusivo de `ADMINISTRADOR`.
 Laboratórios
 Projetos
 Produtos
+Classes de resíduo
+Locais de armazenamento
 Permissões
-Resíduos — indicação futura/Em breve
+Resíduos — modelos reutilizáveis
 ```
 
 Decisões:
