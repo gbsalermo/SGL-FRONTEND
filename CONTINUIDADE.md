@@ -38,15 +38,15 @@ Regra especial:
 - frontend e documentação podem ser alterados diretamente quando autorizado;
 - não antecipar etapas futuras.
 
-A Etapa 4 já possui implementação histórica em `feat/etapa-4-residuos`, porém essa branch é anterior às correções recentes do supervisor. Ela serve apenas como fonte para port seletivo.
+As Etapas 1–4 estão fechadas e integradas.
 
 Branch atual:
 
 ```text
-collab/etapa-4-residuos-reconcile
+collab/etapa-5-projetos-atividades
 ```
 
-Antes de alterações visuais/contratuais, atualizar a branch com `gitlab/main` quando for fast-forward possível e confirmar o contrato reconciliado no backend.
+O frontend da Etapa 5 deve aguardar os contratos backend de Projeto → SCI → Atividade antes de alterações funcionais do bloco 5.5.
 
 ---
 
