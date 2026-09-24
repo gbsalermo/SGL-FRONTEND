@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 import { pedidoService } from '@/modules/pedidos/services/pedidoService'
 import type { PedidoResponse, StatusPedido } from '@/modules/pedidos/types/pedido'
 import { residuoService } from '@/modules/residuos/services/residuoService'
-import type { ResiduoResponse, StatusResiduo } from '@/modules/residuos/types/residuo'
+import type { HistoricoResiduoResponse, ResiduoResponse, StatusResiduo } from '@/modules/residuos/types/residuo'
 import { useSessionStore } from '@/stores/session'
 
 interface AtualizacaoUsuario {
@@ -15,7 +15,7 @@ interface AtualizacaoUsuario {
   detalhe: string
   data: string
   rota: string
-  classe: 'blue' | 'orange' | 'green' | 'slate'
+  classe: 'blue' | 'orange' | 'green' | 'slate' | 'red'
 }
 
 const router = useRouter()
@@ -25,6 +25,7 @@ const carregando = ref(true)
 const erro = ref('')
 const pedidos = ref<PedidoResponse[]>([])
 const residuos = ref<ResiduoResponse[]>([])
+const historicoResiduos = ref<HistoricoResiduoResponse[]>([])
 const atualizadoEm = ref(new Date())
 
 const primeiroNome = computed(() => session.usuario?.nome?.trim().split(/\s+/)[0] || 'usuário')
@@ -43,6 +44,18 @@ const pedidoMaisRecente = computed(() =>
 const residuoMaisRecente = computed(() =>
   [...residuos.value].sort((a, b) => dataMaisRecenteResiduo(b).getTime() - dataMaisRecenteResiduo(a).getTime())[0] ?? null,
 )
+
+function formatarObservacaoHistorico(observacao: string | null) {
+  if (!observacao) return ''
+
+  return observacao
+    .replaceAll('ARMAZENADO_TEMPORARIAMENTE', 'Armazenado temporariamente')
+    .replaceAll('LIBERADO_PARA_ARMAZENAMENTO', 'Liberado para armazenamento')
+    .replaceAll('EM_ANALISE', 'Em análise')
+    .replaceAll('INFORMADO', 'Informado')
+    .replaceAll('DESPACHADO', 'Despachado')
+    .replaceAll('CANCELADO', 'Cancelado')
+}
 
 const atualizacoes = computed<AtualizacaoUsuario[]>(() => {
   const itens: AtualizacaoUsuario[] = []
@@ -120,6 +133,31 @@ const atualizacoes = computed<AtualizacaoUsuario[]>(() => {
     }
   })
 
+  historicoResiduos.value
+    .filter((evento) =>
+      evento.acao === 'RETORNO_ADMINISTRATIVO_DE_ETAPA'
+      || evento.acao === 'RESIDUO_CANCELADO_ADMINISTRATIVAMENTE')
+    .forEach((evento) => {
+      const residuo = residuos.value.find((item) => item.id === evento.residuoId)
+      const codigo = evento.residuoCodigoRastreio
+        || (residuo ? codigoResiduo(residuo) : `RES-${evento.residuoId.replaceAll('-', '').slice(-6).toUpperCase()}`)
+
+      const cancelado = evento.acao === 'RESIDUO_CANCELADO_ADMINISTRATIVAMENTE'
+
+      itens.push({
+        id: `historico-residuo-${evento.id}`,
+        tipo: 'residuo',
+        titulo: cancelado
+          ? `${codigo} foi cancelado`
+          : `${codigo} retornou para reavaliação`,
+        detalhe: formatarObservacaoHistorico(evento.observacao)
+          || (cancelado ? 'Cancelamento administrativo registrado.' : 'Retorno administrativo registrado.'),
+        data: evento.dataHora,
+        rota: `/meus-residuos?residuo=${encodeURIComponent(evento.residuoId)}`,
+        classe: cancelado ? 'red' : 'slate',
+      })
+    })
+
   return itens
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     .slice(0, 6)
@@ -136,18 +174,22 @@ async function carregarDashboard() {
   carregando.value = true
   erro.value = ''
 
-  const [pedidosResult, residuosResult] = await Promise.allSettled([
+  const [pedidosResult, residuosResult, historicoResult] = await Promise.allSettled([
     pedidoService.listarPorUsuario(usuarioId),
     residuoService.listarPorGerador(usuarioId),
+    residuoService.buscarHistoricoPorGerador(usuarioId),
   ])
 
   pedidos.value = pedidosResult.status === 'fulfilled' ? pedidosResult.value : []
   residuos.value = residuosResult.status === 'fulfilled' ? residuosResult.value : []
+  historicoResiduos.value = historicoResult.status === 'fulfilled' ? historicoResult.value : []
 
-  const falhas = [pedidosResult, residuosResult].filter((resultado) => resultado.status === 'rejected').length
+  const falhas = [pedidosResult, residuosResult, historicoResult]
+    .filter((resultado) => resultado.status === 'rejected').length
+
   if (falhas > 0) {
-    erro.value = falhas === 2
-      ? 'Não foi possível carregar seus pedidos e resíduos. Tente atualizar novamente.'
+    erro.value = falhas === 3
+      ? 'Não foi possível carregar seus pedidos, resíduos e movimentações. Tente atualizar novamente.'
       : 'Parte dos seus dados não pôde ser atualizada. O conteúdo disponível continua exibido.'
   }
 
@@ -168,7 +210,12 @@ function codigoResiduo(residuo: ResiduoResponse) {
 }
 
 function dataMaisRecenteResiduo(residuo: ResiduoResponse) {
+  const eventoMaisRecente = historicoResiduos.value
+    .filter((evento) => evento.residuoId === residuo.id)
+    .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())[0]
+
   const datas = [
+    eventoMaisRecente?.dataHora,
     residuo.dataDespacho,
     residuo.dataArmazenamentoTemporario,
     residuo.dataLiberacao,
@@ -477,7 +524,10 @@ onMounted(carregarDashboard)
             </div>
           </div>
 
-          <div class="tracking-message tracking-message--orange">
+          <div
+            class="tracking-message tracking-message--orange"
+            :class="{ 'tracking-message--error': residuoMaisRecente.status === 'CANCELADO' }"
+          >
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
             <span>{{ mensagemResiduo(residuoMaisRecente) }}</span>
           </div>
@@ -761,6 +811,7 @@ onMounted(carregarDashboard)
 .update-icon--orange { background: #fff1e7; color: #ec7315; }
 .update-icon--green { background: #eaf8ef; color: #168a47; }
 .update-icon--slate { background: #eef1f5; color: #5f7087; }
+.update-icon--red { background: #fff0f0; color: #c83232; }
 .update-copy { min-width: 0; display: grid; gap: 2px; }
 .update-copy strong, .update-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .update-copy strong { color: #2a394f; font-size: 10.5px; }
