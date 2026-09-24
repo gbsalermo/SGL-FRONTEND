@@ -4,7 +4,7 @@
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
 **Atualizado em:** 24/09/2026  
-**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2, 3 e 4 concluídas e validadas; Etapa 5 — Projetos e Atividades está iniciada; o frontend aguarda o fechamento do domínio backend no bloco 5.0.
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2, 3 e 4 concluídas e validadas; Etapa 5 — Projetos e Atividades em andamento no bloco 5.1 — Projeto base; frontend aguarda contratos backend estabilizados.
 
 Este documento resume o estado real do frontend para retomada humana ou por IA. O objetivo é evitar reconstrução de módulos já aprovados e impedir que roadmaps antigos sejam tratados como tarefa imediata.
 
@@ -15,10 +15,10 @@ Etapa 1 — padrão visual global              ✅ concluída
 Etapa 2 — Dark Mode definitivo              ✅ concluída
 Etapa 3 — refinamentos do fluxo de Resíduos ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos  ✅ concluída e validada
-Etapa 5 — Projetos e Atividades             🔧 atual — 5.0
+Etapa 5 — Projetos e Atividades             🔧 atual — 5.1 backend
 ```
 
-Retomada imediata: após integrar `collab/etapa-4-residuos-reconcile` no GitLab, criar a branch da Etapa 5 a partir da `gitlab/main` atualizada. O plano canônico permanece no backend.
+Retomada imediata: continuar `collab/etapa-5-projetos-atividades`. Backend está no 5.1 — Projeto base; frontend deve aguardar Projeto → SCI → Atividade e contratos HTTP estabilizados antes do 5.5.
 
 Dark Mode definitivo: fonte única em `src/services/themeService.ts`, tokens consolidados, Vuetify/DOM sincronizados e Login/404/rótulos de impressão preservados em Light.
 
