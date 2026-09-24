@@ -324,58 +324,30 @@ Validações finais incluíram:
 
 ---
 
-# 9. Etapa 4 — em reconciliação
+# 9. Etapa 4 — concluída e validada
 
-A implementação histórica dos blocos 4.1–4.4 existe na branch antiga, mas ainda precisa ser portada para a base atual. O frontend só deve ser reconciliado depois que cada contrato correspondente do backend estiver estável.
-
-Ordem de reconciliação:
+A Etapa 4 foi reconciliada sobre a base atual e validada ponta a ponta.
 
 ```text
-4.1 Locais de armazenamento cadastráveis
-→ 4.2 Modelos de Resíduo pré-cadastrados ✅ concluído e validado
-→ 4.3 Escolha modelo x preenchimento manual
-→ 4.4 Correções administrativas do ciclo
+4.1 Locais de armazenamento cadastráveis              ✅
+4.2 Modelos de Resíduo                                ✅
+4.3 Uso de modelo ou preenchimento manual             ✅
+4.4 Correções administrativas do ciclo de vida        ✅
 ```
 
-Frontend só deve ser fechado depois das regras de backend/domínio de cada subetapa estarem definidas.
+Estado frontend consolidado:
 
-## 4.1
+- Administração → Cadastros expõe Modelos de Resíduo no bloco Resíduos;
+- Informar Resíduo permite Manual ou Modelo;
+- modelo apenas pré-preenche e não cria vínculo vivo com o Resíduo real;
+- validações locais seguem o padrão visual aprovado em light/dark;
+- cancelamento e retorno administrativo aparecem no histórico e nos dashboards adequados;
+- Dashboard do Solicitante mostra somente eventos dos próprios Resíduos;
+- Dashboard da Gestão combina movimentações de estoque e eventos operacionais de Resíduos da Unidade;
+- cancelados são tratados em Meus Resíduos, Gestão, relatórios e rótulo.
 
-Esperado no frontend:
+A próxima etapa é **Etapa 5 — Projetos e Atividades**.
 
-- escolher local cadastrado;
-- permitir complemento livre;
-- manter caminho manual quando permitido;
-- não perder histórico se o cadastro do local mudar.
-
-## 4.2 / 4.3
-
-Na Administração, Gestão poderá manter modelos reutilizáveis.
-
-Na criação:
-
-```text
-usar modelo
-ou
-preencher manualmente
-```
-
-Selecionar modelo deve preencher sugestões, sem transformar o Resíduo real em referência viva ao modelo.
-
-## 4.4
-
-Avaliar ações de Administrador:
-
-```text
-Cancelar Resíduo
-Retornar para análise/liberação
-```
-
-Sempre com justificativa e histórico. Regras de status precisam ser fechadas antes da implementação.
-
-Delete lógico geral continua na Etapa 11.
-
----
 
 # 10. Etapas futuras
 
@@ -408,15 +380,16 @@ Etapa 13 revisará classes grandes como `Residuo` no backend, Services, DTOs e C
 Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
-Etapa 4 — expansão operacional de Resíduos            🔧 reconciliação + revalidação
-Etapas 5 a 13                                         ⏳
+Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
+Etapa 5 — Projetos e Atividades                       ⏭ próxima
+Etapas 6 a 13                                         ⏳
 ```
 
 ---
 
 # 12. Regra final de retomada
 
-**A Etapa 3 está concluída e validada. Em 22/09/2026 os `main` foram reconciliados e a sincronização GitLab/GitHub foi automatizada. A Etapa 4 continua em `collab/etapa-4-residuos-reconcile`; a antiga `feat/etapa-4-residuos` é somente referência. Ler `docs/SINCRONIZACAO_GITLAB_GITHUB.md` e o handoff canônico do backend antes de portar qualquer tela. Backend/contratos devem ser reconciliados antes do frontend de cada bloco.**
+**As Etapas 1–4 estão concluídas e validadas. Após o merge da branch `collab/etapa-4-residuos-reconcile` no GitLab, iniciar a Etapa 5 a partir da `gitlab/main` atualizada. A antiga `feat/etapa-4-residuos` permanece somente como referência histórica.**
 
 ### Estado frontend do 4.4
 
@@ -428,7 +401,7 @@ Implementado na branch de reconciliação:
 - cancelados deixam de contar como resíduos ativos;
 - dark mode integrado aos novos estados e ações.
 
-Validação funcional integrada ainda pendente antes do fechamento da Etapa 4.
+Validação funcional integrada concluída; este bloco faz parte do fechamento da Etapa 4.
 
 ### Ajustes após validação do 4.4
 
@@ -437,4 +410,4 @@ Validação funcional integrada ainda pendente antes do fechamento da Etapa 4.
 - cancelamento aparece como atualização crítica e retorno como movimentação de reavaliação;
 - o Resíduo mais recente também considera a data de eventos do histórico administrativo.
 
-Reteste pendente desses ajustes antes do fechamento definitivo da Etapa 4.
+Os ajustes foram revalidados e incorporados ao fechamento definitivo da Etapa 4.
