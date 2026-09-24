@@ -13,7 +13,6 @@ Este índice separa documentação vigente, decisões de produto, referências v
 2. SINCRONIZACAO_GITLAB_GITHUB.md
 3. backend: docs/PLANO_PRE_PRODUCAO.md
 4. backend: docs/CONTINUIDADE_ETAPA_5_2026-09-24.md
-4. backend: docs/CONTINUIDADE_ETAPA_4_2026-09-17.md
 5. ../README.md
 6. DOSSIE_PROJETO_SGL.md
 7. src/router/index.ts para rotas reais
