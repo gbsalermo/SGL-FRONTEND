@@ -205,6 +205,18 @@ function formatarEnum(valor: string | null) {
   return valor.toLowerCase().replaceAll('_', ' ').replace(/^./, (letra) => letra.toUpperCase())
 }
 
+function formatarObservacaoHistorico(observacao: string | null) {
+  if (!observacao) return ''
+
+  return observacao
+    .replaceAll('ARMAZENADO_TEMPORARIAMENTE', 'Armazenado temporariamente')
+    .replaceAll('LIBERADO_PARA_ARMAZENAMENTO', 'Liberado para armazenamento')
+    .replaceAll('EM_ANALISE', 'Em análise')
+    .replaceAll('INFORMADO', 'Informado')
+    .replaceAll('DESPACHADO', 'Despachado')
+    .replaceAll('CANCELADO', 'Cancelado')
+}
+
 function formatarData(valor: string | null) {
   if (!valor) return '—'
   const data = new Date(valor)
@@ -820,7 +832,7 @@ onMounted(carregar)
                 <div class="timeline-card">
                   <div><strong>{{ acaoHistorico(evento.acao) }}</strong><time>{{ formatarData(evento.dataHora) }}</time></div>
                   <p>{{ statusRotulo(evento.status) }} · {{ evento.usuarioNome ?? 'Sistema' }}</p>
-                  <small v-if="evento.observacao">{{ evento.observacao }}</small>
+                  <small v-if="evento.observacao">{{ formatarObservacaoHistorico(evento.observacao) }}</small>
                 </div>
               </li>
             </ol>
