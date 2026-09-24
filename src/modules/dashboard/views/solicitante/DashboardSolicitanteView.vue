@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { pedidoService } from '@/modules/pedidos/services/pedidoService'
@@ -174,22 +174,54 @@ async function carregarDashboard() {
   carregando.value = true
   erro.value = ''
 
-  const [pedidosResult, residuosResult, historicoResult] = await Promise.allSettled([
+  const [pedidosResult, residuosResult] = await Promise.allSettled([
     pedidoService.listarPorUsuario(usuarioId),
     residuoService.listarPorGerador(usuarioId),
-    residuoService.buscarHistoricoPorGerador(usuarioId),
   ])
 
   pedidos.value = pedidosResult.status === 'fulfilled' ? pedidosResult.value : []
   residuos.value = residuosResult.status === 'fulfilled' ? residuosResult.value : []
-  historicoResiduos.value = historicoResult.status === 'fulfilled' ? historicoResult.value : []
 
-  const falhas = [pedidosResult, residuosResult, historicoResult]
+  let historicoFalhou = false
+
+  try {
+    const historicoAgregado = await residuoService.buscarHistoricoPorGerador(usuarioId)
+
+    if (historicoAgregado.length > 0 || residuos.value.length === 0) {
+      historicoResiduos.value = historicoAgregado
+    } else {
+      const resultadosHistorico = await Promise.allSettled(
+        residuos.value.map((residuo) => residuoService.buscarHistorico(residuo.id)),
+      )
+
+      historicoResiduos.value = resultadosHistorico
+        .filter((resultado): resultado is PromiseFulfilledResult<HistoricoResiduoResponse[]> =>
+          resultado.status === 'fulfilled')
+        .flatMap((resultado) => resultado.value)
+        .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())
+
+      historicoFalhou = resultadosHistorico.some((resultado) => resultado.status === 'rejected')
+    }
+  } catch {
+    const resultadosHistorico = await Promise.allSettled(
+      residuos.value.map((residuo) => residuoService.buscarHistorico(residuo.id)),
+    )
+
+    historicoResiduos.value = resultadosHistorico
+      .filter((resultado): resultado is PromiseFulfilledResult<HistoricoResiduoResponse[]> =>
+        resultado.status === 'fulfilled')
+      .flatMap((resultado) => resultado.value)
+      .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())
+
+    historicoFalhou = resultadosHistorico.some((resultado) => resultado.status === 'rejected')
+  }
+
+  const falhasPrincipais = [pedidosResult, residuosResult]
     .filter((resultado) => resultado.status === 'rejected').length
 
-  if (falhas > 0) {
-    erro.value = falhas === 3
-      ? 'Não foi possível carregar seus pedidos, resíduos e movimentações. Tente atualizar novamente.'
+  if (falhasPrincipais > 0 || historicoFalhou) {
+    erro.value = falhasPrincipais === 2
+      ? 'Não foi possível carregar seus pedidos e resíduos. Tente atualizar novamente.'
       : 'Parte dos seus dados não pôde ser atualizada. O conteúdo disponível continua exibido.'
   }
 
@@ -371,6 +403,9 @@ function mensagemResiduo(residuo: ResiduoResponse) {
 }
 
 onMounted(carregarDashboard)
+onActivated(() => {
+  if (!carregando.value) void carregarDashboard()
+})
 </script>
 
 <template>
