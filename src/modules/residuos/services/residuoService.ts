@@ -84,6 +84,11 @@ export const residuoService = {
     return data
   },
 
+  async buscarHistoricoDaUnidade() {
+    const { data } = await http.get<HistoricoResiduoResponse[]>('/v1/residuos/historico/unidade')
+    return data
+  },
+
   async buscarDadosRotulo(id: string) {
     const { data } = await http.get<RotuloResiduoResponse>(`/v1/residuos/${id}/rotulo`)
     return data
