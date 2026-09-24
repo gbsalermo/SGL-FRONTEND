@@ -561,3 +561,19 @@ matriz de permissões
 ```
 
 Não usar este documento para impedir melhorias justificadas do bloco atual de pré-produção. O planejamento vigente está em `../CONTINUIDADE.md`.
+
+# Fluxo futuro da Etapa 5 — Projetos
+
+Após estabilização do backend:
+
+```text
+Projetos
+→ selecionar/consultar Projeto
+→ SCI vinculados
+→ Atividades do SCI
+```
+
+Laboratório permanece disponível como filtro/contexto institucional, sem ser etapa obrigatória de navegação.
+
+O fluxo atual de Administração → Cadastros → Projetos permanece válido até o bloco 5.5.
+
