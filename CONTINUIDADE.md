@@ -3,15 +3,15 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 22/09/2026  
+**Última atualização:** 24/09/2026  
 **Branch estável:** `main` do GitLab institucional  
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
 **Branch atual de reconciliação:** `collab/etapa-4-residuos-reconcile`  
-**Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
-**Etapa atual:** Etapa 4 — implementação histórica concluída, reconciliação com a `main` corrigida pelo supervisor e revalidação em andamento  
-**Bloco atual da Etapa 4:** 4.4 — Correções administrativas do ciclo de vida — implementado, validação funcional pendente
+**Etapa concluída:** Etapa 4 — expansão operacional de Resíduos ✅  
+**Etapa atual:** Etapa 5 — Projetos e Atividades ⏭ próxima  
+**Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
-**Handoff da próxima etapa:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
+**Referência de fechamento da Etapa 4:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
 
 Este é o checkpoint principal para retomada do frontend. Contratos HTTP devem ser confirmados no Swagger/OpenAPI do backend.
 
