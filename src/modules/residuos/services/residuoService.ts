@@ -1,11 +1,14 @@
 import { http } from '@/services/http'
 import type {
+  AdministrarResiduoRequest,
   AnalisarResiduoRequest,
   ArmazenarResiduoRequest,
   ClasseResiduoResponse,
   CriarResiduoRequest,
   DespacharResiduoRequest,
   HistoricoResiduoResponse,
+  LocalArmazenamentoResiduoResponse,
+  ModeloResiduoResponse,
   ProdutoResiduoResponse,
   ProjetoResiduoResponse,
   ReceberResiduoRequest,
@@ -64,8 +67,25 @@ export const residuoService = {
     return data
   },
 
+  async administrar(id: string, payload: AdministrarResiduoRequest) {
+    const { data } = await http.put<ResiduoResponse>(`/v1/residuos/${id}/administrar`, payload)
+    return data
+  },
+
   async buscarHistorico(id: string) {
     const { data } = await http.get<HistoricoResiduoResponse[]>(`/v1/residuos/${id}/historico`)
+    return data
+  },
+
+  async buscarHistoricoPorGerador(usuarioGeradorId: string) {
+    const { data } = await http.get<HistoricoResiduoResponse[]>('/v1/residuos/historico/por-gerador', {
+      params: { usuarioGeradorId },
+    })
+    return data
+  },
+
+  async buscarHistoricoDaUnidade() {
+    const { data } = await http.get<HistoricoResiduoResponse[]>('/v1/residuos/historico/unidade')
     return data
   },
 
@@ -77,6 +97,16 @@ export const residuoService = {
   async listarClassesAtivas() {
     const { data } = await http.get<ClasseResiduoResponse[]>('/v1/classes-residuo/ativos')
     return data.sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
+  },
+
+  async listarLocaisArmazenamentoAtivos() {
+    const { data } = await http.get<LocalArmazenamentoResiduoResponse[]>('/v1/locais-armazenamento-residuo/ativos')
+    return data.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  },
+
+  async listarModelosResiduoAtivos() {
+    const { data } = await http.get<ModeloResiduoResponse[]>('/v1/modelos-residuo/ativos')
+    return data.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
   },
 
   async listarProjetosPorLaboratorio(laboratorioId: string) {

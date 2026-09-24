@@ -13,9 +13,9 @@
 
 ---
 
-## Estado atual — 11/09/2026
+## Estado atual — 24/09/2026
 
-O primeiro protótipo do SGL foi **funcionalmente aprovado**. As Etapas 1 (padrão visual global) e 2 (Dark Mode definitivo) da pré-produção foram concluídas. A etapa atual é a **Etapa 3 — Refinamentos do fluxo atual de Resíduos**, anterior ao roadmap formal de matriz de permissões, congelamento, homologação final e segurança definitiva.
+O primeiro protótipo do SGL foi **funcionalmente aprovado**. As **Etapas 1, 2, 3 e 4 da pré-produção foram concluídas e validadas**. A próxima etapa canônica é a **Etapa 5 — Projetos e Atividades**.
 
 Estado consolidado:
 
@@ -44,7 +44,7 @@ Autenticação/autorização definitiva               ⏳ etapa formal posterior
 Integração corporativa                            ⏳ etapa formal posterior
 ```
 
-> Para retomar o projeto, começar por [`CONTINUIDADE.md`](CONTINUIDADE.md), pelo plano canônico do backend `docs/PLANO_PRE_PRODUCAO.md`, pelo checkpoint `docs/CONTINUIDADE_ETAPA_3_2026-09-11.md`, por [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) e `src/router/index.ts`. Contratos HTTP pertencem ao Swagger/OpenAPI do backend.
+> Para retomar o projeto, começar por [`CONTINUIDADE.md`](CONTINUIDADE.md), [`docs/SINCRONIZACAO_GITLAB_GITHUB.md`](docs/SINCRONIZACAO_GITLAB_GITHUB.md), pelo plano e handoff da Etapa 4 no backend, por [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) e `src/router/index.ts`. GitLab é a fonte canônica de `main`; contratos HTTP pertencem ao Swagger/OpenAPI do backend.
 
 ---
 
@@ -347,7 +347,7 @@ Laboratórios
 Projetos
 Produtos
 Permissões
-Resíduos — indicação futura/Em breve
+Resíduos — modelos e cadastros reutilizáveis
 ```
 
 Decisões:
@@ -451,8 +451,10 @@ Não tratar visibilidade de menu/rota como segurança de produção.
 ```text
 Etapa 1 — padrão visual global                 ✅
 Etapa 2 — Dark Mode definitivo                 ✅
-Etapa 3 — refinamentos do fluxo de Resíduos    🔧 atual
-Etapas 4 a 9                                   ⏳ sequenciais
+Etapa 3 — refinamentos do fluxo de Resíduos    ✅
+Etapa 4 — expansão operacional de Resíduos     ✅
+Etapa 5 — Projetos e Atividades                ⏭ próxima
+Etapas 6 a 13                                  ⏳ sequenciais
 ```
 
 ### Depois — roadmap formal de produção

@@ -124,6 +124,20 @@ export interface ClasseResiduoRequest {
   ativo: boolean
 }
 
+export interface LocalArmazenamentoResiduoCadastro {
+  id: string
+  unidadeId: string
+  unidadeNome: string
+  nome: string
+  ativo: boolean
+}
+
+export interface LocalArmazenamentoResiduoRequest {
+  unidadeId: string
+  nome: string
+  ativo: boolean
+}
+
 export interface UsuarioPermissao extends UsuarioSessao {}
 
 export interface AlterarPerfilRequest {
@@ -132,4 +146,64 @@ export interface AlterarPerfilRequest {
 
 export interface ApiErrorAdmin {
   message?: string
+}
+
+export type EstadoFisicoModeloResiduo = 'LIQUIDO' | 'SOLIDO' | 'SEMISSOLIDO' | 'GASOSO' | 'OUTRO'
+
+export interface ComponenteModeloResiduoCadastro {
+  id: string
+  produtoId: string | null
+  produtoNome: string | null
+  nomeComponente: string
+  principal: boolean
+  concentracaoOuQuantidade: string | null
+  observacao: string | null
+}
+
+export interface ComponenteModeloResiduoRequest {
+  produtoId: string | null
+  nomeComponente: string | null
+  principal: boolean
+  concentracaoOuQuantidade: string | null
+  observacao: string | null
+}
+
+export interface ModeloResiduoCadastro {
+  id: string
+  unidadeId: string
+  unidadeNome: string
+  nome: string
+  descricao: string
+  processoOrigem: string
+  estadoFisico: EstadoFisicoModeloResiduo
+  tratamentoRealizado: boolean
+  descricaoTratamento: string | null
+  recipiente: string
+  unidadeMedida: UnidadeMedidaCadastro
+  nivelRisco: NivelRiscoCadastro
+  riscos: TipoRiscoCadastro[]
+  classes: ClasseResiduoCadastro[]
+  medidasSeguranca: MedidaSegurancaCadastro[]
+  observacaoSeguranca: string | null
+  componentes: ComponenteModeloResiduoCadastro[]
+  ativo: boolean
+}
+
+export interface ModeloResiduoRequest {
+  unidadeId: string
+  nome: string
+  descricao: string
+  processoOrigem: string
+  estadoFisico: EstadoFisicoModeloResiduo
+  tratamentoRealizado: boolean
+  descricaoTratamento: string | null
+  recipiente: string
+  unidadeMedida: UnidadeMedidaCadastro
+  nivelRisco: NivelRiscoCadastro
+  riscos: TipoRiscoCadastro[]
+  classesIds: string[]
+  medidasSeguranca: MedidaSegurancaCadastro[]
+  observacaoSeguranca: string | null
+  componentes: ComponenteModeloResiduoRequest[]
+  ativo: boolean
 }

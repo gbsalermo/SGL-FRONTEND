@@ -102,6 +102,12 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nt
 body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(5) strong {
   color: #7ed6d0 !important;
 }
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(6) {
+  border-color: #713845 !important;
+}
+body.sgl-dark-active .gestao-main .residuos-gestao-page .metrics-grid article:nth-child(6) strong {
+  color: #ff6677 !important;
+}
 
 /* Feedback */
 body.sgl-dark-active .gestao-main .residuos-gestao-page .feedback {
@@ -117,7 +123,7 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .feedback--success {
 body.sgl-dark-active .gestao-main .residuos-gestao-page .feedback--error {
   border-color: #713845 !important;
   background: #2b1a23 !important;
-  color: #ff9aa5 !important;
+  color: #ff6677 !important;
 }
 
 /* Workspace / abas / filtros */
@@ -282,6 +288,11 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill[data-status
   background: #153438 !important;
   color: #83ddd8 !important;
 }
+body.sgl-dark-active .gestao-main .residuos-gestao-page .status-pill[data-status='CANCELADO'] {
+  border-color: #8e3b49 !important;
+  background: #251821 !important;
+  color: #ff6677 !important;
+}
 
 /* Ações */
 body.sgl-dark-active .gestao-main .residuos-gestao-page :where(
@@ -326,6 +337,16 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .label-action {
   border: 1px solid var(--sgl-border-strong) !important;
   background: var(--sgl-surface-elevated) !important;
   color: #dbe8f8 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .admin-return-action {
+  background: #b7791f !important;
+  color: #fff !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .admin-cancel-action {
+  background: #c23b31 !important;
+  color: #fff !important;
 }
 
 /* Drawers e modais */
@@ -457,6 +478,20 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .modal-card {
   color: var(--sgl-text) !important;
 }
 
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface-elevated) !important;
+  color: var(--sgl-text) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice__label {
+  color: #c9d5e5 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .storage-choice__modes label {
+  color: var(--sgl-text-muted) !important;
+}
+
 body.sgl-dark-active .gestao-main .residuos-gestao-page .field {
   gap: var(--sgl-space-2) !important;
 }
@@ -560,3 +595,82 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .state-box--error {
   background: #2B1A23 !important;
   color: #FF9AA5 !important;
 }
+
+/* Validações locais dos modais da Gestão */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .validation-box--error {
+  border: 1px solid #d94a5a !important;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px rgb(217 74 90 / 18%) !important;
+  border-radius: 9px !important;
+  padding: 8px !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .validation-box--error .risk-fieldset button,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .validation-box--error .risk-option {
+  border-color: #8e3b49 !important;
+  background: var(--sgl-surface-elevated) !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .inline-error {
+  margin-top: 7px !important;
+  color: #ff6677 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .input--error {
+  border-color: #ff5c6c !important;
+  box-shadow: 0 0 0 2px rgb(255 92 108 / 18%) !important;
+}
+
+/* Comparação entre dados informados e classificação da Gestão */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card {
+  border-color: #31455f !important;
+  background: #101d30 !important;
+  color: #d8e2ef !important;
+  opacity: 1 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--original {
+  border-color: #36547a !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved {
+  border-color: #2f684d !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved.pending {
+  border-color: #876a31 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card > header span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dt,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dd small,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta small {
+  color: #91a1b7 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card > header strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dd {
+  color: #d9e4f2 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dl > div,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta {
+  border-color: #2a3e58 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved:not(.pending) > header strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved:not(.pending) .approval-meta strong {
+  color: #72dba8 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved.pending > header strong {
+  color: #f0cf83 !important;
+}
+

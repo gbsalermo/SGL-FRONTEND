@@ -1,0 +1,141 @@
+/*
+ * Validação visual global — áreas autenticadas do SGL
+ *
+ * Objetivo:
+ * - manter erros próximos dos campos quando o navegador conhece a restrição;
+ * - unificar vermelho, borda e foco entre módulos;
+ * - preservar superfícies neutras no dark mode;
+ * - manter banners gerais apenas para falhas de operação/API.
+ */
+
+/* ========================================================================== */
+/* Validação nativa de campos                                                  */
+/* ========================================================================== */
+
+body.sgl-light-active :where(.solicitante-main, .gestao-main)
+  :where(.field, .search-field):has(:user-invalid) > span {
+  color: #b42318 !important;
+}
+
+body.sgl-light-active :where(.solicitante-main, .gestao-main)
+  :where(input, select, textarea):user-invalid {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 2px rgb(220 53 69 / 10%) !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main)
+  :where(.field, .search-field):has(:user-invalid) > span {
+  color: #ff6677 !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main)
+  :where(input, select, textarea):user-invalid {
+  border-color: #ff5c6c !important;
+  box-shadow: 0 0 0 2px rgb(255 92 108 / 18%) !important;
+}
+
+/* ========================================================================== */
+/* Erros locais / grupos de seleção                                            */
+/* ========================================================================== */
+
+body.sgl-light-active :where(.solicitante-main, .gestao-main) .validation-box--error {
+  border: 1px solid #dc3545 !important;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px rgb(220 53 69 / 7%) !important;
+}
+
+body.sgl-light-active :where(.solicitante-main, .gestao-main) .validation-box--error
+  :where(.risk-option, .check-line) {
+  border-color: #e59aa2 !important;
+}
+
+body.sgl-light-active :where(.solicitante-main, .gestao-main) .inline-error {
+  color: #b42318 !important;
+}
+
+body.sgl-light-active :where(.solicitante-main, .gestao-main) .input--error {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 2px rgb(220 53 69 / 10%) !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .validation-box--error {
+  border: 1px solid #d94a5a !important;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px rgb(217 74 90 / 18%) !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .validation-box--error
+  :where(.risk-option, .check-line) {
+  border-color: #8e3b49 !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .inline-error {
+  color: #ff6677 !important;
+  font-weight: 700 !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .input--error {
+  border-color: #ff5c6c !important;
+  box-shadow: 0 0 0 2px rgb(255 92 108 / 18%) !important;
+}
+
+/* ========================================================================== */
+/* Erros gerais de operação / API                                              */
+/* ========================================================================== */
+
+body.sgl-light-active :where(.solicitante-main, .gestao-main)
+  :where(.feedback--error, .error-banner, .state-box--error) {
+  border: 1px solid #dc3545 !important;
+  background: #fff7f7 !important;
+  color: #b42318 !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main)
+  :where(.feedback--error, .error-banner, .state-box--error) {
+  border: 1px solid #d94a5a !important;
+  background: #251821 !important;
+  color: #ff6677 !important;
+  box-shadow: inset 0 0 0 1px rgb(217 74 90 / 10%) !important;
+}
+
+/* ========================================================================== */
+/* Formulários recorrentes                                                     */
+/* ========================================================================== */
+
+/* Pedido: cada linha passa a acusar visualmente qualquer required/min/max inválido. */
+body.sgl-light-active :where(.solicitante-main, .gestao-main) .novo-pedido-page
+  .item-row:has(:user-invalid) {
+  border-color: #dc3545 !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .novo-pedido-page
+  .item-row:has(:user-invalid) {
+  border-color: #d94a5a !important;
+  box-shadow: inset 0 0 0 1px rgb(217 74 90 / 12%) !important;
+}
+
+/* Cadastros e Estagiários: mantém o modal neutro e destaca somente o campo. */
+body.sgl-dark-active .gestao-main
+  :where(.admin-page, .intern-page)
+  :where(.field, .form-grid):has(:user-invalid) {
+  --sgl-validation-error: #ff6677;
+}
+
+body.sgl-dark-active .gestao-main
+  :where(.admin-page, .intern-page)
+  .field:has(:user-invalid) > span {
+  color: var(--sgl-validation-error) !important;
+}
+
+/* Checkbox/radio nativo também recebe o vermelho institucional de erro. */
+body.sgl-light-active :where(.solicitante-main, .gestao-main)
+  input:is([type='checkbox'], [type='radio']):user-invalid {
+  outline: 1px solid #dc3545 !important;
+  outline-offset: 2px;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main)
+  input:is([type='checkbox'], [type='radio']):user-invalid {
+  outline: 1px solid #ff5c6c !important;
+  outline-offset: 2px;
+}

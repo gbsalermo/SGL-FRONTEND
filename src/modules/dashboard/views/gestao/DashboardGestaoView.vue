@@ -11,7 +11,7 @@ import type { MovimentacaoEstoqueResponse, TipoMovimentacao } from '@/modules/mo
 import { pedidoService } from '@/modules/pedidos/services/pedidoService'
 import type { PedidoResponse } from '@/modules/pedidos/types/pedido'
 import { residuoService } from '@/modules/residuos/services/residuoService'
-import type { ResiduoResponse } from '@/modules/residuos/types/residuo'
+import type { HistoricoResiduoResponse, ResiduoResponse } from '@/modules/residuos/types/residuo'
 import { useSessionStore } from '@/stores/session'
 
 interface ItemAtencao {
@@ -22,6 +22,25 @@ interface ItemAtencao {
   descricao: string
   detalhe: string
   nivel: 'critico' | 'alto' | 'medio'
+  rota: string
+}
+
+type ClasseMovimentacaoPainel =
+  | 'entrada'
+  | 'saida'
+  | 'ajuste'
+  | 'devolucao'
+  | 'descarte'
+  | 'residuo'
+  | 'retorno'
+  | 'cancelamento'
+
+interface MovimentacaoPainel {
+  id: string
+  data: string
+  rotulo: string
+  detalhe: string
+  classe: ClasseMovimentacaoPainel
   rota: string
 }
 
@@ -47,6 +66,7 @@ const pedidos = ref<PedidoResponse[]>([])
 const estoquesBaixos = ref<EstoqueCentralResponse[]>([])
 const residuos = ref<ResiduoResponse[]>([])
 const movimentacoes = ref<MovimentacaoEstoqueResponse[]>([])
+const historicoResiduos = ref<HistoricoResiduoResponse[]>([])
 const lotes = ref<LoteResponse[]>([])
 const laboratorios = ref<LaboratorioCadastro[]>([])
 const usuarios = ref<UsuarioPermissao[]>([])
@@ -69,7 +89,7 @@ const residuosPendentesAnalise = computed(() =>
 )
 
 const residuosAtivos = computed(() =>
-  residuos.value.filter((residuo) => residuo.status !== 'DESPACHADO'),
+  residuos.value.filter((residuo) => !['DESPACHADO', 'CANCELADO'].includes(residuo.status)),
 )
 
 const lotesVencidos = computed(() =>
@@ -191,11 +211,43 @@ const itensAtencao = computed<ItemAtencao[]>(() => {
     .slice(0, 8)
 })
 
-const ultimasMovimentacoes = computed(() =>
-  [...movimentacoes.value]
-    .sort((a, b) => new Date(b.dataMovimentacao).getTime() - new Date(a.dataMovimentacao).getTime())
-    .slice(0, 10),
-)
+const ultimasMovimentacoes = computed<MovimentacaoPainel[]>(() => {
+  const estoque: MovimentacaoPainel[] = movimentacoes.value.map((movimentacao) => {
+    const meta = movimentoMeta(movimentacao.tipoMovimentacao)
+    return {
+      id: `estoque-${movimentacao.id}`,
+      data: movimentacao.dataMovimentacao,
+      rotulo: `${meta.rotulo} registrada`,
+      detalhe: descricaoMovimentacao(movimentacao),
+      classe: meta.classe as ClasseMovimentacaoPainel,
+      rota: rotaMovimentacaoEstoque(movimentacao),
+    }
+  })
+
+  const residuosHistorico: MovimentacaoPainel[] = historicoResiduos.value.map((evento) => {
+    const meta = historicoResiduoMeta(evento.acao)
+    const codigo = evento.residuoCodigoRastreio
+      || `RES-${evento.residuoId.replaceAll('-', '').slice(-6).toUpperCase()}`
+
+    const observacao = formatarObservacaoHistorico(evento.observacao)
+    const contexto = observacao
+      ? `${codigo} · ${evento.residuoDescricao} · ${observacao}`
+      : `${codigo} · ${evento.residuoDescricao}`
+
+    return {
+      id: `residuo-${evento.id}`,
+      data: evento.dataHora,
+      rotulo: meta.rotulo,
+      detalhe: contexto,
+      classe: meta.classe,
+      rota: `/residuos?residuo=${encodeURIComponent(evento.residuoId)}`,
+    }
+  })
+
+  return [...estoque, ...residuosHistorico]
+    .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+    .slice(0, 10)
+})
 
 const resumoLaboratorios = computed<ResumoLaboratorio[]>(() => {
   const mapa = new Map<string, ResumoLaboratorio>()
@@ -271,6 +323,7 @@ async function carregarDashboard() {
       baixosResult,
       residuosResult,
       movimentacoesResult,
+      historicoResiduosResult,
       laboratoriosResult,
       usuariosResult,
     ] = await Promise.allSettled([
@@ -279,6 +332,7 @@ async function carregarDashboard() {
       unidadeId.value ? estoqueService.listarEstoqueBaixo(unidadeId.value) : Promise.resolve([]),
       residuoService.listarTodos(),
       movimentacaoService.listarTodos(),
+      residuoService.buscarHistoricoDaUnidade(),
       cadastrosAdminService.listarLaboratorios(),
       cadastrosAdminService.listarUsuarios(),
     ])
@@ -287,6 +341,7 @@ async function carregarDashboard() {
     estoquesBaixos.value = baixosResult.status === 'fulfilled' ? baixosResult.value.filter((item) => item.ativo) : []
     residuos.value = residuosResult.status === 'fulfilled' ? residuosResult.value : []
     movimentacoes.value = movimentacoesResult.status === 'fulfilled' ? movimentacoesResult.value : []
+    historicoResiduos.value = historicoResiduosResult.status === 'fulfilled' ? historicoResiduosResult.value : []
     laboratorios.value = laboratoriosResult.status === 'fulfilled' ? laboratoriosResult.value : []
     usuarios.value = usuariosResult.status === 'fulfilled' ? usuariosResult.value : []
 
@@ -307,6 +362,7 @@ async function carregarDashboard() {
       baixosResult,
       residuosResult,
       movimentacoesResult,
+      historicoResiduosResult,
       laboratoriosResult,
       usuariosResult,
     ].filter((resultado) => resultado.status === 'rejected').length
@@ -328,21 +384,25 @@ function abrir(rota: string) {
   router.push(rota)
 }
 
-function abrirMovimentacao(movimentacao: MovimentacaoEstoqueResponse) {
+function abrirMovimentacao(movimentacao: MovimentacaoPainel) {
+  router.push(movimentacao.rota)
+}
+
+function rotaMovimentacaoEstoque(movimentacao: MovimentacaoEstoqueResponse) {
   if (movimentacao.tipoMovimentacao === 'SAIDA' && movimentacao.pedidoId) {
-    router.push(`/pedidos?pedido=${encodeURIComponent(movimentacao.pedidoId)}`)
-    return
+    return `/pedidos?pedido=${encodeURIComponent(movimentacao.pedidoId)}`
   }
+
   if (movimentacao.estoqueCentralId) {
     const lote = movimentacao.loteId ? `?lote=${encodeURIComponent(movimentacao.loteId)}` : ''
-    router.push(`/estoque/${movimentacao.estoqueCentralId}${lote}`)
-    return
+    return `/estoque/${movimentacao.estoqueCentralId}${lote}`
   }
+
   if (movimentacao.pedidoId) {
-    router.push(`/pedidos?pedido=${encodeURIComponent(movimentacao.pedidoId)}`)
-    return
+    return `/pedidos?pedido=${encodeURIComponent(movimentacao.pedidoId)}`
   }
-  router.push(`/movimentacoes?movimentacao=${encodeURIComponent(movimentacao.id)}`)
+
+  return `/movimentacoes?movimentacao=${encodeURIComponent(movimentacao.id)}`
 }
 
 function laboratorioAnterior() {
@@ -410,6 +470,36 @@ function movimentoMeta(tipo: TipoMovimentacao) {
     DESCARTE_VENCIMENTO: { rotulo: 'Descarte', classe: 'descarte' },
   }
   return mapa[tipo]
+}
+
+function historicoResiduoMeta(acao: string): { rotulo: string; classe: ClasseMovimentacaoPainel } {
+  const mapa: Record<string, { rotulo: string; classe: ClasseMovimentacaoPainel }> = {
+    RESIDUO_INFORMADO: { rotulo: 'Resíduo informado', classe: 'residuo' },
+    RECEBIDO_PELA_GESTAO: { rotulo: 'Resíduo recebido', classe: 'residuo' },
+    RISCO_CONFERIDO_E_RESIDUO_LIBERADO: { rotulo: 'Resíduo liberado', classe: 'residuo' },
+    ARMAZENAMENTO_TEMPORARIO_CONFIRMADO: { rotulo: 'Armazenamento confirmado', classe: 'residuo' },
+    ARMAZENAMENTO_TEMPORARIO_CORRIGIDO: { rotulo: 'Armazenamento corrigido', classe: 'residuo' },
+    DESPACHO_CONFIRMADO: { rotulo: 'Resíduo despachado', classe: 'residuo' },
+    RETORNO_ADMINISTRATIVO_DE_ETAPA: { rotulo: 'Retorno administrativo', classe: 'retorno' },
+    RESIDUO_CANCELADO_ADMINISTRATIVAMENTE: { rotulo: 'Resíduo cancelado', classe: 'cancelamento' },
+  }
+
+  return mapa[acao] ?? {
+    rotulo: acao.toLowerCase().replaceAll('_', ' ').replace(/^./, (letra) => letra.toUpperCase()),
+    classe: 'residuo',
+  }
+}
+
+function formatarObservacaoHistorico(observacao: string | null) {
+  if (!observacao) return ''
+
+  return observacao
+    .replaceAll('ARMAZENADO_TEMPORARIAMENTE', 'Armazenado temporariamente')
+    .replaceAll('LIBERADO_PARA_ARMAZENAMENTO', 'Liberado para armazenamento')
+    .replaceAll('EM_ANALISE', 'Em análise')
+    .replaceAll('INFORMADO', 'Informado')
+    .replaceAll('DESPACHADO', 'Despachado')
+    .replaceAll('CANCELADO', 'Cancelado')
 }
 
 function descricaoMovimentacao(movimentacao: MovimentacaoEstoqueResponse) {
@@ -526,22 +616,22 @@ onMounted(carregarDashboard)
             v-for="(movimentacao, index) in ultimasMovimentacoes"
             :key="movimentacao.id"
             class="timeline-item"
-            :class="`timeline-item--${movimentoMeta(movimentacao.tipoMovimentacao).classe}`"
+            :class="`timeline-item--${movimentacao.classe}`"
             type="button"
             @click="abrirMovimentacao(movimentacao)"
           >
-            <time>{{ formatarHora(movimentacao.dataMovimentacao) }}</time>
-            <span class="timeline-axis" :class="`timeline-axis--${movimentoMeta(movimentacao.tipoMovimentacao).classe}`">
+            <time>{{ formatarHora(movimentacao.data) }}</time>
+            <span class="timeline-axis" :class="`timeline-axis--${movimentacao.classe}`">
               <span v-if="index > 0" class="timeline-line timeline-line--top" />
               <span class="timeline-dot" />
               <span v-if="index < ultimasMovimentacoes.length - 1" class="timeline-line timeline-line--bottom" />
             </span>
             <span class="timeline-copy">
-              <strong>{{ movimentoMeta(movimentacao.tipoMovimentacao).rotulo }} registrada</strong>
-              <small>{{ descricaoMovimentacao(movimentacao) }}</small>
+              <strong>{{ movimentacao.rotulo }}</strong>
+              <small>{{ movimentacao.detalhe }}</small>
             </span>
-            <span class="timeline-status" :class="`timeline-status--${movimentoMeta(movimentacao.tipoMovimentacao).classe}`">
-              {{ movimentoMeta(movimentacao.tipoMovimentacao).rotulo }}
+            <span class="timeline-status" :class="`timeline-status--${movimentacao.classe}`">
+              {{ movimentacao.rotulo }}
             </span>
             <svg class="timeline-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" /></svg>
           </button>
@@ -1078,6 +1168,9 @@ onMounted(carregarDashboard)
 .timeline-item--ajuste { --timeline-accent: #7446df; }
 .timeline-item--devolucao { --timeline-accent: #20a452; }
 .timeline-item--descarte { --timeline-accent: #e38a16; }
+.timeline-item--residuo { --timeline-accent: #7446df; }
+.timeline-item--retorno { --timeline-accent: #d18a16; }
+.timeline-item--cancelamento { --timeline-accent: #e13b3b; }
 .timeline-item:hover {
   z-index: 1;
   transform: translateY(-1px) translateX(2px);
@@ -1089,6 +1182,9 @@ onMounted(carregarDashboard)
 .timeline-item--ajuste:hover { background: #f9f6ff; }
 .timeline-item--devolucao:hover { background: #f4fbf6; }
 .timeline-item--descarte:hover { background: #fff8ef; }
+.timeline-item--residuo:hover { background: #f9f6ff; }
+.timeline-item--retorno:hover { background: #fff8ef; }
+.timeline-item--cancelamento:hover { background: #fff5f5; }
 .timeline-item time {
   align-self: center;
   color: #47566e;
@@ -1123,6 +1219,9 @@ onMounted(carregarDashboard)
 .timeline-axis--ajuste { color: #7446df; }
 .timeline-axis--devolucao { color: #20a452; }
 .timeline-axis--descarte { color: #e38a16; }
+.timeline-axis--residuo { color: #7446df; }
+.timeline-axis--retorno { color: #d18a16; }
+.timeline-axis--cancelamento { color: #e13b3b; }
 .timeline-copy { min-width: 0; align-self: center; display: grid; gap: 2px; }
 .timeline-copy strong,
 .timeline-copy small {
@@ -1145,6 +1244,9 @@ onMounted(carregarDashboard)
 .timeline-status--ajuste { background: #f3efff; color: #6942ca; }
 .timeline-status--devolucao { background: #ebf8ef; color: #198d45; }
 .timeline-status--descarte { background: #fff4e5; color: #cf750c; }
+.timeline-status--residuo { background: #f3efff; color: #6942ca; }
+.timeline-status--retorno { background: #fff4e5; color: #b66a0c; }
+.timeline-status--cancelamento { background: #fff0f0; color: #d63434; }
 .timeline-chevron {
   width: 13px;
   height: 13px;

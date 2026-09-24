@@ -176,7 +176,7 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .meus-residuos-page
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .meus-residuos-page .state-box--error {
   border-color: #713845 !important;
   background: #251821 !important;
-  color: #ff9aa5 !important;
+  color: #ff6677 !important;
 }
 
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .meus-residuos-page .residuo-card {
@@ -227,6 +227,12 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .meus-residuos-page
   border: 1px solid #46556a !important;
   background: #202c3d !important;
   color: #c2cedd !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .meus-residuos-page .status-pill[data-status='CANCELADO'] {
+  border: 1px solid #8e3b49 !important;
+  background: #251821 !important;
+  color: #ff6677 !important;
 }
 
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .meus-residuos-page .residuo-card--target {
@@ -470,7 +476,7 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .novo-pedido-page .
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .novo-pedido-page .error-banner {
   border-color: #713845 !important;
   background: #2b1a23 !important;
-  color: #ff9aa5 !important;
+  color: #ff6677 !important;
 }
 
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .novo-pedido-page .form-footer {
@@ -506,6 +512,35 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .resi
   border-color: #263a54 !important;
   background: #0d1929 !important;
   box-shadow: 0 12px 30px rgb(0 5 14 / 14%) !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-picker {
+  border-color: #315071;
+  background: #111f33;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-picker__intro strong {
+  color: #d7e6fb;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-picker__intro p,
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-picker__empty {
+  color: #8fa1b8;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-mode-switch {
+  border-color: #35506f;
+  background: #0f1c2d;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-mode-switch button {
+  border-right-color: #29415f;
+  color: #9fb0c5;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .model-mode-switch button.active {
+  background: #2456c4;
+  color: #fff;
 }
 
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .form-section {
@@ -640,13 +675,19 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .prin
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .notice--error {
   border-color: #713845 !important;
   background: #2b1a23 !important;
-  color: #ff9aa5 !important;
+  color: #ff6677 !important;
 }
 
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .notice--warning {
   border-color: #765d2a !important;
   background: #302716 !important;
   color: #ecd69f !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .notice--model {
+  border-color: #315b86;
+  background: #11243a;
+  color: #9fc8f5;
 }
 
 body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .form-footer {
@@ -974,4 +1015,37 @@ body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page butto
   body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page * {
     transition: none !important;
   }
+}
+
+/* Validações locais — Informar resíduo */
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .validation-box--error {
+  border: 1px solid #d94a5a !important;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px rgb(217 74 90 / 18%) !important;
+  border-radius: 9px !important;
+  padding: 8px !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .validation-box--error .risk-option {
+  border-color: #8e3b49 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .inline-error {
+  margin-top: 7px !important;
+  color: #ff6677 !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .input--error {
+  border-color: #ff5c6c !important;
+  box-shadow: 0 0 0 2px rgb(255 92 108 / 18%) !important;
+}
+
+body.sgl-dark-active :where(.solicitante-main, .gestao-main) .residuo-page .inline-warning {
+  border-color: #765d2a !important;
+  background: #302716 !important;
+  color: #ecd69f !important;
 }

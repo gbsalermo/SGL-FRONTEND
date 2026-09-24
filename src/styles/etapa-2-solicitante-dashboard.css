@@ -366,6 +366,10 @@ body.sgl-dark-active .solicitante-main .update-icon--slate {
   background: #202c3d !important;
   color: #a9b8ca !important;
 }
+body.sgl-dark-active .solicitante-main .update-icon--red {
+  background: #351b22 !important;
+  color: #ff6677 !important;
+}
 
 body.sgl-dark-active .solicitante-main .dashboard-alert {
   border-color: #725727 !important;

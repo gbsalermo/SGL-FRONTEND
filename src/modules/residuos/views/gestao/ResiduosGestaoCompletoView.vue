@@ -5,10 +5,12 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { residuoService } from '@/modules/residuos/services/residuoService'
 import type {
+  AcaoAdministrativaResiduo,
   AnalisarResiduoRequest,
   ApiErrorResponse,
   ClasseResiduoResponse,
   HistoricoResiduoResponse,
+  LocalArmazenamentoResiduoResponse,
   MedidaSegurancaResiduo,
   NivelRiscoResiduo,
   ResiduoResponse,
@@ -18,6 +20,8 @@ import type {
 import { useSessionStore } from '@/stores/session'
 
 type FiltroResiduo = StatusResiduo | 'TODOS'
+type ModoLocalAnalise = 'CATALOGO' | 'MANUAL'
+type ModoLocalConfirmacao = 'MANTER' | 'CATALOGO' | 'MANUAL'
 
 const session = useSessionStore()
 const router = useRouter()
@@ -25,9 +29,14 @@ const route = useRoute()
 
 const residuos = ref<ResiduoResponse[]>([])
 const classesResiduo = ref<ClasseResiduoResponse[]>([])
+const locaisArmazenamento = ref<LocalArmazenamentoResiduoResponse[]>([])
 const carregando = ref(false)
 const enviando = ref(false)
 const erro = ref('')
+const erroAnalise = ref('')
+const errosAnalise = ref<Record<string, string>>({})
+const erroArmazenamento = ref('')
+const erroDespacho = ref('')
 const sucesso = ref('')
 const busca = ref('')
 const aba = ref<FiltroResiduo>('TODOS')
@@ -39,10 +48,17 @@ const recebimentoAberto = ref(false)
 const analiseAberta = ref(false)
 const armazenamentoAberto = ref(false)
 const despachoAberto = ref(false)
+const administracaoAberta = ref(false)
+const acaoAdministrativa = ref<AcaoAdministrativaResiduo>('RETORNAR_ETAPA')
+const justificativaAdministrativa = ref('')
+const erroAdministracao = ref('')
 
 const observacaoRecebimento = ref('')
 const nivelRiscoConfirmado = ref<NivelRiscoResiduo>('BAIXO')
 const riscosConfirmados = ref<TipoRiscoResiduo[]>([])
+const modoLocalAnalise = ref<ModoLocalAnalise>('CATALOGO')
+const localArmazenamentoResiduoId = ref('')
+const complementoLocalArmazenamento = ref('')
 const localArmazenamentoTemporario = ref('')
 const destinoFinalPrevisto = ref('')
 const dataPrevistaDespacho = ref('')
@@ -50,6 +66,9 @@ const observacaoGestor = ref('')
 const classesConfirmadasIds = ref<string[]>([])
 const medidasSegurancaConfirmadas = ref<MedidaSegurancaResiduo[]>([])
 const observacaoSegurancaConfirmada = ref('')
+const modoLocalConfirmacao = ref<ModoLocalConfirmacao>('MANTER')
+const localArmazenamentoConfirmacaoId = ref('')
+const complementoLocalConfirmacao = ref('')
 const localArmazenamentoConfirmacao = ref('')
 const destinoFinalConfirmado = ref('')
 const observacaoDespacho = ref('')
@@ -84,9 +103,11 @@ const abas: Array<{ valor: FiltroResiduo; rotulo: string }> = [
   { valor: 'LIBERADO_PARA_ARMAZENAMENTO', rotulo: 'Liberados' },
   { valor: 'ARMAZENADO_TEMPORARIAMENTE', rotulo: 'Armazenados' },
   { valor: 'DESPACHADO', rotulo: 'Despachados' },
+  { valor: 'CANCELADO', rotulo: 'Cancelados' },
 ]
 
 const residuoAlvo = computed(() => typeof route.query.residuo === 'string' ? route.query.residuo : '')
+const ehAdministrador = computed(() => session.usuario?.perfil === 'ADMINISTRADOR')
 
 const residuosFiltrados = computed(() => {
   const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
@@ -111,8 +132,24 @@ const eventoLiberacao = computed(() =>
     .find((evento) => evento.acao === 'RISCO_CONFERIDO_E_RESIDUO_LIBERADO') ?? null,
 )
 
+const classificacaoGestaoVigente = computed(() => {
+  if (!selecionado.value?.nivelRiscoConfirmado) return false
+  return [
+    'LIBERADO_PARA_ARMAZENAMENTO',
+    'ARMAZENADO_TEMPORARIAMENTE',
+    'DESPACHADO',
+  ].includes(selecionado.value.status)
+})
+
+const situacaoClassificacaoGestao = computed(() => {
+  if (!selecionado.value?.nivelRiscoConfirmado) return 'Aguardando análise'
+  if (selecionado.value.status === 'CANCELADO') return 'Classificação histórica'
+  if (classificacaoGestaoVigente.value) return 'Classificação liberada'
+  return 'Em reavaliação'
+})
+
 function rotuloAcaoRotulo(status: StatusResiduo) {
-  return ['INFORMADO', 'EM_ANALISE'].includes(status)
+  return ['INFORMADO', 'EM_ANALISE', 'CANCELADO'].includes(status)
     ? 'Visualizar prévia do rótulo'
     : 'Visualizar rótulo'
 }
@@ -134,6 +171,7 @@ function aplicarFiltroDaRota() {
     'LIBERADO_PARA_ARMAZENAMENTO',
     'ARMAZENADO_TEMPORARIAMENTE',
     'DESPACHADO',
+    'CANCELADO',
   ]
   if (status && statusValidos.includes(status as StatusResiduo)) {
     aba.value = status as StatusResiduo
@@ -157,6 +195,7 @@ function statusRotulo(status: StatusResiduo) {
     LIBERADO_PARA_ARMAZENAMENTO: 'Liberado',
     ARMAZENADO_TEMPORARIAMENTE: 'Armazenado',
     DESPACHADO: 'Despachado',
+    CANCELADO: 'Cancelado',
   }
   return mapa[status]
 }
@@ -164,6 +203,18 @@ function statusRotulo(status: StatusResiduo) {
 function formatarEnum(valor: string | null) {
   if (!valor) return '—'
   return valor.toLowerCase().replaceAll('_', ' ').replace(/^./, (letra) => letra.toUpperCase())
+}
+
+function formatarObservacaoHistorico(observacao: string | null) {
+  if (!observacao) return ''
+
+  return observacao
+    .replaceAll('ARMAZENADO_TEMPORARIAMENTE', 'Armazenado temporariamente')
+    .replaceAll('LIBERADO_PARA_ARMAZENAMENTO', 'Liberado para armazenamento')
+    .replaceAll('EM_ANALISE', 'Em análise')
+    .replaceAll('INFORMADO', 'Informado')
+    .replaceAll('DESPACHADO', 'Despachado')
+    .replaceAll('CANCELADO', 'Cancelado')
 }
 
 function formatarData(valor: string | null) {
@@ -179,7 +230,10 @@ function acaoHistorico(acao: string) {
     RECEBIDO_PELA_GESTAO: 'Recebido pela Gestão',
     RISCO_CONFERIDO_E_RESIDUO_LIBERADO: 'Classificação concluída e resíduo liberado',
     ARMAZENAMENTO_TEMPORARIO_CONFIRMADO: 'Armazenamento temporário confirmado',
+    ARMAZENAMENTO_TEMPORARIO_CORRIGIDO: 'Local de armazenamento corrigido na confirmação física',
     DESPACHO_CONFIRMADO: 'Despacho e destinação confirmados',
+    RESIDUO_CANCELADO_ADMINISTRATIVAMENTE: 'Resíduo cancelado administrativamente',
+    RETORNO_ADMINISTRATIVO_DE_ETAPA: 'Resíduo retornado para a etapa anterior',
   }
   return mapa[acao] ?? formatarEnum(acao)
 }
@@ -203,6 +257,7 @@ function fecharRecebimento() {
 function fecharAnalise() {
   if (enviando.value) return
   analiseAberta.value = false
+  erroAnalise.value = ''
   limparSelecaoOperacional()
 }
 
@@ -218,16 +273,25 @@ function fecharDespacho() {
   limparSelecaoOperacional()
 }
 
+function fecharAdministracao() {
+  if (enviando.value) return
+  administracaoAberta.value = false
+  justificativaAdministrativa.value = ''
+  erroAdministracao.value = ''
+}
+
 async function carregar() {
   carregando.value = true
   erro.value = ''
   try {
-    const [residuosCarregados, classesCarregadas] = await Promise.all([
+    const [residuosCarregados, classesCarregadas, locaisCarregados] = await Promise.all([
       residuoService.listarTodos(),
       residuoService.listarClassesAtivas(),
+      residuoService.listarLocaisArmazenamentoAtivos(),
     ])
     residuos.value = residuosCarregados
     classesResiduo.value = classesCarregadas
+    locaisArmazenamento.value = locaisCarregados
     if (selecionado.value) {
       selecionado.value = residuos.value.find((item) => item.id === selecionado.value?.id) ?? null
     }
@@ -303,7 +367,24 @@ function abrirAnalise(residuo: ResiduoResponse) {
   selecionado.value = residuo
   nivelRiscoConfirmado.value = residuo.nivelRiscoConfirmado ?? residuo.nivelRiscoInformado
   riscosConfirmados.value = residuo.riscosConfirmados.length ? [...residuo.riscosConfirmados] : [...residuo.riscosInformados]
-  localArmazenamentoTemporario.value = residuo.localArmazenamentoTemporario ?? ''
+
+  if (residuo.localArmazenamentoResiduoId) {
+    modoLocalAnalise.value = 'CATALOGO'
+    localArmazenamentoResiduoId.value = residuo.localArmazenamentoResiduoId
+    complementoLocalArmazenamento.value = residuo.complementoLocalArmazenamento ?? ''
+    localArmazenamentoTemporario.value = ''
+  } else if (residuo.localArmazenamentoTemporario) {
+    modoLocalAnalise.value = 'MANUAL'
+    localArmazenamentoResiduoId.value = ''
+    complementoLocalArmazenamento.value = ''
+    localArmazenamentoTemporario.value = residuo.localArmazenamentoTemporario
+  } else {
+    modoLocalAnalise.value = locaisArmazenamento.value.length ? 'CATALOGO' : 'MANUAL'
+    localArmazenamentoResiduoId.value = ''
+    complementoLocalArmazenamento.value = ''
+    localArmazenamentoTemporario.value = ''
+  }
+
   destinoFinalPrevisto.value = residuo.destinoFinalPrevisto ?? ''
   dataPrevistaDespacho.value = residuo.dataPrevistaDespacho ?? ''
   observacaoGestor.value = residuo.observacaoGestor ?? ''
@@ -318,6 +399,8 @@ function abrirAnalise(residuo: ResiduoResponse) {
     ?? residuo.observacaoSegurancaInformada
     ?? ''
   erro.value = ''
+  erroAnalise.value = ''
+  errosAnalise.value = {}
   sucesso.value = ''
   analiseAberta.value = true
 }
@@ -332,23 +415,58 @@ function alternarRisco(risco: TipoRiscoResiduo) {
   if (risco !== 'NENHUM' && !existe) riscosConfirmados.value = riscosConfirmados.value.filter((item) => item !== 'NENHUM')
 }
 
+function limparErroAnalise(campo: string) {
+  if (!errosAnalise.value[campo]) return
+  const atualizados = { ...errosAnalise.value }
+  delete atualizados[campo]
+  errosAnalise.value = atualizados
+}
+
 function validarAnalise() {
   if (!session.usuario?.id) throw new Error('Sessão sem usuário gestor válido.')
-  if (classesConfirmadasIds.value.length === 0) throw new Error('Confirme pelo menos uma classe de resíduo.')
-  if (medidasSegurancaConfirmadas.value.includes('OUTRO') && !observacaoSegurancaConfirmada.value.trim()) {
-    throw new Error('Descreva a medida de segurança marcada como Outro.')
+
+  const erros: Record<string, string> = {}
+
+  if (classesConfirmadasIds.value.length === 0) {
+    erros.classes = 'Confirme pelo menos uma classe de resíduo.'
   }
-  if (!localArmazenamentoTemporario.value.trim()) throw new Error('Informe o local de armazenamento temporário.')
-  if (!destinoFinalPrevisto.value.trim()) throw new Error('Informe o destino final previsto.')
-  if (riscosConfirmados.value.length === 0) throw new Error('Confirme pelo menos uma classificação de risco.')
+
+  if (medidasSegurancaConfirmadas.value.length === 0) {
+    erros.seguranca = 'Confirme pelo menos uma medida de Segurança / EPI.'
+  }
+
+  if (medidasSegurancaConfirmadas.value.includes('OUTRO') && !observacaoSegurancaConfirmada.value.trim()) {
+    erros.segurancaOutro = 'Descreva a medida de segurança marcada como Outro.'
+  }
+
+  if (modoLocalAnalise.value === 'CATALOGO' && !localArmazenamentoResiduoId.value) {
+    erros.local = 'Selecione um local de armazenamento cadastrado.'
+  }
+
+  if (modoLocalAnalise.value === 'MANUAL' && !localArmazenamentoTemporario.value.trim()) {
+    erros.local = 'Informe o local de armazenamento temporário.'
+  }
+
+  if (!destinoFinalPrevisto.value.trim()) {
+    erros.destino = 'Informe o destino final previsto.'
+  }
+
+  if (riscosConfirmados.value.length === 0) {
+    erros.riscos = 'Confirme pelo menos uma classificação de risco.'
+  }
+
+  errosAnalise.value = erros
+  return Object.keys(erros).length === 0
 }
 
 async function confirmarAnalise() {
   if (!selecionado.value || !session.usuario?.id) return
   erro.value = ''
+  erroAnalise.value = ''
   sucesso.value = ''
   try {
-    validarAnalise()
+    errosAnalise.value = {}
+    if (!validarAnalise()) return
     const payload: AnalisarResiduoRequest = {
       usuarioGestorId: session.usuario.id,
       nivelRiscoConfirmado: nivelRiscoConfirmado.value,
@@ -356,7 +474,15 @@ async function confirmarAnalise() {
       classesConfirmadasIds: [...classesConfirmadasIds.value],
       medidasSegurancaConfirmadas: [...medidasSegurancaConfirmadas.value],
       observacaoSegurancaConfirmada: observacaoSegurancaConfirmada.value.trim() || null,
-      localArmazenamentoTemporario: localArmazenamentoTemporario.value.trim(),
+      localArmazenamentoResiduoId: modoLocalAnalise.value === 'CATALOGO'
+        ? localArmazenamentoResiduoId.value || null
+        : null,
+      complementoLocalArmazenamento: modoLocalAnalise.value === 'CATALOGO'
+        ? complementoLocalArmazenamento.value.trim() || null
+        : null,
+      localArmazenamentoTemporario: modoLocalAnalise.value === 'MANUAL'
+        ? localArmazenamentoTemporario.value.trim() || null
+        : null,
       destinoFinalPrevisto: destinoFinalPrevisto.value.trim(),
       dataPrevistaDespacho: dataPrevistaDespacho.value || null,
       observacaoGestor: observacaoGestor.value.trim() || null,
@@ -368,7 +494,7 @@ async function confirmarAnalise() {
     limparSelecaoOperacional()
     sucesso.value = 'Análise concluída. Impressão do rótulo liberada.'
   } catch (error) {
-    erro.value = mensagemErro(error)
+    erroAnalise.value = mensagemErro(error)
   } finally {
     enviando.value = false
   }
@@ -376,28 +502,54 @@ async function confirmarAnalise() {
 
 function abrirArmazenamento(residuo: ResiduoResponse) {
   selecionado.value = residuo
-  localArmazenamentoConfirmacao.value = residuo.localArmazenamentoTemporario ?? ''
+  modoLocalConfirmacao.value = 'MANTER'
+  localArmazenamentoConfirmacaoId.value = ''
+  complementoLocalConfirmacao.value = ''
+  localArmazenamentoConfirmacao.value = ''
   erro.value = ''
+  erroArmazenamento.value = ''
   sucesso.value = ''
   armazenamentoAberto.value = true
 }
 
 async function confirmarArmazenamento() {
   if (!selecionado.value || !session.usuario?.id) return
+
+  if (modoLocalConfirmacao.value === 'CATALOGO' && !localArmazenamentoConfirmacaoId.value) {
+    erroArmazenamento.value = 'Selecione o novo local cadastrado.'
+    return
+  }
+
+  if (modoLocalConfirmacao.value === 'MANUAL' && !localArmazenamentoConfirmacao.value.trim()) {
+    erroArmazenamento.value = 'Informe o novo local físico.'
+    return
+  }
+
   enviando.value = true
   erro.value = ''
+  erroArmazenamento.value = ''
   sucesso.value = ''
   try {
     const atualizado = await residuoService.armazenar(selecionado.value.id, {
       usuarioGestorId: session.usuario.id,
-      localArmazenamentoTemporario: localArmazenamentoConfirmacao.value.trim() || null,
+      localArmazenamentoResiduoId: modoLocalConfirmacao.value === 'CATALOGO'
+        ? localArmazenamentoConfirmacaoId.value || null
+        : null,
+      complementoLocalArmazenamento: modoLocalConfirmacao.value === 'CATALOGO'
+        ? complementoLocalConfirmacao.value.trim() || null
+        : null,
+      localArmazenamentoTemporario: modoLocalConfirmacao.value === 'MANUAL'
+        ? localArmazenamentoConfirmacao.value.trim() || null
+        : null,
     })
     atualizarResiduo(atualizado)
     armazenamentoAberto.value = false
     limparSelecaoOperacional()
-    sucesso.value = 'Armazenamento temporário confirmado.'
+    sucesso.value = modoLocalConfirmacao.value === 'MANTER'
+      ? 'Armazenamento temporário confirmado.'
+      : 'Armazenamento confirmado com correção do local físico.'
   } catch (error) {
-    erro.value = mensagemErro(error)
+    erroArmazenamento.value = mensagemErro(error)
   } finally {
     enviando.value = false
   }
@@ -408,6 +560,7 @@ function abrirDespacho(residuo: ResiduoResponse) {
   destinoFinalConfirmado.value = residuo.destinoFinalConfirmado ?? residuo.destinoFinalPrevisto ?? ''
   observacaoDespacho.value = ''
   erro.value = ''
+  erroDespacho.value = ''
   sucesso.value = ''
   despachoAberto.value = true
 }
@@ -415,12 +568,13 @@ function abrirDespacho(residuo: ResiduoResponse) {
 async function confirmarDespacho() {
   if (!selecionado.value || !session.usuario?.id) return
   if (!destinoFinalConfirmado.value.trim()) {
-    erro.value = 'Informe o destino final confirmado.'
+    erroDespacho.value = 'Informe o destino final confirmado.'
     return
   }
 
   enviando.value = true
   erro.value = ''
+  erroDespacho.value = ''
   sucesso.value = ''
   try {
     const atualizado = await residuoService.despachar(selecionado.value.id, {
@@ -433,7 +587,50 @@ async function confirmarDespacho() {
     limparSelecaoOperacional()
     sucesso.value = 'Despacho confirmado. O ciclo operacional do resíduo foi encerrado.'
   } catch (error) {
-    erro.value = mensagemErro(error)
+    erroDespacho.value = mensagemErro(error)
+  } finally {
+    enviando.value = false
+  }
+}
+
+function abrirAdministracao(residuo: ResiduoResponse, acao: AcaoAdministrativaResiduo) {
+  selecionado.value = residuo
+  acaoAdministrativa.value = acao
+  justificativaAdministrativa.value = ''
+  erroAdministracao.value = ''
+  erro.value = ''
+  sucesso.value = ''
+  administracaoAberta.value = true
+}
+
+async function confirmarAdministracao() {
+  if (!selecionado.value || !session.usuario?.id || !ehAdministrador.value) return
+
+  if (!justificativaAdministrativa.value.trim()) {
+    erroAdministracao.value = 'Informe a justificativa da correção administrativa.'
+    return
+  }
+
+  enviando.value = true
+  erroAdministracao.value = ''
+  try {
+    const atualizado = await residuoService.administrar(selecionado.value.id, {
+      usuarioAdministradorId: session.usuario.id,
+      acao: acaoAdministrativa.value,
+      justificativa: justificativaAdministrativa.value.trim(),
+    })
+
+    atualizarResiduo(atualizado)
+    selecionado.value = atualizado
+    administracaoAberta.value = false
+    justificativaAdministrativa.value = ''
+    await carregarHistorico(atualizado.id)
+
+    sucesso.value = acaoAdministrativa.value === 'CANCELAR'
+      ? 'Resíduo cancelado administrativamente. A justificativa foi registrada no histórico.'
+      : 'Resíduo retornado para a etapa anterior. A justificativa foi registrada no histórico.'
+  } catch (error) {
+    erroAdministracao.value = mensagemErro(error)
   } finally {
     enviando.value = false
   }
@@ -467,12 +664,13 @@ onMounted(carregar)
       <button class="secondary-action" type="button" :disabled="carregando" @click="carregar">Atualizar dados</button>
     </header>
 
-    <div class="metrics-grid metrics-grid--five">
+    <div class="metrics-grid metrics-grid--six">
       <article><span>A receber</span><strong>{{ quantidadeStatus('INFORMADO') }}</strong><small>aguardando conferência física</small></article>
       <article><span>Em análise</span><strong>{{ quantidadeStatus('EM_ANALISE') }}</strong><small>prévia disponível · impressão bloqueada</small></article>
       <article><span>Liberados</span><strong>{{ quantidadeStatus('LIBERADO_PARA_ARMAZENAMENTO') }}</strong><small>rótulo disponível</small></article>
       <article><span>Armazenados</span><strong>{{ quantidadeStatus('ARMAZENADO_TEMPORARIAMENTE') }}</strong><small>aguardando destinação</small></article>
       <article><span>Despachados</span><strong>{{ quantidadeStatus('DESPACHADO') }}</strong><small>ciclo concluído</small></article>
+      <article><span>Cancelados</span><strong>{{ quantidadeStatus('CANCELADO') }}</strong><small>encerrados administrativamente</small></article>
     </div>
 
     <div v-if="sucesso" class="feedback feedback--success">{{ sucesso }}</div>
@@ -536,7 +734,7 @@ onMounted(carregar)
       </div>
     </section>
 
-    <div v-if="selecionado && !recebimentoAberto && !analiseAberta && !armazenamentoAberto && !despachoAberto" class="drawer-backdrop" @click.self="fecharDetalhes">
+    <div v-if="selecionado && !recebimentoAberto && !analiseAberta && !armazenamentoAberto && !despachoAberto && !administracaoAberta" class="drawer-backdrop" @click.self="fecharDetalhes">
       <aside class="detail-drawer">
         <header>
           <div>
@@ -572,12 +770,14 @@ onMounted(carregar)
           <section>
             <h3>Composição informada</h3>
             <div class="components-list">
-              <article v-for="componente in selecionado.componentes" :key="componente.id">
-                <div>
-                  <strong>{{ componente.nomeComponente }}</strong>
-                  <small>{{ componente.produtoNomeCatalogo ? `Catálogo · ${componente.produtoNomeCatalogo}` : 'Componente livre' }}</small>
+              <article v-for="componente in selecionado.componentes" :key="componente.id" class="component-item">
+                <div class="component-item__header">
+                  <div class="component-item__identity">
+                    <strong>{{ componente.nomeComponente }}</strong>
+                    <small>{{ componente.produtoNomeCatalogo ? `Catálogo · ${componente.produtoNomeCatalogo}` : 'Componente livre' }}</small>
+                  </div>
+                  <span v-if="componente.principal" class="component-principal">Principal</span>
                 </div>
-                <span v-if="componente.principal">Principal</span>
                 <p>{{ componente.concentracaoOuQuantidade ?? 'Quantidade/concentração não informada' }}</p>
               </article>
             </div>
@@ -594,16 +794,19 @@ onMounted(carregar)
               </dl>
             </article>
 
-            <article class="comparison-card comparison-card--approved" :class="{ pending: !selecionado.nivelRiscoConfirmado }">
-              <header><span>APROVADO PELA GESTÃO</span><strong>{{ selecionado.nivelRiscoConfirmado ? 'Classificação liberada' : 'Aguardando análise' }}</strong></header>
+            <article class="comparison-card comparison-card--approved" :class="{ pending: !classificacaoGestaoVigente }">
+              <header>
+                <span>{{ classificacaoGestaoVigente ? 'APROVADO PELA GESTÃO' : selecionado.nivelRiscoConfirmado ? 'ÚLTIMA CLASSIFICAÇÃO DA GESTÃO' : 'ANÁLISE DA GESTÃO' }}</span>
+                <strong>{{ situacaoClassificacaoGestao }}</strong>
+              </header>
               <dl>
                 <div><dt>Classes</dt><dd><b>{{ selecionado.classesConfirmadas.map((classe) => classe.codigo).join(' · ') || 'Aguardando confirmação' }}</b><small>{{ selecionado.classesConfirmadas.map((classe) => classe.descricao).join(' · ') || 'Ainda não confirmadas.' }}</small></dd></div>
                 <div><dt>Risco</dt><dd><b>{{ selecionado.nivelRiscoConfirmado ? `Risco ${formatarEnum(selecionado.nivelRiscoConfirmado)}` : 'Aguardando análise' }}</b><small>{{ selecionado.riscosConfirmados.length ? selecionado.riscosConfirmados.map(formatarEnum).join(' · ') : 'Nenhum risco confirmado ainda.' }}</small></dd></div>
                 <div><dt>Segurança / EPI</dt><dd>{{ selecionado.medidasSegurancaConfirmadas.length ? selecionado.medidasSegurancaConfirmadas.map(formatarEnum).join(' · ') : 'Ainda não confirmada.' }}</dd></div>
                 <div><dt>Observação técnica</dt><dd>{{ selecionado.observacaoGestor ?? 'Sem observação técnica.' }}</dd></div>
               </dl>
-              <footer v-if="eventoLiberacao" class="approval-meta">
-                <span>Liberado por</span>
+              <footer v-if="eventoLiberacao && selecionado.nivelRiscoConfirmado" class="approval-meta">
+                <span>{{ classificacaoGestaoVigente ? 'Liberado por' : 'Última liberação por' }}</span>
                 <strong>{{ eventoLiberacao.usuarioNome ?? 'Gestor não identificado' }}</strong>
                 <small>{{ formatarData(eventoLiberacao.dataHora) }}</small>
               </footer>
@@ -629,7 +832,7 @@ onMounted(carregar)
                 <div class="timeline-card">
                   <div><strong>{{ acaoHistorico(evento.acao) }}</strong><time>{{ formatarData(evento.dataHora) }}</time></div>
                   <p>{{ statusRotulo(evento.status) }} · {{ evento.usuarioNome ?? 'Sistema' }}</p>
-                  <small v-if="evento.observacao">{{ evento.observacao }}</small>
+                  <small v-if="evento.observacao">{{ formatarObservacaoHistorico(evento.observacao) }}</small>
                 </div>
               </li>
             </ol>
@@ -641,6 +844,22 @@ onMounted(carregar)
             <button v-if="selecionado.status === 'EM_ANALISE'" class="analysis-action" type="button" @click="abrirAnalise(selecionado)">Analisar e classificar</button>
             <button v-if="selecionado.status === 'LIBERADO_PARA_ARMAZENAMENTO'" class="storage-action" type="button" @click="abrirArmazenamento(selecionado)">Confirmar armazenamento</button>
             <button v-if="selecionado.status === 'ARMAZENADO_TEMPORARIAMENTE'" class="dispatch-action" type="button" @click="abrirDespacho(selecionado)">Confirmar despacho</button>
+            <button
+              v-if="ehAdministrador && !['INFORMADO', 'CANCELADO'].includes(selecionado.status)"
+              class="admin-return-action"
+              type="button"
+              @click="abrirAdministracao(selecionado, 'RETORNAR_ETAPA')"
+            >
+              Retornar etapa
+            </button>
+            <button
+              v-if="ehAdministrador && !['DESPACHADO', 'CANCELADO'].includes(selecionado.status)"
+              class="admin-cancel-action"
+              type="button"
+              @click="abrirAdministracao(selecionado, 'CANCELAR')"
+            >
+              Cancelar resíduo
+            </button>
           </div>
         </div>
       </aside>
@@ -662,6 +881,7 @@ onMounted(carregar)
       <section class="modal-card modal-card--large" role="dialog" aria-modal="true" aria-label="Analisar e classificar resíduo">
         <header><div><span>ANÁLISE TÉCNICA</span><h2>Classificar e liberar resíduo</h2></div><button type="button" @click="fecharAnalise">×</button></header>
         <div class="modal-content analysis-content">
+          <div v-if="erroAnalise" class="feedback feedback--error modal-operation-error">{{ erroAnalise }}</div>
           <div class="declaration-reference">
             <div>
               <span>Informado pelo laboratório</span>
@@ -676,17 +896,46 @@ onMounted(carregar)
             <label class="field"><span>Nível de risco confirmado</span><select v-model="nivelRiscoConfirmado"><option value="NENHUM">Nenhum</option><option value="BAIXO">Baixo</option><option value="MEDIO">Médio</option><option value="ALTO">Alto</option></select></label>
             <label class="field"><span>Data prevista de despacho <small>(opcional)</small></span><input v-model="dataPrevistaDespacho" type="date" :min="minDataDespacho" /></label>
           </div>
-          <fieldset class="risk-fieldset"><legend>Riscos confirmados</legend><button v-for="risco in tiposRisco" :key="risco.valor" type="button" :class="{ selected: riscosConfirmados.includes(risco.valor) }" @click="alternarRisco(risco.valor)"><span class="checkmark">{{ riscosConfirmados.includes(risco.valor) ? '✓' : '' }}</span>{{ risco.rotulo }}</button></fieldset>
+          <fieldset class="risk-fieldset" :class="{ 'validation-box--error': errosAnalise.riscos }"><legend>Riscos confirmados</legend><button v-for="risco in tiposRisco" :key="risco.valor" type="button" :class="{ selected: riscosConfirmados.includes(risco.valor) }" @click="alternarRisco(risco.valor); limparErroAnalise('riscos')"><span class="checkmark">{{ riscosConfirmados.includes(risco.valor) ? '✓' : '' }}</span>{{ risco.rotulo }}</button></fieldset>
+          <p v-if="errosAnalise.riscos" class="inline-error">{{ errosAnalise.riscos }}</p>
 
-          <fieldset class="risk-fieldset"><legend>Classes confirmadas</legend><button v-for="classe in classesResiduo" :key="classe.id" type="button" :class="{ selected: classesConfirmadasIds.includes(classe.id) }" @click="classesConfirmadasIds = classesConfirmadasIds.includes(classe.id) ? classesConfirmadasIds.filter((id) => id !== classe.id) : [...classesConfirmadasIds, classe.id]"><span class="checkmark">{{ classesConfirmadasIds.includes(classe.id) ? '✓' : '' }}</span>{{ classe.codigo }} — {{ classe.descricao }}</button></fieldset>
+          <fieldset class="risk-fieldset" :class="{ 'validation-box--error': errosAnalise.classes }"><legend>Classes confirmadas</legend><button v-for="classe in classesResiduo" :key="classe.id" type="button" :class="{ selected: classesConfirmadasIds.includes(classe.id) }" @click="classesConfirmadasIds = classesConfirmadasIds.includes(classe.id) ? classesConfirmadasIds.filter((id) => id !== classe.id) : [...classesConfirmadasIds, classe.id]; limparErroAnalise('classes')"><span class="checkmark">{{ classesConfirmadasIds.includes(classe.id) ? '✓' : '' }}</span>{{ classe.codigo }} — {{ classe.descricao }}</button></fieldset>
+          <p v-if="errosAnalise.classes" class="inline-error">{{ errosAnalise.classes }}</p>
 
-          <fieldset class="risk-fieldset"><legend>Segurança / EPI confirmados</legend><button v-for="medida in medidasSeguranca" :key="medida.valor" type="button" :class="{ selected: medidasSegurancaConfirmadas.includes(medida.valor) }" @click="medidasSegurancaConfirmadas = medidasSegurancaConfirmadas.includes(medida.valor) ? medidasSegurancaConfirmadas.filter((item) => item !== medida.valor) : [...medidasSegurancaConfirmadas, medida.valor]"><span class="checkmark">{{ medidasSegurancaConfirmadas.includes(medida.valor) ? '✓' : '' }}</span>{{ medida.rotulo }}</button></fieldset>
-          <label class="field"><span>Orientação complementar de segurança <small>(obrigatória para Outro)</small></span><textarea v-model="observacaoSegurancaConfirmada" rows="3" /></label>
+          <fieldset class="risk-fieldset" :class="{ 'validation-box--error': errosAnalise.seguranca }"><legend>Segurança / EPI confirmados</legend><button v-for="medida in medidasSeguranca" :key="medida.valor" type="button" :class="{ selected: medidasSegurancaConfirmadas.includes(medida.valor) }" @click="medidasSegurancaConfirmadas = medidasSegurancaConfirmadas.includes(medida.valor) ? medidasSegurancaConfirmadas.filter((item) => item !== medida.valor) : [...medidasSegurancaConfirmadas, medida.valor]; limparErroAnalise('seguranca')"><span class="checkmark">{{ medidasSegurancaConfirmadas.includes(medida.valor) ? '✓' : '' }}</span>{{ medida.rotulo }}</button></fieldset>
+          <p v-if="errosAnalise.seguranca" class="inline-error">{{ errosAnalise.seguranca }}</p>
+          <label class="field"><span>Orientação complementar de segurança <small>(obrigatória para Outro)</small></span><textarea v-model="observacaoSegurancaConfirmada" rows="3" :class="{ 'input--error': errosAnalise.segurancaOutro }" @input="limparErroAnalise('segurancaOutro')" /><small v-if="errosAnalise.segurancaOutro" class="inline-error">{{ errosAnalise.segurancaOutro }}</small></label>
 
-          <div class="analysis-grid">
-            <label class="field"><span>Local de armazenamento temporário</span><input v-model="localArmazenamentoTemporario" /></label>
-            <label class="field"><span>Destino final previsto</span><input v-model="destinoFinalPrevisto" /></label>
-          </div>
+          <section class="storage-choice" :class="{ 'validation-box--error': errosAnalise.local }">
+            <span class="storage-choice__label">Local de armazenamento temporário</span>
+            <div class="storage-choice__modes">
+              <label><input v-model="modoLocalAnalise" type="radio" value="CATALOGO" /><span>Local cadastrado</span></label>
+              <label><input v-model="modoLocalAnalise" type="radio" value="MANUAL" /><span>Informar manualmente</span></label>
+            </div>
+
+            <div v-if="modoLocalAnalise === 'CATALOGO'" class="analysis-grid">
+              <label class="field">
+                <span>Local cadastrado</span>
+                <select v-model="localArmazenamentoResiduoId" @change="limparErroAnalise('local')">
+                  <option value="">Selecione...</option>
+                  <option v-for="local in locaisArmazenamento" :key="local.id" :value="local.id">{{ local.nome }}</option>
+                </select>
+                <small v-if="locaisArmazenamento.length === 0">Nenhum local ativo cadastrado. Use a opção manual.</small>
+              </label>
+              <label class="field">
+                <span>Complemento <small>(opcional)</small></span>
+                <input v-model="complementoLocalArmazenamento" maxlength="150" placeholder="Ex.: Prateleira B2" />
+              </label>
+            </div>
+
+            <label v-else class="field">
+              <span>Local manual</span>
+              <input v-model="localArmazenamentoTemporario" maxlength="255" placeholder="Descreva o local físico" @input="limparErroAnalise('local')" />
+            </label>
+            <p v-if="errosAnalise.local" class="inline-error">{{ errosAnalise.local }}</p>
+          </section>
+
+          <label class="field"><span>Destino final previsto</span><input v-model="destinoFinalPrevisto" :class="{ 'input--error': errosAnalise.destino }" @input="limparErroAnalise('destino')" /><small v-if="errosAnalise.destino" class="inline-error">{{ errosAnalise.destino }}</small></label>
           <label class="field"><span>Observação técnica <small>(opcional)</small></span><textarea v-model="observacaoGestor" rows="4" /></label>
           <p class="guidance guidance--warning">Ao confirmar, o resíduo é liberado para armazenamento e a impressão do rótulo é autorizada. O código SGL já foi gerado no registro inicial.</p>
         </div>
@@ -699,10 +948,92 @@ onMounted(carregar)
         <header><div><span>ARMAZENAMENTO</span><h2>Confirmar armazenamento temporário</h2></div><button type="button" @click="fecharArmazenamento">×</button></header>
         <div class="modal-content">
           <div class="selected-summary"><strong>{{ selecionado.codigoRastreio }}</strong><span>{{ selecionado.descricao }}</span></div>
-          <label class="field"><span>Local de armazenamento</span><input v-model="localArmazenamentoConfirmacao" placeholder="Local físico do recipiente" /></label>
-          <p class="guidance">Confirme o local físico onde o recipiente rotulado foi armazenado. É possível corrigir o local definido na análise.</p>
+
+          <div class="planned-location">
+            <span>Local planejado</span>
+            <strong>{{ selecionado.localArmazenamentoTemporario ?? 'Não definido' }}</strong>
+          </div>
+
+          <section class="storage-choice" :class="{ 'validation-box--error': erroArmazenamento }">
+            <span class="storage-choice__label">Confirmação do local físico</span>
+            <div class="storage-choice__modes storage-choice__modes--vertical">
+              <label><input v-model="modoLocalConfirmacao" type="radio" value="MANTER" /><span>Manter o local planejado</span></label>
+              <label><input v-model="modoLocalConfirmacao" type="radio" value="CATALOGO" /><span>Corrigir para outro local cadastrado</span></label>
+              <label><input v-model="modoLocalConfirmacao" type="radio" value="MANUAL" /><span>Corrigir manualmente</span></label>
+            </div>
+
+            <div v-if="modoLocalConfirmacao === 'CATALOGO'" class="analysis-grid">
+              <label class="field">
+                <span>Novo local cadastrado</span>
+                <select v-model="localArmazenamentoConfirmacaoId" @change="erroArmazenamento = ''">
+                  <option value="">Selecione...</option>
+                  <option v-for="local in locaisArmazenamento" :key="local.id" :value="local.id">{{ local.nome }}</option>
+                </select>
+                <small v-if="locaisArmazenamento.length === 0">Nenhum local ativo cadastrado.</small>
+              </label>
+              <label class="field">
+                <span>Complemento <small>(opcional)</small></span>
+                <input v-model="complementoLocalConfirmacao" maxlength="150" placeholder="Ex.: Estante A1" />
+              </label>
+            </div>
+
+            <label v-else-if="modoLocalConfirmacao === 'MANUAL'" class="field">
+              <span>Novo local físico</span>
+              <input v-model="localArmazenamentoConfirmacao" maxlength="255" placeholder="Descreva o local físico real" @input="erroArmazenamento = ''" />
+            </label>
+            <p v-if="erroArmazenamento" class="inline-error">{{ erroArmazenamento }}</p>
+          </section>
+
+          <p class="guidance">Se o recipiente foi armazenado onde estava previsto, apenas mantenha o local planejado. Correções ficam registradas no histórico.</p>
         </div>
         <footer><button class="secondary-action" type="button" @click="fecharArmazenamento">Cancelar</button><button class="storage-action" type="button" :disabled="enviando" @click="confirmarArmazenamento">{{ enviando ? 'Confirmando...' : 'Confirmar armazenamento' }}</button></footer>
+      </section>
+    </div>
+
+    <div v-if="administracaoAberta && selecionado" class="modal-backdrop" @click.self="fecharAdministracao">
+      <section class="modal-card" role="dialog" aria-modal="true" aria-label="Correção administrativa do resíduo">
+        <header>
+          <div>
+            <span>ADMINISTRAÇÃO DO CICLO</span>
+            <h2>{{ acaoAdministrativa === 'CANCELAR' ? 'Cancelar resíduo' : 'Retornar etapa operacional' }}</h2>
+          </div>
+          <button type="button" @click="fecharAdministracao">×</button>
+        </header>
+        <div class="modal-content">
+          <div class="selected-summary">
+            <strong>{{ selecionado.codigoRastreio ?? selecionado.id }}</strong>
+            <span>{{ selecionado.descricao }} · {{ statusRotulo(selecionado.status) }}</span>
+          </div>
+          <p class="guidance guidance--warning">
+            {{ acaoAdministrativa === 'CANCELAR'
+              ? 'O cancelamento encerra este registro operacional. Resíduos já despachados precisam retornar uma etapa antes de serem cancelados.'
+              : 'O resíduo voltará exatamente uma etapa do ciclo. O histórico permanece preservado e a justificativa será auditável.' }}
+          </p>
+          <label class="field">
+            <span>Justificativa administrativa</span>
+            <textarea
+              v-model="justificativaAdministrativa"
+              maxlength="1000"
+              rows="4"
+              required
+              :class="{ 'input--error': erroAdministracao }"
+              placeholder="Explique por que esta correção é necessária..."
+              @input="erroAdministracao = ''"
+            />
+            <small v-if="erroAdministracao" class="inline-error">{{ erroAdministracao }}</small>
+          </label>
+        </div>
+        <footer>
+          <button class="secondary-action" type="button" @click="fecharAdministracao">Voltar</button>
+          <button
+            :class="acaoAdministrativa === 'CANCELAR' ? 'admin-cancel-action' : 'admin-return-action'"
+            type="button"
+            :disabled="enviando"
+            @click="confirmarAdministracao"
+          >
+            {{ enviando ? 'Aplicando...' : acaoAdministrativa === 'CANCELAR' ? 'Confirmar cancelamento' : 'Confirmar retorno' }}
+          </button>
+        </footer>
       </section>
     </div>
 
@@ -711,7 +1042,7 @@ onMounted(carregar)
         <header><div><span>DESPACHO</span><h2>Confirmar destinação do resíduo</h2></div><button type="button" @click="fecharDespacho">×</button></header>
         <div class="modal-content">
           <div class="selected-summary"><strong>{{ selecionado.codigoRastreio }}</strong><span>{{ selecionado.descricao }}</span></div>
-          <label class="field"><span>Destino final confirmado</span><input v-model="destinoFinalConfirmado" placeholder="Empresa, unidade ou destino responsável" /></label>
+          <label class="field"><span>Destino final confirmado</span><input v-model="destinoFinalConfirmado" :class="{ 'input--error': erroDespacho }" placeholder="Empresa, unidade ou destino responsável" @input="erroDespacho = ''" /><small v-if="erroDespacho" class="inline-error">{{ erroDespacho }}</small></label>
           <label class="field field--spaced"><span>Observação <small>(opcional)</small></span><textarea v-model="observacaoDespacho" rows="4" /></label>
           <p class="guidance guidance--warning">O despacho encerra o ciclo operacional do resíduo no SGL e fica registrado no histórico.</p>
         </div>
@@ -723,38 +1054,48 @@ onMounted(carregar)
 
 <style scoped>
 .residuos-completo { max-width: 1500px; margin: 0 auto; color: #16243b; }
-.metrics-grid--five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.metrics-grid--six { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .residuo-alvo { background: #fbf8ff !important; box-shadow: inset 4px 0 0 #7446df; animation: destaque-residuo 900ms ease-out; }
 @keyframes destaque-residuo { from { background: #eee5ff; } to { background: #fbf8ff; } }
-.storage-action, .dispatch-action, .label-action { min-height: 40px; padding: 0 14px; border: 0; border-radius: 7px; color: #fff; font: inherit; font-size: 11px; font-weight: 850; cursor: pointer; }
+.storage-action, .dispatch-action, .label-action, .admin-return-action, .admin-cancel-action { min-height: 40px; padding: 0 14px; border: 0; border-radius: 7px; color: #fff; font: inherit; font-size: 11px; font-weight: 850; cursor: pointer; }
 .storage-action { background: #0f766e; }
 .dispatch-action { background: #6b4fa1; }
 .label-action { background: #173d7a; }
-.storage-action:disabled, .dispatch-action:disabled { opacity: .55; cursor: default; }
+.admin-return-action { background: #b7791f; }
+.admin-cancel-action { background: #b42318; }
+.storage-action:disabled, .dispatch-action:disabled, .admin-return-action:disabled, .admin-cancel-action:disabled { opacity: .55; cursor: default; }
+.component-item { display: grid; gap: 8px !important; }
+.component-item__header { min-width: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.component-item__identity { min-width: 0; flex: 1; }
+.component-item__identity strong, .component-item__identity small { display: block; }
+.component-item__identity strong { overflow-wrap: anywhere; }
+.component-principal { flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 26px; padding: 3px 9px; border: 1px solid var(--sgl-primary); border-radius: 999px; background: var(--sgl-surface-soft); color: var(--sgl-primary); font-size: var(--sgl-font-helper); font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+.component-item > p { margin: 0; }
+.modal-operation-error { margin: 0; }
 .details-list { display: grid; gap: 8px; margin: 0; }
 .details-list div { display: grid; grid-template-columns: 150px 1fr; gap: 12px; }
-.details-list dt { color: #7a879a; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-.details-list dd { margin: 0; color: #33465f; font-size: 11px; }
+.details-list dt { color: #7a879a; font-size: var(--sgl-font-helper); font-weight: 800; text-transform: uppercase; }
+.details-list dd { margin: 0; color: #33465f; font-size: var(--sgl-font-label); }
 .comparison-section { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .comparison-card { min-width: 0; display: flex; flex-direction: column; gap: 14px; padding: 16px; border: 1px solid #d9e3f0; border-radius: 10px; background: #f8fbff; }
 .comparison-card--approved { border-color: #c7dfcf; background: #f5fbf7; }
 .comparison-card.pending { border-color: #d9e3f0; background: #f8fafc; opacity: .82; }
 .comparison-card > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.comparison-card > header span { color: #738198; font-size: 9px; font-weight: 900; letter-spacing: .05em; }
-.comparison-card > header strong { color: #263b5b; font-size: 10px; text-align: right; }
+.comparison-card > header span { color: #738198; font-size: var(--sgl-font-helper); font-weight: 800; letter-spacing: .03em; }
+.comparison-card > header strong { color: #263b5b; font-size: var(--sgl-font-label); text-align: right; }
 .comparison-card dl { display: grid; gap: 10px; margin: 0; }
 .comparison-card dl > div { display: grid; grid-template-columns: 105px 1fr; gap: 12px; padding-top: 10px; border-top: 1px solid rgb(164 180 202 / 25%); }
-.comparison-card dt { color: #7a879a; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-.comparison-card dd { margin: 0; color: #33465f; font-size: 11px; line-height: 1.45; }
+.comparison-card dt { color: #7a879a; font-size: var(--sgl-font-helper); font-weight: 800; text-transform: uppercase; }
+.comparison-card dd { margin: 0; color: #33465f; font-size: var(--sgl-font-label); line-height: var(--sgl-line-height-body); }
 .comparison-card dd b, .comparison-card dd small { display: block; }
-.comparison-card dd small { margin-top: 3px; color: #6f7e92; font-size: 9px; }
+.comparison-card dd small { margin-top: 3px; color: #6f7e92; font-size: var(--sgl-font-helper); }
 .approval-meta { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid #cfe0d4; }
-.approval-meta span { color: #738198; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-.approval-meta strong { color: #20583a; font-size: 10px; }
-.approval-meta small { color: #718096; font-size: 9px; }
+.approval-meta span { color: #738198; font-size: var(--sgl-font-helper); font-weight: 800; text-transform: uppercase; }
+.approval-meta strong { color: #20583a; font-size: var(--sgl-font-label); }
+.approval-meta small { color: #718096; font-size: var(--sgl-font-helper); }
 .tracking-card { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 16px; border: 1px solid #d9e3f0; border-radius: 9px; background: #f8fbff; }
-.tracking-card span { display: block; color: #738198; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-.tracking-card strong { display: block; margin-top: 5px; color: #17345e; font-size: 12px; line-height: 1.35; }
+.tracking-card span { display: block; color: #738198; font-size: var(--sgl-font-helper); font-weight: 800; text-transform: uppercase; }
+.tracking-card strong { display: block; margin-top: 5px; color: #17345e; font-size: var(--sgl-font-body); line-height: var(--sgl-line-height-body); }
 .history-section { padding-top: 2px; }
 .history-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
 .history-heading span { color: #2456c4; font-size: 9px; font-weight: 900; letter-spacing: .06em; }
@@ -773,6 +1114,18 @@ onMounted(carregar)
 .timeline-card small { display: block; margin-top: 7px; color: #7c899b; font-size: 9px; line-height: 1.45; }
 .drawer-actions--wrap { flex-wrap: wrap; }
 .field--spaced { margin-top: 15px; }
-@media (max-width: 1180px) { .metrics-grid--five { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 760px) { .metrics-grid--five, .tracking-card, .comparison-section { grid-template-columns: 1fr; } .timeline-card > div { flex-direction: column; gap: 4px; } .approval-meta { grid-template-columns: 1fr; } }
+.validation-box--error { border-color: #e4a39f !important; background: #fff8f7 !important; }
+.inline-error { display: block; margin: 7px 0 0; color: #a82820; font-size: 9.5px; font-weight: 800; line-height: 1.45; }
+.input--error { border-color: #d97068 !important; box-shadow: 0 0 0 3px rgb(196 60 49 / 8%) !important; }
+.storage-choice { display: grid; gap: 10px; padding: 12px; border: 1px solid #dce4ee; border-radius: 8px; background: #fbfcfe; }
+.storage-choice__label { color: #405169; font-size: var(--sgl-font-label); font-weight: 700; text-transform: none; }
+.storage-choice__modes { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.storage-choice__modes--vertical { align-items: flex-start; flex-direction: column; }
+.storage-choice__modes label { display: inline-flex; align-items: center; gap: 6px; color: #526178; font-size: var(--sgl-font-label); cursor: pointer; }
+.storage-choice__modes input { margin: 0; }
+.planned-location { display: grid; gap: 4px; padding: 11px 12px; border: 1px solid #cfe0d4; border-radius: 8px; background: #f5fbf7; }
+.planned-location span { color: #648070; font-size: var(--sgl-font-label); font-weight: 700; text-transform: none; }
+.planned-location strong { color: #20583a; font-size: var(--sgl-font-body); line-height: var(--sgl-line-height-body); }
+@media (max-width: 1180px) { .metrics-grid--six { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .metrics-grid--six, .tracking-card, .comparison-section { grid-template-columns: 1fr; } .timeline-card > div { flex-direction: column; gap: 4px; } .approval-meta { grid-template-columns: 1fr; } }
 </style>

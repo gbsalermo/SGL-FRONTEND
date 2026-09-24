@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { pedidoService } from '@/modules/pedidos/services/pedidoService'
 import type { PedidoResponse, StatusPedido } from '@/modules/pedidos/types/pedido'
 import { residuoService } from '@/modules/residuos/services/residuoService'
-import type { ResiduoResponse, StatusResiduo } from '@/modules/residuos/types/residuo'
+import type { HistoricoResiduoResponse, ResiduoResponse, StatusResiduo } from '@/modules/residuos/types/residuo'
 import { useSessionStore } from '@/stores/session'
 
 interface AtualizacaoUsuario {
@@ -15,7 +15,7 @@ interface AtualizacaoUsuario {
   detalhe: string
   data: string
   rota: string
-  classe: 'blue' | 'orange' | 'green' | 'slate'
+  classe: 'blue' | 'orange' | 'green' | 'slate' | 'red'
 }
 
 const router = useRouter()
@@ -25,6 +25,7 @@ const carregando = ref(true)
 const erro = ref('')
 const pedidos = ref<PedidoResponse[]>([])
 const residuos = ref<ResiduoResponse[]>([])
+const historicoResiduos = ref<HistoricoResiduoResponse[]>([])
 const atualizadoEm = ref(new Date())
 
 const primeiroNome = computed(() => session.usuario?.nome?.trim().split(/\s+/)[0] || 'usuário')
@@ -32,7 +33,7 @@ const primeiroNome = computed(() => session.usuario?.nome?.trim().split(/\s+/)[0
 const pedidosPendentes = computed(() => pedidos.value.filter((pedido) => pedido.status === 'PENDENTE'))
 const pedidosAprovados = computed(() => pedidos.value.filter((pedido) => pedido.status === 'APROVADO'))
 const pedidosEntregues = computed(() => pedidos.value.filter((pedido) => pedido.status === 'ENTREGUE'))
-const residuosAtivos = computed(() => residuos.value.filter((residuo) => residuo.status !== 'DESPACHADO'))
+const residuosAtivos = computed(() => residuos.value.filter((residuo) => !['DESPACHADO', 'CANCELADO'].includes(residuo.status)))
 
 const pedidoMaisRecente = computed(() =>
   [...pedidos.value].sort(
@@ -43,6 +44,18 @@ const pedidoMaisRecente = computed(() =>
 const residuoMaisRecente = computed(() =>
   [...residuos.value].sort((a, b) => dataMaisRecenteResiduo(b).getTime() - dataMaisRecenteResiduo(a).getTime())[0] ?? null,
 )
+
+function formatarObservacaoHistorico(observacao: string | null) {
+  if (!observacao) return ''
+
+  return observacao
+    .replaceAll('ARMAZENADO_TEMPORARIAMENTE', 'Armazenado temporariamente')
+    .replaceAll('LIBERADO_PARA_ARMAZENAMENTO', 'Liberado para armazenamento')
+    .replaceAll('EM_ANALISE', 'Em análise')
+    .replaceAll('INFORMADO', 'Informado')
+    .replaceAll('DESPACHADO', 'Despachado')
+    .replaceAll('CANCELADO', 'Cancelado')
+}
 
 const atualizacoes = computed<AtualizacaoUsuario[]>(() => {
   const itens: AtualizacaoUsuario[] = []
@@ -120,6 +133,31 @@ const atualizacoes = computed<AtualizacaoUsuario[]>(() => {
     }
   })
 
+  historicoResiduos.value
+    .filter((evento) =>
+      evento.acao === 'RETORNO_ADMINISTRATIVO_DE_ETAPA'
+      || evento.acao === 'RESIDUO_CANCELADO_ADMINISTRATIVAMENTE')
+    .forEach((evento) => {
+      const residuo = residuos.value.find((item) => item.id === evento.residuoId)
+      const codigo = evento.residuoCodigoRastreio
+        || (residuo ? codigoResiduo(residuo) : `RES-${evento.residuoId.replaceAll('-', '').slice(-6).toUpperCase()}`)
+
+      const cancelado = evento.acao === 'RESIDUO_CANCELADO_ADMINISTRATIVAMENTE'
+
+      itens.push({
+        id: `historico-residuo-${evento.id}`,
+        tipo: 'residuo',
+        titulo: cancelado
+          ? `${codigo} foi cancelado`
+          : `${codigo} retornou para reavaliação`,
+        detalhe: formatarObservacaoHistorico(evento.observacao)
+          || (cancelado ? 'Cancelamento administrativo registrado.' : 'Retorno administrativo registrado.'),
+        data: evento.dataHora,
+        rota: `/meus-residuos?residuo=${encodeURIComponent(evento.residuoId)}`,
+        classe: cancelado ? 'red' : 'slate',
+      })
+    })
+
   return itens
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     .slice(0, 6)
@@ -144,9 +182,45 @@ async function carregarDashboard() {
   pedidos.value = pedidosResult.status === 'fulfilled' ? pedidosResult.value : []
   residuos.value = residuosResult.status === 'fulfilled' ? residuosResult.value : []
 
-  const falhas = [pedidosResult, residuosResult].filter((resultado) => resultado.status === 'rejected').length
-  if (falhas > 0) {
-    erro.value = falhas === 2
+  let historicoFalhou = false
+
+  try {
+    const historicoAgregado = await residuoService.buscarHistoricoPorGerador(usuarioId)
+
+    if (historicoAgregado.length > 0 || residuos.value.length === 0) {
+      historicoResiduos.value = historicoAgregado
+    } else {
+      const resultadosHistorico = await Promise.allSettled(
+        residuos.value.map((residuo) => residuoService.buscarHistorico(residuo.id)),
+      )
+
+      historicoResiduos.value = resultadosHistorico
+        .filter((resultado): resultado is PromiseFulfilledResult<HistoricoResiduoResponse[]> =>
+          resultado.status === 'fulfilled')
+        .flatMap((resultado) => resultado.value)
+        .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())
+
+      historicoFalhou = resultadosHistorico.some((resultado) => resultado.status === 'rejected')
+    }
+  } catch {
+    const resultadosHistorico = await Promise.allSettled(
+      residuos.value.map((residuo) => residuoService.buscarHistorico(residuo.id)),
+    )
+
+    historicoResiduos.value = resultadosHistorico
+      .filter((resultado): resultado is PromiseFulfilledResult<HistoricoResiduoResponse[]> =>
+        resultado.status === 'fulfilled')
+      .flatMap((resultado) => resultado.value)
+      .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())
+
+    historicoFalhou = resultadosHistorico.some((resultado) => resultado.status === 'rejected')
+  }
+
+  const falhasPrincipais = [pedidosResult, residuosResult]
+    .filter((resultado) => resultado.status === 'rejected').length
+
+  if (falhasPrincipais > 0 || historicoFalhou) {
+    erro.value = falhasPrincipais === 2
       ? 'Não foi possível carregar seus pedidos e resíduos. Tente atualizar novamente.'
       : 'Parte dos seus dados não pôde ser atualizada. O conteúdo disponível continua exibido.'
   }
@@ -168,7 +242,12 @@ function codigoResiduo(residuo: ResiduoResponse) {
 }
 
 function dataMaisRecenteResiduo(residuo: ResiduoResponse) {
+  const eventoMaisRecente = historicoResiduos.value
+    .filter((evento) => evento.residuoId === residuo.id)
+    .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())[0]
+
   const datas = [
+    eventoMaisRecente?.dataHora,
     residuo.dataDespacho,
     residuo.dataArmazenamentoTemporario,
     residuo.dataLiberacao,
@@ -281,12 +360,14 @@ function indiceEtapaResiduo(status: StatusResiduo) {
     LIBERADO_PARA_ARMAZENAMENTO: 2,
     ARMAZENADO_TEMPORARIAMENTE: 3,
     DESPACHADO: 4,
+    CANCELADO: 0,
   }
   return mapa[status]
 }
 
 function estadoEtapaResiduo(residuo: ResiduoResponse, indice: number) {
   const atual = indiceEtapaResiduo(residuo.status)
+  if (residuo.status === 'CANCELADO') return 'error'
   if (residuo.status === 'DESPACHADO') return indice <= atual ? 'done' : 'pending'
   if (indice < atual) return 'done'
   if (indice === atual) return 'current'
@@ -316,11 +397,15 @@ function mensagemResiduo(residuo: ResiduoResponse) {
     LIBERADO_PARA_ARMAZENAMENTO: 'A análise foi concluída e o resíduo está liberado para armazenamento temporário.',
     ARMAZENADO_TEMPORARIAMENTE: 'O resíduo está armazenado temporariamente e aguarda a destinação final.',
     DESPACHADO: 'O resíduo foi despachado e o fluxo de destinação foi concluído.',
+    CANCELADO: 'O resíduo foi cancelado administrativamente. Consulte os detalhes para acompanhar a situação.',
   }
   return mapa[residuo.status]
 }
 
 onMounted(carregarDashboard)
+onActivated(() => {
+  if (!carregando.value) void carregarDashboard()
+})
 </script>
 
 <template>
@@ -474,7 +559,10 @@ onMounted(carregarDashboard)
             </div>
           </div>
 
-          <div class="tracking-message tracking-message--orange">
+          <div
+            class="tracking-message tracking-message--orange"
+            :class="{ 'tracking-message--error': residuoMaisRecente.status === 'CANCELADO' }"
+          >
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
             <span>{{ mensagemResiduo(residuoMaisRecente) }}</span>
           </div>
@@ -758,6 +846,7 @@ onMounted(carregarDashboard)
 .update-icon--orange { background: #fff1e7; color: #ec7315; }
 .update-icon--green { background: #eaf8ef; color: #168a47; }
 .update-icon--slate { background: #eef1f5; color: #5f7087; }
+.update-icon--red { background: #fff0f0; color: #c83232; }
 .update-copy { min-width: 0; display: grid; gap: 2px; }
 .update-copy strong, .update-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .update-copy strong { color: #2a394f; font-size: 10.5px; }

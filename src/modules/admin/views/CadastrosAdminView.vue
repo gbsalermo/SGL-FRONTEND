@@ -10,6 +10,8 @@ import type {
   ClasseResiduoRequest,
   LaboratorioCadastro,
   LaboratorioRequest,
+  LocalArmazenamentoResiduoCadastro,
+  LocalArmazenamentoResiduoRequest,
   MedidaSegurancaCadastro,
   NivelRiscoCadastro,
   OrgaoFiscalizadorCadastro,
@@ -25,8 +27,8 @@ import type {
 } from '@/modules/admin/types/cadastros'
 import { useSessionStore } from '@/stores/session'
 
-type AbaCadastro = 'laboratorios' | 'projetos' | 'produtos' | 'classes-residuo' | 'permissoes'
-type ModalCadastro = 'laboratorio' | 'projeto' | 'produto' | 'classe-residuo' | null
+type AbaCadastro = 'laboratorios' | 'projetos' | 'produtos' | 'classes-residuo' | 'locais-armazenamento' | 'permissoes'
+type ModalCadastro = 'laboratorio' | 'projeto' | 'produto' | 'classe-residuo' | 'local-armazenamento' | null
 
 interface LaboratorioForm {
   unidadeId: string
@@ -74,6 +76,12 @@ interface ClasseResiduoForm {
   ativo: boolean
 }
 
+interface LocalArmazenamentoForm {
+  unidadeId: string
+  nome: string
+  ativo: boolean
+}
+
 const session = useSessionStore()
 const aba = ref<AbaCadastro>('laboratorios')
 const unidades = ref<UnidadeCadastro[]>([])
@@ -81,6 +89,7 @@ const laboratorios = ref<LaboratorioCadastro[]>([])
 const projetos = ref<ProjetoCadastro[]>([])
 const produtos = ref<ProdutoCadastro[]>([])
 const classesResiduo = ref<ClasseResiduoCadastro[]>([])
+const locaisArmazenamento = ref<LocalArmazenamentoResiduoCadastro[]>([])
 const usuarios = ref<UsuarioPermissao[]>([])
 const carregando = ref(false)
 const salvando = ref(false)
@@ -99,6 +108,7 @@ const laboratorioForm = ref<LaboratorioForm>(novoLaboratorio())
 const projetoForm = ref<ProjetoForm>(novoProjeto())
 const produtoForm = ref<ProdutoForm>(novoProduto())
 const classeResiduoForm = ref<ClasseResiduoForm>(novaClasseResiduo())
+const localArmazenamentoForm = ref<LocalArmazenamentoForm>(novoLocalArmazenamento())
 const perfisEdicao = ref<Record<string, PerfilUsuario>>({})
 
 const perfis: Array<{ valor: PerfilUsuario; rotulo: string }> = [
@@ -131,6 +141,7 @@ const abas: Array<{ id: AbaCadastro; titulo: string; descricao: string }> = [
   { id: 'projetos', titulo: 'Projetos', descricao: 'Projetos vinculados aos laboratórios' },
   { id: 'produtos', titulo: 'Produtos', descricao: 'Catálogo-base de materiais do SGL' },
   { id: 'classes-residuo', titulo: 'Classes de resíduo', descricao: 'Classificações disponíveis para a Unidade' },
+  { id: 'locais-armazenamento', titulo: 'Locais de armazenamento', descricao: 'Locais temporários disponíveis para Resíduos' },
   { id: 'permissoes', titulo: 'Permissões', descricao: 'Perfis de acesso dos usuários existentes' },
 ]
 
@@ -161,6 +172,12 @@ const classesResiduoFiltradas = computed(() => classesResiduo.value.filter((item
   return bateBusca && (mostrarInativos.value || item.ativo)
 }))
 
+const locaisArmazenamentoFiltrados = computed(() => locaisArmazenamento.value.filter((item) => {
+  const bateBusca = !termoBusca.value || [item.nome, item.unidadeNome]
+    .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termoBusca.value))
+  return bateBusca && (mostrarInativos.value || item.ativo)
+}))
+
 const usuariosFiltrados = computed(() => usuarios.value.filter((item) => {
   if (!termoBusca.value) return true
   return [item.nome, item.email, item.unidadeNome ?? '', item.laboratorioNome ?? '', rotuloPerfil(item.perfil)]
@@ -179,6 +196,7 @@ const resumo = computed(() => ({
   projetos: projetos.value.filter((item) => item.ativo).length,
   produtos: produtos.value.filter((item) => item.ativo).length,
   classesResiduo: classesResiduo.value.filter((item) => item.ativo).length,
+  locaisArmazenamento: locaisArmazenamento.value.filter((item) => item.ativo).length,
   usuarios: usuarios.value.filter((item) => item.ativo).length,
 }))
 
@@ -203,6 +221,21 @@ function novoProduto(): ProdutoForm {
 function novaClasseResiduo(): ClasseResiduoForm {
   return { unidadeId: session.usuario?.unidadeId ?? '', codigo: '', descricao: '', ativo: true }
 }
+
+function novoLocalArmazenamento(): LocalArmazenamentoForm {
+  return { unidadeId: session.usuario?.unidadeId ?? '', nome: '', ativo: true }
+}
+
+const rotuloNovoCadastro = computed(() => {
+  const rotulos: Partial<Record<AbaCadastro, string>> = {
+    laboratorios: 'laboratório',
+    projetos: 'projeto',
+    produtos: 'produto',
+    'classes-residuo': 'classe',
+    'locais-armazenamento': 'local',
+  }
+  return rotulos[aba.value] ?? 'cadastro'
+})
 
 function mensagemErro(error: unknown, fallback = 'Não foi possível concluir a operação.') {
   if (axios.isAxiosError<ApiErrorAdmin>(error)) return error.response?.data?.message ?? fallback
@@ -261,6 +294,9 @@ function abrirNovo() {
   } else if (aba.value === 'classes-residuo') {
     classeResiduoForm.value = novaClasseResiduo()
     modal.value = 'classe-residuo'
+  } else if (aba.value === 'locais-armazenamento') {
+    localArmazenamentoForm.value = novoLocalArmazenamento()
+    modal.value = 'local-armazenamento'
   }
 }
 
@@ -323,6 +359,17 @@ function editarClasseResiduo(item: ClasseResiduoCadastro) {
   classeResiduoForm.value = { unidadeId: item.unidadeId, codigo: item.codigo, descricao: item.descricao, ativo: item.ativo }
   erroModal.value = ''
   modal.value = 'classe-residuo'
+}
+
+function editarLocalArmazenamento(item: LocalArmazenamentoResiduoCadastro) {
+  idEdicao.value = item.id
+  localArmazenamentoForm.value = {
+    unidadeId: item.unidadeId,
+    nome: item.nome,
+    ativo: item.ativo,
+  }
+  erroModal.value = ''
+  modal.value = 'local-armazenamento'
 }
 
 function fecharModal() {
@@ -495,6 +542,32 @@ async function salvarClasseResiduo() {
   }
 }
 
+async function salvarLocalArmazenamento() {
+  if (!localArmazenamentoForm.value.unidadeId || !localArmazenamentoForm.value.nome.trim()) {
+    erroModal.value = 'Informe a unidade e o nome do local de armazenamento.'
+    return
+  }
+
+  const payload: LocalArmazenamentoResiduoRequest = {
+    unidadeId: localArmazenamentoForm.value.unidadeId,
+    nome: localArmazenamentoForm.value.nome.trim(),
+    ativo: localArmazenamentoForm.value.ativo,
+  }
+
+  salvando.value = true
+  try {
+    if (idEdicao.value) await cadastrosAdminService.atualizarLocalArmazenamentoResiduo(idEdicao.value, payload)
+    else await cadastrosAdminService.criarLocalArmazenamentoResiduo(payload)
+    sucesso.value = idEdicao.value ? 'Local de armazenamento atualizado.' : 'Local de armazenamento cadastrado.'
+    fecharModalForcado()
+    await carregar()
+  } catch (error) {
+    erroModal.value = mensagemErro(error)
+  } finally {
+    salvando.value = false
+  }
+}
+
 function fecharModalForcado() {
   modal.value = null
   idEdicao.value = null
@@ -592,6 +665,24 @@ async function alternarClasseResiduo(item: ClasseResiduoCadastro) {
   }
 }
 
+async function alternarLocalArmazenamento(item: LocalArmazenamentoResiduoCadastro) {
+  alterandoStatus.value = item.id
+  erro.value = ''
+  try {
+    await cadastrosAdminService.atualizarLocalArmazenamentoResiduo(item.id, {
+      unidadeId: item.unidadeId,
+      nome: item.nome,
+      ativo: !item.ativo,
+    })
+    sucesso.value = `Local ${item.ativo ? 'inativado' : 'reativado'}.`
+    await carregar()
+  } catch (error) {
+    erro.value = mensagemErro(error)
+  } finally {
+    alterandoStatus.value = null
+  }
+}
+
 async function salvarPermissao(usuario: UsuarioPermissao) {
   const novoPerfil = perfisEdicao.value[usuario.id]
   if (!novoPerfil || novoPerfil === usuario.perfil || usuario.id === session.usuario?.id) return
@@ -614,12 +705,13 @@ async function carregar() {
   carregando.value = true
   erro.value = ''
   try {
-    const [units, labs, projects, products, residueClasses, users] = await Promise.all([
+    const [units, labs, projects, products, residueClasses, storageLocations, users] = await Promise.all([
       cadastrosAdminService.listarUnidades(),
       cadastrosAdminService.listarLaboratorios(),
       cadastrosAdminService.listarProjetos(),
       cadastrosAdminService.listarProdutos(),
       cadastrosAdminService.listarClassesResiduo(),
+      cadastrosAdminService.listarLocaisArmazenamentoResiduo(),
       cadastrosAdminService.listarUsuarios(),
     ])
     unidades.value = [...units].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
@@ -627,6 +719,7 @@ async function carregar() {
     projetos.value = [...projects].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     produtos.value = [...products].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     classesResiduo.value = [...residueClasses].sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
+    locaisArmazenamento.value = [...storageLocations].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     usuarios.value = [...users].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     perfisEdicao.value = Object.fromEntries(usuarios.value.map((usuario) => [usuario.id, usuario.perfil]))
   } catch (error) {
@@ -657,6 +750,7 @@ onMounted(carregar)
       <article><span>Projetos ativos</span><strong>{{ resumo.projetos }}</strong></article>
       <article><span>Produtos ativos</span><strong>{{ resumo.produtos }}</strong></article>
       <article><span>Classes ativas</span><strong>{{ resumo.classesResiduo }}</strong></article>
+      <article><span>Locais ativos</span><strong>{{ resumo.locaisArmazenamento }}</strong></article>
       <article><span>Usuários ativos</span><strong>{{ resumo.usuarios }}</strong><small>vindos do cadastro institucional</small></article>
     </section>
 
@@ -692,10 +786,11 @@ onMounted(carregar)
             <p v-else-if="aba === 'projetos'">Mantenha os projetos associados aos laboratórios.</p>
             <p v-else-if="aba === 'produtos'">Mantenha o catálogo de produtos; estoque e lotes continuam em suas áreas operacionais.</p>
             <p v-else-if="aba === 'classes-residuo'">Mantenha as classes disponíveis para classificação de resíduos nesta Unidade.</p>
+            <p v-else-if="aba === 'locais-armazenamento'">Mantenha os locais temporários que poderão ser selecionados no fluxo de Resíduos.</p>
             <p v-else>Usuários são criados pelo fluxo institucional. Aqui é alterado somente o perfil de acesso.</p>
           </div>
           <button v-if="aba !== 'permissoes'" class="btn btn--primary" type="button" @click="abrirNovo">
-            + Novo {{ aba === 'laboratorios' ? 'laboratório' : aba === 'projetos' ? 'projeto' : aba === 'produtos' ? 'produto' : 'classe' }}
+            + Novo {{ rotuloNovoCadastro }}
           </button>
         </header>
 
@@ -788,6 +883,24 @@ onMounted(carregar)
           </table>
         </div>
 
+        <div v-else-if="aba === 'locais-armazenamento'" class="table-wrap">
+          <table>
+            <thead><tr><th>Situação</th><th>Local</th><th>Unidade</th><th></th></tr></thead>
+            <tbody>
+              <tr v-for="item in locaisArmazenamentoFiltrados" :key="item.id">
+                <td><span class="status" :class="item.ativo ? 'status--active' : 'status--inactive'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td>
+                <td><strong>{{ item.nome }}</strong><small>Local disponível para armazenamento temporário de Resíduos</small></td>
+                <td>{{ item.unidadeNome }}</td>
+                <td class="actions">
+                  <button type="button" @click="editarLocalArmazenamento(item)">Editar</button>
+                  <button type="button" :disabled="alterandoStatus === item.id" @click="alternarLocalArmazenamento(item)">{{ item.ativo ? 'Inativar' : 'Reativar' }}</button>
+                </td>
+              </tr>
+              <tr v-if="locaisArmazenamentoFiltrados.length === 0"><td colspan="4" class="empty-table">Nenhum local de armazenamento encontrado.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
         <div v-else class="table-wrap">
           <table class="permissions-table">
             <thead><tr><th>Usuário</th><th>Unidade / laboratório</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
@@ -825,7 +938,7 @@ onMounted(carregar)
         <header>
           <div>
             <span>{{ idEdicao ? 'EDIÇÃO' : 'NOVO CADASTRO' }}</span>
-            <h2>{{ modal === 'laboratorio' ? 'Laboratório' : modal === 'projeto' ? 'Projeto' : modal === 'produto' ? 'Produto' : 'Classe de resíduo' }}</h2>
+            <h2>{{ modal === 'laboratorio' ? 'Laboratório' : modal === 'projeto' ? 'Projeto' : modal === 'produto' ? 'Produto' : modal === 'classe-residuo' ? 'Classe de resíduo' : 'Local de armazenamento' }}</h2>
           </div>
           <button type="button" aria-label="Fechar" @click="fecharModal">×</button>
         </header>
@@ -908,7 +1021,7 @@ onMounted(carregar)
           <footer class="modal-actions"><button class="btn btn--ghost" type="button" :disabled="salvando" @click="fecharModal">Cancelar</button><button class="btn btn--primary" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar produto' }}</button></footer>
         </form>
 
-        <form v-else class="modal-body" @submit.prevent="salvarClasseResiduo">
+        <form v-else-if="modal === 'classe-residuo'" class="modal-body" @submit.prevent="salvarClasseResiduo">
           <div class="form-grid">
             <label class="field"><span>Unidade *</span><select v-model="classeResiduoForm.unidadeId" required><option value="">Selecione...</option><option v-for="unidade in unidades" :key="unidade.id" :value="unidade.id">{{ unidade.sigla ? `${unidade.sigla} — ${unidade.nome}` : unidade.nome }}</option></select></label>
             <label class="field"><span>Código *</span><input v-model="classeResiduoForm.codigo" required placeholder="Ex.: A" /></label>
@@ -916,6 +1029,16 @@ onMounted(carregar)
           <label class="field"><span>Descrição *</span><textarea v-model="classeResiduoForm.descricao" rows="4" required /></label>
           <label class="check-line"><input v-model="classeResiduoForm.ativo" type="checkbox" /><span>Classe ativa</span></label>
           <footer class="modal-actions"><button class="btn btn--ghost" type="button" :disabled="salvando" @click="fecharModal">Cancelar</button><button class="btn btn--primary" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar classe' }}</button></footer>
+        </form>
+
+        <form v-else class="modal-body" @submit.prevent="salvarLocalArmazenamento">
+          <div class="form-grid">
+            <label class="field"><span>Unidade *</span><select v-model="localArmazenamentoForm.unidadeId" required><option value="">Selecione...</option><option v-for="unidade in unidades" :key="unidade.id" :value="unidade.id">{{ unidade.sigla ? `${unidade.sigla} — ${unidade.nome}` : unidade.nome }}</option></select></label>
+            <label class="field"><span>Nome do local *</span><input v-model="localArmazenamentoForm.nome" maxlength="150" required placeholder="Ex.: Almoxarifado Químico" /></label>
+          </div>
+          <p class="form-hint">Cadastre apenas o local-base. Prateleira, estante ou posição específica será informada como complemento no fluxo do Resíduo.</p>
+          <label class="check-line"><input v-model="localArmazenamentoForm.ativo" type="checkbox" /><span>Local ativo</span></label>
+          <footer class="modal-actions"><button class="btn btn--ghost" type="button" :disabled="salvando" @click="fecharModal">Cancelar</button><button class="btn btn--primary" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar local' }}</button></footer>
         </form>
       </section>
     </div>
@@ -928,7 +1051,7 @@ onMounted(carregar)
 .eyebrow { margin: 0 0 7px; color: #2459bd; font-size: 10px; font-weight: 900; letter-spacing: .08em; }
 .page-header h1 { margin: 0; color: #0e2140; font-size: 31px; line-height: 1.1; }
 .page-header span { display: block; margin-top: 7px; color: #6d7c91; font-size: 12px; }
-.summary-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 11px; margin-bottom: 12px; }
+.summary-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 11px; margin-bottom: 12px; }
 .summary-grid article { padding: 15px 17px; border: 1px solid #dde5ef; border-radius: 9px; background: #fff; }
 .summary-grid span { display: block; color: #728096; font-size: 9px; font-weight: 850; text-transform: uppercase; }
 .summary-grid strong { display: block; margin-top: 5px; color: #17345e; font-size: 24px; }

@@ -12,7 +12,7 @@ export type EstadoFisicoResiduo = 'LIQUIDO' | 'SOLIDO' | 'SEMISSOLIDO' | 'GASOSO
 export type MedidaSegurancaResiduo =
   | 'LUVAS' | 'OCULOS_PROTECAO' | 'PROTECAO_RESPIRATORIA' | 'JALECO_AVENTAL' | 'OUTRO'
 
-export type StatusResiduo = 'INFORMADO' | 'EM_ANALISE' | 'LIBERADO_PARA_ARMAZENAMENTO' | 'ARMAZENADO_TEMPORARIAMENTE' | 'DESPACHADO'
+export type StatusResiduo = 'INFORMADO' | 'EM_ANALISE' | 'LIBERADO_PARA_ARMAZENAMENTO' | 'ARMAZENADO_TEMPORARIAMENTE' | 'DESPACHADO' | 'CANCELADO'
 
 export interface ClasseResiduoResponse {
   id: string
@@ -20,6 +20,45 @@ export interface ClasseResiduoResponse {
   unidadeNome: string
   codigo: string
   descricao: string
+  ativo: boolean
+}
+
+export interface LocalArmazenamentoResiduoResponse {
+  id: string
+  unidadeId: string
+  unidadeNome: string
+  nome: string
+  ativo: boolean
+}
+
+export interface ComponenteModeloResiduoResponse {
+  id: string
+  produtoId: string | null
+  produtoNome: string | null
+  nomeComponente: string
+  principal: boolean
+  concentracaoOuQuantidade: string | null
+  observacao: string | null
+}
+
+export interface ModeloResiduoResponse {
+  id: string
+  unidadeId: string
+  unidadeNome: string
+  nome: string
+  descricao: string
+  processoOrigem: string
+  estadoFisico: EstadoFisicoResiduo
+  tratamentoRealizado: boolean
+  descricaoTratamento: string | null
+  recipiente: string
+  unidadeMedida: UnidadeMedidaResiduo
+  nivelRisco: NivelRiscoResiduo
+  riscos: TipoRiscoResiduo[]
+  classes: ClasseResiduoResponse[]
+  medidasSeguranca: MedidaSegurancaResiduo[]
+  observacaoSeguranca: string | null
+  componentes: ComponenteModeloResiduoResponse[]
   ativo: boolean
 }
 
@@ -58,6 +97,14 @@ export interface CriarResiduoRequest {
   observacaoSegurancaInformada: string | null
 }
 
+export type AcaoAdministrativaResiduo = 'CANCELAR' | 'RETORNAR_ETAPA'
+
+export interface AdministrarResiduoRequest {
+  usuarioAdministradorId: string
+  acao: AcaoAdministrativaResiduo
+  justificativa: string
+}
+
 export interface ReceberResiduoRequest { usuarioGestorId: string; observacao: string | null }
 
 export interface AnalisarResiduoRequest {
@@ -67,13 +114,20 @@ export interface AnalisarResiduoRequest {
   classesConfirmadasIds: string[]
   medidasSegurancaConfirmadas: MedidaSegurancaResiduo[]
   observacaoSegurancaConfirmada: string | null
-  localArmazenamentoTemporario: string
+  localArmazenamentoResiduoId: string | null
+  complementoLocalArmazenamento: string | null
+  localArmazenamentoTemporario: string | null
   destinoFinalPrevisto: string
   dataPrevistaDespacho: string | null
   observacaoGestor: string | null
 }
 
-export interface ArmazenarResiduoRequest { usuarioGestorId: string; localArmazenamentoTemporario: string | null }
+export interface ArmazenarResiduoRequest {
+  usuarioGestorId: string
+  localArmazenamentoResiduoId: string | null
+  complementoLocalArmazenamento: string | null
+  localArmazenamentoTemporario: string | null
+}
 export interface DespacharResiduoRequest { usuarioGestorId: string; destinoFinalConfirmado: string; observacao: string | null }
 
 export interface ComponenteResiduoResponse {
@@ -118,6 +172,8 @@ export interface ResiduoResponse {
   observacaoSegurancaConfirmada: string | null
   observacaoGerador: string | null
   observacaoGestor: string | null
+  localArmazenamentoResiduoId: string | null
+  complementoLocalArmazenamento: string | null
   localArmazenamentoTemporario: string | null
   destinoFinalPrevisto: string | null
   destinoFinalConfirmado: string | null
@@ -131,7 +187,18 @@ export interface ResiduoResponse {
   componentes: ComponenteResiduoResponse[]
 }
 
-export interface HistoricoResiduoResponse { id: string; status: StatusResiduo; acao: string; observacao: string | null; dataHora: string; usuarioId: string | null; usuarioNome: string | null }
+export interface HistoricoResiduoResponse {
+  id: string
+  residuoId: string
+  residuoCodigoRastreio: string | null
+  residuoDescricao: string
+  status: StatusResiduo
+  acao: string
+  observacao: string | null
+  dataHora: string
+  usuarioId: string | null
+  usuarioNome: string | null
+}
 
 export interface RotuloResiduoResponse {
   residuoId: string

@@ -314,8 +314,10 @@ Acesso: `ADMINISTRADOR`.
 Laboratórios
 Projetos
 Produtos
+Classes de resíduo
+Locais de armazenamento
 Permissões
-Resíduos — Em breve
+Resíduos — Modelos de Resíduo
 ```
 
 Não há:

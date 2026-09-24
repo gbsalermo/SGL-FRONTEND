@@ -3,15 +3,19 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 17/09/2026  
-**Branch estável:** `main`  
-**Branch recém-concluída:** `feat/etapa-3-residuos`  
-**Etapa concluída:** Etapa 3 — refinamentos do fluxo atual de Resíduos ✅  
-**Próxima etapa:** Etapa 4 — expansão operacional de Resíduos  
+**Última atualização:** 24/09/2026  
+**Branch estável:** `main` do GitLab institucional  
+**Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
+**Branch atual de reconciliação:** `collab/etapa-4-residuos-reconcile`  
+**Etapa concluída:** Etapa 4 — expansão operacional de Resíduos ✅  
+**Etapa atual:** Etapa 5 — Projetos e Atividades ⏭ próxima  
+**Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
-**Handoff da próxima etapa:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
+**Referência de fechamento da Etapa 4:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`
 
 Este é o checkpoint principal para retomada do frontend. Contratos HTTP devem ser confirmados no Swagger/OpenAPI do backend.
+
+> **Infraestrutura Git obrigatória:** ler `docs/SINCRONIZACAO_GITLAB_GITHUB.md` antes de alterar branches. GitLab é a fonte canônica de `main`; GitHub espelha `main` e recebe a colaboração em `collab/*`. Não usar `--force` e não editar `GitHub/main` diretamente.
 
 ---
 
@@ -34,13 +38,15 @@ Regra especial:
 - frontend e documentação podem ser alterados diretamente quando autorizado;
 - não antecipar etapas futuras.
 
-Antes da Etapa 4, confirmar que a Etapa 3 foi integrada à `main` nos dois repositórios e criar branch nova a partir da `main` atualizada.
+A Etapa 4 já possui implementação histórica em `feat/etapa-4-residuos`, porém essa branch é anterior às correções recentes do supervisor. Ela serve apenas como fonte para port seletivo.
 
-Branch sugerida:
+Branch atual:
 
 ```text
-feat/etapa-4-residuos
+collab/etapa-4-residuos-reconcile
 ```
+
+Antes de alterações visuais/contratuais, atualizar a branch com `gitlab/main` quando for fast-forward possível e confirmar o contrato reconciliado no backend.
 
 ---
 
@@ -318,56 +324,30 @@ Validações finais incluíram:
 
 ---
 
-# 9. Etapa 4 — próxima etapa
+# 9. Etapa 4 — concluída e validada
 
-Ordem prevista:
-
-```text
-4.1 Locais de armazenamento cadastráveis
-→ 4.2 Modelos de Resíduo pré-cadastrados
-→ 4.3 Escolha modelo x preenchimento manual
-→ 4.4 Correções administrativas do ciclo
-```
-
-Frontend só deve ser fechado depois das regras de backend/domínio de cada subetapa estarem definidas.
-
-## 4.1
-
-Esperado no frontend:
-
-- escolher local cadastrado;
-- permitir complemento livre;
-- manter caminho manual quando permitido;
-- não perder histórico se o cadastro do local mudar.
-
-## 4.2 / 4.3
-
-Na Administração, Gestão poderá manter modelos reutilizáveis.
-
-Na criação:
+A Etapa 4 foi reconciliada sobre a base atual e validada ponta a ponta.
 
 ```text
-usar modelo
-ou
-preencher manualmente
+4.1 Locais de armazenamento cadastráveis              ✅
+4.2 Modelos de Resíduo                                ✅
+4.3 Uso de modelo ou preenchimento manual             ✅
+4.4 Correções administrativas do ciclo de vida        ✅
 ```
 
-Selecionar modelo deve preencher sugestões, sem transformar o Resíduo real em referência viva ao modelo.
+Estado frontend consolidado:
 
-## 4.4
+- Administração → Cadastros expõe Modelos de Resíduo no bloco Resíduos;
+- Informar Resíduo permite Manual ou Modelo;
+- modelo apenas pré-preenche e não cria vínculo vivo com o Resíduo real;
+- validações locais seguem o padrão visual aprovado em light/dark;
+- cancelamento e retorno administrativo aparecem no histórico e nos dashboards adequados;
+- Dashboard do Solicitante mostra somente eventos dos próprios Resíduos;
+- Dashboard da Gestão combina movimentações de estoque e eventos operacionais de Resíduos da Unidade;
+- cancelados são tratados em Meus Resíduos, Gestão, relatórios e rótulo.
 
-Avaliar ações de Administrador:
+A próxima etapa é **Etapa 5 — Projetos e Atividades**.
 
-```text
-Cancelar Resíduo
-Retornar para análise/liberação
-```
-
-Sempre com justificativa e histórico. Regras de status precisam ser fechadas antes da implementação.
-
-Delete lógico geral continua na Etapa 11.
-
----
 
 # 10. Etapas futuras
 
@@ -400,12 +380,34 @@ Etapa 13 revisará classes grandes como `Residuo` no backend, Services, DTOs e C
 Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
-Etapa 4 — expansão operacional de Resíduos            ⏭ próxima
-Etapas 5 a 13                                         ⏳
+Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
+Etapa 5 — Projetos e Atividades                       ⏭ próxima
+Etapas 6 a 13                                         ⏳
 ```
 
 ---
 
 # 12. Regra final de retomada
 
-**A Etapa 3 está concluída e validada. A próxima janela deve confirmar que a branch `feat/etapa-3-residuos` foi integrada à `main` nos dois repositórios. Depois, criar `feat/etapa-4-residuos` a partir da `main` atualizada e começar pela 4.1 — locais de armazenamento cadastráveis. Antes de alterar o frontend, fechar a modelagem e os contratos necessários no backend. Ler o handoff `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_4_2026-09-17.md`.**
+**As Etapas 1–4 estão concluídas e validadas. Após o merge da branch `collab/etapa-4-residuos-reconcile` no GitLab, iniciar a Etapa 5 a partir da `gitlab/main` atualizada. A antiga `feat/etapa-4-residuos` permanece somente como referência histórica.**
+
+### Estado frontend do 4.4
+
+Implementado na branch de reconciliação:
+- status `CANCELADO` nas telas de Gestão, Solicitante e Relatórios;
+- ações `Retornar etapa` e `Cancelar resíduo` visíveis apenas para Administrador;
+- modal com justificativa obrigatória e erro local;
+- histórico apresenta cancelamento e retorno administrativo;
+- cancelados deixam de contar como resíduos ativos;
+- dark mode integrado aos novos estados e ações.
+
+Validação funcional integrada concluída; este bloco faz parte do fechamento da Etapa 4.
+
+### Ajustes após validação do 4.4
+
+- nomes internos dos status são humanizados inclusive para eventos históricos já gravados;
+- dashboard do Solicitante consulta o histórico real dos seus Resíduos e inclui retorno administrativo/cancelamento em **Últimas atualizações**;
+- cancelamento aparece como atualização crítica e retorno como movimentação de reavaliação;
+- o Resíduo mais recente também considera a data de eventos do histórico administrativo.
+
+Os ajustes foram revalidados e incorporados ao fechamento definitivo da Etapa 4.
