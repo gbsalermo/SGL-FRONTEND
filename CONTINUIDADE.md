@@ -429,3 +429,12 @@ Implementado na branch de reconciliação:
 - dark mode integrado aos novos estados e ações.
 
 Validação funcional integrada ainda pendente antes do fechamento da Etapa 4.
+
+### Ajustes após validação do 4.4
+
+- nomes internos dos status são humanizados inclusive para eventos históricos já gravados;
+- dashboard do Solicitante consulta o histórico real dos seus Resíduos e inclui retorno administrativo/cancelamento em **Últimas atualizações**;
+- cancelamento aparece como atualização crítica e retorno como movimentação de reavaliação;
+- o Resíduo mais recente também considera a data de eventos do histórico administrativo.
+
+Reteste pendente desses ajustes antes do fechamento definitivo da Etapa 4.
