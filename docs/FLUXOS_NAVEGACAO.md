@@ -418,8 +418,9 @@ Permissões
 → consultar usuários existentes
 → alterar perfil permitido
 
-Resíduos — Em breve
-→ sem ação operacional atual
+Resíduos — Modelos de Resíduo
+→ criar/editar/inativar modelos reutilizáveis
+→ usar como pré-preenchimento em Informar resíduo
 ```
 
 Não há cadastro manual normal de Unidade ou criação manual de Usuário nessa central.
