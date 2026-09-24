@@ -609,3 +609,54 @@ body.sgl-dark-active .gestao-main .residuos-gestao-page .input--error {
   border-color: #ff5c6c !important;
   box-shadow: 0 0 0 2px rgb(255 92 108 / 18%) !important;
 }
+
+/* Comparação entre dados informados e classificação da Gestão */
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card {
+  border-color: #31455f !important;
+  background: #101d30 !important;
+  color: #d8e2ef !important;
+  opacity: 1 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--original {
+  border-color: #36547a !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved {
+  border-color: #2f684d !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved.pending {
+  border-color: #876a31 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card > header span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dt,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dd small,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta span,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta small {
+  color: #91a1b7 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card > header strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dd {
+  color: #d9e4f2 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card dl > div,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .approval-meta {
+  border-color: #2a3e58 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved:not(.pending) > header strong,
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved:not(.pending) .approval-meta strong {
+  color: #72dba8 !important;
+}
+
+body.sgl-dark-active .gestao-main .residuos-gestao-page .comparison-card--approved.pending > header strong {
+  color: #f0cf83 !important;
+}
+
