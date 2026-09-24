@@ -13,9 +13,9 @@
 
 ---
 
-## Estado atual — 22/09/2026
+## Estado atual — 24/09/2026
 
-O primeiro protótipo do SGL foi **funcionalmente aprovado**. As Etapas 1, 2 e 3 da pré-produção foram concluídas. A **Etapa 4 — Expansão operacional de Resíduos** possui uma implementação histórica que está sendo reconciliada com a `main` atual antes da revalidação integrada.
+O primeiro protótipo do SGL foi **funcionalmente aprovado**. As **Etapas 1, 2, 3 e 4 da pré-produção foram concluídas e validadas**. A próxima etapa canônica é a **Etapa 5 — Projetos e Atividades**.
 
 Estado consolidado:
 
@@ -347,7 +347,7 @@ Laboratórios
 Projetos
 Produtos
 Permissões
-Resíduos — indicação futura/Em breve
+Resíduos — modelos e cadastros reutilizáveis
 ```
 
 Decisões:
@@ -451,8 +451,10 @@ Não tratar visibilidade de menu/rota como segurança de produção.
 ```text
 Etapa 1 — padrão visual global                 ✅
 Etapa 2 — Dark Mode definitivo                 ✅
-Etapa 3 — refinamentos do fluxo de Resíduos    🔧 atual
-Etapas 4 a 9                                   ⏳ sequenciais
+Etapa 3 — refinamentos do fluxo de Resíduos    ✅
+Etapa 4 — expansão operacional de Resíduos     ✅
+Etapa 5 — Projetos e Atividades                ⏭ próxima
+Etapas 6 a 13                                  ⏳ sequenciais
 ```
 
 ### Depois — roadmap formal de produção
