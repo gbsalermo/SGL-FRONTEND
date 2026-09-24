@@ -8,7 +8,7 @@
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
 **Branch atual de trabalho:** `collab/etapa-5-projetos-atividades`  
 **Etapa concluída:** Etapa 4 — expansão operacional de Resíduos ✅  
-**Etapa atual:** Etapa 5 — Projetos e Atividades 🔧 iniciada — aguardando estabilização do domínio backend  
+**Etapa atual:** Etapa 5 — Projetos e Atividades 🔧 5.1 Projeto base — frontend aguardando estabilização do contrato backend  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
@@ -346,8 +346,32 @@ Estado frontend consolidado:
 - Dashboard da Gestão combina movimentações de estoque e eventos operacionais de Resíduos da Unidade;
 - cancelados são tratados em Meus Resíduos, Gestão, relatórios e rótulo.
 
-A próxima etapa é **Etapa 5 — Projetos e Atividades**.
+A etapa atual é **Etapa 5 — Projetos e Atividades**, com o backend no **5.1 — Projeto base**.
 
+
+## Decisões da Etapa 5 que afetam o frontend
+
+```text
+Projeto
+→ SCI
+→ Atividades
+```
+
+Projeto é o eixo operacional principal. Laboratório continua contexto/filtro e laboratório responsável, mas a futura interface não deve obrigar o usuário a entrar em Laboratório para acessar Projeto.
+
+Código SEG será exibido como dado institucional:
+
+```text
+Projeto   XX.XX.XX.XXX.XX.00
+SCI       XX.XX.XX.XXX.XX.SS
+Atividade XX.XX.XX.XXX.XX.SS.AAA
+```
+
+Nesta primeira versão, o código será cadastrado e validado pelo backend, não gerado automaticamente.
+
+O CRUD atual de Projeto em Administração permanece funcional até o bloco **5.5 — Interface**, quando a experiência será reorganizada sobre os contratos estabilizados.
+
+---
 
 # 10. Etapas futuras
 
@@ -381,7 +405,7 @@ Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
-Etapa 5 — Projetos e Atividades                       ⏭ próxima
+Etapa 5 — Projetos e Atividades                       🔧 atual — 5.1 backend
 Etapas 6 a 13                                         ⏳
 ```
 
@@ -389,7 +413,7 @@ Etapas 6 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**As Etapas 1–4 estão concluídas e validadas. Após o merge da branch `collab/etapa-4-residuos-reconcile` no GitLab, iniciar a Etapa 5 a partir da `gitlab/main` atualizada. A antiga `feat/etapa-4-residuos` permanece somente como referência histórica.**
+**As Etapas 1–4 estão concluídas e validadas. A Etapa 5 está em andamento na branch `collab/etapa-5-projetos-atividades`. O frontend não deve antecipar a modelagem: aguardar Projeto → SCI → Atividade e contratos HTTP estabilizados no backend antes do 5.5 — Interface.**
 
 ### Estado frontend do 4.4
 
