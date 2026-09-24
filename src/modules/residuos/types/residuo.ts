@@ -187,7 +187,18 @@ export interface ResiduoResponse {
   componentes: ComponenteResiduoResponse[]
 }
 
-export interface HistoricoResiduoResponse { id: string; status: StatusResiduo; acao: string; observacao: string | null; dataHora: string; usuarioId: string | null; usuarioNome: string | null }
+export interface HistoricoResiduoResponse {
+  id: string
+  residuoId: string
+  residuoCodigoRastreio: string | null
+  residuoDescricao: string
+  status: StatusResiduo
+  acao: string
+  observacao: string | null
+  dataHora: string
+  usuarioId: string | null
+  usuarioNome: string | null
+}
 
 export interface RotuloResiduoResponse {
   residuoId: string
