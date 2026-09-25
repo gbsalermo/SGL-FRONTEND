@@ -83,3 +83,40 @@ export interface AtividadeRequest {
   situacaoExecucao: SituacaoExecucaoProjeto
   ativo: boolean
 }
+
+
+export interface ProrrogacaoRequest {
+  usuarioId: string
+  novaDataFim: string
+  justificativa: string
+}
+
+export interface CorrecaoCodigoSegRequest {
+  usuarioId: string
+  novoCodigoSeg: string
+  justificativa: string
+}
+
+export interface HistoricoProrrogacao {
+  id: string
+  usuarioId: string
+  usuarioNome: string
+  dataFimAnterior: string
+  dataFimNova: string
+  justificativa: string
+  dataHora: string
+}
+
+export type TipoAlvoCodigoSeg = 'PROJETO' | 'SCI' | 'ATIVIDADE'
+
+export interface HistoricoCorrecaoCodigoSeg {
+  id: string
+  tipoAlvo: TipoAlvoCodigoSeg
+  alvoId: string
+  usuarioId: string
+  usuarioNome: string
+  codigoAnterior: string
+  codigoNovo: string
+  justificativa: string
+  dataHora: string
+}
