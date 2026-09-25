@@ -89,4 +89,40 @@ export const projetosService = {
     )
     return data
   },
+
+  async listarProrrogacoesProjeto(id: string) {
+    const { data } = await http.get<HistoricoProrrogacao[]>(`/v1/projetos/${id}/prorrogacoes`)
+    return data
+  },
+
+  async listarProrrogacoesSci(id: string) {
+    const { data } = await http.get<HistoricoProrrogacao[]>(`/v1/scis/${id}/prorrogacoes`)
+    return data
+  },
+
+  async listarProrrogacoesAtividade(id: string) {
+    const { data } = await http.get<HistoricoProrrogacao[]>(`/v1/atividades/${id}/prorrogacoes`)
+    return data
+  },
+
+  async listarCorrecoesProjeto(id: string) {
+    const { data } = await http.get<HistoricoCorrecaoCodigoSeg[]>(
+      `/v1/projetos/${id}/correcoes-codigo-seg`,
+    )
+    return data
+  },
+
+  async listarCorrecoesSci(id: string) {
+    const { data } = await http.get<HistoricoCorrecaoCodigoSeg[]>(
+      `/v1/scis/${id}/correcoes-codigo-seg`,
+    )
+    return data
+  },
+
+  async listarCorrecoesAtividade(id: string) {
+    const { data } = await http.get<HistoricoCorrecaoCodigoSeg[]>(
+      `/v1/atividades/${id}/correcoes-codigo-seg`,
+    )
+    return data
+  },
 }
