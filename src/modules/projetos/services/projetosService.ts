@@ -2,7 +2,11 @@ import { http } from '@/services/http'
 import type {
   AtividadeOperacional,
   AtividadeRequest,
+  CorrecaoCodigoSegRequest,
+  HistoricoCorrecaoCodigoSeg,
+  HistoricoProrrogacao,
   ProjetoOperacional,
+  ProrrogacaoRequest,
   SciOperacional,
   SciRequest,
 } from '@/modules/projetos/types/projetos'
@@ -44,6 +48,45 @@ export const projetosService = {
 
   async atualizarAtividade(id: string, payload: AtividadeRequest) {
     const { data } = await http.put<AtividadeOperacional>(`/v1/atividades/${id}`, payload)
+    return data
+  },
+
+  async prorrogarProjeto(id: string, payload: ProrrogacaoRequest) {
+    const { data } = await http.post<HistoricoProrrogacao>(`/v1/projetos/${id}/prorrogacoes`, payload)
+    return data
+  },
+
+  async prorrogarSci(id: string, payload: ProrrogacaoRequest) {
+    const { data } = await http.post<HistoricoProrrogacao>(`/v1/scis/${id}/prorrogacoes`, payload)
+    return data
+  },
+
+  async prorrogarAtividade(id: string, payload: ProrrogacaoRequest) {
+    const { data } = await http.post<HistoricoProrrogacao>(`/v1/atividades/${id}/prorrogacoes`, payload)
+    return data
+  },
+
+  async corrigirCodigoSegProjeto(id: string, payload: CorrecaoCodigoSegRequest) {
+    const { data } = await http.post<HistoricoCorrecaoCodigoSeg[]>(
+      `/v1/projetos/${id}/correcoes-codigo-seg`,
+      payload,
+    )
+    return data
+  },
+
+  async corrigirCodigoSegSci(id: string, payload: CorrecaoCodigoSegRequest) {
+    const { data } = await http.post<HistoricoCorrecaoCodigoSeg[]>(
+      `/v1/scis/${id}/correcoes-codigo-seg`,
+      payload,
+    )
+    return data
+  },
+
+  async corrigirCodigoSegAtividade(id: string, payload: CorrecaoCodigoSegRequest) {
+    const { data } = await http.post<HistoricoCorrecaoCodigoSeg[]>(
+      `/v1/atividades/${id}/correcoes-codigo-seg`,
+      payload,
+    )
     return data
   },
 }
