@@ -8,7 +8,7 @@
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
 **Branch atual de trabalho:** `collab/etapa-5-projetos-atividades`  
 **Etapa concluída:** Etapa 4 — expansão operacional de Resíduos ✅  
-**Etapa atual:** Etapa 5 — Projetos e Atividades 🔧 5.1 Projeto base — frontend aguardando estabilização do contrato backend  
+**Etapa atual:** Etapa 5 — Projetos e Atividades 🔧 5.5 Interface e integração — em implementação  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
@@ -46,7 +46,7 @@ Branch atual:
 collab/etapa-5-projetos-atividades
 ```
 
-O frontend da Etapa 5 deve aguardar os contratos backend de Projeto → SCI → Atividade antes de alterações funcionais do bloco 5.5.
+Os contratos backend de Projeto → SCI → Atividade, prorrogações e Código SEG estão estabilizados. O frontend está liberado para o bloco 5.5.
 
 ---
 
@@ -106,6 +106,7 @@ GESTÃO / ADMIN
 /estoque/lotes-vencendo
 /estoque/:id
 /movimentacoes
+/projetos
 /estagiarios
 /residuos
 /relatorios
@@ -346,7 +347,7 @@ Estado frontend consolidado:
 - Dashboard da Gestão combina movimentações de estoque e eventos operacionais de Resíduos da Unidade;
 - cancelados são tratados em Meus Resíduos, Gestão, relatórios e rótulo.
 
-A etapa atual é **Etapa 5 — Projetos e Atividades**, com o backend no **5.1 — Projeto base**.
+A etapa atual é **Etapa 5 — Projetos e Atividades**, com os blocos backend 5.1–5.4 concluídos e o **5.5 — Interface e integração** em execução.
 
 
 ## Decisões da Etapa 5 que afetam o frontend
@@ -405,7 +406,7 @@ Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
-Etapa 5 — Projetos e Atividades                       🔧 atual — 5.1 backend
+Etapa 5 — Projetos e Atividades                       🔧 atual — 5.5 Interface e integração
 Etapas 6 a 13                                         ⏳
 ```
 
@@ -413,7 +414,7 @@ Etapas 6 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**As Etapas 1–4 estão concluídas e validadas. A Etapa 5 está em andamento na branch `collab/etapa-5-projetos-atividades`. O frontend não deve antecipar a modelagem: aguardar Projeto → SCI → Atividade e contratos HTTP estabilizados no backend antes do 5.5 — Interface.**
+**As Etapas 1–4 estão concluídas e validadas. Na Etapa 5, os blocos backend 5.0–5.4 estão fechados; retomar pelo 5.5 — Interface e integração na branch `collab/etapa-5-projetos-atividades`.**
 
 ### Estado frontend do 4.4
 
@@ -435,3 +436,22 @@ Validação funcional integrada concluída; este bloco faz parte do fechamento d
 - o Resíduo mais recente também considera a data de eventos do histórico administrativo.
 
 Os ajustes foram revalidados e incorporados ao fechamento definitivo da Etapa 4.
+
+
+### Estado inicial do 5.5
+
+Implementado o primeiro incremento da interface integrada:
+
+- nova rota operacional `/projetos` para Gestão/Administração;
+- acesso direto no menu lateral, sem passagem obrigatória por Laboratório;
+- listagem de Projetos da Unidade;
+- busca por título, Código SEG, laboratório ou responsável;
+- filtro por status;
+- resumo de Projetos ativos, atrasados, concluídos e total;
+- seleção de Projeto com painel de detalhes;
+- carregamento integrado de SCI do Projeto;
+- visualização das Atividades agrupadas por SCI;
+- exibição de Código SEG, status, situação de execução, período, responsável e recurso externo;
+- acesso rápido ao cadastro administrativo de Projetos para Administrador.
+
+O backend DEV ganhou massa idempotente específica da Etapa 5 para que a hierarquia seja visível mesmo em banco já existente.
