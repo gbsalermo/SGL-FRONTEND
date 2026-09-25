@@ -358,56 +358,58 @@ onMounted(carregar)
             Este projeto ainda não possui SCI cadastrado.
           </div>
 
-          <article v-for="sci in scis" v-else :key="sci.id" class="sci-card">
-            <header>
-              <div>
-                <p class="seg-code">{{ sci.codigoSeg }}</p>
-                <h4>{{ sci.nome }}</h4>
-                <span>{{ sci.responsavel || 'Responsável não informado' }}</span>
-              </div>
-              <div class="detail-badges">
-                <span class="badge" :class="classeStatus(sci.status)">
-                  {{ rotuloStatus(sci.status) }}
-                </span>
-                <span class="badge" :class="classeSituacao(sci.situacaoExecucao)">
-                  {{ rotuloSituacao(sci.situacaoExecucao) }}
-                </span>
-              </div>
-            </header>
-
-            <div class="sci-period">
-              <span>{{ formatarData(sci.dataInicio) }}</span>
-              <span>→</span>
-              <span>{{ formatarData(sci.dataFim) }}</span>
-              <strong>{{ atividadesDoSci(sci.id).length }} atividade(s)</strong>
-            </div>
-
-            <div v-if="atividadesDoSci(sci.id).length === 0" class="activity-empty">
-              Nenhuma Atividade vinculada a este SCI.
-            </div>
-
-            <div v-else class="activity-list">
-              <article
-                v-for="atividade in atividadesDoSci(sci.id)"
-                :key="atividade.id"
-                class="activity-item"
-              >
+          <template v-else>
+            <article v-for="sci in scis" :key="sci.id" class="sci-card">
+              <header>
                 <div>
-                  <p class="seg-code">{{ atividade.codigoSeg }}</p>
-                  <strong>{{ atividade.nome }}</strong>
-                  <span>{{ atividade.responsavel || 'Responsável não informado' }}</span>
+                  <p class="seg-code">{{ sci.codigoSeg }}</p>
+                  <h4>{{ sci.nome }}</h4>
+                  <span>{{ sci.responsavel || 'Responsável não informado' }}</span>
                 </div>
-                <div class="activity-item__meta">
-                  <span class="badge" :class="classeStatus(atividade.status)">
-                    {{ rotuloStatus(atividade.status) }}
+                <div class="detail-badges">
+                  <span class="badge" :class="classeStatus(sci.status)">
+                    {{ rotuloStatus(sci.status) }}
                   </span>
-                  <small>
-                    {{ formatarData(atividade.dataInicio) }} → {{ formatarData(atividade.dataFim) }}
-                  </small>
+                  <span class="badge" :class="classeSituacao(sci.situacaoExecucao)">
+                    {{ rotuloSituacao(sci.situacaoExecucao) }}
+                  </span>
                 </div>
-              </article>
-            </div>
-          </article>
+              </header>
+
+              <div class="sci-period">
+                <span>{{ formatarData(sci.dataInicio) }}</span>
+                <span>→</span>
+                <span>{{ formatarData(sci.dataFim) }}</span>
+                <strong>{{ atividadesDoSci(sci.id).length }} atividade(s)</strong>
+              </div>
+
+              <div v-if="atividadesDoSci(sci.id).length === 0" class="activity-empty">
+                Nenhuma Atividade vinculada a este SCI.
+              </div>
+
+              <div v-else class="activity-list">
+                <article
+                  v-for="atividade in atividadesDoSci(sci.id)"
+                  :key="atividade.id"
+                  class="activity-item"
+                >
+                  <div>
+                    <p class="seg-code">{{ atividade.codigoSeg }}</p>
+                    <strong>{{ atividade.nome }}</strong>
+                    <span>{{ atividade.responsavel || 'Responsável não informado' }}</span>
+                  </div>
+                  <div class="activity-item__meta">
+                    <span class="badge" :class="classeStatus(atividade.status)">
+                      {{ rotuloStatus(atividade.status) }}
+                    </span>
+                    <small>
+                      {{ formatarData(atividade.dataInicio) }} → {{ formatarData(atividade.dataFim) }}
+                    </small>
+                  </div>
+                </article>
+              </div>
+            </article>
+          </template>
 
           <div v-if="atividadesSemSci.length > 0" class="feedback feedback--warning">
             Existem {{ atividadesSemSci.length }} Atividade(s) retornadas sem SCI visível neste Projeto.
