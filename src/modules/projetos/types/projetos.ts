@@ -58,3 +58,28 @@ export interface AtividadeOperacional {
   situacaoExecucao: SituacaoExecucaoProjeto
   ativo: boolean
 }
+
+
+export interface SciRequest {
+  projetoId: string
+  codigoSeg: string
+  nome: string
+  responsavel: string | null
+  dataInicio: string
+  dataFim: string | null
+  status: StatusProjeto
+  situacaoExecucao: SituacaoExecucaoProjeto
+  ativo: boolean
+}
+
+export interface AtividadeRequest {
+  sciId: string
+  codigoSeg: string
+  nome: string
+  responsavel: string | null
+  dataInicio: string
+  dataFim: string | null
+  status: StatusProjeto
+  situacaoExecucao: SituacaoExecucaoProjeto
+  ativo: boolean
+}
