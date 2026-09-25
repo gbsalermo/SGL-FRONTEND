@@ -303,7 +303,14 @@ async function salvarAcaoEspecial() {
         await projetosService.prorrogarAtividade(alvo.id, payload)
       }
 
-      sucesso.value = `Prazo de ${alvo.nome} prorrogado com histórico registrado.`
+      const mensagemSucesso = `Prazo de ${alvo.nome} prorrogado com histórico registrado.`
+
+      modalAcao.value = null
+      alvoAcao.value = null
+      novaDataFim.value = ''
+      justificativaAcao.value = ''
+      await carregar()
+      sucesso.value = mensagemSucesso
     } else {
       if (!novoCodigoSeg.value.trim() || novoCodigoSeg.value.trim() === alvo.codigoSeg) {
         erroAcao.value = 'Informe um novo Código SEG diferente do atual.'
@@ -324,11 +331,15 @@ async function salvarAcaoEspecial() {
         await projetosService.corrigirCodigoSegAtividade(alvo.id, payload)
       }
 
-      sucesso.value = `Código SEG de ${alvo.nome} corrigido com auditoria registrada.`
-    }
+      const mensagemSucesso = `Código SEG de ${alvo.nome} corrigido com auditoria registrada.`
 
-    fecharModalAcao()
-    await carregar()
+      modalAcao.value = null
+      alvoAcao.value = null
+      novoCodigoSeg.value = ''
+      justificativaAcao.value = ''
+      await carregar()
+      sucesso.value = mensagemSucesso
+    }
   } catch (error) {
     erroAcao.value = mensagemErro(error, 'Não foi possível concluir a operação.')
   } finally {
