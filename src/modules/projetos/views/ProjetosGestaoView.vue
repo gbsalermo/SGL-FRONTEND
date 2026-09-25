@@ -16,6 +16,16 @@ import { useSessionStore } from '@/stores/session'
 
 type FiltroStatus = 'TODOS' | StatusProjeto
 type ModalHierarquia = 'sci' | 'atividade' | null
+type ModalAcao = 'prorrogacao' | 'correcao' | null
+type TipoAlvo = 'projeto' | 'sci' | 'atividade'
+
+interface AlvoAcao {
+  tipo: TipoAlvo
+  id: string
+  nome: string
+  codigoSeg: string | null
+  dataFim: string | null
+}
 
 interface SciForm {
   projetoId: string
@@ -53,10 +63,18 @@ const filtroStatus = ref<FiltroStatus>('TODOS')
 const carregando = ref(false)
 const carregandoDetalhes = ref(false)
 const erro = ref('')
+const sucesso = ref('')
 const modal = ref<ModalHierarquia>(null)
 const editandoId = ref<string | null>(null)
 const salvandoHierarquia = ref(false)
 const erroModal = ref('')
+const modalAcao = ref<ModalAcao>(null)
+const alvoAcao = ref<AlvoAcao | null>(null)
+const novaDataFim = ref('')
+const novoCodigoSeg = ref('')
+const justificativaAcao = ref('')
+const salvandoAcao = ref(false)
+const erroAcao = ref('')
 
 const statusOpcoes: StatusProjeto[] = [
   'ATIVO',
@@ -179,6 +197,143 @@ function classeSituacao(valor: ProjetoOperacional['situacaoExecucao']) {
   if (valor === 'EM_ANDAMENTO_ATRASADO' || valor === 'EXECUCAO_CANCELADA') return 'badge--danger'
   if (valor === 'EM_ANDAMENTO_NO_PRAZO') return 'badge--success'
   return 'badge--neutral'
+}
+
+function podeProrrogar(item: {
+  ativo: boolean
+  status: StatusProjeto
+  situacaoExecucao: SituacaoExecucaoProjeto
+  dataFim: string | null
+}) {
+  return item.ativo
+    && item.status === 'ATIVO'
+    && item.situacaoExecucao !== 'EXECUCAO_CANCELADA'
+    && Boolean(item.dataFim)
+}
+
+function podeProrrogarSci(sci: SciOperacional) {
+  return Boolean(projetoSelecionado.value)
+    && podeProrrogar(sci)
+    && podeProrrogar(projetoSelecionado.value!)
+}
+
+function podeProrrogarAtividade(atividade: AtividadeOperacional) {
+  const sci = scis.value.find((item) => item.id === atividade.sciId)
+  return Boolean(sci && projetoSelecionado.value)
+    && podeProrrogar(atividade)
+    && podeProrrogar(sci!)
+    && podeProrrogar(projetoSelecionado.value!)
+}
+
+function abrirProrrogacao(alvo: AlvoAcao) {
+  if (!alvo.dataFim) {
+    erro.value = 'A primeira data final deve ser definida pela edição comum antes de uma prorrogação.'
+    return
+  }
+
+  sucesso.value = ''
+  erro.value = ''
+  alvoAcao.value = alvo
+  novaDataFim.value = ''
+  justificativaAcao.value = ''
+  erroAcao.value = ''
+  modalAcao.value = 'prorrogacao'
+}
+
+function abrirCorrecaoCodigoSeg(alvo: AlvoAcao) {
+  if (!alvo.codigoSeg) {
+    erro.value = 'O Projeto ainda não possui Código SEG. Use a edição comum para realizar a primeira definição.'
+    return
+  }
+
+  sucesso.value = ''
+  erro.value = ''
+  alvoAcao.value = alvo
+  novoCodigoSeg.value = alvo.codigoSeg
+  justificativaAcao.value = ''
+  erroAcao.value = ''
+  modalAcao.value = 'correcao'
+}
+
+function fecharModalAcao() {
+  if (salvandoAcao.value) return
+  modalAcao.value = null
+  alvoAcao.value = null
+  novaDataFim.value = ''
+  novoCodigoSeg.value = ''
+  justificativaAcao.value = ''
+  erroAcao.value = ''
+}
+
+async function salvarAcaoEspecial() {
+  const usuarioId = session.usuario?.id
+  const alvo = alvoAcao.value
+
+  if (!usuarioId || !alvo || !modalAcao.value) {
+    erroAcao.value = 'Não foi possível identificar o usuário operador ou o alvo da operação.'
+    return
+  }
+
+  if (!justificativaAcao.value.trim()) {
+    erroAcao.value = 'Informe uma justificativa para a operação.'
+    return
+  }
+
+  salvandoAcao.value = true
+  erroAcao.value = ''
+
+  try {
+    if (modalAcao.value === 'prorrogacao') {
+      if (!novaDataFim.value) {
+        erroAcao.value = 'Informe a nova data final.'
+        return
+      }
+
+      const payload = {
+        usuarioId,
+        novaDataFim: novaDataFim.value,
+        justificativa: justificativaAcao.value.trim(),
+      }
+
+      if (alvo.tipo === 'projeto') {
+        await projetosService.prorrogarProjeto(alvo.id, payload)
+      } else if (alvo.tipo === 'sci') {
+        await projetosService.prorrogarSci(alvo.id, payload)
+      } else {
+        await projetosService.prorrogarAtividade(alvo.id, payload)
+      }
+
+      sucesso.value = `Prazo de ${alvo.nome} prorrogado com histórico registrado.`
+    } else {
+      if (!novoCodigoSeg.value.trim() || novoCodigoSeg.value.trim() === alvo.codigoSeg) {
+        erroAcao.value = 'Informe um novo Código SEG diferente do atual.'
+        return
+      }
+
+      const payload = {
+        usuarioId,
+        novoCodigoSeg: novoCodigoSeg.value.trim(),
+        justificativa: justificativaAcao.value.trim(),
+      }
+
+      if (alvo.tipo === 'projeto') {
+        await projetosService.corrigirCodigoSegProjeto(alvo.id, payload)
+      } else if (alvo.tipo === 'sci') {
+        await projetosService.corrigirCodigoSegSci(alvo.id, payload)
+      } else {
+        await projetosService.corrigirCodigoSegAtividade(alvo.id, payload)
+      }
+
+      sucesso.value = `Código SEG de ${alvo.nome} corrigido com auditoria registrada.`
+    }
+
+    fecharModalAcao()
+    await carregar()
+  } catch (error) {
+    erroAcao.value = mensagemErro(error, 'Não foi possível concluir a operação.')
+  } finally {
+    salvandoAcao.value = false
+  }
 }
 
 function abrirNovoSci() {
@@ -351,6 +506,7 @@ async function carregarDetalhes(projetoId: string) {
   projetoSelecionadoId.value = projetoId
   carregandoDetalhes.value = true
   erro.value = ''
+  sucesso.value = ''
 
   try {
     const [listaScis, listaAtividades] = await Promise.all([
@@ -374,6 +530,7 @@ async function carregarDetalhes(projetoId: string) {
 async function carregar() {
   carregando.value = true
   erro.value = ''
+  sucesso.value = ''
 
   try {
     const lista = await projetosService.listarProjetos()
@@ -455,6 +612,7 @@ onMounted(carregar)
     </section>
 
     <p v-if="erro" class="feedback feedback--error">{{ erro }}</p>
+    <p v-if="sucesso" class="feedback feedback--success">{{ sucesso }}</p>
 
     <section class="toolbar-card">
       <label>
@@ -534,14 +692,44 @@ onMounted(carregar)
             <p>{{ projetoSelecionado.descricao || 'Projeto sem descrição cadastrada.' }}</p>
           </div>
 
-          <div class="hierarchy-summary">
-            <div>
-              <strong>{{ scis.length }}</strong>
-              <span>SCI</span>
+          <div class="hero-side">
+            <div class="hierarchy-summary">
+              <div>
+                <strong>{{ scis.length }}</strong>
+                <span>SCI</span>
+              </div>
+              <div>
+                <strong>{{ atividades.length }}</strong>
+                <span>Atividades</span>
+              </div>
             </div>
-            <div>
-              <strong>{{ atividades.length }}</strong>
-              <span>Atividades</span>
+            <div class="entity-actions">
+              <button
+                v-if="podeProrrogar(projetoSelecionado)"
+                type="button"
+                @click="abrirProrrogacao({
+                  tipo: 'projeto',
+                  id: projetoSelecionado.id,
+                  nome: projetoSelecionado.nome,
+                  codigoSeg: projetoSelecionado.codigoSeg,
+                  dataFim: projetoSelecionado.dataFim,
+                })"
+              >
+                Prorrogar prazo
+              </button>
+              <button
+                v-if="projetoSelecionado.codigoSeg"
+                type="button"
+                @click="abrirCorrecaoCodigoSeg({
+                  tipo: 'projeto',
+                  id: projetoSelecionado.id,
+                  nome: projetoSelecionado.nome,
+                  codigoSeg: projetoSelecionado.codigoSeg,
+                  dataFim: projetoSelecionado.dataFim,
+                })"
+              >
+                Corrigir SEG
+              </button>
             </div>
           </div>
         </header>
@@ -618,6 +806,31 @@ onMounted(carregar)
                   <div class="inline-actions">
                     <button type="button" @click="abrirEditarSci(sci)">Editar SCI</button>
                     <button type="button" @click="abrirNovaAtividade(sci)">+ Atividade</button>
+                    <button
+                      v-if="podeProrrogarSci(sci)"
+                      type="button"
+                      @click="abrirProrrogacao({
+                        tipo: 'sci',
+                        id: sci.id,
+                        nome: sci.nome,
+                        codigoSeg: sci.codigoSeg,
+                        dataFim: sci.dataFim,
+                      })"
+                    >
+                      Prorrogar
+                    </button>
+                    <button
+                      type="button"
+                      @click="abrirCorrecaoCodigoSeg({
+                        tipo: 'sci',
+                        id: sci.id,
+                        nome: sci.nome,
+                        codigoSeg: sci.codigoSeg,
+                        dataFim: sci.dataFim,
+                      })"
+                    >
+                      Corrigir SEG
+                    </button>
                   </div>
                 </div>
               </header>
@@ -651,9 +864,38 @@ onMounted(carregar)
                     <small>
                       {{ formatarData(atividade.dataInicio) }} → {{ formatarData(atividade.dataFim) }}
                     </small>
-                    <button class="activity-edit" type="button" @click="abrirEditarAtividade(atividade)">
-                      Editar
-                    </button>
+                    <div class="activity-actions">
+                      <button class="activity-edit" type="button" @click="abrirEditarAtividade(atividade)">
+                        Editar
+                      </button>
+                      <button
+                        v-if="podeProrrogarAtividade(atividade)"
+                        class="activity-edit"
+                        type="button"
+                        @click="abrirProrrogacao({
+                          tipo: 'atividade',
+                          id: atividade.id,
+                          nome: atividade.nome,
+                          codigoSeg: atividade.codigoSeg,
+                          dataFim: atividade.dataFim,
+                        })"
+                      >
+                        Prorrogar
+                      </button>
+                      <button
+                        class="activity-edit"
+                        type="button"
+                        @click="abrirCorrecaoCodigoSeg({
+                          tipo: 'atividade',
+                          id: atividade.id,
+                          nome: atividade.nome,
+                          codigoSeg: atividade.codigoSeg,
+                          dataFim: atividade.dataFim,
+                        })"
+                      >
+                        Corrigir SEG
+                      </button>
+                    </div>
                   </div>
                 </article>
               </div>
@@ -805,6 +1047,68 @@ onMounted(carregar)
             <button class="button button--ghost" type="button" :disabled="salvandoHierarquia" @click="fecharModal">Cancelar</button>
             <button class="button button--primary" type="submit" :disabled="salvandoHierarquia">
               {{ salvandoHierarquia ? 'Salvando...' : 'Salvar Atividade' }}
+            </button>
+          </footer>
+        </form>
+      </section>
+    </div>
+
+    <div v-if="modalAcao && alvoAcao" class="modal-backdrop" @click.self="fecharModalAcao">
+      <section class="modal-card modal-card--compact" role="dialog" aria-modal="true">
+        <header>
+          <div>
+            <p class="eyebrow">OPERAÇÃO ADMINISTRATIVA</p>
+            <h2>{{ modalAcao === 'prorrogacao' ? 'Prorrogar prazo' : 'Corrigir Código SEG' }}</h2>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModalAcao">×</button>
+        </header>
+
+        <div class="action-target">
+          <span>{{ alvoAcao.tipo.toUpperCase() }}</span>
+          <strong>{{ alvoAcao.nome }}</strong>
+          <small>{{ alvoAcao.codigoSeg || 'Sem Código SEG' }}</small>
+        </div>
+
+        <p v-if="erroAcao" class="feedback feedback--error modal-feedback">{{ erroAcao }}</p>
+
+        <form class="hierarchy-form" @submit.prevent="salvarAcaoEspecial">
+          <template v-if="modalAcao === 'prorrogacao'">
+            <div class="action-current">
+              <span>Data final atual</span>
+              <strong>{{ formatarData(alvoAcao.dataFim) }}</strong>
+            </div>
+            <label class="form-field">
+              <span>Nova data final *</span>
+              <input v-model="novaDataFim" type="date" required />
+              <small>A nova data deve ser posterior à atual e respeitar os limites dos pais quando houver.</small>
+            </label>
+          </template>
+
+          <label v-else class="form-field">
+            <span>Novo Código SEG *</span>
+            <input v-model="novoCodigoSeg" required />
+            <small>
+              A correção é auditada. Em Projeto/SCI, os descendentes têm o prefixo atualizado preservando seus sufixos.
+            </small>
+          </label>
+
+          <label class="form-field">
+            <span>Justificativa *</span>
+            <textarea
+              v-model="justificativaAcao"
+              rows="4"
+              maxlength="1000"
+              required
+              placeholder="Descreva o motivo institucional da operação."
+            />
+          </label>
+
+          <footer class="modal-actions">
+            <button class="button button--ghost" type="button" :disabled="salvandoAcao" @click="fecharModalAcao">
+              Cancelar
+            </button>
+            <button class="button button--primary" type="submit" :disabled="salvandoAcao">
+              {{ salvandoAcao ? 'Salvando...' : modalAcao === 'prorrogacao' ? 'Confirmar prorrogação' : 'Confirmar correção' }}
             </button>
           </footer>
         </form>
@@ -1575,6 +1879,104 @@ onMounted(carregar)
 
   .modal-actions .button {
     width: 100%;
+  }
+}
+
+.feedback--success {
+  border: 1px solid color-mix(in srgb, #16835d 30%, var(--sgl-border));
+  background: color-mix(in srgb, #16835d 7%, var(--sgl-surface));
+  color: #16835d;
+}
+
+.hero-side {
+  display: grid;
+  align-content: start;
+  justify-items: end;
+  gap: 9px;
+}
+
+.entity-actions,
+.activity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.entity-actions button {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--sgl-border);
+  border-radius: 6px;
+  background: var(--sgl-surface);
+  color: var(--sgl-primary);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.form-field textarea {
+  width: 100%;
+  border: 1px solid var(--sgl-border);
+  border-radius: 8px;
+  padding: 10px;
+  resize: vertical;
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font: inherit;
+  font-size: 11px;
+}
+
+.modal-card--compact {
+  width: min(560px, 100%);
+}
+
+.action-target {
+  display: grid;
+  gap: 4px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--sgl-border);
+  background: color-mix(in srgb, var(--sgl-primary) 4%, var(--sgl-surface));
+}
+
+.action-target span,
+.action-current span {
+  color: var(--sgl-text-muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.action-target strong {
+  font-size: 12px;
+}
+
+.action-target small {
+  color: var(--sgl-text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9px;
+}
+
+.action-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 12px;
+  border: 1px solid var(--sgl-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--sgl-primary) 3%, var(--sgl-surface));
+}
+
+@media (max-width: 700px) {
+  .hero-side {
+    justify-items: stretch;
+  }
+
+  .entity-actions,
+  .activity-actions {
+    justify-content: flex-start;
   }
 }
 
