@@ -5,13 +5,41 @@ import { computed, onMounted, ref } from 'vue'
 import { projetosService } from '@/modules/projetos/services/projetosService'
 import type {
   AtividadeOperacional,
+  AtividadeRequest,
   ProjetoOperacional,
   SciOperacional,
+  SciRequest,
+  SituacaoExecucaoProjeto,
   StatusProjeto,
 } from '@/modules/projetos/types/projetos'
 import { useSessionStore } from '@/stores/session'
 
 type FiltroStatus = 'TODOS' | StatusProjeto
+type ModalHierarquia = 'sci' | 'atividade' | null
+
+interface SciForm {
+  projetoId: string
+  codigoSeg: string
+  nome: string
+  responsavel: string
+  dataInicio: string
+  dataFim: string
+  status: StatusProjeto
+  situacaoExecucao: SituacaoExecucaoProjeto
+  ativo: boolean
+}
+
+interface AtividadeForm {
+  sciId: string
+  codigoSeg: string
+  nome: string
+  responsavel: string
+  dataInicio: string
+  dataFim: string
+  status: StatusProjeto
+  situacaoExecucao: SituacaoExecucaoProjeto
+  ativo: boolean
+}
 
 const session = useSessionStore()
 
@@ -25,6 +53,47 @@ const filtroStatus = ref<FiltroStatus>('TODOS')
 const carregando = ref(false)
 const carregandoDetalhes = ref(false)
 const erro = ref('')
+const modal = ref<ModalHierarquia>(null)
+const editandoId = ref<string | null>(null)
+const salvandoHierarquia = ref(false)
+const erroModal = ref('')
+
+const statusOpcoes: StatusProjeto[] = [
+  'ATIVO',
+  'ENCERRADO_COM_AVALIACAO_PENDENTE',
+  'CONCLUIDO',
+]
+
+const situacaoOpcoes: SituacaoExecucaoProjeto[] = [
+  'NAO_INFORMADO',
+  'EM_ANDAMENTO_NO_PRAZO',
+  'EM_ANDAMENTO_ATRASADO',
+  'EXECUCAO_CANCELADA',
+]
+
+const sciForm = ref<SciForm>({
+  projetoId: '',
+  codigoSeg: '',
+  nome: '',
+  responsavel: '',
+  dataInicio: '',
+  dataFim: '',
+  status: 'ATIVO',
+  situacaoExecucao: 'NAO_INFORMADO',
+  ativo: true,
+})
+
+const atividadeForm = ref<AtividadeForm>({
+  sciId: '',
+  codigoSeg: '',
+  nome: '',
+  responsavel: '',
+  dataInicio: '',
+  dataFim: '',
+  status: 'ATIVO',
+  situacaoExecucao: 'NAO_INFORMADO',
+  ativo: true,
+})
 
 const ehAdministrador = computed(() => session.usuario?.perfil === 'ADMINISTRADOR')
 
@@ -110,6 +179,172 @@ function classeSituacao(valor: ProjetoOperacional['situacaoExecucao']) {
   if (valor === 'EM_ANDAMENTO_ATRASADO' || valor === 'EXECUCAO_CANCELADA') return 'badge--danger'
   if (valor === 'EM_ANDAMENTO_NO_PRAZO') return 'badge--success'
   return 'badge--neutral'
+}
+
+function abrirNovoSci() {
+  if (!projetoSelecionado.value) return
+
+  editandoId.value = null
+  erroModal.value = ''
+  sciForm.value = {
+    projetoId: projetoSelecionado.value.id,
+    codigoSeg: '',
+    nome: '',
+    responsavel: '',
+    dataInicio: projetoSelecionado.value.dataInicio ?? '',
+    dataFim: projetoSelecionado.value.dataFim ?? '',
+    status: 'ATIVO',
+    situacaoExecucao: 'NAO_INFORMADO',
+    ativo: true,
+  }
+  modal.value = 'sci'
+}
+
+function abrirEditarSci(sci: SciOperacional) {
+  editandoId.value = sci.id
+  erroModal.value = ''
+  sciForm.value = {
+    projetoId: sci.projetoId,
+    codigoSeg: sci.codigoSeg,
+    nome: sci.nome,
+    responsavel: sci.responsavel ?? '',
+    dataInicio: sci.dataInicio,
+    dataFim: sci.dataFim ?? '',
+    status: sci.status,
+    situacaoExecucao: sci.situacaoExecucao,
+    ativo: sci.ativo,
+  }
+  modal.value = 'sci'
+}
+
+function abrirNovaAtividade(sci: SciOperacional) {
+  editandoId.value = null
+  erroModal.value = ''
+  atividadeForm.value = {
+    sciId: sci.id,
+    codigoSeg: '',
+    nome: '',
+    responsavel: '',
+    dataInicio: sci.dataInicio,
+    dataFim: sci.dataFim ?? '',
+    status: 'ATIVO',
+    situacaoExecucao: 'NAO_INFORMADO',
+    ativo: true,
+  }
+  modal.value = 'atividade'
+}
+
+function abrirEditarAtividade(atividade: AtividadeOperacional) {
+  editandoId.value = atividade.id
+  erroModal.value = ''
+  atividadeForm.value = {
+    sciId: atividade.sciId,
+    codigoSeg: atividade.codigoSeg,
+    nome: atividade.nome,
+    responsavel: atividade.responsavel ?? '',
+    dataInicio: atividade.dataInicio,
+    dataFim: atividade.dataFim ?? '',
+    status: atividade.status,
+    situacaoExecucao: atividade.situacaoExecucao,
+    ativo: atividade.ativo,
+  }
+  modal.value = 'atividade'
+}
+
+function fecharModal() {
+  if (salvandoHierarquia.value) return
+  modal.value = null
+  editandoId.value = null
+  erroModal.value = ''
+}
+
+async function salvarSci() {
+  if (!sciForm.value.projetoId || !sciForm.value.codigoSeg.trim() || !sciForm.value.nome.trim() || !sciForm.value.dataInicio) {
+    erroModal.value = 'Informe Código SEG, título e data de início do SCI.'
+    return
+  }
+
+  if (sciForm.value.dataFim && sciForm.value.dataFim < sciForm.value.dataInicio) {
+    erroModal.value = 'A data final do SCI não pode ser anterior à data inicial.'
+    return
+  }
+
+  const payload: SciRequest = {
+    projetoId: sciForm.value.projetoId,
+    codigoSeg: sciForm.value.codigoSeg.trim(),
+    nome: sciForm.value.nome.trim(),
+    responsavel: sciForm.value.responsavel.trim() || null,
+    dataInicio: sciForm.value.dataInicio,
+    dataFim: sciForm.value.dataFim || null,
+    status: sciForm.value.status,
+    situacaoExecucao: sciForm.value.situacaoExecucao,
+    ativo: sciForm.value.ativo,
+  }
+
+  salvandoHierarquia.value = true
+  erroModal.value = ''
+
+  try {
+    if (editandoId.value) {
+      await projetosService.atualizarSci(editandoId.value, payload)
+    } else {
+      await projetosService.criarSci(payload)
+    }
+
+    modal.value = null
+    editandoId.value = null
+    await carregarDetalhes(payload.projetoId)
+  } catch (error) {
+    erroModal.value = mensagemErro(error, 'Não foi possível salvar o SCI.')
+  } finally {
+    salvandoHierarquia.value = false
+  }
+}
+
+async function salvarAtividade() {
+  if (!atividadeForm.value.sciId || !atividadeForm.value.codigoSeg.trim() || !atividadeForm.value.nome.trim() || !atividadeForm.value.dataInicio) {
+    erroModal.value = 'Informe Código SEG, título e data de início da Atividade.'
+    return
+  }
+
+  if (atividadeForm.value.dataFim && atividadeForm.value.dataFim < atividadeForm.value.dataInicio) {
+    erroModal.value = 'A data final da Atividade não pode ser anterior à data inicial.'
+    return
+  }
+
+  const payload: AtividadeRequest = {
+    sciId: atividadeForm.value.sciId,
+    codigoSeg: atividadeForm.value.codigoSeg.trim(),
+    nome: atividadeForm.value.nome.trim(),
+    responsavel: atividadeForm.value.responsavel.trim() || null,
+    dataInicio: atividadeForm.value.dataInicio,
+    dataFim: atividadeForm.value.dataFim || null,
+    status: atividadeForm.value.status,
+    situacaoExecucao: atividadeForm.value.situacaoExecucao,
+    ativo: atividadeForm.value.ativo,
+  }
+
+  salvandoHierarquia.value = true
+  erroModal.value = ''
+
+  try {
+    if (editandoId.value) {
+      await projetosService.atualizarAtividade(editandoId.value, payload)
+    } else {
+      await projetosService.criarAtividade(payload)
+    }
+
+    modal.value = null
+    editandoId.value = null
+
+    if (projetoSelecionadoId.value) {
+      await carregarDetalhes(projetoSelecionadoId.value)
+    }
+  } catch (error) {
+    erroModal.value = mensagemErro(error, 'Não foi possível salvar a Atividade.')
+  } finally {
+    salvandoHierarquia.value = false
+  }
 }
 
 async function carregarDetalhes(projetoId: string) {
@@ -347,7 +582,12 @@ onMounted(carregar)
               <p class="eyebrow">ESTRUTURA DO PROJETO</p>
               <h3>SCI e Atividades</h3>
             </div>
-            <small>Os códigos preservam a hierarquia institucional do SEG.</small>
+            <div class="hierarchy-header-actions">
+              <small>Os códigos preservam a hierarquia institucional do SEG.</small>
+              <button class="button button--primary button--small" type="button" @click="abrirNovoSci">
+                + Novo SCI
+              </button>
+            </div>
           </header>
 
           <div v-if="carregandoDetalhes" class="empty-state">
@@ -366,13 +606,19 @@ onMounted(carregar)
                   <h4>{{ sci.nome }}</h4>
                   <span>{{ sci.responsavel || 'Responsável não informado' }}</span>
                 </div>
-                <div class="detail-badges">
-                  <span class="badge" :class="classeStatus(sci.status)">
-                    {{ rotuloStatus(sci.status) }}
-                  </span>
-                  <span class="badge" :class="classeSituacao(sci.situacaoExecucao)">
-                    {{ rotuloSituacao(sci.situacaoExecucao) }}
-                  </span>
+                <div class="sci-actions">
+                  <div class="detail-badges">
+                    <span class="badge" :class="classeStatus(sci.status)">
+                      {{ rotuloStatus(sci.status) }}
+                    </span>
+                    <span class="badge" :class="classeSituacao(sci.situacaoExecucao)">
+                      {{ rotuloSituacao(sci.situacaoExecucao) }}
+                    </span>
+                  </div>
+                  <div class="inline-actions">
+                    <button type="button" @click="abrirEditarSci(sci)">Editar SCI</button>
+                    <button type="button" @click="abrirNovaAtividade(sci)">+ Atividade</button>
+                  </div>
                 </div>
               </header>
 
@@ -405,6 +651,9 @@ onMounted(carregar)
                     <small>
                       {{ formatarData(atividade.dataInicio) }} → {{ formatarData(atividade.dataFim) }}
                     </small>
+                    <button class="activity-edit" type="button" @click="abrirEditarAtividade(atividade)">
+                      Editar
+                    </button>
                   </div>
                 </article>
               </div>
@@ -421,6 +670,146 @@ onMounted(carregar)
         Selecione um Projeto para visualizar seus SCI e Atividades.
       </article>
     </section>
+
+    <div v-if="modal" class="modal-backdrop" @click.self="fecharModal">
+      <section class="modal-card" role="dialog" aria-modal="true">
+        <header>
+          <div>
+            <p class="eyebrow">{{ editandoId ? 'EDIÇÃO' : 'NOVO CADASTRO' }}</p>
+            <h2>{{ modal === 'sci' ? 'SCI' : 'Atividade' }}</h2>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModal">×</button>
+        </header>
+
+        <p v-if="erroModal" class="feedback feedback--error modal-feedback">{{ erroModal }}</p>
+
+        <form v-if="modal === 'sci'" class="hierarchy-form" @submit.prevent="salvarSci">
+          <label class="form-field">
+            <span>Projeto</span>
+            <input :value="projetoSelecionado?.nome || ''" disabled />
+          </label>
+
+          <div class="form-grid">
+            <label class="form-field">
+              <span>Código SEG *</span>
+              <input
+                v-model="sciForm.codigoSeg"
+                required
+                placeholder="XX.XX.XX.XXX.XX.SS"
+                :disabled="Boolean(editandoId)"
+              />
+              <small v-if="editandoId">Código imutável no CRUD comum.</small>
+              <small v-else-if="projetoSelecionado?.codigoSeg">Deve manter a raiz de {{ projetoSelecionado.codigoSeg }}.</small>
+            </label>
+            <label class="form-field">
+              <span>Título *</span>
+              <input v-model="sciForm.nome" required />
+            </label>
+            <label class="form-field">
+              <span>Responsável</span>
+              <input v-model="sciForm.responsavel" />
+            </label>
+            <label class="form-field">
+              <span>Status</span>
+              <select v-model="sciForm.status">
+                <option v-for="item in statusOpcoes" :key="item" :value="item">{{ rotuloStatus(item) }}</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>Data de início *</span>
+              <input v-model="sciForm.dataInicio" type="date" required :disabled="Boolean(editandoId)" />
+              <small v-if="editandoId">A data de início não pode ser alterada depois da criação.</small>
+            </label>
+            <label class="form-field">
+              <span>Data final</span>
+              <input v-model="sciForm.dataFim" type="date" />
+              <small v-if="editandoId">Aumento de prazo deve usar o fluxo de prorrogação.</small>
+            </label>
+            <label class="form-field">
+              <span>Situação de execução</span>
+              <select v-model="sciForm.situacaoExecucao">
+                <option v-for="item in situacaoOpcoes" :key="item" :value="item">{{ rotuloSituacao(item) }}</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="check-field">
+            <input v-model="sciForm.ativo" type="checkbox" />
+            <span>SCI habilitado tecnicamente</span>
+          </label>
+
+          <footer class="modal-actions">
+            <button class="button button--ghost" type="button" :disabled="salvandoHierarquia" @click="fecharModal">Cancelar</button>
+            <button class="button button--primary" type="submit" :disabled="salvandoHierarquia">
+              {{ salvandoHierarquia ? 'Salvando...' : 'Salvar SCI' }}
+            </button>
+          </footer>
+        </form>
+
+        <form v-else class="hierarchy-form" @submit.prevent="salvarAtividade">
+          <label class="form-field">
+            <span>SCI</span>
+            <input :value="scis.find((item) => item.id === atividadeForm.sciId)?.nome || ''" disabled />
+          </label>
+
+          <div class="form-grid">
+            <label class="form-field">
+              <span>Código SEG *</span>
+              <input
+                v-model="atividadeForm.codigoSeg"
+                required
+                placeholder="XX.XX.XX.XXX.XX.SS.AAA"
+                :disabled="Boolean(editandoId)"
+              />
+              <small v-if="editandoId">Código imutável no CRUD comum.</small>
+              <small v-else>Deve herdar integralmente o Código SEG do SCI e acrescentar três dígitos.</small>
+            </label>
+            <label class="form-field">
+              <span>Título *</span>
+              <input v-model="atividadeForm.nome" required />
+            </label>
+            <label class="form-field">
+              <span>Responsável</span>
+              <input v-model="atividadeForm.responsavel" />
+            </label>
+            <label class="form-field">
+              <span>Status</span>
+              <select v-model="atividadeForm.status">
+                <option v-for="item in statusOpcoes" :key="item" :value="item">{{ rotuloStatus(item) }}</option>
+              </select>
+            </label>
+            <label class="form-field">
+              <span>Data de início *</span>
+              <input v-model="atividadeForm.dataInicio" type="date" required :disabled="Boolean(editandoId)" />
+              <small v-if="editandoId">A data de início não pode ser alterada depois da criação.</small>
+            </label>
+            <label class="form-field">
+              <span>Data final</span>
+              <input v-model="atividadeForm.dataFim" type="date" />
+              <small v-if="editandoId">Aumento de prazo deve usar o fluxo de prorrogação.</small>
+            </label>
+            <label class="form-field">
+              <span>Situação de execução</span>
+              <select v-model="atividadeForm.situacaoExecucao">
+                <option v-for="item in situacaoOpcoes" :key="item" :value="item">{{ rotuloSituacao(item) }}</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="check-field">
+            <input v-model="atividadeForm.ativo" type="checkbox" />
+            <span>Atividade habilitada tecnicamente</span>
+          </label>
+
+          <footer class="modal-actions">
+            <button class="button button--ghost" type="button" :disabled="salvandoHierarquia" @click="fecharModal">Cancelar</button>
+            <button class="button button--primary" type="submit" :disabled="salvandoHierarquia">
+              {{ salvandoHierarquia ? 'Salvando...' : 'Salvar Atividade' }}
+            </button>
+          </footer>
+        </form>
+      </section>
+    </div>
   </main>
 </template>
 
@@ -1002,4 +1391,191 @@ onMounted(carregar)
     text-align: left;
   }
 }
+
+.button--small {
+  min-height: 34px;
+  padding-inline: 11px;
+  font-size: 10px;
+}
+
+.hierarchy-header-actions {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.sci-actions {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.inline-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.inline-actions button,
+.activity-edit {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--sgl-border);
+  border-radius: 6px;
+  background: var(--sgl-surface);
+  color: var(--sgl-primary);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.inline-actions button:hover,
+.activity-edit:hover {
+  background: color-mix(in srgb, var(--sgl-primary) 7%, var(--sgl-surface));
+}
+
+.activity-edit {
+  margin-top: 3px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(6 18 38 / 58%);
+}
+
+.modal-card {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border: 1px solid var(--sgl-border);
+  border-radius: 14px;
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  box-shadow: 0 24px 70px rgb(5 18 40 / 25%);
+}
+
+.modal-card > header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--sgl-border);
+  background: var(--sgl-surface);
+}
+
+.modal-card > header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.modal-card > header > button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--sgl-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--sgl-text);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.modal-feedback {
+  margin: 14px 18px 0;
+}
+
+.hierarchy-form {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.form-field > span {
+  color: var(--sgl-text-muted);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--sgl-border);
+  border-radius: 8px;
+  padding: 0 10px;
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font: inherit;
+  font-size: 11px;
+}
+
+.form-field input:disabled {
+  opacity: .7;
+  background: color-mix(in srgb, var(--sgl-text-muted) 5%, var(--sgl-surface));
+}
+
+.form-field small {
+  color: var(--sgl-text-muted);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.check-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sgl-text-muted);
+  font-size: 10px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+@media (max-width: 700px) {
+  .hierarchy-header-actions,
+  .sci-actions {
+    justify-items: start;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-backdrop {
+    padding: 12px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions .button {
+    width: 100%;
+  }
+}
+
 </style>
