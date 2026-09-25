@@ -6,6 +6,8 @@ import { projetosService } from '@/modules/projetos/services/projetosService'
 import type {
   AtividadeOperacional,
   AtividadeRequest,
+  HistoricoCorrecaoCodigoSeg,
+  HistoricoProrrogacao,
   ProjetoOperacional,
   SciOperacional,
   SciRequest,
@@ -75,6 +77,11 @@ const novoCodigoSeg = ref('')
 const justificativaAcao = ref('')
 const salvandoAcao = ref(false)
 const erroAcao = ref('')
+const alvoHistorico = ref<AlvoAcao | null>(null)
+const historicoProrrogacoes = ref<HistoricoProrrogacao[]>([])
+const historicoCorrecoes = ref<HistoricoCorrecaoCodigoSeg[]>([])
+const carregandoHistorico = ref(false)
+const erroHistorico = ref('')
 
 const statusOpcoes: StatusProjeto[] = [
   'ATIVO',
@@ -345,6 +352,63 @@ async function salvarAcaoEspecial() {
   } finally {
     salvandoAcao.value = false
   }
+}
+
+function formatarDataHora(valor?: string | null) {
+  if (!valor) return 'Data não informada'
+
+  const data = new Date(valor)
+  if (Number.isNaN(data.getTime())) return valor
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(data)
+}
+
+async function abrirHistorico(alvo: AlvoAcao) {
+  alvoHistorico.value = alvo
+  historicoProrrogacoes.value = []
+  historicoCorrecoes.value = []
+  erroHistorico.value = ''
+  carregandoHistorico.value = true
+
+  try {
+    if (alvo.tipo === 'projeto') {
+      const [prorrogacoes, correcoes] = await Promise.all([
+        projetosService.listarProrrogacoesProjeto(alvo.id),
+        projetosService.listarCorrecoesProjeto(alvo.id),
+      ])
+      historicoProrrogacoes.value = prorrogacoes
+      historicoCorrecoes.value = correcoes
+    } else if (alvo.tipo === 'sci') {
+      const [prorrogacoes, correcoes] = await Promise.all([
+        projetosService.listarProrrogacoesSci(alvo.id),
+        projetosService.listarCorrecoesSci(alvo.id),
+      ])
+      historicoProrrogacoes.value = prorrogacoes
+      historicoCorrecoes.value = correcoes
+    } else {
+      const [prorrogacoes, correcoes] = await Promise.all([
+        projetosService.listarProrrogacoesAtividade(alvo.id),
+        projetosService.listarCorrecoesAtividade(alvo.id),
+      ])
+      historicoProrrogacoes.value = prorrogacoes
+      historicoCorrecoes.value = correcoes
+    }
+  } catch (error) {
+    erroHistorico.value = mensagemErro(error, 'Não foi possível carregar o histórico desta entidade.')
+  } finally {
+    carregandoHistorico.value = false
+  }
+}
+
+function fecharHistorico() {
+  if (carregandoHistorico.value) return
+  alvoHistorico.value = null
+  historicoProrrogacoes.value = []
+  historicoCorrecoes.value = []
+  erroHistorico.value = ''
 }
 
 function abrirNovoSci() {
@@ -741,6 +805,18 @@ onMounted(carregar)
               >
                 Corrigir SEG
               </button>
+              <button
+                type="button"
+                @click="abrirHistorico({
+                  tipo: 'projeto',
+                  id: projetoSelecionado.id,
+                  nome: projetoSelecionado.nome,
+                  codigoSeg: projetoSelecionado.codigoSeg,
+                  dataFim: projetoSelecionado.dataFim,
+                })"
+              >
+                Histórico
+              </button>
             </div>
           </div>
         </header>
@@ -842,6 +918,18 @@ onMounted(carregar)
                     >
                       Corrigir SEG
                     </button>
+                    <button
+                      type="button"
+                      @click="abrirHistorico({
+                        tipo: 'sci',
+                        id: sci.id,
+                        nome: sci.nome,
+                        codigoSeg: sci.codigoSeg,
+                        dataFim: sci.dataFim,
+                      })"
+                    >
+                      Histórico
+                    </button>
                   </div>
                 </div>
               </header>
@@ -905,6 +993,19 @@ onMounted(carregar)
                         })"
                       >
                         Corrigir SEG
+                      </button>
+                      <button
+                        class="activity-edit"
+                        type="button"
+                        @click="abrirHistorico({
+                          tipo: 'atividade',
+                          id: atividade.id,
+                          nome: atividade.nome,
+                          codigoSeg: atividade.codigoSeg,
+                          dataFim: atividade.dataFim,
+                        })"
+                      >
+                        Histórico
                       </button>
                     </div>
                   </div>
@@ -1123,6 +1224,100 @@ onMounted(carregar)
             </button>
           </footer>
         </form>
+      </section>
+    </div>
+
+    <div v-if="alvoHistorico" class="modal-backdrop" @click.self="fecharHistorico">
+      <section class="modal-card modal-card--history" role="dialog" aria-modal="true">
+        <header>
+          <div>
+            <p class="eyebrow">AUDITORIA</p>
+            <h2>Histórico</h2>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharHistorico">×</button>
+        </header>
+
+        <div class="action-target">
+          <span>{{ alvoHistorico.tipo.toUpperCase() }}</span>
+          <strong>{{ alvoHistorico.nome }}</strong>
+          <small>{{ alvoHistorico.codigoSeg || 'Sem Código SEG' }}</small>
+        </div>
+
+        <p v-if="erroHistorico" class="feedback feedback--error modal-feedback">{{ erroHistorico }}</p>
+
+        <div v-if="carregandoHistorico" class="empty-state">
+          Carregando histórico...
+        </div>
+
+        <div v-else class="history-content">
+          <section class="history-section">
+            <header>
+              <div>
+                <p class="eyebrow">PRAZOS</p>
+                <h3>Prorrogações</h3>
+              </div>
+              <span>{{ historicoProrrogacoes.length }}</span>
+            </header>
+
+            <p v-if="historicoProrrogacoes.length === 0" class="history-empty">
+              Nenhuma prorrogação registrada.
+            </p>
+
+            <template v-else>
+              <article
+                v-for="item in historicoProrrogacoes"
+                :key="item.id"
+                class="history-item"
+              >
+                <div class="history-item__line">
+                  <strong>{{ formatarData(item.dataFimAnterior) }} → {{ formatarData(item.dataFimNova) }}</strong>
+                  <time>{{ formatarDataHora(item.dataHora) }}</time>
+                </div>
+                <p>{{ item.justificativa }}</p>
+                <small>{{ item.usuarioNome || 'Usuário não identificado' }}</small>
+              </article>
+            </template>
+          </section>
+
+          <section class="history-section">
+            <header>
+              <div>
+                <p class="eyebrow">IDENTIFICAÇÃO</p>
+                <h3>Correções de Código SEG</h3>
+              </div>
+              <span>{{ historicoCorrecoes.length }}</span>
+            </header>
+
+            <p v-if="historicoCorrecoes.length === 0" class="history-empty">
+              Nenhuma correção de Código SEG registrada.
+            </p>
+
+            <template v-else>
+              <article
+                v-for="item in historicoCorrecoes"
+                :key="item.id"
+                class="history-item"
+              >
+                <div class="history-code-change">
+                  <code>{{ item.codigoAnterior }}</code>
+                  <span>→</span>
+                  <code>{{ item.codigoNovo }}</code>
+                </div>
+                <p>{{ item.justificativa }}</p>
+                <div class="history-item__line">
+                  <small>{{ item.usuarioNome || 'Usuário não identificado' }}</small>
+                  <time>{{ formatarDataHora(item.dataHora) }}</time>
+                </div>
+              </article>
+            </template>
+          </section>
+        </div>
+
+        <footer class="history-footer">
+          <button class="button button--ghost" type="button" @click="fecharHistorico">
+            Fechar
+          </button>
+        </footer>
       </section>
     </div>
   </main>
@@ -1991,4 +2186,128 @@ onMounted(carregar)
   }
 }
 
+
+.modal-card--history {
+  width: min(760px, 100%);
+}
+
+.history-content {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+}
+
+.history-section {
+  min-width: 0;
+  border: 1px solid var(--sgl-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.history-section > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 13px;
+  border-bottom: 1px solid var(--sgl-border);
+  background: color-mix(in srgb, var(--sgl-primary) 4%, var(--sgl-surface));
+}
+
+.history-section > header h3 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.history-section > header > span {
+  min-width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sgl-primary) 10%, var(--sgl-surface));
+  color: var(--sgl-primary);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.history-item {
+  display: grid;
+  gap: 7px;
+  padding: 12px 13px;
+  border-bottom: 1px solid var(--sgl-border);
+}
+
+.history-item:last-child {
+  border-bottom: 0;
+}
+
+.history-item p {
+  margin: 0;
+  color: var(--sgl-text);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.history-item small,
+.history-item time {
+  color: var(--sgl-text-muted);
+  font-size: 9px;
+}
+
+.history-item__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.history-item__line strong {
+  font-size: 10px;
+}
+
+.history-code-change {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.history-code-change code {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--sgl-primary) 6%, var(--sgl-surface));
+  color: var(--sgl-text);
+  font-size: 8px;
+}
+
+.history-empty {
+  margin: 0;
+  padding: 20px 13px;
+  color: var(--sgl-text-muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+.history-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 18px 18px;
+}
+
+@media (max-width: 700px) {
+  .history-content {
+    grid-template-columns: 1fr;
+  }
+
+  .history-item__line,
+  .history-code-change {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
 </style>
