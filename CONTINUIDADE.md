@@ -8,7 +8,7 @@
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
 **Branch atual de trabalho:** `collab/etapa-5-projetos-atividades`  
 **Etapa concluída:** Etapa 4 — expansão operacional de Resíduos ✅  
-**Etapa atual:** Etapa 5 — Projetos e Atividades 🔧 5.5 Interface e integração — em implementação  
+**Etapa atual:** Etapa 5 — Projetos e Atividades 🔧 5.5 Interface e integração — implementação principal concluída; validação pendente  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
@@ -358,7 +358,7 @@ Projeto
 → Atividades
 ```
 
-Projeto é o eixo operacional principal. Laboratório continua contexto/filtro e laboratório responsável, mas a futura interface não deve obrigar o usuário a entrar em Laboratório para acessar Projeto.
+Projeto é o eixo operacional principal. Laboratório continua contexto/filtro e laboratório responsável, mas a interface não obriga mais o usuário a entrar em Laboratório para acessar Projeto.
 
 Código SEG será exibido como dado institucional:
 
@@ -406,7 +406,7 @@ Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
-Etapa 5 — Projetos e Atividades                       🔧 atual — 5.5 Interface e integração
+Etapa 5 — Projetos e Atividades                       🔧 atual — 5.5 implementação pronta; validação pendente
 Etapas 6 a 13                                         ⏳
 ```
 
@@ -438,20 +438,39 @@ Validação funcional integrada concluída; este bloco faz parte do fechamento d
 Os ajustes foram revalidados e incorporados ao fechamento definitivo da Etapa 4.
 
 
-### Estado inicial do 5.5
+### Checkpoint do 5.5 — implementação principal concluída
 
-Implementado o primeiro incremento da interface integrada:
+Implementado na branch `collab/etapa-5-projetos-atividades`:
 
 - nova rota operacional `/projetos` para Gestão/Administração;
 - acesso direto no menu lateral, sem passagem obrigatória por Laboratório;
-- listagem de Projetos da Unidade;
-- busca por título, Código SEG, laboratório ou responsável;
-- filtro por status;
+- listagem, busca e filtro de Projetos da Unidade;
 - resumo de Projetos ativos, atrasados, concluídos e total;
-- seleção de Projeto com painel de detalhes;
-- carregamento integrado de SCI do Projeto;
-- visualização das Atividades agrupadas por SCI;
-- exibição de Código SEG, status, situação de execução, período, responsável e recurso externo;
-- acesso rápido ao cadastro administrativo de Projetos para Administrador.
+- seleção de Projeto com painel de detalhes e hierarquia completa;
+- SCI carregados por Projeto e Atividades agrupadas por SCI;
+- exibição de Código SEG, status, situação, período, responsável e recurso externo;
+- cadastro e edição de SCI diretamente no hub;
+- cadastro e edição de Atividades diretamente no SCI;
+- Código SEG e data de início bloqueados na edição comum conforme regras backend;
+- mensagens orientando que aumento de prazo deve usar prorrogação;
+- prorrogação de Projeto, SCI e Atividade integrada ao fluxo específico;
+- correção administrativa de Código SEG integrada aos três níveis;
+- usuário da sessão usado como operador temporário, compatível com o contrato atual;
+- histórico visual de prorrogações e correções de Código SEG;
+- formulário administrativo de Projeto atualizado com Código SEG, status, situação de execução e recurso externo;
+- acesso rápido ao cadastro administrativo de Projetos para Administrador;
+- interface responsiva e baseada nas variáveis visuais já usadas pelo light/dark mode.
 
-O backend DEV ganhou massa idempotente específica da Etapa 5 para que a hierarquia seja visível mesmo em banco já existente.
+O backend DEV ganhou massa idempotente específica da Etapa 5 para que a hierarquia seja visível mesmo em banco já existente. A massa inclui cenários no prazo, atrasado e concluído, com múltiplos SCI e Atividades.
+
+Estado do bloco:
+
+```text
+5.5.1 Hub Projeto → SCI → Atividade                 ✅ implementado
+5.5.2 CRUD operacional SCI/Atividade                 ✅ implementado
+5.5.3 Cadastro administrativo de Projeto atualizado  ✅ implementado
+5.5.4 Prorrogação + correção SEG + auditoria          ✅ implementado
+5.5.5 Validação visual/integrada                      🔧 pendente
+```
+
+Não marcar a Etapa 5 como concluída antes da validação da interface em execução.
