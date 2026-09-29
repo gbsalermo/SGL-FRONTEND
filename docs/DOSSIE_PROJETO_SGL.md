@@ -3,8 +3,8 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Atualizado em:** 24/09/2026  
-**Estado:** primeiro protótipo funcional aprovado; Etapas 1, 2, 3 e 4 concluídas e validadas; Etapa 5 — Projetos e Atividades em andamento no bloco 5.1 — Projeto base; frontend aguarda contratos backend estabilizados.
+**Atualizado em:** 29/09/2026  
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1–5 concluídas e validadas; frontend da Etapa 5 encerrado; próxima etapa: Etapa 6 — Estagiários e vínculos.
 
 Este documento resume o estado real do frontend para retomada humana ou por IA. O objetivo é evitar reconstrução de módulos já aprovados e impedir que roadmaps antigos sejam tratados como tarefa imediata.
 
@@ -15,10 +15,11 @@ Etapa 1 — padrão visual global              ✅ concluída
 Etapa 2 — Dark Mode definitivo              ✅ concluída
 Etapa 3 — refinamentos do fluxo de Resíduos ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos  ✅ concluída e validada
-Etapa 5 — Projetos e Atividades             🔧 atual — 5.1 backend
+Etapa 5 — Projetos e Atividades             ✅ concluída e validada
+Etapa 6 — Estagiários e vínculos            ⏳ próxima
 ```
 
-Retomada imediata: continuar `collab/etapa-5-projetos-atividades`. Backend está no 5.1 — Projeto base; frontend deve aguardar Projeto → SCI → Atividade e contratos HTTP estabilizados antes do 5.5.
+Retomada imediata: após o merge de `collab/etapa-5-projetos-atividades`, criar a branch da Etapa 6 sobre a `main` sincronizada. Projeto → SCI → Atividade e os contratos HTTP da Etapa 5 estão estabilizados.
 
 Dark Mode definitivo: fonte única em `src/services/themeService.ts`, tokens consolidados, Vuetify/DOM sincronizados e Login/404/rótulos de impressão preservados em Light.
 
@@ -626,3 +627,28 @@ O documento `ROADMAP_INTERFACE_GESTAO.md` registra esse bloco posterior. O prime
 ```
 
 **O SGL está funcionalmente aprovado e em pré-produção pós-aprovação. Não tratar afirmações antigas de “matriz de permissões = próximo passo” como estado atual; essa etapa pertence ao roadmap formal posterior.**
+
+
+---
+
+## Fechamento da Etapa 5
+
+Fechamento confirmado em 29/09/2026.
+
+Frontend entregue e validado:
+
+- rota `/projetos` como hub operacional;
+- Projeto como eixo principal;
+- filtro por Laboratório, busca e status;
+- Projeto → SCI → Atividade;
+- cadastro/edição de SCI e Atividade;
+- prorrogações;
+- correção SEG;
+- históricos;
+- cadastro administrativo de Projeto atualizado;
+- sugestão editável de Código SEG para SCI/Atividade;
+- tipografia canônica e dark mode;
+- diferenciação visual: SCI em azul do padrão de status e Atividade em verde;
+- refinamentos finais aprovados em execução.
+
+Próxima etapa: **Etapa 6 — Estagiários e vínculos**.

@@ -7,8 +7,8 @@
 **Branch estável:** `main` do GitLab institucional  
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
 **Branch atual de trabalho:** `collab/etapa-5-projetos-atividades`  
-**Etapa concluída:** Etapa 4 — expansão operacional de Resíduos ✅  
-**Etapa atual:** Etapa 5 — Projetos e Atividades 🔧 5.5 Interface e integração — implementação principal concluída; validação pendente  
+**Etapa concluída:** Etapa 5 — Projetos e Atividades ✅  
+**Próxima etapa:** Etapa 6 — Estagiários e vínculos ⏳  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
@@ -347,7 +347,7 @@ Estado frontend consolidado:
 - Dashboard da Gestão combina movimentações de estoque e eventos operacionais de Resíduos da Unidade;
 - cancelados são tratados em Meus Resíduos, Gestão, relatórios e rótulo.
 
-A etapa atual é **Etapa 5 — Projetos e Atividades**, com os blocos backend 5.1–5.4 concluídos e o **5.5 — Interface e integração** em execução.
+A **Etapa 5 — Projetos e Atividades está concluída e validada**. A próxima etapa é **Etapa 6 — Estagiários e vínculos**.
 
 
 ## Decisões da Etapa 5 que afetam o frontend
@@ -406,15 +406,16 @@ Etapa 1 — refinamento visual global                   ✅
 Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
-Etapa 5 — Projetos e Atividades                       🔧 atual — 5.5 implementação pronta; validação pendente
-Etapas 6 a 13                                         ⏳
+Etapa 5 — Projetos e Atividades                       ✅ concluída e validada
+Etapa 6 — Estagiários e vínculos                      ⏳ próxima
+Etapas 7 a 13                                         ⏳
 ```
 
 ---
 
 # 12. Regra final de retomada
 
-**As Etapas 1–4 estão concluídas e validadas. Na Etapa 5, os blocos backend 5.0–5.4 estão fechados; retomar pelo 5.5 — Interface e integração na branch `collab/etapa-5-projetos-atividades`.**
+**As Etapas 1–5 estão concluídas e validadas. Após o merge da branch `collab/etapa-5-projetos-atividades`, retomar pela Etapa 6 — Estagiários e vínculos em branch própria criada sobre a `main` sincronizada.**
 
 ### Estado frontend do 4.4
 
@@ -438,7 +439,7 @@ Validação funcional integrada concluída; este bloco faz parte do fechamento d
 Os ajustes foram revalidados e incorporados ao fechamento definitivo da Etapa 4.
 
 
-### Checkpoint do 5.5 — implementação principal concluída
+### Fechamento do 5.5 — concluído e validado
 
 Implementado na branch `collab/etapa-5-projetos-atividades`:
 
@@ -466,14 +467,14 @@ O backend DEV ganhou massa idempotente específica da Etapa 5 para que a hierarq
 Estado do bloco:
 
 ```text
-5.5.1 Hub Projeto → SCI → Atividade                 ✅ implementado
-5.5.2 CRUD operacional SCI/Atividade                 ✅ implementado
-5.5.3 Cadastro administrativo de Projeto atualizado  ✅ implementado
-5.5.4 Prorrogação + correção SEG + auditoria          ✅ implementado
-5.5.5 Validação visual/integrada                      🔧 pendente
+5.5.1 Hub Projeto → SCI → Atividade                 ✅
+5.5.2 CRUD operacional SCI/Atividade                 ✅
+5.5.3 Cadastro administrativo de Projeto atualizado  ✅
+5.5.4 Prorrogação + correção SEG + auditoria          ✅
+5.5.5 Validação visual/integrada                      ✅
 ```
 
-Não marcar a Etapa 5 como concluída antes da validação da interface em execução.
+Validação da interface em execução confirmada em 29/09/2026. Etapa 5 encerrada.
 
 
 ### Decisão de interface — primeira definição do Código SEG
@@ -495,7 +496,6 @@ Aplicados durante a validação da 5.5:
 
 - filtro explícito por Laboratório adicionado ao bloco de pesquisa/filtros;
 - contador duplicado removido do cabeçalho lateral de Projetos, mantendo o total apenas nos KPIs superiores;
-- ação **Abrir hierarquia** tornou-se funcional, com foco/scroll suave para a estrutura do Projeto selecionado;
 - cards de SCI passaram a exibir identificação visual explícita **SCI**;
 - Atividades passaram a ser renderizadas como blocos subordinados e visualmente recuados dentro de seu SCI;
 - cada Atividade exibe identificação **ATIVIDADE** e a relação textual **Vinculada ao SCI: ...**;
@@ -514,7 +514,7 @@ Refinamento final da validação do 5.5:
 - a sugestão considera a lista completa retornada pelo backend, inclusive registros inativos;
 - o Código SEG sugerido permanece editável antes do primeiro salvamento, permitindo códigos institucionais avulsos;
 - depois da criação, permanece a regra de imutabilidade no CRUD comum e correção somente pelo fluxo auditável;
-- o selo visual **SCI** passou a usar azul institucional sólido; Atividade continua identificada em verde.
+- o selo visual **SCI** usa o mesmo padrão azul dos badges de status; Atividade permanece identificada em verde.
 
 
 ### Decisão futura — Central de Relatórios na Etapa 7
@@ -547,3 +547,23 @@ Movimentações
 ├── Resumo
 └── Detalhamento
 ```
+
+
+### Fechamento definitivo da Etapa 5
+
+Confirmado em 29/09/2026 após validação funcional e visual.
+
+Pontos finais aprovados:
+
+- filtro por Laboratório;
+- contador redundante removido da lista de Projetos;
+- ação redundante de hierarquia removida;
+- SCI e Atividades claramente diferenciados;
+- SCI usa padrão azul dos badges do sistema;
+- Atividades usam verde;
+- sugestão assistida e editável de Código SEG;
+- Projeto sem SEG continua com primeira definição via Cadastros;
+- demais alterações SEG passam pelo fluxo auditável;
+- decisões da Etapa 7 sobre Projetos e síntese Movimentações/Resumo registradas.
+
+Após merge, a retomada deve ocorrer pela Etapa 6.
