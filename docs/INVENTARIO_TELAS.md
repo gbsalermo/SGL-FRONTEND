@@ -458,3 +458,19 @@ matriz de permissões
 ```
 
 Este inventário deve ser atualizado quando uma rota/tela real mudar, não para registrar planejamento abstrato.
+
+# Etapa 5 — planejamento de telas
+
+Nenhuma rota nova deve ser criada antes da estabilização de Projeto/SCI/Atividade no backend.
+
+Planejado para o 5.5:
+
+```text
+Projetos — visão principal
+→ detalhe do Projeto
+→ SCI
+→ Atividades
+```
+
+A tela atual de Projetos em Administração permanece como CRUD compatível durante a transição.
+

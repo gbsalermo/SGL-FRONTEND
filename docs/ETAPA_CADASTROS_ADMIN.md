@@ -81,6 +81,23 @@ ativo
 
 A interface valida que a data final não seja anterior à inicial e preserva os projetos inativos para auditoria.
 
+
+#### Evolução da Etapa 5
+
+O CRUD atual de Projeto permanece funcional durante a evolução do domínio. Ele não deve ser removido antes do 5.5.
+
+Decisões vigentes:
+
+- Projeto mantém Laboratório responsável/contextual;
+- Projeto é o eixo operacional principal;
+- futura hierarquia: Projeto → SCI → Atividade;
+- a navegação futura não deve exigir entrar no Laboratório para acessar Projeto;
+- Código SEG passa a integrar o cadastro;
+- status principal e situação de execução são conceitos distintos;
+- recurso externo deve ser explícito e, quando presente, identificar a empresa.
+
+A reorganização da interface será feita somente após os contratos backend estarem estabilizados.
+
 ### Produtos
 
 A área mantém somente o **catálogo-base**. Quantidades, lotes e movimentações continuam nas telas operacionais de Estoque.

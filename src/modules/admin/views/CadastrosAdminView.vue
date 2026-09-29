@@ -19,6 +19,8 @@ import type {
   ProdutoRequest,
   ProjetoCadastro,
   ProjetoRequest,
+  SituacaoExecucaoProjetoCadastro,
+  StatusProjetoCadastro,
   TipoPerecivelCadastro,
   TipoRiscoCadastro,
   UnidadeCadastro,
@@ -45,6 +47,11 @@ interface ProjetoForm {
   dataInicio: string
   dataFim: string
   responsavel: string
+  codigoSeg: string
+  status: StatusProjetoCadastro
+  situacaoExecucao: SituacaoExecucaoProjetoCadastro
+  possuiRecursoExterno: boolean
+  empresaRecursoExterno: string
   ativo: boolean
 }
 
@@ -136,9 +143,22 @@ const medidasSeguranca: MedidaSegurancaCadastro[] = [
   'LUVAS', 'OCULOS_PROTECAO', 'PROTECAO_RESPIRATORIA', 'JALECO_AVENTAL', 'OUTRO',
 ]
 
+const statusProjeto: StatusProjetoCadastro[] = [
+  'ATIVO',
+  'ENCERRADO_COM_AVALIACAO_PENDENTE',
+  'CONCLUIDO',
+]
+
+const situacoesProjeto: SituacaoExecucaoProjetoCadastro[] = [
+  'NAO_INFORMADO',
+  'EM_ANDAMENTO_NO_PRAZO',
+  'EM_ANDAMENTO_ATRASADO',
+  'EXECUCAO_CANCELADA',
+]
+
 const abas: Array<{ id: AbaCadastro; titulo: string; descricao: string }> = [
   { id: 'laboratorios', titulo: 'Laboratórios', descricao: 'Estrutura, unidade e responsável' },
-  { id: 'projetos', titulo: 'Projetos', descricao: 'Projetos vinculados aos laboratórios' },
+  { id: 'projetos', titulo: 'Projetos', descricao: 'Eixo operacional, Código SEG e contexto laboratorial' },
   { id: 'produtos', titulo: 'Produtos', descricao: 'Catálogo-base de materiais do SGL' },
   { id: 'classes-residuo', titulo: 'Classes de resíduo', descricao: 'Classificações disponíveis para a Unidade' },
   { id: 'locais-armazenamento', titulo: 'Locais de armazenamento', descricao: 'Locais temporários disponíveis para Resíduos' },
@@ -205,7 +225,20 @@ function novoLaboratorio(): LaboratorioForm {
 }
 
 function novoProjeto(): ProjetoForm {
-  return { laboratorioId: '', nome: '', descricao: '', dataInicio: '', dataFim: '', responsavel: '', ativo: true }
+  return {
+    laboratorioId: '',
+    nome: '',
+    descricao: '',
+    dataInicio: '',
+    dataFim: '',
+    responsavel: '',
+    codigoSeg: '',
+    status: 'ATIVO',
+    situacaoExecucao: 'NAO_INFORMADO',
+    possuiRecursoExterno: false,
+    empresaRecursoExterno: '',
+    ativo: true,
+  }
 }
 
 function novoProduto(): ProdutoForm {
@@ -322,6 +355,11 @@ function editarProjeto(item: ProjetoCadastro) {
     dataInicio: item.dataInicio ?? '',
     dataFim: item.dataFim ?? '',
     responsavel: item.responsavel ?? '',
+    codigoSeg: item.codigoSeg ?? '',
+    status: item.status,
+    situacaoExecucao: item.situacaoExecucao,
+    possuiRecursoExterno: item.possuiRecursoExterno,
+    empresaRecursoExterno: item.empresaRecursoExterno ?? '',
     ativo: item.ativo,
   }
   erroModal.value = ''
@@ -446,6 +484,10 @@ async function salvarProjeto() {
     erroModal.value = 'A data final não pode ser anterior à data inicial.'
     return
   }
+  if (projetoForm.value.possuiRecursoExterno && !projetoForm.value.empresaRecursoExterno.trim()) {
+    erroModal.value = 'Informe a empresa responsável pelo recurso externo.'
+    return
+  }
   const payload: ProjetoRequest = {
     laboratorioId: projetoForm.value.laboratorioId,
     nome: projetoForm.value.nome.trim(),
@@ -453,6 +495,13 @@ async function salvarProjeto() {
     dataInicio: projetoForm.value.dataInicio || null,
     dataFim: projetoForm.value.dataFim || null,
     responsavel: projetoForm.value.responsavel.trim() || null,
+    codigoSeg: projetoForm.value.codigoSeg.trim() || null,
+    status: projetoForm.value.status,
+    situacaoExecucao: projetoForm.value.situacaoExecucao,
+    possuiRecursoExterno: projetoForm.value.possuiRecursoExterno,
+    empresaRecursoExterno: projetoForm.value.possuiRecursoExterno
+      ? projetoForm.value.empresaRecursoExterno.trim() || null
+      : null,
     ativo: projetoForm.value.ativo,
   }
   salvando.value = true
@@ -605,6 +654,11 @@ async function alternarProjeto(item: ProjetoCadastro) {
       dataInicio: item.dataInicio,
       dataFim: item.dataFim,
       responsavel: item.responsavel,
+      codigoSeg: item.codigoSeg,
+      status: item.status,
+      situacaoExecucao: item.situacaoExecucao,
+      possuiRecursoExterno: item.possuiRecursoExterno,
+      empresaRecursoExterno: item.empresaRecursoExterno,
       ativo: !item.ativo,
     })
     sucesso.value = `Projeto ${item.ativo ? 'inativado' : 'reativado'}.`
@@ -813,7 +867,7 @@ onMounted(carregar)
             <tbody>
               <tr v-for="item in laboratoriosFiltrados" :key="item.id">
                 <td><span class="status" :class="item.ativo ? 'status--active' : 'status--inactive'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td>
-                <td><strong>{{ item.nome }}</strong><small>{{ item.descricao || 'Sem descrição' }}</small></td>
+                <td><strong>{{ item.nome }}</strong><small>{{ item.codigoSeg || 'SEG não definido' }} · {{ rotuloEnum(item.status) }}</small></td>
                 <td>{{ unidadeNome(item.unidadeId) }}</td>
                 <td>{{ item.responsavelNome || 'Não definido' }}</td>
                 <td class="actions">
@@ -828,7 +882,7 @@ onMounted(carregar)
 
         <div v-else-if="aba === 'projetos'" class="table-wrap">
           <table>
-            <thead><tr><th>Situação</th><th>Projeto</th><th>Laboratório</th><th>Responsável</th><th>Período</th><th></th></tr></thead>
+            <thead><tr><th>Situação</th><th>Projeto / SEG</th><th>Laboratório</th><th>Responsável</th><th>Período</th><th></th></tr></thead>
             <tbody>
               <tr v-for="item in projetosFiltrados" :key="item.id">
                 <td><span class="status" :class="item.ativo ? 'status--active' : 'status--inactive'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td>
@@ -963,9 +1017,24 @@ onMounted(carregar)
             <label class="field"><span>Data de início</span><input v-model="projetoForm.dataInicio" type="date" /></label>
             <label class="field"><span>Data final</span><input v-model="projetoForm.dataFim" type="date" /></label>
           </div>
-          <label class="field"><span>Responsável pelo projeto</span><input v-model="projetoForm.responsavel" placeholder="Nome do responsável" /></label>
+          <div class="form-grid">
+            <label class="field">
+              <span>Código SEG</span>
+              <input
+                v-model="projetoForm.codigoSeg"
+                placeholder="XX.XX.XX.XXX.XX.00"
+                :disabled="Boolean(idEdicao && projetoForm.codigoSeg)"
+              />
+              <small v-if="idEdicao && projetoForm.codigoSeg">Após definido, o Código SEG só pode ser alterado pelo fluxo administrativo de correção.</small>
+            </label>
+            <label class="field"><span>Responsável pelo projeto</span><input v-model="projetoForm.responsavel" placeholder="Nome do responsável" /></label>
+            <label class="field"><span>Status</span><select v-model="projetoForm.status"><option v-for="item in statusProjeto" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select></label>
+            <label class="field"><span>Situação de execução</span><select v-model="projetoForm.situacaoExecucao"><option v-for="item in situacoesProjeto" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select></label>
+          </div>
           <label class="field"><span>Descrição</span><textarea v-model="projetoForm.descricao" rows="4" /></label>
-          <label class="check-line"><input v-model="projetoForm.ativo" type="checkbox" /><span>Projeto ativo</span></label>
+          <label class="check-line"><input v-model="projetoForm.possuiRecursoExterno" type="checkbox" /><span>Projeto possui recurso externo</span></label>
+          <label v-if="projetoForm.possuiRecursoExterno" class="field"><span>Empresa do recurso externo *</span><input v-model="projetoForm.empresaRecursoExterno" required placeholder="Empresa ou instituição parceira" /></label>
+          <label class="check-line"><input v-model="projetoForm.ativo" type="checkbox" /><span>Projeto ativo tecnicamente</span></label>
           <footer class="modal-actions"><button class="btn btn--ghost" type="button" :disabled="salvando" @click="fecharModal">Cancelar</button><button class="btn btn--primary" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar projeto' }}</button></footer>
         </form>
 

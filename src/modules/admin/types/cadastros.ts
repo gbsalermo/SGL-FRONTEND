@@ -24,6 +24,17 @@ export interface LaboratorioRequest {
   ativo: boolean
 }
 
+export type StatusProjetoCadastro =
+  | 'ATIVO'
+  | 'ENCERRADO_COM_AVALIACAO_PENDENTE'
+  | 'CONCLUIDO'
+
+export type SituacaoExecucaoProjetoCadastro =
+  | 'NAO_INFORMADO'
+  | 'EM_ANDAMENTO_NO_PRAZO'
+  | 'EM_ANDAMENTO_ATRASADO'
+  | 'EXECUCAO_CANCELADA'
+
 export interface ProjetoCadastro {
   id: string
   laboratorioId: string
@@ -33,6 +44,11 @@ export interface ProjetoCadastro {
   dataInicio: string | null
   dataFim: string | null
   responsavel: string | null
+  codigoSeg: string | null
+  status: StatusProjetoCadastro
+  situacaoExecucao: SituacaoExecucaoProjetoCadastro
+  possuiRecursoExterno: boolean
+  empresaRecursoExterno: string | null
   ativo: boolean
 }
 
@@ -43,6 +59,11 @@ export interface ProjetoRequest {
   dataInicio: string | null
   dataFim: string | null
   responsavel: string | null
+  codigoSeg: string | null
+  status: StatusProjetoCadastro
+  situacaoExecucao: SituacaoExecucaoProjetoCadastro
+  possuiRecursoExterno: boolean
+  empresaRecursoExterno: string | null
   ativo: boolean
 }
 

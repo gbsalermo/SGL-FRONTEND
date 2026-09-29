@@ -12,7 +12,7 @@ Este índice separa documentação vigente, decisões de produto, referências v
 1. ../CONTINUIDADE.md
 2. SINCRONIZACAO_GITLAB_GITHUB.md
 3. backend: docs/PLANO_PRE_PRODUCAO.md
-4. backend: docs/CONTINUIDADE_ETAPA_4_2026-09-17.md
+4. backend: docs/CONTINUIDADE_ETAPA_5_2026-09-24.md
 5. ../README.md
 6. DOSSIE_PROJETO_SGL.md
 7. src/router/index.ts para rotas reais
@@ -179,8 +179,9 @@ planejamento de pré-produção                 ✅
 → Etapa 2 Dark Mode definitivo              ✅
 → Etapa 3 refinamentos de Resíduos          ✅
 → Etapa 4 expansão operacional de Resíduos  ✅
-→ Etapa 5 Projetos e Atividades              ⏭
-→ Etapas 6 a 9
+→ Etapa 5 Projetos e Atividades              ✅ concluída e validada
+→ Etapa 6 Estagiários e vínculos             ⏳ próxima
+→ Etapas 7 a 9
 → estabilização do bloco
 ```
 

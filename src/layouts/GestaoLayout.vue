@@ -640,6 +640,14 @@ onBeforeUnmount(() => {
           <span v-show="!recolhida">Relatórios</span>
         </router-link>
 
+        <router-link to="/projetos" title="Projetos">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 5h7l2 2h7v12H4z" />
+            <path d="M8 11h8M8 15h6" />
+          </svg>
+          <span v-show="!recolhida">Projetos</span>
+        </router-link>
+
         <router-link to="/estagiarios" title="Estagiários">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="9" cy="8" r="3" />
