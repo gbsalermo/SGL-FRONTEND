@@ -26,6 +26,21 @@ export interface ProjetoOperacional {
   ativo: boolean
 }
 
+export interface ProjetoRequest {
+  laboratorioId: string
+  nome: string
+  descricao: string | null
+  dataInicio: string | null
+  dataFim: string | null
+  responsavel: string | null
+  codigoSeg: string | null
+  status: StatusProjeto
+  situacaoExecucao: SituacaoExecucaoProjeto
+  possuiRecursoExterno: boolean
+  empresaRecursoExterno: string | null
+  ativo: boolean
+}
+
 export interface SciOperacional {
   id: string
   projetoId: string
