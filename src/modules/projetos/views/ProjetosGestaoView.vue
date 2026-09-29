@@ -946,7 +946,7 @@ onMounted(carregar)
               <header>
                 <div class="sci-identity">
                   <div class="entity-heading">
-                    <span class="entity-type entity-type--sci">SCI</span>
+                    <span class="badge badge--primary">SCI</span>
                     <p class="seg-code">{{ sci.codigoSeg }}</p>
                   </div>
                   <h4>{{ sci.nome }}</h4>
@@ -2466,12 +2466,6 @@ onMounted(carregar)
   font-size: var(--sgl-font-helper);
   font-weight: var(--sgl-font-weight-bold);
   letter-spacing: .04em;
-}
-
-.entity-type--sci {
-  background: var(--sgl-primary-dark);
-  color: #FFFFFF;
-  border: 1px solid var(--sgl-primary);
 }
 
 .entity-type--activity {
