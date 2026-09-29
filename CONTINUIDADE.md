@@ -487,3 +487,17 @@ Confirmado durante a validação visual do 5.5:
 - esse comportamento foi aprovado para permanecer assim.
 
 Também foi ajustada a escala tipográfica do hub `/projetos` para se aproximar das demais telas operacionais da Gestão, eliminando textos auxiliares excessivamente pequenos.
+
+
+### Refinamentos de validação visual — hub de Projetos
+
+Aplicados durante a validação da 5.5:
+
+- filtro explícito por Laboratório adicionado ao bloco de pesquisa/filtros;
+- contador duplicado removido do cabeçalho lateral de Projetos, mantendo o total apenas nos KPIs superiores;
+- ação **Abrir hierarquia** tornou-se funcional, com foco/scroll suave para a estrutura do Projeto selecionado;
+- cards de SCI passaram a exibir identificação visual explícita **SCI**;
+- Atividades passaram a ser renderizadas como blocos subordinados e visualmente recuados dentro de seu SCI;
+- cada Atividade exibe identificação **ATIVIDADE** e a relação textual **Vinculada ao SCI: ...**;
+- quantidade de Atividades permanece visível no bloco do SCI;
+- tipografia continua baseada exclusivamente nos tokens canônicos do SGL.
