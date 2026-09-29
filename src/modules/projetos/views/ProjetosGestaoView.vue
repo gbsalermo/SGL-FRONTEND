@@ -946,7 +946,7 @@ onMounted(carregar)
               <header>
                 <div class="sci-identity">
                   <div class="entity-heading">
-                    <span class="badge badge--primary">SCI</span>
+                    <span class="badge badge--primary entity-badge">SCI</span>
                     <p class="seg-code">{{ sci.codigoSeg }}</p>
                   </div>
                   <h4>{{ sci.nome }}</h4>
@@ -1019,7 +1019,7 @@ onMounted(carregar)
               <div v-else class="activity-list">
                 <div class="activity-list__header">
                   <div>
-                    <span class="entity-type entity-type--activity">ATIVIDADES</span>
+                    <span class="badge badge--green entity-badge">ATIVIDADES</span>
                     <strong>Vinculadas a este SCI</strong>
                   </div>
                   <span>{{ atividadesDoSci(sci.id).length }}</span>
@@ -1032,7 +1032,7 @@ onMounted(carregar)
                 >
                   <div class="activity-identity">
                     <div class="entity-heading">
-                      <span class="entity-type entity-type--activity">ATIVIDADE</span>
+                      <span class="badge badge--green entity-badge">ATIVIDADE</span>
                       <p class="seg-code">{{ atividade.codigoSeg }}</p>
                     </div>
                     <strong>{{ atividade.nome }}</strong>
@@ -1658,6 +1658,12 @@ onMounted(carregar)
 .badge--primary {
   background: color-mix(in srgb, var(--sgl-primary) 12%, var(--sgl-surface));
   color: var(--sgl-primary);
+}
+
+.badge--green {
+  background: color-mix(in srgb, var(--sgl-green) 14%, var(--sgl-surface));
+  color: var(--sgl-green);
+  border: 1px solid color-mix(in srgb, var(--sgl-green) 28%, var(--sgl-border));
 }
 
 .badge--success {
@@ -2457,20 +2463,17 @@ onMounted(carregar)
   flex-wrap: wrap;
 }
 
-.entity-type {
+.entity-badge {
+  min-height: 28px;
+  padding: 0 10px;
   display: inline-flex;
   align-items: center;
-  min-height: 26px;
-  padding: 0 9px;
-  border-radius: var(--sgl-radius-pill);
-  font-size: var(--sgl-font-helper);
-  font-weight: var(--sgl-font-weight-bold);
-  letter-spacing: .04em;
-}
-
-.entity-type--activity {
-  background: color-mix(in srgb, var(--sgl-green) 11%, var(--sgl-surface));
-  color: var(--sgl-green);
+  justify-content: center;
+  font-size: var(--sgl-font-label) !important;
+  font-weight: var(--sgl-font-weight-bold) !important;
+  line-height: 1;
+  letter-spacing: .02em;
+  white-space: nowrap;
 }
 
 .sci-identity {
@@ -2483,23 +2486,29 @@ onMounted(carregar)
 }
 
 .activity-list__header {
+  min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 10px;
-  padding: 0 2px;
+  padding: 2px;
 }
 
 .activity-list__header > div {
+  min-height: 32px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .activity-list__header > div > strong {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
   font-size: var(--sgl-font-label);
   font-weight: var(--sgl-font-weight-semibold);
+  line-height: 1.2;
 }
 
 .activity-list__header > span {
