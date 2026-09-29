@@ -474,3 +474,16 @@ Estado do bloco:
 ```
 
 Não marcar a Etapa 5 como concluída antes da validação da interface em execução.
+
+
+### Decisão de interface — primeira definição do Código SEG
+
+Confirmado durante a validação visual do 5.5:
+
+- Projeto ainda sem Código SEG recebe sua **primeira definição** por `Administração > Cadastros > Projetos`;
+- depois que o Código SEG existe, ele fica bloqueado na edição comum;
+- alterações posteriores devem usar o fluxo administrativo **Corrigir SEG**, com justificativa e auditoria;
+- o hub operacional de Projetos não oferece "Corrigir SEG" para Projeto ainda sem código, evitando misturar primeira definição com correção administrativa;
+- esse comportamento foi aprovado para permanecer assim.
+
+Também foi ajustada a escala tipográfica do hub `/projetos` para se aproximar das demais telas operacionais da Gestão, eliminando textos auxiliares excessivamente pequenos.
