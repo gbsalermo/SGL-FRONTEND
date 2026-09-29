@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { projetosService } from '@/modules/projetos/services/projetosService'
 import type {
@@ -63,7 +63,6 @@ const projetoSelecionadoId = ref<string | null>(null)
 const busca = ref('')
 const filtroStatus = ref<FiltroStatus>('TODOS')
 const filtroLaboratorio = ref('TODOS')
-const hierarchySection = ref<HTMLElement | null>(null)
 const carregando = ref(false)
 const carregandoDetalhes = ref(false)
 const erro = ref('')
@@ -596,25 +595,6 @@ async function salvarAtividade() {
   }
 }
 
-async function abrirHierarquiaSelecionada() {
-  const projetoId = projetoSelecionadoId.value ?? projetosFiltrados.value[0]?.id
-
-  if (!projetoId) {
-    erro.value = 'Selecione um Projeto para abrir sua hierarquia.'
-    return
-  }
-
-  if (projetoSelecionadoId.value !== projetoId) {
-    await carregarDetalhes(projetoId)
-  }
-
-  await nextTick()
-  hierarchySection.value?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start',
-  })
-}
-
 async function carregarDetalhes(projetoId: string) {
   projetoSelecionadoId.value = projetoId
   carregandoDetalhes.value = true
@@ -764,18 +744,8 @@ onMounted(carregar)
 
     <section class="workspace">
       <aside class="project-list-card">
-        <header>
-          <div>
-            <span>PROJETOS</span>
-          </div>
-          <button
-            class="hierarchy-open-button"
-            type="button"
-            :disabled="!projetoSelecionado && projetosFiltrados.length === 0"
-            @click="abrirHierarquiaSelecionada"
-          >
-            Abrir hierarquia
-          </button>
+        <header class="project-list-header">
+          <span>PROJETOS</span>
         </header>
 
         <div v-if="carregando && projetos.length === 0" class="empty-state">
@@ -909,7 +879,7 @@ onMounted(carregar)
           </div>
         </section>
 
-        <section ref="hierarchySection" class="hierarchy-section">
+        <section class="hierarchy-section">
           <header>
             <div>
               <p class="eyebrow">ESTRUTURA DO PROJETO</p>
@@ -2413,6 +2383,21 @@ onMounted(carregar)
   cursor: default;
 }
 
+.project-list-header {
+  display: flex !important;
+  align-items: center;
+  justify-content: center !important;
+  min-height: var(--sgl-control-height);
+  text-align: center;
+}
+
+.project-list-header > span {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-bold);
+  letter-spacing: .04em;
+}
+
 .sci-card {
   border-left: 4px solid var(--sgl-primary);
 }
@@ -2445,8 +2430,8 @@ onMounted(carregar)
 }
 
 .entity-type--activity {
-  background: color-mix(in srgb, var(--sgl-neutral) 11%, var(--sgl-surface));
-  color: var(--sgl-neutral-strong);
+  background: color-mix(in srgb, var(--sgl-green) 11%, var(--sgl-surface));
+  color: var(--sgl-green);
 }
 
 .sci-identity {
@@ -2494,7 +2479,7 @@ onMounted(carregar)
 .activity-item {
   margin-top: 8px;
   border: 1px solid var(--sgl-border);
-  border-left: 3px solid var(--sgl-border-strong);
+  border-left: 4px solid var(--sgl-green);
   border-radius: var(--sgl-radius-surface);
   background: var(--sgl-surface);
 }
