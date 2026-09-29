@@ -501,3 +501,17 @@ Aplicados durante a validação da 5.5:
 - cada Atividade exibe identificação **ATIVIDADE** e a relação textual **Vinculada ao SCI: ...**;
 - quantidade de Atividades permanece visível no bloco do SCI;
 - tipografia continua baseada exclusivamente nos tokens canônicos do SGL.
+
+
+### Sugestão assistida de Código SEG
+
+Refinamento final da validação do 5.5:
+
+- Projeto continua podendo existir sem Código SEG até sua primeira definição em Administração > Cadastros > Projetos;
+- sem Código SEG no Projeto, o hub orienta a definir a raiz antes de criar SCI;
+- ao abrir **Novo SCI**, o formulário sugere `maior sufixo SCI já utilizado + 1`;
+- ao abrir **Nova Atividade**, o formulário sugere `maior sufixo da Atividade já utilizado no SCI + 1`;
+- a sugestão considera a lista completa retornada pelo backend, inclusive registros inativos;
+- o Código SEG sugerido permanece editável antes do primeiro salvamento, permitindo códigos institucionais avulsos;
+- depois da criação, permanece a regra de imutabilidade no CRUD comum e correção somente pelo fluxo auditável;
+- o selo visual **SCI** passou a usar azul institucional sólido; Atividade continua identificada em verde.
