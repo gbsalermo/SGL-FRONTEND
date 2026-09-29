@@ -2310,4 +2310,153 @@ onMounted(carregar)
     flex-direction: column;
   }
 }
+
+
+/* Escala tipográfica operacional alinhada às demais telas de Gestão. */
+.projects-page .subtitle {
+  font-size: 14px;
+}
+
+.projects-page .button {
+  font-size: 13px;
+}
+
+.projects-page .summary-grid span {
+  font-size: 12px;
+}
+
+.projects-page .summary-grid small {
+  font-size: 11px;
+}
+
+.projects-page .toolbar-card label > span {
+  font-size: 11px;
+}
+
+.projects-page .toolbar-card input,
+.projects-page .toolbar-card select {
+  font-size: 12px;
+}
+
+.projects-page .project-list-card > header span,
+.projects-page .project-list-card > header small {
+  font-size: 10px;
+}
+
+.projects-page .project-item > strong {
+  font-size: 13px;
+}
+
+.projects-page .project-item > small,
+.projects-page .project-item footer {
+  font-size: 10px;
+}
+
+.projects-page .seg-code {
+  font-size: 10px;
+}
+
+.projects-page .seg-code--large {
+  font-size: 11px;
+}
+
+.projects-page .detail-hero p:not(.seg-code) {
+  font-size: 13px;
+}
+
+.projects-page .hierarchy-summary span {
+  font-size: 10px;
+}
+
+.projects-page .metadata-grid span,
+.projects-page .metadata-grid small {
+  font-size: 10px;
+}
+
+.projects-page .metadata-grid strong {
+  font-size: 12px;
+}
+
+.projects-page .hierarchy-section > header small {
+  font-size: 10px;
+}
+
+.projects-page .sci-card h4 {
+  font-size: 14px;
+}
+
+.projects-page .sci-card header span:not(.badge),
+.projects-page .sci-period {
+  font-size: 10px;
+}
+
+.projects-page .activity-item strong {
+  font-size: 12px;
+}
+
+.projects-page .activity-item div > span:not(.badge),
+.projects-page .activity-item__meta small {
+  font-size: 10px;
+}
+
+.projects-page .activity-empty,
+.projects-page .empty-state {
+  font-size: 12px;
+}
+
+.projects-page .inline-actions button,
+.projects-page .activity-edit,
+.projects-page .entity-actions button,
+.projects-page .button--small {
+  font-size: 10px;
+}
+
+.projects-page .form-field > span {
+  font-size: 10px;
+}
+
+.projects-page .form-field input,
+.projects-page .form-field select,
+.projects-page .form-field textarea {
+  font-size: 12px;
+}
+
+.projects-page .form-field small {
+  font-size: 10px;
+}
+
+.projects-page .check-field {
+  font-size: 11px;
+}
+
+.projects-page .action-target span,
+.projects-page .action-current span {
+  font-size: 10px;
+}
+
+.projects-page .action-target strong {
+  font-size: 13px;
+}
+
+.projects-page .action-target small,
+.projects-page .history-item small,
+.projects-page .history-item time,
+.projects-page .history-section > header > span {
+  font-size: 10px;
+}
+
+.projects-page .history-section > header h3 {
+  font-size: 14px;
+}
+
+.projects-page .history-item p,
+.projects-page .history-item__line strong,
+.projects-page .history-empty {
+  font-size: 11px;
+}
+
+.projects-page .history-code-change code {
+  font-size: 9px;
+}
+
 </style>
