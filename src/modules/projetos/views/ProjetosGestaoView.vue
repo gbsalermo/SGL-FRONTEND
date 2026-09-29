@@ -2464,15 +2464,6 @@ onMounted(carregar)
 }
 
 .entity-badge {
-  min-height: 28px;
-  padding: 0 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--sgl-font-label) !important;
-  font-weight: var(--sgl-font-weight-bold) !important;
-  line-height: 1;
-  letter-spacing: .02em;
   white-space: nowrap;
 }
 
