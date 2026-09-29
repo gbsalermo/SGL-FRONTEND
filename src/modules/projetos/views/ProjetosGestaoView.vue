@@ -429,14 +429,54 @@ function fecharHistorico() {
   erroHistorico.value = ''
 }
 
+function sugerirCodigoSci(projeto: ProjetoOperacional) {
+  if (!projeto.codigoSeg) return ''
+
+  const raizProjeto = projeto.codigoSeg.replace(/\.\d{2}$/, '')
+  const prefixo = `${raizProjeto}.`
+
+  const maiorSufixo = scis.value
+    .filter((sci) => sci.projetoId === projeto.id && sci.codigoSeg.startsWith(prefixo))
+    .map((sci) => sci.codigoSeg.slice(prefixo.length))
+    .filter((sufixo) => /^\d{2}$/.test(sufixo))
+    .map(Number)
+    .filter((numero) => numero >= 1 && numero <= 99)
+    .reduce((maior, atual) => Math.max(maior, atual), 0)
+
+  if (maiorSufixo >= 99) return ''
+
+  return `${prefixo}${String(maiorSufixo + 1).padStart(2, '0')}`
+}
+
+function sugerirCodigoAtividade(sci: SciOperacional) {
+  const prefixo = `${sci.codigoSeg}.`
+
+  const maiorSufixo = atividades.value
+    .filter((atividade) => atividade.sciId === sci.id && atividade.codigoSeg.startsWith(prefixo))
+    .map((atividade) => atividade.codigoSeg.slice(prefixo.length))
+    .filter((sufixo) => /^\d{3}$/.test(sufixo))
+    .map(Number)
+    .filter((numero) => numero >= 1 && numero <= 999)
+    .reduce((maior, atual) => Math.max(maior, atual), 0)
+
+  if (maiorSufixo >= 999) return ''
+
+  return `${prefixo}${String(maiorSufixo + 1).padStart(3, '0')}`
+}
+
 function abrirNovoSci() {
   if (!projetoSelecionado.value) return
+
+  if (!projetoSelecionado.value.codigoSeg) {
+    erro.value = 'Defina primeiro o Código SEG do Projeto em Administração > Cadastros > Projetos para criar um SCI.'
+    return
+  }
 
   editandoId.value = null
   erroModal.value = ''
   sciForm.value = {
     projetoId: projetoSelecionado.value.id,
-    codigoSeg: '',
+    codigoSeg: sugerirCodigoSci(projetoSelecionado.value),
     nome: '',
     responsavel: '',
     dataInicio: projetoSelecionado.value.dataInicio ?? '',
@@ -470,7 +510,7 @@ function abrirNovaAtividade(sci: SciOperacional) {
   erroModal.value = ''
   atividadeForm.value = {
     sciId: sci.id,
-    codigoSeg: '',
+    codigoSeg: sugerirCodigoAtividade(sci),
     nome: '',
     responsavel: '',
     dataInicio: sci.dataInicio,
@@ -1098,7 +1138,9 @@ onMounted(carregar)
                 :disabled="Boolean(editandoId)"
               />
               <small v-if="editandoId">Código imutável no CRUD comum.</small>
-              <small v-else-if="projetoSelecionado?.codigoSeg">Deve manter a raiz de {{ projetoSelecionado.codigoSeg }}.</small>
+              <small v-else-if="projetoSelecionado?.codigoSeg">
+                Sugestão automática baseada nos códigos já utilizados. Você pode alterar antes de salvar, mantendo a raiz do Projeto.
+              </small>
             </label>
             <label class="form-field">
               <span>Título *</span>
@@ -1161,7 +1203,9 @@ onMounted(carregar)
                 :disabled="Boolean(editandoId)"
               />
               <small v-if="editandoId">Código imutável no CRUD comum.</small>
-              <small v-else>Deve herdar integralmente o Código SEG do SCI e acrescentar três dígitos.</small>
+              <small v-else>
+                Sugestão automática baseada nas Atividades já utilizadas neste SCI. Você pode alterar o sufixo antes de salvar.
+              </small>
             </label>
             <label class="form-field">
               <span>Título *</span>
@@ -2425,8 +2469,9 @@ onMounted(carregar)
 }
 
 .entity-type--sci {
-  background: color-mix(in srgb, var(--sgl-primary) 13%, var(--sgl-surface));
-  color: var(--sgl-primary);
+  background: var(--sgl-primary-dark);
+  color: #FFFFFF;
+  border: 1px solid var(--sgl-primary);
 }
 
 .entity-type--activity {
