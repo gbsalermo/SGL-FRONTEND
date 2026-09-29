@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 
 import { projetosService } from '@/modules/projetos/services/projetosService'
 import type {
@@ -62,6 +62,8 @@ const projetoSelecionadoId = ref<string | null>(null)
 
 const busca = ref('')
 const filtroStatus = ref<FiltroStatus>('TODOS')
+const filtroLaboratorio = ref('TODOS')
+const hierarchySection = ref<HTMLElement | null>(null)
 const carregando = ref(false)
 const carregandoDetalhes = ref(false)
 const erro = ref('')
@@ -124,9 +126,26 @@ const ehAdministrador = computed(() => session.usuario?.perfil === 'ADMINISTRADO
 
 const termoBusca = computed(() => busca.value.trim().toLocaleLowerCase('pt-BR'))
 
+const laboratoriosDisponiveis = computed(() => {
+  const unicos = new Map<string, string>()
+
+  for (const projeto of projetos.value) {
+    if (projeto.laboratorioId && projeto.laboratorioNome) {
+      unicos.set(projeto.laboratorioId, projeto.laboratorioNome)
+    }
+  }
+
+  return [...unicos.entries()]
+    .map(([id, nome]) => ({ id, nome }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+})
+
 const projetosFiltrados = computed(() => {
   return projetos.value.filter((projeto) => {
     const bateStatus = filtroStatus.value === 'TODOS' || projeto.status === filtroStatus.value
+    const bateLaboratorio = filtroLaboratorio.value === 'TODOS'
+      || projeto.laboratorioId === filtroLaboratorio.value
+
     const campos = [
       projeto.nome,
       projeto.codigoSeg ?? '',
@@ -137,7 +156,7 @@ const projetosFiltrados = computed(() => {
     const bateBusca = !termoBusca.value
       || campos.some((campo) => campo.toLocaleLowerCase('pt-BR').includes(termoBusca.value))
 
-    return bateStatus && bateBusca
+    return bateStatus && bateLaboratorio && bateBusca
   })
 })
 
@@ -577,6 +596,25 @@ async function salvarAtividade() {
   }
 }
 
+async function abrirHierarquiaSelecionada() {
+  const projetoId = projetoSelecionadoId.value ?? projetosFiltrados.value[0]?.id
+
+  if (!projetoId) {
+    erro.value = 'Selecione um Projeto para abrir sua hierarquia.'
+    return
+  }
+
+  if (projetoSelecionadoId.value !== projetoId) {
+    await carregarDetalhes(projetoId)
+  }
+
+  await nextTick()
+  hierarchySection.value?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  })
+}
+
 async function carregarDetalhes(projetoId: string) {
   projetoSelecionadoId.value = projetoId
   carregandoDetalhes.value = true
@@ -708,6 +746,20 @@ onMounted(carregar)
           <option value="CONCLUIDO">Concluídos</option>
         </select>
       </label>
+
+      <label>
+        <span>Laboratório</span>
+        <select v-model="filtroLaboratorio">
+          <option value="TODOS">Todos os laboratórios</option>
+          <option
+            v-for="laboratorio in laboratoriosDisponiveis"
+            :key="laboratorio.id"
+            :value="laboratorio.id"
+          >
+            {{ laboratorio.nome }}
+          </option>
+        </select>
+      </label>
     </section>
 
     <section class="workspace">
@@ -715,9 +767,15 @@ onMounted(carregar)
         <header>
           <div>
             <span>PROJETOS</span>
-            <strong>{{ projetosFiltrados.length }}</strong>
           </div>
-          <small>Clique para abrir a hierarquia</small>
+          <button
+            class="hierarchy-open-button"
+            type="button"
+            :disabled="!projetoSelecionado && projetosFiltrados.length === 0"
+            @click="abrirHierarquiaSelecionada"
+          >
+            Abrir hierarquia
+          </button>
         </header>
 
         <div v-if="carregando && projetos.length === 0" class="empty-state">
@@ -851,7 +909,7 @@ onMounted(carregar)
           </div>
         </section>
 
-        <section class="hierarchy-section">
+        <section ref="hierarchySection" class="hierarchy-section">
           <header>
             <div>
               <p class="eyebrow">ESTRUTURA DO PROJETO</p>
@@ -876,8 +934,11 @@ onMounted(carregar)
           <template v-else>
             <article v-for="sci in scis" :key="sci.id" class="sci-card">
               <header>
-                <div>
-                  <p class="seg-code">{{ sci.codigoSeg }}</p>
+                <div class="sci-identity">
+                  <div class="entity-heading">
+                    <span class="entity-type entity-type--sci">SCI</span>
+                    <p class="seg-code">{{ sci.codigoSeg }}</p>
+                  </div>
                   <h4>{{ sci.nome }}</h4>
                   <span>{{ sci.responsavel || 'Responsável não informado' }}</span>
                 </div>
@@ -946,15 +1007,29 @@ onMounted(carregar)
               </div>
 
               <div v-else class="activity-list">
+                <div class="activity-list__header">
+                  <div>
+                    <span class="entity-type entity-type--activity">ATIVIDADES</span>
+                    <strong>Vinculadas a este SCI</strong>
+                  </div>
+                  <span>{{ atividadesDoSci(sci.id).length }}</span>
+                </div>
+
                 <article
                   v-for="atividade in atividadesDoSci(sci.id)"
                   :key="atividade.id"
                   class="activity-item"
                 >
-                  <div>
-                    <p class="seg-code">{{ atividade.codigoSeg }}</p>
+                  <div class="activity-identity">
+                    <div class="entity-heading">
+                      <span class="entity-type entity-type--activity">ATIVIDADE</span>
+                      <p class="seg-code">{{ atividade.codigoSeg }}</p>
+                    </div>
                     <strong>{{ atividade.nome }}</strong>
                     <span>{{ atividade.responsavel || 'Responsável não informado' }}</span>
+                    <small class="activity-parent">
+                      Vinculada ao SCI: <strong>{{ sci.nome }}</strong>
+                    </small>
                   </div>
                   <div class="activity-item__meta">
                     <span class="badge" :class="classeStatus(atividade.status)">
@@ -1432,7 +1507,7 @@ onMounted(carregar)
 
 .toolbar-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 230px;
+  grid-template-columns: minmax(0, 1fr) 220px 260px;
   gap: 12px;
   padding: 14px;
   border: 1px solid var(--sgl-border);
@@ -2313,6 +2388,163 @@ onMounted(carregar)
 
 
 
+
+/* Refinamentos de navegação e hierarquia — validação 5.5 */
+.hierarchy-open-button {
+  min-height: var(--sgl-control-height);
+  padding: 0 12px;
+  border: 1px solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+  color: var(--sgl-primary);
+  font: inherit;
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+  cursor: pointer;
+}
+
+.hierarchy-open-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--sgl-primary) 45%, var(--sgl-border));
+  background: color-mix(in srgb, var(--sgl-primary) 6%, var(--sgl-surface));
+}
+
+.hierarchy-open-button:disabled {
+  opacity: var(--sgl-disabled-opacity);
+  cursor: default;
+}
+
+.sci-card {
+  border-left: 4px solid var(--sgl-primary);
+}
+
+.sci-card > header {
+  padding: 16px 18px;
+}
+
+.entity-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.entity-type {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: var(--sgl-radius-pill);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  letter-spacing: .04em;
+}
+
+.entity-type--sci {
+  background: color-mix(in srgb, var(--sgl-primary) 13%, var(--sgl-surface));
+  color: var(--sgl-primary);
+}
+
+.entity-type--activity {
+  background: color-mix(in srgb, var(--sgl-neutral) 11%, var(--sgl-surface));
+  color: var(--sgl-neutral-strong);
+}
+
+.sci-identity {
+  min-width: 0;
+}
+
+.activity-list {
+  padding: 14px 16px 16px 22px;
+  background: color-mix(in srgb, var(--sgl-background) 72%, var(--sgl-surface));
+}
+
+.activity-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+
+.activity-list__header > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activity-list__header > div > strong {
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+.activity-list__header > span {
+  min-width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--sgl-radius-pill);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-bold);
+  border: 1px solid var(--sgl-border);
+}
+
+.activity-item {
+  margin-top: 8px;
+  border: 1px solid var(--sgl-border);
+  border-left: 3px solid var(--sgl-border-strong);
+  border-radius: var(--sgl-radius-surface);
+  background: var(--sgl-surface);
+}
+
+.activity-item:first-of-type {
+  margin-top: 0;
+}
+
+.activity-item:last-child {
+  border-bottom: 1px solid var(--sgl-border);
+}
+
+.activity-identity {
+  min-width: 0;
+}
+
+.activity-parent {
+  display: block;
+  margin-top: 8px;
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+.activity-parent strong {
+  font-size: inherit;
+  font-weight: var(--sgl-font-weight-semibold);
+  color: var(--sgl-text);
+}
+
+@media (max-width: 1050px) {
+  .toolbar-card {
+    grid-template-columns: minmax(0, 1fr) repeat(2, minmax(180px, 240px));
+  }
+}
+
+@media (max-width: 820px) {
+  .toolbar-card {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-list {
+    padding: 12px;
+  }
+
+  .activity-list__header,
+  .activity-list__header > div {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
 
 /* Tipografia canônica — docs/PADRAO_VISUAL_PRE_PRODUCAO.md + tokens.css */
 .projects-page {
