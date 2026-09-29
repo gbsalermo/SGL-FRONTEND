@@ -2312,151 +2312,96 @@ onMounted(carregar)
 }
 
 
-/* Escala tipográfica operacional alinhada às demais telas de Gestão. */
-.projects-page .subtitle {
-  font-size: 14px;
+
+
+/* Tipografia canônica — docs/PADRAO_VISUAL_PRE_PRODUCAO.md + tokens.css */
+.projects-page {
+  font-size: var(--sgl-font-body);
+  line-height: var(--sgl-line-height-body);
 }
 
-.projects-page .button {
-  font-size: 13px;
+.projects-page .page-header h1 {
+  font-size: var(--sgl-font-page-title);
+  font-weight: var(--sgl-font-weight-bold);
+  line-height: var(--sgl-line-height-tight);
 }
 
-.projects-page .summary-grid span {
-  font-size: 12px;
+.projects-page .subtitle,
+.projects-page .detail-hero p:not(.seg-code),
+.projects-page .project-item > strong,
+.projects-page .metadata-grid strong,
+.projects-page .activity-item strong,
+.projects-page .action-target strong,
+.projects-page .history-item p {
+  font-size: var(--sgl-font-body);
 }
 
-.projects-page .summary-grid small {
-  font-size: 11px;
+.projects-page .hierarchy-section h3 {
+  font-size: var(--sgl-font-section-title);
+  font-weight: var(--sgl-font-weight-semibold);
 }
 
-.projects-page .toolbar-card label > span {
-  font-size: 11px;
+.projects-page .sci-card h4,
+.projects-page .modal-card > header h2,
+.projects-page .history-section > header h3 {
+  font-size: var(--sgl-font-card-title);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+.projects-page .eyebrow,
+.projects-page .summary-grid span,
+.projects-page .toolbar-card label > span,
+.projects-page .metadata-grid span,
+.projects-page .form-field > span,
+.projects-page .action-target span,
+.projects-page .action-current span {
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
 }
 
 .projects-page .toolbar-card input,
-.projects-page .toolbar-card select {
-  font-size: 12px;
-}
-
-.projects-page .project-list-card > header span,
-.projects-page .project-list-card > header small {
-  font-size: 10px;
-}
-
-.projects-page .project-item > strong {
-  font-size: 13px;
-}
-
-.projects-page .project-item > small,
-.projects-page .project-item footer {
-  font-size: 10px;
-}
-
-.projects-page .seg-code {
-  font-size: 10px;
-}
-
-.projects-page .seg-code--large {
-  font-size: 11px;
-}
-
-.projects-page .detail-hero p:not(.seg-code) {
-  font-size: 13px;
-}
-
-.projects-page .hierarchy-summary span {
-  font-size: 10px;
-}
-
-.projects-page .metadata-grid span,
-.projects-page .metadata-grid small {
-  font-size: 10px;
-}
-
-.projects-page .metadata-grid strong {
-  font-size: 12px;
-}
-
-.projects-page .hierarchy-section > header small {
-  font-size: 10px;
-}
-
-.projects-page .sci-card h4 {
-  font-size: 14px;
-}
-
-.projects-page .sci-card header span:not(.badge),
-.projects-page .sci-period {
-  font-size: 10px;
-}
-
-.projects-page .activity-item strong {
-  font-size: 12px;
-}
-
-.projects-page .activity-item div > span:not(.badge),
-.projects-page .activity-item__meta small {
-  font-size: 10px;
-}
-
-.projects-page .activity-empty,
-.projects-page .empty-state {
-  font-size: 12px;
-}
-
-.projects-page .inline-actions button,
-.projects-page .activity-edit,
-.projects-page .entity-actions button,
-.projects-page .button--small {
-  font-size: 10px;
-}
-
-.projects-page .form-field > span {
-  font-size: 10px;
-}
-
+.projects-page .toolbar-card select,
+.projects-page .button,
 .projects-page .form-field input,
 .projects-page .form-field select,
-.projects-page .form-field textarea {
-  font-size: 12px;
-}
-
-.projects-page .form-field small {
-  font-size: 10px;
-}
-
+.projects-page .form-field textarea,
 .projects-page .check-field {
-  font-size: 11px;
+  font-size: var(--sgl-font-body);
 }
 
-.projects-page .action-target span,
-.projects-page .action-current span {
-  font-size: 10px;
-}
-
-.projects-page .action-target strong {
-  font-size: 13px;
-}
-
+.projects-page .summary-grid small,
+.projects-page .project-list-card > header span,
+.projects-page .project-list-card > header small,
+.projects-page .project-item > small,
+.projects-page .project-item footer,
+.projects-page .seg-code,
+.projects-page .seg-code--large,
+.projects-page .hierarchy-summary span,
+.projects-page .metadata-grid small,
+.projects-page .hierarchy-section > header small,
+.projects-page .sci-card header span:not(.badge),
+.projects-page .sci-period,
+.projects-page .activity-item div > span:not(.badge),
+.projects-page .activity-item__meta small,
+.projects-page .activity-empty,
+.projects-page .empty-state,
+.projects-page .form-field small,
 .projects-page .action-target small,
 .projects-page .history-item small,
 .projects-page .history-item time,
-.projects-page .history-section > header > span {
-  font-size: 10px;
-}
-
-.projects-page .history-section > header h3 {
-  font-size: 14px;
-}
-
-.projects-page .history-item p,
-.projects-page .history-item__line strong,
-.projects-page .history-empty {
-  font-size: 11px;
-}
-
+.projects-page .history-empty,
 .projects-page .history-code-change code {
-  font-size: 9px;
+  font-size: var(--sgl-font-helper);
+}
+
+.projects-page .badge,
+.projects-page .button--small,
+.projects-page .inline-actions button,
+.projects-page .activity-edit,
+.projects-page .entity-actions button,
+.projects-page .history-section > header > span {
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
 }
 
 </style>
