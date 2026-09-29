@@ -515,3 +515,35 @@ Refinamento final da validação do 5.5:
 - o Código SEG sugerido permanece editável antes do primeiro salvamento, permitindo códigos institucionais avulsos;
 - depois da criação, permanece a regra de imutabilidade no CRUD comum e correção somente pelo fluxo auditável;
 - o selo visual **SCI** passou a usar azul institucional sólido; Atividade continua identificada em verde.
+
+
+### Decisão futura — Central de Relatórios na Etapa 7
+
+Após estabilização das Etapas 5 e 6:
+
+- adicionar **Projetos** como relatório consolidado próprio;
+- o relatório deve usar dados de Projeto/SCI/Atividade e, quando disponível, dimensões de vínculos/Estagiários da Etapa 6;
+- **Movimentações** e **Resumo operacional** deixam de aparecer como opções separadas no seletor;
+- a Central exibirá uma única opção **Movimentações**, com modos internos **Resumo** e **Detalhamento**;
+- inicialmente, a interface pode continuar consumindo os endpoints atuais separados de movimentações e resumo operacional para evitar quebra de contrato;
+- a síntese libera o espaço visual necessário para inserir **Projetos** sem aumentar a quantidade de opções principais.
+
+Estrutura alvo do seletor:
+
+```text
+Estagiários
+Produtos
+Movimentações
+Estoque e lotes
+Resíduos
+Fiscalização
+Projetos
+```
+
+Estrutura interna de Movimentações:
+
+```text
+Movimentações
+├── Resumo
+└── Detalhamento
+```
