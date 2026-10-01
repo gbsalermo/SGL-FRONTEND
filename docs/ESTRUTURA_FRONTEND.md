@@ -246,6 +246,8 @@ public/animations/folder-not-found.lottie
 12. Não representar Estagiário por um único Laboratório quando houver múltiplas participações; mostrar Atividade/Projeto/Laboratório por contexto.
 13. No fluxo futuro de Pedido de Estagiário, a View seleciona a participação e o backend deriva Projeto/Laboratório; não duplicar essa regra em store/componentes.
 14. Solicitante e Gestão podem ter Views diferentes, mas devem consumir o mesmo registro de Pedido e a mesma fonte de verdade backend.
+15. Situação/período do vínculo de estágio são dados institucionais sincronizados; o frontend não deve tratá-los como workflow manual cotidiano de prorrogação/encerramento.
+16. Nova bolsa reutiliza Usuario/Estagiario e cria novo VinculoEstagio; prorrogação preserva o vínculo existente.
 
 ---
 
