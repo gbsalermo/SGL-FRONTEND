@@ -435,15 +435,15 @@ Fluxo alvo do frontend integrado da Etapa 6:
 
 Não apresentar um único "Laboratório do Estagiário" como atributo definitivo. Um mesmo vínculo pode conter Atividades de Projetos/Laboratórios diferentes dentro da mesma Unidade.
 
-Encerramento:
+Ciclo institucional:
 
 ```text
-estágio ativo
-→ Encerrar estágio
-→ confirmação
-→ backend grava inativo + data efetiva
-→ histórico permanece visível
+ambiente institucional
+→ backend sincroniza situação/período
+→ frontend reflete EM_ANDAMENTO / PRORROGADO / FINALIZADO
 ```
+
+Não oferecer botão cotidiano de "Encerrar estágio" ou "Prorrogar estágio" como fonte de verdade. Nova bolsa mantém o mesmo Usuario/Estagiario e cria novo VinculoEstagio; prorrogação da mesma bolsa mantém o vínculo atual.
 
 ---
 
