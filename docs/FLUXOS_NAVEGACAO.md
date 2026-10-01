@@ -404,6 +404,22 @@ Sem QR Code visual na implementação atual.
 
 # 12. Fluxo de Estagiários
 
+**Estado de contrato:** backend 6.1–6.3 concluído e validado em 01/10/2026; integração visual completa prevista para o 6.5.
+
+O frontend deverá consumir no vínculo:
+
+- Formação;
+- Curso;
+- treinamento de segurança;
+
+e em cada participação:
+
+- Atividade;
+- SCI;
+- Projeto;
+- Laboratório;
+- Culturas.
+
 Fluxo alvo do frontend integrado da Etapa 6:
 
 ```text
