@@ -123,7 +123,9 @@ identificador + senha preenchidos
 
 Senha ainda não é validada pelo backend de autenticação definitivo.
 
-A sessão mantém o contexto institucional do usuário, incluindo Unidade e Laboratório. O interceptor HTTP envia `X-SGL-Unidade-Id` para suportar o isolamento funcional atual.
+A sessão mantém atualmente Unidade e Laboratório por compatibilidade com o protótipo. O interceptor HTTP envia `X-SGL-Unidade-Id` para suportar o isolamento funcional atual.
+
+Para Estagiários, `laboratorioId/laboratorioNome` da sessão **não representam um laboratório operacional definitivo**. O contexto futuro será derivado das participações em Atividades.
 
 ---
 
@@ -174,6 +176,8 @@ cancelamento conforme estado
 ```
 
 Regras de baixa/FIFO/FEFO pertencem ao backend.
+
+Planejamento aprovado para Etapas 8–9: em Pedido de Estagiário, a interface passará a selecionar uma participação/Atividade aberta; Projeto/Laboratório serão derivados pelo backend. A tela da Gestão lerá o mesmo contexto no mesmo Pedido.
 
 ---
 
@@ -285,7 +289,7 @@ Sem QR visual na implementação atual.
 /estagiarios
 ```
 
-Cobertura:
+Cobertura atual:
 
 ```text
 listar
@@ -297,6 +301,17 @@ tipo de vínculo
 encerrar
 indicadores de prazo
 ```
+
+Evolução aprovada para o 6.5:
+
+```text
+Estagiário
+→ vínculo
+→ participações em Atividades
+→ cada participação mostra Projeto/Laboratório derivados
+```
+
+A interface deve remover a noção de um único "Laboratório do Estagiário" como atributo definitivo.
 
 ---
 
