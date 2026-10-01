@@ -307,12 +307,11 @@ Cobertura atual:
 
 ```text
 listar
-cadastrar
-editar
-Unidade/Laboratório
-período
-tipo de vínculo
-encerrar
+consultar vínculo institucional
+exibir período/situação sincronizados
+exibir Formação/Curso/treinamento
+exibir participações/Atividades/Culturas
+associar contexto operacional quando permitido
 indicadores de prazo
 ```
 
