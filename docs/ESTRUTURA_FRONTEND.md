@@ -191,6 +191,18 @@ X-SGL-Unidade-Id
 
 Esse contexto suporta o isolamento funcional multitenant atual. Não tratá-lo como autenticação/autorização definitiva.
 
+Para Estagiários, o frontend não deve usar o Laboratório armazenado na sessão como fonte operacional definitiva. A fonte alvo é a lista de participações retornada pelo backend:
+
+```text
+VinculoEstagio
+→ VinculoEstagioAtividade
+→ Atividade
+→ Projeto
+→ Laboratório
+```
+
+A Unidade continua sendo o limite de tenant.
+
 ---
 
 # 7. CSS, tema e assets
@@ -231,6 +243,9 @@ public/animations/folder-not-found.lottie
 9. Não criar área operacional de Produto duplicando Cadastro/Estoque sem nova decisão.
 10. UUID público é o identificador de fronteira.
 11. Guards do frontend são UX; autorização definitiva pertence ao backend.
+12. Não representar Estagiário por um único Laboratório quando houver múltiplas participações; mostrar Atividade/Projeto/Laboratório por contexto.
+13. No fluxo futuro de Pedido de Estagiário, a View seleciona a participação e o backend deriva Projeto/Laboratório; não duplicar essa regra em store/componentes.
+14. Solicitante e Gestão podem ter Views diferentes, mas devem consumir o mesmo registro de Pedido e a mesma fonte de verdade backend.
 
 ---
 
@@ -268,7 +283,19 @@ Fonte: `src/router/index.ts`.
 
 # 10. Estado de evolução
 
-Não existe “próxima feature estrutural” definida por este documento.
+A evolução estrutural já aprovada que afeta o frontend é:
+
+```text
+Etapa 6.5
+→ Estagiários por participações, sem laboratório único
+
+Etapa 8
+→ estabilizar contexto operacional de Unidade/Soluções/Pedidos
+
+Etapa 9
+→ Pedido de Estagiário seleciona VinculoEstagioAtividade
+→ backend deriva Projeto/Laboratório
+```
 
 O primeiro protótipo foi funcionalmente aprovado e o projeto está em pré-produção pós-aprovação. A sequência vigente está em `../CONTINUIDADE.md`.
 
