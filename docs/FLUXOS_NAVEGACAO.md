@@ -128,6 +128,8 @@ O dashboard do Solicitante não expõe ações de Gestão/Administração.
 
 ## Novo pedido
 
+Fluxo **atual de compatibilidade**:
+
 ```text
 /inicio ou menu
 → /pedidos/novo
@@ -142,6 +144,22 @@ O dashboard do Solicitante não expõe ações de Gestão/Administração.
 ```
 
 Backend valida estoque, lote elegível, FIFO/FEFO e regras de domínio.
+
+Fluxo **alvo para Estagiários**, aprovado em 01/10/2026 e planejado para Etapas 8–9:
+
+```text
+/inicio ou menu
+→ /pedidos/novo
+→ carregar participações/Atividades abertas do Estagiário
+→ escolher a participação correspondente ao Pedido
+→ backend deriva Projeto/Laboratório/Unidade
+→ adicionar materiais
+→ revisar
+→ enviar
+→ acompanhar em /meus-pedidos
+```
+
+Se houver uma única participação aberta, ela pode ser selecionada automaticamente. Com múltiplas participações, a escolha é explícita. O frontend não deve combinar livremente Atividade, Projeto e Laboratório para Estagiários.
 
 ## Meus pedidos
 
@@ -200,7 +218,8 @@ O dashboard não substitui as telas operacionais; ele aponta para elas.
 /pedidos
 → fila/filtros
 → selecionar pedido
-→ revisar solicitante/laboratório/projeto/itens
+→ revisar solicitante/contexto operacional/itens
+→ visualizar Atividade/Projeto/Laboratório derivados quando o solicitante for Estagiário
 → executar ação permitida pelo estado
 ```
 
@@ -371,15 +390,20 @@ Sem QR Code visual na implementação atual.
 
 # 12. Fluxo de Estagiários
 
+Fluxo alvo do frontend integrado da Etapa 6:
+
 ```text
 /estagiarios
 → listar/filtrar
-→ Novo estágio ou Editar
 → escolher usuário ESTAGIARIO elegível
-→ Unidade do usuário orienta laboratórios disponíveis
-→ registrar tipo/período
+→ criar/consultar vínculo
+→ visualizar participações em Atividades
+→ cada participação deriva Projeto e Laboratório
+→ registrar dados acadêmicos/período
 → salvar
 ```
+
+Não apresentar um único "Laboratório do Estagiário" como atributo definitivo. Um mesmo vínculo pode conter Atividades de Projetos/Laboratórios diferentes dentro da mesma Unidade.
 
 Encerramento:
 
