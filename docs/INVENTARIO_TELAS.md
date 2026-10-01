@@ -285,6 +285,20 @@ Sem QR visual na implementação atual.
 
 # 10. Estagiários
 
+**Estado atual:** o backend dos blocos 6.1–6.3 está concluído e validado; a tela atual ainda é compatibilidade até a integração do 6.5.
+
+A versão alvo deve representar:
+
+```text
+vínculo
+├── Formação
+├── Curso
+├── treinamento de segurança
+└── participações
+    ├── Atividade / SCI / Projeto / Laboratório
+    └── Culturas
+```
+
 ```text
 /estagiarios
 ```
