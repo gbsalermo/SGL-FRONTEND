@@ -444,7 +444,7 @@ Etapas 7 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**As Etapas 1–5 estão concluídas e validadas. Na Etapa 6, os blocos backend 6.1, 6.2 e 6.3 estão concluídos e validados; o próximo bloco de domínio é o 6.4 e a integração visual permanece no 6.5. O frontend integrado deve refletir Formação/Curso/treinamento por vínculo e Culturas por participação, além de Atividade/Projeto/Laboratório por contexto, sem apresentar um único laboratório como atributo definitivo.**
+**As Etapas 1–5 estão concluídas e validadas. Na Etapa 6, os blocos backend 6.1, 6.2 e 6.3 estão concluídos e validados; o bloco de domínio 6.4 está em andamento e a integração visual permanece no 6.5. O frontend integrado deve refletir Formação/Curso/treinamento por vínculo e Culturas por participação, além de Atividade/Projeto/Laboratório por contexto, sem apresentar um único laboratório como atributo definitivo.**
 
 ### Estado frontend do 4.4
 
