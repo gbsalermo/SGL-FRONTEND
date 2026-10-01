@@ -161,6 +161,20 @@ Fluxo **alvo para Estagiários**, aprovado em 01/10/2026 e planejado para Etapas
 
 Se houver uma única participação aberta, ela pode ser selecionada automaticamente. Com múltiplas participações, a escolha é explícita. O frontend não deve combinar livremente Atividade, Projeto e Laboratório para Estagiários.
 
+Para solicitantes não Estagiários:
+
+```text
+TECNICO / ANALISTA / PESQUISADOR
+├── com Projeto
+│   → selecionar Projeto
+│   → backend deriva Laboratório
+│
+└── sem Projeto
+    → usar Laboratório institucional/base do Usuario
+```
+
+Assim o frontend não cria combinações inválidas de Projeto e Laboratório.
+
 ## Meus pedidos
 
 ```text
