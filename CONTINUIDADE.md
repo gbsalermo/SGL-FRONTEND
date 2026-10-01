@@ -383,6 +383,12 @@ Consequências para o frontend:
 - Projeto/Laboratório serão derivados pelo backend;
 - Solicitante e Gestão continuarão exibindo o mesmo Pedido, vindo da mesma API/fonte de verdade.
 
+Para solicitantes não Estagiários:
+
+- TECNICO/ANALISTA/PESQUISADOR com Projeto escolhem o Projeto; o backend deriva o Laboratório;
+- sem Projeto, o contexto base continua vindo de `Usuario.laboratorio`;
+- a UI não deve oferecer Projeto e Laboratório como escolhas independentes quando o Projeto já determina o Laboratório.
+
 Código SEG será exibido como dado institucional:
 
 ```text
