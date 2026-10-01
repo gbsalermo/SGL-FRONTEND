@@ -15,7 +15,7 @@
 
 ## Estado atual — 29/09/2026
 
-O primeiro protótipo do SGL foi **funcionalmente aprovado**. As **Etapas 1–5 da pré-produção foram concluídas e validadas**. A **Etapa 6 — Estagiários e vínculos** está em andamento: o backend dos blocos **6.1–6.3 está concluído e validado**; a integração visual completa permanece planejada para o **6.5**.
+O primeiro protótipo do SGL foi **funcionalmente aprovado**. As **Etapas 1–5 da pré-produção foram concluídas e validadas**. A **Etapa 6 — Estagiários e vínculos** está em andamento: o backend dos blocos **6.1–6.3 está concluído e validado**, o **6.4 está em andamento**, e a integração visual completa permanece planejada para o **6.5**.
 
 Estado consolidado:
 
