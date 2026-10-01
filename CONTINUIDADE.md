@@ -141,7 +141,7 @@ PESQUISADOR
 ESTAGIARIO
 ```
 
-A sessão DEV contém:
+A sessão DEV contém atualmente:
 
 ```text
 unidadeId
@@ -158,6 +158,8 @@ X-SGL-Unidade-Id: <unidadeId>
 ```
 
 Esse mecanismo garante contexto funcional de Unidade em desenvolvimento, mas não substitui autenticação/autorização definitiva.
+
+**Decisão estrutural de 01/10/2026:** `laboratorioId/laboratorioNome` permanecem na sessão DEV apenas por compatibilidade enquanto o fluxo atual existir. Para Estagiários, esses campos não representam um "Laboratório do Estagiário" definitivo. O contexto operacional será derivado de suas participações em Atividades.
 
 ---
 
@@ -360,6 +362,27 @@ Projeto
 
 Projeto é o eixo operacional principal. Laboratório continua contexto/filtro e laboratório responsável, mas a interface não obriga mais o usuário a entrar em Laboratório para acessar Projeto.
 
+## Decisão da Etapa 6 que afeta Estagiários e Pedidos
+
+O Estagiário pode possuir múltiplas participações em Atividades, inclusive em Projetos/Laboratórios diferentes dentro da mesma Unidade.
+
+```text
+Estagiario
+→ VinculoEstagio
+→ participações
+   ├── Atividade A → Projeto A → Laboratório A
+   └── Atividade B → Projeto B → Laboratório B
+```
+
+Consequências para o frontend:
+
+- não tratar `usuario.laboratorioId` como contexto operacional definitivo do Estagiário;
+- no bloco 6.5, remover a legenda/atributo visual de um único "Laboratório do Estagiário";
+- exibir Atividade/Projeto/Laboratório por participação;
+- na evolução de Pedidos, o Estagiário escolherá uma participação/Atividade aberta;
+- Projeto/Laboratório serão derivados pelo backend;
+- Solicitante e Gestão continuarão exibindo o mesmo Pedido, vindo da mesma API/fonte de verdade.
+
 Código SEG será exibido como dado institucional:
 
 ```text
@@ -380,8 +403,8 @@ O CRUD atual de Projeto em Administração permanece funcional até o bloco **5.
 Etapa 5 — Projetos + Atividades
 Etapa 6 — Estagiários + vínculos
 Etapa 7 — relatórios consolidados
-Etapa 8 — unidades + Soluções
-Etapa 9 — Pedidos + Soluções
+Etapa 8 — unidades + Soluções + contexto operacional
+Etapa 9 — Pedidos + Soluções + participação do Estagiário
 Etapa 10 — rótulos + impressão operacional
 Etapa 11 — Manual + delete lógico
 Etapa 12 — testes automatizados frontend
@@ -407,7 +430,7 @@ Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
 Etapa 5 — Projetos e Atividades                       ✅ concluída e validada
-Etapa 6 — Estagiários e vínculos                      ⏳ próxima
+Etapa 6 — Estagiários e vínculos                      🔧 em andamento
 Etapas 7 a 13                                         ⏳
 ```
 
@@ -415,7 +438,7 @@ Etapas 7 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**As Etapas 1–5 estão concluídas e validadas. Após o merge da branch `collab/etapa-5-projetos-atividades`, retomar pela Etapa 6 — Estagiários e vínculos em branch própria criada sobre a `main` sincronizada.**
+**As Etapas 1–5 estão concluídas e validadas. A Etapa 6 está em andamento na branch `collab/etapa-6-estagiarios-vinculos`. O frontend integrado do 6.5 deve refletir participações/Atividades como contexto operacional do Estagiário, sem apresentar um único laboratório como atributo definitivo.**
 
 ### Estado frontend do 4.4
 
