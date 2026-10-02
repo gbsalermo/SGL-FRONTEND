@@ -620,3 +620,8 @@ Após merge, a retomada deve ocorrer pela Etapa 6.
 O drawer de Estagiários passou a permitir edição local de Formação, Curso, Bolsa/modalidade, Orientador e período. A integração institucional continua prioritária por campo: quando enviar um valor, ele prevalece; quando não enviar, o valor mantido no SGL permanece.
 
 A ação `Editar vínculo` usa `PUT /v1/vinculos-estagio/{vinculoId}`. Vínculos finalizados permanecem somente leitura. Início e fim previsto são obrigatórios; a interface não permite salvar estágio sem término predeterminado.
+
+
+### Projetos ↔ Estagiários após a Etapa 6
+
+Refinamento futuro já decidido: no hub de Projetos, cada Atividade deverá mostrar também os Estagiários associados a ela, além do responsável já exibido. A informação deve vir das participações `VinculoEstagioAtividade`; não criar relação visual ou contratual artificial diretamente entre Projeto e Estagiário. Implementar somente após o fechamento da Etapa 6.
