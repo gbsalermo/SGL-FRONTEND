@@ -970,3 +970,152 @@ body.sgl-dark-active .gestao-main .intern-page tbody tr td {
     background: #172941 !important;
   }
 }
+
+
+/* Etapa 6.5 — drawer consolidado */
+body.sgl-dark-active .gestao-main .intern-page .section-icon {
+  width: 38px !important;
+  height: 38px !important;
+  flex-basis: 38px !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .participation-header strong {
+  font-size: 14px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .participation-state {
+  font-size: 10.5px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .participation-card dt {
+  color: #8FA2B9 !important;
+  font-size: 10.5px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .participation-card dd {
+  color: #D6E0EC !important;
+  font-size: 12.5px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .participation-period {
+  color: #A8B8CB !important;
+  font-size: 11.5px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .card-subtitle {
+  color: #93A6BE !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .link-history-divider {
+  background: #2A3F5A !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-action--complete {
+  border-color: #367858 !important;
+  background: #163629 !important;
+  color: #72DBA8 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-action--complete .training-action-icon {
+  background: #2E8D59 !important;
+  color: #FFFFFF !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-action--pending {
+  border-color: #765D2A !important;
+  background: #2A2316 !important;
+  color: #F0C15A !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-action--pending .training-action-icon {
+  background: #A77B16 !important;
+  color: #FFFFFF !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .section-inline-action {
+  border-color: #315071 !important;
+  background: #111F33 !important;
+  color: #9BC4FF !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .observation-entry {
+  border-color: #2A3F5A !important;
+  background: #111F33 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .observation-entry--training {
+  border-color: #2D674D !important;
+  background: #142820 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .observation-kind {
+  background: #172941 !important;
+  color: #A9C9F2 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .observation-entry-header small {
+  color: #8FA0B6 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .observation-entry > strong {
+  color: #F4F7FC !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .observation-entry p {
+  color: #C1CDDC !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .culture-create {
+  border-color: #315071 !important;
+  background: #101D30 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .culture-create strong {
+  color: #F4F7FC !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .culture-create small {
+  color: #9FB0C6 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .culture-create-row input {
+  border-color: #30455F !important;
+  background: #111F33 !important;
+  color: #EEF4FB !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-confirm-state {
+  border-color: #2D674D !important;
+  background: #163629 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-confirm-state strong {
+  color: #72DBA8 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-confirm-state small {
+  color: #A9C5B6 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-confirm-state--revert {
+  border-color: #765D2A !important;
+  background: #2A2316 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-confirm-state--revert strong {
+  color: #F0C15A !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .drawer-action--success {
+  border-color: #2E8D59 !important;
+  background: #2E8D59 !important;
+  color: #FFFFFF !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .drawer-action--warning {
+  border-color: #9B7419 !important;
+  background: #9B7419 !important;
+  color: #FFFFFF !important;
+}
