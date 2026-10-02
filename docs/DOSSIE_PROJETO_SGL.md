@@ -652,3 +652,10 @@ Frontend entregue e validado:
 - refinamentos finais aprovados em execução.
 
 Próxima etapa: **Etapa 6 — Estagiários e vínculos**.
+
+
+### Drawer Estagiários 6.5 — refinamento final
+
+Ações foram promovidas para o topo; Bolsa e histórico foram consolidados em `BOLSA / VÍNCULO`; Segurança deixou de ser seção própria; treinamento passou a usar confirmação e reversão auditável; Observações consolidam registros de vínculo, participação, treinamento e notas operacionais; Participações ganharam maior legibilidade; Culturas podem ser criadas diretamente no modal de associação.
+
+A rodada está implementada e segue para validação do 6.6.
