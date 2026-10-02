@@ -1743,7 +1743,7 @@ onMounted(carregar)
                 :key="atividade.id"
                 :value="atividade.id"
               >
-                {{ atividade.nome }} · {{ atividade.projetoNome || 'Projeto não informado' }}
+                {{ atividade.nome }} · Projeto: {{ atividade.projetoNome || 'não informado' }}
               </option>
             </select>
           </label>
@@ -1806,7 +1806,7 @@ onMounted(carregar)
                 :key="atividade.id"
                 :value="atividade.id"
               >
-                {{ atividade.nome }} · {{ atividade.projetoNome || 'Projeto não informado' }}
+                {{ atividade.nome }} · Projeto: {{ atividade.projetoNome || 'não informado' }}
               </option>
             </select>
           </label>
