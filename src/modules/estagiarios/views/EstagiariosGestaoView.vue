@@ -58,6 +58,7 @@ const participacaoDataFim = ref('')
 const modalBolsaAberto = ref(false)
 const tipoOperacaoBolsa = ref<'PRORROGAR' | 'NOVA'>('PRORROGAR')
 const prorrogacaoFimPrevista = ref('')
+const referenciaBolsaVigente = ref('')
 const novaBolsaTipo = ref<TipoBolsaEstagiario>('BOLSA_INSTITUCIONAL')
 const novaBolsaEspecificacao = ref('')
 const novaBolsaInicio = ref('')
@@ -528,6 +529,7 @@ function abrirEditarBolsa() {
   limparFeedbackAcao()
   tipoOperacaoBolsa.value = 'PRORROGAR'
   prorrogacaoFimPrevista.value = ''
+  referenciaBolsaVigente.value = vinculo.referenciaInstitucional || ''
   novaBolsaTipo.value = vinculo.tipoBolsa
   novaBolsaEspecificacao.value = ''
   novaBolsaInicio.value = hojeIso()
@@ -537,6 +539,32 @@ function abrirEditarBolsa() {
 
 function fecharModalBolsa() {
   modalBolsaAberto.value = false
+}
+
+async function salvarReferenciaBolsa() {
+  const vinculo = vinculoSelecionado.value
+  if (!vinculo) return
+
+  limparFeedbackAcao()
+
+  if (!referenciaBolsaVigente.value.trim()) {
+    acaoErro.value = 'Informe a referência da bolsa vigente.'
+    return
+  }
+
+  processandoAcao.value = true
+  try {
+    await estagiarioService.atualizarReferenciaBolsa(
+      vinculo.id,
+      referenciaBolsaVigente.value.trim(),
+    )
+    acaoSucesso.value = 'Referência da bolsa atualizada.'
+    await carregar()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível atualizar a referência da bolsa.')
+  } finally {
+    processandoAcao.value = false
+  }
 }
 
 async function salvarBolsa() {
@@ -1745,6 +1773,27 @@ onMounted(carregar)
           </div>
 
           <template v-if="tipoOperacaoBolsa === 'PRORROGAR'">
+            <label class="action-field">
+              <span>Referência da bolsa vigente</span>
+              <div class="scholarship-reference-edit">
+                <input
+                  v-model="referenciaBolsaVigente"
+                  type="text"
+                  maxlength="120"
+                  placeholder="Ex.: Bolsa Growth, convênio privado, contrato XYZ"
+                />
+                <button
+                  class="drawer-action"
+                  type="button"
+                  :disabled="processandoAcao"
+                  @click="salvarReferenciaBolsa"
+                >
+                  Salvar referência
+                </button>
+              </div>
+              <small>Pode ser alterada sem prorrogar a bolsa.</small>
+            </label>
+
             <div class="scholarship-extension-summary">
               <span>Término atual</span>
               <strong>{{ formatarData(vinculoSelecionado?.dataFimPrevista) }}</strong>
