@@ -15,7 +15,7 @@
 
 ## Estado atual — 01/10/2026
 
-O primeiro protótipo do SGL foi **funcionalmente aprovado**. As **Etapas 1–5 da pré-produção foram concluídas e validadas**. A **Etapa 6 — Estagiários e vínculos** está em andamento: o backend dos blocos **6.1–6.3 está concluído e validado**, o **6.4 foi concluído e validado no backend**, e a integração visual completa permanece planejada para o **6.5**.
+O primeiro protótipo do SGL foi **funcionalmente aprovado**. As **Etapas 1–5 da pré-produção foram concluídas e validadas**. A **Etapa 6 — Estagiários e vínculos** está em andamento: o backend dos blocos **6.1–6.3 está concluído e validado**, o **6.4 foi concluído e validado no backend** e o **6.5 — frontend integrado** foi implementado, com validação visual/local pendente.
 
 Estado consolidado:
 
@@ -469,7 +469,7 @@ Etapa 2 — Dark Mode definitivo                 ✅
 Etapa 3 — refinamentos do fluxo de Resíduos    ✅
 Etapa 4 — expansão operacional de Resíduos     ✅
 Etapa 5 — Projetos e Atividades                ✅ concluída e validada
-Etapa 6 — Estagiários e vínculos               🔧 backend 6.1–6.4 validado; frontend 6.5 próximo
+Etapa 6 — Estagiários e vínculos               🔧 backend 6.1–6.4 validado; frontend 6.5 implementado, validação pendente
 Etapas 7 a 13                                  ⏳ sequenciais
 ```
 
