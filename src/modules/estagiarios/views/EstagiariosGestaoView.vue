@@ -303,10 +303,9 @@ function usaPrazoDoProjeto(participacao: VinculoEstagioAtividadeResponse) {
 }
 
 function participacaoSelecionadaParaEncerrar() {
-  if (participacaoEncerramento.value) return participacaoEncerramento.value
-
   return participacoesAtivas(vinculoSelecionado.value)
     .find((participacao) => participacao.id === participacaoEncerramentoId.value)
+    ?? participacaoEncerramento.value
     ?? null
 }
 
