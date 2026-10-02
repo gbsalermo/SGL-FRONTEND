@@ -44,6 +44,16 @@ const atividadeSelecionadaId = ref('')
 const atividadeInicio = ref('')
 const atividadeObservacao = ref('')
 
+const modalEditarParticipacaoAberto = ref(false)
+const participacaoEdicao = ref<VinculoEstagioAtividadeResponse | null>(null)
+const participacaoEdicaoAtividadeId = ref('')
+const participacaoEdicaoInicio = ref('')
+const participacaoEdicaoObservacao = ref('')
+
+const modalEncerrarParticipacaoAberto = ref(false)
+const participacaoEncerramento = ref<VinculoEstagioAtividadeResponse | null>(null)
+const participacaoDataFim = ref('')
+
 const modalCulturasAberto = ref(false)
 const participacaoCulturas = ref<VinculoEstagioAtividadeResponse | null>(null)
 const culturasDisponiveis = ref<CulturaEstagioResponse[]>([])
@@ -68,7 +78,10 @@ const edicaoDataFimPrevista = ref('')
 const edicaoTipoBolsa = ref<TipoBolsaEstagiario>('BOLSA_INSTITUCIONAL')
 const edicaoFormacao = ref<FormacaoEstagiario>('GRADUACAO')
 const edicaoFormacaoOutro = ref('')
+const NOVO_CURSO_VALUE = '__NOVO_CURSO__'
+
 const edicaoCursoId = ref('')
+const edicaoNovoCursoNome = ref('')
 const edicaoObservacao = ref('')
 
 const formacoes: Record<FormacaoEstagiario, string> = {
@@ -450,6 +463,7 @@ async function abrirEditarVinculo() {
   edicaoFormacao.value = vinculo.formacao || 'GRADUACAO'
   edicaoFormacaoOutro.value = vinculo.formacaoOutro || ''
   edicaoCursoId.value = vinculo.cursoId || ''
+  edicaoNovoCursoNome.value = ''
   edicaoObservacao.value = vinculo.observacao || ''
 
   modalVinculoAberto.value = true
@@ -501,9 +515,34 @@ async function salvarVinculo() {
     return
   }
 
+  if (edicaoCursoId.value === NOVO_CURSO_VALUE && !edicaoNovoCursoNome.value.trim()) {
+    acaoErro.value = 'Informe o nome do novo Curso.'
+    return
+  }
+
+  if (edicaoCursoId.value === NOVO_CURSO_VALUE && !selecionado.value?.unidadeId) {
+    acaoErro.value = 'A Unidade do Estagiário não foi identificada.'
+    return
+  }
+
   processandoAcao.value = true
 
   try {
+    let cursoId: string | null = edicaoCursoId.value || null
+
+    if (edicaoCursoId.value === NOVO_CURSO_VALUE) {
+      const criado = await estagiarioService.criarCurso(
+        selecionado.value!.unidadeId!,
+        edicaoNovoCursoNome.value.trim(),
+      )
+
+      cursoId = criado.id
+      cursosDisponiveis.value = [...cursosDisponiveis.value, criado]
+        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      edicaoCursoId.value = criado.id
+      edicaoNovoCursoNome.value = ''
+    }
+
     await estagiarioService.atualizarVinculo(vinculo.id, {
       orientadorId: edicaoOrientadorId.value,
       dataInicio: edicaoDataInicio.value,
@@ -513,7 +552,7 @@ async function salvarVinculo() {
       formacaoOutro: edicaoFormacao.value === 'OUTRO'
         ? edicaoFormacaoOutro.value.trim()
         : null,
-      cursoId: edicaoCursoId.value || null,
+      cursoId,
       observacao: edicaoObservacao.value.trim() || null,
     })
 
@@ -578,6 +617,121 @@ async function associarAtividade() {
     await carregar()
   } catch (error) {
     acaoErro.value = mensagemErro(error, 'Não foi possível associar a Atividade.')
+  } finally {
+    processandoAcao.value = false
+  }
+}
+
+
+async function carregarAtividadesDisponiveis() {
+  if (atividadesDisponiveis.value.length > 0) return
+
+  atividadesDisponiveis.value = await estagiarioService.listarAtividadesDisponiveis()
+}
+
+async function abrirEditarParticipacao(participacao: VinculoEstagioAtividadeResponse) {
+  if (!participacao.ativa) return
+
+  limparFeedbackAcao()
+  participacaoEdicao.value = participacao
+  participacaoEdicaoAtividadeId.value = participacao.atividadeId || ''
+  participacaoEdicaoInicio.value = participacao.dataInicioParticipacao
+  participacaoEdicaoObservacao.value = participacao.observacao || ''
+  modalEditarParticipacaoAberto.value = true
+
+  try {
+    await carregarAtividadesDisponiveis()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível carregar as Atividades disponíveis.')
+  }
+}
+
+function fecharModalEditarParticipacao() {
+  modalEditarParticipacaoAberto.value = false
+  participacaoEdicao.value = null
+}
+
+async function salvarEdicaoParticipacao() {
+  const participacao = participacaoEdicao.value
+
+  if (!participacao) return
+
+  if (!participacaoEdicaoAtividadeId.value) {
+    acaoErro.value = 'Selecione uma Atividade.'
+    return
+  }
+
+  if (!participacaoEdicaoInicio.value) {
+    acaoErro.value = 'Informe a data de início da participação.'
+    return
+  }
+
+  limparFeedbackAcao()
+  processandoAcao.value = true
+
+  try {
+    await estagiarioService.atualizarParticipacao(participacao.id, {
+      atividadeId: participacaoEdicaoAtividadeId.value,
+      dataInicioParticipacao: participacaoEdicaoInicio.value,
+      observacao: participacaoEdicaoObservacao.value.trim() || null,
+      culturaIds: participacao.culturas?.map((cultura) => cultura.id) ?? [],
+    })
+
+    modalEditarParticipacaoAberto.value = false
+    participacaoEdicao.value = null
+    acaoSucesso.value = 'Participação atualizada.'
+    await carregar()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível atualizar a participação.')
+  } finally {
+    processandoAcao.value = false
+  }
+}
+
+function abrirEncerrarParticipacao(participacao: VinculoEstagioAtividadeResponse) {
+  if (!participacao.ativa) return
+
+  limparFeedbackAcao()
+  participacaoEncerramento.value = participacao
+  participacaoDataFim.value = hojeIso()
+  modalEncerrarParticipacaoAberto.value = true
+}
+
+function fecharModalEncerrarParticipacao() {
+  modalEncerrarParticipacaoAberto.value = false
+  participacaoEncerramento.value = null
+}
+
+async function encerrarParticipacao() {
+  const participacao = participacaoEncerramento.value
+
+  if (!participacao) return
+
+  if (!participacaoDataFim.value) {
+    acaoErro.value = 'Informe a data final da participação.'
+    return
+  }
+
+  if (participacaoDataFim.value < participacao.dataInicioParticipacao) {
+    acaoErro.value = 'A data final não pode ser anterior ao início da participação.'
+    return
+  }
+
+  limparFeedbackAcao()
+  processandoAcao.value = true
+
+  try {
+    await estagiarioService.encerrarParticipacao(participacao.id, participacaoDataFim.value)
+
+    modalEncerrarParticipacaoAberto.value = false
+    participacaoEncerramento.value = null
+    acaoSucesso.value = 'Participação encerrada.'
+    await carregar()
+  } catch (error) {
+    acaoErro.value = mensagemErro(
+      error,
+      'Não foi possível encerrar a participação. Se esta for a última participação ativa, associe ou corrija outra Atividade antes.',
+    )
   } finally {
     processandoAcao.value = false
   }
@@ -1100,7 +1254,7 @@ onMounted(carregar)
                       <strong>{{ rotuloBolsa(vinculo.tipoBolsa) }}</strong>
                       <small>
                         {{ formatarData(vinculo.dataInicio) }}
-                        <b>até</b>
+                        até
                         {{ formatarData(fimExibicao(vinculo)) }}
                       </small>
                     </div>
@@ -1190,8 +1344,18 @@ onMounted(carregar)
                   </dl>
 
                   <div v-if="participacao.ativa" class="participation-actions">
+                    <button type="button" @click="abrirEditarParticipacao(participacao)">
+                      Editar participação
+                    </button>
                     <button type="button" @click="abrirGerenciarCulturas(participacao)">
                       Gerenciar culturas
+                    </button>
+                    <button
+                      class="participation-action--danger"
+                      type="button"
+                      @click="abrirEncerrarParticipacao(participacao)"
+                    >
+                      Encerrar participação
                     </button>
                   </div>
 
@@ -1314,7 +1478,19 @@ onMounted(carregar)
                 <option v-for="curso in cursosDisponiveis" :key="curso.id" :value="curso.id">
                   {{ curso.nome }}
                 </option>
+                <option :value="NOVO_CURSO_VALUE">Outro / adicionar novo curso</option>
               </select>
+            </label>
+
+            <label v-if="edicaoCursoId === NOVO_CURSO_VALUE" class="action-field">
+              <span>Novo curso</span>
+              <input
+                v-model="edicaoNovoCursoNome"
+                type="text"
+                maxlength="120"
+                placeholder="Ex.: Engenharia Ambiental"
+              />
+              <small>O Curso será criado no catálogo da Unidade e já ficará selecionado no vínculo.</small>
             </label>
 
             <label class="action-field">
@@ -1423,6 +1599,126 @@ onMounted(carregar)
             @click="associarAtividade"
           >
             {{ processandoAcao ? 'Associando...' : 'Associar atividade' }}
+          </button>
+        </footer>
+      </section>
+    </div>
+
+    <div
+      v-if="modalEditarParticipacaoAberto"
+      class="action-modal-backdrop"
+      @click.self="fecharModalEditarParticipacao"
+    >
+      <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Editar participação">
+        <header>
+          <div>
+            <span>CORREÇÃO OPERACIONAL</span>
+            <h2>Editar participação</h2>
+            <p>Use esta opção para corrigir uma Atividade vinculada por engano ou ajustar os dados da participação.</p>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModalEditarParticipacao">×</button>
+        </header>
+
+        <div class="action-modal-content">
+          <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
+
+          <label class="action-field">
+            <span>Atividade</span>
+            <select v-model="participacaoEdicaoAtividadeId">
+              <option value="">Selecione</option>
+              <option
+                v-for="atividade in atividadesDisponiveis"
+                :key="atividade.id"
+                :value="atividade.id"
+              >
+                {{ atividade.nome }} · {{ atividade.projetoNome || 'Projeto não informado' }}
+              </option>
+            </select>
+          </label>
+
+          <label class="action-field">
+            <span>Início da participação</span>
+            <input v-model="participacaoEdicaoInicio" type="date" />
+          </label>
+
+          <label class="action-field">
+            <span>Observação</span>
+            <textarea
+              v-model="participacaoEdicaoObservacao"
+              rows="3"
+              placeholder="Opcional"
+            />
+          </label>
+
+          <p class="culture-guidance">
+            As Culturas já associadas serão preservadas. Se precisar alterá-las, use “Gerenciar culturas”.
+          </p>
+        </div>
+
+        <footer>
+          <button class="drawer-action" type="button" @click="fecharModalEditarParticipacao">
+            Cancelar
+          </button>
+          <button
+            class="drawer-action drawer-action--primary"
+            type="button"
+            :disabled="processandoAcao"
+            @click="salvarEdicaoParticipacao"
+          >
+            {{ processandoAcao ? 'Salvando...' : 'Salvar participação' }}
+          </button>
+        </footer>
+      </section>
+    </div>
+
+    <div
+      v-if="modalEncerrarParticipacaoAberto"
+      class="action-modal-backdrop"
+      @click.self="fecharModalEncerrarParticipacao"
+    >
+      <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Encerrar participação">
+        <header>
+          <div>
+            <span>CONFIRMAÇÃO</span>
+            <h2>Encerrar participação</h2>
+            <p>
+              O vínculo do Estagiário continua ativo; apenas a participação nesta Atividade será encerrada.
+            </p>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModalEncerrarParticipacao">×</button>
+        </header>
+
+        <div class="action-modal-content">
+          <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
+
+          <div class="participation-ending-summary">
+            <strong>{{ participacaoEncerramento?.atividadeNome || 'Atividade selecionada' }}</strong>
+            <small>
+              {{ participacaoEncerramento?.projetoNome || 'Projeto não informado' }}
+            </small>
+          </div>
+
+          <label class="action-field">
+            <span>Data final da participação</span>
+            <input v-model="participacaoDataFim" type="date" />
+            <small>
+              A regra da Etapa 6 continua válida: a última participação ativa não pode ser encerrada
+              enquanto o vínculo de estágio estiver em andamento.
+            </small>
+          </label>
+        </div>
+
+        <footer>
+          <button class="drawer-action" type="button" @click="fecharModalEncerrarParticipacao">
+            Cancelar
+          </button>
+          <button
+            class="drawer-action drawer-action--danger"
+            type="button"
+            :disabled="processandoAcao"
+            @click="encerrarParticipacao"
+          >
+            {{ processandoAcao ? 'Encerrando...' : 'Confirmar encerramento' }}
           </button>
         </footer>
       </section>
@@ -2870,8 +3166,21 @@ tbody tr:hover .history-preview {
 
 .participation-card dl {
   margin-top: 15px;
-  grid-template-columns: 92px 1fr;
   row-gap: 9px;
+}
+
+.participation-card dl > div {
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: start;
+}
+
+.participation-card dt,
+.participation-card dd {
+  min-width: 0;
+}
+
+.participation-card dd {
+  overflow-wrap: anywhere;
 }
 
 .participation-card dt {
@@ -2901,7 +3210,7 @@ tbody tr:hover .history-preview {
 }
 
 .participation-period span {
-  font-weight: 800;
+  font-weight: inherit;
 }
 
 .section-inline-action {
@@ -3034,6 +3343,46 @@ tbody tr:hover .history-preview {
   border-color: #a77912;
   background: #a77912;
   color: #fff;
+}
+
+.drawer-action--danger {
+  border-color: #a74343;
+  background: #a74343;
+  color: #fff;
+}
+
+.participation-action--danger {
+  border-color: #d8abab !important;
+  color: #9b3535 !important;
+}
+
+.participation-header > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.participation-header strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.participation-ending-summary {
+  display: grid;
+  gap: 4px;
+  padding: 13px 14px;
+  border: 1px solid #e0e7ef;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.participation-ending-summary strong {
+  color: #2c4058;
+  font-size: 12.5px;
+}
+
+.participation-ending-summary small {
+  color: #78889b;
+  font-size: 10.5px;
 }
 
 .culture-create {
