@@ -735,3 +735,54 @@ body.sgl-dark-active .gestao-main .intern-page .observation {
   background: #111f33 !important;
   color: #d5e0ed !important;
 }
+
+
+/* Etapa 6.5 — polimento de leitura da tabela */
+body.sgl-dark-active .gestao-main .intern-page .status-pill--extended {
+  border: 1px solid #315b91 !important;
+  background: #17365e !important;
+  color: #9bc4ff !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .status-reason,
+body.sgl-dark-active .gestao-main .intern-page .student-responsible,
+body.sgl-dark-active .gestao-main .intern-page .formation-cell small,
+body.sgl-dark-active .gestao-main .intern-page .context-empty-text,
+body.sgl-dark-active .gestao-main .intern-page .history-preview {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .formation-cell strong,
+body.sgl-dark-active .gestao-main .intern-page .context-item {
+  color: #eef4fb !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .context-icon {
+  stroke: #91a7c2 !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-dark-active .gestao-main .intern-page .metric-card--success:hover {
+    border-color: #3c825f !important;
+    background: #172d25 !important;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page .metric-card--warning:hover {
+    border-color: #a78432 !important;
+    background: #2a2316 !important;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page .metric-card--info:hover {
+    border-color: #4f7fb9 !important;
+    background: #162b46 !important;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page .metric-card:not(.metric-card--success):not(.metric-card--warning):not(.metric-card--info):hover {
+    border-color: #617187 !important;
+    background: #17202d !important;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page tbody tr:hover .history-preview {
+    color: #d2dce8 !important;
+  }
+}
