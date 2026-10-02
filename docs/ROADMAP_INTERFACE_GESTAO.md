@@ -187,3 +187,17 @@ matriz → congelamento → homologação → segurança → integração corpor
 ```
 
 **Não interpretar “matriz de permissões” como tarefa imediata enquanto o bloco atual de pré-produção ainda estiver em andamento.**
+
+## Estado atual — 02/10/2026
+
+As Etapas 1–6 estão concluídas e validadas. A frente atual é a **Etapa 7 — Relatórios consolidados**.
+
+Prioridades de interface da Etapa 7:
+
+- adicionar **Projetos** à Central de Relatórios;
+- unificar visualmente **Movimentações** e **Resumo operacional** em uma única opção com modos internos `Resumo` e `Detalhamento`;
+- preservar inicialmente os endpoints backend existentes para reduzir regressão;
+- incorporar dimensões de Estagiários/vínculos já estabilizadas na Etapa 6 quando fizer sentido para filtros e consolidações;
+- manter preview, PDF e XLSX coerentes com a mesma consulta/filtros.
+
+Branch atual: `collab/etapa-7-relatorios-consolidados`.
