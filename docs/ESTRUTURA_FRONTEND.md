@@ -191,7 +191,7 @@ X-SGL-Unidade-Id
 
 Esse contexto suporta o isolamento funcional multitenant atual. Não tratá-lo como autenticação/autorização definitiva.
 
-Para Estagiários, o frontend não deve usar o Laboratório armazenado na sessão como fonte operacional definitiva. O backend 6.1–6.3 já estabilizou vínculo, Formação, Curso, treinamento e Culturas por participação. A fonte alvo de contexto operacional é a lista de participações retornada pelo backend:
+Para Estagiários, o frontend não deve usar o Laboratório armazenado na sessão como fonte operacional definitiva. O backend 6.1–6.4 já estabilizou vínculo, Formação, Curso, treinamento, Culturas por participação e ciclo institucional sincronizado. A fonte alvo de contexto operacional é a lista de participações retornada pelo backend:
 
 ```text
 VinculoEstagio
