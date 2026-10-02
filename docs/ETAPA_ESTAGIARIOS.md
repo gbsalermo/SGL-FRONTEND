@@ -216,3 +216,8 @@ Foi adicionada a ação `Editar vínculo` no drawer, com Formação, Curso, Bols
 A data final prevista é obrigatória. Não há opção de estágio sem término previsto.
 
 O modal segue o padrão visual consolidado de Resíduos e vínculos finalizados não oferecem edição local.
+
+
+### Integração posterior com a tela de Projetos
+
+Depois do fechamento da Etapa 6, usar o vínculo `VinculoEstagioAtividade` também no sentido inverso para enriquecer a tela de Projetos: dentro de cada Atividade, manter o responsável atual e acrescentar os Estagiários associados. O desenho definitivo para participações atuais e históricas será fechado nessa rodada posterior.
