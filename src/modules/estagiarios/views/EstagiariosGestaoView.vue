@@ -773,11 +773,12 @@ async function salvarEdicaoParticipacao() {
   }
 }
 
-function abrirEncerrarParticipacao(participacao: VinculoEstagioAtividadeResponse) {
-  if (!participacao.ativa) return
+function abrirEncerrarParticipacao(participacao?: VinculoEstagioAtividadeResponse) {
+  if (participacao && !participacao.ativa) return
 
   limparFeedbackAcao()
-  participacaoEncerramento.value = participacao
+  participacaoEncerramento.value = participacao ?? null
+  participacaoEncerramentoId.value = participacao?.id ?? ''
   participacaoDataFim.value = hojeIso()
   modalEncerrarParticipacaoAberto.value = true
 }
@@ -785,10 +786,11 @@ function abrirEncerrarParticipacao(participacao: VinculoEstagioAtividadeResponse
 function fecharModalEncerrarParticipacao() {
   modalEncerrarParticipacaoAberto.value = false
   participacaoEncerramento.value = null
+  participacaoEncerramentoId.value = ''
 }
 
 async function encerrarParticipacao() {
-  const participacao = participacaoEncerramento.value
+  const participacao = participacaoSelecionadaParaEncerrar()
 
   if (!participacao) return
 
@@ -810,7 +812,8 @@ async function encerrarParticipacao() {
 
     modalEncerrarParticipacaoAberto.value = false
     participacaoEncerramento.value = null
-    acaoSucesso.value = 'Participação encerrada.'
+    participacaoEncerramentoId.value = ''
+    acaoSucesso.value = 'Atividade encerrada para este Estagiário.'
     await carregar()
   } catch (error) {
     acaoErro.value = mensagemErro(
