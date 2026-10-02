@@ -4,6 +4,8 @@
 
 Na rodada de refinamento visual, o drawer de detalhes foi ampliado para 860 px e as linhas da tabela receberam maior altura/padding para manter legibilidade compatível com as demais telas de Gestão. A Unidade IQ recebeu massa DEV adicional no backend para exercitar todos os estados visuais.
 
+Na rodada seguinte de polimento, a hierarquia da tabela foi alinhada ao uso do cliente: Status concentra `Não iniciado`, `Em andamento`, `Prorrogado` e `Encerrado`, com motivo auxiliar abaixo; Estagiário mostra o Orientador/Responsável; Formação concentra nível e Curso; Contexto operacional ganhou ícones e maior legibilidade; Bolsa/modalidade ficou restrita ao drawer. `Não iniciado` só é usado quando o vínculo ainda não possui qualquer participação em Atividade.
+
 **Branch frontend:** `feat/estagiarios-v2`  
 **Branch backend:** `feat/estagiarios-v2`  
 **Base:** `main` atual, já contendo o módulo de Resíduos mergeado.
