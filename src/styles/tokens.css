@@ -45,6 +45,15 @@
   --sgl-card-padding: 20px;
   --sgl-page-padding: 24px;
 
+  /* Drawers e modais — padrão operacional consolidado após Resíduos */
+  --sgl-drawer-width: 760px;
+  --sgl-drawer-width-wide: 860px;
+  --sgl-modal-width: 620px;
+  --sgl-modal-width-large: 920px;
+  --sgl-detail-padding-inline: 30px;
+  --sgl-modal-header-padding-block: 24px;
+  --sgl-modal-content-padding-block: 26px;
+
   /* Tipografia */
   --sgl-font-page-title: 24px;
   --sgl-font-section-title: 18px;
