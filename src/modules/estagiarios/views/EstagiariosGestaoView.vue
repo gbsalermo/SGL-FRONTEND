@@ -1651,6 +1651,76 @@ onMounted(carregar)
       </section>
     </div>
 
+    <div v-if="modalBolsaAberto" class="action-modal-backdrop" @click.self="fecharModalBolsa">
+      <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Editar bolsa">
+        <header>
+          <div>
+            <span>ALTERNATIVA LOCAL</span>
+            <h2>Editar bolsa</h2>
+            <p>
+              Registra uma nova bolsa para o mesmo Estagiário. A bolsa atual é encerrada e permanece no histórico.
+              Quando o ambiente institucional fornecer esse evento, ele continua sendo a fonte prioritária.
+            </p>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModalBolsa">×</button>
+        </header>
+
+        <div class="action-modal-content">
+          <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
+
+          <div class="scholarship-current">
+            <span>Bolsa atual</span>
+            <strong>{{ rotuloBolsa(vinculoSelecionado?.tipoBolsa) }}</strong>
+            <small>
+              {{ formatarData(vinculoSelecionado?.dataInicio) }}
+              até
+              {{ formatarData(fimBasePeriodo(vinculoSelecionado)) }}
+            </small>
+          </div>
+
+          <label class="action-field">
+            <span>Nova bolsa / modalidade</span>
+            <select v-model="novaBolsaTipo">
+              <option v-for="opcao in opcoesBolsa" :key="opcao.valor" :value="opcao.valor">
+                {{ opcao.rotulo }}
+              </option>
+            </select>
+          </label>
+
+          <div class="edit-link-grid">
+            <label class="action-field">
+              <span>Data inicial da nova bolsa</span>
+              <input v-model="novaBolsaInicio" type="date" />
+              <small>A bolsa atual será encerrada no dia anterior.</small>
+            </label>
+
+            <label class="action-field">
+              <span>Data final prevista</span>
+              <input v-model="novaBolsaFimPrevista" type="date" />
+            </label>
+          </div>
+
+          <p class="culture-guidance">
+            Formação, Curso, Orientador, treinamento e participações ativas são preservados na nova ocorrência.
+          </p>
+        </div>
+
+        <footer>
+          <button class="drawer-action" type="button" @click="fecharModalBolsa">
+            Cancelar
+          </button>
+          <button
+            class="drawer-action drawer-action--primary"
+            type="button"
+            :disabled="processandoAcao"
+            @click="salvarNovaBolsa"
+          >
+            {{ processandoAcao ? 'Salvando...' : 'Confirmar nova bolsa' }}
+          </button>
+        </footer>
+      </section>
+    </div>
+
     <div v-if="modalAtividadeAberto" class="action-modal-backdrop" @click.self="fecharModalAtividade">
       <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Associar atividade">
         <header>
