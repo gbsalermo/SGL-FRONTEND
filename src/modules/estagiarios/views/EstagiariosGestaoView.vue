@@ -677,7 +677,7 @@ onMounted(carregar)
               <td class="period-cell">
                 <div class="period-range">
                   <strong>{{ formatarData(vinculoAtual(estagiario)?.dataInicio) }}</strong>
-                  <span aria-hidden="true">→</span>
+                  <span class="period-separator">até</span>
                   <strong>{{ formatarData(fimBasePeriodo(vinculoAtual(estagiario))) }}</strong>
                 </div>
                 <small
@@ -741,7 +741,7 @@ onMounted(carregar)
 
                 <div class="institutional-period">
                   <span>{{ formatarData(vinculoSelecionado.dataInicio) }}</span>
-                  <span>→</span>
+                  <span class="period-separator">até</span>
                   <span>{{ formatarData(fimBasePeriodo(vinculoSelecionado)) }}</span>
                 </div>
 
@@ -1910,9 +1910,13 @@ tbody tr:hover .history-preview {
   white-space: nowrap;
 }
 
-.period-range > span {
+.period-separator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #8a98aa;
-  font-size: 12px;
+  font-size: 10.5px;
+  font-weight: 600;
 }
 
 .extension-note {
