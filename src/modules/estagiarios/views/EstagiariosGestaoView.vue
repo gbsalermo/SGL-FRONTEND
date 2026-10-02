@@ -518,6 +518,62 @@ function fecharModalVinculo() {
   modalVinculoAberto.value = false
 }
 
+function abrirEditarBolsa() {
+  const vinculo = vinculoSelecionado.value
+
+  if (!vinculo || vinculo.situacao === 'FINALIZADO') return
+
+  limparFeedbackAcao()
+  novaBolsaTipo.value = vinculo.tipoBolsa
+  novaBolsaInicio.value = hojeIso()
+  novaBolsaFimPrevista.value = ''
+  modalBolsaAberto.value = true
+}
+
+function fecharModalBolsa() {
+  modalBolsaAberto.value = false
+}
+
+async function salvarNovaBolsa() {
+  const vinculo = vinculoSelecionado.value
+
+  if (!vinculo) return
+
+  if (!novaBolsaInicio.value || !novaBolsaFimPrevista.value) {
+    acaoErro.value = 'Informe a data inicial e a data final prevista da nova bolsa.'
+    return
+  }
+
+  if (novaBolsaFimPrevista.value < novaBolsaInicio.value) {
+    acaoErro.value = 'A data final prevista não pode ser anterior à data inicial.'
+    return
+  }
+
+  if (novaBolsaInicio.value > hojeIso()) {
+    acaoErro.value = 'A troca manual imediata não aceita uma data inicial futura.'
+    return
+  }
+
+  limparFeedbackAcao()
+  processandoAcao.value = true
+
+  try {
+    await estagiarioService.registrarNovaBolsa(vinculo.id, {
+      tipoBolsa: novaBolsaTipo.value,
+      dataInicio: novaBolsaInicio.value,
+      dataFimPrevista: novaBolsaFimPrevista.value,
+    })
+
+    modalBolsaAberto.value = false
+    acaoSucesso.value = 'Nova bolsa registrada. A bolsa anterior foi preservada no histórico.'
+    await carregar()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível registrar a nova bolsa.')
+  } finally {
+    processandoAcao.value = false
+  }
+}
+
 async function salvarVinculo() {
   const vinculo = vinculoSelecionado.value
   if (!vinculo) return
