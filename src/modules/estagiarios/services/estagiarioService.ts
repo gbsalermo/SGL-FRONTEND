@@ -7,6 +7,7 @@ import type {
   EstagiarioRequest,
   EstagiarioResponse,
   NovaBolsaVinculoEstagioRequest,
+  ProrrogarBolsaVinculoEstagioRequest,
   ObservacaoVinculoEstagioResponse,
   VinculoEstagioAtividadeRequest,
   VinculoEstagioAtividadeResponse,
@@ -63,6 +64,17 @@ export const estagiarioService = {
   async registrarNovaBolsa(vinculoId: string, payload: NovaBolsaVinculoEstagioRequest) {
     const { data } = await http.post<VinculoEstagioResponse>(
       `/v1/vinculos-estagio/${vinculoId}/nova-bolsa`,
+      payload,
+    )
+    return data
+  },
+
+  async prorrogarBolsa(
+    vinculoId: string,
+    payload: ProrrogarBolsaVinculoEstagioRequest,
+  ) {
+    const { data } = await http.put<VinculoEstagioResponse>(
+      `/v1/vinculos-estagio/${vinculoId}/prorrogar-bolsa`,
       payload,
     )
     return data
