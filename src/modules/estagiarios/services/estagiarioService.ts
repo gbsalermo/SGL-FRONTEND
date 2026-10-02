@@ -1,11 +1,14 @@
 import { http } from '@/services/http'
 import type {
   AtividadeDisponivelEstagioResponse,
+  AtualizarVinculoEstagioRequest,
   CulturaEstagioResponse,
+  CursoEstagioResponse,
   EstagiarioRequest,
   EstagiarioResponse,
   VinculoEstagioAtividadeRequest,
   VinculoEstagioAtividadeResponse,
+  UsuarioOpcaoEstagioResponse,
   VinculoEstagioResponse,
 } from '@/modules/estagiarios/types/estagiario'
 
@@ -44,6 +47,24 @@ export const estagiarioService = {
 
   async encerrar(id: string) {
     const { data } = await http.put<EstagiarioResponse>(`/v1/estagiarios/${id}/encerrar`)
+    return data
+  },
+
+  async atualizarVinculo(vinculoId: string, payload: AtualizarVinculoEstagioRequest) {
+    const { data } = await http.put<VinculoEstagioResponse>(
+      `/v1/vinculos-estagio/${vinculoId}`,
+      payload,
+    )
+    return data
+  },
+
+  async listarCursosAtivos() {
+    const { data } = await http.get<CursoEstagioResponse[]>('/v1/cursos/ativos')
+    return data
+  },
+
+  async listarUsuarios() {
+    const { data } = await http.get<UsuarioOpcaoEstagioResponse[]>('/v1/usuarios')
     return data
   },
 
