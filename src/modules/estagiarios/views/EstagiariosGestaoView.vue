@@ -1247,7 +1247,7 @@ onMounted(carregar)
                   v-if="possuiProrrogacaoExibivel(vinculoAtual(estagiario))"
                   class="extension-note"
                 >
-                  Prorrogado <span class="extension-separator">até</span> {{ formatarData(vinculoAtual(estagiario)?.dataFimPrevista) }}
+                  Prorrogado até {{ formatarData(vinculoAtual(estagiario)?.dataFimPrevista) }}
                 </small>
               </td>
 
@@ -1375,17 +1375,17 @@ onMounted(carregar)
                   </span>
                 </div>
 
-                <div class="institutional-period">
-                  <span>{{ formatarData(vinculoSelecionado.dataInicio) }}</span>
-                  <span class="period-separator">até</span>
-                  <span>{{ formatarData(fimBasePeriodo(vinculoSelecionado)) }}</span>
-                </div>
+                <small>
+                    {{ formatarData(vinculoSelecionado?.dataInicio) }}
+                  <span class="scholarship-modal-separator">até</span>
+                    {{ formatarData(fimBasePeriodo(vinculoSelecionado)) }}
+                  </small>
 
                 <p
                   v-if="possuiProrrogacaoExibivel(vinculoSelecionado)"
                   class="drawer-extension-note"
                 >
-                  Prorrogado <span class="extension-separator">até</span> <strong>{{ formatarData(vinculoSelecionado.dataFimPrevista) }}</strong>
+                  Prorrogado até <strong>{{ formatarData(vinculoSelecionado.dataFimPrevista) }}</strong>
                 </p>
 
                 <p>
@@ -1716,7 +1716,7 @@ onMounted(carregar)
             <strong>{{ rotuloBolsa(vinculoSelecionado?.tipoBolsa) }}</strong>
             <small>
               {{ formatarData(vinculoSelecionado?.dataInicio) }}
-              <span class="scholarship-modal-separator">até</span>
+              até
               {{ formatarData(fimBasePeriodo(vinculoSelecionado)) }}
             </small>
           </div>
@@ -3048,7 +3048,7 @@ tbody tr:hover .history-preview {
   justify-content: center;
   color: #8a98aa;
   font-size: 10.5px;
-  font-weight: 400 !important;
+  font-weight: normal;
 }
 
 .extension-note {
@@ -3056,10 +3056,6 @@ tbody tr:hover .history-preview {
   color: #4f79b7 !important;
   font-size: 10.5px !important;
   font-weight: 700;
-}
-
-.extension-separator {
-  font-weight: 400 !important;
 }
 
 .drawer-extension-note {
@@ -3316,10 +3312,9 @@ tbody tr:hover .history-preview {
   font-size: 11px;
 }
 
-.scholarship-current small .scholarship-modal-separator {
-  font-weight: 400 !important;
+.institutional-period .period-separator {
+  font-weight: 400;
 }
-
 
 .scholarship-mode-selector {
   display: grid;
