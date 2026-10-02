@@ -481,3 +481,61 @@ body.sgl-light-active .gestao-main .intern-page .metric-card--info {
   border-color: var(--sgl-border) !important;
   background: var(--sgl-surface) !important;
 }
+
+
+/* Etapa 6.5 — drawer alinhado ao padrão consolidado de Resíduos */
+body.sgl-light-active .gestao-main .intern-page .detail-drawer > header {
+  gap: 20px;
+  padding: 24px 30px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-drawer header h2 {
+  font-size: 23px;
+  line-height: 1.2;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-drawer header p {
+  margin-top: 5px;
+  font-size: 11px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-content {
+  gap: 0;
+  padding: 28px 30px 42px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-content h3 {
+  margin-bottom: 11px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-grid span {
+  font-size: 9.5px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-grid strong {
+  font-size: 12.5px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .observation {
+  font-size: 12.5px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .action-modal-card {
+  border-color: var(--sgl-border);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .intern-page .action-modal-card > header,
+body.sgl-light-active .gestao-main .intern-page .action-modal-card > footer {
+  border-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .intern-page .action-field input,
+body.sgl-light-active .gestao-main .intern-page .action-field select,
+body.sgl-light-active .gestao-main .intern-page .action-field textarea {
+  border-color: var(--sgl-border-strong);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+}
