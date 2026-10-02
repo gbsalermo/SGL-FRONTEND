@@ -34,10 +34,13 @@ export interface VinculoEstagioAtividadeResponse {
   atividadeId: string | null
   atividadeNome: string | null
   atividadeCodigoSeg: string | null
+  atividadeDataInicio: string | null
+  atividadeDataFim: string | null
   sciId: string | null
   sciNome: string | null
   projetoId: string | null
   projetoNome: string | null
+  projetoDataFim: string | null
   laboratorioId: string | null
   laboratorioNome: string | null
   dataInicioParticipacao: string
@@ -150,6 +153,12 @@ export interface AtualizarVinculoEstagioRequest {
   formacaoOutro?: string | null
   cursoId?: string | null
   observacao?: string | null
+}
+
+export interface NovaBolsaVinculoEstagioRequest {
+  tipoBolsa: TipoBolsaEstagiario
+  dataInicio: string
+  dataFimPrevista: string
 }
 
 
