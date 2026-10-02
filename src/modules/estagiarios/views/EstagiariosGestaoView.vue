@@ -791,7 +791,10 @@ function fecharModalEncerrarParticipacao() {
 async function encerrarParticipacao() {
   const participacao = participacaoSelecionadaParaEncerrar()
 
-  if (!participacao) return
+  if (!participacao) {
+    acaoErro.value = 'Selecione a Atividade que será encerrada.'
+    return
+  }
 
   if (!participacaoDataFim.value) {
     acaoErro.value = 'Informe a data final da participação.'
@@ -1865,10 +1868,25 @@ onMounted(carregar)
         <div class="action-modal-content">
           <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
 
-          <div class="participation-ending-summary">
-            <strong>{{ participacaoEncerramento?.atividadeNome || 'Atividade selecionada' }}</strong>
+          <label class="action-field">
+            <span>Atividade</span>
+            <select v-model="participacaoEncerramentoId">
+              <option value="">Selecione</option>
+              <option
+                v-for="participacao in participacoesAtivas(vinculoSelecionado)"
+                :key="participacao.id"
+                :value="participacao.id"
+              >
+                {{ participacao.atividadeNome || 'Atividade sem nome' }} · Projeto:
+                {{ participacao.projetoNome || 'não informado' }}
+              </option>
+            </select>
+          </label>
+
+          <div v-if="participacaoSelecionadaParaEncerrar()" class="participation-ending-summary">
+            <strong>{{ participacaoSelecionadaParaEncerrar()?.atividadeNome || 'Atividade selecionada' }}</strong>
             <small>
-              {{ participacaoEncerramento?.projetoNome || 'Projeto não informado' }}
+              Projeto: {{ participacaoSelecionadaParaEncerrar()?.projetoNome || 'não informado' }}
             </small>
           </div>
 
