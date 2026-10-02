@@ -59,6 +59,7 @@ const modalBolsaAberto = ref(false)
 const tipoOperacaoBolsa = ref<'PRORROGAR' | 'NOVA'>('PRORROGAR')
 const prorrogacaoFimPrevista = ref('')
 const novaBolsaTipo = ref<TipoBolsaEstagiario>('BOLSA_INSTITUCIONAL')
+const novaBolsaEspecificacao = ref('')
 const novaBolsaInicio = ref('')
 const novaBolsaFimPrevista = ref('')
 
@@ -528,6 +529,7 @@ function abrirEditarBolsa() {
   tipoOperacaoBolsa.value = 'PRORROGAR'
   prorrogacaoFimPrevista.value = ''
   novaBolsaTipo.value = vinculo.tipoBolsa
+  novaBolsaEspecificacao.value = ''
   novaBolsaInicio.value = hojeIso()
   novaBolsaFimPrevista.value = ''
   modalBolsaAberto.value = true
@@ -599,6 +601,7 @@ async function salvarBolsa() {
   try {
     await estagiarioService.registrarNovaBolsa(vinculo.id, {
       tipoBolsa: novaBolsaTipo.value,
+      especificacaoBolsa: novaBolsaEspecificacao.value.trim() || null,
       dataInicio: novaBolsaInicio.value,
       dataFimPrevista: novaBolsaFimPrevista.value,
     })
@@ -1766,6 +1769,17 @@ onMounted(carregar)
                   {{ opcao.rotulo }}
                 </option>
               </select>
+            </label>
+
+            <label class="action-field">
+              <span>Especificar bolsa</span>
+              <input
+                v-model="novaBolsaEspecificacao"
+                type="text"
+                maxlength="120"
+                placeholder="Ex.: Bolsa Growth, convênio privado, contrato XYZ"
+              />
+              <small>Opcional. Esta informação será exibida no campo Referência do vínculo.</small>
             </label>
 
             <div class="edit-link-grid scholarship-date-grid">
