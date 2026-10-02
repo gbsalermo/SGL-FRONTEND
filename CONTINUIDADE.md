@@ -613,3 +613,10 @@ Após merge, a retomada deve ocorrer pela Etapa 6.
 - período da tabela/drawer mostra `início → fim original` e, quando o backend possui histórico de prorrogação, `Prorrogado até <nova data>`;
 - vínculo sem qualquer participação continua `Não iniciado`; vínculo com participações históricas, porém nenhuma ativa, permanece no status institucional e informa `Sem atividade ativa`.
 - tipografia e espaçamento interno do drawer/modais foram alinhados à referência madura de Resíduos.
+
+
+### Modelo híbrido do vínculo — 02/10/2026
+
+O drawer de Estagiários passou a permitir edição local de Formação, Curso, Bolsa/modalidade, Orientador e período. A integração institucional continua prioritária por campo: quando enviar um valor, ele prevalece; quando não enviar, o valor mantido no SGL permanece.
+
+A ação `Editar vínculo` usa `PUT /v1/vinculos-estagio/{vinculoId}`. Vínculos finalizados permanecem somente leitura. Início e fim previsto são obrigatórios; a interface não permite salvar estágio sem término predeterminado.
