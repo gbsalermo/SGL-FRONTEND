@@ -651,3 +651,17 @@ Refinamentos implementados:
 - `BOLSA / VÍNCULO` reúne bolsa vigente/último vínculo e histórico no mesmo card.
 
 Implementação publicada, ainda pendente de validação manual/automática no 6.6.
+
+### Polimento adicional do drawer 6.5 — 02/10/2026
+
+Após a validação visual do drawer de Estagiários:
+
+- corrigido o layout de `Participações em atividades`, que estava distribuindo os pares SCI/Projeto e Laboratório/Culturas em colunas incorretas e provocando sobreposição de textos;
+- o `até` dentro do histórico/drawer deixou de usar negrito; o destaque permanece reservado à listagem principal;
+- participações ativas agora oferecem `Editar participação`, `Gerenciar culturas` e `Encerrar participação`;
+- `Editar participação` permite corrigir Atividade, data de início e observação, preservando as Culturas já associadas;
+- `Encerrar participação` usa o fluxo histórico já existente e mantém a regra de não encerrar a última participação ativa enquanto o vínculo institucional estiver em andamento;
+- o campo Curso do modal `Editar vínculo` ganhou `Outro / adicionar novo curso`; ao informar um novo nome, o frontend cria o registro no catálogo da Unidade e usa o novo Curso no vínculo;
+- nenhuma migration adicional foi necessária para este polimento.
+
+A validação final de build/suíte continua reservada ao bloco 6.6.
