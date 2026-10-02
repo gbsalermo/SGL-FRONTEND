@@ -64,6 +64,15 @@ export const estagiarioService = {
     return data
   },
 
+  async criarCurso(unidadeId: string, nome: string) {
+    const { data } = await http.post<CursoEstagioResponse>('/v1/cursos', {
+      unidadeId,
+      nome,
+      ativo: true,
+    })
+    return data
+  },
+
   async listarUsuarios() {
     const { data } = await http.get<UsuarioOpcaoEstagioResponse[]>('/v1/usuarios')
     return data
@@ -106,6 +115,25 @@ export const estagiarioService = {
     const { data } = await http.post<VinculoEstagioAtividadeResponse>(
       `/v1/vinculos-estagio/${vinculoId}/atividades`,
       payload,
+    )
+    return data
+  },
+
+  async atualizarParticipacao(
+    participacaoId: string,
+    payload: VinculoEstagioAtividadeRequest,
+  ) {
+    const { data } = await http.put<VinculoEstagioAtividadeResponse>(
+      `/v1/vinculos-estagio/participacoes/${participacaoId}`,
+      payload,
+    )
+    return data
+  },
+
+  async encerrarParticipacao(participacaoId: string, dataFimParticipacao: string) {
+    const { data } = await http.put<VinculoEstagioAtividadeResponse>(
+      `/v1/vinculos-estagio/participacoes/${participacaoId}/encerrar`,
+      { dataFimParticipacao },
     )
     return data
   },
