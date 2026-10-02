@@ -56,6 +56,8 @@ const participacaoEncerramentoId = ref('')
 const participacaoDataFim = ref('')
 
 const modalBolsaAberto = ref(false)
+const tipoOperacaoBolsa = ref<'PRORROGAR' | 'NOVA'>('PRORROGAR')
+const prorrogacaoFimPrevista = ref('')
 const novaBolsaTipo = ref<TipoBolsaEstagiario>('BOLSA_INSTITUCIONAL')
 const novaBolsaInicio = ref('')
 const novaBolsaFimPrevista = ref('')
@@ -523,6 +525,8 @@ function abrirEditarBolsa() {
   if (!vinculo || vinculo.situacao === 'FINALIZADO') return
 
   limparFeedbackAcao()
+  tipoOperacaoBolsa.value = 'PRORROGAR'
+  prorrogacaoFimPrevista.value = ''
   novaBolsaTipo.value = vinculo.tipoBolsa
   novaBolsaInicio.value = hojeIso()
   novaBolsaFimPrevista.value = ''
@@ -533,10 +537,47 @@ function fecharModalBolsa() {
   modalBolsaAberto.value = false
 }
 
-async function salvarNovaBolsa() {
+async function salvarBolsa() {
   const vinculo = vinculoSelecionado.value
 
   if (!vinculo) return
+
+  limparFeedbackAcao()
+
+  if (tipoOperacaoBolsa.value === 'PRORROGAR') {
+    if (!prorrogacaoFimPrevista.value) {
+      acaoErro.value = 'Informe a nova data final prevista.'
+      return
+    }
+
+    if (!vinculo.dataFimPrevista) {
+      acaoErro.value = 'A bolsa atual não possui data final prevista.'
+      return
+    }
+
+    if (prorrogacaoFimPrevista.value <= vinculo.dataFimPrevista) {
+      acaoErro.value = 'A prorrogação deve informar uma data posterior ao término atual.'
+      return
+    }
+
+    processandoAcao.value = true
+
+    try {
+      await estagiarioService.prorrogarBolsa(vinculo.id, {
+        novaDataFimPrevista: prorrogacaoFimPrevista.value,
+      })
+
+      modalBolsaAberto.value = false
+      acaoSucesso.value = 'Bolsa atual prorrogada e histórico atualizado.'
+      await carregar()
+    } catch (error) {
+      acaoErro.value = mensagemErro(error, 'Não foi possível prorrogar a bolsa atual.')
+    } finally {
+      processandoAcao.value = false
+    }
+
+    return
+  }
 
   if (!novaBolsaInicio.value || !novaBolsaFimPrevista.value) {
     acaoErro.value = 'Informe a data inicial e a data final prevista da nova bolsa.'
@@ -549,11 +590,10 @@ async function salvarNovaBolsa() {
   }
 
   if (novaBolsaInicio.value > hojeIso()) {
-    acaoErro.value = 'A troca manual imediata não aceita uma data inicial futura.'
+    acaoErro.value = 'Para registrar uma nova bolsa local, a data inicial deve ser hoje ou uma data passada.'
     return
   }
 
-  limparFeedbackAcao()
   processandoAcao.value = true
 
   try {
