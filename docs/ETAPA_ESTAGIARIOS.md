@@ -221,3 +221,25 @@ O modal segue o padrão visual consolidado de Resíduos e vínculos finalizados 
 ### Integração posterior com a tela de Projetos
 
 Depois do fechamento da Etapa 6, usar o vínculo `VinculoEstagioAtividade` também no sentido inverso para enriquecer a tela de Projetos: dentro de cada Atividade, manter o responsável atual e acrescentar os Estagiários associados. O desenho definitivo para participações atuais e históricas será fechado nessa rodada posterior.
+
+
+### Drawer final — ações, vínculo, observações e Culturas
+
+No polimento final do 6.5, o drawer passa a seguir:
+
+```text
+01 Ações operacionais
+02 Bolsa / Vínculo
+03 Formação
+04 Orientador
+05 Participações em Atividades
+06 Observações
+```
+
+Ações operacionais ficam no topo. O treinamento não possui seção própria: aparece como estado/ação, verde quando concluído, e qualquer mudança exige confirmação. É possível reverter uma conclusão; concluir e reverter geram eventos auditáveis no backend. Uma observação opcional pode acompanhar a alteração e é exibida em Observações.
+
+O bloco Observações reúne registros operacionais adicionados por Gestor/Admin e, quando existirem, observações do vínculo, participações e treinamento.
+
+O modal de Culturas permite selecionar Culturas ativas e criar uma nova Cultura para a Unidade sem sair do fluxo. A nova Cultura é selecionada automaticamente, mas a associação à participação só é confirmada ao salvar o modal.
+
+A escala de texto das Participações e os marcadores numéricos das seções foram ampliados para legibilidade em 100% de zoom.
