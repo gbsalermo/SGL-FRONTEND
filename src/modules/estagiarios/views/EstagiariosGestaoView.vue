@@ -2754,4 +2754,340 @@ tbody tr:hover .history-preview {
     grid-column: 2;
   }
 }
+
+/* Etapa 6.5 — consolidação final do drawer */
+.section-heading {
+  gap: 12px;
+}
+
+.section-heading-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-heading--with-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.section-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 10px;
+  font-size: 11px;
+  box-shadow: inset 0 0 0 1px rgb(69 97 127 / 8%);
+}
+
+.section-heading h3 {
+  font-size: 12.5px;
+  letter-spacing: .015em;
+}
+
+.drawer-section--actions {
+  padding-top: 2px;
+}
+
+.training-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.training-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.training-action--complete {
+  border-color: #8acaa7;
+  background: #eef9f2;
+  color: #247248;
+}
+
+.training-action--complete .training-action-icon {
+  background: #38a866;
+  color: #fff;
+}
+
+.training-action--pending {
+  border-color: #d6be79;
+  background: #fff9e8;
+  color: #8a670c;
+}
+
+.training-action--pending .training-action-icon {
+  background: #d7a817;
+  color: #fff;
+}
+
+.card-subtitle {
+  margin-bottom: 11px;
+  color: #6e7d90;
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.card-subtitle--history {
+  margin: 0 0 8px;
+}
+
+.link-history-divider {
+  height: 1px;
+  margin: 18px 0 16px;
+  background: #e0e7ef;
+}
+
+.timeline--inside-card .timeline-item:last-child::before {
+  bottom: 50%;
+}
+
+.participation-card {
+  padding: 18px;
+}
+
+.participation-header strong {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.participation-state {
+  font-size: 10.5px;
+}
+
+.participation-card dl {
+  margin-top: 15px;
+  grid-template-columns: 92px 1fr;
+  row-gap: 9px;
+}
+
+.participation-card dt {
+  font-size: 10.5px;
+  font-weight: 750;
+}
+
+.participation-card dd {
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.participation-actions {
+  margin-top: 14px;
+}
+
+.participation-actions button {
+  min-height: 38px;
+  padding: 0 13px;
+  font-size: 10.5px;
+}
+
+.participation-period {
+  margin-top: 13px;
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.participation-period span {
+  font-weight: 800;
+}
+
+.section-inline-action {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #cbd7e6;
+  border-radius: 7px;
+  background: #fff;
+  color: #315174;
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.observations-list {
+  display: grid;
+  gap: 10px;
+}
+
+.observation-entry {
+  padding: 14px 15px;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.observation-entry--training {
+  border-color: #cfe4d7;
+  background: #f4fbf6;
+}
+
+.observation-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.observation-kind {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #edf3fa;
+  color: #49627f;
+  font-size: 9.5px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.observation-entry-header small {
+  color: #8190a3;
+  font-size: 10px;
+}
+
+.observation-entry > strong {
+  color: #2d4058;
+  font-size: 12px;
+}
+
+.observation-entry p {
+  margin: 7px 0 0;
+  color: #53647a;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.training-confirm-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #b9dec7;
+  border-radius: 8px;
+  background: #f0faf4;
+}
+
+.training-confirm-state > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 50%;
+  background: #39a867;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.training-confirm-state strong,
+.training-confirm-state small {
+  display: block;
+}
+
+.training-confirm-state strong {
+  color: #276946;
+  font-size: 12.5px;
+}
+
+.training-confirm-state small {
+  margin-top: 3px;
+  color: #688071;
+  font-size: 10.5px;
+}
+
+.training-confirm-state--revert {
+  border-color: #ead9a5;
+  background: #fff9e9;
+}
+
+.training-confirm-state--revert > span {
+  background: #c49312;
+}
+
+.training-confirm-state--revert strong {
+  color: #765a0c;
+}
+
+.drawer-action--success {
+  border-color: #2d8f58;
+  background: #2d8f58;
+  color: #fff;
+}
+
+.drawer-action--warning {
+  border-color: #a77912;
+  background: #a77912;
+  color: #fff;
+}
+
+.culture-create {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 14px;
+  border: 1px dashed #cbd7e6;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.culture-create strong,
+.culture-create small {
+  display: block;
+}
+
+.culture-create strong {
+  color: #2c4058;
+  font-size: 12px;
+}
+
+.culture-create small {
+  margin-top: 4px;
+  color: #78889b;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.culture-create-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 9px;
+}
+
+.culture-create-row input {
+  width: 100%;
+  min-height: 41px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fff;
+  color: #25364d;
+  font: inherit;
+  font-size: 12.5px;
+}
+
+@media (max-width: 680px) {
+  .section-heading--with-action {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .culture-create-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 </style>
