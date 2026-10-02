@@ -919,14 +919,16 @@ th {
 }
 
 td {
-  padding: 15px;
+  padding: 17px 16px;
   border-top: 1px solid #edf1f5;
   color: #37475e;
-  font-size: 11px;
+  font-size: 11.5px;
+  line-height: 1.45;
   vertical-align: middle;
 }
 
 tbody tr {
+  height: 78px;
   cursor: pointer;
 }
 
@@ -1070,7 +1072,7 @@ td small {
 }
 
 .detail-drawer {
-  width: min(640px, 96vw);
+  width: min(860px, 96vw);
   height: 100vh;
   overflow-y: auto;
   background: #fff;
@@ -1084,7 +1086,7 @@ td small {
   display: flex;
   justify-content: space-between;
   gap: 18px;
-  padding: 24px;
+  padding: 28px 30px;
   border-bottom: 1px solid #e2e8f0;
   background: #fff;
 }
@@ -1130,7 +1132,7 @@ td small {
 .detail-content {
   display: grid;
   gap: 0;
-  padding: 0 24px 30px;
+  padding: 0 30px 38px;
 }
 
 .drawer-section {
