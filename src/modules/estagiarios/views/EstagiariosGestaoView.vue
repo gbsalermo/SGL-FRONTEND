@@ -7,10 +7,12 @@ import type {
   ApiErrorResponse,
   AtividadeDisponivelEstagioResponse,
   CulturaEstagioResponse,
+  CursoEstagioResponse,
   EstagiarioResponse,
   FormacaoEstagiario,
   SituacaoEstagio,
   TipoBolsaEstagiario,
+  UsuarioOpcaoEstagioResponse,
   VinculoEstagioAtividadeResponse,
   VinculoEstagioResponse,
 } from '@/modules/estagiarios/types/estagiario'
@@ -43,6 +45,18 @@ const participacaoCulturas = ref<VinculoEstagioAtividadeResponse | null>(null)
 const culturasDisponiveis = ref<CulturaEstagioResponse[]>([])
 const culturasSelecionadas = ref<string[]>([])
 
+const modalVinculoAberto = ref(false)
+const cursosDisponiveis = ref<CursoEstagioResponse[]>([])
+const orientadoresDisponiveis = ref<UsuarioOpcaoEstagioResponse[]>([])
+const edicaoOrientadorId = ref('')
+const edicaoDataInicio = ref('')
+const edicaoDataFimPrevista = ref('')
+const edicaoTipoBolsa = ref<TipoBolsaEstagiario>('BOLSA_INSTITUCIONAL')
+const edicaoFormacao = ref<FormacaoEstagiario>('GRADUACAO')
+const edicaoFormacaoOutro = ref('')
+const edicaoCursoId = ref('')
+const edicaoObservacao = ref('')
+
 const formacoes: Record<FormacaoEstagiario, string> = {
   ENSINO_MEDIO: 'Ensino médio',
   GRADUACAO: 'Graduação',
@@ -59,6 +73,15 @@ const opcoesFormacao = Object.entries(formacoes)
     valor: valor as FormacaoEstagiario,
     rotulo,
   }))
+
+
+const opcoesBolsa: Array<{ valor: TipoBolsaEstagiario; rotulo: string }> = [
+  { valor: 'BOLSA_CNPQ', rotulo: 'Bolsa CNPq' },
+  { valor: 'BOLSA_CAPES', rotulo: 'Bolsa CAPES' },
+  { valor: 'BOLSA_INSTITUCIONAL', rotulo: 'Bolsa institucional' },
+  { valor: 'VOLUNTARIO', rotulo: 'Voluntário' },
+  { valor: 'CONTRATUAL', rotulo: 'Contrato' },
+]
 
 const situacoes: Record<SituacaoEstagio, string> = {
   EM_ANDAMENTO: 'Em andamento',
@@ -357,6 +380,98 @@ function hojeIso() {
 function limparFeedbackAcao() {
   acaoErro.value = ''
   acaoSucesso.value = ''
+}
+
+async function abrirEditarVinculo() {
+  const vinculo = vinculoSelecionado.value
+  const estagiario = selecionado.value
+
+  if (!vinculo || !estagiario || vinculo.situacao === 'FINALIZADO') return
+
+  limparFeedbackAcao()
+
+  edicaoOrientadorId.value = vinculo.orientadorId || ''
+  edicaoDataInicio.value = vinculo.dataInicio
+  edicaoDataFimPrevista.value = vinculo.dataFimPrevista || ''
+  edicaoTipoBolsa.value = vinculo.tipoBolsa
+  edicaoFormacao.value = vinculo.formacao || 'GRADUACAO'
+  edicaoFormacaoOutro.value = vinculo.formacaoOutro || ''
+  edicaoCursoId.value = vinculo.cursoId || ''
+  edicaoObservacao.value = vinculo.observacao || ''
+
+  modalVinculoAberto.value = true
+
+  try {
+    const [cursos, usuarios] = await Promise.all([
+      estagiarioService.listarCursosAtivos(),
+      estagiarioService.listarUsuarios(),
+    ])
+
+    cursosDisponiveis.value = cursos
+    orientadoresDisponiveis.value = usuarios.filter((usuario) =>
+      usuario.ativo
+      && usuario.unidadeId === estagiario.unidadeId
+      && ['ANALISTA', 'PESQUISADOR'].includes(usuario.perfil),
+    )
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível carregar os dados de edição do vínculo.')
+  }
+}
+
+function fecharModalVinculo() {
+  modalVinculoAberto.value = false
+}
+
+async function salvarVinculo() {
+  const vinculo = vinculoSelecionado.value
+  if (!vinculo) return
+
+  limparFeedbackAcao()
+
+  if (!edicaoOrientadorId.value) {
+    acaoErro.value = 'Selecione um Orientador.'
+    return
+  }
+
+  if (!edicaoDataInicio.value || !edicaoDataFimPrevista.value) {
+    acaoErro.value = 'Data de início e data final prevista são obrigatórias.'
+    return
+  }
+
+  if (edicaoDataFimPrevista.value < edicaoDataInicio.value) {
+    acaoErro.value = 'A data final prevista não pode ser anterior à data de início.'
+    return
+  }
+
+  if (edicaoFormacao.value === 'OUTRO' && !edicaoFormacaoOutro.value.trim()) {
+    acaoErro.value = 'Informe a descrição da formação.'
+    return
+  }
+
+  processandoAcao.value = true
+
+  try {
+    await estagiarioService.atualizarVinculo(vinculo.id, {
+      orientadorId: edicaoOrientadorId.value,
+      dataInicio: edicaoDataInicio.value,
+      dataFimPrevista: edicaoDataFimPrevista.value,
+      tipoBolsa: edicaoTipoBolsa.value,
+      formacao: edicaoFormacao.value,
+      formacaoOutro: edicaoFormacao.value === 'OUTRO'
+        ? edicaoFormacaoOutro.value.trim()
+        : null,
+      cursoId: edicaoCursoId.value || null,
+      observacao: edicaoObservacao.value.trim() || null,
+    })
+
+    modalVinculoAberto.value = false
+    acaoSucesso.value = 'Dados do vínculo atualizados no SGL.'
+    await carregar()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível atualizar o vínculo.')
+  } finally {
+    processandoAcao.value = false
+  }
 }
 
 async function abrirAssociarAtividade() {
@@ -823,6 +938,15 @@ onMounted(carregar)
                   class="drawer-action drawer-action--primary"
                   type="button"
                   :disabled="processandoAcao"
+                  @click="abrirEditarVinculo"
+                >
+                  Editar vínculo
+                </button>
+
+                <button
+                  class="drawer-action"
+                  type="button"
+                  :disabled="processandoAcao"
                   @click="abrirAssociarAtividade"
                 >
                   Associar atividade
@@ -941,6 +1065,98 @@ onMounted(carregar)
           </div>
         </div>
       </aside>
+    </div>
+
+    <div v-if="modalVinculoAberto" class="action-modal-backdrop" @click.self="fecharModalVinculo">
+      <section class="action-modal-card action-modal-card--large" role="dialog" aria-modal="true" aria-label="Editar vínculo">
+        <header>
+          <div>
+            <span>DADOS DO SGL</span>
+            <h2>Editar vínculo</h2>
+            <p>O ambiente institucional prevalece quando sincronizar um campo também mantido pelo SGL.</p>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModalVinculo">×</button>
+        </header>
+
+        <div class="action-modal-content">
+          <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
+
+          <div class="edit-link-grid">
+            <label class="action-field">
+              <span>Formação</span>
+              <select v-model="edicaoFormacao">
+                <option v-for="opcao in opcoesFormacao" :key="opcao.valor" :value="opcao.valor">
+                  {{ opcao.rotulo }}
+                </option>
+              </select>
+            </label>
+
+            <label v-if="edicaoFormacao === 'OUTRO'" class="action-field">
+              <span>Descrição da formação</span>
+              <input v-model="edicaoFormacaoOutro" type="text" />
+            </label>
+
+            <label class="action-field">
+              <span>Curso</span>
+              <select v-model="edicaoCursoId">
+                <option value="">Sem curso</option>
+                <option v-for="curso in cursosDisponiveis" :key="curso.id" :value="curso.id">
+                  {{ curso.nome }}
+                </option>
+              </select>
+            </label>
+
+            <label class="action-field">
+              <span>Bolsa / modalidade</span>
+              <select v-model="edicaoTipoBolsa">
+                <option v-for="opcao in opcoesBolsa" :key="opcao.valor" :value="opcao.valor">
+                  {{ opcao.rotulo }}
+                </option>
+              </select>
+            </label>
+
+            <label class="action-field">
+              <span>Orientador / responsável</span>
+              <select v-model="edicaoOrientadorId">
+                <option value="">Selecione</option>
+                <option v-for="usuario in orientadoresDisponiveis" :key="usuario.id" :value="usuario.id">
+                  {{ usuario.nome }}
+                </option>
+              </select>
+            </label>
+
+            <label class="action-field">
+              <span>Data de início</span>
+              <input v-model="edicaoDataInicio" type="date" />
+            </label>
+
+            <label class="action-field">
+              <span>Data final prevista</span>
+              <input v-model="edicaoDataFimPrevista" type="date" required />
+              <small>Obrigatória. Todo estágio deve possuir término previsto.</small>
+            </label>
+          </div>
+
+          <label class="action-field">
+            <span>Observação</span>
+            <textarea v-model="edicaoObservacao" rows="3" placeholder="Opcional" />
+          </label>
+        </div>
+
+        <footer>
+          <button class="drawer-action" type="button" @click="fecharModalVinculo">
+            Cancelar
+          </button>
+          <button
+            class="drawer-action drawer-action--primary"
+            type="button"
+            :disabled="processandoAcao"
+            @click="salvarVinculo"
+          >
+            {{ processandoAcao ? 'Salvando...' : 'Salvar alterações' }}
+          </button>
+        </footer>
+      </section>
     </div>
 
     <div v-if="modalAtividadeAberto" class="action-modal-backdrop" @click.self="fecharModalAtividade">
@@ -2118,6 +2334,23 @@ tbody tr:hover .history-preview {
   height: 16px;
 }
 
+
+.action-modal-card--large {
+  width: min(100%, 920px);
+}
+
+.edit-link-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.action-field small {
+  color: #7a8798;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .primary-action:hover:not(:disabled) {
     background: #1d4fae;
@@ -2151,7 +2384,8 @@ tbody tr:hover .history-preview {
 
   .metrics-grid,
   .filters-grid,
-  .detail-grid {
+  .detail-grid,
+  .edit-link-grid {
     grid-template-columns: 1fr;
   }
 
