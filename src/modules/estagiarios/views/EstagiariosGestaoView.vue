@@ -13,9 +13,9 @@ import type {
   VinculoEstagioResponse,
 } from '@/modules/estagiarios/types/estagiario'
 
-type FiltroStatus = 'TODOS' | 'OPERACIONAL' | 'SEM_ATIVIDADE' | 'ENCERRADO'
-type EstadoOperacional = Exclude<FiltroStatus, 'TODOS'>
+type EstadoOperacional = 'OPERACIONAL' | 'SEM_ATIVIDADE' | 'ENCERRADO'
 type StatusTabela = 'NAO_INICIADO' | 'EM_ANDAMENTO' | 'PRORROGADO' | 'ENCERRADO'
+type FiltroStatus = 'TODOS' | StatusTabela
 
 const estagiarios = ref<EstagiarioResponse[]>([])
 const carregando = ref(false)
@@ -237,10 +237,9 @@ const estagiariosFiltrados = computed(() => {
   const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
 
   return estagiarios.value.filter((estagiario) => {
-    const estado = estadoOperacional(estagiario)
     const vinculo = vinculoAtual(estagiario)
 
-    const statusOk = filtroStatus.value === 'TODOS' || filtroStatus.value === estado
+    const statusOk = filtroStatus.value === 'TODOS' || filtroStatus.value === statusTabela(estagiario)
     const formacaoOk = filtroFormacao.value === 'TODOS' || vinculo?.formacao === filtroFormacao.value
     const contextoOk = correspondeContexto(estagiario)
     const buscaOk = !termo || termosPesquisa(estagiario)
@@ -361,11 +360,12 @@ onMounted(carregar)
         </label>
 
         <label class="field">
-          <span>Situação</span>
+          <span>Status</span>
           <select v-model="filtroStatus">
             <option value="TODOS">Todos</option>
-            <option value="OPERACIONAL">Operacional</option>
-            <option value="SEM_ATIVIDADE">Sem atividade</option>
+            <option value="NAO_INICIADO">Não iniciado</option>
+            <option value="EM_ANDAMENTO">Em andamento</option>
+            <option value="PRORROGADO">Prorrogado</option>
             <option value="ENCERRADO">Encerrado</option>
           </select>
         </label>
