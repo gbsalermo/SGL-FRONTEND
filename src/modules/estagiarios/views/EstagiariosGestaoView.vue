@@ -1716,7 +1716,7 @@ onMounted(carregar)
             <strong>{{ rotuloBolsa(vinculoSelecionado?.tipoBolsa) }}</strong>
             <small>
               {{ formatarData(vinculoSelecionado?.dataInicio) }}
-              até
+              <span class="scholarship-modal-separator">até</span>
               {{ formatarData(fimBasePeriodo(vinculoSelecionado)) }}
             </small>
           </div>
@@ -3314,6 +3314,10 @@ tbody tr:hover .history-preview {
 .scholarship-current small {
   color: #6f7f92;
   font-size: 11px;
+}
+
+.scholarship-current small .scholarship-modal-separator {
+  font-weight: 400 !important;
 }
 
 
