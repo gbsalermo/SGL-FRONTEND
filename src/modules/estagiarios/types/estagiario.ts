@@ -161,6 +161,10 @@ export interface NovaBolsaVinculoEstagioRequest {
   dataFimPrevista: string
 }
 
+export interface ProrrogarBolsaVinculoEstagioRequest {
+  novaDataFimPrevista: string
+}
+
 
 export type TipoObservacaoVinculoEstagio =
   | 'OPERACIONAL'
