@@ -4,7 +4,7 @@
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
 **Atualizado em:** 29/09/2026  
-**Estado:** primeiro protótipo funcional aprovado; Etapas 1–5 concluídas e validadas; frontend da Etapa 5 encerrado; próxima etapa: Etapa 6 — Estagiários e vínculos.
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1–5 concluídas e validadas; frontend da Etapa 5 encerrado; etapa atual: Etapa 7 — Relatórios consolidados.
 
 Este documento resume o estado real do frontend para retomada humana ou por IA. O objetivo é evitar reconstrução de módulos já aprovados e impedir que roadmaps antigos sejam tratados como tarefa imediata.
 
@@ -19,7 +19,7 @@ Etapa 5 — Projetos e Atividades             ✅ concluída e validada
 Etapa 6 — Estagiários e vínculos            ⏳ próxima
 ```
 
-Retomada imediata: após o merge de `collab/etapa-5-projetos-atividades`, criar a branch da Etapa 6 sobre a `main` sincronizada. Projeto → SCI → Atividade e os contratos HTTP da Etapa 5 estão estabilizados.
+Retomada imediata: após o merge de `collab/etapa-7-relatorios-consolidados`, criar a branch da Etapa 6 sobre a `main` sincronizada. Projeto → SCI → Atividade e os contratos HTTP da Etapa 5 estão estabilizados.
 
 Dark Mode definitivo: fonte única em `src/services/themeService.ts`, tokens consolidados, Vuetify/DOM sincronizados e Login/404/rótulos de impressão preservados em Light.
 
@@ -651,11 +651,11 @@ Frontend entregue e validado:
 - diferenciação visual: SCI em azul do padrão de status e Atividade em verde;
 - refinamentos finais aprovados em execução.
 
-Próxima etapa: **Etapa 6 — Estagiários e vínculos**.
+Etapa 6 concluída e validada. Frente atual: **Etapa 7 — Relatórios consolidados**.
 
 
 ### Drawer Estagiários 6.5 — refinamento final
 
 Ações foram promovidas para o topo; Bolsa e histórico foram consolidados em `BOLSA / VÍNCULO`; Segurança deixou de ser seção própria; treinamento passou a usar confirmação e reversão auditável; Observações consolidam registros de vínculo, participação, treinamento e notas operacionais; Participações ganharam maior legibilidade; Culturas podem ser criadas diretamente no modal de associação.
 
-A rodada está implementada e segue para validação do 6.6.
+A rodada foi validada no 6.6; Etapa 6 encerrada.
