@@ -1463,7 +1463,7 @@ onMounted(carregar)
                       type="button"
                       @click="abrirEncerrarParticipacao(participacao)"
                     >
-                      Encerrar participação
+                      Encerrar atividade
                     </button>
                   </div>
 
