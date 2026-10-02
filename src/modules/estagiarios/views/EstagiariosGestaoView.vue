@@ -739,7 +739,7 @@ onMounted(carregar)
               <td class="student-cell">
                 <strong>{{ estagiario.usuarioNome }}</strong>
                 <small class="student-responsible">
-                  Responsável: {{ vinculoAtual(estagiario)?.orientadorNome || 'Não informado' }}
+                  Orientador: {{ vinculoAtual(estagiario)?.orientadorNome || 'Não informado' }}
                 </small>
               </td>
 
