@@ -3258,7 +3258,12 @@ tbody tr:hover .history-preview {
 .edit-link-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 15px;
+}
+
+.edit-link-grid > .action-field {
+  align-content: start;
 }
 
 .action-field small {
@@ -3307,6 +3312,77 @@ tbody tr:hover .history-preview {
   font-size: 11px;
 }
 
+.institutional-period .period-separator {
+  font-weight: 400;
+}
+
+.scholarship-mode-selector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.scholarship-mode-selector > button {
+  display: grid;
+  gap: 5px;
+  min-height: 76px;
+  padding: 12px 13px;
+  border: 1px solid #d5deea;
+  border-radius: 8px;
+  background: #fff;
+  color: #43546b;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.scholarship-mode-selector > button strong {
+  color: #2d4058;
+  font-size: 11.5px;
+}
+
+.scholarship-mode-selector > button small {
+  color: #758397;
+  font-size: 9.5px;
+  line-height: 1.45;
+}
+
+.scholarship-mode-selector > .scholarship-mode-option--active {
+  border-color: #4c72d9;
+  background: #f4f7ff;
+  box-shadow: inset 0 0 0 1px #4c72d9;
+}
+
+.scholarship-extension-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e0e7ef;
+  border-radius: 8px;
+  background: #fafcff;
+}
+
+.scholarship-extension-summary span {
+  color: #758397;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.scholarship-extension-summary strong {
+  color: #2d4058;
+  font-size: 12.5px;
+}
+
+.scholarship-date-grid .action-field {
+  align-content: start;
+}
+
+.field-helper-placeholder {
+  visibility: hidden;
+}
+
 .participation-period small {
   margin-left: 3px;
   color: #5c78a1;
@@ -3349,6 +3425,10 @@ tbody tr:hover .history-preview {
   .filters-grid,
   .detail-grid,
   .edit-link-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scholarship-mode-selector {
     grid-template-columns: 1fr;
   }
 
