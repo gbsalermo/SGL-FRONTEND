@@ -603,3 +603,13 @@ Após merge, a retomada deve ocorrer pela Etapa 6.
 
 
 **Polimento final da interface principal:** tipografia geral da listagem/filtros/cards foi ampliada para melhorar leitura em zoom 100%. Os quatro cards-resumo ficam neutros por padrão e usam a cor correspondente apenas no hover, preservando as bolinhas como indicador permanente. Não há novas informações planejadas para a interface principal nesta rodada; próximos ajustes ficam restritos à validação visual e ao drawer.
+
+
+### Ações operacionais iniciadas no drawer — 02/10/2026
+
+- `Associar atividade` abre modal operacional e usa `POST /v1/vinculos-estagio/{vinculoId}/atividades`;
+- `Registrar treinamento` usa o endpoint específico de conclusão de treinamento;
+- `Gerenciar culturas` fica disponível nas participações ativas e substitui o conjunto de Culturas pelo endpoint específico;
+- período da tabela/drawer mostra `início → fim original` e, quando o backend possui histórico de prorrogação, `Prorrogado até <nova data>`;
+- vínculo sem qualquer participação continua `Não iniciado`; vínculo com participações históricas, porém nenhuma ativa, permanece no status institucional e informa `Sem atividade ativa`.
+- tipografia e espaçamento interno do drawer/modais foram alinhados à referência madura de Resíduos.
