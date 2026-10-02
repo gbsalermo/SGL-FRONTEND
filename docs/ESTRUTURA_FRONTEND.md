@@ -191,7 +191,9 @@ X-SGL-Unidade-Id
 
 Esse contexto suporta o isolamento funcional multitenant atual. Não tratá-lo como autenticação/autorização definitiva.
 
-Para Estagiários, o frontend não deve usar o Laboratório armazenado na sessão como fonte operacional definitiva. O backend 6.1–6.4 já estabilizou vínculo, Formação, Curso, treinamento, Culturas por participação e ciclo institucional sincronizado. A fonte alvo de contexto operacional é a lista de participações retornada pelo backend:
+Para Estagiários, o frontend não deve usar o Laboratório armazenado na sessão como fonte operacional definitiva. O backend 6.1–6.4 já estabilizou vínculo, Formação, Curso, treinamento, Culturas por participação e ciclo institucional sincronizado.
+
+No 6.5, `EstagiariosGestaoView.vue` passou a consumir diretamente essa estrutura aninhada para montar a pré-visualização operacional e o drawer de detalhes, sem manter um estado paralelo de laboratório único. A fonte alvo de contexto operacional é a lista de participações retornada pelo backend:
 
 ```text
 VinculoEstagio
