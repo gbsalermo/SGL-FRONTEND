@@ -587,3 +587,151 @@ body.sgl-dark-active .gestao-main .intern-page textarea:focus-visible {
     transform: none !important;
   }
 }
+
+
+/* Etapa 6.5 — contexto operacional e vínculo institucional */
+body.sgl-dark-active .gestao-main .intern-page .metric-card--success {
+  border-color: #2d674d !important;
+  background: linear-gradient(135deg, #142820, #111f33) !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .metric-card--warning {
+  border-color: #765d2a !important;
+  background: linear-gradient(135deg, #251f14, #111f33) !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .metric-card--info {
+  border-color: #315071 !important;
+  background: linear-gradient(135deg, #132b4a, #111f33) !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .status-pill--pending {
+  border: 1px solid #765d2a !important;
+  background: #2a2316 !important;
+  color: #f0c15a !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .student-cell strong,
+body.sgl-dark-active .gestao-main .intern-page .link-cell strong,
+body.sgl-dark-active .gestao-main .intern-page .period-cell strong {
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .student-course,
+body.sgl-dark-active .gestao-main .intern-page .history-preview {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .link-state {
+  background: #17365e !important;
+  color: #9bc4ff !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .link-state--closed {
+  background: #202c3d !important;
+  color: #c2cedd !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .context-preview span {
+  color: #c8d4e3 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .context-preview span::before {
+  border-color: #7f93ad !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .context-empty {
+  background: #2a2316 !important;
+  color: #f0c15a !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .drawer-header {
+  border-color: #263a54 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .drawer-kicker {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .drawer-title-row h2 {
+  color: #f7f9fd !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .drawer-section {
+  border-color: #263a54 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .section-heading h3 {
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .section-icon {
+  background: #172941 !important;
+  color: #a9c9f2 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .institutional-card,
+body.sgl-dark-active .gestao-main .intern-page .participation-card,
+body.sgl-dark-active .gestao-main .intern-page .drawer-empty {
+  border-color: #2a3f5a !important;
+  background: #111f33 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .institutional-title > strong,
+body.sgl-dark-active .gestao-main .intern-page .participation-header strong,
+body.sgl-dark-active .gestao-main .intern-page .single-value,
+body.sgl-dark-active .gestao-main .intern-page .timeline-item strong {
+  color: #f4f7fc !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .institutional-period,
+body.sgl-dark-active .gestao-main .intern-page .institutional-card p,
+body.sgl-dark-active .gestao-main .intern-page .participation-card dd,
+body.sgl-dark-active .gestao-main .intern-page .participation-period,
+body.sgl-dark-active .gestao-main .intern-page .timeline-item small,
+body.sgl-dark-active .gestao-main .intern-page .drawer-empty {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-card {
+  border-color: #2d674d !important;
+  background: #163629 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-card strong {
+  color: #72dba8 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-card small {
+  color: #a9c5b6 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-card--pending {
+  border-color: #765d2a !important;
+  background: #2a2316 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .training-card--pending strong {
+  color: #f0c15a !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .participation-state {
+  background: #163629 !important;
+  color: #72dba8 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .participation-state--closed {
+  background: #202c3d !important;
+  color: #c2cedd !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .timeline-item::before {
+  background: #30455f !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .observation {
+  border: 1px solid #2a3f5a !important;
+  background: #111f33 !important;
+  color: #d5e0ed !important;
+}
