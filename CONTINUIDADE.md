@@ -10,7 +10,9 @@
 **Etapa concluída:** Etapa 5 — Projetos e Atividades ✅  
 **Etapa atual:** Etapa 6 — Estagiários e vínculos 🔧 — backend 6.1–6.4 concluído e validado; frontend 6.5 implementado, validação pendente
 
-**Ajuste de legibilidade do 6.5:** linhas da tabela de Estagiários foram ampliadas para a densidade das telas maduras de Gestão e o drawer detalhado passou para 860 px por conter vínculo, Formação, segurança, participações e histórico. A massa DEV da Unidade IQ foi ampliada no backend para validar os previews.  
+**Ajuste de legibilidade do 6.5:** linhas da tabela de Estagiários foram ampliadas para a densidade das telas maduras de Gestão e o drawer detalhado passou para 860 px por conter vínculo, Formação, segurança, participações e histórico. A massa DEV da Unidade IQ foi ampliada no backend para validar os previews.
+
+**Polimento de informação do 6.5:** a tabela passou a priorizar os campos que o cliente já consulta diretamente: `Status`, `Estagiário`, `Formação`, `Contexto operacional` e `Período`. Bolsa/modalidade saiu da listagem e ficou no drawer. `Não iniciado` é um status visual derivado apenas quando o vínculo existe e ainda nunca teve participação em Atividade; `Prorrogado`, `Em andamento` e `Encerrado` permanecem visíveis na coluna de Status. O nome do Orientador aparece abaixo do Estagiário e Curso abaixo de Formação.  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
