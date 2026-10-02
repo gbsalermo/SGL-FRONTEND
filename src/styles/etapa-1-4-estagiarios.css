@@ -96,7 +96,7 @@ body.sgl-light-active .gestao-main .intern-page .metrics-grid article.danger {
 
 body.sgl-light-active .gestao-main .intern-page .metrics-grid span {
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-label);
+  font-size: 12px;
   font-weight: var(--sgl-font-weight-semibold);
   text-transform: none;
 }
@@ -110,7 +110,7 @@ body.sgl-light-active .gestao-main .intern-page .metrics-grid strong {
 body.sgl-light-active .gestao-main .intern-page .metrics-grid small {
   margin-top: var(--sgl-space-1);
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-helper);
+  font-size: 11px;
   line-height: var(--sgl-line-height-body);
 }
 
@@ -142,7 +142,7 @@ body.sgl-light-active .gestao-main .intern-page .field {
 body.sgl-light-active .gestao-main .intern-page .field > span,
 body.sgl-light-active .gestao-main .intern-page .unit-readonly span {
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-label);
+  font-size: 10.5px;
   font-weight: var(--sgl-font-weight-semibold);
   text-transform: none;
 }
@@ -154,7 +154,7 @@ body.sgl-light-active .gestao-main .intern-page .field select {
   border-color: var(--sgl-border-strong);
   border-radius: var(--sgl-radius-control);
   color: var(--sgl-text);
-  font-size: var(--sgl-font-body);
+  font-size: 13px;
 }
 
 body.sgl-light-active .gestao-main .intern-page .field textarea {
@@ -195,26 +195,26 @@ body.sgl-light-active .gestao-main .intern-page th {
   padding: var(--sgl-space-3) var(--sgl-space-4);
   background: var(--sgl-surface-soft);
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-helper);
+  font-size: 10.5px;
   font-weight: var(--sgl-font-weight-bold);
 }
 
 body.sgl-light-active .gestao-main .intern-page td {
   padding: 17px 16px;
   color: var(--sgl-text-muted);
-  font-size: 11.5px;
+  font-size: 12.5px;
   line-height: var(--sgl-line-height-body);
 }
 
 body.sgl-light-active .gestao-main .intern-page td strong {
   color: var(--sgl-text);
-  font-size: 11.5px;
+  font-size: 12.5px;
 }
 
 body.sgl-light-active .gestao-main .intern-page td small {
   margin-top: 5px;
   color: var(--sgl-text-muted);
-  font-size: 9.5px;
+  font-size: 10.5px;
 }
 
 body.sgl-light-active .gestao-main .intern-page tbody tr {
@@ -473,4 +473,11 @@ body.sgl-light-active .gestao-main .intern-page .context-icon {
   body.sgl-light-active .gestao-main .intern-page tbody tr:hover .history-preview {
     color: #556477;
   }
+}
+
+body.sgl-light-active .gestao-main .intern-page .metric-card--success,
+body.sgl-light-active .gestao-main .intern-page .metric-card--warning,
+body.sgl-light-active .gestao-main .intern-page .metric-card--info {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface) !important;
 }
