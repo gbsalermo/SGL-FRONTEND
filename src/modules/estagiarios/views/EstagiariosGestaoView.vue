@@ -1701,8 +1701,8 @@ onMounted(carregar)
             <span>ALTERNATIVA LOCAL</span>
             <h2>Editar bolsa</h2>
             <p>
-              Registra uma nova bolsa para o mesmo Estagiário. A bolsa atual é encerrada e permanece no histórico.
-              Quando o ambiente institucional fornecer esse evento, ele continua sendo a fonte prioritária.
+              Escolha entre prorrogar a bolsa atual ou registrar uma nova ocorrência.
+              O ambiente institucional continua sendo a fonte prioritária quando fornecer esse evento.
             </p>
           </div>
           <button type="button" aria-label="Fechar" @click="fecharModalBolsa">×</button>
@@ -1721,31 +1721,71 @@ onMounted(carregar)
             </small>
           </div>
 
-          <label class="action-field">
-            <span>Nova bolsa / modalidade</span>
-            <select v-model="novaBolsaTipo">
-              <option v-for="opcao in opcoesBolsa" :key="opcao.valor" :value="opcao.valor">
-                {{ opcao.rotulo }}
-              </option>
-            </select>
-          </label>
+          <div class="scholarship-mode-selector" role="group" aria-label="Tipo de alteração da bolsa">
+            <button
+              type="button"
+              :class="{ 'scholarship-mode-option--active': tipoOperacaoBolsa === 'PRORROGAR' }"
+              @click="tipoOperacaoBolsa = 'PRORROGAR'; acaoErro = ''"
+            >
+              <strong>Prorrogar bolsa atual</strong>
+              <small>Mantém o mesmo vínculo e amplia somente a data final prevista.</small>
+            </button>
 
-          <div class="edit-link-grid">
-            <label class="action-field">
-              <span>Data inicial da nova bolsa</span>
-              <input v-model="novaBolsaInicio" type="date" />
-              <small>A bolsa atual será encerrada no dia anterior.</small>
-            </label>
-
-            <label class="action-field">
-              <span>Data final prevista</span>
-              <input v-model="novaBolsaFimPrevista" type="date" />
-            </label>
+            <button
+              type="button"
+              :class="{ 'scholarship-mode-option--active': tipoOperacaoBolsa === 'NOVA' }"
+              @click="tipoOperacaoBolsa = 'NOVA'; acaoErro = ''"
+            >
+              <strong>Registrar nova bolsa</strong>
+              <small>Encerra a ocorrência atual e cria uma nova, preservando o histórico.</small>
+            </button>
           </div>
 
-          <p class="culture-guidance">
-            Formação, Curso, Orientador, treinamento e participações ativas são preservados na nova ocorrência.
-          </p>
+          <template v-if="tipoOperacaoBolsa === 'PRORROGAR'">
+            <div class="scholarship-extension-summary">
+              <span>Término atual</span>
+              <strong>{{ formatarData(vinculoSelecionado?.dataFimPrevista) }}</strong>
+            </div>
+
+            <label class="action-field">
+              <span>Nova data final prevista</span>
+              <input
+                v-model="prorrogacaoFimPrevista"
+                type="date"
+                :min="vinculoSelecionado?.dataFimPrevista || undefined"
+              />
+              <small>A nova data deve ser posterior ao término atual.</small>
+            </label>
+          </template>
+
+          <template v-else>
+            <label class="action-field">
+              <span>Nova bolsa / modalidade</span>
+              <select v-model="novaBolsaTipo">
+                <option v-for="opcao in opcoesBolsa" :key="opcao.valor" :value="opcao.valor">
+                  {{ opcao.rotulo }}
+                </option>
+              </select>
+            </label>
+
+            <div class="edit-link-grid scholarship-date-grid">
+              <label class="action-field">
+                <span>Data inicial da nova bolsa</span>
+                <input v-model="novaBolsaInicio" type="date" :max="hojeIso()" />
+                <small>A bolsa atual será encerrada no dia anterior.</small>
+              </label>
+
+              <label class="action-field">
+                <span>Data final prevista</span>
+                <input v-model="novaBolsaFimPrevista" type="date" />
+                <small class="field-helper-placeholder" aria-hidden="true">Alinhamento</small>
+              </label>
+            </div>
+
+            <p class="culture-guidance">
+              Formação, Curso, Orientador, treinamento e participações são preservados conforme o período da nova ocorrência.
+            </p>
+          </template>
         </div>
 
         <footer>
@@ -1756,9 +1796,13 @@ onMounted(carregar)
             class="drawer-action drawer-action--primary"
             type="button"
             :disabled="processandoAcao"
-            @click="salvarNovaBolsa"
+            @click="salvarBolsa"
           >
-            {{ processandoAcao ? 'Salvando...' : 'Confirmar nova bolsa' }}
+            {{ processandoAcao
+              ? 'Salvando...'
+              : tipoOperacaoBolsa === 'PRORROGAR'
+                ? 'Confirmar prorrogação'
+                : 'Confirmar nova bolsa' }}
           </button>
         </footer>
       </section>
