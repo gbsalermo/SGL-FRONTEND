@@ -240,7 +240,7 @@ body.sgl-dark-active .gestao-main .intern-page .field {
 body.sgl-dark-active .gestao-main .intern-page .field > span,
 body.sgl-dark-active .gestao-main .intern-page .unit-readonly span {
   color: #c9d5e5 !important;
-  font-size: var(--sgl-font-label) !important;
+  font-size: 10.5px !important;
   font-weight: var(--sgl-font-weight-semibold) !important;
   text-transform: none !important;
 }
@@ -253,7 +253,7 @@ body.sgl-dark-active .gestao-main .intern-page .field select {
   border-radius: var(--sgl-radius-control) !important;
   background: #111f33 !important;
   color: #eef4fb !important;
-  font-size: var(--sgl-font-body) !important;
+  font-size: 13px !important;
   color-scheme: dark;
 }
 
@@ -322,7 +322,7 @@ body.sgl-dark-active .gestao-main .intern-page th {
   border-color: #2a3d58 !important;
   background: #14243c !important;
   color: #b8c6d8 !important;
-  font-size: var(--sgl-font-helper) !important;
+  font-size: 10.5px !important;
   font-weight: var(--sgl-font-weight-bold) !important;
 }
 
@@ -331,19 +331,19 @@ body.sgl-dark-active .gestao-main .intern-page td {
   border-color: #223550 !important;
   background: #0f1c2e !important;
   color: #b8c6d8 !important;
-  font-size: 11.5px !important;
+  font-size: 12.5px !important;
   line-height: var(--sgl-line-height-body) !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page td strong {
   color: #f4f7fc !important;
-  font-size: 11.5px !important;
+  font-size: 12.5px !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page td small {
   margin-top: 5px !important;
   color: #9fb0c6 !important;
-  font-size: 9.5px !important;
+  font-size: 10.5px !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page .actions-column {
@@ -785,4 +785,11 @@ body.sgl-dark-active .gestao-main .intern-page .context-icon {
   body.sgl-dark-active .gestao-main .intern-page tbody tr:hover .history-preview {
     color: #d2dce8 !important;
   }
+}
+
+body.sgl-dark-active .gestao-main .intern-page .metric-card--success,
+body.sgl-dark-active .gestao-main .intern-page .metric-card--warning,
+body.sgl-dark-active .gestao-main .intern-page .metric-card--info {
+  border-color: #30455f !important;
+  background: #111f33 !important;
 }
