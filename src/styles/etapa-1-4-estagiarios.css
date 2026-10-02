@@ -416,3 +416,61 @@ body.sgl-light-active .gestao-main .intern-page textarea:focus-visible {
     animation-duration: .01ms !important;
   }
 }
+
+
+/* Etapa 6.5 — polimento de leitura da tabela */
+body.sgl-light-active .gestao-main .intern-page .status-pill--pending {
+  background: #FFF5DC;
+  color: #AA7200;
+}
+
+body.sgl-light-active .gestao-main .intern-page .status-pill--extended {
+  background: #E4EFFF;
+  color: #2A66B7;
+}
+
+body.sgl-light-active .gestao-main .intern-page .status-reason,
+body.sgl-light-active .gestao-main .intern-page .student-responsible,
+body.sgl-light-active .gestao-main .intern-page .formation-cell small,
+body.sgl-light-active .gestao-main .intern-page .context-empty-text,
+body.sgl-light-active .gestao-main .intern-page .history-preview {
+  color: var(--sgl-text-muted);
+}
+
+body.sgl-light-active .gestao-main .intern-page .formation-cell strong {
+  color: var(--sgl-text);
+}
+
+body.sgl-light-active .gestao-main .intern-page .context-item {
+  color: var(--sgl-text);
+}
+
+body.sgl-light-active .gestao-main .intern-page .context-icon {
+  stroke: var(--sgl-text-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-light-active .gestao-main .intern-page .metric-card--success:hover {
+    border-color: #7BC89B;
+    background: #EEF8F1;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metric-card--warning:hover {
+    border-color: #E1BD58;
+    background: #FFF4D4;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metric-card--info:hover {
+    border-color: #78A9E9;
+    background: #EDF5FF;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metric-card:not(.metric-card--success):not(.metric-card--warning):not(.metric-card--info):hover {
+    border-color: #A9B5C4;
+    background: #F5F7FA;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page tbody tr:hover .history-preview {
+    color: #556477;
+  }
+}
