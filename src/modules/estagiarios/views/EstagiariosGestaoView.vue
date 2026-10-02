@@ -1247,7 +1247,7 @@ onMounted(carregar)
                   v-if="possuiProrrogacaoExibivel(vinculoAtual(estagiario))"
                   class="extension-note"
                 >
-                  Prorrogado até {{ formatarData(vinculoAtual(estagiario)?.dataFimPrevista) }}
+                  Prorrogado <span class="extension-separator">até</span> {{ formatarData(vinculoAtual(estagiario)?.dataFimPrevista) }}
                 </small>
               </td>
 
@@ -1385,7 +1385,7 @@ onMounted(carregar)
                   v-if="possuiProrrogacaoExibivel(vinculoSelecionado)"
                   class="drawer-extension-note"
                 >
-                  Prorrogado até <strong>{{ formatarData(vinculoSelecionado.dataFimPrevista) }}</strong>
+                  Prorrogado <span class="extension-separator">até</span> <strong>{{ formatarData(vinculoSelecionado.dataFimPrevista) }}</strong>
                 </p>
 
                 <p>
@@ -3048,7 +3048,7 @@ tbody tr:hover .history-preview {
   justify-content: center;
   color: #8a98aa;
   font-size: 10.5px;
-  font-weight: 600;
+  font-weight: 400 !important;
 }
 
 .extension-note {
@@ -3056,6 +3056,10 @@ tbody tr:hover .history-preview {
   color: #4f79b7 !important;
   font-size: 10.5px !important;
   font-weight: 700;
+}
+
+.extension-separator {
+  font-weight: 400 !important;
 }
 
 .drawer-extension-note {
@@ -3312,9 +3316,6 @@ tbody tr:hover .history-preview {
   font-size: 11px;
 }
 
-.institutional-period .period-separator {
-  font-weight: 400;
-}
 
 .scholarship-mode-selector {
   display: grid;
