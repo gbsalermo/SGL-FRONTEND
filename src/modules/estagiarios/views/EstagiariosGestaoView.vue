@@ -732,7 +732,7 @@ onMounted(carregar)
 .breadcrumb {
   margin: 0 0 8px;
   color: #2456c4;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: .08em;
 }
@@ -746,7 +746,7 @@ onMounted(carregar)
 .page-heading p:not(.breadcrumb) {
   margin: 8px 0 0;
   color: #66758a;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .primary-action,
@@ -755,7 +755,7 @@ onMounted(carregar)
   padding: 0 14px;
   border-radius: 7px;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -806,27 +806,19 @@ onMounted(carregar)
   content: '';
 }
 
-.metric-card--success {
-  border-color: #cfe7d8;
-  background: linear-gradient(135deg, #f4fcf7, #fff);
+.metric-card--success,
+.metric-card--warning,
+.metric-card--info {
+  border-color: #dce4ef;
+  background: #fff;
 }
 
 .metric-card--success::before {
   background: #1aa35b;
 }
 
-.metric-card--warning {
-  border-color: #eddcb1;
-  background: linear-gradient(135deg, #fffaf0, #fff);
-}
-
 .metric-card--warning::before {
   background: #e3a008;
-}
-
-.metric-card--info {
-  border-color: #cedff5;
-  background: linear-gradient(135deg, #f4f8ff, #fff);
 }
 
 .metric-card--info::before {
@@ -837,7 +829,7 @@ onMounted(carregar)
   display: block;
   padding-left: 19px;
   color: #55657a;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 850;
 }
 
@@ -852,7 +844,7 @@ onMounted(carregar)
   display: block;
   margin-top: 6px;
   color: #8390a2;
-  font-size: 10px;
+  font-size: 12.5px;
 }
 
 .metric-card {
@@ -887,7 +879,7 @@ onMounted(carregar)
   margin-bottom: 16px;
   padding: 13px 15px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .feedback--error {
@@ -918,7 +910,7 @@ onMounted(carregar)
 
 .field > span {
   color: #66758a;
-  font-size: 9px;
+  font-size: 10.5px;
   font-weight: 850;
   text-transform: uppercase;
 }
@@ -933,7 +925,7 @@ onMounted(carregar)
   background: #fff;
   color: #23354e;
   font: inherit;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .filter-summary {
@@ -944,7 +936,7 @@ onMounted(carregar)
   border-top: 1px solid #edf1f5;
   border-bottom: 1px solid #edf1f5;
   color: #6c7a8d;
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .filter-summary > div {
@@ -986,7 +978,7 @@ th {
   padding: 12px 15px;
   background: #f8fafd;
   color: #738197;
-  font-size: 9px;
+  font-size: 10.5px;
   text-align: left;
   text-transform: uppercase;
 }
@@ -995,8 +987,8 @@ td {
   padding: 17px 16px;
   border-top: 1px solid #edf1f5;
   color: #37475e;
-  font-size: 11.5px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  line-height: 1.5;
   vertical-align: middle;
 }
 
@@ -1021,7 +1013,7 @@ td small {
 
 .student-cell strong {
   color: #17243a;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .student-responsible {
@@ -1030,7 +1022,7 @@ td small {
 
 .formation-cell strong {
   color: #17243a;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .formation-cell small {
@@ -1044,7 +1036,7 @@ td small {
 .status-reason {
   margin-top: 7px;
   color: #7d8a9c;
-  font-size: 9.5px;
+  font-size: 10.5px;
 }
 
 .link-cell strong {
@@ -1059,7 +1051,7 @@ td small {
   border-radius: 999px;
   background: #dcecff;
   color: #2365bd;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
 }
 
@@ -1078,7 +1070,7 @@ td small {
   align-items: center;
   gap: 7px;
   color: #34465e;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 650;
 }
 
@@ -1095,13 +1087,13 @@ td small {
 
 .context-empty-text {
   color: #7a8798;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
 }
 
 .history-preview {
   color: #7a8798;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
   transition: color 150ms ease;
 }
@@ -1130,7 +1122,7 @@ tbody tr:hover .history-preview {
   min-height: 25px;
   padding: 0 9px;
   border-radius: 999px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -1215,7 +1207,7 @@ tbody tr:hover .history-preview {
 .drawer-header p:not(.drawer-kicker) {
   margin: 6px 0 0;
   color: #758397;
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .drawer-header > button {
@@ -1295,13 +1287,13 @@ tbody tr:hover .history-preview {
   gap: 8px;
   margin-top: 12px;
   color: #43566f;
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .institutional-card p {
   margin: 10px 0 0;
   color: #728095;
-  font-size: 10px;
+  font-size: 12.5px;
 }
 
 .institutional-card p strong {
@@ -1333,7 +1325,7 @@ tbody tr:hover .history-preview {
   display: block;
   margin-top: 5px;
   color: #2a3b52;
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .single-value {
@@ -1382,7 +1374,7 @@ tbody tr:hover .history-preview {
 
 .training-card strong {
   color: #23683f;
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .training-card--pending strong {
@@ -1432,7 +1424,7 @@ tbody tr:hover .history-preview {
 
 .participation-header strong {
   color: #25364d;
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .participation-dot {
@@ -1543,7 +1535,7 @@ tbody tr:hover .history-preview {
 
 .timeline-item strong {
   color: #2c3e55;
-  font-size: 10px;
+  font-size: 12.5px;
 }
 
 .timeline-item small {
