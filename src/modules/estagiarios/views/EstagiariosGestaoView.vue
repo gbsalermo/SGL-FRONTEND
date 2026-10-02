@@ -198,6 +198,21 @@ function dataLocal(valor: string) {
   return new Date(ano, (mes ?? 1) - 1, dia ?? 1)
 }
 
+function formatarDataHora(valor: string) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(new Date(valor))
+}
+
+function rotuloEventoObservacao(observacao: ObservacaoVinculoEstagioResponse) {
+  if (observacao.evento === 'TREINAMENTO_CONCLUIDO') return 'Treinamento de segurança concluído'
+  if (observacao.evento === 'TREINAMENTO_REVERTIDO') return 'Conclusão do treinamento revertida'
+  return observacao.tipo === 'TREINAMENTO_SEGURANCA'
+    ? 'Observação sobre treinamento de segurança'
+    : 'Observação operacional'
+}
+
 function fimExibicao(vinculo: VinculoEstagioResponse | null) {
   if (!vinculo) return null
   return vinculo.dataFimEfetiva || vinculo.dataFimPrevista
@@ -351,12 +366,36 @@ const encerramEmBreve = computed(() => {
 
 const vinculoSelecionado = computed(() => selecionado.value ? vinculoAtual(selecionado.value) : null)
 
-function abrirDetalhes(estagiario: EstagiarioResponse) {
+async function carregarObservacoesVinculo() {
+  const vinculo = vinculoSelecionado.value
+
+  if (!vinculo) {
+    observacoesVinculo.value = []
+    return
+  }
+
+  carregandoObservacoes.value = true
+
+  try {
+    observacoesVinculo.value = await estagiarioService.listarObservacoes(vinculo.id)
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível carregar as observações do vínculo.')
+  } finally {
+    carregandoObservacoes.value = false
+  }
+}
+
+async function abrirDetalhes(estagiario: EstagiarioResponse) {
   selecionado.value = estagiario
+  observacoesVinculo.value = []
+  await carregarObservacoesVinculo()
 }
 
 function fecharDetalhes() {
   selecionado.value = null
+  observacoesVinculo.value = []
+  acaoErro.value = ''
+  acaoSucesso.value = ''
 }
 
 function limparFiltros() {
@@ -544,22 +583,96 @@ async function associarAtividade() {
   }
 }
 
-async function registrarTreinamento() {
-  if (
-    !vinculoSelecionado.value
-    || vinculoSelecionado.value.treinamentoSegurancaConcluido
-    || vinculoSelecionado.value.situacao === 'FINALIZADO'
-  ) return
+function abrirModalTreinamento() {
+  const vinculo = vinculoSelecionado.value
+
+  if (!vinculo || vinculo.situacao === 'FINALIZADO') return
+
+  limparFeedbackAcao()
+  treinamentoNovoEstado.value = !Boolean(vinculo.treinamentoSegurancaConcluido)
+  treinamentoObservacao.value = ''
+  modalTreinamentoAberto.value = true
+}
+
+function fecharModalTreinamento() {
+  modalTreinamentoAberto.value = false
+  treinamentoObservacao.value = ''
+}
+
+async function salvarTreinamento() {
+  const vinculo = vinculoSelecionado.value
+  const usuarioId = session.usuario?.id
+
+  if (!vinculo || !usuarioId) {
+    acaoErro.value = 'Não foi possível identificar o vínculo ou o usuário operador.'
+    return
+  }
 
   limparFeedbackAcao()
   processandoAcao.value = true
 
   try {
-    await estagiarioService.concluirTreinamento(vinculoSelecionado.value.id)
-    acaoSucesso.value = 'Treinamento de segurança registrado.'
+    await estagiarioService.alterarTreinamento(
+      vinculo.id,
+      usuarioId,
+      treinamentoNovoEstado.value,
+      treinamentoObservacao.value.trim() || null,
+    )
+
+    modalTreinamentoAberto.value = false
+    acaoSucesso.value = treinamentoNovoEstado.value
+      ? 'Treinamento de segurança registrado.'
+      : 'Conclusão do treinamento de segurança revertida.'
+
     await carregar()
+    await carregarObservacoesVinculo()
   } catch (error) {
-    acaoErro.value = mensagemErro(error, 'Não foi possível registrar o treinamento.')
+    acaoErro.value = mensagemErro(error, 'Não foi possível alterar o treinamento de segurança.')
+  } finally {
+    processandoAcao.value = false
+  }
+}
+
+function abrirModalObservacao() {
+  if (!vinculoSelecionado.value) return
+
+  limparFeedbackAcao()
+  observacaoTexto.value = ''
+  modalObservacaoAberto.value = true
+}
+
+function fecharModalObservacao() {
+  modalObservacaoAberto.value = false
+  observacaoTexto.value = ''
+}
+
+async function salvarObservacao() {
+  const vinculo = vinculoSelecionado.value
+  const usuarioId = session.usuario?.id
+  const texto = observacaoTexto.value.trim()
+
+  if (!vinculo || !usuarioId) {
+    acaoErro.value = 'Não foi possível identificar o vínculo ou o usuário operador.'
+    return
+  }
+
+  if (!texto) {
+    acaoErro.value = 'Digite a observação.'
+    return
+  }
+
+  limparFeedbackAcao()
+  processandoAcao.value = true
+
+  try {
+    await estagiarioService.adicionarObservacao(vinculo.id, usuarioId, texto)
+
+    modalObservacaoAberto.value = false
+    observacaoTexto.value = ''
+    acaoSucesso.value = 'Observação registrada.'
+    await carregarObservacoesVinculo()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível registrar a observação.')
   } finally {
     processandoAcao.value = false
   }
@@ -571,6 +684,7 @@ async function abrirGerenciarCulturas(participacao: VinculoEstagioAtividadeRespo
   limparFeedbackAcao()
   participacaoCulturas.value = participacao
   culturasSelecionadas.value = participacao.culturas?.map((cultura) => cultura.id) ?? []
+  novaCulturaNome.value = ''
   modalCulturasAberto.value = true
 
   if (culturasDisponiveis.value.length > 0) return
@@ -585,6 +699,42 @@ async function abrirGerenciarCulturas(participacao: VinculoEstagioAtividadeRespo
 function fecharModalCulturas() {
   modalCulturasAberto.value = false
   participacaoCulturas.value = null
+}
+
+async function criarCulturaNoModal() {
+  const unidadeId = selecionado.value?.unidadeId
+  const nome = novaCulturaNome.value.trim()
+
+  if (!unidadeId) {
+    acaoErro.value = 'A Unidade do Estagiário não foi identificada.'
+    return
+  }
+
+  if (!nome) {
+    acaoErro.value = 'Informe o nome da nova Cultura.'
+    return
+  }
+
+  limparFeedbackAcao()
+  processandoAcao.value = true
+
+  try {
+    const criada = await estagiarioService.criarCultura(unidadeId, nome)
+
+    culturasDisponiveis.value = [...culturasDisponiveis.value, criada]
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+
+    if (!culturasSelecionadas.value.includes(criada.id)) {
+      culturasSelecionadas.value = [...culturasSelecionadas.value, criada.id]
+    }
+
+    novaCulturaNome.value = ''
+    acaoSucesso.value = 'Cultura criada e selecionada para esta participação.'
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível criar a Cultura.')
+  } finally {
+    processandoAcao.value = false
+  }
 }
 
 async function salvarCulturas() {
