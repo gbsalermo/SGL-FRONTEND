@@ -152,6 +152,26 @@ export interface AtualizarVinculoEstagioRequest {
   observacao?: string | null
 }
 
+
+export type TipoObservacaoVinculoEstagio =
+  | 'OPERACIONAL'
+  | 'TREINAMENTO_SEGURANCA'
+
+export type EventoObservacaoVinculoEstagio =
+  | 'OBSERVACAO'
+  | 'TREINAMENTO_CONCLUIDO'
+  | 'TREINAMENTO_REVERTIDO'
+
+export interface ObservacaoVinculoEstagioResponse {
+  id: string
+  tipo: TipoObservacaoVinculoEstagio
+  evento: EventoObservacaoVinculoEstagio
+  texto: string | null
+  usuarioId: string
+  usuarioNome: string
+  dataHora: string
+}
+
 export interface ApiErrorResponse {
   message?: string
 }
