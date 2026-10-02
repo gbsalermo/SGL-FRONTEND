@@ -326,7 +326,7 @@ Estagiário
 
 A interface deve remover a noção de um único "Laboratório do Estagiário" como atributo definitivo.
 
-O backend 6.4 foi validado em 02/10/2026 e a adequação visual do 6.5 foi implementada. A tela agora exibe preview operacional na listagem e detalhes completos em drawer; validação visual/local permanece pendente. O drawer foi ampliado para 860 px e a densidade vertical das linhas foi aproximada do padrão de Gestão para melhorar a leitura em zoom 100%. A listagem principal foi simplificada para Status, Estagiário/Responsável, Formação/Curso, Contexto operacional e Período; Bolsa/modalidade permanece como detalhe no drawer.
+O backend 6.4 foi validado em 02/10/2026 e a adequação visual do 6.5 foi implementada e validada. A tela exibe preview operacional na listagem e detalhes completos em drawer. O drawer foi ampliado para 860 px e a densidade vertical das linhas foi aproximada do padrão de Gestão para melhorar a leitura em zoom 100%. A listagem principal foi simplificada para Status, Estagiário/Responsável, Formação/Curso, Contexto operacional e Período; Bolsa/modalidade permanece como detalhe no drawer.
 
 ---
 
