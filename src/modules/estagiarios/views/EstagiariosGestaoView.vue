@@ -15,13 +15,14 @@ import type {
 
 type FiltroStatus = 'TODOS' | 'OPERACIONAL' | 'SEM_ATIVIDADE' | 'ENCERRADO'
 type EstadoOperacional = Exclude<FiltroStatus, 'TODOS'>
+type StatusTabela = 'NAO_INICIADO' | 'EM_ANDAMENTO' | 'PRORROGADO' | 'ENCERRADO'
 
 const estagiarios = ref<EstagiarioResponse[]>([])
 const carregando = ref(false)
 const erro = ref('')
 const busca = ref('')
 const filtroStatus = ref<FiltroStatus>('TODOS')
-const tipoBolsa = ref<TipoBolsaEstagiario | 'TODOS'>('TODOS')
+const filtroFormacao = ref<FormacaoEstagiario | 'TODOS'>('TODOS')
 const contexto = ref('TODOS')
 const selecionado = ref<EstagiarioResponse | null>(null)
 
@@ -43,6 +44,12 @@ const formacoes: Record<FormacaoEstagiario, string> = {
   APOIO_TECNICO: 'Apoio técnico',
   OUTRO: 'Outro',
 }
+
+const opcoesFormacao = Object.entries(formacoes)
+  .map(([valor, rotulo]) => ({
+    valor: valor as FormacaoEstagiario,
+    rotulo,
+  }))
 
 const situacoes: Record<SituacaoEstagio, string> = {
   EM_ANDAMENTO: 'Em andamento',
@@ -88,7 +95,12 @@ function classeEstado(estado: EstadoOperacional) {
 }
 
 function rotuloBolsa(valor: TipoBolsaEstagiario | null | undefined) {
-  return tiposBolsa.find((item) => item.valor === valor)?.rotulo ?? 'Não informado'
+  if (valor === 'BOLSA_CNPQ') return 'Bolsa CNPq'
+  if (valor === 'BOLSA_CAPES') return 'Bolsa CAPES'
+  if (valor === 'BOLSA_INSTITUCIONAL') return 'Bolsa institucional'
+  if (valor === 'VOLUNTARIO') return 'Voluntário'
+  if (valor === 'CONTRATUAL') return 'Contrato'
+  return 'Não informado'
 }
 
 function rotuloFormacao(vinculo: VinculoEstagioResponse | null) {
@@ -100,6 +112,46 @@ function rotuloFormacao(vinculo: VinculoEstagioResponse | null) {
 function rotuloSituacao(valor: SituacaoEstagio | null | undefined) {
   return valor ? situacoes[valor] : 'Não informada'
 }
+
+function statusTabela(estagiario: EstagiarioResponse): StatusTabela {
+  const vinculo = vinculoAtual(estagiario)
+
+  if (!vinculo || vinculo.situacao === 'FINALIZADO') return 'ENCERRADO'
+
+  const participacoes = vinculo.participacoesAtividade ?? []
+
+  if (participacoes.length === 0) return 'NAO_INICIADO'
+  if (vinculo.situacao === 'PRORROGADO') return 'PRORROGADO'
+
+  return 'EM_ANDAMENTO'
+}
+
+function rotuloStatusTabela(status: StatusTabela) {
+  if (status === 'NAO_INICIADO') return 'Não iniciado'
+  if (status === 'PRORROGADO') return 'Prorrogado'
+  if (status === 'ENCERRADO') return 'Encerrado'
+  return 'Em andamento'
+}
+
+function classeStatusTabela(status: StatusTabela) {
+  if (status === 'NAO_INICIADO') return 'status-pill--pending'
+  if (status === 'PRORROGADO') return 'status-pill--extended'
+  if (status === 'ENCERRADO') return 'status-pill--closed'
+  return 'status-pill--active'
+}
+
+function detalheStatusTabela(estagiario: EstagiarioResponse) {
+  const status = statusTabela(estagiario)
+  const vinculo = vinculoAtual(estagiario)
+
+  if (status === 'NAO_INICIADO') return 'Sem atividade vinculada'
+  if (status === 'ENCERRADO') return 'Vínculo finalizado'
+
+  return participacoesAtivas(vinculo).length > 0
+    ? 'Com atividade ativa'
+    : 'Sem atividade ativa'
+}
+
 
 function formatarData(valor: string | null | undefined) {
   if (!valor) return 'Não informada'
@@ -209,12 +261,12 @@ const estagiariosFiltrados = computed(() => {
     const vinculo = vinculoAtual(estagiario)
 
     const statusOk = filtroStatus.value === 'TODOS' || filtroStatus.value === estado
-    const bolsaOk = tipoBolsa.value === 'TODOS' || vinculo?.tipoBolsa === tipoBolsa.value
+    const formacaoOk = filtroFormacao.value === 'TODOS' || vinculo?.formacao === filtroFormacao.value
     const contextoOk = correspondeContexto(estagiario)
     const buscaOk = !termo || termosPesquisa(estagiario)
       .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termo))
 
-    return statusOk && bolsaOk && contextoOk && buscaOk
+    return statusOk && formacaoOk && contextoOk && buscaOk
   })
 })
 
@@ -249,7 +301,7 @@ function fecharDetalhes() {
 function limparFiltros() {
   busca.value = ''
   filtroStatus.value = 'TODOS'
-  tipoBolsa.value = 'TODOS'
+  filtroFormacao.value = 'TODOS'
   contexto.value = 'TODOS'
 }
 
@@ -339,11 +391,11 @@ onMounted(carregar)
         </label>
 
         <label class="field">
-          <span>Tipo de vínculo</span>
-          <select v-model="tipoBolsa">
+          <span>Formação</span>
+          <select v-model="filtroFormacao">
             <option value="TODOS">Todos</option>
-            <option v-for="tipo in tiposBolsa" :key="tipo.valor" :value="tipo.valor">
-              {{ tipo.rotulo }}
+            <option v-for="opcao in opcoesFormacao" :key="opcao.valor" :value="opcao.valor">
+              {{ opcao.rotulo }}
             </option>
           </select>
         </label>
@@ -366,7 +418,7 @@ onMounted(carregar)
         </div>
 
         <button
-          v-if="busca || filtroStatus !== 'TODOS' || tipoBolsa !== 'TODOS' || contexto !== 'TODOS'"
+          v-if="busca || filtroStatus !== 'TODOS' || filtroFormacao !== 'TODOS' || contexto !== 'TODOS'"
           type="button"
           @click="limparFiltros"
         >
@@ -383,9 +435,9 @@ onMounted(carregar)
         <table>
           <thead>
             <tr>
-              <th>Estado</th>
+              <th>Status</th>
               <th>Estagiário</th>
-              <th>Vínculo</th>
+              <th>Formação</th>
               <th>Contexto operacional</th>
               <th>Período</th>
               <th></th>
@@ -398,33 +450,27 @@ onMounted(carregar)
               :key="estagiario.id"
               @click="abrirDetalhes(estagiario)"
             >
-              <td>
+              <td class="status-cell">
                 <span
                   class="status-pill"
-                  :class="classeEstado(estadoOperacional(estagiario))"
+                  :class="classeStatusTabela(statusTabela(estagiario))"
                 >
                   <span class="status-dot" />
-                  {{ rotuloEstado(estadoOperacional(estagiario)) }}
+                  {{ rotuloStatusTabela(statusTabela(estagiario)) }}
                 </span>
+                <small class="status-reason">{{ detalheStatusTabela(estagiario) }}</small>
               </td>
 
               <td class="student-cell">
                 <strong>{{ estagiario.usuarioNome }}</strong>
-                <small>{{ rotuloFormacao(vinculoAtual(estagiario)) }}</small>
-                <small class="student-course">
-                  {{ vinculoAtual(estagiario)?.cursoNome || 'Curso não informado' }}
+                <small class="student-responsible">
+                  Responsável: {{ vinculoAtual(estagiario)?.orientadorNome || 'Não informado' }}
                 </small>
               </td>
 
-              <td class="link-cell">
-                <strong>{{ rotuloBolsa(vinculoAtual(estagiario)?.tipoBolsa) }}</strong>
-                <span
-                  v-if="vinculoAtual(estagiario)"
-                  class="link-state"
-                  :class="{ 'link-state--closed': vinculoAtual(estagiario)?.situacao === 'FINALIZADO' }"
-                >
-                  {{ rotuloSituacao(vinculoAtual(estagiario)?.situacao) }}
-                </span>
+              <td class="formation-cell">
+                <strong>{{ rotuloFormacao(vinculoAtual(estagiario)) }}</strong>
+                <small>{{ vinculoAtual(estagiario)?.cursoNome || 'Curso não informado' }}</small>
               </td>
 
               <td>
@@ -432,19 +478,38 @@ onMounted(carregar)
                   v-if="estadoOperacional(estagiario) === 'OPERACIONAL'"
                   class="context-preview"
                 >
-                  <span>{{ textoQuantidade(contagemContexto(vinculoAtual(estagiario)).atividades, 'atividade', 'atividades') }}</span>
-                  <span>{{ textoQuantidade(contagemContexto(vinculoAtual(estagiario)).projetos, 'projeto', 'projetos') }}</span>
-                  <span>{{ textoQuantidade(contagemContexto(vinculoAtual(estagiario)).laboratorios, 'laboratório', 'laboratórios') }}</span>
+                  <span class="context-item">
+                    <svg class="context-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M9 5h6M7 3h10v4H7zM6 7h12v14H6zM9 11h6M9 15h6" />
+                    </svg>
+                    {{ textoQuantidade(contagemContexto(vinculoAtual(estagiario)).atividades, 'atividade', 'atividades') }}
+                  </span>
+                  <span class="context-item">
+                    <svg class="context-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 7h7l2 2h9v10H3zM3 7V5h7l2 2" />
+                    </svg>
+                    {{ textoQuantidade(contagemContexto(vinculoAtual(estagiario)).projetos, 'projeto', 'projetos') }}
+                  </span>
+                  <span class="context-item">
+                    <svg class="context-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M8 15h8" />
+                    </svg>
+                    {{ textoQuantidade(contagemContexto(vinculoAtual(estagiario)).laboratorios, 'laboratório', 'laboratórios') }}
+                  </span>
                 </div>
 
                 <span
                   v-else-if="estadoOperacional(estagiario) === 'SEM_ATIVIDADE'"
-                  class="context-empty"
+                  class="context-empty-text"
                 >
-                  Aguardando atividade
+                  Sem atividades vinculadas
                 </span>
 
-                <span v-else class="history-preview">
+                <span
+                  v-else
+                  class="history-preview"
+                  title="Abra os detalhes para consultar o histórico"
+                >
                   Histórico disponível
                 </span>
               </td>
@@ -475,10 +540,10 @@ onMounted(carregar)
               <h2>{{ selecionado.usuarioNome }}</h2>
               <span
                 class="status-pill"
-                :class="classeEstado(estadoOperacional(selecionado))"
+                :class="classeStatusTabela(statusTabela(selecionado))"
               >
                 <span class="status-dot" />
-                {{ rotuloEstado(estadoOperacional(selecionado)) }}
+                {{ rotuloStatusTabela(statusTabela(selecionado)) }}
               </span>
             </div>
             <p>{{ selecionado.unidadeNome || 'Unidade não informada' }}</p>
@@ -492,7 +557,7 @@ onMounted(carregar)
             <section class="drawer-section">
               <div class="section-heading">
                 <span class="section-icon">01</span>
-                <h3>Vínculo institucional</h3>
+                <h3>Bolsa</h3>
               </div>
 
               <div class="institutional-card">
