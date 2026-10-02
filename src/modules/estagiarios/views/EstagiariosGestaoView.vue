@@ -302,6 +302,14 @@ function usaPrazoDoProjeto(participacao: VinculoEstagioAtividadeResponse) {
   )
 }
 
+function participacaoSelecionadaParaEncerrar() {
+  if (participacaoEncerramento.value) return participacaoEncerramento.value
+
+  return participacoesAtivas(vinculoSelecionado.value)
+    .find((participacao) => participacao.id === participacaoEncerramentoId.value)
+    ?? null
+}
+
 function mensagemErro(error: unknown, padrao = 'Não foi possível carregar os dados de estagiários.') {
   if (axios.isAxiosError<ApiErrorResponse>(error)) return error.response?.data?.message ?? padrao
   return error instanceof Error ? error.message : padrao
