@@ -1,6 +1,6 @@
 # Roadmap Formal — SGL Frontend
 
-**Atualizado em:** 04/09/2026  
+**Atualizado em:** 01/10/2026  
 **Estado do produto:** primeiro protótipo funcional aprovado.  
 **Uso deste documento:** sequência formal a ser retomada **depois** do bloco atual de ajustes de pré-produção.
 
@@ -19,7 +19,7 @@ Relatórios / fiscalização                         ✅
 PDF/XLSX                                          ✅
 Resíduos Solicitante/Gestão                       ✅
 Rótulos Produto/Resíduo                           ✅
-Estagiários                                       ✅
+Estagiários — base visual atual                   ✅
 Pessoas por laboratório                           ✅
 Administração / Cadastros                         ✅
 Dashboard Gestão                                  ✅
@@ -32,6 +32,8 @@ Isolamento funcional por Unidade                  ✅
 ```
 
 Esses blocos não devem voltar a aparecer como “próxima etapa”.
+
+Observação de evolução: o backend da Etapa 6 já estabilizou vínculos históricos, Formação, Curso, treinamento de segurança, participações e Culturas. A interface de Estagiários ainda será refinada no 6.5 para refletir esse domínio; isso não invalida a existência da tela atual, apenas substitui sua representação legada.
 
 ---
 

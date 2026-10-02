@@ -128,6 +128,8 @@ O dashboard do Solicitante não expõe ações de Gestão/Administração.
 
 ## Novo pedido
 
+Fluxo **atual de compatibilidade**:
+
 ```text
 /inicio ou menu
 → /pedidos/novo
@@ -142,6 +144,36 @@ O dashboard do Solicitante não expõe ações de Gestão/Administração.
 ```
 
 Backend valida estoque, lote elegível, FIFO/FEFO e regras de domínio.
+
+Fluxo **alvo para Estagiários**, aprovado em 01/10/2026 e planejado para Etapas 8–9:
+
+```text
+/inicio ou menu
+→ /pedidos/novo
+→ carregar participações/Atividades abertas do Estagiário
+→ escolher a participação correspondente ao Pedido
+→ backend deriva Projeto/Laboratório/Unidade
+→ adicionar materiais
+→ revisar
+→ enviar
+→ acompanhar em /meus-pedidos
+```
+
+Se houver uma única participação aberta, ela pode ser selecionada automaticamente. Com múltiplas participações, a escolha é explícita. O frontend não deve combinar livremente Atividade, Projeto e Laboratório para Estagiários.
+
+Para solicitantes não Estagiários:
+
+```text
+TECNICO / ANALISTA / PESQUISADOR
+├── com Projeto
+│   → selecionar Projeto
+│   → backend deriva Laboratório
+│
+└── sem Projeto
+    → usar Laboratório institucional/base do Usuario
+```
+
+Assim o frontend não cria combinações inválidas de Projeto e Laboratório.
 
 ## Meus pedidos
 
@@ -200,7 +232,8 @@ O dashboard não substitui as telas operacionais; ele aponta para elas.
 /pedidos
 → fila/filtros
 → selecionar pedido
-→ revisar solicitante/laboratório/projeto/itens
+→ revisar solicitante/contexto operacional/itens
+→ visualizar Atividade/Projeto/Laboratório derivados quando o solicitante for Estagiário
 → executar ação permitida pelo estado
 ```
 
@@ -371,25 +404,50 @@ Sem QR Code visual na implementação atual.
 
 # 12. Fluxo de Estagiários
 
+**Estado de contrato:** backend 6.1–6.3 concluído e validado em 01/10/2026; integração visual completa prevista para o 6.5.
+
+O frontend deverá consumir no vínculo:
+
+- Formação;
+- Curso;
+- treinamento de segurança;
+
+e em cada participação:
+
+- Atividade;
+- SCI;
+- Projeto;
+- Laboratório;
+- Culturas.
+
+Fluxo alvo do frontend integrado da Etapa 6:
+
 ```text
 /estagiarios
 → listar/filtrar
-→ Novo estágio ou Editar
 → escolher usuário ESTAGIARIO elegível
-→ Unidade do usuário orienta laboratórios disponíveis
-→ registrar tipo/período
+→ criar/consultar vínculo
+→ visualizar participações em Atividades
+→ cada participação deriva Projeto e Laboratório
+→ registrar dados acadêmicos/período
 → salvar
 ```
 
-Encerramento:
+Não apresentar um único "Laboratório do Estagiário" como atributo definitivo. Um mesmo vínculo pode conter Atividades de Projetos/Laboratórios diferentes dentro da mesma Unidade.
+
+Ciclo institucional:
 
 ```text
-estágio ativo
-→ Encerrar estágio
-→ confirmação
-→ backend grava inativo + data efetiva
-→ histórico permanece visível
+ambiente institucional
+→ backend sincroniza situação/período
+→ frontend reflete EM_ANDAMENTO / PRORROGADO / FINALIZADO
 ```
+
+Não oferecer botão cotidiano de "Encerrar estágio" ou "Prorrogar estágio" como fonte de verdade. Nova bolsa mantém o mesmo Usuario/Estagiario e cria novo VinculoEstagio; prorrogação da mesma bolsa mantém o vínculo atual.
+
+O backend 6.4 foi validado em 02/10/2026; o 6.5 deve apenas refletir esse contrato na interface.
+
+**Implementação 6.5:** a rota `/estagiarios` agora usa listagem consolidada com estado operacional, preview de atividades/projetos/laboratórios e drawer lateral com vínculo institucional, Formação/Curso, Orientador, treinamento, participações, Culturas e histórico de vínculos. Edição/encerramento manual deixaram de ser ações principais da tela.
 
 ---
 

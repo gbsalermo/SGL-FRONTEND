@@ -1,5 +1,19 @@
 import { http } from '@/services/http'
-import type { EstagiarioRequest, EstagiarioResponse } from '@/modules/estagiarios/types/estagiario'
+import type {
+  AtividadeDisponivelEstagioResponse,
+  AtualizarVinculoEstagioRequest,
+  CulturaEstagioResponse,
+  CursoEstagioResponse,
+  EstagiarioRequest,
+  EstagiarioResponse,
+  NovaBolsaVinculoEstagioRequest,
+  ProrrogarBolsaVinculoEstagioRequest,
+  ObservacaoVinculoEstagioResponse,
+  VinculoEstagioAtividadeRequest,
+  VinculoEstagioAtividadeResponse,
+  UsuarioOpcaoEstagioResponse,
+  VinculoEstagioResponse,
+} from '@/modules/estagiarios/types/estagiario'
 
 export const estagiarioService = {
   async listarTodos() {
@@ -36,6 +50,142 @@ export const estagiarioService = {
 
   async encerrar(id: string) {
     const { data } = await http.put<EstagiarioResponse>(`/v1/estagiarios/${id}/encerrar`)
+    return data
+  },
+
+  async atualizarVinculo(vinculoId: string, payload: AtualizarVinculoEstagioRequest) {
+    const { data } = await http.put<VinculoEstagioResponse>(
+      `/v1/vinculos-estagio/${vinculoId}`,
+      payload,
+    )
+    return data
+  },
+
+  async registrarNovaBolsa(vinculoId: string, payload: NovaBolsaVinculoEstagioRequest) {
+    const { data } = await http.post<VinculoEstagioResponse>(
+      `/v1/vinculos-estagio/${vinculoId}/nova-bolsa`,
+      payload,
+    )
+    return data
+  },
+
+  async atualizarReferenciaBolsa(vinculoId: string, referencia: string) {
+    const { data } = await http.put<VinculoEstagioResponse>(
+      `/v1/vinculos-estagio/${vinculoId}/referencia-bolsa`,
+      { referencia },
+    )
+    return data
+  },
+
+  async prorrogarBolsa(
+    vinculoId: string,
+    payload: ProrrogarBolsaVinculoEstagioRequest,
+  ) {
+    const { data } = await http.put<VinculoEstagioResponse>(
+      `/v1/vinculos-estagio/${vinculoId}/prorrogar-bolsa`,
+      payload,
+    )
+    return data
+  },
+
+  async listarCursosAtivos() {
+    const { data } = await http.get<CursoEstagioResponse[]>('/v1/cursos/ativos')
+    return data
+  },
+
+  async criarCurso(unidadeId: string, nome: string) {
+    const { data } = await http.post<CursoEstagioResponse>('/v1/cursos', {
+      unidadeId,
+      nome,
+      ativo: true,
+    })
+    return data
+  },
+
+  async listarUsuarios() {
+    const { data } = await http.get<UsuarioOpcaoEstagioResponse[]>('/v1/usuarios')
+    return data
+  },
+
+  async listarObservacoes(vinculoId: string) {
+    const { data } = await http.get<ObservacaoVinculoEstagioResponse[]>(
+      `/v1/vinculos-estagio/${vinculoId}/observacoes`,
+    )
+    return data
+  },
+
+  async adicionarObservacao(vinculoId: string, usuarioId: string, texto: string) {
+    const { data } = await http.post<ObservacaoVinculoEstagioResponse>(
+      `/v1/vinculos-estagio/${vinculoId}/observacoes`,
+      { usuarioId, texto },
+    )
+    return data
+  },
+
+  async alterarTreinamento(
+    vinculoId: string,
+    usuarioId: string,
+    concluido: boolean,
+    observacao?: string | null,
+  ) {
+    const { data } = await http.put<ObservacaoVinculoEstagioResponse>(
+      `/v1/vinculos-estagio/${vinculoId}/treinamento-seguranca`,
+      { usuarioId, concluido, observacao: observacao || null },
+    )
+    return data
+  },
+
+  async listarAtividadesDisponiveis() {
+    const { data } = await http.get<AtividadeDisponivelEstagioResponse[]>('/v1/atividades/ativos')
+    return data
+  },
+
+  async associarAtividade(vinculoId: string, payload: VinculoEstagioAtividadeRequest) {
+    const { data } = await http.post<VinculoEstagioAtividadeResponse>(
+      `/v1/vinculos-estagio/${vinculoId}/atividades`,
+      payload,
+    )
+    return data
+  },
+
+  async atualizarParticipacao(
+    participacaoId: string,
+    payload: VinculoEstagioAtividadeRequest,
+  ) {
+    const { data } = await http.put<VinculoEstagioAtividadeResponse>(
+      `/v1/vinculos-estagio/participacoes/${participacaoId}`,
+      payload,
+    )
+    return data
+  },
+
+  async encerrarParticipacao(participacaoId: string, dataFimParticipacao: string) {
+    const { data } = await http.put<VinculoEstagioAtividadeResponse>(
+      `/v1/vinculos-estagio/participacoes/${participacaoId}/encerrar`,
+      { dataFimParticipacao },
+    )
+    return data
+  },
+
+  async listarCulturasAtivas() {
+    const { data } = await http.get<CulturaEstagioResponse[]>('/v1/culturas/ativos')
+    return data
+  },
+
+  async criarCultura(unidadeId: string, nome: string) {
+    const { data } = await http.post<CulturaEstagioResponse>('/v1/culturas', {
+      unidadeId,
+      nome,
+      ativo: true,
+    })
+    return data
+  },
+
+  async atualizarCulturas(participacaoId: string, culturaIds: string[]) {
+    const { data } = await http.put<VinculoEstagioAtividadeResponse>(
+      `/v1/vinculos-estagio/participacoes/${participacaoId}/culturas`,
+      { culturaIds },
+    )
     return data
   },
 }

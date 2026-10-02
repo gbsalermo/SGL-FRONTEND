@@ -123,7 +123,9 @@ identificador + senha preenchidos
 
 Senha ainda não é validada pelo backend de autenticação definitivo.
 
-A sessão mantém o contexto institucional do usuário, incluindo Unidade e Laboratório. O interceptor HTTP envia `X-SGL-Unidade-Id` para suportar o isolamento funcional atual.
+A sessão mantém atualmente Unidade e Laboratório por compatibilidade com o protótipo. O interceptor HTTP envia `X-SGL-Unidade-Id` para suportar o isolamento funcional atual.
+
+Para Estagiários, `laboratorioId/laboratorioNome` da sessão **não representam um laboratório operacional definitivo**. O contexto futuro será derivado das participações em Atividades.
 
 ---
 
@@ -174,6 +176,8 @@ cancelamento conforme estado
 ```
 
 Regras de baixa/FIFO/FEFO pertencem ao backend.
+
+Planejamento aprovado para Etapas 8–9: em Pedido de Estagiário, a interface passará a selecionar uma participação/Atividade aberta; Projeto/Laboratório serão derivados pelo backend. A tela da Gestão lerá o mesmo contexto no mesmo Pedido.
 
 ---
 
@@ -281,22 +285,48 @@ Sem QR visual na implementação atual.
 
 # 10. Estagiários
 
+**Estado atual:** o backend dos blocos 6.1–6.3 está concluído e validado; a tela atual ainda é compatibilidade até a integração do 6.5.
+
+A versão alvo deve representar:
+
+```text
+vínculo
+├── Formação
+├── Curso
+├── treinamento de segurança
+└── participações
+    ├── Atividade / SCI / Projeto / Laboratório
+    └── Culturas
+```
+
 ```text
 /estagiarios
 ```
 
-Cobertura:
+Cobertura atual:
 
 ```text
 listar
-cadastrar
-editar
-Unidade/Laboratório
-período
-tipo de vínculo
-encerrar
+consultar vínculo institucional
+exibir período/situação sincronizados
+exibir Formação/Curso/treinamento
+exibir participações/Atividades/Culturas
+associar contexto operacional quando permitido
 indicadores de prazo
 ```
+
+Evolução aprovada para o 6.5:
+
+```text
+Estagiário
+→ vínculo
+→ participações em Atividades
+→ cada participação mostra Projeto/Laboratório derivados
+```
+
+A interface deve remover a noção de um único "Laboratório do Estagiário" como atributo definitivo.
+
+O backend 6.4 foi validado em 02/10/2026 e a adequação visual do 6.5 foi implementada. A tela agora exibe preview operacional na listagem e detalhes completos em drawer; validação visual/local permanece pendente. O drawer foi ampliado para 860 px e a densidade vertical das linhas foi aproximada do padrão de Gestão para melhorar a leitura em zoom 100%. A listagem principal foi simplificada para Status, Estagiário/Responsável, Formação/Curso, Contexto operacional e Período; Bolsa/modalidade permanece como detalhe no drawer.
 
 ---
 
@@ -474,3 +504,12 @@ Projetos — visão principal
 
 A tela atual de Projetos em Administração permanece como CRUD compatível durante a transição.
 
+
+
+**Ações operacionais do drawer de Estagiários:** Associar atividade; Registrar treinamento; Gerenciar culturas por participação ativa. Os modais operacionais seguem a referência de Resíduos (620 px comum; header/footer 24×30; conteúdo 26×30; controles 45 px).
+
+
+**Drawer de Estagiários — edição híbrida:** `Editar vínculo` — Formação, Curso, Bolsa/modalidade, Orientador e período; `Associar atividade`; `Registrar treinamento`; `Gerenciar culturas`. O fim previsto é obrigatório e o vínculo finalizado permanece somente leitura.
+
+
+**Drawer consolidado 6.5:** Ações operacionais no topo; Bolsa/Vínculo + histórico em um único card; Formação; Orientador; Participações; Observações. Treinamento é ação confirmável e reversível/auditável. Observações podem ser adicionadas pelo Gestor/Admin. O modal de Culturas permite criar nova Cultura da Unidade durante a associação.

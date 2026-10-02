@@ -3,7 +3,7 @@
 **Etapa:** 1 — Padronização e refinamento visual global  
 **Estado:** ✅ Etapa 1 concluída e validada  
 **Data de fechamento:** 10/09/2026  
-**Observação de continuidade:** este documento registra as decisões e a execução histórica da Etapa 1. A Etapa 2 — Dark Mode definitivo — também já foi concluída; a etapa atual do projeto é a Etapa 3 — refinamentos do fluxo de Resíduos.
+**Observação de continuidade:** este documento nasceu na Etapa 1 e permanece como referência visual canônica. Refinamentos aprovados nas etapas posteriores devem ser incorporados aqui quando passam a ser padrão reutilizável. Última consolidação: 02/10/2026, incorporando medidas amadurecidas em Resíduos e reutilizadas em Estagiários 6.5.
 
 Este documento registra as decisões oficiais fechadas na subetapa 1.1 e acompanha a implementação da Etapa 1 de pré-produção. Ele não redefine a identidade visual original do SGL; consolida os valores e regras que devem orientar as próximas subetapas sem quebrar o MVP funcional já aprovado.
 
@@ -442,3 +442,68 @@ Como a Etapa 1 está encerrada, estas regras passam a funcionar como critérios 
 5. preservar a arquitetura definitiva do Dark Mode fechada na Etapa 2 e não recriar soluções provisórias;
 6. comparar mudanças com o padrão já aprovado e evitar regressões funcionais;
 7. registrar novas decisões visuais no documento da etapa correspondente antes de espalhá-las pela aplicação.
+
+---
+
+## 17. Padrão operacional consolidado de drawers e modais — 02/10/2026
+
+Os refinamentos de legibilidade validados no módulo de Resíduos passaram a ser referência para novas telas e para interfaces revisitadas.
+
+### 17.1 Drawer de detalhes
+
+```text
+largura padrão            760 px
+largura ampla             860 px quando o conteúdo exigir múltiplos blocos operacionais
+header                     24 px vertical / 30 px horizontal
+conteúdo                   28 px topo / 30 px horizontal / 42 px base
+título                     23 px / line-height 1.2
+texto do header            11 px
+título interno             11.5 px
+valor de detalhe           ~12.5 px
+texto auxiliar             10–10.5 px
+botão fechar               40 × 40 px
+```
+
+A largura ampla não cria uma nova família visual: ela mantém tipografia, espaçamento, raios, bordas e comportamento do drawer padrão, alterando apenas a largura quando a quantidade de informação justifica.
+
+### 17.2 Modal operacional
+
+```text
+largura comum              620 px
+largura grande             920 px
+header/footer              24 px vertical / 30 px horizontal
+conteúdo                   26 px vertical / 30 px horizontal
+título                     23 px / line-height 1.2
+label                      10.5 px
+controle                   45 px de altura
+texto de controle          12.5 px
+botões                     ~41 px de altura
+```
+
+Esses valores estão representados por tokens em `src/styles/tokens.css` e devem ser preferidos em novas implementações.
+
+### 17.3 Cards de resumo/KPI
+
+Quando o card resume estados diferentes:
+
+- superfície e borda permanecem neutras por padrão;
+- um ponto/ícone pequeno pode manter a cor semântica do estado;
+- se houver hover, a superfície/borda pode assumir discretamente a mesma família de cor;
+- não manter o card inteiro colorido apenas para decoração;
+- cores semânticas continuam significando sucesso, atenção, informação, erro ou neutralidade.
+
+### 17.4 Legibilidade
+
+A escala histórica da Etapa 1 continua válida como objetivo global. Em tabelas densas, labels auxiliares podem usar a escala operacional amadurecida em Resíduos, mas texto funcional não deve ser reduzido apenas para fazer conteúdo caber.
+
+Ao revisar uma tela existente:
+
+```text
+PADRAO_VISUAL_PRE_PRODUCAO.md
+→ tokens.css
+→ foundation.css
+→ referência madura mais próxima (hoje: Resíduos)
+→ CSS local apenas para exceções reais
+```
+
+Novos efeitos ou medidas que forem aprovados como reutilizáveis devem voltar para este documento e, quando aplicável, para os tokens compartilhados.

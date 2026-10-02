@@ -6,9 +6,13 @@
 **Última atualização:** 24/09/2026  
 **Branch estável:** `main` do GitLab institucional  
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
-**Branch atual de trabalho:** `collab/etapa-5-projetos-atividades`  
-**Etapa concluída:** Etapa 5 — Projetos e Atividades ✅  
-**Próxima etapa:** Etapa 6 — Estagiários e vínculos ⏳  
+**Branch atual de trabalho:** `collab/etapa-6-estagiarios-vinculos`  
+**Etapa concluída:** Etapa 6 — Estagiários e Vínculos ✅  
+**Próxima etapa:** Etapa 7 — Relatórios consolidados ⏳
+
+**Ajuste de legibilidade do 6.5:** linhas da tabela de Estagiários foram ampliadas para a densidade das telas maduras de Gestão e o drawer detalhado passou para 860 px por conter vínculo, Formação, segurança, participações e histórico. A massa DEV da Unidade IQ foi ampliada no backend para validar os previews.
+
+**Polimento de informação do 6.5:** a tabela passou a priorizar os campos que o cliente já consulta diretamente: `Status`, `Estagiário`, `Formação`, `Contexto operacional` e `Período`. Bolsa/modalidade saiu da listagem e ficou no drawer. `Não iniciado` é um status visual derivado apenas quando o vínculo existe e ainda nunca teve participação em Atividade; `Prorrogado`, `Em andamento` e `Encerrado` permanecem visíveis na coluna de Status. O nome do Orientador aparece abaixo do Estagiário e Curso abaixo de Formação.  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
@@ -141,7 +145,7 @@ PESQUISADOR
 ESTAGIARIO
 ```
 
-A sessão DEV contém:
+A sessão DEV contém atualmente:
 
 ```text
 unidadeId
@@ -158,6 +162,8 @@ X-SGL-Unidade-Id: <unidadeId>
 ```
 
 Esse mecanismo garante contexto funcional de Unidade em desenvolvimento, mas não substitui autenticação/autorização definitiva.
+
+**Decisão estrutural de 01/10/2026:** `laboratorioId/laboratorioNome` permanecem na sessão DEV apenas por compatibilidade enquanto o fluxo atual existir. Para Estagiários, esses campos não representam um "Laboratório do Estagiário" definitivo. O contexto operacional será derivado de suas participações em Atividades.
 
 ---
 
@@ -347,7 +353,7 @@ Estado frontend consolidado:
 - Dashboard da Gestão combina movimentações de estoque e eventos operacionais de Resíduos da Unidade;
 - cancelados são tratados em Meus Resíduos, Gestão, relatórios e rótulo.
 
-A **Etapa 5 — Projetos e Atividades está concluída e validada**. A próxima etapa é **Etapa 6 — Estagiários e vínculos**.
+A **Etapa 5 — Projetos e Atividades está concluída e validada**. A **Etapa 6 — Estagiários e vínculos** está em andamento; o backend dos blocos 6.1–6.4 está concluído e validado e o 6.5 foi implementado no frontend, aguardando validação visual/local.
 
 
 ## Decisões da Etapa 5 que afetam o frontend
@@ -359,6 +365,33 @@ Projeto
 ```
 
 Projeto é o eixo operacional principal. Laboratório continua contexto/filtro e laboratório responsável, mas a interface não obriga mais o usuário a entrar em Laboratório para acessar Projeto.
+
+## Decisão da Etapa 6 que afeta Estagiários e Pedidos
+
+O Estagiário pode possuir múltiplas participações em Atividades, inclusive em Projetos/Laboratórios diferentes dentro da mesma Unidade.
+
+```text
+Estagiario
+→ VinculoEstagio
+→ participações
+   ├── Atividade A → Projeto A → Laboratório A
+   └── Atividade B → Projeto B → Laboratório B
+```
+
+Consequências para o frontend:
+
+- não tratar `usuario.laboratorioId` como contexto operacional definitivo do Estagiário;
+- no bloco 6.5, remover a legenda/atributo visual de um único "Laboratório do Estagiário";
+- exibir Atividade/Projeto/Laboratório por participação;
+- na evolução de Pedidos, o Estagiário escolherá uma participação/Atividade aberta;
+- Projeto/Laboratório serão derivados pelo backend;
+- Solicitante e Gestão continuarão exibindo o mesmo Pedido, vindo da mesma API/fonte de verdade.
+
+Para solicitantes não Estagiários:
+
+- TECNICO/ANALISTA/PESQUISADOR com Projeto escolhem o Projeto; o backend deriva o Laboratório;
+- sem Projeto, o contexto base continua vindo de `Usuario.laboratorio`;
+- a UI não deve oferecer Projeto e Laboratório como escolhas independentes quando o Projeto já determina o Laboratório.
 
 Código SEG será exibido como dado institucional:
 
@@ -380,8 +413,8 @@ O CRUD atual de Projeto em Administração permanece funcional até o bloco **5.
 Etapa 5 — Projetos + Atividades
 Etapa 6 — Estagiários + vínculos
 Etapa 7 — relatórios consolidados
-Etapa 8 — unidades + Soluções
-Etapa 9 — Pedidos + Soluções
+Etapa 8 — unidades + Soluções + contexto operacional
+Etapa 9 — Pedidos + Soluções + participação do Estagiário
 Etapa 10 — rótulos + impressão operacional
 Etapa 11 — Manual + delete lógico
 Etapa 12 — testes automatizados frontend
@@ -407,7 +440,7 @@ Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
 Etapa 5 — Projetos e Atividades                       ✅ concluída e validada
-Etapa 6 — Estagiários e vínculos                      ⏳ próxima
+Etapa 6 — Estagiários e vínculos                      ✅ concluída e validada
 Etapas 7 a 13                                         ⏳
 ```
 
@@ -415,7 +448,7 @@ Etapas 7 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**As Etapas 1–5 estão concluídas e validadas. Após o merge da branch `collab/etapa-5-projetos-atividades`, retomar pela Etapa 6 — Estagiários e vínculos em branch própria criada sobre a `main` sincronizada.**
+**As Etapas 1–6 estão concluídas e validadas. A próxima etapa é a 7 — Relatórios consolidados. O frontend de Estagiários está estabilizado com Formação/Curso/treinamento por vínculo, Culturas por participação e Atividade/Projeto/Laboratório por contexto, sem um único laboratório como atributo definitivo do Estagiário.**
 
 ### Estado frontend do 4.4
 
@@ -567,3 +600,104 @@ Pontos finais aprovados:
 - decisões da Etapa 7 sobre Projetos e síntese Movimentações/Resumo registradas.
 
 Após merge, a retomada deve ocorrer pela Etapa 6.
+
+
+**Polimento final da interface principal:** tipografia geral da listagem/filtros/cards foi ampliada para melhorar leitura em zoom 100%. Os quatro cards-resumo ficam neutros por padrão e usam a cor correspondente apenas no hover, preservando as bolinhas como indicador permanente. Não há novas informações planejadas para a interface principal nesta rodada; próximos ajustes ficam restritos à validação visual e ao drawer.
+
+
+### Ações operacionais iniciadas no drawer — 02/10/2026
+
+- `Associar atividade` abre modal operacional e usa `POST /v1/vinculos-estagio/{vinculoId}/atividades`;
+- `Registrar treinamento` usa o endpoint específico de conclusão de treinamento;
+- `Gerenciar culturas` fica disponível nas participações ativas e substitui o conjunto de Culturas pelo endpoint específico;
+- período da tabela/drawer mostra `início → fim original` e, quando o backend possui histórico de prorrogação, `Prorrogado até <nova data>`;
+- vínculo sem qualquer participação continua `Não iniciado`; vínculo com participações históricas, porém nenhuma ativa, permanece no status institucional e informa `Sem atividade ativa`.
+- tipografia e espaçamento interno do drawer/modais foram alinhados à referência madura de Resíduos.
+
+
+### Modelo híbrido do vínculo — 02/10/2026
+
+O drawer de Estagiários passou a permitir edição local de Formação, Curso, Bolsa/modalidade, Orientador e período. A integração institucional continua prioritária por campo: quando enviar um valor, ele prevalece; quando não enviar, o valor mantido no SGL permanece.
+
+A ação `Editar vínculo` usa `PUT /v1/vinculos-estagio/{vinculoId}`. Vínculos finalizados permanecem somente leitura. Início e fim previsto são obrigatórios; a interface não permite salvar estágio sem término predeterminado.
+
+
+### Projetos ↔ Estagiários após a Etapa 6
+
+Refinamento futuro já decidido: no hub de Projetos, cada Atividade deverá mostrar também os Estagiários associados a ela, além do responsável já exibido. A informação deve vir das participações `VinculoEstagioAtividade`; não criar relação visual ou contratual artificial diretamente entre Projeto e Estagiário. Implementar somente após o fechamento da Etapa 6.
+
+
+### Drawer consolidado do 6.5 — 02/10/2026
+
+O drawer de Estagiários foi reorganizado para:
+
+1. Ações operacionais;
+2. Bolsa / Vínculo + histórico;
+3. Formação;
+4. Orientador;
+5. Participações em Atividades;
+6. Observações.
+
+Refinamentos implementados:
+
+- numeração/separadores de seção ampliados;
+- treinamento integrado às Ações operacionais;
+- conclusão/reversão de treinamento passa por modal de confirmação;
+- observação opcional de treinamento aparece no histórico de Observações;
+- Gestor/Admin pode adicionar observação operacional;
+- observações existentes de vínculo e participação também aparecem no bloco;
+- Participações ganharam tipografia maior;
+- Gerenciar Culturas permite criar uma Cultura da Unidade sem sair do modal, selecionando-a para associação;
+- `BOLSA / VÍNCULO` reúne bolsa vigente/último vínculo e histórico no mesmo card.
+
+Implementação publicada, ainda pendente de validação manual/automática no 6.6.
+
+### Polimento adicional do drawer 6.5 — 02/10/2026
+
+Após a validação visual do drawer de Estagiários:
+
+- corrigido o layout de `Participações em atividades`, que estava distribuindo os pares SCI/Projeto e Laboratório/Culturas em colunas incorretas e provocando sobreposição de textos;
+- o `até` dentro do histórico/drawer deixou de usar negrito; o destaque permanece reservado à listagem principal;
+- participações ativas agora oferecem `Editar participação`, `Gerenciar culturas` e `Encerrar participação`;
+- `Editar participação` permite corrigir Atividade, data de início e observação, preservando as Culturas já associadas;
+- `Encerrar participação` usa o fluxo histórico já existente e mantém a regra de não encerrar a última participação ativa enquanto o vínculo institucional estiver em andamento;
+- o campo Curso do modal `Editar vínculo` ganhou `Outro / adicionar novo curso`; ao informar um novo nome, o frontend cria o registro no catálogo da Unidade e usa o novo Curso no vínculo;
+- nenhuma migration adicional foi necessária para este polimento.
+
+A validação final de build/suíte continua reservada ao bloco 6.6.
+
+### Refinamento 6.5 — atividade e bolsa — 02/10/2026
+
+- Ações operacionais agora incluem `Editar bolsa` e `Encerrar atividade`.
+- `Editar vínculo` mostra Bolsa/modalidade somente para leitura.
+- `Editar bolsa` recebe nova modalidade, data inicial e data final prevista; a ocorrência anterior permanece no histórico.
+- `Encerrar atividade` pode ser acionado no topo do drawer ou no card da participação.
+- participações ativas exibem como término previsto a data final da Atividade; quando ausente, usam a data final do Projeto em vez de mostrar apenas `atual`.
+- nos selects de associação/edição, o contexto aparece como `Projeto: <nome>`.
+- validação formal de build/suíte continua reservada ao 6.6.
+
+### Correção do modal de Bolsa — 02/10/2026
+
+- `Editar bolsa` agora oferece dois modos: `Prorrogar bolsa atual` e `Registrar nova bolsa`.
+- prorrogação pede apenas a nova data final prevista e mantém a ocorrência vigente;
+- nova bolsa pede modalidade, data inicial e data final prevista; a data inicial local pode ser hoje ou anterior;
+- o grid das datas foi alinhado para manter os dois campos no mesmo eixo;
+- o separador `até` dentro do card `Bolsa vigente` do drawer deixou de usar negrito, sem alterar o tratamento da interface principal;
+- o fluxo de nova bolsa foi ajustado para aceitar corretamente a troca na data atual mesmo quando há participações registradas no ponto de corte.
+
+### Fechamento da Etapa 6 — 02/10/2026
+
+Validação funcional, visual e automatizada confirmada 100%.
+
+Estado final:
+- listagem e drawer consolidados;
+- ações operacionais aprovadas;
+- Bolsa/Vínculo com histórico, prorrogação, nova bolsa, especificação/referência e edição de referência vigente;
+- Formação/Curso e Orientador integrados;
+- múltiplas participações em Atividades;
+- edição/encerramento de participação;
+- Culturas por participação;
+- observações e treinamento auditáveis;
+- frontend pronto para merge da Etapa 6.
+
+**Próxima frente: Etapa 7 — Relatórios consolidados.**

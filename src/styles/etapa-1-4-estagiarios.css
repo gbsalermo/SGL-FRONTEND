@@ -96,7 +96,7 @@ body.sgl-light-active .gestao-main .intern-page .metrics-grid article.danger {
 
 body.sgl-light-active .gestao-main .intern-page .metrics-grid span {
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-label);
+  font-size: 13px;
   font-weight: var(--sgl-font-weight-semibold);
   text-transform: none;
 }
@@ -110,7 +110,7 @@ body.sgl-light-active .gestao-main .intern-page .metrics-grid strong {
 body.sgl-light-active .gestao-main .intern-page .metrics-grid small {
   margin-top: var(--sgl-space-1);
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-helper);
+  font-size: 12px;
   line-height: var(--sgl-line-height-body);
 }
 
@@ -142,7 +142,7 @@ body.sgl-light-active .gestao-main .intern-page .field {
 body.sgl-light-active .gestao-main .intern-page .field > span,
 body.sgl-light-active .gestao-main .intern-page .unit-readonly span {
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-label);
+  font-size: 11.5px;
   font-weight: var(--sgl-font-weight-semibold);
   text-transform: none;
 }
@@ -154,7 +154,7 @@ body.sgl-light-active .gestao-main .intern-page .field select {
   border-color: var(--sgl-border-strong);
   border-radius: var(--sgl-radius-control);
   color: var(--sgl-text);
-  font-size: var(--sgl-font-body);
+  font-size: 14px;
 }
 
 body.sgl-light-active .gestao-main .intern-page .field textarea {
@@ -176,7 +176,7 @@ body.sgl-light-active .gestao-main .intern-page .filter-summary {
   padding: var(--sgl-space-3) var(--sgl-space-4);
   border-color: var(--sgl-border);
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-helper);
+  font-size: 11.5px;
 }
 
 body.sgl-light-active .gestao-main .intern-page .filter-summary button {
@@ -195,26 +195,26 @@ body.sgl-light-active .gestao-main .intern-page th {
   padding: var(--sgl-space-3) var(--sgl-space-4);
   background: var(--sgl-surface-soft);
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-helper);
+  font-size: 11.5px;
   font-weight: var(--sgl-font-weight-bold);
 }
 
 body.sgl-light-active .gestao-main .intern-page td {
-  padding: var(--sgl-space-4);
+  padding: 18px 16px;
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-label);
+  font-size: 13.5px;
   line-height: var(--sgl-line-height-body);
 }
 
 body.sgl-light-active .gestao-main .intern-page td strong {
   color: var(--sgl-text);
-  font-size: var(--sgl-font-label);
+  font-size: 13.5px;
 }
 
 body.sgl-light-active .gestao-main .intern-page td small {
-  margin-top: var(--sgl-space-1);
+  margin-top: 6px;
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-helper);
+  font-size: 11.5px;
 }
 
 body.sgl-light-active .gestao-main .intern-page tbody tr {
@@ -230,10 +230,10 @@ body.sgl-light-active .gestao-main .intern-page .actions-column {
 }
 
 body.sgl-light-active .gestao-main .intern-page .status-pill {
-  min-height: 26px;
+  min-height: 28px;
   align-items: center;
-  padding: 0 10px;
-  font-size: var(--sgl-font-helper);
+  padding: 0 11px;
+  font-size: 11.5px;
 }
 
 body.sgl-light-active .gestao-main .intern-page .status-pill--active {
@@ -248,7 +248,7 @@ body.sgl-light-active .gestao-main .intern-page .status-pill--closed {
 
 /* Drawer e modais */
 body.sgl-light-active .gestao-main .intern-page .detail-drawer {
-  width: min(760px, 96vw);
+  width: min(860px, 96vw);
   background: var(--sgl-surface);
 }
 
@@ -415,4 +415,242 @@ body.sgl-light-active .gestao-main .intern-page textarea:focus-visible {
     transition-duration: .01ms !important;
     animation-duration: .01ms !important;
   }
+}
+
+
+/* Etapa 6.5 — polimento de leitura da tabela */
+body.sgl-light-active .gestao-main .intern-page .status-pill--pending {
+  background: #FFF5DC;
+  color: #AA7200;
+}
+
+body.sgl-light-active .gestao-main .intern-page .status-pill--extended {
+  background: #E4EFFF;
+  color: #2A66B7;
+}
+
+body.sgl-light-active .gestao-main .intern-page .status-reason,
+body.sgl-light-active .gestao-main .intern-page .student-responsible,
+body.sgl-light-active .gestao-main .intern-page .formation-cell small,
+body.sgl-light-active .gestao-main .intern-page .context-empty-text,
+body.sgl-light-active .gestao-main .intern-page .history-preview {
+  color: var(--sgl-text-muted);
+}
+
+body.sgl-light-active .gestao-main .intern-page .formation-cell strong {
+  color: var(--sgl-text);
+}
+
+body.sgl-light-active .gestao-main .intern-page .context-item {
+  color: var(--sgl-text);
+}
+
+body.sgl-light-active .gestao-main .intern-page .context-icon {
+  stroke: var(--sgl-text-muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-light-active .gestao-main .intern-page .metric-card--success:hover {
+    border-color: #7BC89B;
+    background: #EEF8F1;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metric-card--warning:hover {
+    border-color: #E1BD58;
+    background: #FFF4D4;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metric-card--info:hover {
+    border-color: #78A9E9;
+    background: #EDF5FF;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metric-card:not(.metric-card--success):not(.metric-card--warning):not(.metric-card--info):hover {
+    border-color: #A9B5C4;
+    background: #F5F7FA;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page tbody tr:hover .history-preview {
+    color: #556477;
+  }
+}
+
+body.sgl-light-active .gestao-main .intern-page .metric-card--success,
+body.sgl-light-active .gestao-main .intern-page .metric-card--warning,
+body.sgl-light-active .gestao-main .intern-page .metric-card--info {
+  border-color: var(--sgl-border) !important;
+  background: var(--sgl-surface) !important;
+}
+
+
+/* Etapa 6.5 — drawer alinhado ao padrão consolidado de Resíduos */
+body.sgl-light-active .gestao-main .intern-page .detail-drawer > header {
+  gap: 20px;
+  padding: 24px 30px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-drawer header h2 {
+  font-size: 23px;
+  line-height: 1.2;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-drawer header p {
+  margin-top: 5px;
+  font-size: 11px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-content {
+  gap: 0;
+  padding: 28px 30px 42px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-content h3 {
+  margin-bottom: 11px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-grid span {
+  font-size: 9.5px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .detail-grid strong {
+  font-size: 12.5px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .observation {
+  font-size: 12.5px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .action-modal-card {
+  border-color: var(--sgl-border);
+  background: var(--sgl-surface);
+}
+
+body.sgl-light-active .gestao-main .intern-page .action-modal-card > header,
+body.sgl-light-active .gestao-main .intern-page .action-modal-card > footer {
+  border-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .intern-page .action-field input,
+body.sgl-light-active .gestao-main .intern-page .action-field select,
+body.sgl-light-active .gestao-main .intern-page .action-field textarea {
+  border-color: var(--sgl-border-strong);
+  background: var(--sgl-surface);
+  color: var(--sgl-text);
+}
+
+
+/* Etapa 6.5 — polimento final da listagem principal */
+body.sgl-light-active .gestao-main .intern-page .context-item,
+body.sgl-light-active .gestao-main .intern-page .context-empty-text,
+body.sgl-light-active .gestao-main .intern-page .history-preview {
+  font-size: 13px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .period-separator {
+  color: var(--sgl-text) !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+}
+
+body.sgl-light-active .gestao-main .intern-page .period-cell .extension-note {
+  color: #52657D !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+}
+
+body.sgl-light-active .gestao-main .intern-page tbody tr {
+  cursor: pointer;
+}
+
+body.sgl-light-active .gestao-main .intern-page tbody tr td {
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-light-active .gestao-main .intern-page .metric-card--success:hover {
+    border-color: #52B778 !important;
+    background: #EEF9F2 !important;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metric-card--warning:hover {
+    border-color: #D7A81D !important;
+    background: #FFF7DE !important;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metric-card--info:hover {
+    border-color: #4E83D7 !important;
+    background: #EDF4FF !important;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page .metric-card:not(.metric-card--success):not(.metric-card--warning):not(.metric-card--info):hover {
+    border-color: #8795A8 !important;
+    background: #F1F4F8 !important;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page tbody tr:hover td {
+    background: #EAF2FC !important;
+    border-color: #CAD9EC !important;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page tbody tr:hover td:first-child {
+    box-shadow: inset 4px 0 0 #4E7FBF;
+  }
+
+  body.sgl-light-active .gestao-main .intern-page tbody tr:hover .detail-action {
+    border-color: #8EACD2;
+    background: #F8FBFF;
+  }
+}
+
+
+/* Etapa 6.5 — drawer consolidado */
+body.sgl-light-active .gestao-main .intern-page .section-icon {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .participation-header strong {
+  font-size: 14px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .participation-card dt {
+  font-size: 10.5px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .participation-card dd {
+  font-size: 12.5px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .participation-period {
+  font-size: 11.5px;
+}
+
+body.sgl-light-active .gestao-main .intern-page .training-action--complete {
+  border-color: #8ACAA7;
+  background: #EEF9F2;
+  color: #247248;
+}
+
+body.sgl-light-active .gestao-main .intern-page .training-action--pending {
+  border-color: #D6BE79;
+  background: #FFF9E8;
+  color: #8A670C;
+}
+
+body.sgl-light-active .gestao-main .intern-page .observation-entry,
+body.sgl-light-active .gestao-main .intern-page .culture-create {
+  border-color: var(--sgl-border);
+}
+
+body.sgl-light-active .gestao-main .intern-page .observation-entry--training {
+  border-color: #CFE4D7;
+  background: #F4FBF6;
 }

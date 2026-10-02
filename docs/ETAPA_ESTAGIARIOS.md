@@ -1,5 +1,11 @@
 # Etapa Estagiários — Primeiro Protótipo SGL
 
+> **Evolução vigente — Etapa 6.5 (02/10/2026):** este documento preserva o primeiro protótipo como histórico. A rota `/estagiarios` agora usa o modelo de vínculos e participações do backend, com preview operacional na tabela e drawer detalhado. Edição/encerramento manual deixaram de ser ações principais, e Laboratório não é mais tratado como atributo operacional único do Estagiário.
+
+Na rodada de refinamento visual, o drawer de detalhes foi ampliado para 860 px e as linhas da tabela receberam maior altura/padding para manter legibilidade compatível com as demais telas de Gestão. A Unidade IQ recebeu massa DEV adicional no backend para exercitar todos os estados visuais.
+
+Na rodada seguinte de polimento, a hierarquia da tabela foi alinhada ao uso do cliente: Status concentra `Não iniciado`, `Em andamento`, `Prorrogado` e `Encerrado`, com motivo auxiliar abaixo; Estagiário mostra o Orientador/Responsável; Formação concentra nível e Curso; Contexto operacional ganhou ícones e maior legibilidade; Bolsa/modalidade ficou restrita ao drawer. `Não iniciado` só é usado quando o vínculo ainda não possui qualquer participação em Atividade.
+
 **Branch frontend:** `feat/estagiarios-v2`  
 **Branch backend:** `feat/estagiarios-v2`  
 **Base:** `main` atual, já contendo o módulo de Resíduos mergeado.
@@ -191,3 +197,49 @@ Validar localmente:
 ```
 
 Após esta validação, a etapa de **Estagiários + auditoria de vínculos do laboratório** pode ser encerrada e o roadmap segue para **Administração → Cadastros**.
+
+
+### Polimento final da listagem principal — 02/10/2026
+
+A tipografia da página, filtros e tabela foi ampliada para melhorar a legibilidade em zoom 100%. Os quatro cards-resumo passaram a usar superfície neutra/cinza por padrão; as cores verde, amarelo, azul e cinza permanecem nas bolinhas e entram no card apenas no hover. A composição informacional da interface principal foi considerada suficiente nesta rodada, ficando o restante do 6.5 concentrado em validação visual e detalhes do drawer.
+
+
+### Período e ações operacionais — 02/10/2026
+
+A coluna Período passou a usar `data inicial → data final original`; em vínculos prorrogados com histórico disponível, a nova data aparece abaixo como `Prorrogado até ...`. O drawer iniciou suas ações operacionais com Associação de Atividade, registro de treinamento de segurança e gestão de Culturas por participação. A massa IQ inclui também vínculo aberto que já teve participações, mas não possui atividade ativa, para validar a diferença entre `Não iniciado` e `Sem atividade ativa`.
+
+
+### Edição híbrida do vínculo — 02/10/2026
+
+Foi adicionada a ação `Editar vínculo` no drawer, com Formação, Curso, Bolsa/modalidade, Orientador, data inicial, data final prevista e observação. O SGL pode manter esses campos localmente, mas a sincronização institucional substitui o valor quando informar o mesmo campo.
+
+A data final prevista é obrigatória. Não há opção de estágio sem término previsto.
+
+O modal segue o padrão visual consolidado de Resíduos e vínculos finalizados não oferecem edição local.
+
+
+### Integração posterior com a tela de Projetos
+
+Depois do fechamento da Etapa 6, usar o vínculo `VinculoEstagioAtividade` também no sentido inverso para enriquecer a tela de Projetos: dentro de cada Atividade, manter o responsável atual e acrescentar os Estagiários associados. O desenho definitivo para participações atuais e históricas será fechado nessa rodada posterior.
+
+
+### Drawer final — ações, vínculo, observações e Culturas
+
+No polimento final do 6.5, o drawer passa a seguir:
+
+```text
+01 Ações operacionais
+02 Bolsa / Vínculo
+03 Formação
+04 Orientador
+05 Participações em Atividades
+06 Observações
+```
+
+Ações operacionais ficam no topo. O treinamento não possui seção própria: aparece como estado/ação, verde quando concluído, e qualquer mudança exige confirmação. É possível reverter uma conclusão; concluir e reverter geram eventos auditáveis no backend. Uma observação opcional pode acompanhar a alteração e é exibida em Observações.
+
+O bloco Observações reúne registros operacionais adicionados por Gestor/Admin e, quando existirem, observações do vínculo, participações e treinamento.
+
+O modal de Culturas permite selecionar Culturas ativas e criar uma nova Cultura para a Unidade sem sair do fluxo. A nova Cultura é selecionada automaticamente, mas a associação à participação só é confirmada ao salvar o modal.
+
+A escala de texto das Participações e os marcadores numéricos das seções foram ampliados para legibilidade em 100% de zoom.
