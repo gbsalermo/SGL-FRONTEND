@@ -954,6 +954,8 @@ onMounted(carregar)
         </header>
 
         <div class="action-modal-content">
+          <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
+
           <label class="action-field">
             <span>Atividade</span>
             <select v-model="atividadeSelecionadaId">
@@ -1011,6 +1013,8 @@ onMounted(carregar)
         </header>
 
         <div class="action-modal-content">
+          <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
+
           <p class="culture-guidance">
             Selecione as Culturas relacionadas a esta participação.
           </p>
@@ -1019,15 +1023,16 @@ onMounted(carregar)
             Nenhuma Cultura ativa disponível.
           </div>
 
-          <label
-            v-for="cultura in culturasDisponiveis"
-            v-else
-            :key="cultura.id"
-            class="culture-option"
-          >
-            <input v-model="culturasSelecionadas" type="checkbox" :value="cultura.id" />
-            <span>{{ cultura.nome }}</span>
-          </label>
+          <template v-else>
+            <label
+              v-for="cultura in culturasDisponiveis"
+              :key="cultura.id"
+              class="culture-option"
+            >
+              <input v-model="culturasSelecionadas" type="checkbox" :value="cultura.id" />
+              <span>{{ cultura.nome }}</span>
+            </label>
+          </template>
         </div>
 
         <footer>
@@ -1517,7 +1522,7 @@ tbody tr:hover .history-preview {
   display: flex;
   justify-content: space-between;
   gap: 18px;
-  padding: 28px 30px;
+  padding: 24px 30px;
   border-bottom: 1px solid #e2e8f0;
   background: #fff;
 }
@@ -1550,20 +1555,20 @@ tbody tr:hover .history-preview {
 }
 
 .drawer-header > button {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border: 0;
   border-radius: 50%;
   background: #f1f4f8;
   color: #34445a;
-  font-size: 22px;
+  font-size: 24px;
   cursor: pointer;
 }
 
 .detail-content {
   display: grid;
   gap: 0;
-  padding: 0 30px 38px;
+  padding: 28px 30px 42px;
 }
 
 .drawer-section {
@@ -1585,7 +1590,7 @@ tbody tr:hover .history-preview {
 .section-heading h3 {
   margin: 0;
   color: #17243a;
-  font-size: 11px;
+  font-size: 11.5px;
   text-transform: uppercase;
 }
 
@@ -1618,7 +1623,7 @@ tbody tr:hover .history-preview {
 
 .institutional-title > strong {
   color: #17243a;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .institutional-period {
@@ -1655,7 +1660,7 @@ tbody tr:hover .history-preview {
 .detail-grid span {
   display: block;
   color: #7b889a;
-  font-size: 8px;
+  font-size: 9.5px;
   font-weight: 850;
   text-transform: uppercase;
 }
@@ -1670,7 +1675,7 @@ tbody tr:hover .history-preview {
 .single-value {
   margin: 0;
   color: #2a3b52;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
 }
 
@@ -1721,9 +1726,9 @@ tbody tr:hover .history-preview {
 }
 
 .training-card small {
-  margin-top: 3px;
+  margin-top: 4px;
   color: #6f7e8f;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .drawer-empty {
@@ -1806,13 +1811,13 @@ tbody tr:hover .history-preview {
 
 .participation-card dt {
   color: #8290a2;
-  font-size: 9px;
+  font-size: 9.5px;
 }
 
 .participation-card dd {
   margin: 0;
   color: #43546b;
-  font-size: 9px;
+  font-size: 10.5px;
 }
 
 .participation-period {
@@ -1820,7 +1825,7 @@ tbody tr:hover .history-preview {
   gap: 6px;
   margin: 11px 0 0 17px;
   color: #7b889b;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .timeline {
@@ -1878,9 +1883,9 @@ tbody tr:hover .history-preview {
 }
 
 .timeline-item small {
-  margin-top: 3px;
+  margin-top: 4px;
   color: #8390a2;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .observation {
@@ -1889,8 +1894,224 @@ tbody tr:hover .history-preview {
   border-radius: 8px;
   background: #f7f9fc;
   color: #526278;
-  font-size: 10px;
+  font-size: 12.5px;
   line-height: 1.5;
+}
+
+
+.period-cell {
+  min-width: 230px;
+}
+
+.period-range {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.period-range > span {
+  color: #8a98aa;
+  font-size: 12px;
+}
+
+.extension-note {
+  margin-top: 7px !important;
+  color: #4f79b7 !important;
+  font-size: 10.5px !important;
+  font-weight: 700;
+}
+
+.drawer-extension-note {
+  color: #4f79b7 !important;
+}
+
+.drawer-feedback {
+  margin: 0 0 18px;
+}
+
+.feedback--success {
+  background: #eef9f2;
+  color: #26734a;
+}
+
+.operational-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.drawer-action {
+  min-height: 41px;
+  padding: 0 15px;
+  border: 1px solid #cbd7e6;
+  border-radius: 7px;
+  background: #fff;
+  color: #315174;
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.drawer-action--primary {
+  border-color: #2456c4;
+  background: #2456c4;
+  color: #fff;
+}
+
+.drawer-action:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.participation-actions {
+  margin: 12px 0 0 17px;
+}
+
+.participation-actions button {
+  min-height: 35px;
+  padding: 0 11px;
+  border: 1px solid #cbd7e6;
+  border-radius: 6px;
+  background: #fff;
+  color: #315174;
+  font: inherit;
+  font-size: 9.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.action-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(13 25 45 / 48%);
+}
+
+.action-modal-card {
+  width: min(100%, 620px);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgb(15 23 42 / 18%);
+}
+
+.action-modal-card > header,
+.action-modal-card > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 30px;
+}
+
+.action-modal-card > header {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.action-modal-card > footer {
+  justify-content: flex-end;
+  border-top: 1px solid #e2e8f0;
+}
+
+.action-modal-card > header span {
+  color: #748399;
+  font-size: 9.5px;
+  font-weight: 850;
+  letter-spacing: .05em;
+}
+
+.action-modal-card h2 {
+  margin: 9px 0 0;
+  color: #17243a;
+  font-size: 23px;
+  line-height: 1.2;
+}
+
+.action-modal-card header p {
+  margin: 5px 0 0;
+  color: #728095;
+  font-size: 11px;
+}
+
+.action-modal-card header > button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f4f8;
+  color: #34445a;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.action-modal-content {
+  display: grid;
+  gap: 18px;
+  padding: 26px 30px;
+}
+
+.action-field {
+  display: grid;
+  gap: 8px;
+}
+
+.action-field > span {
+  color: #66758a;
+  font-size: 10.5px;
+  font-weight: 750;
+}
+
+.action-field input,
+.action-field select,
+.action-field textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #fff;
+  color: #25364d;
+  font: inherit;
+  font-size: 12.5px;
+}
+
+.action-field input,
+.action-field select {
+  min-height: 45px;
+  padding: 0 12px;
+}
+
+.action-field textarea {
+  padding: 12px;
+  resize: vertical;
+}
+
+.culture-guidance {
+  margin: 0;
+  color: #66758a;
+  font-size: 10.5px;
+}
+
+.culture-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #e0e7ef;
+  border-radius: 7px;
+  color: #35475f;
+  font-size: 12.5px;
+}
+
+.culture-option input {
+  width: 16px;
+  height: 16px;
 }
 
 @media (hover: hover) and (pointer: fine) {
