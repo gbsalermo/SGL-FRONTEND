@@ -157,6 +157,7 @@ export interface AtualizarVinculoEstagioRequest {
 
 export interface NovaBolsaVinculoEstagioRequest {
   tipoBolsa: TipoBolsaEstagiario
+  especificacaoBolsa?: string | null
   dataInicio: string
   dataFimPrevista: string
 }
