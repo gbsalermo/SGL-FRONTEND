@@ -600,3 +600,6 @@ Pontos finais aprovados:
 - decisões da Etapa 7 sobre Projetos e síntese Movimentações/Resumo registradas.
 
 Após merge, a retomada deve ocorrer pela Etapa 6.
+
+
+**Polimento final da interface principal:** tipografia geral da listagem/filtros/cards foi ampliada para melhorar leitura em zoom 100%. Os quatro cards-resumo ficam neutros por padrão e usam a cor correspondente apenas no hover, preservando as bolinhas como indicador permanente. Não há novas informações planejadas para a interface principal nesta rodada; próximos ajustes ficam restritos à validação visual e ao drawer.
