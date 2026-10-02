@@ -1,5 +1,7 @@
 # Etapa Estagiários — Primeiro Protótipo SGL
 
+> **Evolução vigente — Etapa 6.5 (02/10/2026):** este documento preserva o primeiro protótipo como histórico. A rota `/estagiarios` agora usa o modelo de vínculos e participações do backend, com preview operacional na tabela e drawer detalhado. Edição/encerramento manual deixaram de ser ações principais, e Laboratório não é mais tratado como atributo operacional único do Estagiário.
+
 **Branch frontend:** `feat/estagiarios-v2`  
 **Branch backend:** `feat/estagiarios-v2`  
 **Base:** `main` atual, já contendo o módulo de Resíduos mergeado.
