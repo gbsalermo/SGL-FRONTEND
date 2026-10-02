@@ -665,3 +665,13 @@ Após a validação visual do drawer de Estagiários:
 - nenhuma migration adicional foi necessária para este polimento.
 
 A validação final de build/suíte continua reservada ao bloco 6.6.
+
+### Refinamento 6.5 — atividade e bolsa — 02/10/2026
+
+- Ações operacionais agora incluem `Editar bolsa` e `Encerrar atividade`.
+- `Editar vínculo` mostra Bolsa/modalidade somente para leitura.
+- `Editar bolsa` recebe nova modalidade, data inicial e data final prevista; a ocorrência anterior permanece no histórico.
+- `Encerrar atividade` pode ser acionado no topo do drawer ou no card da participação.
+- participações ativas exibem como término previsto a data final da Atividade; quando ausente, usam a data final do Projeto em vez de mostrar apenas `atual`.
+- nos selects de associação/edição, o contexto aparece como `Projeto: <nome>`.
+- validação formal de build/suíte continua reservada ao 6.6.
