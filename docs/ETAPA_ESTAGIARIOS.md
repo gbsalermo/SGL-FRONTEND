@@ -197,3 +197,8 @@ Validar localmente:
 ```
 
 Após esta validação, a etapa de **Estagiários + auditoria de vínculos do laboratório** pode ser encerrada e o roadmap segue para **Administração → Cadastros**.
+
+
+### Polimento final da listagem principal — 02/10/2026
+
+A tipografia da página, filtros e tabela foi ampliada para melhorar a legibilidade em zoom 100%. Os quatro cards-resumo passaram a usar superfície neutra/cinza por padrão; as cores verde, amarelo, azul e cinza permanecem nas bolinhas e entram no card apenas no hover. A composição informacional da interface principal foi considerada suficiente nesta rodada, ficando o restante do 6.5 concentrado em validação visual e detalhes do drawer.
