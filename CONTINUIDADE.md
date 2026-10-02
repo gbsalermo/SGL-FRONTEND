@@ -6,9 +6,9 @@
 **Última atualização:** 24/09/2026  
 **Branch estável:** `main` do GitLab institucional  
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
-**Branch atual de trabalho:** `collab/etapa-5-projetos-atividades`  
-**Etapa concluída:** Etapa 5 — Projetos e Atividades ✅  
-**Etapa atual:** Etapa 6 — Estagiários e vínculos 🔧 — backend 6.1–6.4 concluído e validado; frontend 6.5 implementado, validação pendente
+**Branch atual de trabalho:** `collab/etapa-6-estagiarios-vinculos`  
+**Etapa concluída:** Etapa 6 — Estagiários e Vínculos ✅  
+**Próxima etapa:** Etapa 7 — Relatórios consolidados ⏳
 
 **Ajuste de legibilidade do 6.5:** linhas da tabela de Estagiários foram ampliadas para a densidade das telas maduras de Gestão e o drawer detalhado passou para 860 px por conter vínculo, Formação, segurança, participações e histórico. A massa DEV da Unidade IQ foi ampliada no backend para validar os previews.
 
@@ -440,7 +440,7 @@ Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
 Etapa 5 — Projetos e Atividades                       ✅ concluída e validada
-Etapa 6 — Estagiários e vínculos                      🔧 backend 6.1–6.4 validado; frontend 6.5 implementado, validação pendente
+Etapa 6 — Estagiários e vínculos                      ✅ concluída e validada
 Etapas 7 a 13                                         ⏳
 ```
 
@@ -448,7 +448,7 @@ Etapas 7 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**As Etapas 1–5 estão concluídas e validadas. Na Etapa 6, os blocos backend 6.1–6.4 estão concluídos e validados; o 6.5 foi implementado no frontend e agora precisa de validação visual/local. A interface não deve oferecer prorrogação/encerramento manual do estágio como fonte normal de verdade; deve refletir o estado recebido do backend/instituição. O frontend integrado deve refletir Formação/Curso/treinamento por vínculo e Culturas por participação, além de Atividade/Projeto/Laboratório por contexto, sem apresentar um único laboratório como atributo definitivo.**
+**As Etapas 1–6 estão concluídas e validadas. A próxima etapa é a 7 — Relatórios consolidados. O frontend de Estagiários está estabilizado com Formação/Curso/treinamento por vínculo, Culturas por participação e Atividade/Projeto/Laboratório por contexto, sem um único laboratório como atributo definitivo do Estagiário.**
 
 ### Estado frontend do 4.4
 
@@ -684,3 +684,20 @@ A validação final de build/suíte continua reservada ao bloco 6.6.
 - o grid das datas foi alinhado para manter os dois campos no mesmo eixo;
 - o separador `até` dentro do card `Bolsa vigente` do drawer deixou de usar negrito, sem alterar o tratamento da interface principal;
 - o fluxo de nova bolsa foi ajustado para aceitar corretamente a troca na data atual mesmo quando há participações registradas no ponto de corte.
+
+### Fechamento da Etapa 6 — 02/10/2026
+
+Validação funcional, visual e automatizada confirmada 100%.
+
+Estado final:
+- listagem e drawer consolidados;
+- ações operacionais aprovadas;
+- Bolsa/Vínculo com histórico, prorrogação, nova bolsa, especificação/referência e edição de referência vigente;
+- Formação/Curso e Orientador integrados;
+- múltiplas participações em Atividades;
+- edição/encerramento de participação;
+- Culturas por participação;
+- observações e treinamento auditáveis;
+- frontend pronto para merge da Etapa 6.
+
+**Próxima frente: Etapa 7 — Relatórios consolidados.**
