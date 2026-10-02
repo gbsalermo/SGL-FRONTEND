@@ -69,6 +69,14 @@ export const estagiarioService = {
     return data
   },
 
+  async atualizarReferenciaBolsa(vinculoId: string, referencia: string) {
+    const { data } = await http.put<VinculoEstagioResponse>(
+      `/v1/vinculos-estagio/${vinculoId}/referencia-bolsa`,
+      { referencia },
+    )
+    return data
+  },
+
   async prorrogarBolsa(
     vinculoId: string,
     payload: ProrrogarBolsaVinculoEstagioRequest,
