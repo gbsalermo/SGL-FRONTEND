@@ -53,6 +53,7 @@ export interface VinculoEstagioResponse {
   orientadorNome: string | null
   dataInicio: string
   dataFimPrevista: string | null
+  dataFimPrevistaOriginal: string | null
   dataFimEfetiva: string | null
   tipoBolsa: TipoBolsaEstagiario
   situacao: SituacaoEstagio
@@ -97,6 +98,28 @@ export interface EstagiarioRequest {
   tipoBolsa: TipoBolsaEstagiario
   observacao: string | null
   ativo: boolean | null
+}
+
+
+export interface AtividadeDisponivelEstagioResponse {
+  id: string
+  sciId: string | null
+  sciNome: string | null
+  projetoId: string | null
+  projetoNome: string | null
+  codigoSeg: string
+  nome: string
+  responsavel: string
+  dataInicio: string
+  dataFim: string | null
+  ativo: boolean
+}
+
+export interface VinculoEstagioAtividadeRequest {
+  atividadeId: string
+  dataInicioParticipacao: string
+  observacao?: string | null
+  culturaIds?: string[]
 }
 
 export interface ApiErrorResponse {
