@@ -2,121 +2,109 @@
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 
-import type { UsuarioSessao } from '@/modules/auth/types/session'
 import { estagiarioService } from '@/modules/estagiarios/services/estagiarioService'
 import type {
   ApiErrorResponse,
-  EstagiarioRequest,
   EstagiarioResponse,
+  FormacaoEstagiario,
+  SituacaoEstagio,
   TipoBolsaEstagiario,
+  VinculoEstagioAtividadeResponse,
+  VinculoEstagioResponse,
 } from '@/modules/estagiarios/types/estagiario'
-import { http } from '@/services/http'
 
-type FiltroStatus = 'TODOS' | 'ATIVOS' | 'ENCERRADOS'
-type ModoFormulario = 'CRIAR' | 'EDITAR'
-
-interface LaboratorioOpcao {
-  id: string
-  unidadeId: string | null
-  nome: string
-  ativo: boolean
-}
-
-interface FormularioEstagiario {
-  usuarioId: string
-  laboratorioId: string
-  dataInicioEstagio: string
-  dataFimEstagio: string
-  tipoBolsa: TipoBolsaEstagiario
-  observacao: string
-}
+type FiltroStatus = 'TODOS' | 'OPERACIONAL' | 'SEM_ATIVIDADE' | 'ENCERRADO'
+type EstadoOperacional = Exclude<FiltroStatus, 'TODOS'>
 
 const estagiarios = ref<EstagiarioResponse[]>([])
-const usuarios = ref<UsuarioSessao[]>([])
-const laboratoriosCadastro = ref<LaboratorioOpcao[]>([])
 const carregando = ref(false)
-const salvando = ref(false)
-const encerrando = ref(false)
 const erro = ref('')
-const sucesso = ref('')
 const busca = ref('')
 const filtroStatus = ref<FiltroStatus>('TODOS')
-const laboratorioId = ref('TODOS')
 const tipoBolsa = ref<TipoBolsaEstagiario | 'TODOS'>('TODOS')
+const contexto = ref('TODOS')
 const selecionado = ref<EstagiarioResponse | null>(null)
-const formularioAberto = ref(false)
-const modoFormulario = ref<ModoFormulario>('CRIAR')
-const idEmEdicao = ref<string | null>(null)
-const erroFormulario = ref('')
-const formulario = ref<FormularioEstagiario>(novoFormulario())
-const encerramentoAlvo = ref<EstagiarioResponse | null>(null)
 
 const tiposBolsa: Array<{ valor: TipoBolsaEstagiario; rotulo: string }> = [
-  { valor: 'BOLSA_CNPQ', rotulo: 'Bolsa CNPq' },
-  { valor: 'BOLSA_CAPES', rotulo: 'Bolsa CAPES' },
-  { valor: 'BOLSA_INSTITUCIONAL', rotulo: 'Bolsa institucional' },
+  { valor: 'BOLSA_CNPQ', rotulo: 'CNPq' },
+  { valor: 'BOLSA_CAPES', rotulo: 'CAPES' },
+  { valor: 'BOLSA_INSTITUCIONAL', rotulo: 'Institucional' },
   { valor: 'VOLUNTARIO', rotulo: 'Voluntário' },
   { valor: 'CONTRATUAL', rotulo: 'Contratual' },
 ]
 
-const laboratorios = computed(() => {
-  const mapa = new Map<string, string>()
-  estagiarios.value.forEach((item) => {
-    if (item.laboratorioId && item.laboratorioNome) mapa.set(item.laboratorioId, item.laboratorioNome)
-  })
-  return [...mapa.entries()].map(([id, nome]) => ({ id, nome })).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-})
-
-const ativos = computed(() => estagiarios.value.filter((item) => item.ativo))
-const encerrados = computed(() => estagiarios.value.filter((item) => !item.ativo))
-const vencidosAtivos = computed(() => ativos.value.filter((item) => item.dataFimEstagio && dataLocal(item.dataFimEstagio) < inicioDoDia(new Date())).length)
-const encerramEmBreve = computed(() => {
-  const hoje = inicioDoDia(new Date())
-  const limite = new Date(hoje)
-  limite.setDate(limite.getDate() + 30)
-  return ativos.value.filter((item) => {
-    if (!item.dataFimEstagio) return false
-    const fim = dataLocal(item.dataFimEstagio)
-    return fim >= hoje && fim <= limite
-  }).length
-})
-
-const estagiariosFiltrados = computed(() => {
-  const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
-  return estagiarios.value.filter((item) => {
-    const statusOk = filtroStatus.value === 'TODOS'
-      || (filtroStatus.value === 'ATIVOS' && item.ativo)
-      || (filtroStatus.value === 'ENCERRADOS' && !item.ativo)
-    const laboratorioOk = laboratorioId.value === 'TODOS' || item.laboratorioId === laboratorioId.value
-    const bolsaOk = tipoBolsa.value === 'TODOS' || item.tipoBolsa === tipoBolsa.value
-    const buscaOk = !termo || [item.usuarioNome, item.unidadeNome ?? '', item.laboratorioNome ?? '', rotuloBolsa(item.tipoBolsa), item.observacao ?? '']
-      .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termo))
-    return statusOk && laboratorioOk && bolsaOk && buscaOk
-  })
-})
-
-const usuariosDisponiveisCadastro = computed(() => {
-  const vinculados = new Set(estagiarios.value.map((item) => item.usuarioId))
-  return usuarios.value
-    .filter((usuario) => usuario.ativo && usuario.perfil === 'ESTAGIARIO' && !vinculados.has(usuario.id))
-    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-})
-
-const usuarioFormulario = computed(() => usuarios.value.find((usuario) => usuario.id === formulario.value.usuarioId) ?? null)
-const laboratoriosFormulario = computed(() => {
-  const unidadeId = usuarioFormulario.value?.unidadeId
-  if (!unidadeId) return []
-  return laboratoriosCadastro.value
-    .filter((lab) => lab.ativo && lab.unidadeId === unidadeId)
-    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-})
-
-function novoFormulario(): FormularioEstagiario {
-  return { usuarioId: '', laboratorioId: '', dataInicioEstagio: '', dataFimEstagio: '', tipoBolsa: 'BOLSA_INSTITUCIONAL', observacao: '' }
+const formacoes: Record<FormacaoEstagiario, string> = {
+  ENSINO_MEDIO: 'Ensino médio',
+  GRADUACAO: 'Graduação',
+  MESTRADO: 'Mestrado',
+  DOUTORADO: 'Doutorado',
+  POS_DOUTORADO: 'Pós-doutorado',
+  APOIO_ADMINISTRATIVO: 'Apoio administrativo',
+  APOIO_TECNICO: 'Apoio técnico',
+  OUTRO: 'Outro',
 }
 
-function inicioDoDia(data: Date) {
-  return new Date(data.getFullYear(), data.getMonth(), data.getDate())
+const situacoes: Record<SituacaoEstagio, string> = {
+  EM_ANDAMENTO: 'Em andamento',
+  PRORROGADO: 'Prorrogado',
+  FINALIZADO: 'Encerrado',
+}
+
+function vinculoAtual(estagiario: EstagiarioResponse) {
+  return estagiario.vinculos?.find((item) => item.situacao !== 'FINALIZADO')
+    ?? estagiario.vinculos?.[0]
+    ?? null
+}
+
+function participacoesAtivas(vinculo: VinculoEstagioResponse | null) {
+  return vinculo?.participacoesAtividade?.filter((item) => item.ativa) ?? []
+}
+
+function estadoOperacional(estagiario: EstagiarioResponse): EstadoOperacional {
+  const vinculo = vinculoAtual(estagiario)
+
+  if (!vinculo || vinculo.situacao === 'FINALIZADO') return 'ENCERRADO'
+
+  if (
+    Boolean(estagiario.usuarioAtivo)
+    && participacoesAtivas(vinculo).length > 0
+  ) {
+    return 'OPERACIONAL'
+  }
+
+  return 'SEM_ATIVIDADE'
+}
+
+function rotuloEstado(estado: EstadoOperacional) {
+  if (estado === 'OPERACIONAL') return 'Operacional'
+  if (estado === 'SEM_ATIVIDADE') return 'Sem atividade'
+  return 'Encerrado'
+}
+
+function classeEstado(estado: EstadoOperacional) {
+  if (estado === 'OPERACIONAL') return 'status-pill--active'
+  if (estado === 'SEM_ATIVIDADE') return 'status-pill--pending'
+  return 'status-pill--closed'
+}
+
+function rotuloBolsa(valor: TipoBolsaEstagiario | null | undefined) {
+  return tiposBolsa.find((item) => item.valor === valor)?.rotulo ?? 'Não informado'
+}
+
+function rotuloFormacao(vinculo: VinculoEstagioResponse | null) {
+  if (!vinculo?.formacao) return 'Formação não informada'
+  if (vinculo.formacao === 'OUTRO') return vinculo.formacaoOutro || 'Outra formação'
+  return formacoes[vinculo.formacao]
+}
+
+function rotuloSituacao(valor: SituacaoEstagio | null | undefined) {
+  return valor ? situacoes[valor] : 'Não informada'
+}
+
+function formatarData(valor: string | null | undefined) {
+  if (!valor) return 'Não informada'
+  const [ano, mes, dia] = valor.split('-').map(Number)
+  return new Intl.DateTimeFormat('pt-BR').format(new Date(ano, (mes ?? 1) - 1, dia ?? 1))
 }
 
 function dataLocal(valor: string) {
@@ -124,41 +112,125 @@ function dataLocal(valor: string) {
   return new Date(ano, (mes ?? 1) - 1, dia ?? 1)
 }
 
-function mensagemErro(error: unknown, padrao = 'Não foi possível concluir a operação.') {
+function fimExibicao(vinculo: VinculoEstagioResponse | null) {
+  if (!vinculo) return null
+  return vinculo.dataFimEfetiva || vinculo.dataFimPrevista
+}
+
+function contagemContexto(vinculo: VinculoEstagioResponse | null) {
+  const participacoes = participacoesAtivas(vinculo)
+  const projetos = new Set(participacoes.map((item) => item.projetoId).filter(Boolean))
+  const laboratorios = new Set(participacoes.map((item) => item.laboratorioId).filter(Boolean))
+
+  return {
+    atividades: participacoes.length,
+    projetos: projetos.size,
+    laboratorios: laboratorios.size,
+  }
+}
+
+function textoQuantidade(valor: number, singular: string, plural: string) {
+  return `${valor} ${valor === 1 ? singular : plural}`
+}
+
+function mensagemErro(error: unknown, padrao = 'Não foi possível carregar os dados de estagiários.') {
   if (axios.isAxiosError<ApiErrorResponse>(error)) return error.response?.data?.message ?? padrao
   return error instanceof Error ? error.message : padrao
 }
 
-function rotuloBolsa(valor: TipoBolsaEstagiario) {
-  return tiposBolsa.find((tipo) => tipo.valor === valor)?.rotulo ?? valor
+const contextos = computed(() => {
+  const opcoes = new Map<string, string>()
+
+  estagiarios.value.forEach((estagiario) => {
+    estagiario.vinculos?.forEach((vinculo) => {
+      vinculo.participacoesAtividade?.forEach((participacao) => {
+        if (participacao.projetoId && participacao.projetoNome) {
+          opcoes.set(`PROJETO:${participacao.projetoId}`, `Projeto · ${participacao.projetoNome}`)
+        }
+        if (participacao.laboratorioId && participacao.laboratorioNome) {
+          opcoes.set(`LAB:${participacao.laboratorioId}`, `Laboratório · ${participacao.laboratorioNome}`)
+        }
+      })
+    })
+  })
+
+  return [...opcoes.entries()]
+    .map(([valor, rotulo]) => ({ valor, rotulo }))
+    .sort((a, b) => a.rotulo.localeCompare(b.rotulo, 'pt-BR'))
+})
+
+function correspondeContexto(estagiario: EstagiarioResponse) {
+  if (contexto.value === 'TODOS') return true
+
+  const [tipo, id] = contexto.value.split(':')
+  const vinculo = vinculoAtual(estagiario)
+
+  return participacoesAtivas(vinculo).some((participacao) => {
+    if (tipo === 'PROJETO') return participacao.projetoId === id
+    if (tipo === 'LAB') return participacao.laboratorioId === id
+    return false
+  })
 }
 
-function formatarData(valor: string | null) {
-  if (!valor) return 'Sem data definida'
-  return new Intl.DateTimeFormat('pt-BR').format(dataLocal(valor))
+function termosPesquisa(estagiario: EstagiarioResponse) {
+  const vinculo = vinculoAtual(estagiario)
+  const participacoes = vinculo?.participacoesAtividade ?? []
+
+  return [
+    estagiario.usuarioNome,
+    estagiario.unidadeNome ?? '',
+    rotuloBolsa(vinculo?.tipoBolsa),
+    rotuloFormacao(vinculo),
+    vinculo?.cursoNome ?? '',
+    vinculo?.orientadorNome ?? '',
+    vinculo?.referenciaInstitucional ?? '',
+    ...participacoes.flatMap((item) => [
+      item.atividadeNome ?? '',
+      item.atividadeCodigoSeg ?? '',
+      item.sciNome ?? '',
+      item.projetoNome ?? '',
+      item.laboratorioNome ?? '',
+      ...(item.culturas ?? []).map((cultura) => cultura.nome),
+    ]),
+  ]
 }
 
-function periodo(estagiario: EstagiarioResponse) {
-  return `${formatarData(estagiario.dataInicioEstagio)} — ${estagiario.dataFimEstagio ? formatarData(estagiario.dataFimEstagio) : 'em andamento'}`
-}
+const estagiariosFiltrados = computed(() => {
+  const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
 
-function diasDeVinculo(estagiario: EstagiarioResponse) {
-  const inicio = dataLocal(estagiario.dataInicioEstagio)
-  const fim = !estagiario.ativo && estagiario.dataFimEstagio ? dataLocal(estagiario.dataFimEstagio) : inicioDoDia(new Date())
-  return Math.max(0, Math.floor((fim.getTime() - inicio.getTime()) / 86_400_000) + 1)
-}
+  return estagiarios.value.filter((estagiario) => {
+    const estado = estadoOperacional(estagiario)
+    const vinculo = vinculoAtual(estagiario)
 
-function situacaoPeriodo(estagiario: EstagiarioResponse) {
-  if (!estagiario.ativo) return 'Estágio encerrado'
-  if (!estagiario.dataFimEstagio) return 'Ativo · sem data final definida'
-  const hoje = inicioDoDia(new Date())
-  const fim = dataLocal(estagiario.dataFimEstagio)
-  const dias = Math.ceil((fim.getTime() - hoje.getTime()) / 86_400_000)
-  if (dias < 0) return `Prazo vencido há ${Math.abs(dias)} dia(s)`
-  if (dias === 0) return 'Término previsto para hoje'
-  if (dias <= 30) return `Término em ${dias} dia(s)`
-  return `Ativo · ${dias} dia(s) até o término previsto`
-}
+    const statusOk = filtroStatus.value === 'TODOS' || filtroStatus.value === estado
+    const bolsaOk = tipoBolsa.value === 'TODOS' || vinculo?.tipoBolsa === tipoBolsa.value
+    const contextoOk = correspondeContexto(estagiario)
+    const buscaOk = !termo || termosPesquisa(estagiario)
+      .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termo))
+
+    return statusOk && bolsaOk && contextoOk && buscaOk
+  })
+})
+
+const operacionais = computed(() => estagiarios.value.filter((item) => estadoOperacional(item) === 'OPERACIONAL'))
+const semAtividade = computed(() => estagiarios.value.filter((item) => estadoOperacional(item) === 'SEM_ATIVIDADE'))
+const encerrados = computed(() => estagiarios.value.filter((item) => estadoOperacional(item) === 'ENCERRADO'))
+
+const encerramEmBreve = computed(() => {
+  const hoje = new Date()
+  hoje.setHours(0, 0, 0, 0)
+  const limite = new Date(hoje)
+  limite.setDate(limite.getDate() + 30)
+
+  return estagiarios.value.filter((estagiario) => {
+    const vinculo = vinculoAtual(estagiario)
+    if (!vinculo || vinculo.situacao === 'FINALIZADO' || !vinculo.dataFimPrevista) return false
+    const fim = dataLocal(vinculo.dataFimPrevista)
+    return fim >= hoje && fim <= limite
+  }).length
+})
+
+const vinculoSelecionado = computed(() => selecionado.value ? vinculoAtual(selecionado.value) : null)
 
 function abrirDetalhes(estagiario: EstagiarioResponse) {
   selecionado.value = estagiario
@@ -171,141 +243,22 @@ function fecharDetalhes() {
 function limparFiltros() {
   busca.value = ''
   filtroStatus.value = 'TODOS'
-  laboratorioId.value = 'TODOS'
   tipoBolsa.value = 'TODOS'
-}
-
-function abrirCadastro() {
-  selecionado.value = null
-  modoFormulario.value = 'CRIAR'
-  idEmEdicao.value = null
-  formulario.value = novoFormulario()
-  erroFormulario.value = ''
-  formularioAberto.value = true
-}
-
-function abrirEdicao(estagiario: EstagiarioResponse) {
-  selecionado.value = null
-  modoFormulario.value = 'EDITAR'
-  idEmEdicao.value = estagiario.id
-  formulario.value = {
-    usuarioId: estagiario.usuarioId,
-    laboratorioId: estagiario.laboratorioId ?? '',
-    dataInicioEstagio: estagiario.dataInicioEstagio,
-    dataFimEstagio: estagiario.dataFimEstagio ?? '',
-    tipoBolsa: estagiario.tipoBolsa,
-    observacao: estagiario.observacao ?? '',
-  }
-  erroFormulario.value = ''
-  formularioAberto.value = true
-}
-
-function fecharFormulario() {
-  if (salvando.value) return
-  formularioAberto.value = false
-  erroFormulario.value = ''
-  idEmEdicao.value = null
-  formulario.value = novoFormulario()
-}
-
-function sincronizarLaboratorio() {
-  if (!laboratoriosFormulario.value.some((lab) => lab.id === formulario.value.laboratorioId)) formulario.value.laboratorioId = ''
-}
-
-function validarFormulario() {
-  if (!formulario.value.usuarioId) return 'Selecione o usuário estagiário.'
-  if (!formulario.value.laboratorioId) return 'Selecione o laboratório.'
-  if (!formulario.value.dataInicioEstagio) return 'Informe a data de início.'
-  if (formulario.value.dataFimEstagio && formulario.value.dataFimEstagio < formulario.value.dataInicioEstagio) return 'A data de fim não pode ser anterior à data de início.'
-  const usuario = usuarioFormulario.value
-  const laboratorio = laboratoriosCadastro.value.find((lab) => lab.id === formulario.value.laboratorioId)
-  if (!usuario?.unidadeId || !laboratorio?.unidadeId || usuario.unidadeId !== laboratorio.unidadeId) return 'O laboratório deve pertencer à mesma unidade do estagiário.'
-  return ''
-}
-
-async function salvarFormulario() {
-  const validacao = validarFormulario()
-  if (validacao) {
-    erroFormulario.value = validacao
-    return
-  }
-  const atual = idEmEdicao.value ? estagiarios.value.find((item) => item.id === idEmEdicao.value) : null
-  const payload: EstagiarioRequest = {
-    usuarioId: formulario.value.usuarioId,
-    laboratorioId: formulario.value.laboratorioId,
-    dataInicioEstagio: formulario.value.dataInicioEstagio,
-    dataFimEstagio: formulario.value.dataFimEstagio || null,
-    tipoBolsa: formulario.value.tipoBolsa,
-    observacao: formulario.value.observacao.trim() || null,
-    ativo: modoFormulario.value === 'EDITAR' ? (atual?.ativo ?? true) : true,
-  }
-  salvando.value = true
-  erroFormulario.value = ''
-  try {
-    if (modoFormulario.value === 'CRIAR') {
-      await estagiarioService.criar(payload)
-      sucesso.value = 'Estágio cadastrado com sucesso.'
-    } else if (idEmEdicao.value) {
-      await estagiarioService.atualizar(idEmEdicao.value, payload)
-      sucesso.value = 'Vínculo atualizado com sucesso.'
-    }
-    fecharFormularioForcado()
-    await carregar()
-  } catch (error) {
-    erroFormulario.value = mensagemErro(error)
-  } finally {
-    salvando.value = false
-  }
-}
-
-function fecharFormularioForcado() {
-  formularioAberto.value = false
-  erroFormulario.value = ''
-  idEmEdicao.value = null
-  formulario.value = novoFormulario()
-}
-
-function abrirEncerramento(estagiario: EstagiarioResponse) {
-  selecionado.value = null
-  encerramentoAlvo.value = estagiario
-}
-
-function fecharEncerramento() {
-  if (encerrando.value) return
-  encerramentoAlvo.value = null
-}
-
-async function confirmarEncerramento() {
-  if (!encerramentoAlvo.value) return
-  encerrando.value = true
-  erro.value = ''
-  try {
-    await estagiarioService.encerrar(encerramentoAlvo.value.id)
-    sucesso.value = `Estágio de ${encerramentoAlvo.value.usuarioNome} encerrado com sucesso.`
-    encerramentoAlvo.value = null
-    await carregar()
-  } catch (error) {
-    erro.value = mensagemErro(error, 'Não foi possível encerrar o estágio.')
-  } finally {
-    encerrando.value = false
-  }
+  contexto.value = 'TODOS'
 }
 
 async function carregar() {
   carregando.value = true
   erro.value = ''
+
   try {
-    const [lista, usuariosResponse, laboratoriosResponse] = await Promise.all([
-      estagiarioService.listarTodos(),
-      http.get<UsuarioSessao[]>('/v1/usuarios'),
-      http.get<LaboratorioOpcao[]>('/v1/laboratorios'),
-    ])
-    estagiarios.value = lista
-    usuarios.value = usuariosResponse.data
-    laboratoriosCadastro.value = laboratoriosResponse.data
-    if (selecionado.value) selecionado.value = estagiarios.value.find((item) => item.id === selecionado.value?.id) ?? null
+    estagiarios.value = await estagiarioService.listarTodos()
+
+    if (selecionado.value) {
+      selecionado.value = estagiarios.value.find((item) => item.id === selecionado.value?.id) ?? null
+    }
   } catch (error) {
-    erro.value = mensagemErro(error, 'Não foi possível carregar os dados de estagiários.')
+    erro.value = mensagemErro(error)
   } finally {
     carregando.value = false
   }
@@ -320,53 +273,186 @@ onMounted(carregar)
       <div>
         <p class="breadcrumb">GESTÃO / ESTAGIÁRIOS</p>
         <h1>Estagiários</h1>
-        <p>Auditoria simples de vínculos, unidade, laboratório e período de estágio.</p>
+        <p>Acompanhamento institucional e operacional dos vínculos.</p>
       </div>
+
       <div class="heading-actions">
-        <button class="secondary-action" type="button" :disabled="carregando" @click="carregar">{{ carregando ? 'Atualizando...' : 'Atualizar' }}</button>
-        <button class="primary-action" type="button" @click="abrirCadastro">Novo estágio</button>
+        <button class="primary-action" type="button" :disabled="carregando" @click="carregar">
+          {{ carregando ? 'Atualizando...' : 'Atualizar' }}
+        </button>
       </div>
     </header>
 
     <section class="metrics-grid">
-      <article><span>Ativos</span><strong>{{ ativos.length }}</strong><small>vínculos em andamento</small></article>
-      <article :class="{ warning: encerramEmBreve > 0 }"><span>Até 30 dias</span><strong>{{ encerramEmBreve }}</strong><small>próximos do término</small></article>
-      <article :class="{ danger: vencidosAtivos > 0 }"><span>Prazo vencido</span><strong>{{ vencidosAtivos }}</strong><small>ainda marcados como ativos</small></article>
-      <article><span>Encerrados</span><strong>{{ encerrados.length }}</strong><small>histórico preservado</small></article>
+      <article class="metric-card metric-card--success">
+        <span>Operacionais</span>
+        <strong>{{ operacionais.length }}</strong>
+        <small>com participação ativa</small>
+      </article>
+
+      <article class="metric-card metric-card--warning">
+        <span>Sem atividade</span>
+        <strong>{{ semAtividade.length }}</strong>
+        <small>aguardando contexto operacional</small>
+      </article>
+
+      <article class="metric-card metric-card--info">
+        <span>Até 30 dias</span>
+        <strong>{{ encerramEmBreve }}</strong>
+        <small>próximos do término previsto</small>
+      </article>
+
+      <article class="metric-card">
+        <span>Encerrados</span>
+        <strong>{{ encerrados.length }}</strong>
+        <small>vínculos finalizados</small>
+      </article>
     </section>
 
-    <div v-if="sucesso" class="feedback feedback--success">{{ sucesso }}</div>
     <div v-if="erro" class="feedback feedback--error">{{ erro }}</div>
 
     <section class="workspace-card">
       <div class="filters-grid">
-        <label class="field field--search"><span>Busca</span><input v-model="busca" type="search" placeholder="Nome, unidade, laboratório, vínculo..." /></label>
-        <label class="field"><span>Status</span><select v-model="filtroStatus"><option value="TODOS">Todos</option><option value="ATIVOS">Ativos</option><option value="ENCERRADOS">Encerrados</option></select></label>
-        <label class="field"><span>Laboratório</span><select v-model="laboratorioId"><option value="TODOS">Todos</option><option v-for="lab in laboratorios" :key="lab.id" :value="lab.id">{{ lab.nome }}</option></select></label>
-        <label class="field"><span>Tipo de vínculo</span><select v-model="tipoBolsa"><option value="TODOS">Todos</option><option v-for="tipo in tiposBolsa" :key="tipo.valor" :value="tipo.valor">{{ tipo.rotulo }}</option></select></label>
+        <label class="field field--search">
+          <span>Busca</span>
+          <input
+            v-model="busca"
+            type="search"
+            placeholder="Nome, curso, projeto, laboratório..."
+          />
+        </label>
+
+        <label class="field">
+          <span>Situação</span>
+          <select v-model="filtroStatus">
+            <option value="TODOS">Todos</option>
+            <option value="OPERACIONAL">Operacional</option>
+            <option value="SEM_ATIVIDADE">Sem atividade</option>
+            <option value="ENCERRADO">Encerrado</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Tipo de vínculo</span>
+          <select v-model="tipoBolsa">
+            <option value="TODOS">Todos</option>
+            <option v-for="tipo in tiposBolsa" :key="tipo.valor" :value="tipo.valor">
+              {{ tipo.rotulo }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Projeto / Laboratório</span>
+          <select v-model="contexto">
+            <option value="TODOS">Todos</option>
+            <option v-for="opcao in contextos" :key="opcao.valor" :value="opcao.valor">
+              {{ opcao.rotulo }}
+            </option>
+          </select>
+        </label>
       </div>
 
       <div class="filter-summary">
-        <div><strong>{{ estagiariosFiltrados.length }}</strong><span>registro(s)</span></div>
-        <button v-if="busca || filtroStatus !== 'TODOS' || laboratorioId !== 'TODOS' || tipoBolsa !== 'TODOS'" type="button" @click="limparFiltros">Limpar filtros</button>
+        <div>
+          <strong>{{ estagiariosFiltrados.length }}</strong>
+          <span>registro(s)</span>
+        </div>
+
+        <button
+          v-if="busca || filtroStatus !== 'TODOS' || tipoBolsa !== 'TODOS' || contexto !== 'TODOS'"
+          type="button"
+          @click="limparFiltros"
+        >
+          Limpar filtros
+        </button>
       </div>
 
       <div v-if="carregando" class="state-box">Carregando estagiários...</div>
-      <div v-else-if="estagiariosFiltrados.length === 0" class="state-box">Nenhum registro encontrado.</div>
+      <div v-else-if="estagiariosFiltrados.length === 0" class="state-box">
+        Nenhum estagiário encontrado.
+      </div>
 
       <div v-else class="table-wrap">
         <table>
-          <thead><tr><th>Status</th><th>Estagiário</th><th>Unidade / laboratório</th><th>Vínculo</th><th>Período</th><th></th></tr></thead>
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Estagiário</th>
+              <th>Vínculo</th>
+              <th>Contexto operacional</th>
+              <th>Período</th>
+              <th></th>
+            </tr>
+          </thead>
+
           <tbody>
-            <tr v-for="estagiario in estagiariosFiltrados" :key="estagiario.id" @click="abrirDetalhes(estagiario)">
-              <td><span class="status-pill" :class="estagiario.ativo ? 'status-pill--active' : 'status-pill--closed'">{{ estagiario.ativo ? 'ATIVO' : 'ENCERRADO' }}</span></td>
-              <td><strong>{{ estagiario.usuarioNome }}</strong><small>{{ situacaoPeriodo(estagiario) }}</small></td>
-              <td><strong>{{ estagiario.unidadeNome ?? 'Sem unidade' }}</strong><small>{{ estagiario.laboratorioNome ?? 'Sem laboratório' }}</small></td>
-              <td>{{ rotuloBolsa(estagiario.tipoBolsa) }}</td>
-              <td><strong>{{ formatarData(estagiario.dataInicioEstagio) }}</strong><small>{{ estagiario.dataFimEstagio ? `até ${formatarData(estagiario.dataFimEstagio)}` : 'sem data final' }}</small></td>
+            <tr
+              v-for="estagiario in estagiariosFiltrados"
+              :key="estagiario.id"
+              @click="abrirDetalhes(estagiario)"
+            >
+              <td>
+                <span
+                  class="status-pill"
+                  :class="classeEstado(estadoOperacional(estagiario))"
+                >
+                  <span class="status-dot" />
+                  {{ rotuloEstado(estadoOperacional(estagiario)) }}
+                </span>
+              </td>
+
+              <td class="student-cell">
+                <strong>{{ estagiario.usuarioNome }}</strong>
+                <small>{{ rotuloFormacao(vinculoAtual(estagiario)) }}</small>
+                <small class="student-course">
+                  {{ vinculoAtual(estagiario)?.cursoNome || 'Curso não informado' }}
+                </small>
+              </td>
+
+              <td class="link-cell">
+                <strong>{{ rotuloBolsa(vinculoAtual(estagiario)?.tipoBolsa) }}</strong>
+                <span
+                  v-if="vinculoAtual(estagiario)"
+                  class="link-state"
+                  :class="{ 'link-state--closed': vinculoAtual(estagiario)?.situacao === 'FINALIZADO' }"
+                >
+                  {{ rotuloSituacao(vinculoAtual(estagiario)?.situacao) }}
+                </span>
+              </td>
+
+              <td>
+                <div
+                  v-if="estadoOperacional(estagiario) === 'OPERACIONAL'"
+                  class="context-preview"
+                >
+                  <span>{{ textoQuantidade(contagemContexto(vinculoAtual(estagiario)).atividades, 'atividade', 'atividades') }}</span>
+                  <span>{{ textoQuantidade(contagemContexto(vinculoAtual(estagiario)).projetos, 'projeto', 'projetos') }}</span>
+                  <span>{{ textoQuantidade(contagemContexto(vinculoAtual(estagiario)).laboratorios, 'laboratório', 'laboratórios') }}</span>
+                </div>
+
+                <span
+                  v-else-if="estadoOperacional(estagiario) === 'SEM_ATIVIDADE'"
+                  class="context-empty"
+                >
+                  Aguardando atividade
+                </span>
+
+                <span v-else class="history-preview">
+                  Histórico disponível
+                </span>
+              </td>
+
+              <td class="period-cell">
+                <strong>{{ formatarData(vinculoAtual(estagiario)?.dataInicio) }}</strong>
+                <small>até</small>
+                <strong>{{ formatarData(fimExibicao(vinculoAtual(estagiario))) }}</strong>
+              </td>
+
               <td class="actions-column" @click.stop>
-                <button class="detail-action" type="button" @click="abrirEdicao(estagiario)">Editar</button>
-                <button v-if="estagiario.ativo" class="danger-action" type="button" @click="abrirEncerramento(estagiario)">Encerrar</button>
+                <button class="detail-action" type="button" @click="abrirDetalhes(estagiario)">
+                  Detalhes <span aria-hidden="true">›</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -375,55 +461,1060 @@ onMounted(carregar)
     </section>
 
     <div v-if="selecionado" class="drawer-backdrop" @click.self="fecharDetalhes">
-      <aside class="detail-drawer" role="dialog" aria-modal="true">
-        <header>
-          <div><span class="status-pill" :class="selecionado.ativo ? 'status-pill--active' : 'status-pill--closed'">{{ selecionado.ativo ? 'ATIVO' : 'ENCERRADO' }}</span><h2>{{ selecionado.usuarioNome }}</h2><p>{{ selecionado.unidadeNome ?? 'Sem unidade' }}</p></div>
-          <button type="button" @click="fecharDetalhes">×</button>
+      <aside class="detail-drawer" role="dialog" aria-modal="true" aria-label="Detalhes do estagiário">
+        <header class="drawer-header">
+          <div>
+            <p class="drawer-kicker">DETALHES DO ESTAGIÁRIO</p>
+            <div class="drawer-title-row">
+              <h2>{{ selecionado.usuarioNome }}</h2>
+              <span
+                class="status-pill"
+                :class="classeEstado(estadoOperacional(selecionado))"
+              >
+                <span class="status-dot" />
+                {{ rotuloEstado(estadoOperacional(selecionado)) }}
+              </span>
+            </div>
+            <p>{{ selecionado.unidadeNome || 'Unidade não informada' }}</p>
+          </div>
+
+          <button type="button" aria-label="Fechar" @click="fecharDetalhes">×</button>
         </header>
+
         <div class="detail-content">
-          <section class="detail-grid">
-            <article><span>Unidade</span><strong>{{ selecionado.unidadeNome ?? 'Não informada' }}</strong></article>
-            <article><span>Laboratório</span><strong>{{ selecionado.laboratorioNome ?? 'Não informado' }}</strong></article>
-            <article><span>Tipo de vínculo</span><strong>{{ rotuloBolsa(selecionado.tipoBolsa) }}</strong></article>
-            <article><span>Duração</span><strong>{{ diasDeVinculo(selecionado) }} dia(s)</strong></article>
-          </section>
-          <section class="period-card"><span>PERÍODO DO ESTÁGIO</span><strong>{{ periodo(selecionado) }}</strong><p>{{ situacaoPeriodo(selecionado) }}</p></section>
-          <section><h3>Observação</h3><p class="observation">{{ selecionado.observacao || 'Nenhuma observação registrada.' }}</p></section>
-          <div class="drawer-actions">
-            <button class="secondary-action" type="button" @click="abrirEdicao(selecionado)">Editar vínculo</button>
-            <button v-if="selecionado.ativo" class="danger-action" type="button" @click="abrirEncerramento(selecionado)">Encerrar estágio</button>
+          <template v-if="vinculoSelecionado">
+            <section class="drawer-section">
+              <div class="section-heading">
+                <span class="section-icon">01</span>
+                <h3>Vínculo institucional</h3>
+              </div>
+
+              <div class="institutional-card">
+                <div class="institutional-title">
+                  <strong>{{ rotuloBolsa(vinculoSelecionado.tipoBolsa) }}</strong>
+                  <span class="link-state" :class="{ 'link-state--closed': vinculoSelecionado.situacao === 'FINALIZADO' }">
+                    {{ rotuloSituacao(vinculoSelecionado.situacao) }}
+                  </span>
+                </div>
+
+                <div class="institutional-period">
+                  <span>{{ formatarData(vinculoSelecionado.dataInicio) }}</span>
+                  <span>→</span>
+                  <span>{{ formatarData(fimExibicao(vinculoSelecionado)) }}</span>
+                </div>
+
+                <p>
+                  Referência:
+                  <strong>{{ vinculoSelecionado.referenciaInstitucional || 'não informada' }}</strong>
+                </p>
+              </div>
+            </section>
+
+            <section class="drawer-section compact-section">
+              <div class="section-heading">
+                <span class="section-icon">02</span>
+                <h3>Formação</h3>
+              </div>
+
+              <div class="detail-grid">
+                <article>
+                  <span>Formação</span>
+                  <strong>{{ rotuloFormacao(vinculoSelecionado) }}</strong>
+                </article>
+
+                <article>
+                  <span>Curso</span>
+                  <strong>{{ vinculoSelecionado.cursoNome || 'Não informado' }}</strong>
+                </article>
+              </div>
+            </section>
+
+            <section class="drawer-section compact-section">
+              <div class="section-heading">
+                <span class="section-icon">03</span>
+                <h3>Orientador</h3>
+              </div>
+
+              <p class="single-value">{{ vinculoSelecionado.orientadorNome || 'Não informado' }}</p>
+            </section>
+
+            <section class="drawer-section compact-section">
+              <div class="section-heading">
+                <span class="section-icon">04</span>
+                <h3>Segurança</h3>
+              </div>
+
+              <div
+                class="training-card"
+                :class="{ 'training-card--pending': !vinculoSelecionado.treinamentoSegurancaConcluido }"
+              >
+                <span class="training-check">{{ vinculoSelecionado.treinamentoSegurancaConcluido ? '✓' : '!' }}</span>
+                <div>
+                  <strong>
+                    {{ vinculoSelecionado.treinamentoSegurancaConcluido ? 'Treinamento concluído' : 'Treinamento pendente' }}
+                  </strong>
+                  <small>
+                    {{ vinculoSelecionado.treinamentoSegurancaConcluido ? 'Conclusão registrada no vínculo' : 'Aguardando registro de conclusão' }}
+                  </small>
+                </div>
+              </div>
+            </section>
+
+            <section class="drawer-section">
+              <div class="section-heading">
+                <span class="section-icon">05</span>
+                <h3>Participações em atividades</h3>
+              </div>
+
+              <div v-if="vinculoSelecionado.participacoesAtividade.length === 0" class="drawer-empty">
+                Este vínculo ainda não possui participação em Atividade.
+              </div>
+
+              <div v-else class="participations-list">
+                <article
+                  v-for="participacao in vinculoSelecionado.participacoesAtividade"
+                  :key="participacao.id"
+                  class="participation-card"
+                >
+                  <div class="participation-header">
+                    <div>
+                      <span class="participation-dot" :class="{ 'participation-dot--closed': !participacao.ativa }" />
+                      <strong>{{ participacao.atividadeNome || 'Atividade sem nome' }}</strong>
+                    </div>
+
+                    <span
+                      class="participation-state"
+                      :class="{ 'participation-state--closed': !participacao.ativa }"
+                    >
+                      {{ participacao.ativa ? 'Participação ativa' : 'Participação encerrada' }}
+                    </span>
+                  </div>
+
+                  <dl>
+                    <div>
+                      <dt>SCI</dt>
+                      <dd>{{ participacao.sciNome || 'Não informado' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Projeto</dt>
+                      <dd>{{ participacao.projetoNome || 'Não informado' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Laboratório</dt>
+                      <dd>{{ participacao.laboratorioNome || 'Não informado' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Culturas</dt>
+                      <dd>
+                        {{ participacao.culturas?.length
+                          ? participacao.culturas.map((cultura) => cultura.nome).join(', ')
+                          : 'Nenhuma cultura associada' }}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <div class="participation-period">
+                    {{ formatarData(participacao.dataInicioParticipacao) }}
+                    <span>→</span>
+                    {{ participacao.dataFimParticipacao ? formatarData(participacao.dataFimParticipacao) : 'atual' }}
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section v-if="selecionado.vinculos.length > 0" class="drawer-section">
+              <div class="section-heading">
+                <span class="section-icon">06</span>
+                <h3>Histórico de vínculos</h3>
+              </div>
+
+              <div class="timeline">
+                <article v-for="vinculo in selecionado.vinculos" :key="vinculo.id" class="timeline-item">
+                  <span class="timeline-dot" :class="{ 'timeline-dot--closed': vinculo.situacao === 'FINALIZADO' }" />
+                  <div>
+                    <strong>{{ rotuloBolsa(vinculo.tipoBolsa) }}</strong>
+                    <small>{{ formatarData(vinculo.dataInicio) }} → {{ formatarData(fimExibicao(vinculo)) }}</small>
+                  </div>
+                  <span class="link-state" :class="{ 'link-state--closed': vinculo.situacao === 'FINALIZADO' }">
+                    {{ rotuloSituacao(vinculo.situacao) }}
+                  </span>
+                </article>
+              </div>
+            </section>
+
+            <section v-if="vinculoSelecionado.observacao" class="drawer-section">
+              <div class="section-heading">
+                <span class="section-icon">07</span>
+                <h3>Observação</h3>
+              </div>
+              <p class="observation">{{ vinculoSelecionado.observacao }}</p>
+            </section>
+          </template>
+
+          <div v-else class="drawer-empty">
+            Nenhum vínculo institucional foi encontrado para este Estagiário.
           </div>
         </div>
       </aside>
-    </div>
-
-    <div v-if="formularioAberto" class="modal-backdrop" @click.self="fecharFormulario">
-      <section class="form-modal" role="dialog" aria-modal="true">
-        <header><div><span>{{ modoFormulario === 'CRIAR' ? 'NOVO VÍNCULO' : 'EDIÇÃO' }}</span><h2>{{ modoFormulario === 'CRIAR' ? 'Cadastrar estágio' : 'Editar estágio' }}</h2></div><button type="button" @click="fecharFormulario">×</button></header>
-        <form class="form-content" @submit.prevent="salvarFormulario">
-          <div v-if="erroFormulario" class="feedback feedback--error">{{ erroFormulario }}</div>
-          <label class="field field--full"><span>Usuário estagiário</span><select v-model="formulario.usuarioId" :disabled="modoFormulario === 'EDITAR'" required @change="sincronizarLaboratorio"><option value="">Selecione...</option><option v-for="usuario in usuariosDisponiveisCadastro" :key="usuario.id" :value="usuario.id">{{ usuario.nome }} — {{ usuario.email }}</option><option v-if="modoFormulario === 'EDITAR' && usuarioFormulario" :value="usuarioFormulario.id">{{ usuarioFormulario.nome }} — {{ usuarioFormulario.email }}</option></select></label>
-          <div class="unit-readonly"><span>Unidade</span><strong>{{ usuarioFormulario?.unidadeNome ?? 'Selecione o estagiário para identificar a unidade' }}</strong></div>
-          <label class="field field--full"><span>Laboratório</span><select v-model="formulario.laboratorioId" required :disabled="!formulario.usuarioId"><option value="">Selecione...</option><option v-for="lab in laboratoriosFormulario" :key="lab.id" :value="lab.id">{{ lab.nome }}</option></select><small>Somente laboratórios ativos da mesma unidade.</small></label>
-          <div class="form-grid"><label class="field"><span>Início</span><input v-model="formulario.dataInicioEstagio" type="date" required /></label><label class="field"><span>Fim previsto</span><input v-model="formulario.dataFimEstagio" type="date" /></label></div>
-          <label class="field field--full"><span>Tipo de vínculo</span><select v-model="formulario.tipoBolsa" required><option v-for="tipo in tiposBolsa" :key="tipo.valor" :value="tipo.valor">{{ tipo.rotulo }}</option></select><small v-if="formulario.tipoBolsa === 'CONTRATUAL'">Estágio empregatício sem conexão com bolsa ou voluntariado.</small></label>
-          <label class="field field--full"><span>Observação</span><textarea v-model="formulario.observacao" rows="4" /></label>
-          <footer class="form-actions"><button class="secondary-action" type="button" :disabled="salvando" @click="fecharFormulario">Cancelar</button><button class="primary-action" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar' }}</button></footer>
-        </form>
-      </section>
-    </div>
-
-    <div v-if="encerramentoAlvo" class="modal-backdrop" @click.self="fecharEncerramento">
-      <section class="confirm-modal" role="dialog" aria-modal="true">
-        <h2>Encerrar estágio?</h2>
-        <p>O vínculo de <strong>{{ encerramentoAlvo.usuarioNome }}</strong> será marcado como encerrado e a data final será registrada como hoje.</p>
-        <div class="confirm-summary"><span>{{ encerramentoAlvo.unidadeNome }}</span><strong>{{ encerramentoAlvo.laboratorioNome }}</strong></div>
-        <footer class="form-actions"><button class="secondary-action" type="button" :disabled="encerrando" @click="fecharEncerramento">Cancelar</button><button class="danger-action" type="button" :disabled="encerrando" @click="confirmarEncerramento">{{ encerrando ? 'Encerrando...' : 'Confirmar encerramento' }}</button></footer>
-      </section>
     </div>
   </section>
 </template>
 
 <style scoped>
-.intern-page{max-width:1500px;margin:0 auto;color:#17243a}.page-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:22px}.heading-actions,.drawer-actions{display:flex;gap:9px}.breadcrumb{margin:0 0 8px;color:#2456c4;font-size:10px;font-weight:900;letter-spacing:.08em}.page-heading h1{margin:0;color:#0a1c3b;font-size:31px}.page-heading p:not(.breadcrumb){margin:8px 0 0;color:#66758a;font-size:13px}.secondary-action,.detail-action,.primary-action,.danger-action{min-height:40px;padding:0 14px;border-radius:7px;font:inherit;font-size:11px;font-weight:800;cursor:pointer}.secondary-action,.detail-action{border:1px solid #cfd9e7;background:#fff;color:#24405f}.primary-action{border:1px solid #2456c4;background:#2456c4;color:#fff}.danger-action{border:1px solid #d85c5c;background:#fff4f4;color:#a52d2d}.secondary-action:disabled,.primary-action:disabled,.danger-action:disabled{opacity:.55;cursor:default}.metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.metrics-grid article{padding:18px;border:1px solid #dce4ef;border-radius:10px;background:#fff}.metrics-grid article.warning{background:#fffbf1;border-color:#ecd6a3}.metrics-grid article.danger{background:#fff5f5;border-color:#efc7c7}.metrics-grid span{display:block;color:#68778b;font-size:10px;font-weight:850;text-transform:uppercase}.metrics-grid strong{display:block;margin-top:10px;color:#0d2852;font-size:28px}.metrics-grid small{display:block;margin-top:7px;color:#8390a2;font-size:10px}.feedback{margin-bottom:16px;padding:13px 15px;border-radius:8px;font-size:12px}.feedback--error{background:#fff4f4;color:#9f2e2e}.feedback--success{background:#f2fbf5;color:#267748}.workspace-card{overflow:hidden;border:1px solid #dbe3ee;border-radius:11px;background:#fff}.filters-grid{display:grid;grid-template-columns:minmax(300px,1.6fr) repeat(3,minmax(160px,.7fr));gap:12px;padding:18px;background:#fbfcfe}.field{display:flex;flex-direction:column;gap:7px}.field>span,.unit-readonly span{color:#66758a;font-size:9px;font-weight:850;text-transform:uppercase}.field input,.field select,.field textarea{width:100%;padding:0 12px;border:1px solid #d4dde9;border-radius:7px;background:#fff;color:#23354e;font:inherit;font-size:12px}.field input,.field select{height:42px}.field textarea{padding-block:10px;resize:vertical}.field small{color:#7c899b;font-size:9px}.filter-summary{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid #edf1f5;border-bottom:1px solid #edf1f5}.filter-summary>div{display:flex;gap:7px;align-items:baseline}.filter-summary button{border:0;background:transparent;color:#2456c4;cursor:pointer}.state-box{padding:34px;text-align:center;color:#708096}.table-wrap{overflow-x:auto}table{width:100%;min-width:1050px;border-collapse:collapse}th{padding:12px 15px;background:#f8fafd;color:#738197;font-size:9px;text-align:left;text-transform:uppercase}td{padding:14px 15px;border-top:1px solid #edf1f5;color:#37475e;font-size:11px}tbody tr{cursor:pointer}tbody tr:hover{background:#f8fbff}td strong,td small{display:block}td small{margin-top:4px;color:#8793a4}.actions-column{display:flex;gap:6px;justify-content:flex-end}.status-pill{display:inline-flex;padding:6px 9px;border-radius:999px;font-size:8px;font-weight:900}.status-pill--active{background:#e9f7ef;color:#267748}.status-pill--closed{background:#eef1f5;color:#657287}.drawer-backdrop,.modal-backdrop{position:fixed;inset:0;z-index:70;display:flex;background:rgb(13 25 45 / 42%)}.drawer-backdrop{justify-content:flex-end}.detail-drawer{width:min(680px,94vw);height:100vh;overflow-y:auto;background:#fff}.detail-drawer>header,.form-modal>header{display:flex;justify-content:space-between;gap:18px;padding:24px;border-bottom:1px solid #e2e8f0}.detail-drawer header h2,.form-modal header h2{margin:8px 0 0}.detail-drawer header p{margin:4px 0 0;color:#758397}.detail-drawer header>button,.form-modal header>button{width:38px;height:38px;border:0;border-radius:50%;background:#f1f4f8;font-size:22px;cursor:pointer}.detail-content{display:grid;gap:20px;padding:24px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.detail-grid article,.period-card,.unit-readonly,.confirm-summary{padding:14px;border:1px solid #dfe6ef;border-radius:8px;background:#fafcff}.detail-grid span,.period-card>span{display:block;color:#7b889a;font-size:8px;font-weight:850;text-transform:uppercase}.detail-grid strong,.period-card strong{display:block;margin-top:5px}.period-card{background:#f4f8ff}.period-card p{margin:5px 0 0;color:#6c7b90;font-size:10px}.observation{padding:14px;background:#f7f9fc;border-radius:8px}.modal-backdrop{align-items:center;justify-content:center;padding:20px}.form-modal,.confirm-modal{width:min(650px,96vw);max-height:92vh;overflow-y:auto;border-radius:12px;background:#fff}.form-modal header span{font-size:9px;font-weight:900;color:#2456c4}.form-content{display:grid;gap:15px;padding:22px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field--full{grid-column:1/-1}.unit-readonly strong{display:block;margin-top:6px;color:#2d415c}.form-actions{display:flex;justify-content:flex-end;gap:9px;padding-top:6px}.confirm-modal{padding:24px}.confirm-modal h2{margin:0}.confirm-modal p{color:#5e6d82;line-height:1.5}.confirm-summary{margin:16px 0}.confirm-summary span,.confirm-summary strong{display:block}.confirm-summary span{color:#7b889a;font-size:10px}.confirm-summary strong{margin-top:4px}.drawer-actions{justify-content:flex-end}.detail-content h3{margin:0 0 8px;font-size:11px;text-transform:uppercase}@media(max-width:1100px){.metrics-grid{grid-template-columns:1fr 1fr}.filters-grid{grid-template-columns:1fr 1fr}.field--search{grid-column:1/-1}}@media(max-width:680px){.page-heading{align-items:stretch;flex-direction:column}.heading-actions,.drawer-actions{flex-direction:column}.metrics-grid,.filters-grid,.form-grid,.detail-grid{grid-template-columns:1fr}.field--search{grid-column:auto}}
+.intern-page {
+  max-width: 1560px;
+  margin: 0 auto;
+  color: #17243a;
+}
+
+.page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.heading-actions {
+  display: flex;
+  gap: 9px;
+}
+
+.breadcrumb {
+  margin: 0 0 8px;
+  color: #2456c4;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.page-heading h1 {
+  margin: 0;
+  color: #0a1c3b;
+  font-size: 31px;
+}
+
+.page-heading p:not(.breadcrumb) {
+  margin: 8px 0 0;
+  color: #66758a;
+  font-size: 13px;
+}
+
+.primary-action,
+.detail-action {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary-action {
+  border: 1px solid #2456c4;
+  background: #2456c4;
+  color: #fff;
+}
+
+.detail-action {
+  border: 1px solid #cbd7e6;
+  background: #fff;
+  color: #2456c4;
+  white-space: nowrap;
+}
+
+.primary-action:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.metric-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 112px;
+  padding: 18px 20px;
+  border: 1px solid #dce4ef;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.metric-card::before {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #6d7c90;
+  content: '';
+}
+
+.metric-card--success {
+  border-color: #cfe7d8;
+  background: linear-gradient(135deg, #f4fcf7, #fff);
+}
+
+.metric-card--success::before {
+  background: #1aa35b;
+}
+
+.metric-card--warning {
+  border-color: #eddcb1;
+  background: linear-gradient(135deg, #fffaf0, #fff);
+}
+
+.metric-card--warning::before {
+  background: #e3a008;
+}
+
+.metric-card--info {
+  border-color: #cedff5;
+  background: linear-gradient(135deg, #f4f8ff, #fff);
+}
+
+.metric-card--info::before {
+  background: #2474d9;
+}
+
+.metric-card span {
+  display: block;
+  padding-left: 19px;
+  color: #55657a;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.metric-card strong {
+  display: block;
+  margin-top: 10px;
+  color: #132944;
+  font-size: 28px;
+}
+
+.metric-card small {
+  display: block;
+  margin-top: 6px;
+  color: #8390a2;
+  font-size: 10px;
+}
+
+.feedback {
+  margin-bottom: 16px;
+  padding: 13px 15px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.feedback--error {
+  background: #fff4f4;
+  color: #9f2e2e;
+}
+
+.workspace-card {
+  overflow: hidden;
+  border: 1px solid #dbe3ee;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.5fr) repeat(3, minmax(170px, .8fr));
+  gap: 12px;
+  padding: 18px;
+  background: #fbfcfe;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field > span {
+  color: #66758a;
+  font-size: 9px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d4dde9;
+  border-radius: 7px;
+  background: #fff;
+  color: #23354e;
+  font: inherit;
+  font-size: 12px;
+}
+
+.filter-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-top: 1px solid #edf1f5;
+  border-bottom: 1px solid #edf1f5;
+  color: #6c7a8d;
+  font-size: 11px;
+}
+
+.filter-summary > div {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.filter-summary strong {
+  color: #17243a;
+}
+
+.filter-summary button {
+  border: 0;
+  background: transparent;
+  color: #2456c4;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.state-box {
+  padding: 34px;
+  text-align: center;
+  color: #708096;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 1160px;
+  border-collapse: collapse;
+}
+
+th {
+  padding: 12px 15px;
+  background: #f8fafd;
+  color: #738197;
+  font-size: 9px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+td {
+  padding: 15px;
+  border-top: 1px solid #edf1f5;
+  color: #37475e;
+  font-size: 11px;
+  vertical-align: middle;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
+tbody tr:hover {
+  background: #f8fbff;
+}
+
+td strong,
+td small {
+  display: block;
+}
+
+td small {
+  margin-top: 4px;
+  color: #8793a4;
+}
+
+.student-cell strong {
+  color: #17243a;
+  font-size: 12px;
+}
+
+.student-course {
+  color: #64748a;
+}
+
+.link-cell strong {
+  margin-bottom: 7px;
+  color: #17243a;
+}
+
+.link-state {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #dcecff;
+  color: #2365bd;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.link-state--closed {
+  background: #edf0f4;
+  color: #667386;
+}
+
+.context-preview {
+  display: grid;
+  gap: 4px;
+}
+
+.context-preview span {
+  position: relative;
+  padding-left: 15px;
+  color: #34465e;
+  font-size: 10px;
+}
+
+.context-preview span::before {
+  position: absolute;
+  top: 5px;
+  left: 1px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid #5f7188;
+  border-radius: 2px;
+  content: '';
+}
+
+.context-empty {
+  display: inline-flex;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #fff7e6;
+  color: #9a6900;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.history-preview {
+  color: #637287;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.period-cell strong {
+  color: #26384f;
+}
+
+.period-cell small {
+  margin: 2px 0;
+}
+
+.actions-column {
+  text-align: right;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  min-height: 25px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-pill--active {
+  background: #e9f7ef;
+  color: #207847;
+}
+
+.status-pill--pending {
+  background: #fff5dc;
+  color: #aa7200;
+}
+
+.status-pill--closed {
+  background: #eef1f5;
+  color: #657287;
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  justify-content: flex-end;
+  background: rgb(13 25 45 / 42%);
+}
+
+.detail-drawer {
+  width: min(640px, 96vw);
+  height: 100vh;
+  overflow-y: auto;
+  background: #fff;
+  box-shadow: -18px 0 48px rgb(25 43 70 / 15%);
+}
+
+.drawer-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.drawer-kicker {
+  margin: 0 0 11px;
+  color: #6e7d91;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.drawer-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.drawer-title-row h2 {
+  margin: 0;
+  color: #13233b;
+  font-size: 23px;
+}
+
+.drawer-header p:not(.drawer-kicker) {
+  margin: 6px 0 0;
+  color: #758397;
+  font-size: 11px;
+}
+
+.drawer-header > button {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f4f8;
+  color: #34445a;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.detail-content {
+  display: grid;
+  gap: 0;
+  padding: 0 24px 30px;
+}
+
+.drawer-section {
+  padding: 21px 0;
+  border-bottom: 1px solid #e8edf3;
+}
+
+.compact-section {
+  padding-block: 17px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 13px;
+}
+
+.section-heading h3 {
+  margin: 0;
+  color: #17243a;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: #eef4fb;
+  color: #45617f;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.institutional-card {
+  padding: 16px;
+  border: 1px solid #dce5ef;
+  border-radius: 9px;
+  background: #fbfcfe;
+}
+
+.institutional-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.institutional-title > strong {
+  color: #17243a;
+  font-size: 14px;
+}
+
+.institutional-period {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  color: #43566f;
+  font-size: 11px;
+}
+
+.institutional-card p {
+  margin: 10px 0 0;
+  color: #728095;
+  font-size: 10px;
+}
+
+.institutional-card p strong {
+  color: #42546c;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.detail-grid article {
+  padding: 13px 14px;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  background: #fafcff;
+}
+
+.detail-grid span {
+  display: block;
+  color: #7b889a;
+  font-size: 8px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.detail-grid strong {
+  display: block;
+  margin-top: 5px;
+  color: #2a3b52;
+  font-size: 11px;
+}
+
+.single-value {
+  margin: 0;
+  color: #2a3b52;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.training-card {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 14px;
+  border: 1px solid #cfe6d8;
+  border-radius: 8px;
+  background: #f2fbf5;
+}
+
+.training-card--pending {
+  border-color: #eddcb1;
+  background: #fffaf0;
+}
+
+.training-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #1d9b56;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.training-card--pending .training-check {
+  background: #d89a08;
+}
+
+.training-card strong,
+.training-card small {
+  display: block;
+}
+
+.training-card strong {
+  color: #23683f;
+  font-size: 11px;
+}
+
+.training-card--pending strong {
+  color: #8c6508;
+}
+
+.training-card small {
+  margin-top: 3px;
+  color: #6f7e8f;
+  font-size: 9px;
+}
+
+.drawer-empty {
+  padding: 18px;
+  border: 1px dashed #ced8e5;
+  border-radius: 8px;
+  background: #fafcff;
+  color: #748399;
+  font-size: 11px;
+  text-align: center;
+}
+
+.participations-list {
+  display: grid;
+  gap: 10px;
+}
+
+.participation-card {
+  padding: 14px;
+  border: 1px solid #dfe6ef;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.participation-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.participation-header > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.participation-header strong {
+  color: #25364d;
+  font-size: 11px;
+}
+
+.participation-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #1ca35b;
+}
+
+.participation-dot--closed {
+  background: #aab4c1;
+}
+
+.participation-state {
+  display: inline-flex;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #e9f7ef;
+  color: #207847;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.participation-state--closed {
+  background: #eef1f5;
+  color: #697789;
+}
+
+.participation-card dl {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0 17px;
+}
+
+.participation-card dl > div {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 8px;
+}
+
+.participation-card dt {
+  color: #8290a2;
+  font-size: 9px;
+}
+
+.participation-card dd {
+  margin: 0;
+  color: #43546b;
+  font-size: 9px;
+}
+
+.participation-period {
+  display: flex;
+  gap: 6px;
+  margin: 11px 0 0 17px;
+  color: #7b889b;
+  font-size: 8px;
+}
+
+.timeline {
+  display: grid;
+  gap: 0;
+}
+
+.timeline-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 52px;
+}
+
+.timeline-item::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 1px;
+  background: #d8e1ec;
+  content: '';
+}
+
+.timeline-item:first-child::before {
+  top: 50%;
+}
+
+.timeline-item:last-child::before {
+  bottom: 50%;
+}
+
+.timeline-dot {
+  z-index: 1;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #2b75d6;
+}
+
+.timeline-dot--closed {
+  background: #98a5b6;
+}
+
+.timeline-item strong,
+.timeline-item small {
+  display: block;
+}
+
+.timeline-item strong {
+  color: #2c3e55;
+  font-size: 10px;
+}
+
+.timeline-item small {
+  margin-top: 3px;
+  color: #8390a2;
+  font-size: 8px;
+}
+
+.observation {
+  margin: 0;
+  padding: 13px 14px;
+  border-radius: 8px;
+  background: #f7f9fc;
+  color: #526278;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .primary-action:hover:not(:disabled) {
+    background: #1d4fae;
+  }
+
+  .detail-action:hover {
+    border-color: #8cb0dc;
+    background: #f4f8ff;
+  }
+}
+
+@media (max-width: 1150px) {
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filters-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .field--search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 680px) {
+  .page-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .metrics-grid,
+  .filters-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field--search {
+    grid-column: auto;
+  }
+
+  .detail-content {
+    padding-inline: 18px;
+  }
+
+  .drawer-header {
+    padding: 20px 18px;
+  }
+
+  .participation-header {
+    flex-direction: column;
+  }
+
+  .timeline-item {
+    grid-template-columns: 18px 1fr;
+  }
+
+  .timeline-item .link-state {
+    grid-column: 2;
+  }
+}
 </style>
