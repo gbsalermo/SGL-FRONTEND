@@ -3,6 +3,7 @@ import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 
 import { estagiarioService } from '@/modules/estagiarios/services/estagiarioService'
+import { useSessionStore } from '@/stores/session'
 import type {
   ApiErrorResponse,
   AtividadeDisponivelEstagioResponse,
@@ -10,6 +11,7 @@ import type {
   CursoEstagioResponse,
   EstagiarioResponse,
   FormacaoEstagiario,
+  ObservacaoVinculoEstagioResponse,
   SituacaoEstagio,
   TipoBolsaEstagiario,
   UsuarioOpcaoEstagioResponse,
@@ -20,6 +22,8 @@ import type {
 type EstadoOperacional = 'OPERACIONAL' | 'SEM_ATIVIDADE' | 'ENCERRADO'
 type StatusTabela = 'NAO_INICIADO' | 'EM_ANDAMENTO' | 'PRORROGADO' | 'ENCERRADO'
 type FiltroStatus = 'TODOS' | StatusTabela
+
+const session = useSessionStore()
 
 const estagiarios = ref<EstagiarioResponse[]>([])
 const carregando = ref(false)
@@ -44,6 +48,16 @@ const modalCulturasAberto = ref(false)
 const participacaoCulturas = ref<VinculoEstagioAtividadeResponse | null>(null)
 const culturasDisponiveis = ref<CulturaEstagioResponse[]>([])
 const culturasSelecionadas = ref<string[]>([])
+const novaCulturaNome = ref('')
+
+const observacoesVinculo = ref<ObservacaoVinculoEstagioResponse[]>([])
+const carregandoObservacoes = ref(false)
+const modalObservacaoAberto = ref(false)
+const observacaoTexto = ref('')
+
+const modalTreinamentoAberto = ref(false)
+const treinamentoNovoEstado = ref(false)
+const treinamentoObservacao = ref('')
 
 const modalVinculoAberto = ref(false)
 const cursosDisponiveis = ref<CursoEstagioResponse[]>([])
