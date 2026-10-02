@@ -207,3 +207,12 @@ A tipografia da página, filtros e tabela foi ampliada para melhorar a legibilid
 ### Período e ações operacionais — 02/10/2026
 
 A coluna Período passou a usar `data inicial → data final original`; em vínculos prorrogados com histórico disponível, a nova data aparece abaixo como `Prorrogado até ...`. O drawer iniciou suas ações operacionais com Associação de Atividade, registro de treinamento de segurança e gestão de Culturas por participação. A massa IQ inclui também vínculo aberto que já teve participações, mas não possui atividade ativa, para validar a diferença entre `Não iniciado` e `Sem atividade ativa`.
+
+
+### Edição híbrida do vínculo — 02/10/2026
+
+Foi adicionada a ação `Editar vínculo` no drawer, com Formação, Curso, Bolsa/modalidade, Orientador, data inicial, data final prevista e observação. O SGL pode manter esses campos localmente, mas a sincronização institucional substitui o valor quando informar o mesmo campo.
+
+A data final prevista é obrigatória. Não há opção de estágio sem término previsto.
+
+O modal segue o padrão visual consolidado de Resíduos e vínculos finalizados não oferecem edição local.
