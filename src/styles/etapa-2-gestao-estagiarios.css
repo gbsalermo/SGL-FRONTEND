@@ -327,23 +327,23 @@ body.sgl-dark-active .gestao-main .intern-page th {
 }
 
 body.sgl-dark-active .gestao-main .intern-page td {
-  padding: var(--sgl-space-4) !important;
+  padding: 17px 16px !important;
   border-color: #223550 !important;
   background: #0f1c2e !important;
   color: #b8c6d8 !important;
-  font-size: var(--sgl-font-label) !important;
+  font-size: 11.5px !important;
   line-height: var(--sgl-line-height-body) !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page td strong {
   color: #f4f7fc !important;
-  font-size: var(--sgl-font-label) !important;
+  font-size: 11.5px !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page td small {
-  margin-top: var(--sgl-space-1) !important;
+  margin-top: 5px !important;
   color: #9fb0c6 !important;
-  font-size: var(--sgl-font-helper) !important;
+  font-size: 9.5px !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page .actions-column {
@@ -387,7 +387,7 @@ body.sgl-dark-active .gestao-main .intern-page .modal-backdrop {
 
 /* Drawer */
 body.sgl-dark-active .gestao-main .intern-page .detail-drawer {
-  width: min(760px, 96vw) !important;
+  width: min(860px, 96vw) !important;
   background: #0d1929 !important;
   color: #dce6f2 !important;
   box-shadow: -22px 0 64px rgb(0 0 0 / 42%) !important;
