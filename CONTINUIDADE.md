@@ -6,7 +6,7 @@
 **Última atualização:** 24/09/2026  
 **Branch estável:** `main` do GitLab institucional  
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
-**Branch atual de trabalho:** `collab/etapa-6-estagiarios-vinculos`  
+**Branch atual de trabalho:** `collab/etapa-7-relatorios-consolidados`  
 **Etapa concluída:** Etapa 6 — Estagiários e Vínculos ✅  
 **Próxima etapa:** Etapa 7 — Relatórios consolidados ⏳
 
@@ -15,7 +15,7 @@
 **Polimento de informação do 6.5:** a tabela passou a priorizar os campos que o cliente já consulta diretamente: `Status`, `Estagiário`, `Formação`, `Contexto operacional` e `Período`. Bolsa/modalidade saiu da listagem e ficou no drawer. `Não iniciado` é um status visual derivado apenas quando o vínculo existe e ainda nunca teve participação em Atividade; `Prorrogado`, `Em andamento` e `Encerrado` permanecem visíveis na coluna de Status. O nome do Orientador aparece abaixo do Estagiário e Curso abaixo de Formação.  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
-**Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
+**Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_7_2026-10-02.md`
 
 Este é o checkpoint principal para retomada do frontend. Contratos HTTP devem ser confirmados no Swagger/OpenAPI do backend.
 
@@ -47,7 +47,7 @@ As Etapas 1–4 estão fechadas e integradas.
 Branch atual:
 
 ```text
-collab/etapa-5-projetos-atividades
+collab/etapa-7-relatorios-consolidados
 ```
 
 Os contratos backend de Projeto → SCI → Atividade, prorrogações e Código SEG estão estabilizados. O frontend está liberado para o bloco 5.5.
@@ -353,7 +353,7 @@ Estado frontend consolidado:
 - Dashboard da Gestão combina movimentações de estoque e eventos operacionais de Resíduos da Unidade;
 - cancelados são tratados em Meus Resíduos, Gestão, relatórios e rótulo.
 
-A **Etapa 5 — Projetos e Atividades está concluída e validada**. A **Etapa 6 — Estagiários e vínculos** está em andamento; o backend dos blocos 6.1–6.4 está concluído e validado e o 6.5 foi implementado no frontend, aguardando validação visual/local.
+A **Etapa 5 — Projetos e Atividades está concluída e validada**. A **Etapa 6 — Estagiários e vínculos** está concluída e validada; a frente atual é a **Etapa 7 — Relatórios consolidados**.
 
 
 ## Decisões da Etapa 5 que afetam o frontend
@@ -474,7 +474,7 @@ Os ajustes foram revalidados e incorporados ao fechamento definitivo da Etapa 4.
 
 ### Fechamento do 5.5 — concluído e validado
 
-Implementado na branch `collab/etapa-5-projetos-atividades`:
+Implementado na branch `collab/etapa-7-relatorios-consolidados`:
 
 - nova rota operacional `/projetos` para Gestão/Administração;
 - acesso direto no menu lateral, sem passagem obrigatória por Laboratório;
