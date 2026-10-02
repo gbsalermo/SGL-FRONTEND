@@ -326,6 +326,8 @@ Estagiário
 
 A interface deve remover a noção de um único "Laboratório do Estagiário" como atributo definitivo.
 
+O backend 6.4 foi validado em 02/10/2026; a adequação visual correspondente permanece para o 6.5.
+
 ---
 
 # 11. Administração/Cadastros
