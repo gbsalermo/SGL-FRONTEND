@@ -675,3 +675,12 @@ A validação final de build/suíte continua reservada ao bloco 6.6.
 - participações ativas exibem como término previsto a data final da Atividade; quando ausente, usam a data final do Projeto em vez de mostrar apenas `atual`.
 - nos selects de associação/edição, o contexto aparece como `Projeto: <nome>`.
 - validação formal de build/suíte continua reservada ao 6.6.
+
+### Correção do modal de Bolsa — 02/10/2026
+
+- `Editar bolsa` agora oferece dois modos: `Prorrogar bolsa atual` e `Registrar nova bolsa`.
+- prorrogação pede apenas a nova data final prevista e mantém a ocorrência vigente;
+- nova bolsa pede modalidade, data inicial e data final prevista; a data inicial local pode ser hoje ou anterior;
+- o grid das datas foi alinhado para manter os dois campos no mesmo eixo;
+- o separador `até` dentro do card `Bolsa vigente` do drawer deixou de usar negrito, sem alterar o tratamento da interface principal;
+- o fluxo de nova bolsa foi ajustado para aceitar corretamente a troca na data atual mesmo quando há participações registradas no ponto de corte.
