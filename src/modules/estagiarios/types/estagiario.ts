@@ -81,7 +81,7 @@ export interface EstagiarioResponse {
   laboratorioId: string | null
   laboratorioNome: string | null
   dataInicioEstagio: string | null
-  dataFimEstagio: string | null
+  dataFimEstagio: string
   tipoBolsa: TipoBolsaEstagiario | null
   observacao: string | null
   ativo: boolean
