@@ -133,6 +133,12 @@ function textoQuantidade(valor: number, singular: string, plural: string) {
   return `${valor} ${valor === 1 ? singular : plural}`
 }
 
+function nomesCulturas(participacao: VinculoEstagioAtividadeResponse) {
+  return participacao.culturas?.length
+    ? participacao.culturas.map((cultura) => cultura.nome).join(', ')
+    : 'Nenhuma cultura associada'
+}
+
 function mensagemErro(error: unknown, padrao = 'Não foi possível carregar os dados de estagiários.') {
   if (axios.isAxiosError<ApiErrorResponse>(error)) return error.response?.data?.message ?? padrao
   return error instanceof Error ? error.message : padrao
@@ -606,9 +612,7 @@ onMounted(carregar)
                     <div>
                       <dt>Culturas</dt>
                       <dd>
-                        {{ participacao.culturas?.length
-                          ? participacao.culturas.map((cultura) => cultura.nome).join(', ')
-                          : 'Nenhuma cultura associada' }}
+                        {{ nomesCulturas(participacao) }}
                       </dd>
                     </div>
                   </dl>
