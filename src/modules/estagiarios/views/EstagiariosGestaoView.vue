@@ -5,6 +5,8 @@ import { computed, onMounted, ref } from 'vue'
 import { estagiarioService } from '@/modules/estagiarios/services/estagiarioService'
 import type {
   ApiErrorResponse,
+  AtividadeDisponivelEstagioResponse,
+  CulturaEstagioResponse,
   EstagiarioResponse,
   FormacaoEstagiario,
   SituacaoEstagio,
@@ -25,6 +27,21 @@ const filtroStatus = ref<FiltroStatus>('TODOS')
 const filtroFormacao = ref<FormacaoEstagiario | 'TODOS'>('TODOS')
 const contexto = ref('TODOS')
 const selecionado = ref<EstagiarioResponse | null>(null)
+
+const acaoErro = ref('')
+const acaoSucesso = ref('')
+const processandoAcao = ref(false)
+
+const modalAtividadeAberto = ref(false)
+const atividadesDisponiveis = ref<AtividadeDisponivelEstagioResponse[]>([])
+const atividadeSelecionadaId = ref('')
+const atividadeInicio = ref('')
+const atividadeObservacao = ref('')
+
+const modalCulturasAberto = ref(false)
+const participacaoCulturas = ref<VinculoEstagioAtividadeResponse | null>(null)
+const culturasDisponiveis = ref<CulturaEstagioResponse[]>([])
+const culturasSelecionadas = ref<string[]>([])
 
 const formacoes: Record<FormacaoEstagiario, string> = {
   ENSINO_MEDIO: 'Ensino médio',
@@ -147,6 +164,34 @@ function dataLocal(valor: string) {
 function fimExibicao(vinculo: VinculoEstagioResponse | null) {
   if (!vinculo) return null
   return vinculo.dataFimEfetiva || vinculo.dataFimPrevista
+}
+
+function fimBasePeriodo(vinculo: VinculoEstagioResponse | null) {
+  if (!vinculo) return null
+
+  if (
+    vinculo.situacao === 'PRORROGADO'
+    && vinculo.dataFimPrevistaOriginal
+  ) {
+    return vinculo.dataFimPrevistaOriginal
+  }
+
+  return vinculo.dataFimEfetiva || vinculo.dataFimPrevista
+}
+
+function possuiProrrogacaoExibivel(vinculo: VinculoEstagioResponse | null) {
+  return Boolean(
+    vinculo?.situacao === 'PRORROGADO'
+    && vinculo.dataFimPrevistaOriginal
+    && vinculo.dataFimPrevista,
+  )
+}
+
+function textoContextoSemAtividade(estagiario: EstagiarioResponse) {
+  const vinculo = vinculoAtual(estagiario)
+  return (vinculo?.participacoesAtividade?.length ?? 0) > 0
+    ? 'Sem atividades ativas'
+    : 'Sem atividades vinculadas'
 }
 
 function contagemContexto(vinculo: VinculoEstagioResponse | null) {
@@ -298,6 +343,141 @@ async function carregar() {
     erro.value = mensagemErro(error)
   } finally {
     carregando.value = false
+  }
+}
+
+function hojeIso() {
+  const agora = new Date()
+  const ano = agora.getFullYear()
+  const mes = String(agora.getMonth() + 1).padStart(2, '0')
+  const dia = String(agora.getDate()).padStart(2, '0')
+  return `${ano}-${mes}-${dia}`
+}
+
+function limparFeedbackAcao() {
+  acaoErro.value = ''
+  acaoSucesso.value = ''
+}
+
+async function abrirAssociarAtividade() {
+  if (!vinculoSelecionado.value || vinculoSelecionado.value.situacao === 'FINALIZADO') return
+
+  limparFeedbackAcao()
+  atividadeSelecionadaId.value = ''
+  atividadeInicio.value = hojeIso()
+  atividadeObservacao.value = ''
+  modalAtividadeAberto.value = true
+
+  if (atividadesDisponiveis.value.length > 0) return
+
+  try {
+    atividadesDisponiveis.value = await estagiarioService.listarAtividadesDisponiveis()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível carregar as Atividades disponíveis.')
+  }
+}
+
+function fecharModalAtividade() {
+  modalAtividadeAberto.value = false
+}
+
+async function associarAtividade() {
+  if (!vinculoSelecionado.value) return
+
+  if (!atividadeSelecionadaId.value) {
+    acaoErro.value = 'Selecione uma Atividade.'
+    return
+  }
+
+  if (!atividadeInicio.value) {
+    acaoErro.value = 'Informe a data de início da participação.'
+    return
+  }
+
+  limparFeedbackAcao()
+  processandoAcao.value = true
+
+  try {
+    await estagiarioService.associarAtividade(vinculoSelecionado.value.id, {
+      atividadeId: atividadeSelecionadaId.value,
+      dataInicioParticipacao: atividadeInicio.value,
+      observacao: atividadeObservacao.value.trim() || null,
+      culturaIds: [],
+    })
+
+    modalAtividadeAberto.value = false
+    acaoSucesso.value = 'Atividade associada ao vínculo.'
+    await carregar()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível associar a Atividade.')
+  } finally {
+    processandoAcao.value = false
+  }
+}
+
+async function registrarTreinamento() {
+  if (
+    !vinculoSelecionado.value
+    || vinculoSelecionado.value.treinamentoSegurancaConcluido
+    || vinculoSelecionado.value.situacao === 'FINALIZADO'
+  ) return
+
+  limparFeedbackAcao()
+  processandoAcao.value = true
+
+  try {
+    await estagiarioService.concluirTreinamento(vinculoSelecionado.value.id)
+    acaoSucesso.value = 'Treinamento de segurança registrado.'
+    await carregar()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível registrar o treinamento.')
+  } finally {
+    processandoAcao.value = false
+  }
+}
+
+async function abrirGerenciarCulturas(participacao: VinculoEstagioAtividadeResponse) {
+  if (!participacao.ativa) return
+
+  limparFeedbackAcao()
+  participacaoCulturas.value = participacao
+  culturasSelecionadas.value = participacao.culturas?.map((cultura) => cultura.id) ?? []
+  modalCulturasAberto.value = true
+
+  if (culturasDisponiveis.value.length > 0) return
+
+  try {
+    culturasDisponiveis.value = await estagiarioService.listarCulturasAtivas()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível carregar as Culturas.')
+  }
+}
+
+function fecharModalCulturas() {
+  modalCulturasAberto.value = false
+  participacaoCulturas.value = null
+}
+
+async function salvarCulturas() {
+  if (!participacaoCulturas.value) return
+
+  limparFeedbackAcao()
+  processandoAcao.value = true
+
+  try {
+    await estagiarioService.atualizarCulturas(
+      participacaoCulturas.value.id,
+      culturasSelecionadas.value,
+    )
+
+    modalCulturasAberto.value = false
+    participacaoCulturas.value = null
+    acaoSucesso.value = 'Culturas da participação atualizadas.'
+    await carregar()
+  } catch (error) {
+    acaoErro.value = mensagemErro(error, 'Não foi possível atualizar as Culturas.')
+  } finally {
+    processandoAcao.value = false
   }
 }
 
@@ -482,7 +662,7 @@ onMounted(carregar)
                   v-else-if="estadoOperacional(estagiario) === 'SEM_ATIVIDADE'"
                   class="context-empty-text"
                 >
-                  Sem atividades vinculadas
+                  {{ textoContextoSemAtividade(estagiario) }}
                 </span>
 
                 <span
@@ -495,9 +675,17 @@ onMounted(carregar)
               </td>
 
               <td class="period-cell">
-                <strong>{{ formatarData(vinculoAtual(estagiario)?.dataInicio) }}</strong>
-                <small>até</small>
-                <strong>{{ formatarData(fimExibicao(vinculoAtual(estagiario))) }}</strong>
+                <div class="period-range">
+                  <strong>{{ formatarData(vinculoAtual(estagiario)?.dataInicio) }}</strong>
+                  <span aria-hidden="true">→</span>
+                  <strong>{{ formatarData(fimBasePeriodo(vinculoAtual(estagiario))) }}</strong>
+                </div>
+                <small
+                  v-if="possuiProrrogacaoExibivel(vinculoAtual(estagiario))"
+                  class="extension-note"
+                >
+                  Prorrogado até {{ formatarData(vinculoAtual(estagiario)?.dataFimPrevista) }}
+                </small>
               </td>
 
               <td class="actions-column" @click.stop>
@@ -533,6 +721,9 @@ onMounted(carregar)
         </header>
 
         <div class="detail-content">
+          <div v-if="acaoErro" class="feedback feedback--error drawer-feedback">{{ acaoErro }}</div>
+          <div v-if="acaoSucesso" class="feedback feedback--success drawer-feedback">{{ acaoSucesso }}</div>
+
           <template v-if="vinculoSelecionado">
             <section class="drawer-section">
               <div class="section-heading">
@@ -551,8 +742,15 @@ onMounted(carregar)
                 <div class="institutional-period">
                   <span>{{ formatarData(vinculoSelecionado.dataInicio) }}</span>
                   <span>→</span>
-                  <span>{{ formatarData(fimExibicao(vinculoSelecionado)) }}</span>
+                  <span>{{ formatarData(fimBasePeriodo(vinculoSelecionado)) }}</span>
                 </div>
+
+                <p
+                  v-if="possuiProrrogacaoExibivel(vinculoSelecionado)"
+                  class="drawer-extension-note"
+                >
+                  Prorrogado até <strong>{{ formatarData(vinculoSelecionado.dataFimPrevista) }}</strong>
+                </p>
 
                 <p>
                   Referência:
@@ -611,9 +809,41 @@ onMounted(carregar)
               </div>
             </section>
 
-            <section class="drawer-section">
+            <section
+              v-if="vinculoSelecionado.situacao !== 'FINALIZADO'"
+              class="drawer-section compact-section"
+            >
               <div class="section-heading">
                 <span class="section-icon">05</span>
+                <h3>Ações operacionais</h3>
+              </div>
+
+              <div class="operational-actions">
+                <button
+                  class="drawer-action drawer-action--primary"
+                  type="button"
+                  :disabled="processandoAcao"
+                  @click="abrirAssociarAtividade"
+                >
+                  Associar atividade
+                </button>
+
+                <button
+                  class="drawer-action"
+                  type="button"
+                  :disabled="processandoAcao || vinculoSelecionado.treinamentoSegurancaConcluido"
+                  @click="registrarTreinamento"
+                >
+                  {{ vinculoSelecionado.treinamentoSegurancaConcluido
+                    ? 'Treinamento concluído'
+                    : 'Registrar treinamento' }}
+                </button>
+              </div>
+            </section>
+
+            <section class="drawer-section">
+              <div class="section-heading">
+                <span class="section-icon">06</span>
                 <h3>Participações em atividades</h3>
               </div>
 
@@ -662,6 +892,12 @@ onMounted(carregar)
                     </div>
                   </dl>
 
+                  <div v-if="participacao.ativa" class="participation-actions">
+                    <button type="button" @click="abrirGerenciarCulturas(participacao)">
+                      Gerenciar culturas
+                    </button>
+                  </div>
+
                   <div class="participation-period">
                     {{ formatarData(participacao.dataInicioParticipacao) }}
                     <span>→</span>
@@ -673,7 +909,7 @@ onMounted(carregar)
 
             <section v-if="selecionado.vinculos.length > 0" class="drawer-section">
               <div class="section-heading">
-                <span class="section-icon">06</span>
+                <span class="section-icon">07</span>
                 <h3>Histórico de vínculos</h3>
               </div>
 
@@ -693,7 +929,7 @@ onMounted(carregar)
 
             <section v-if="vinculoSelecionado.observacao" class="drawer-section">
               <div class="section-heading">
-                <span class="section-icon">07</span>
+                <span class="section-icon">08</span>
                 <h3>Observação</h3>
               </div>
               <p class="observation">{{ vinculoSelecionado.observacao }}</p>
@@ -705,6 +941,109 @@ onMounted(carregar)
           </div>
         </div>
       </aside>
+    </div>
+
+    <div v-if="modalAtividadeAberto" class="action-modal-backdrop" @click.self="fecharModalAtividade">
+      <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Associar atividade">
+        <header>
+          <div>
+            <span>AÇÃO OPERACIONAL</span>
+            <h2>Associar atividade</h2>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModalAtividade">×</button>
+        </header>
+
+        <div class="action-modal-content">
+          <label class="action-field">
+            <span>Atividade</span>
+            <select v-model="atividadeSelecionadaId">
+              <option value="">Selecione</option>
+              <option
+                v-for="atividade in atividadesDisponiveis"
+                :key="atividade.id"
+                :value="atividade.id"
+              >
+                {{ atividade.nome }} · {{ atividade.projetoNome || 'Projeto não informado' }}
+              </option>
+            </select>
+          </label>
+
+          <label class="action-field">
+            <span>Início da participação</span>
+            <input v-model="atividadeInicio" type="date" />
+          </label>
+
+          <label class="action-field">
+            <span>Observação</span>
+            <textarea
+              v-model="atividadeObservacao"
+              rows="3"
+              placeholder="Opcional"
+            />
+          </label>
+        </div>
+
+        <footer>
+          <button class="drawer-action" type="button" @click="fecharModalAtividade">
+            Cancelar
+          </button>
+          <button
+            class="drawer-action drawer-action--primary"
+            type="button"
+            :disabled="processandoAcao"
+            @click="associarAtividade"
+          >
+            {{ processandoAcao ? 'Associando...' : 'Associar atividade' }}
+          </button>
+        </footer>
+      </section>
+    </div>
+
+    <div v-if="modalCulturasAberto" class="action-modal-backdrop" @click.self="fecharModalCulturas">
+      <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Gerenciar culturas">
+        <header>
+          <div>
+            <span>AÇÃO OPERACIONAL</span>
+            <h2>Gerenciar culturas</h2>
+            <p>{{ participacaoCulturas?.atividadeNome || 'Participação selecionada' }}</p>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModalCulturas">×</button>
+        </header>
+
+        <div class="action-modal-content">
+          <p class="culture-guidance">
+            Selecione as Culturas relacionadas a esta participação.
+          </p>
+
+          <div v-if="culturasDisponiveis.length === 0" class="drawer-empty">
+            Nenhuma Cultura ativa disponível.
+          </div>
+
+          <label
+            v-for="cultura in culturasDisponiveis"
+            v-else
+            :key="cultura.id"
+            class="culture-option"
+          >
+            <input v-model="culturasSelecionadas" type="checkbox" :value="cultura.id" />
+            <span>{{ cultura.nome }}</span>
+          </label>
+        </div>
+
+        <footer>
+          <button class="drawer-action" type="button" @click="fecharModalCulturas">
+            Cancelar
+          </button>
+          <button
+            class="drawer-action drawer-action--primary"
+            type="button"
+            :disabled="processandoAcao"
+            @click="salvarCulturas"
+          >
+            {{ processandoAcao ? 'Salvando...' : 'Salvar culturas' }}
+          </button>
+        </footer>
+      </section>
     </div>
   </section>
 </template>
