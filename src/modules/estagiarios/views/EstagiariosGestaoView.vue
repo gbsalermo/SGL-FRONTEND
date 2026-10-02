@@ -1601,14 +1601,11 @@ onMounted(carregar)
               <small>O Curso será criado no catálogo da Unidade e já ficará selecionado no vínculo.</small>
             </label>
 
-            <label class="action-field">
+            <div class="action-field action-field--readonly">
               <span>Bolsa / modalidade</span>
-              <select v-model="edicaoTipoBolsa">
-                <option v-for="opcao in opcoesBolsa" :key="opcao.valor" :value="opcao.valor">
-                  {{ opcao.rotulo }}
-                </option>
-              </select>
-            </label>
+              <strong>{{ rotuloBolsa(edicaoTipoBolsa) }}</strong>
+              <small>Somente leitura. Para trocar a bolsa, use “Editar bolsa” nas Ações operacionais.</small>
+            </div>
 
             <label class="action-field">
               <span>Orientador / responsável</span>
