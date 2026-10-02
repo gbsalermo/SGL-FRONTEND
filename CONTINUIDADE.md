@@ -625,3 +625,29 @@ A ação `Editar vínculo` usa `PUT /v1/vinculos-estagio/{vinculoId}`. Vínculos
 ### Projetos ↔ Estagiários após a Etapa 6
 
 Refinamento futuro já decidido: no hub de Projetos, cada Atividade deverá mostrar também os Estagiários associados a ela, além do responsável já exibido. A informação deve vir das participações `VinculoEstagioAtividade`; não criar relação visual ou contratual artificial diretamente entre Projeto e Estagiário. Implementar somente após o fechamento da Etapa 6.
+
+
+### Drawer consolidado do 6.5 — 02/10/2026
+
+O drawer de Estagiários foi reorganizado para:
+
+1. Ações operacionais;
+2. Bolsa / Vínculo + histórico;
+3. Formação;
+4. Orientador;
+5. Participações em Atividades;
+6. Observações.
+
+Refinamentos implementados:
+
+- numeração/separadores de seção ampliados;
+- treinamento integrado às Ações operacionais;
+- conclusão/reversão de treinamento passa por modal de confirmação;
+- observação opcional de treinamento aparece no histórico de Observações;
+- Gestor/Admin pode adicionar observação operacional;
+- observações existentes de vínculo e participação também aparecem no bloco;
+- Participações ganharam tipografia maior;
+- Gerenciar Culturas permite criar uma Cultura da Unidade sem sair do modal, selecionando-a para associação;
+- `BOLSA / VÍNCULO` reúne bolsa vigente/último vínculo e histórico no mesmo card.
+
+Implementação publicada, ainda pendente de validação manual/automática no 6.6.
