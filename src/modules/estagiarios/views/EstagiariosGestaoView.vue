@@ -287,6 +287,21 @@ function nomesCulturas(participacao: VinculoEstagioAtividadeResponse) {
     : 'Nenhuma cultura associada'
 }
 
+function fimReferenciaParticipacao(participacao: VinculoEstagioAtividadeResponse) {
+  return participacao.dataFimParticipacao
+    || participacao.atividadeDataFim
+    || participacao.projetoDataFim
+    || null
+}
+
+function usaPrazoDoProjeto(participacao: VinculoEstagioAtividadeResponse) {
+  return Boolean(
+    participacao.ativa
+    && !participacao.atividadeDataFim
+    && participacao.projetoDataFim,
+  )
+}
+
 function mensagemErro(error: unknown, padrao = 'Não foi possível carregar os dados de estagiários.') {
   if (axios.isAxiosError<ApiErrorResponse>(error)) return error.response?.data?.message ?? padrao
   return error instanceof Error ? error.message : padrao
