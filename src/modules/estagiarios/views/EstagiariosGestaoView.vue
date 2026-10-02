@@ -1004,13 +1004,64 @@ onMounted(carregar)
           <div v-if="acaoSucesso" class="feedback feedback--success drawer-feedback">{{ acaoSucesso }}</div>
 
           <template v-if="vinculoSelecionado">
-            <section class="drawer-section">
+            <section class="drawer-section compact-section drawer-section--actions">
               <div class="section-heading">
                 <span class="section-icon">01</span>
-                <h3>Bolsa</h3>
+                <h3>Ações operacionais</h3>
+              </div>
+
+              <div class="operational-actions">
+                <button
+                  v-if="vinculoSelecionado.situacao !== 'FINALIZADO'"
+                  class="drawer-action drawer-action--primary"
+                  type="button"
+                  :disabled="processandoAcao"
+                  @click="abrirEditarVinculo"
+                >
+                  Editar vínculo
+                </button>
+
+                <button
+                  v-if="vinculoSelecionado.situacao !== 'FINALIZADO'"
+                  class="drawer-action"
+                  type="button"
+                  :disabled="processandoAcao"
+                  @click="abrirAssociarAtividade"
+                >
+                  Associar atividade
+                </button>
+
+                <button
+                  class="drawer-action training-action"
+                  :class="{
+                    'training-action--complete': vinculoSelecionado.treinamentoSegurancaConcluido,
+                    'training-action--pending': !vinculoSelecionado.treinamentoSegurancaConcluido,
+                  }"
+                  type="button"
+                  :disabled="processandoAcao || vinculoSelecionado.situacao === 'FINALIZADO'"
+                  @click="abrirModalTreinamento"
+                >
+                  <span class="training-action-icon" aria-hidden="true">
+                    {{ vinculoSelecionado.treinamentoSegurancaConcluido ? '✓' : '!' }}
+                  </span>
+                  <span>
+                    {{ vinculoSelecionado.treinamentoSegurancaConcluido
+                      ? 'Treinamento concluído'
+                      : 'Treinamento pendente' }}
+                  </span>
+                </button>
+              </div>
+            </section>
+
+            <section class="drawer-section">
+              <div class="section-heading">
+                <span class="section-icon">02</span>
+                <h3>Bolsa / Vínculo</h3>
               </div>
 
               <div class="institutional-card">
+                <div class="card-subtitle">Bolsa vigente</div>
+
                 <div class="institutional-title">
                   <strong>{{ rotuloBolsa(vinculoSelecionado.tipoBolsa) }}</strong>
                   <span class="link-state" :class="{ 'link-state--closed': vinculoSelecionado.situacao === 'FINALIZADO' }">
@@ -1035,12 +1086,33 @@ onMounted(carregar)
                   Referência:
                   <strong>{{ vinculoSelecionado.referenciaInstitucional || 'não informada' }}</strong>
                 </p>
+
+                <div class="link-history-divider" />
+
+                <div class="card-subtitle card-subtitle--history">Histórico de vínculos</div>
+
+                <div class="timeline timeline--inside-card">
+                  <article v-for="vinculo in selecionado.vinculos" :key="vinculo.id" class="timeline-item">
+                    <span class="timeline-dot" :class="{ 'timeline-dot--closed': vinculo.situacao === 'FINALIZADO' }" />
+                    <div>
+                      <strong>{{ rotuloBolsa(vinculo.tipoBolsa) }}</strong>
+                      <small>
+                        {{ formatarData(vinculo.dataInicio) }}
+                        <b>até</b>
+                        {{ formatarData(fimExibicao(vinculo)) }}
+                      </small>
+                    </div>
+                    <span class="link-state" :class="{ 'link-state--closed': vinculo.situacao === 'FINALIZADO' }">
+                      {{ rotuloSituacao(vinculo.situacao) }}
+                    </span>
+                  </article>
+                </div>
               </div>
             </section>
 
             <section class="drawer-section compact-section">
               <div class="section-heading">
-                <span class="section-icon">02</span>
+                <span class="section-icon">03</span>
                 <h3>Formação</h3>
               </div>
 
@@ -1059,79 +1131,16 @@ onMounted(carregar)
 
             <section class="drawer-section compact-section">
               <div class="section-heading">
-                <span class="section-icon">03</span>
+                <span class="section-icon">04</span>
                 <h3>Orientador</h3>
               </div>
 
               <p class="single-value">{{ vinculoSelecionado.orientadorNome || 'Não informado' }}</p>
             </section>
 
-            <section class="drawer-section compact-section">
-              <div class="section-heading">
-                <span class="section-icon">04</span>
-                <h3>Segurança</h3>
-              </div>
-
-              <div
-                class="training-card"
-                :class="{ 'training-card--pending': !vinculoSelecionado.treinamentoSegurancaConcluido }"
-              >
-                <span class="training-check">{{ vinculoSelecionado.treinamentoSegurancaConcluido ? '✓' : '!' }}</span>
-                <div>
-                  <strong>
-                    {{ vinculoSelecionado.treinamentoSegurancaConcluido ? 'Treinamento concluído' : 'Treinamento pendente' }}
-                  </strong>
-                  <small>
-                    {{ vinculoSelecionado.treinamentoSegurancaConcluido ? 'Conclusão registrada no vínculo' : 'Aguardando registro de conclusão' }}
-                  </small>
-                </div>
-              </div>
-            </section>
-
-            <section
-              v-if="vinculoSelecionado.situacao !== 'FINALIZADO'"
-              class="drawer-section compact-section"
-            >
-              <div class="section-heading">
-                <span class="section-icon">05</span>
-                <h3>Ações operacionais</h3>
-              </div>
-
-              <div class="operational-actions">
-                <button
-                  class="drawer-action drawer-action--primary"
-                  type="button"
-                  :disabled="processandoAcao"
-                  @click="abrirEditarVinculo"
-                >
-                  Editar vínculo
-                </button>
-
-                <button
-                  class="drawer-action"
-                  type="button"
-                  :disabled="processandoAcao"
-                  @click="abrirAssociarAtividade"
-                >
-                  Associar atividade
-                </button>
-
-                <button
-                  class="drawer-action"
-                  type="button"
-                  :disabled="processandoAcao || vinculoSelecionado.treinamentoSegurancaConcluido"
-                  @click="registrarTreinamento"
-                >
-                  {{ vinculoSelecionado.treinamentoSegurancaConcluido
-                    ? 'Treinamento concluído'
-                    : 'Registrar treinamento' }}
-                </button>
-              </div>
-            </section>
-
             <section class="drawer-section">
               <div class="section-heading">
-                <span class="section-icon">06</span>
+                <span class="section-icon">05</span>
                 <h3>Participações em atividades</h3>
               </div>
 
@@ -1174,9 +1183,7 @@ onMounted(carregar)
                     </div>
                     <div>
                       <dt>Culturas</dt>
-                      <dd>
-                        {{ nomesCulturas(participacao) }}
-                      </dd>
+                      <dd>{{ nomesCulturas(participacao) }}</dd>
                     </div>
                   </dl>
 
@@ -1188,39 +1195,77 @@ onMounted(carregar)
 
                   <div class="participation-period">
                     {{ formatarData(participacao.dataInicioParticipacao) }}
-                    <span>→</span>
+                    <span>até</span>
                     {{ participacao.dataFimParticipacao ? formatarData(participacao.dataFimParticipacao) : 'atual' }}
                   </div>
                 </article>
               </div>
             </section>
 
-            <section v-if="selecionado.vinculos.length > 0" class="drawer-section">
-              <div class="section-heading">
-                <span class="section-icon">07</span>
-                <h3>Histórico de vínculos</h3>
+            <section class="drawer-section observations-section">
+              <div class="section-heading section-heading--with-action">
+                <div class="section-heading-main">
+                  <span class="section-icon">06</span>
+                  <h3>Observações</h3>
+                </div>
+
+                <button class="section-inline-action" type="button" @click="abrirModalObservacao">
+                  + Adicionar observação
+                </button>
               </div>
 
-              <div class="timeline">
-                <article v-for="vinculo in selecionado.vinculos" :key="vinculo.id" class="timeline-item">
-                  <span class="timeline-dot" :class="{ 'timeline-dot--closed': vinculo.situacao === 'FINALIZADO' }" />
-                  <div>
-                    <strong>{{ rotuloBolsa(vinculo.tipoBolsa) }}</strong>
-                    <small>{{ formatarData(vinculo.dataInicio) }} → {{ formatarData(fimExibicao(vinculo)) }}</small>
+              <div v-if="carregandoObservacoes" class="drawer-empty">
+                Carregando observações...
+              </div>
+
+              <div v-else class="observations-list">
+                <article v-if="vinculoSelecionado.observacao" class="observation-entry">
+                  <div class="observation-entry-header">
+                    <span class="observation-kind">Vínculo</span>
+                    <small>Observação atual do vínculo</small>
                   </div>
-                  <span class="link-state" :class="{ 'link-state--closed': vinculo.situacao === 'FINALIZADO' }">
-                    {{ rotuloSituacao(vinculo.situacao) }}
-                  </span>
+                  <p>{{ vinculoSelecionado.observacao }}</p>
                 </article>
-              </div>
-            </section>
 
-            <section v-if="vinculoSelecionado.observacao" class="drawer-section">
-              <div class="section-heading">
-                <span class="section-icon">08</span>
-                <h3>Observação</h3>
+                <article
+                  v-for="participacao in vinculoSelecionado.participacoesAtividade.filter((item) => Boolean(item.observacao))"
+                  :key="`participacao-${participacao.id}`"
+                  class="observation-entry"
+                >
+                  <div class="observation-entry-header">
+                    <span class="observation-kind">Participação</span>
+                    <small>{{ participacao.atividadeNome || 'Atividade' }}</small>
+                  </div>
+                  <p>{{ participacao.observacao }}</p>
+                </article>
+
+                <article
+                  v-for="observacao in observacoesVinculo"
+                  :key="observacao.id"
+                  class="observation-entry"
+                  :class="{ 'observation-entry--training': observacao.tipo === 'TREINAMENTO_SEGURANCA' }"
+                >
+                  <div class="observation-entry-header">
+                    <span class="observation-kind">
+                      {{ observacao.tipo === 'TREINAMENTO_SEGURANCA' ? 'Treinamento' : 'Operacional' }}
+                    </span>
+                    <small>{{ formatarDataHora(observacao.dataHora) }} · {{ observacao.usuarioNome }}</small>
+                  </div>
+                  <strong>{{ rotuloEventoObservacao(observacao) }}</strong>
+                  <p v-if="observacao.texto">{{ observacao.texto }}</p>
+                </article>
+
+                <div
+                  v-if="
+                    !vinculoSelecionado.observacao
+                    && !vinculoSelecionado.participacoesAtividade.some((item) => Boolean(item.observacao))
+                    && observacoesVinculo.length === 0
+                  "
+                  class="drawer-empty"
+                >
+                  Nenhuma observação registrada para este vínculo.
+                </div>
               </div>
-              <p class="observation">{{ vinculoSelecionado.observacao }}</p>
             </section>
           </template>
 
