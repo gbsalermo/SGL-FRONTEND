@@ -240,7 +240,7 @@ body.sgl-dark-active .gestao-main .intern-page .field {
 body.sgl-dark-active .gestao-main .intern-page .field > span,
 body.sgl-dark-active .gestao-main .intern-page .unit-readonly span {
   color: #c9d5e5 !important;
-  font-size: 10.5px !important;
+  font-size: 11.5px !important;
   font-weight: var(--sgl-font-weight-semibold) !important;
   text-transform: none !important;
 }
@@ -253,7 +253,7 @@ body.sgl-dark-active .gestao-main .intern-page .field select {
   border-radius: var(--sgl-radius-control) !important;
   background: #111f33 !important;
   color: #eef4fb !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   color-scheme: dark;
 }
 
@@ -322,28 +322,28 @@ body.sgl-dark-active .gestao-main .intern-page th {
   border-color: #2a3d58 !important;
   background: #14243c !important;
   color: #b8c6d8 !important;
-  font-size: 10.5px !important;
+  font-size: 11.5px !important;
   font-weight: var(--sgl-font-weight-bold) !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page td {
-  padding: 17px 16px !important;
+  padding: 18px 16px !important;
   border-color: #223550 !important;
   background: #0f1c2e !important;
   color: #b8c6d8 !important;
-  font-size: 12.5px !important;
+  font-size: 13.5px !important;
   line-height: var(--sgl-line-height-body) !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page td strong {
   color: #f4f7fc !important;
-  font-size: 12.5px !important;
+  font-size: 13.5px !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page td small {
-  margin-top: 5px !important;
+  margin-top: 6px !important;
   color: #9fb0c6 !important;
-  font-size: 10.5px !important;
+  font-size: 11.5px !important;
 }
 
 body.sgl-dark-active .gestao-main .intern-page .actions-column {
@@ -358,11 +358,11 @@ body.sgl-dark-active .gestao-main .intern-page .actions-column {
 
 /* Status */
 body.sgl-dark-active .gestao-main .intern-page .status-pill {
-  min-height: 26px !important;
+  min-height: 28px !important;
   align-items: center !important;
-  padding: 0 10px !important;
+  padding: 0 11px !important;
   border-radius: var(--sgl-radius-pill) !important;
-  font-size: var(--sgl-font-helper) !important;
+  font-size: 11.5px !important;
   font-weight: var(--sgl-font-weight-bold) !important;
 }
 
@@ -902,4 +902,71 @@ body.sgl-dark-active .gestao-main .intern-page .drawer-action--primary {
 body.sgl-dark-active .gestao-main .intern-page .extension-note,
 body.sgl-dark-active .gestao-main .intern-page .drawer-extension-note {
   color: #9bc4ff !important;
+}
+
+
+/* Etapa 6.5 — polimento final da listagem principal */
+body.sgl-dark-active .gestao-main .intern-page .context-item,
+body.sgl-dark-active .gestao-main .intern-page .context-empty-text,
+body.sgl-dark-active .gestao-main .intern-page .history-preview {
+  font-size: 13px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .period-separator {
+  color: #E7EEF7 !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .period-cell .extension-note {
+  color: #B8C6D8 !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page tbody tr {
+  cursor: pointer;
+}
+
+body.sgl-dark-active .gestao-main .intern-page tbody tr td {
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.sgl-dark-active .gestao-main .intern-page .metric-card--success:hover {
+    border-color: #3F9367 !important;
+    background: #173328 !important;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page .metric-card--warning:hover {
+    border-color: #B08A2D !important;
+    background: #302716 !important;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page .metric-card--info:hover {
+    border-color: #568CCB !important;
+    background: #183553 !important;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page .metric-card:not(.metric-card--success):not(.metric-card--warning):not(.metric-card--info):hover {
+    border-color: #6E7E93 !important;
+    background: #192536 !important;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page tbody tr:hover td {
+    background: #172B46 !important;
+    border-color: #34506F !important;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page tbody tr:hover td:first-child {
+    box-shadow: inset 4px 0 0 #5D91D8;
+  }
+
+  body.sgl-dark-active .gestao-main .intern-page tbody tr:hover .detail-action {
+    border-color: #4F78A7 !important;
+    background: #172941 !important;
+  }
 }
