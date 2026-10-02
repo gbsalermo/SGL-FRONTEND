@@ -445,6 +445,8 @@ ambiente institucional
 
 Não oferecer botão cotidiano de "Encerrar estágio" ou "Prorrogar estágio" como fonte de verdade. Nova bolsa mantém o mesmo Usuario/Estagiario e cria novo VinculoEstagio; prorrogação da mesma bolsa mantém o vínculo atual.
 
+O backend 6.4 foi validado em 02/10/2026; o 6.5 deve apenas refletir esse contrato na interface.
+
 ---
 
 # 13. Fluxo de Administração/Cadastros
