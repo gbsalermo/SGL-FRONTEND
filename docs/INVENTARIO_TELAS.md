@@ -510,3 +510,6 @@ A tela atual de Projetos em Administração permanece como CRUD compatível dura
 
 
 **Drawer de Estagiários — edição híbrida:** `Editar vínculo` — Formação, Curso, Bolsa/modalidade, Orientador e período; `Associar atividade`; `Registrar treinamento`; `Gerenciar culturas`. O fim previsto é obrigatório e o vínculo finalizado permanece somente leitura.
+
+
+**Drawer consolidado 6.5:** Ações operacionais no topo; Bolsa/Vínculo + histórico em um único card; Formação; Orientador; Participações; Observações. Treinamento é ação confirmável e reversível/auditável. Observações podem ser adicionadas pelo Gestor/Admin. O modal de Culturas permite criar nova Cultura da Unidade durante a associação.
