@@ -1060,7 +1060,9 @@ onMounted(carregar)
               </div>
 
               <div class="institutional-card">
-                <div class="card-subtitle">Bolsa vigente</div>
+                <div class="card-subtitle">
+                  {{ vinculoSelecionado.situacao === 'FINALIZADO' ? 'Último vínculo' : 'Bolsa vigente' }}
+                </div>
 
                 <div class="institutional-title">
                   <strong>{{ rotuloBolsa(vinculoSelecionado.tipoBolsa) }}</strong>
