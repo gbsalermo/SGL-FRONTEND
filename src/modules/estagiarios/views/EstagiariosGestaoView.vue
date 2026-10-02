@@ -52,7 +52,13 @@ const participacaoEdicaoObservacao = ref('')
 
 const modalEncerrarParticipacaoAberto = ref(false)
 const participacaoEncerramento = ref<VinculoEstagioAtividadeResponse | null>(null)
+const participacaoEncerramentoId = ref('')
 const participacaoDataFim = ref('')
+
+const modalBolsaAberto = ref(false)
+const novaBolsaTipo = ref<TipoBolsaEstagiario>('BOLSA_INSTITUCIONAL')
+const novaBolsaInicio = ref('')
+const novaBolsaFimPrevista = ref('')
 
 const modalCulturasAberto = ref(false)
 const participacaoCulturas = ref<VinculoEstagioAtividadeResponse | null>(null)
