@@ -1473,6 +1473,7 @@ onMounted(carregar)
                     {{ formatarData(participacao.dataInicioParticipacao) }}
                     <span>até</span>
                     {{ fimReferenciaParticipacao(participacao) ? formatarData(fimReferenciaParticipacao(participacao)) : 'atual' }}
+                    <small v-if="usaPrazoDoProjeto(participacao)">prazo do Projeto</small>
                   </div>
                 </article>
               </div>
@@ -1853,11 +1854,11 @@ onMounted(carregar)
       class="action-modal-backdrop"
       @click.self="fecharModalEncerrarParticipacao"
     >
-      <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Encerrar participação">
+      <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Encerrar atividade">
         <header>
           <div>
             <span>CONFIRMAÇÃO</span>
-            <h2>Encerrar participação</h2>
+            <h2>Encerrar atividade</h2>
             <p>
               O vínculo do Estagiário continua ativo; apenas a participação nesta Atividade será encerrada.
             </p>
@@ -3180,6 +3181,53 @@ tbody tr:hover .history-preview {
   color: #7a8798;
   font-size: 10px;
   line-height: 1.5;
+}
+
+.action-field--readonly {
+  align-content: center;
+  min-height: 74px;
+  padding: 10px 12px;
+  border: 1px solid #dce4ee;
+  border-radius: 7px;
+  background: #f8fafc;
+}
+
+.action-field--readonly strong {
+  color: #2d4058;
+  font-size: 12.5px;
+}
+
+.scholarship-current {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid #dce5ef;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.scholarship-current > span {
+  color: #78889b;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.scholarship-current strong {
+  color: #25364d;
+  font-size: 14px;
+}
+
+.scholarship-current small {
+  color: #6f7f92;
+  font-size: 11px;
+}
+
+.participation-period small {
+  margin-left: 3px;
+  color: #5c78a1;
+  font-size: 9.5px;
+  font-weight: 700;
 }
 
 @media (hover: hover) and (pointer: fine) {
