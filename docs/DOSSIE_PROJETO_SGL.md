@@ -16,7 +16,7 @@ Etapa 2 — Dark Mode definitivo              ✅ concluída
 Etapa 3 — refinamentos do fluxo de Resíduos ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos  ✅ concluída e validada
 Etapa 5 — Projetos e Atividades             ✅ concluída e validada
-Etapa 6 — Estagiários e vínculos            ⏳ próxima
+Etapa 6 — Estagiários e vínculos            ✅ concluída e validada
 ```
 
 Retomada imediata: após o merge de `collab/etapa-7-relatorios-consolidados`, criar a branch da Etapa 6 sobre a `main` sincronizada. Projeto → SCI → Atividade e os contratos HTTP da Etapa 5 estão estabilizados.
