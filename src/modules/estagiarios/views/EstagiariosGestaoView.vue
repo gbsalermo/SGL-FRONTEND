@@ -1470,7 +1470,7 @@ onMounted(carregar)
                   <div class="participation-period">
                     {{ formatarData(participacao.dataInicioParticipacao) }}
                     <span>até</span>
-                    {{ participacao.dataFimParticipacao ? formatarData(participacao.dataFimParticipacao) : 'atual' }}
+                    {{ fimReferenciaParticipacao(participacao) ? formatarData(fimReferenciaParticipacao(participacao)) : 'atual' }}
                   </div>
                 </article>
               </div>
