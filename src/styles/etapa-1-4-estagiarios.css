@@ -200,21 +200,21 @@ body.sgl-light-active .gestao-main .intern-page th {
 }
 
 body.sgl-light-active .gestao-main .intern-page td {
-  padding: var(--sgl-space-4);
+  padding: 17px 16px;
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-label);
+  font-size: 11.5px;
   line-height: var(--sgl-line-height-body);
 }
 
 body.sgl-light-active .gestao-main .intern-page td strong {
   color: var(--sgl-text);
-  font-size: var(--sgl-font-label);
+  font-size: 11.5px;
 }
 
 body.sgl-light-active .gestao-main .intern-page td small {
-  margin-top: var(--sgl-space-1);
+  margin-top: 5px;
   color: var(--sgl-text-muted);
-  font-size: var(--sgl-font-helper);
+  font-size: 9.5px;
 }
 
 body.sgl-light-active .gestao-main .intern-page tbody tr {
@@ -248,7 +248,7 @@ body.sgl-light-active .gestao-main .intern-page .status-pill--closed {
 
 /* Drawer e modais */
 body.sgl-light-active .gestao-main .intern-page .detail-drawer {
-  width: min(760px, 96vw);
+  width: min(860px, 96vw);
   background: var(--sgl-surface);
 }
 
