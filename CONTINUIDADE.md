@@ -8,7 +8,9 @@
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
 **Branch atual de trabalho:** `collab/etapa-5-projetos-atividades`  
 **Etapa concluída:** Etapa 5 — Projetos e Atividades ✅  
-**Etapa atual:** Etapa 6 — Estagiários e vínculos 🔧 — backend 6.1–6.4 concluído e validado; frontend 6.5 implementado, validação pendente  
+**Etapa atual:** Etapa 6 — Estagiários e vínculos 🔧 — backend 6.1–6.4 concluído e validado; frontend 6.5 implementado, validação pendente
+
+**Ajuste de legibilidade do 6.5:** linhas da tabela de Estagiários foram ampliadas para a densidade das telas maduras de Gestão e o drawer detalhado passou para 860 px por conter vínculo, Formação, segurança, participações e histórico. A massa DEV da Unidade IQ foi ampliada no backend para validar os previews.  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
