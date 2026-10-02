@@ -793,3 +793,113 @@ body.sgl-dark-active .gestao-main .intern-page .metric-card--info {
   border-color: #30455f !important;
   background: #111f33 !important;
 }
+
+
+/* Etapa 6.5 — drawer e ações alinhados ao padrão consolidado de Resíduos */
+body.sgl-dark-active .gestao-main .intern-page .detail-drawer > header {
+  gap: 20px !important;
+  padding: 24px 30px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .detail-drawer header h2 {
+  font-size: 23px !important;
+  line-height: 1.2 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .detail-drawer header p {
+  margin-top: 5px !important;
+  font-size: 11px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .detail-content {
+  gap: 0 !important;
+  padding: 28px 30px 42px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .detail-content h3 {
+  margin-bottom: 11px !important;
+  font-size: 11.5px !important;
+  text-transform: uppercase !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .detail-grid span {
+  font-size: 9.5px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .detail-grid strong {
+  font-size: 12.5px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .observation {
+  font-size: 12.5px !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .action-modal-backdrop {
+  background: rgb(1 8 18 / 76%) !important;
+  backdrop-filter: blur(2px);
+}
+
+body.sgl-dark-active .gestao-main .intern-page .action-modal-card {
+  border-color: #2a3f5a !important;
+  background: #0d1929 !important;
+  color: #dce6f2 !important;
+  box-shadow: 0 28px 80px rgb(0 0 0 / 48%) !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .action-modal-card > header,
+body.sgl-dark-active .gestao-main .intern-page .action-modal-card > footer {
+  border-color: #263a54 !important;
+  background: #101d30 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .action-modal-card h2 {
+  color: #f7f9fd !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .action-modal-card header p,
+body.sgl-dark-active .gestao-main .intern-page .culture-guidance {
+  color: #9fb0c6 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .action-modal-card header > button {
+  border: 1px solid #30455f !important;
+  background: #172941 !important;
+  color: #dce6f2 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .action-field > span {
+  color: #c9d5e5 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .action-field input,
+body.sgl-dark-active .gestao-main .intern-page .action-field select,
+body.sgl-dark-active .gestao-main .intern-page .action-field textarea {
+  border-color: #30455f !important;
+  background: #111f33 !important;
+  color: #eef4fb !important;
+  color-scheme: dark;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .culture-option {
+  border-color: #2a3f5a !important;
+  background: #111f33 !important;
+  color: #dce6f2 !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .drawer-action,
+body.sgl-dark-active .gestao-main .intern-page .participation-actions button {
+  border-color: #315071 !important;
+  background: #111f33 !important;
+  color: #9bc4ff !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .drawer-action--primary {
+  border-color: var(--sgl-action-primary-border) !important;
+  background: var(--sgl-action-primary) !important;
+  color: #ffffff !important;
+}
+
+body.sgl-dark-active .gestao-main .intern-page .extension-note,
+body.sgl-dark-active .gestao-main .intern-page .drawer-extension-note {
+  color: #9bc4ff !important;
+}
