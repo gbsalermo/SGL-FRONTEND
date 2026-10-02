@@ -8,7 +8,7 @@
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
 **Branch atual de trabalho:** `collab/etapa-5-projetos-atividades`  
 **Etapa concluída:** Etapa 5 — Projetos e Atividades ✅  
-**Etapa atual:** Etapa 6 — Estagiários e vínculos 🔧 — backend 6.1–6.4 concluído e validado; frontend integrado no 6.5  
+**Etapa atual:** Etapa 6 — Estagiários e vínculos 🔧 — backend 6.1–6.4 concluído e validado; frontend 6.5 implementado, validação pendente  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
 **Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
@@ -349,7 +349,7 @@ Estado frontend consolidado:
 - Dashboard da Gestão combina movimentações de estoque e eventos operacionais de Resíduos da Unidade;
 - cancelados são tratados em Meus Resíduos, Gestão, relatórios e rótulo.
 
-A **Etapa 5 — Projetos e Atividades está concluída e validada**. A **Etapa 6 — Estagiários e vínculos** está em andamento; o backend dos blocos 6.1–6.4 está concluído e validado. O próximo bloco é o 6.5 — frontend integrado.
+A **Etapa 5 — Projetos e Atividades está concluída e validada**. A **Etapa 6 — Estagiários e vínculos** está em andamento; o backend dos blocos 6.1–6.4 está concluído e validado e o 6.5 foi implementado no frontend, aguardando validação visual/local.
 
 
 ## Decisões da Etapa 5 que afetam o frontend
@@ -436,7 +436,7 @@ Etapa 2 — Dark Mode definitivo                        ✅
 Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e validada
 Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
 Etapa 5 — Projetos e Atividades                       ✅ concluída e validada
-Etapa 6 — Estagiários e vínculos                      🔧 backend 6.1–6.4 validado; frontend 6.5 próximo
+Etapa 6 — Estagiários e vínculos                      🔧 backend 6.1–6.4 validado; frontend 6.5 implementado, validação pendente
 Etapas 7 a 13                                         ⏳
 ```
 
@@ -444,7 +444,7 @@ Etapas 7 a 13                                         ⏳
 
 # 12. Regra final de retomada
 
-**As Etapas 1–5 estão concluídas e validadas. Na Etapa 6, os blocos backend 6.1–6.4 estão concluídos e validados; o próximo passo é o 6.5, integração visual. A interface não deve oferecer prorrogação/encerramento manual do estágio como fonte normal de verdade; deve refletir o estado recebido do backend/instituição. O frontend integrado deve refletir Formação/Curso/treinamento por vínculo e Culturas por participação, além de Atividade/Projeto/Laboratório por contexto, sem apresentar um único laboratório como atributo definitivo.**
+**As Etapas 1–5 estão concluídas e validadas. Na Etapa 6, os blocos backend 6.1–6.4 estão concluídos e validados; o 6.5 foi implementado no frontend e agora precisa de validação visual/local. A interface não deve oferecer prorrogação/encerramento manual do estágio como fonte normal de verdade; deve refletir o estado recebido do backend/instituição. O frontend integrado deve refletir Formação/Curso/treinamento por vínculo e Culturas por participação, além de Atividade/Projeto/Laboratório por contexto, sem apresentar um único laboratório como atributo definitivo.**
 
 ### Estado frontend do 4.4
 
