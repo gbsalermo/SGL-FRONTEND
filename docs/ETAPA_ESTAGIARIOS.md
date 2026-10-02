@@ -202,3 +202,8 @@ Após esta validação, a etapa de **Estagiários + auditoria de vínculos do la
 ### Polimento final da listagem principal — 02/10/2026
 
 A tipografia da página, filtros e tabela foi ampliada para melhorar a legibilidade em zoom 100%. Os quatro cards-resumo passaram a usar superfície neutra/cinza por padrão; as cores verde, amarelo, azul e cinza permanecem nas bolinhas e entram no card apenas no hover. A composição informacional da interface principal foi considerada suficiente nesta rodada, ficando o restante do 6.5 concentrado em validação visual e detalhes do drawer.
+
+
+### Período e ações operacionais — 02/10/2026
+
+A coluna Período passou a usar `data inicial → data final original`; em vínculos prorrogados com histórico disponível, a nova data aparece abaixo como `Prorrogado até ...`. O drawer iniciou suas ações operacionais com Associação de Atividade, registro de treinamento de segurança e gestão de Culturas por participação. A massa IQ inclui também vínculo aberto que já teve participações, mas não possui atividade ativa, para validar a diferença entre `Não iniciado` e `Sem atividade ativa`.
