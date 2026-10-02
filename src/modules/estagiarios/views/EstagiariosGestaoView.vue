@@ -26,14 +26,6 @@ const filtroFormacao = ref<FormacaoEstagiario | 'TODOS'>('TODOS')
 const contexto = ref('TODOS')
 const selecionado = ref<EstagiarioResponse | null>(null)
 
-const tiposBolsa: Array<{ valor: TipoBolsaEstagiario; rotulo: string }> = [
-  { valor: 'BOLSA_CNPQ', rotulo: 'CNPq' },
-  { valor: 'BOLSA_CAPES', rotulo: 'CAPES' },
-  { valor: 'BOLSA_INSTITUCIONAL', rotulo: 'Institucional' },
-  { valor: 'VOLUNTARIO', rotulo: 'Voluntário' },
-  { valor: 'CONTRATUAL', rotulo: 'Contratual' },
-]
-
 const formacoes: Record<FormacaoEstagiario, string> = {
   ENSINO_MEDIO: 'Ensino médio',
   GRADUACAO: 'Graduação',
@@ -80,18 +72,6 @@ function estadoOperacional(estagiario: EstagiarioResponse): EstadoOperacional {
   }
 
   return 'SEM_ATIVIDADE'
-}
-
-function rotuloEstado(estado: EstadoOperacional) {
-  if (estado === 'OPERACIONAL') return 'Operacional'
-  if (estado === 'SEM_ATIVIDADE') return 'Sem atividade'
-  return 'Encerrado'
-}
-
-function classeEstado(estado: EstadoOperacional) {
-  if (estado === 'OPERACIONAL') return 'status-pill--active'
-  if (estado === 'SEM_ATIVIDADE') return 'status-pill--pending'
-  return 'status-pill--closed'
 }
 
 function rotuloBolsa(valor: TipoBolsaEstagiario | null | undefined) {
@@ -875,6 +855,34 @@ onMounted(carregar)
   font-size: 10px;
 }
 
+.metric-card {
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+}
+
+.metric-card--success:hover {
+  border-color: #7bc89b;
+  background: #eefaf2;
+}
+
+.metric-card--warning:hover {
+  border-color: #e1bd58;
+  background: #fff5d7;
+}
+
+.metric-card--info:hover {
+  border-color: #78a9e9;
+  background: #edf5ff;
+}
+
+.metric-card:not(.metric-card--success):not(.metric-card--warning):not(.metric-card--info):hover {
+  border-color: #a9b5c4;
+  background: #f5f7fa;
+}
+
 .feedback {
   margin-bottom: 16px;
   padding: 13px 15px;
@@ -1016,8 +1024,27 @@ td small {
   font-size: 12px;
 }
 
-.student-course {
+.student-responsible {
   color: #64748a;
+}
+
+.formation-cell strong {
+  color: #17243a;
+  font-size: 12px;
+}
+
+.formation-cell small {
+  color: #64748a;
+}
+
+.status-cell {
+  min-width: 150px;
+}
+
+.status-reason {
+  margin-top: 7px;
+  color: #7d8a9c;
+  font-size: 9.5px;
 }
 
 .link-cell strong {
@@ -1043,41 +1070,44 @@ td small {
 
 .context-preview {
   display: grid;
-  gap: 4px;
+  gap: 6px;
 }
 
-.context-preview span {
-  position: relative;
-  padding-left: 15px;
-  color: #34465e;
-  font-size: 10px;
-}
-
-.context-preview span::before {
-  position: absolute;
-  top: 5px;
-  left: 1px;
-  width: 6px;
-  height: 6px;
-  border: 1px solid #5f7188;
-  border-radius: 2px;
-  content: '';
-}
-
-.context-empty {
+.context-item {
   display: inline-flex;
-  padding: 6px 9px;
-  border-radius: 999px;
-  background: #fff7e6;
-  color: #9a6900;
-  font-size: 9px;
-  font-weight: 750;
+  align-items: center;
+  gap: 7px;
+  color: #34465e;
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.context-icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  fill: none;
+  stroke: #61738a;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.context-empty-text {
+  color: #7a8798;
+  font-size: 11px;
+  font-weight: 650;
 }
 
 .history-preview {
-  color: #637287;
-  font-size: 10px;
-  font-weight: 700;
+  color: #7a8798;
+  font-size: 11px;
+  font-weight: 650;
+  transition: color 150ms ease;
+}
+
+tbody tr:hover .history-preview {
+  color: #556477;
 }
 
 .period-cell strong {
@@ -1120,6 +1150,11 @@ td small {
 .status-pill--pending {
   background: #fff5dc;
   color: #aa7200;
+}
+
+.status-pill--extended {
+  background: #e4efff;
+  color: #2a66b7;
 }
 
 .status-pill--closed {
