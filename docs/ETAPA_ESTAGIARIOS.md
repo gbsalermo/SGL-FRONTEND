@@ -2,6 +2,8 @@
 
 > **Evolução vigente — Etapa 6.5 (02/10/2026):** este documento preserva o primeiro protótipo como histórico. A rota `/estagiarios` agora usa o modelo de vínculos e participações do backend, com preview operacional na tabela e drawer detalhado. Edição/encerramento manual deixaram de ser ações principais, e Laboratório não é mais tratado como atributo operacional único do Estagiário.
 
+Na rodada de refinamento visual, o drawer de detalhes foi ampliado para 860 px e as linhas da tabela receberam maior altura/padding para manter legibilidade compatível com as demais telas de Gestão. A Unidade IQ recebeu massa DEV adicional no backend para exercitar todos os estados visuais.
+
 **Branch frontend:** `feat/estagiarios-v2`  
 **Branch backend:** `feat/estagiarios-v2`  
 **Base:** `main` atual, já contendo o módulo de Resíduos mergeado.
