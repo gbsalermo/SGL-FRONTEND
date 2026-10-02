@@ -1458,6 +1458,31 @@ onMounted(carregar)
               <span>{{ cultura.nome }}</span>
             </label>
           </template>
+
+          <div class="culture-create">
+            <div>
+              <strong>Adicionar nova Cultura</strong>
+              <small>Se ela ainda não existir na Unidade, crie e associe sem sair desta tela.</small>
+            </div>
+
+            <div class="culture-create-row">
+              <input
+                v-model="novaCulturaNome"
+                type="text"
+                maxlength="120"
+                placeholder="Nome da nova Cultura"
+                @keyup.enter="criarCulturaNoModal"
+              />
+              <button
+                class="drawer-action"
+                type="button"
+                :disabled="processandoAcao || !novaCulturaNome.trim()"
+                @click="criarCulturaNoModal"
+              >
+                + Adicionar
+              </button>
+            </div>
+          </div>
         </div>
 
         <footer>
@@ -1471,6 +1496,113 @@ onMounted(carregar)
             @click="salvarCulturas"
           >
             {{ processandoAcao ? 'Salvando...' : 'Salvar culturas' }}
+          </button>
+        </footer>
+      </section>
+    </div>
+
+    <div v-if="modalTreinamentoAberto" class="action-modal-backdrop" @click.self="fecharModalTreinamento">
+      <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Treinamento de segurança">
+        <header>
+          <div>
+            <span>CONFIRMAÇÃO</span>
+            <h2>
+              {{ treinamentoNovoEstado ? 'Registrar treinamento' : 'Reverter treinamento' }}
+            </h2>
+            <p>
+              {{ treinamentoNovoEstado
+                ? 'Confirme a conclusão do treinamento de segurança.'
+                : 'A conclusão deixará de valer para este vínculo, mas o evento continuará no histórico.' }}
+            </p>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModalTreinamento">×</button>
+        </header>
+
+        <div class="action-modal-content">
+          <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
+
+          <div
+            class="training-confirm-state"
+            :class="{ 'training-confirm-state--revert': !treinamentoNovoEstado }"
+          >
+            <span>{{ treinamentoNovoEstado ? '✓' : '↶' }}</span>
+            <div>
+              <strong>
+                {{ treinamentoNovoEstado ? 'Treinamento concluído' : 'Treinamento volta para pendente' }}
+              </strong>
+              <small>A alteração será registrada no histórico do vínculo.</small>
+            </div>
+          </div>
+
+          <label class="action-field">
+            <span>Observação sobre o treinamento de segurança</span>
+            <textarea
+              v-model="treinamentoObservacao"
+              rows="4"
+              maxlength="1000"
+              placeholder="Opcional. Ex.: treinamento presencial realizado no laboratório."
+            />
+          </label>
+        </div>
+
+        <footer>
+          <button class="drawer-action" type="button" @click="fecharModalTreinamento">
+            Cancelar
+          </button>
+          <button
+            class="drawer-action"
+            :class="treinamentoNovoEstado ? 'drawer-action--success' : 'drawer-action--warning'"
+            type="button"
+            :disabled="processandoAcao"
+            @click="salvarTreinamento"
+          >
+            {{ processandoAcao
+              ? 'Salvando...'
+              : treinamentoNovoEstado
+                ? 'Confirmar conclusão'
+                : 'Confirmar reversão' }}
+          </button>
+        </footer>
+      </section>
+    </div>
+
+    <div v-if="modalObservacaoAberto" class="action-modal-backdrop" @click.self="fecharModalObservacao">
+      <section class="action-modal-card" role="dialog" aria-modal="true" aria-label="Adicionar observação">
+        <header>
+          <div>
+            <span>REGISTRO OPERACIONAL</span>
+            <h2>Adicionar observação</h2>
+            <p>A observação ficará vinculada a este vínculo e identificará o usuário que a registrou.</p>
+          </div>
+          <button type="button" aria-label="Fechar" @click="fecharModalObservacao">×</button>
+        </header>
+
+        <div class="action-modal-content">
+          <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
+
+          <label class="action-field">
+            <span>Observação</span>
+            <textarea
+              v-model="observacaoTexto"
+              rows="5"
+              maxlength="1000"
+              placeholder="Digite a observação operacional..."
+            />
+            <small>{{ observacaoTexto.length }}/1000</small>
+          </label>
+        </div>
+
+        <footer>
+          <button class="drawer-action" type="button" @click="fecharModalObservacao">
+            Cancelar
+          </button>
+          <button
+            class="drawer-action drawer-action--primary"
+            type="button"
+            :disabled="processandoAcao || !observacaoTexto.trim()"
+            @click="salvarObservacao"
+          >
+            {{ processandoAcao ? 'Salvando...' : 'Registrar observação' }}
           </button>
         </footer>
       </section>
