@@ -1268,9 +1268,29 @@ onMounted(carregar)
                   class="drawer-action"
                   type="button"
                   :disabled="processandoAcao"
+                  @click="abrirEditarBolsa"
+                >
+                  Editar bolsa
+                </button>
+
+                <button
+                  v-if="vinculoSelecionado.situacao !== 'FINALIZADO'"
+                  class="drawer-action"
+                  type="button"
+                  :disabled="processandoAcao"
                   @click="abrirAssociarAtividade"
                 >
                   Associar atividade
+                </button>
+
+                <button
+                  v-if="participacoesAtivas(vinculoSelecionado).length > 0"
+                  class="drawer-action"
+                  type="button"
+                  :disabled="processandoAcao"
+                  @click="abrirEncerrarParticipacao()"
+                >
+                  Encerrar atividade
                 </button>
 
                 <button
