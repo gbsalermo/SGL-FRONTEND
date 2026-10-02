@@ -447,6 +447,8 @@ Não oferecer botão cotidiano de "Encerrar estágio" ou "Prorrogar estágio" co
 
 O backend 6.4 foi validado em 02/10/2026; o 6.5 deve apenas refletir esse contrato na interface.
 
+**Implementação 6.5:** a rota `/estagiarios` agora usa listagem consolidada com estado operacional, preview de atividades/projetos/laboratórios e drawer lateral com vínculo institucional, Formação/Curso, Orientador, treinamento, participações, Culturas e histórico de vínculos. Edição/encerramento manual deixaram de ser ações principais da tela.
+
 ---
 
 # 13. Fluxo de Administração/Cadastros
