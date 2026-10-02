@@ -122,6 +122,36 @@ export interface VinculoEstagioAtividadeRequest {
   culturaIds?: string[]
 }
 
+
+export interface CursoEstagioResponse {
+  id: string
+  unidadeId: string
+  unidadeNome: string
+  nome: string
+  ativo: boolean
+}
+
+export interface UsuarioOpcaoEstagioResponse {
+  id: string
+  nome: string
+  email: string
+  perfil: string
+  unidadeId: string | null
+  unidadeNome: string | null
+  ativo: boolean
+}
+
+export interface AtualizarVinculoEstagioRequest {
+  orientadorId: string
+  dataInicio: string
+  dataFimPrevista: string
+  tipoBolsa: TipoBolsaEstagiario
+  formacao: FormacaoEstagiario
+  formacaoOutro?: string | null
+  cursoId?: string | null
+  observacao?: string | null
+}
+
 export interface ApiErrorResponse {
   message?: string
 }
