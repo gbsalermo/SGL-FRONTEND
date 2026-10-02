@@ -507,3 +507,6 @@ A tela atual de Projetos em Administração permanece como CRUD compatível dura
 
 
 **Ações operacionais do drawer de Estagiários:** Associar atividade; Registrar treinamento; Gerenciar culturas por participação ativa. Os modais operacionais seguem a referência de Resíduos (620 px comum; header/footer 24×30; conteúdo 26×30; controles 45 px).
+
+
+**Drawer de Estagiários — edição híbrida:** `Editar vínculo` — Formação, Curso, Bolsa/modalidade, Orientador e período; `Associar atividade`; `Registrar treinamento`; `Gerenciar culturas`. O fim previsto é obrigatório e o vínculo finalizado permanece somente leitura.
