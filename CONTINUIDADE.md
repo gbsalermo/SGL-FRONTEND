@@ -6,9 +6,9 @@
 **Última atualização:** 24/09/2026  
 **Branch estável:** `main` do GitLab institucional  
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
-**Branch atual de trabalho:** `collab/etapa-6-estagiarios-vinculos`  
+**Branch atual de trabalho:** `collab/etapa-7-unidades-solucoes-contexto`  
 **Etapa concluída:** Etapa 6 — Estagiários e Vínculos ✅  
-**Próxima etapa:** Etapa 7 — Relatórios consolidados ⏳
+**Etapa atual:** Etapa 7 — Unidades + Soluções + contexto operacional 🔧
 
 **Ajuste de legibilidade do 6.5:** linhas da tabela de Estagiários foram ampliadas para a densidade das telas maduras de Gestão e o drawer detalhado passou para 860 px por conter vínculo, Formação, segurança, participações e histórico. A massa DEV da Unidade IQ foi ampliada no backend para validar os previews.
 
@@ -412,9 +412,9 @@ O CRUD atual de Projeto em Administração permanece funcional até o bloco **5.
 ```text
 Etapa 5 — Projetos + Atividades
 Etapa 6 — Estagiários + vínculos
-Etapa 7 — relatórios consolidados
-Etapa 8 — unidades + Soluções + contexto operacional
-Etapa 9 — Pedidos + Soluções + participação do Estagiário
+Etapa 7 — unidades + Soluções + contexto operacional
+Etapa 8 — Pedidos + Soluções + participação do Estagiário
+Etapa 9 — relatórios consolidados
 Etapa 10 — rótulos + impressão operacional
 Etapa 11 — Manual + delete lógico
 Etapa 12 — testes automatizados frontend
@@ -441,14 +441,15 @@ Etapa 3 — refinamentos do fluxo atual de Resíduos     ✅ concluída e valida
 Etapa 4 — expansão operacional de Resíduos            ✅ concluída e validada
 Etapa 5 — Projetos e Atividades                       ✅ concluída e validada
 Etapa 6 — Estagiários e vínculos                      ✅ concluída e validada
-Etapas 7 a 13                                         ⏳
+Etapa 7 — Unidades + Soluções + contexto operacional 🔧 atual
+Etapas 8 a 13                                         ⏳
 ```
 
 ---
 
 # 12. Regra final de retomada
 
-**As Etapas 1–6 estão concluídas e validadas. A próxima etapa é a 7 — Relatórios consolidados. O frontend de Estagiários está estabilizado com Formação/Curso/treinamento por vínculo, Culturas por participação e Atividade/Projeto/Laboratório por contexto, sem um único laboratório como atributo definitivo do Estagiário.**
+**As Etapas 1–6 estão concluídas e validadas. A etapa atual é a 7 — Unidades + Soluções + contexto operacional. O frontend de Estagiários está estabilizado com Formação/Curso/treinamento por vínculo, Culturas por participação e Atividade/Projeto/Laboratório por contexto, sem um único laboratório como atributo definitivo do Estagiário.**
 
 ### Estado frontend do 4.4
 
@@ -550,7 +551,7 @@ Refinamento final da validação do 5.5:
 - o selo visual **SCI** usa o mesmo padrão azul dos badges de status; Atividade permanece identificada em verde.
 
 
-### Decisão futura — Central de Relatórios na Etapa 7
+### Decisão futura — Central de Relatórios na Etapa 9
 
 Após estabilização das Etapas 5 e 6:
 
@@ -597,7 +598,7 @@ Pontos finais aprovados:
 - sugestão assistida e editável de Código SEG;
 - Projeto sem SEG continua com primeira definição via Cadastros;
 - demais alterações SEG passam pelo fluxo auditável;
-- decisões da Etapa 7 sobre Projetos e síntese Movimentações/Resumo registradas.
+- decisões da futura Etapa 9 sobre Projetos e síntese Movimentações/Resumo registradas.
 
 Após merge, a retomada deve ocorrer pela Etapa 6.
 
@@ -700,4 +701,4 @@ Estado final:
 - observações e treinamento auditáveis;
 - frontend pronto para merge da Etapa 6.
 
-**Próxima frente: Etapa 7 — Relatórios consolidados.**
+**Próxima frente: Etapa 7 — Unidades + Soluções + contexto operacional.**
