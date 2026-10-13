@@ -737,3 +737,15 @@ Após o primeiro teste da tela de Gestor com inicialização local bem-sucedida,
 **Atenção:** essa alteração limita a navegação e os formulários à área administrativa, **mas NÃO fornece autenticação/autorização real de API**; o backend ainda usa `permitAll` temporário. Os endpoints de modelos deverão passar por verificação de permissões no backend no momento da implementação definitiva de identidade/acesso.
 
 **Pendente:** executar `npm run build`, conferir light/dark na interface e realizar o fluxo de ponta a ponta. Não houve merge.
+
+
+### Auditoria de identidade SGL — refatoração da 7.4 (13/10/2026)
+
+O responsável apontou perda de identidade institucional nas implementações recentes. Auditoria feita contra:
+`docs/IDENTIDADE_VISUAL.md`, `docs/PADRAO_VISUAL_PRE_PRODUCAO.md`, `docs/PADROES_PAGINA.md`, `docs/ETAPA_2_DARK_MODE.md`, `docs/ETAPA_1_3_COMPONENTES_BASICOS.md`, `src/styles/tokens.css`, `src/styles/foundation.css` e `src/components/common`.
+
+**Regra obrigatória de continuidade:** consultar `docs/REGRA_PADRONIZACAO_NOVOS_MODULOS.md` antes de criar ou revisar telas. Novos módulos **não devem duplicar componentes Sgl ou criar linguagem CSS própria** quando o Design System já cobre a necessidade.
+
+**Refatoração aplicada nesta rodada:** Central de Soluções reutiliza `SglBreadcrumb`, `SglButton`, `SglCard` e `SglStatusChip`; a tela do Solicitante passou a reutilizar `SglBreadcrumb`, `SglButton` e `SglStatusChip`; revisão parcial de `solucoes.css` para tokens institucionais, dimensões e contraste light/dark. Conferida estrutura de abertura/fechamento das tags Vue nas duas views.
+
+**Restante ainda necessário:** migrar formulários `input/select` para `SglTextField/SglSelect` quando tecnicamente compatíveis; revisar o editor administrativo `ModelosSolucaoAdminView`, que reutilizou regras CSS locais provenientes da interface legada de modelos de Resíduos; conferir efeitos e modais à luz do guia oficial, revisar responsividade e tema. `npm run build` e inspeção visual **não executados** remotamente; etapa ainda **não** validada nem pronta para merge.
