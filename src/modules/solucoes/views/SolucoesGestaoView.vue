@@ -104,7 +104,9 @@ async function executarAcao() {
         p.status === 'EM_PREPARACAO' ? preparada.value === 'SIM' : null,
         justificativa.value.trim())
     }
-    fecharAcao()
+    // Encerrar o modal apos sucesso, mesmo com a requisicao ainda marcada como executando.
+    acaoAberta.value = null
+    pedidoAlvo.value = null
     sucesso.value = action === 'APROVAR'
       ? 'Solução aprovada. Componentes movimentados uma única vez; pedido em preparação.'
       : action === 'ENTREGAR' ? 'Entrega confirmada sem nova baixa no estoque.'
