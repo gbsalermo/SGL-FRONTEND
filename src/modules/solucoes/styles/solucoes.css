@@ -158,3 +158,18 @@ body.sgl-dark-active .sol-page .sol-note { background:var(--sgl-surface-interact
 }
 @media(max-width:480px) { .sol-metrics { grid-template-columns:1fr; } }
 
+
+/* Gestao: mesma fundacao visual e estilos Light/Dark da Central de Residuos.
+   Nao substituir metrics-grid/workspace-card/status-tabs/toolbar por classes locais. */
+.residuos-gestao-page.sol-gestao .metrics-grid--solucoes {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+@media (max-width: 1180px) {
+  .residuos-gestao-page.sol-gestao .metrics-grid--solucoes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .residuos-gestao-page.sol-gestao .metrics-grid--solucoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .residuos-gestao-page.sol-gestao .metrics-grid--solucoes { grid-template-columns: 1fr; }
+}
