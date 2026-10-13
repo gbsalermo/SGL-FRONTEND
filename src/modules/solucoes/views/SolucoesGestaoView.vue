@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
-import { SglBreadcrumb, SglButton, SglCard, SglStatusChip } from '@/components/common'
+import { SglStatusChip } from '@/components/common'
 import { solucaoService } from '../services/solucaoService'
 import {
   erroSolucao, exibirQuantidade, statusSolucaoLabel,
@@ -12,7 +11,6 @@ import '../styles/solucoes.css'
 
 type Operacao = 'APROVAR' | 'ENTREGAR' | 'REJEITAR' | 'CANCELAR'
 type Filtro = StatusSolucao | 'TODOS'
-const router = useRouter()
 const session = useSessionStore()
 const carregando = ref(true)
 const executando = ref(false)
@@ -122,50 +120,47 @@ onMounted(() => { void carregar() })
 </script>
 
 <template>
-  <section class="sol-page sol-gestao">
-    <header class="sol-header">
+  <section class="residuos-gestao-page residuos-completo sol-gestao">
+    <header class="page-heading">
       <div>
-        <SglBreadcrumb :items="[{ label: 'Operação' }, { label: 'Soluções' }]" />
+        <p class="breadcrumb">OPERAÇÃO / SOLUÇÕES</p>
         <h1>Central de soluções</h1>
         <p>Analise solicitações, acompanhe preparações, confirme entregas e gerencie os cancelamentos.</p>
       </div>
-      <div class="sol-actions">
-        <SglButton variant="secondary" class="sol-btn" type="button" :disabled="carregando" @click="carregar">Atualizar dados</SglButton>
-        <SglButton variant="primary" class="sol-btn " type="button" @click="router.push('/solucoes/nova?nova=1')">+ Nova solicitação</SglButton>
-      </div>
+      <button class="secondary-action" type="button" :disabled="carregando" @click="carregar">Atualizar dados</button>
     </header>
 
-    <div class="sol-metrics">
-      <SglCard v-for="item in indicadores" :key="item.status" variant="kpi" class="sol-metric">
+    <div class="metrics-grid sol-metrics">
+      <article v-for="item in indicadores" :key="item.status">
         <span>{{ item.titulo }}</span>
         <strong>{{ total(item.status) }}</strong>
         <small>{{ item.detalhe }}</small>
-      </SglCard>
+      </article>
     </div>
 
-    <div v-if="sucesso" class="sol-success" role="status">{{ sucesso }}</div>
-    <div v-if="erro" class="sol-error" role="alert">{{ erro }}</div>
+    <div v-if="sucesso" class="feedback feedback--success" role="status">{{ sucesso }}</div>
+    <div v-if="erro" class="feedback feedback--error" role="alert">{{ erro }}</div>
 
-    <section class="sol-workspace">
-      <div class="sol-status-tabs" role="tablist" aria-label="Filtrar soluções por status">
+    <section class="workspace-card">
+      <div class="status-tabs" role="tablist" aria-label="Filtrar soluções por status">
         <button v-for="item in filtros" :key="item.valor" type="button" role="tab"
           :aria-selected="filtroStatus === item.valor"
           :class="{ active: filtroStatus === item.valor }" @click="filtroStatus = item.valor">
           {{ item.rotulo }} <small>{{ total(item.valor) }}</small>
         </button>
       </div>
-      <div class="sol-workspace-toolbar">
-        <label class="sol-field">
+      <div class="toolbar">
+        <label>
           <span>Busca</span>
           <input v-model="busca" type="search" placeholder="Solução, solicitante, laboratório, projeto ou produto..." />
         </label>
-        <span class="sol-muted">{{ pedidosFiltrados.length }} registro(s) exibido(s)</span>
+        <div class="toolbar-note">{{ pedidosFiltrados.length }} registro(s) exibido(s)</div>
       </div>
 
-      <div v-if="carregando" class="sol-state">Carregando solicitações...</div>
-      <div v-else-if="pedidosFiltrados.length === 0" class="sol-state">Nenhuma solicitação de Solução encontrada neste recorte.</div>
-      <div v-else class="sol-table-wrap">
-        <table class="sol-table sol-table--records">
+      <div v-if="carregando" class="state-box">Carregando solicitações...</div>
+      <div v-else-if="pedidosFiltrados.length === 0" class="state-box">Nenhuma solicitação de Solução encontrada neste recorte.</div>
+      <div v-else class="table-wrap">
+        <table class="sol-table--records">
           <thead><tr><th>Status</th><th>Solução / Solicitante</th><th>Laboratório / Projeto</th><th>Componentes</th><th>Solicitação</th><th>Ações</th></tr></thead>
           <tbody v-for="p in pedidosFiltrados" :key="p.id">
             <tr>
