@@ -173,3 +173,31 @@ body.sgl-dark-active .sol-page .sol-note { background:var(--sgl-surface-interact
 @media (max-width: 480px) {
   .residuos-gestao-page.sol-gestao .metrics-grid--solucoes { grid-template-columns: 1fr; }
 }
+
+/* Central de Solucoes: somente variacoes especificas de dominio.
+   Base visual e modais vem diretamente da Central de Residuos. */
+.residuos-gestao-page.sol-gestao .solution-row {cursor:pointer}
+.residuos-gestao-page.sol-gestao .sol-table--records {width:100%;min-width:900px;border-collapse:collapse}
+.residuos-gestao-page.sol-gestao .sol-table--records > thead > tr > th,
+.residuos-gestao-page.sol-gestao .sol-table--records > tbody > tr > td {padding:12px 14px;border-bottom:1px solid var(--sgl-border);text-align:left;vertical-align:middle}
+.residuos-gestao-page.sol-gestao .sol-table--records > tbody > tr > td small {display:block;margin-top:4px;color:var(--sgl-text-muted)}
+.residuos-gestao-page.sol-gestao .sol-table--records > tbody > tr > td strong {font-weight:700}
+.residuos-gestao-page.sol-gestao .sol-table--records .actions-column {text-align:right;white-space:nowrap}
+.residuos-gestao-page.sol-gestao .solution-row:hover {background:var(--sgl-surface-soft)}
+.residuos-gestao-page.sol-gestao .sol-detail-heading {display:flex;justify-content:space-between;align-items:center;gap:16px}
+.residuos-gestao-page.sol-gestao .sol-detail-actions {border-top:1px solid var(--sgl-border);border-bottom:1px solid var(--sgl-border);padding:14px 0;margin:16px 0}
+.residuos-gestao-page.sol-gestao .sol-detail-actions h3 {margin:0 0 6px}
+.residuos-gestao-page.sol-gestao .sol-detail-buttons {display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.residuos-gestao-page.sol-gestao .sol-expanded-row > td {padding:12px;background:var(--sgl-surface-soft)}
+.residuos-gestao-page.sol-gestao .sol-dialog-overlay {display:none}
+.residuos-gestao-page.sol-gestao .modal-content .sol-note {margin:12px 0}
+.residuos-gestao-page.sol-gestao .modal-content .sol-field {margin:12px 0}
+.residuos-gestao-page.sol-gestao .modal-card {width:min(620px,calc(100vw - 30px))}
+.residuos-gestao-page.sol-gestao .status-pill[data-status='PENDENTE'] {background:var(--sgl-surface-interactive);color:var(--sgl-warning)}
+.residuos-gestao-page.sol-gestao .status-pill[data-status='EM_PREPARACAO'] {background:var(--sgl-surface-interactive);color:var(--sgl-primary)}
+.residuos-gestao-page.sol-gestao .status-pill[data-status='ENTREGUE'] {background:var(--sgl-surface-interactive);color:var(--sgl-success)}
+.residuos-gestao-page.sol-gestao .status-pill[data-status='REJEITADO'] {background:var(--sgl-surface-interactive);color:var(--sgl-error)}
+.residuos-gestao-page.sol-gestao .status-pill[data-status='CANCELADO'] {background:var(--sgl-surface-soft);color:var(--sgl-text-muted)}
+body.sgl-dark-active .residuos-gestao-page.sol-gestao .status-pill[data-status='PENDENTE'] {color:#f6d28a}
+body.sgl-dark-active .residuos-gestao-page.sol-gestao .status-pill[data-status='EM_PREPARACAO'] {color:#aac7ff}
+body.sgl-dark-active .residuos-gestao-page.sol-gestao .status-pill[data-status='ENTREGUE'] {color:#87d9a9}
