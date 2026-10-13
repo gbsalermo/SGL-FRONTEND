@@ -66,8 +66,6 @@ async function carregarPedidos() {
 function formatarData(valor: string) {
   return new Intl.DateTimeFormat('pt-BR', { dateStyle:'short', timeStyle:'short' }).format(new Date(valor))
 }
-function produtosVisiveis(pedido: PedidoSolucao) { return pedido.itens.slice(0, 2) }
-function produtosRestantes(pedido: PedidoSolucao) { return Math.max(0, pedido.itens.length - 2) }
 function alternarDetalhes(id: string) { pedidoExpandidoId.value = pedidoExpandidoId.value === id ? null : id }
 watch([() => route.query.status, () => route.query.pedido], () => {
   aplicarStatusDaRota()
