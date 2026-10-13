@@ -749,3 +749,19 @@ O responsável apontou perda de identidade institucional nas implementações re
 **Refatoração aplicada nesta rodada:** Central de Soluções reutiliza `SglBreadcrumb`, `SglButton`, `SglCard` e `SglStatusChip`; a tela do Solicitante passou a reutilizar `SglBreadcrumb`, `SglButton` e `SglStatusChip`; revisão parcial de `solucoes.css` para tokens institucionais, dimensões e contraste light/dark. Conferida estrutura de abertura/fechamento das tags Vue nas duas views.
 
 **Restante ainda necessário:** migrar formulários `input/select` para `SglTextField/SglSelect` quando tecnicamente compatíveis; revisar o editor administrativo `ModelosSolucaoAdminView`, que reutilizou regras CSS locais provenientes da interface legada de modelos de Resíduos; conferir efeitos e modais à luz do guia oficial, revisar responsividade e tema. `npm run build` e inspeção visual **não executados** remotamente; etapa ainda **não** validada nem pronta para merge.
+
+
+### 7.4 — Correção do fluxo de Solicitante, cartilha e separação de páginas (13/10/2026)
+
+**Motivação:** imagens de teste revelaram que `Minhas soluções` e `Solicitar solução` carregavam a mesma View, contrariando o padrão consagrado em Pedidos/Resíduos. Usuário explicitou que o fluxo principal é **pedir uma preparação existente no catálogo/cartilha**, não redigir rotineiramente uma receita a partir de Produtos.
+
+**Mudanças publicadas:**
+- `SolucoesSolicitanteView.vue` agora é **apenas consulta/histórico**, com indicadores, tabela, detalhe, status e botão que navega à solicitação.
+- Nova `NovaSolucaoView.vue`: tela independente de **Solicitar solução**, padrão de processo de Novo Pedido (contexto → seleção de solução → exigências/confirmação). A escolha de modelo padrão é o caminho principal; composição fora da cartilha é excepcional, com nome, componentes conhecidos e exigências de finalidade/concentração/volume. Produto e quantidade permanecem obrigatórios nessa excepcionalidade segundo contrato atual do backend.
+- Rotas `/minhas-solucoes`, `/solucoes/solicitar` (Solicitante) e `/solucoes/nova` (Gestão) agora apontam para páginas corretas e distintas; após envio navega a `/minhas-solucoes?criado=1`.
+- O modelo existente mantém `instrucoesPreparo` no cadastro. Ao escolher o modelo, a View apresenta a **cartilha e os componentes**. Ao atender, a Central de Soluções apresenta a mesma cartilha em detalhes do Pedido.
+- **Backend correspondente:** migration `V38__snapshot_instrucoes_preparo_pedido_solucao.sql` + `Pedido.instrucoesPreparoSolucao` + resposta API; o `PedidoService` copia as instruções no momento da criação a partir do modelo vigente. Alterações posteriores no catálogo não reescrevem o histórico do Pedido. Solicitações excepcionais não recebem instruções padronizadas automaticamente.
+
+**Limitações e pendências:** a opção excepcional ainda requer Produtos/quantidades, pois é o contrato vigente da 7.3; caso se queira solicitar uma preparação desconhecida sem saber ingredientes, isso exigirá estado/regra de análise antes da baixa de estoque (não criar itens fictícios). **Build frontend e testes Maven/boot com V38 não foram executados pelo assistente**; antes de validar, executar localmente, testar tela, aprovação e preservação da cartilha após editar o modelo.
+
+**Merge:** não realizado.
