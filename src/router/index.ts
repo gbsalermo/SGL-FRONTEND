@@ -138,7 +138,7 @@ export const router = createRouter({
           component: () => import('@/modules/solucoes/views/SolucoesGestaoView.vue'),
         },
         {
-          path: 'solucoes/solicitar',
+          path: 'solucoes/nova',
           name: 'gestao-nova-solucao',
           component: () => import('@/modules/solucoes/views/SolucoesSolicitanteView.vue'),
         },

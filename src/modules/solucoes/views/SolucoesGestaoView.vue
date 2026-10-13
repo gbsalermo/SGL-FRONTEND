@@ -211,7 +211,7 @@ onMounted(() => { void carregar() })
       </div>
       <div class="sol-actions">
         <button class="sol-btn" :disabled="carregando" @click="carregar">Atualizar</button>
-        <button class="sol-btn sol-btn--primary" @click="router.push('/solucoes/solicitar')">+ Nova solicitação</button>
+        <button class="sol-btn sol-btn--primary" @click="router.push('/solucoes/nova?nova=1')">+ Nova solicitação</button>
       </div>
     </header>
     <div class="sol-summary">

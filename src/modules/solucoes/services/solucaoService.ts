@@ -30,6 +30,10 @@ export const solucaoService = {
     const { data } = await http.get<PedidoSolucao[]>('/v1/solucoes/pedidos')
     return data
   },
+  async listarMinhas(usuarioId: string) {
+    const { data } = await http.get<PedidoSolucao[]>('/v1/pedidos/por-usuario', { params: { usuarioId } })
+    return data.filter(p => p.tipo === 'SOLUCAO')
+  },
   async solicitar(payload: SolucaoInput) {
     const { data } = await http.post<PedidoSolucao>('/v1/solucoes/pedidos', payload)
     return data

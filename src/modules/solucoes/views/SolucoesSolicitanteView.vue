@@ -89,7 +89,7 @@ async function carregar() {
       solucaoService.listarModelos(true),
       solucaoService.listarProjetosPorLaboratorio(laboratorio),
       solucaoService.listarProdutos(unidade),
-      solucaoService.listarPedidos(),
+      solucaoService.listarMinhas(session.usuario!.id),
     ])
     modelos.value = catalogo
     projetos.value = projetosData
