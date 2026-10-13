@@ -115,3 +115,10 @@ Este registro **prevalece sobre os estados históricos de planejamento** anterio
 - [ ] Autorizar fechamento/merge **expressamente** após regressões satisfatórias.
 
 **Próxima etapa no roadmap após encerramento:** `7.5 — Contexto operacional Projeto → SCI → Atividade`. **A margem de erro permanece extra futuro, fora da etapa atual.**
+
+
+### Confirmação complementar — rejeição de Solução pendente
+
+**Validado pelo responsável em teste local:** rejeitar uma solicitação de Solução no status `PENDENTE`, com justificativa, sem saída de componentes do estoque. Este resultado complementa os seis cenários funcionais já confirmados, totalizando **sete cenários principais validados**.
+
+**Próxima regressão:** realizar um Pedido convencional de Produtos (com forma de retirada/embalagem exigida), analisar/aprovar, conferir movimentação e recebimento, garantindo que as mudanças de `ItemPedidoRequestDTO` e `PedidoRequestDTO` não afetaram esse fluxo. Ainda pendentes: inativação/edição de modelo e snapshot da cartilha, segregação de Unidade/perfis, builds/suíte finais e autorização expressa para fechamento/merge.
