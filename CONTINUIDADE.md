@@ -811,3 +811,19 @@ Os cinco cards são dimensionados com a única variante local `metrics-grid--sol
 **Backend implementado:** `PedidoService.validarConsistenciaPedido` e `ResiduoService.validarGeradorNoLaboratorio` dispensam igualdade com o laboratório pessoal para perfis GESTOR/ADMINISTRADOR, preservando validações de Unidade/tenant, laboratório operacional ativo e coerência com Projeto. As mudanças **não** autorizam laboratório inativo e **não** flexibilizam as regras dos solicitantes comuns.
 
 **Validação pendente:** build frontend, Maven/testes backend, login com Gestor sem laboratório/ligado a laboratório inativo, seleção entre múltiplos laboratórios ativos da mesma Unidade, troca de Projeto, operação real dos três fluxos, isolamento cross-Unidade e regressão de solicitante comum. Não fazer merge antes da validação.
+
+
+### Etapa 7.4 — Testes 1 e 2 validados; Teste 3 suspenso para padronização visual (13/10/2026)
+
+**Confirmado pelo responsável:** Teste 1 (cadastro de modelo padrão) **validado**; Teste 2 (solicitação de Solução) **validado**, com observação visual: fonte da quantidade dos componentes estava grande. Reduzida a tipografia em `SolucoesSolicitanteView.vue`.
+
+**Teste 3 (Gestão de Soluções) ainda NÃO validado.** O responsável identificou nova divergência do padrão do SGL, com ações múltiplas e status de contraste insuficiente na tabela.
+
+**Ajustes frontend desta revisão:**
+- Lista da Central de Soluções passa a seguir o padrão de **Central de Resíduos**: status com `status-pill` e contraste claro/escuro, apenas **uma ação primária por estado** na linha e clique no registro para expandir detalhes.
+- Ações de rejeitar, cancelar e aprovação/entrega ficam agrupadas no painel expandido; redução da poluição visual na tabela.
+- Modal de operações passa a usar `modal-backdrop`, `modal-card`, `modal-content` e rodapé com botões do padrão de Resíduos.
+- Botão de confirmação deixa de ficar vermelho em aprovações/entregas e passa a usar aparência destrutiva apenas para rejeição/cancelamento.
+- Estoque, regras de aprovação, cancelamento e API **não alterados** nesta revisão.
+
+**Ainda não foram executados `npm run build` nem smoke visual/funcional local nesta rodada.** Revalidar Teste 3 com conferência da aprovação, modo claro/escuro, abertura do detalhe/modal e movimentações. Não fazer merge antes de validação.
