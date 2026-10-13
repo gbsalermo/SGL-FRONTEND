@@ -163,43 +163,44 @@ onMounted(() => { void carregar() })
           <thead><tr><th>Status</th><th>Solução / Solicitante</th><th>Laboratório / Projeto</th><th>Componentes</th><th>Solicitação</th><th>Ações</th></tr></thead>
           <tbody v-for="p in pedidosFiltrados" :key="p.id">
             <tr class="solution-row">
-              <td><span class="status-pill" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span></td>
+              <td><span class="sol-status" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span></td>
               <td><button type="button" class="solution-expand" :aria-expanded="expandidoId === p.id" @click="alternarDetalhes(p)"><strong>{{ p.nomeSolucao || 'Solução' }}</strong><small>{{ p.usuarioNome }}</small></button></td>
               <td>{{ p.laboratorioNome }}<small>{{ p.projetoNome || 'Sem Projeto' }}</small></td>
               <td>{{ p.itens.length }} produto(s)</td>
               <td>{{ new Date(p.dataSolicitacao).toLocaleDateString('pt-BR') }}</td>
               <td class="actions-column">
-                <button v-if="p.status === 'PENDENTE'" class="analysis-action" type="button" @click="abrirAcao(p,'APROVAR')">Analisar</button>
-                <button v-else-if="p.status === 'EM_PREPARACAO'" class="primary-action" type="button" @click="abrirAcao(p,'ENTREGAR')">Entregar</button>
-                <button v-else class="details-action" type="button" @click="alternarDetalhes(p)">Detalhes</button>
+                <button type="button" class="sol-expand-button" :class="{ 'sol-expand-button--open': expandidoId === p.id }"
+                  :aria-expanded="expandidoId === p.id" :aria-label="expandidoId === p.id ? 'Recolher detalhes da solução' : 'Expandir detalhes da solução'"
+                  @click="alternarDetalhes(p)">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4" /></svg>
+                </button>
               </td>
             </tr>
             <tr v-if="expandidoId === p.id" class="sol-expanded-row">
               <td colspan="6">
                 <div class="sol-details">
                   <div class="sol-detail-heading"><div><h3>{{ p.nomeSolucao }}</h3><p class="sol-muted">{{ p.usuarioNome }} · {{ p.laboratorioNome }}</p></div>
-                    <span class="status-pill" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span>
+                    <span class="sol-status" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span>
                   </div>
-                  <p class="sol-muted">{{ p.observacao || 'Sem observações adicionais.' }}</p>
+                  <div class="sol-request-context"><strong>Finalidade e exigências do solicitante</strong><p>{{ p.observacao || 'Não foram informadas exigências adicionais.' }}</p></div>
                   <div class="sol-table-wrap"><table class="sol-table">
-                    <thead><tr><th>Produto</th><th>Quantidade solicitada</th><th>Quantidade aprovada (canônica)</th></tr></thead>
+                    <thead><tr><th>Componente</th><th>Quantidade necessária</th></tr></thead>
                     <tbody><tr v-for="item in p.itens" :key="item.id">
                       <td>{{ item.produtoNome }}</td>
                       <td>{{ exibirQuantidade(item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada) }} {{ item.unidadeMedidaSolicitada || '' }}</td>
-                      <td>{{ item.quantidadeAprovada === null ? '—' : exibirQuantidade(item.quantidadeAprovada) }}</td>
                     </tr></tbody>
                   </table></div>
                   <div v-if="p.status === 'CANCELADO'" class="sol-note">
                     {{ p.solucaoPreparadaNoCancelamento ? 'Preparação realizada: os ingredientes permanecem consumidos.' : p.estoqueRevertidoNoCancelamento ? 'Preparação não realizada: componentes retornaram ao estoque.' : 'Cancelamento sem saída de estoque.' }}
                   </div>
-                  <h3>Instruções de preparo</h3><p class="sol-note">{{ p.instrucoesPreparoSolucao || 'Sem instruções de preparo registradas neste pedido.' }}</p>
+                  <h3>Cartilha de preparo</h3><p class="sol-note">{{ p.instrucoesPreparoSolucao || 'Sem instruções de preparo registradas neste pedido.' }}</p>
                   <section v-if="p.status === 'PENDENTE' || p.status === 'EM_PREPARACAO'" class="sol-detail-actions">
                     <div><h3>Ações da solução</h3><p class="sol-muted">Confira a composição e a cartilha antes de realizar a operação.</p></div>
                     <div class="sol-detail-buttons">
                       <button v-if="p.status === 'PENDENTE'" class="analysis-action" type="button" @click="abrirAcao(p,'APROVAR')">Aprovar preparação</button>
                       <button v-if="p.status === 'EM_PREPARACAO'" class="primary-action" type="button" @click="abrirAcao(p,'ENTREGAR')">Confirmar entrega</button>
                       <button v-if="p.status === 'PENDENTE'" class="secondary-action" type="button" @click="abrirAcao(p,'REJEITAR')">Rejeitar</button>
-                      <button class="admin-cancel-action" type="button" @click="abrirAcao(p,'CANCELAR')">Cancelar solução</button>
+                      <button v-if="p.status === 'EM_PREPARACAO'" class="admin-cancel-action" type="button" @click="abrirAcao(p,'CANCELAR')">Cancelar preparação</button>
                     </div>
                   </section>
                   <h3>Movimentações vinculadas</h3>
