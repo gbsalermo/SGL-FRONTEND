@@ -765,3 +765,16 @@ O responsável apontou perda de identidade institucional nas implementações re
 **Limitações e pendências:** a opção excepcional ainda requer Produtos/quantidades, pois é o contrato vigente da 7.3; caso se queira solicitar uma preparação desconhecida sem saber ingredientes, isso exigirá estado/regra de análise antes da baixa de estoque (não criar itens fictícios). **Build frontend e testes Maven/boot com V38 não foram executados pelo assistente**; antes de validar, executar localmente, testar tela, aprovação e preservação da cartilha após editar o modelo.
 
 **Merge:** não realizado.
+
+
+### Padronização estrutural de "Solicitar solução" — 13/10/2026
+
+O responsável comparou visualmente `NovoPedidoView.vue` (referência aprovada) com `NovaSolucaoView.vue` e confirmou que a simples substituição de cores/controles **não havia reproduzido a identidade SGL**.
+
+**Correção aplicada no frontend:**
+- `NovaSolucaoView.vue` foi reestruturada usando **a mesma composição** de `NovoPedidoView.vue`: área central limitada a 1180px, cabeçalho/botão de voltar, cartões de identificação do Solicitante/Laboratório, formulário principal com seções numeradas, superfície de itens, urgência no padrão de Pedidos, rodapé com mensagem e ação de envio.
+- Mantidos os elementos específicos do domínio: Solução padrão da cartilha como opção principal; excepcional fora do catálogo; composição e instruções do modelo exibidas no próprio formulário; exigências e Projeto vinculados.
+- O CSS scoped parte da estrutura de `NovoPedidoView.vue`, substituindo as cores literais por tokens `--sgl-*` e evitando sombra decorativa; preserva responsividade e tema claro/escuro.
+- **Não alterar as regras de negócio por motivo visual**. A cartilha da Solução persiste como snapshot no backend (V38).
+
+**Validação pendente:** executar `npm run build`, conferir visual claro/escuro lado a lado com Novo Pedido e testar envio. Não marcar como concluído ou realizar merge antes da revisão do responsável.
