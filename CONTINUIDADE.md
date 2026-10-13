@@ -800,3 +800,14 @@ Diferenças de domínio mantidas: status `EM_PREPARACAO` (no lugar de `APROVADO`
 Os cinco cards são dimensionados com a única variante local `metrics-grid--solucoes`, preservando tamanhos, fontes, contrastes e espaçamentos dos cards de Resíduos. O cabeçalho mostra somente **Atualizar dados**. As ações de aprovar, entregar, rejeitar, cancelar e os detalhes dos pedidos permanecem.
 
 **Pendente:** validação local de `npm run build` e inspeção comparativa tema claro/escuro; não afirmar que já está visualmente validado nem fazer merge.
+
+
+### Ajuste transversal — solicitações de Gestor/Administrador sem vínculo pessoal ativo com laboratório (13/10/2026)
+
+**Regra:** GESTOR/ADMINISTRADOR não precisa pertencer ao laboratório do Pedido, Solução ou Resíduo. A operação deve estar vinculada a **um laboratório ativo selecionado explicitamente**, na Unidade de contexto. Em Pedidos/Soluções esse é o destino; para Resíduo é a origem. Perfis solicitantes regulares seguem usando seu laboratório habitual. Projeto, quando informado, deve pertencer ao laboratório operacional selecionado.
+
+**Frontend implementado:** helper `src/modules/operacao/services/laboratoriosOperacionais.ts`; seleção em `NovoPedidoView.vue`, `NovaSolucaoView.vue` e `InformarResiduoView.vue`. Ao trocar de laboratório, limpar e recarregar o Projeto; ao enviar, usar o laboratório operacional e não `session.usuario.laboratorioId`. Rota de Gestão `/residuos/informar`, com link no menu. Fluxo de retorno de nova Solução em Gestão ajustado para `/solucoes`.
+
+**Backend implementado:** `PedidoService.validarConsistenciaPedido` e `ResiduoService.validarGeradorNoLaboratorio` dispensam igualdade com o laboratório pessoal para perfis GESTOR/ADMINISTRADOR, preservando validações de Unidade/tenant, laboratório operacional ativo e coerência com Projeto. As mudanças **não** autorizam laboratório inativo e **não** flexibilizam as regras dos solicitantes comuns.
+
+**Validação pendente:** build frontend, Maven/testes backend, login com Gestor sem laboratório/ligado a laboratório inativo, seleção entre múltiplos laboratórios ativos da mesma Unidade, troca de Projeto, operação real dos três fluxos, isolamento cross-Unidade e regressão de solicitante comum. Não fazer merge antes da validação.
