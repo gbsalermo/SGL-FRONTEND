@@ -82,3 +82,36 @@ Os cenários **S01, S02, S13 e S14** agora são realizados por usuário **Admini
 A **Central de Soluções** do Gestor contém apenas a operação: listagem de Pedidos, aprovação, rejeição, preparação, entrega, cancelamento e movimentações. Confirme que um perfil `GESTOR` comum **não possui acesso de navegação** aos modelos administrativos, enquanto um `ADMINISTRADOR` pode cadastrar/editar/inativar/importar. Esta é **somente uma conferência de interface**: autorização real de API ainda não existe no DEV.
 
 Verificar também o novo layout: cinco cards de status, filtros em abas com quantidade por status, busca dentro da superfície, tabela de Pedidos; testar tema claro/escuro e os modais. Não marcar como concluído antes de `npm run build` e inspeção visual.
+
+
+---
+
+## Registro consolidado dos testes funcionais — 13/10/2026
+
+Este registro **prevalece sobre os estados históricos de planejamento** anteriores neste documento. Os resultados abaixo foram informados pelo responsável após execução local pela interface, não executados diretamente pelo assistente.
+
+| Cenário | Resultado confirmado |
+|---|---|
+| Cadastro de uma Solução padrão com componentes | **VALIDADO** |
+| Solicitação de Solução padrão com vínculo a Projeto e cartilha | **VALIDADO** |
+| Aprovação integral pela Gestão, saída dos componentes e entrega sem segunda baixa | **VALIDADO** |
+| Solicitação personalizada **fora do catálogo** depois de corrigir o contrato HTTP | **VALIDADO** |
+| Cancelamento **antes do preparo**, com reversão dos componentes ao estoque | **VALIDADO** |
+| Cancelamento **após o preparo**, com consumo mantido e sem devolução ao estoque | **VALIDADO** |
+
+**Resultado funcional:** o ciclo principal pedido → aprovação → estoque → entrega/cancelamento foi testado pela interface. A execução de cada cenário pelo responsável valida o fluxo observado; não equivale a comprovação automática de todos os 17 itens da matriz anterior ou de todas as combinações de lote/concorrência.
+
+**Importante — não confundir rejeição com cancelamento:** o fluxo de gestão revisado disponibiliza **Rejeitar** somente para pedidos `PENDENTE` e **Cancelar preparação** para pedidos aprovados `EM_PREPARACAO`. A linha possui seta de expansão (sem botão “Analisar”); os detalhes exibem componentes e quantidades necessárias, sem coluna redundante de quantidade aprovada.
+
+### Pendências de regressão antes do encerramento formal da 7.4
+
+- [ ] Confirmar rejeição de uma Solução ainda `PENDENTE` (sem qualquer saída de estoque).
+- [ ] Confirmar que um Pedido comum de Produtos ainda pode ser solicitado/aprovado com suas regras de embalagem e estoque.
+- [ ] Confirmar inativação/edição de modelo e preservação da composição/cartilha de pedidos já existentes; promoção explícita de solução personalizada ao catálogo, se o cenário estiver disponível.
+- [ ] Conferir segregação de Unidade/tenant e perfis operacionais, inclusive Gestor sem laboratório pessoal ativo.
+- [ ] Registrar execução verde de `npm run build`, `mvn test` e inicialização após as correções mais recentes.
+- [ ] Revisar Light/Dark e responsividade nos estados que não foram capturados nos testes.
+- [x] Documentar os seis cenários principais validados.
+- [ ] Autorizar fechamento/merge **expressamente** após regressões satisfatórias.
+
+**Próxima etapa no roadmap após encerramento:** `7.5 — Contexto operacional Projeto → SCI → Atividade`. **A margem de erro permanece extra futuro, fora da etapa atual.**
