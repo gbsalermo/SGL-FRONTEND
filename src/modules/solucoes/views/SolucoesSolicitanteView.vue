@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
+import { SglBreadcrumb, SglButton, SglStatusChip } from '@/components/common'
 import { solucaoService } from '../services/solucaoService'
 import {
   erroSolucao, exibirQuantidade, statusSolucaoLabel, unidadesCompativeis,
@@ -160,15 +161,15 @@ onMounted(() => { void carregar() })
   <section class="sol-page">
     <header class="sol-header">
       <div>
-        <div class="sol-breadcrumb">Operação / Soluções</div>
+        <SglBreadcrumb :items="[{ label: 'Operação' }, { label: 'Soluções' }]" />
         <h1>Minhas soluções</h1>
         <p>Solicite uma preparação composta de vários produtos, a partir do catálogo ou de uma composição personalizada. Você receberá uma única solução preparada.</p>
       </div>
       <div class="sol-actions">
-        <button class="sol-btn" type="button" :disabled="carregando" @click="carregar">Atualizar</button>
-        <button class="sol-btn sol-btn--primary" type="button" @click="exibirFormulario = !exibirFormulario; erro = ''">
+        <SglButton variant="secondary" class="sol-btn" type="button" :disabled="carregando" @click="carregar">Atualizar</SglButton>
+        <SglButton variant="primary" class="sol-btn " type="button" @click="exibirFormulario = !exibirFormulario; erro = ''">
           {{ exibirFormulario ? 'Fechar formulário' : '+ Solicitar solução' }}
-        </button>
+        </SglButton>
       </div>
     </header>
 
@@ -225,7 +226,7 @@ onMounted(() => { void carregar() })
           <label class="sol-field"><span>Nome da solução *</span>
             <input v-model="nomeSolucao" maxlength="150" placeholder="Ex.: Solução tampão para projeto" required />
           </label>
-          <div class="sol-list-head"><h3>Composição</h3><button class="sol-btn sol-btn--light" type="button" :disabled="!podeAdicionar" @click="adicionarComponente">+ Adicionar produto</button></div>
+          <div class="sol-list-head"><h3>Composição</h3><SglButton variant="secondary" class="sol-btn " type="button" :disabled="!podeAdicionar" @click="adicionarComponente">+ Adicionar produto</SglButton></div>
           <div v-if="produtosDisponiveis.length === 0" class="sol-note">Não há Produtos com estoque positivo disponíveis nesta Unidade.</div>
           <div v-for="(item, index) in ingredientes" :key="index" class="sol-ingredient">
             <label class="sol-field"><span>Produto {{ index + 1 }} *</span>
@@ -245,14 +246,14 @@ onMounted(() => { void carregar() })
                 <option v-for="u in unidadesCompativeis(produtoPorId(item.produtoId)?.unidadeMedida)" :key="u" :value="u">{{ u }}</option>
               </select>
             </label>
-            <button class="sol-btn" type="button" :disabled="ingredientes.length === 1" @click="removerComponente(index)">Retirar</button>
+            <SglButton variant="secondary" class="sol-btn" type="button" :disabled="ingredientes.length === 1" @click="removerComponente(index)">Retirar</SglButton>
           </div>
         </template>
         <label class="sol-field"><span>Observações / finalidade</span><textarea v-model="observacao" maxlength="1500" placeholder="Descreva a finalidade da preparação ou informações importantes para a análise." /></label>
         <label class="sol-check"><input v-model="urgente" type="checkbox" /> Marcar como urgente (informativo)</label>
         <div class="sol-actions" style="justify-content:flex-end">
-          <button class="sol-btn" type="button" @click="exibirFormulario = false">Cancelar edição</button>
-          <button class="sol-btn sol-btn--primary" type="button" :disabled="enviando || carregando" @click="solicitar">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
+          <SglButton variant="secondary" class="sol-btn" type="button" @click="exibirFormulario = false">Cancelar edição</SglButton>
+          <SglButton variant="primary" class="sol-btn " type="button" :disabled="enviando || carregando" @click="solicitar">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</SglButton>
         </div>
       </div>
     </div>
@@ -265,7 +266,7 @@ onMounted(() => { void carregar() })
         <article v-for="pedido in pedidosFiltrados" :key="pedido.id" class="sol-card" style="padding:15px">
           <div class="sol-list-head">
             <div><h3>{{ pedido.nomeSolucao || 'Solução' }}</h3><span class="sol-muted">{{ pedido.projetoNome || 'Projeto não informado' }} · {{ new Date(pedido.dataSolicitacao).toLocaleString('pt-BR') }}</span></div>
-            <div class="sol-actions"><span class="sol-pill" :class="'sol-pill--' + pedido.status">{{ statusSolucaoLabel[pedido.status] }}</span><button class="sol-btn" type="button" @click="expandidoId = expandidoId === pedido.id ? null : pedido.id">{{ expandidoId === pedido.id ? 'Ocultar' : 'Detalhes' }}</button></div>
+            <div class="sol-actions"><SglStatusChip :tone="pedido.status === 'ENTREGUE' ? 'success' : pedido.status === 'PENDENTE' ? 'warning' : pedido.status === 'EM_PREPARACAO' ? 'info' : pedido.status === 'REJEITADO' ? 'error' : 'neutral'">{{ statusSolucaoLabel[pedido.status] }}</SglStatusChip><SglButton variant="secondary" class="sol-btn" type="button" @click="expandidoId = expandidoId === pedido.id ? null : pedido.id">{{ expandidoId === pedido.id ? 'Ocultar' : 'Detalhes' }}</SglButton></div>
           </div>
           <div v-if="expandidoId === pedido.id" class="sol-details">
             <p class="sol-muted">{{ pedido.observacao || 'Sem observações adicionais.' }}</p>
