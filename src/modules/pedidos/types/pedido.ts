@@ -38,6 +38,7 @@ export interface PedidoResponse {
   projetoNome: string | null
   dataSolicitacao: string
   status: StatusPedido
+  tipo?: 'PRODUTOS' | 'SOLUCAO'
   urgente: boolean
   motivoUrgencia: string | null
   observacao: string | null

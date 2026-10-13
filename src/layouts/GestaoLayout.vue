@@ -656,6 +656,13 @@ onBeforeUnmount(() => {
           <span v-show="!recolhida">Estagiários</span>
         </router-link>
 
+        <router-link to="/solucoes" title="Soluções">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 3h6M10 3v7L4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2l-6-9V3M8 15h8" />
+          </svg>
+          <span v-show="!recolhida">Soluções</span>
+        </router-link>
+
         <router-link to="/residuos" title="Resíduos">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 5h10l-1 16H8L7 5ZM5 5h14M9 5V3h6v2M10 9v8M14 9v8" />
@@ -667,6 +674,10 @@ onBeforeUnmount(() => {
         <router-link to="/solicitacoes/novo" title="Novo pedido">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
           <span v-show="!recolhida">Novo pedido</span>
+        </router-link>
+        <router-link to="/solucoes/solicitar" title="Solicitar solução">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v7L4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2l-6-9V3M8 15h8" /></svg>
+          <span v-show="!recolhida">Solicitar solução</span>
         </router-link>
         <router-link to="/solicitacoes/meus-pedidos" title="Meus pedidos">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" /></svg>

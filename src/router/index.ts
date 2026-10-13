@@ -60,6 +60,17 @@ export const router = createRouter({
           component: () => import('@/modules/pedidos/views/solicitante/MeusPedidosView.vue'),
         },
         {
+          path: 'minhas-solucoes',
+          name: 'solicitante-solucoes',
+          component: () => import('@/modules/solucoes/views/SolucoesSolicitanteView.vue'),
+        },
+        {
+          path: 'solucoes/solicitar',
+          name: 'solicitante-nova-solucao',
+          component: () => import('@/modules/solucoes/views/SolucoesSolicitanteView.vue'),
+          props: true,
+        },
+        {
           path: 'meus-residuos',
           name: 'meus-residuos',
           component: () => import('@/modules/residuos/views/solicitante/MeusResiduosView.vue'),
@@ -120,6 +131,16 @@ export const router = createRouter({
           path: 'estagiarios',
           name: 'gestao-estagiarios',
           component: () => import('@/modules/estagiarios/views/EstagiariosGestaoView.vue'),
+        },
+        {
+          path: 'solucoes',
+          name: 'gestao-solucoes',
+          component: () => import('@/modules/solucoes/views/SolucoesGestaoView.vue'),
+        },
+        {
+          path: 'solucoes/solicitar',
+          name: 'gestao-nova-solucao',
+          component: () => import('@/modules/solucoes/views/SolucoesSolicitanteView.vue'),
         },
         {
           path: 'residuos',

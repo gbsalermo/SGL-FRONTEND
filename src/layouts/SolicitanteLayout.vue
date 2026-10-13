@@ -122,6 +122,13 @@ function sair() {
           <span>Meus pedidos</span>
         </router-link>
 
+        <router-link class="solicitante-nav__item" to="/minhas-solucoes">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 3h6M10 3v7L4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2l-6-9V3M8 15h8" />
+          </svg>
+          <span>Minhas soluções</span>
+        </router-link>
+
         <router-link class="solicitante-nav__item" to="/meus-residuos">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 5h10l-1 16H8L7 5ZM5 5h14M9 5V3h6v2" />
@@ -137,6 +144,11 @@ function sair() {
             <path d="M12 5v14M5 12h14" />
           </svg>
           <span>Novo pedido</span>
+        </router-link>
+
+        <router-link class="solicitante-nav__item" to="/solucoes/solicitar?nova=1">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14M9 3h6M10 3v7L4 19h16l-6-9V3" /></svg>
+          <span>Solicitar solução</span>
         </router-link>
 
         <router-link class="solicitante-nav__item" to="/residuos/novo">
