@@ -18,6 +18,7 @@ import type {
   UnidadeMedidaResiduo,
 } from '@/modules/residuos/types/residuo'
 import { useSessionStore } from '@/stores/session'
+import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
 type ModoPreenchimento = 'MANUAL' | 'MODELO'
@@ -86,6 +87,11 @@ const unidadesMedida: Array<{ value: UnidadeMedidaResiduo; label: string }> = [
 
 const session = useSessionStore()
 const projetos = ref<ProjetoResiduoResponse[]>([])
+const laboratorios = ref<LaboratorioOperacional[]>([])
+const laboratorioSelecionadoId = ref('')
+const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
+const laboratorioOperacionalId = computed(() => gestao.value ? laboratorioSelecionadoId.value : session.usuario?.laboratorioId || '')
+const laboratorioOperacional = computed(() => laboratorios.value.find(l => l.id === laboratorioOperacionalId.value))
 const produtos = ref<ProdutoResiduoResponse[]>([])
 const classesResiduo = ref<ClasseResiduoResponse[]>([])
 const modelosResiduo = ref<ModeloResiduoResponse[]>([])
@@ -160,9 +166,9 @@ function mensagemErro(error: unknown) {
 }
 
 async function carregarDados() {
-  const laboratorioId = usuario.value?.laboratorioId
-  if (!laboratorioId) {
-    erro.value = 'Seu usuário precisa estar vinculado a um laboratório para informar resíduos.'
+  const laboratorioId = laboratorioOperacionalId.value
+  if (!usuario.value?.unidadeId || (!gestao.value && !laboratorioId)) {
+    erro.value = 'Unidade e laboratório operacional são necessários para informar resíduos.'
     return
   }
 
@@ -170,8 +176,12 @@ async function carregarDados() {
   erro.value = ''
   avisoDados.value = ''
 
+  if (gestao.value) {
+    try { laboratorios.value = await listarLaboratoriosOperacionais(usuario.value.unidadeId!) }
+    catch(e) { erro.value = mensagemErro(e); carregandoDados.value = false; return }
+  }
   const [projetosResult, produtosResult, classesResult, modelosResult] = await Promise.allSettled([
-    residuoService.listarProjetosPorLaboratorio(laboratorioId),
+    laboratorioId ? residuoService.listarProjetosPorLaboratorio(laboratorioId) : Promise.resolve([] as ProjetoResiduoResponse[]),
     residuoService.listarProdutosAtivos(),
     residuoService.listarClassesAtivas(),
     residuoService.listarModelosResiduoAtivos(),
@@ -347,8 +357,16 @@ async function focarPrimeiroErroFormulario() {
     ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
+async function selecionarLaboratorio() {
+  projetoId.value = ''
+  projetos.value = []
+  if (!laboratorioOperacionalId.value) return
+  try { projetos.value = await residuoService.listarProjetosPorLaboratorio(laboratorioOperacionalId.value) }
+  catch(e) { erro.value = mensagemErro(e) }
+}
+
 function validarFormulario() {
-  if (!usuario.value?.id || !usuario.value.laboratorioId) {
+  if (!usuario.value?.id || !laboratorioOperacionalId.value) {
     throw new Error('Sessão sem usuário ou laboratório válido.')
   }
 
@@ -389,7 +407,7 @@ function montarPayload(): CriarResiduoRequest {
 
   return {
     usuarioGeradorId: usuario.value!.id,
-    laboratorioId: usuario.value!.laboratorioId!,
+    laboratorioId: laboratorioOperacionalId.value,
     projetoId: projetoId.value || null,
     descricao: descricao.value.trim(),
     processoOrigem: processoOrigem.value.trim(),
@@ -481,8 +499,8 @@ onMounted(carregarDados)
         <small>{{ usuario?.email }}</small>
       </article>
       <article>
-        <span>Laboratório</span>
-        <strong>{{ usuario?.laboratorioNome ?? 'Não vinculado' }}</strong>
+        <span>Laboratório de origem</span>
+        <strong>{{ laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : usuario?.laboratorioNome || 'Não vinculado') }}</strong>
         <small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small>
       </article>
     </div>
@@ -503,6 +521,13 @@ onMounted(carregarDados)
     </div>
 
     <form v-else class="residuo-form" @submit.prevent="enviarResiduo">
+      <label v-if="gestao" class="field" style="display:grid;gap:8px;margin-bottom:16px">
+        <span>Laboratório de origem (obrigatório)</span>
+        <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
+          <option value="">Selecione um laboratório ativo da Unidade</option>
+          <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+        </select>
+      </label>
       <div v-if="avisoDados" class="notice notice--warning">{{ avisoDados }}</div>
       <div v-if="avisoModelo" class="notice notice--model">{{ avisoModelo }}</div>
       <div v-if="erro" class="notice notice--error">{{ erro }}</div>
