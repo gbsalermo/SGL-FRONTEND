@@ -723,3 +723,17 @@ Estado final:
 **A validar localmente:** `npm run build`, navegação nos dois perfis, chamadas REST com unidade correta, e teste de saldos antes/após aprovação, entrega e cancelamentos. Evitar merge antes da validação. **Margem de erro continua como extra futuro**, fora do escopo atual.
 
 **Limites do MVP:** o solicitante acompanha o Pedido; o cancelamento operacional é confirmado pelo gestor, pois o backend ainda não possui entidade separada de "pedido de cancelamento". Identidade/autorização real permanece pendência de segurança para produção.
+
+
+### Polimento da 7.4 — padrão visual de Resíduos e Cadastros (13/10/2026)
+
+Após o primeiro teste da tela de Gestor com inicialização local bem-sucedida, o responsável pediu três correções:
+
+- **Central de Soluções:** cards de status iguais em escala/organização aos da Central de Resíduos; filtros em **abas horizontais com contadores**, busca e tabela integrada na mesma superfície, em vez de botões avulsos.
+- **Dark Mode:** refatoração de `src/modules/solucoes/styles/solucoes.css` para utilizar variáveis institucionais `--sgl-*`, com contraste e cores de status próprios do tema escuro; aplicação também ao solicitante, tabelas e modais.
+- **Permissão e organização do catálogo:** os modelos reutilizáveis de **Resíduos e Soluções** passaram a ficar no mesmo conjunto em **Administração → Cadastros → Resíduos e Soluções**. `CadastrosAdminView.vue` contém a nova seção; `CatalogosResiduosSolucoesView.vue` alterna os dois editores; `ModelosSolucaoAdminView.vue` usa a apresentação dos modelos de Resíduos. A interface operacional de Soluções deixou de oferecer edição de catálogo. O Administrador pode **importar composição de uma solicitação** como modelo reutilizável dentro do módulo administrativo.
+- O link de **Cadastros** no menu lateral da gestão foi habilitado para perfil `ADMINISTRADOR`. Compatibilidade de URL: `/administracao/cadastros/modelos-residuo` e `/administracao/cadastros/modelos-solucao` redirecionam ao agrupamento.
+
+**Atenção:** essa alteração limita a navegação e os formulários à área administrativa, **mas NÃO fornece autenticação/autorização real de API**; o backend ainda usa `permitAll` temporário. Os endpoints de modelos deverão passar por verificação de permissões no backend no momento da implementação definitiva de identidade/acesso.
+
+**Pendente:** executar `npm run build`, conferir light/dark na interface e realizar o fluxo de ponta a ponta. Não houve merge.
