@@ -77,7 +77,7 @@ function validar() {
     return
   }
   if (!nomeSolucao.value.trim()) throw new Error('Informe o nome da Solução personalizada.')
-  if (!ingredientes.value.length) throw new Error('Informe pelo menos um Produto.')
+  if (!ingredientes.value.length) throw new Error('Informe pelo menos um Produto conhecido para avaliar a preparação.')
   const selecionados = new Set<string>()
   for (const item of ingredientes.value) {
     const produto = produtoPorId(item.produtoId)
@@ -132,7 +132,7 @@ onMounted(() => { void carregar() })
     </header>
     <p v-if="erro" class="sol-error" role="alert">{{ erro }}</p>
     <div class="sol-card" style="margin-bottom:20px">
-      <h2>Solicitação de preparação</h2>
+      <h2>1. Contexto da solicitação</h2>
       <div class="sol-form">
         <div class="sol-note">Escolha preferencialmente uma preparação do catálogo. O laboratório seguirá a composição e as orientações aprovadas para esse modelo.</div>
         <div class="sol-form-row">
@@ -146,7 +146,7 @@ onMounted(() => { void carregar() })
             <input :value="session.usuario?.laboratorioNome || 'Não vinculado'" disabled />
           </label>
         </div>
-        <div class="sol-field"><span>O que deseja solicitar?</span>
+        <h2 style="margin:16px 0 4px">2. Escolha da solução</h2><div class="sol-field"><span>O que deseja solicitar?</span>
           <div class="sol-segment" role="group" aria-label="Origem da composição">
             <button type="button" :class="{ active: origem === 'PADRAO' }" @click="origem = 'PADRAO'">Solução padrão</button>
             <button type="button" :class="{ active: origem === 'PERSONALIZADA' }" @click="origem = 'PERSONALIZADA'">Fora do catálogo</button>
@@ -176,7 +176,7 @@ onMounted(() => { void carregar() })
           <label class="sol-field"><span>Qual solução deseja? *</span>
             <input v-model="nomeSolucao" maxlength="150" placeholder="Ex.: Solução tampão para projeto" required />
           </label>
-          <p class="sol-note">Não encontrou sua Solução no catálogo? Descreva as exigências específicas. A gestão avaliará se a preparação pode ser atendida.</p><div class="sol-list-head"><h3>Componentes solicitados (quando conhecidos)</h3><SglButton variant="secondary" class="sol-btn " type="button" :disabled="!podeAdicionar" @click="adicionarComponente">+ Adicionar produto</SglButton></div>
+          <p class="sol-note">Não encontrou a Solução na cartilha? Informe o nome desejado, os componentes conhecidos e as exigências. Esta modalidade depende de análise da gestão.</p><div class="sol-list-head"><h3>Componentes solicitados (quando conhecidos)</h3><SglButton variant="secondary" class="sol-btn " type="button" :disabled="!podeAdicionar" @click="adicionarComponente">+ Adicionar produto</SglButton></div>
           <div v-if="produtosDisponiveis.length === 0" class="sol-note">Não há Produtos com estoque positivo disponíveis nesta Unidade.</div>
           <div v-for="(item, index) in ingredientes" :key="index" class="sol-ingredient">
             <label class="sol-field"><span>Produto {{ index + 1 }} *</span>
@@ -199,8 +199,8 @@ onMounted(() => { void carregar() })
             <SglButton variant="secondary" class="sol-btn" type="button" :disabled="ingredientes.length === 1" @click="removerComponente(index)">Retirar</SglButton>
           </div>
         </template>
-        <label class="sol-field"><span>Finalidade ou exigências especiais</span><textarea v-model="observacao" maxlength="1500" placeholder="Para uma Solução fora do catálogo, informe concentração, volume final, finalidade e quaisquer exigências de preparo." /></label>
-        <label class="sol-check"><input v-model="urgente" type="checkbox" /> Marcar como urgente (informativo)</label>
+        <h2 style="margin:16px 0 4px">3. Exigências e confirmação</h2><label class="sol-field"><span>Finalidade ou exigências especiais</span><textarea v-model="observacao" maxlength="1500" placeholder="Para uma Solução fora do catálogo, informe concentração, volume final, finalidade e quaisquer exigências de preparo." /></label>
+        <label class="sol-check"><input v-model="urgente" type="checkbox" /> Sinalizar urgência (a gestão analisará a prioridade)</label>
         <div class="sol-actions" style="justify-content:flex-end">
           <SglButton variant="secondary" class="sol-btn" type="button" @click="router.push('/minhas-solucoes')">Cancelar edição</SglButton>
           <SglButton variant="primary" class="sol-btn " type="button" :disabled="enviando || carregando" @click="solicitar">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</SglButton>
