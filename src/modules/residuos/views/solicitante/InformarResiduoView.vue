@@ -521,13 +521,6 @@ onMounted(carregarDados)
     </div>
 
     <form v-else class="residuo-form" @submit.prevent="enviarResiduo">
-      <label v-if="gestao" class="field" style="display:grid;gap:8px;margin-bottom:16px">
-        <span>Laboratório de origem (obrigatório)</span>
-        <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
-          <option value="">Selecione um laboratório ativo da Unidade</option>
-          <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
-        </select>
-      </label>
       <div v-if="avisoDados" class="notice notice--warning">{{ avisoDados }}</div>
       <div v-if="avisoModelo" class="notice notice--model">{{ avisoModelo }}</div>
       <div v-if="erro" class="notice notice--error">{{ erro }}</div>
@@ -586,6 +579,14 @@ onMounted(carregarDados)
             <p>Explique o que foi gerado e em qual processo. O projeto é opcional.</p>
           </div>
         </div>
+
+        <label v-if="gestao" class="field">
+          <span>Laboratório de origem <small>(obrigatório)</small></span>
+          <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
+            <option value="">Selecione um laboratório ativo da Unidade</option>
+            <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+          </select>
+        </label>
 
         <div class="form-grid form-grid--two">
           <label class="field">
