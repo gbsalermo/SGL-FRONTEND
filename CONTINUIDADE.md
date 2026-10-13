@@ -836,3 +836,21 @@ O responsável autorizou solucionar os desvios da auditoria visual integral, con
 **Correções publicadas:** CSS de Soluções reduzido para regras somente de domínio; Central baseada no template de Resíduos com ações acessíveis e modais padronizados; histórico alinhado a Meus Pedidos com cores/tamanhos institucionais; solicitação alinhada a Novo Pedido; catálogo de modelos com cores, raios, controles e modais vinculados aos tokens Light/Dark. Regras de Pedido/Estoque não alteradas nesta rodada.
 
 **Validação:** testes funcionais 1 e 2 confirmados anteriormente pelo responsável. Teste 3 permanece pendente. O build e a verificação visual completa em Light/Dark/responsividade **não foram executados pelo assistente**. Sem merge.
+
+
+### Teste 3 validado — simplificação da Central de Soluções (13/10/2026)
+
+**Teste funcional 3 validado pelo responsável:** Pedido de Solução aprovado, componentes com movimentações de saída e entrega confirmada; observações de UX pendentes.
+
+**Correções aplicadas:**
+- Retirado botão **Analisar**. A tabela mostra apenas o botão de expansão por seta como em `Meus Pedidos`; o painel expandido contém ações pertinentes ao status.
+- Eliminada a coluna redundante **Quantidade aprovada (canônica)** dos detalhes: Solução é aprovada como preparação integral. Exibir somente Produto e Quantidade necessária, mais cartilha e exigências do solicitante.
+- No status `PENDENTE`, as opções são **Aprovar preparação** ou **Rejeitar**. Cancelamento não é apresentado ao gestor antes da aprovação.
+- No status `EM_PREPARACAO`, as opções são **Confirmar entrega** ou **Cancelar preparação**. Este último pergunta se já houve preparo, determinando se devolve componentes ao estoque ou conserva consumo.
+- Em `ENTREGUE`, `REJEITADO`, `CANCELADO` ficam só dados e rastreabilidade; sem ações operacionais adicionais.
+- Novo chip `sol-status` e botão `sol-expand-button` seguindo tipografia, bordas, raios e tokens do SGL em Light/Dark.
+- Sem alteração de API/serviços/estoque. A regra de cancelamento de pedido `PENDENTE` continua existindo no backend para demais fluxos; a gestão de Soluções simplesmente não a expõe.
+
+**Regra terminológica:** *Rejeitar* = decisão da gestão sobre solicitação pendente, sem estoque retirado; *Cancelar* = interromper Solução anteriormente aprovada, verificando preparo físico e reversão possível. Não confundir rejeição com cancelamento.
+
+**QA pendente:** build, rechecagem das ações e aparência dos detalhes/chip Light/Dark; não fazer merge.
