@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useSessionStore } from '@/stores/session'
-import { SglStatusChip } from '@/components/common'
 import { solucaoService } from '../services/solucaoService'
 import {
   erroSolucao, exibirQuantidade, statusSolucaoLabel,
@@ -163,25 +162,24 @@ onMounted(() => { void carregar() })
         <table class="sol-table--records">
           <thead><tr><th>Status</th><th>Solução / Solicitante</th><th>Laboratório / Projeto</th><th>Componentes</th><th>Solicitação</th><th>Ações</th></tr></thead>
           <tbody v-for="p in pedidosFiltrados" :key="p.id">
-            <tr>
-              <td><SglStatusChip :tone="p.status === 'ENTREGUE' ? 'success' : p.status === 'PENDENTE' ? 'warning' : p.status === 'EM_PREPARACAO' ? 'info' : p.status === 'REJEITADO' ? 'error' : 'neutral'">{{ statusSolucaoLabel[p.status] }}</SglStatusChip></td>
+            <tr class="solution-row" @click="alternarDetalhes(p)">
+              <td><span class="status-pill" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span></td>
               <td><strong>{{ p.nomeSolucao || 'Solução' }}</strong><small>{{ p.usuarioNome }}</small></td>
               <td>{{ p.laboratorioNome }}<small>{{ p.projetoNome || 'Sem Projeto' }}</small></td>
               <td>{{ p.itens.length }} produto(s)</td>
               <td>{{ new Date(p.dataSolicitacao).toLocaleDateString('pt-BR') }}</td>
-              <td>
-                <div class="sol-actions sol-actions--compact">
-                  <SglButton variant="primary" v-if="p.status === 'PENDENTE'" class="sol-btn " type="button" @click="abrirAcao(p,'APROVAR')">Analisar</SglButton>
-                  <SglButton variant="primary" v-if="p.status === 'EM_PREPARACAO'" class="sol-btn " type="button" @click="abrirAcao(p,'ENTREGAR')">Entregar</SglButton>
-                  <SglButton variant="secondary" v-if="p.status === 'PENDENTE'" class="sol-btn" type="button" @click="abrirAcao(p,'REJEITAR')">Rejeitar</SglButton>
-                  <SglButton variant="danger" v-if="p.status === 'PENDENTE' || p.status === 'EM_PREPARACAO'" class="sol-btn " type="button" @click="abrirAcao(p,'CANCELAR')">Cancelar</SglButton>
-                  <SglButton variant="secondary" class="sol-btn" type="button" :aria-expanded="expandidoId === p.id" @click="alternarDetalhes(p)">{{ expandidoId === p.id ? 'Ocultar' : 'Detalhes' }}</SglButton>
-                </div>
+              <td class="actions-column" @click.stop>
+                <button v-if="p.status === 'PENDENTE'" class="analysis-action" type="button" @click="abrirAcao(p,'APROVAR')">Analisar</button>
+                <button v-else-if="p.status === 'EM_PREPARACAO'" class="primary-action" type="button" @click="abrirAcao(p,'ENTREGAR')">Entregar</button>
+                <button v-else class="details-action" type="button" @click="alternarDetalhes(p)">Detalhes</button>
               </td>
             </tr>
             <tr v-if="expandidoId === p.id" class="sol-expanded-row">
               <td colspan="6">
                 <div class="sol-details">
+                  <div class="sol-detail-heading"><div><h3>{{ p.nomeSolucao }}</h3><p class="sol-muted">{{ p.usuarioNome }} · {{ p.laboratorioNome }}</p></div>
+                    <span class="status-pill" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span>
+                  </div>
                   <p class="sol-muted">{{ p.observacao || 'Sem observações adicionais.' }}</p>
                   <div class="sol-table-wrap"><table class="sol-table">
                     <thead><tr><th>Produto</th><th>Quantidade solicitada</th><th>Quantidade aprovada (canônica)</th></tr></thead>
@@ -195,6 +193,15 @@ onMounted(() => { void carregar() })
                     {{ p.solucaoPreparadaNoCancelamento ? 'Preparação realizada: os ingredientes permanecem consumidos.' : p.estoqueRevertidoNoCancelamento ? 'Preparação não realizada: componentes retornaram ao estoque.' : 'Cancelamento sem saída de estoque.' }}
                   </div>
                   <h3>Instruções de preparo</h3><p class="sol-note" style="white-space:pre-wrap">{{ p.instrucoesPreparoSolucao || 'Sem instruções de preparo registradas neste pedido.' }}</p>
+                  <section v-if="p.status === 'PENDENTE' || p.status === 'EM_PREPARACAO'" class="sol-detail-actions">
+                    <div><h3>Ações da solução</h3><p class="sol-muted">Confira a composição e a cartilha antes de realizar a operação.</p></div>
+                    <div class="sol-detail-buttons">
+                      <button v-if="p.status === 'PENDENTE'" class="analysis-action" type="button" @click="abrirAcao(p,'APROVAR')">Aprovar preparação</button>
+                      <button v-if="p.status === 'EM_PREPARACAO'" class="primary-action" type="button" @click="abrirAcao(p,'ENTREGAR')">Confirmar entrega</button>
+                      <button v-if="p.status === 'PENDENTE'" class="secondary-action" type="button" @click="abrirAcao(p,'REJEITAR')">Rejeitar</button>
+                      <button class="admin-cancel-action" type="button" @click="abrirAcao(p,'CANCELAR')">Cancelar solução</button>
+                    </div>
+                  </section>
                   <h3>Movimentações vinculadas</h3>
                   <div v-if="carregandoMovimentos[p.id]" class="sol-muted">Carregando movimentações...</div>
                   <div v-else-if="!(movimentacoes[p.id] || []).length" class="sol-muted">Nenhuma movimentação registrada neste Pedido.</div>
@@ -212,9 +219,12 @@ onMounted(() => { void carregar() })
       </div>
     </section>
 
-    <div v-if="acaoAberta && pedidoAlvo" class="sol-dialog-overlay" @click.self="fecharAcao">
-      <section class="sol-dialog" role="dialog" aria-modal="true" :aria-label="'Operação sobre ' + pedidoAlvo.nomeSolucao">
-        <h2>{{ acaoAberta === 'APROVAR' ? 'Aprovar preparação' : acaoAberta === 'ENTREGAR' ? 'Confirmar entrega' : acaoAberta === 'CANCELAR' ? 'Cancelar solução' : 'Rejeitar solicitação' }}</h2>
+    <div v-if="acaoAberta && pedidoAlvo" class="modal-backdrop" @click.self="fecharAcao">
+      <section class="modal-card" role="dialog" aria-modal="true" :aria-label="'Operação sobre ' + pedidoAlvo.nomeSolucao">
+        <header><div><span>GESTÃO DE SOLUÇÕES</span><h2>{{ acaoAberta === 'APROVAR' ? 'Aprovar preparação' : acaoAberta === 'ENTREGAR' ? 'Confirmar entrega' : acaoAberta === 'CANCELAR' ? 'Cancelar solução' : 'Rejeitar solicitação' }}</h2></div>
+          <button type="button" aria-label="Fechar" :disabled="executando" @click="fecharAcao">×</button>
+        </header>
+        <div class="modal-content">
         <p class="sol-muted">{{ pedidoAlvo.nomeSolucao }} — {{ pedidoAlvo.usuarioNome }}</p>
         <div v-if="erroAcao" class="sol-error" role="alert">{{ erroAcao }}</div>
         <template v-if="acaoAberta === 'APROVAR'">
@@ -235,10 +245,11 @@ onMounted(() => { void carregar() })
           <label class="sol-field"><span>Justificativa *</span><textarea v-model="justificativa" placeholder="Motivo do cancelamento" /></label>
         </template>
         <label v-if="acaoAberta === 'REJEITAR'" class="sol-field"><span>Justificativa *</span><textarea v-model="justificativa" placeholder="Explique a rejeição" /></label>
-        <div class="sol-dialog-footer">
-          <SglButton variant="secondary" class="sol-btn" type="button" :disabled="executando" @click="fecharAcao">Voltar</SglButton>
-          <SglButton variant="danger" class="sol-btn" :class="acaoAberta === 'CANCELAR' || acaoAberta === 'REJEITAR' ? '' : ''" type="button" :disabled="executando" @click="executarAcao">{{ executando ? 'Processando...' : 'Confirmar' }}</SglButton>
         </div>
+        <footer>
+          <button class="secondary-action" type="button" :disabled="executando" @click="fecharAcao">Voltar</button>
+          <button :class="acaoAberta === 'CANCELAR' || acaoAberta === 'REJEITAR' ? 'admin-cancel-action' : 'primary-action'" type="button" :disabled="executando" @click="executarAcao">{{ executando ? 'Processando...' : 'Confirmar' }}</button>
+        </footer>
       </section>
     </div>
   </section>
