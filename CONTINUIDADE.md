@@ -789,3 +789,14 @@ Diferenças de domínio mantidas: status `EM_PREPARACAO` (no lugar de `APROVADO`
 **Tema:** preservada a estrutura da tela de referência com ajustes de fundo/bordas pelos tokens do SGL para contraste no tema escuro. A composição foi copiada intencionalmente para manter a identidade, sem introduzir uma terceira linguagem.
 
 **Validação local ainda necessária:** executar `npm run build`, comparar lado a lado com `Meus pedidos` nos temas claro/escuro e testar expansão/filtros/detalhes após gerar solicitação. Nenhum merge.
+
+
+### 7.4 — Central de Soluções: identidade idêntica à Central de Resíduos (13/10/2026)
+
+**Ajuste solicitado pelo responsável:** a tela operacional de gestão ainda apresentava divergências entre Light/Dark e o padrão de Resíduos. Remover o botão **+ Nova solicitação**: essa criação pertence ao fluxo do solicitante, não ao cabeçalho da Central de Gestão.
+
+**Aplicado no frontend:** `SolucoesGestaoView.vue` passou a usar a **mesma fundação de layout e CSS existente em Resíduos** (`residuos-gestao-page residuos-completo`, `page-heading`, `breadcrumb`, `secondary-action`, `metrics-grid`, `workspace-card`, `status-tabs`, `toolbar`, `state-box`, `table-wrap` e classes de feedback), em vez de tentar emular visualmente os componentes com estilos específicos de Soluções. Isso aproveita as regras institucionais já implementadas em `src/styles/etapa-1-4-residuos.css` e `src/styles/etapa-2-gestao-residuos.css`, inclusive modos claro e escuro.
+
+Os cinco cards são dimensionados com a única variante local `metrics-grid--solucoes`, preservando tamanhos, fontes, contrastes e espaçamentos dos cards de Resíduos. O cabeçalho mostra somente **Atualizar dados**. As ações de aprovar, entregar, rejeitar, cancelar e os detalhes dos pedidos permanecem.
+
+**Pendente:** validação local de `npm run build` e inspeção comparativa tema claro/escuro; não afirmar que já está visualmente validado nem fazer merge.
