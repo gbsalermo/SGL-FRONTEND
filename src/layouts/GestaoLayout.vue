@@ -671,6 +671,10 @@ onBeforeUnmount(() => {
         </router-link>
 
         <p v-show="!recolhida" class="gestao-nav__group">SOLICITAÇÕES</p>
+        <router-link to="/residuos/informar" title="Informar resíduo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M10 10v8m4-8v8M8 6l1-2h6l1 2M6 6l1 15h10l1-15"/></svg>
+          <span v-show="!recolhida">Informar resíduo</span>
+        </router-link>
         <router-link to="/solicitacoes/novo" title="Novo pedido">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
           <span v-show="!recolhida">Novo pedido</span>
