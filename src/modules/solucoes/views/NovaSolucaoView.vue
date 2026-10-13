@@ -128,7 +128,7 @@ async function solicitar() {
       arquivoDocumento: null,
       itens: origem.value === 'PADRAO' ? [] : personalizadas,
     })
-    await router.push({path: '/minhas-solucoes',query:{criado:'1'}})
+    await router.push(gestao.value ? '/solucoes' : {path: '/minhas-solucoes',query:{criado:'1'}})
   } catch (e) { erro.value = erroSolucao(e) } finally { enviando.value = false }
 }
 watch(origem, () => { erro.value = ''; modeloId.value = ''; ingredientes.value = [{ produtoId: '', quantidade: 1, unidadeMedida: '' }] })
@@ -143,7 +143,7 @@ onMounted(() => { void carregar() })
         <h1>Solicitar solução</h1>
         <p>Escolha uma preparação da cartilha ou descreva uma solicitação excepcional.</p>
       </div>
-      <button class="secondary-action" type="button" @click="router.push('/minhas-solucoes')">Voltar para minhas soluções</button>
+      <button class="secondary-action" type="button" @click="router.push(gestao ? '/solucoes' : '/minhas-solucoes')">{{ gestao ? 'Voltar para gestão' : 'Voltar para minhas soluções' }}</button>
     </header>
 
     <div class="context-grid">
