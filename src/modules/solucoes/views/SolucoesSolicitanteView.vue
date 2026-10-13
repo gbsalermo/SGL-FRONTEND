@@ -391,4 +391,6 @@ th { color: #35415a; background: #fbfcfe; font-size: 11px; text-transform: upper
 .minhas-solucoes-page td,.minhas-solucoes-page .expanded-section { border-color:var(--sgl-border); }
 .minhas-solucoes-page .primary-action { box-shadow:none; }
 @media(max-width:760px){.minhas-solucoes-page .expanded-section--instructions,.minhas-solucoes-page .expanded-section--cancellation{grid-column:auto;}}
+.minhas-solucoes-page .material-quantity > strong {font-size:14px;line-height:1.3;letter-spacing:0;font-weight:700}
+.minhas-solucoes-page .material-quantity > span {font-size:11px}
 </style>
