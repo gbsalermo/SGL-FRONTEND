@@ -302,6 +302,7 @@ onMounted(() => { void carregar() })
       <section class="sol-dialog" role="dialog" aria-modal="true" :aria-label="'Operação sobre ' + pedidoAlvo.nomeSolucao">
         <h2>{{ acaoAberta === 'APROVAR' ? 'Aprovar preparação' : acaoAberta === 'ENTREGAR' ? 'Confirmar entrega' : acaoAberta === 'CANCELAR' ? 'Cancelar solução' : acaoAberta === 'PROMOVER' ? 'Adicionar ao catálogo' : 'Rejeitar solicitação' }}</h2>
         <p class="sol-muted">{{ pedidoAlvo.nomeSolucao }} — {{ pedidoAlvo.usuarioNome }}</p>
+        <div v-if="erro" class="sol-error" role="alert" style="margin:12px 0">{{ erro }}</div>
         <template v-if="acaoAberta === 'APROVAR'">
           <div class="sol-note">A aprovação dá baixa em todos os componentes do estoque e muda o estado para <b>EM PREPARAÇÃO</b>. Para alterar a composição, rejeite a solicitação e peça uma nova receita.</div>
           <ul class="sol-detail-list"><li v-for="item in pedidoAlvo.itens" :key="item.id"><span>{{ item.produtoNome }}</span><b>{{ exibirQuantidade(item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada) }} {{ item.unidadeMedidaSolicitada || '' }}</b></li></ul>
