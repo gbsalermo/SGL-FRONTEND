@@ -210,7 +210,7 @@ onMounted(() => { void carregar() })
             </select>
           </label>
           <div v-if="modelos.length === 0" class="sol-note">Ainda não há soluções padrões ativas. Você pode solicitar uma composição personalizada.</div>
-          <div v-if="modeloSelecionado" class="sol-card" style="background:#f5f8fc">
+          <div v-if="modeloSelecionado" class="sol-card" style="background:var(--sgl-surface-soft,#f5f8fc)">
             <h3>{{ modeloSelecionado.nome }}</h3>
             <p class="sol-muted">{{ modeloSelecionado.descricao || 'Preparação cadastrada no catálogo da Unidade.' }}</p>
             <ul class="sol-detail-list">
