@@ -827,3 +827,12 @@ Os cinco cards são dimensionados com a única variante local `metrics-grid--sol
 - Estoque, regras de aprovação, cancelamento e API **não alterados** nesta revisão.
 
 **Ainda não foram executados `npm run build` nem smoke visual/funcional local nesta rodada.** Revalidar Teste 3 com conferência da aprovação, modo claro/escuro, abertura do detalhe/modal e movimentações. Não fazer merge antes de validação.
+
+
+### 7.4 — Auditoria integral corrigida no código, QA local pendente (13/10/2026)
+
+O responsável autorizou solucionar os desvios da auditoria visual integral, conforme `docs/AUDITORIA_VISUAL_INTEGRAL_SOLUCOES_ETAPA_7_4_2026-10-13.md`.
+
+**Correções publicadas:** CSS de Soluções reduzido para regras somente de domínio; Central baseada no template de Resíduos com ações acessíveis e modais padronizados; histórico alinhado a Meus Pedidos com cores/tamanhos institucionais; solicitação alinhada a Novo Pedido; catálogo de modelos com cores, raios, controles e modais vinculados aos tokens Light/Dark. Regras de Pedido/Estoque não alteradas nesta rodada.
+
+**Validação:** testes funcionais 1 e 2 confirmados anteriormente pelo responsável. Teste 3 permanece pendente. O build e a verificação visual completa em Light/Dark/responsividade **não foram executados pelo assistente**. Sem merge.
