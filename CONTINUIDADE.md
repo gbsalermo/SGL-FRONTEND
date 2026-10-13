@@ -702,3 +702,24 @@ Estado final:
 - frontend pronto para merge da Etapa 6.
 
 **Próxima frente: Etapa 7 — Unidades + Soluções + contexto operacional.**
+
+
+---
+
+## Etapa 7 — Inversão 7.4 / 7.5 e interface de Soluções (13/10/2026)
+
+**Decisão do responsável:** antecipar a interface de Soluções para permitir validar, dentro do SGL, o fluxo de ida e volta usuário/gestor, sem depender de Postman. A Etapa **7.4 agora é Frontend de Soluções + smoke ponta a ponta**. O **contexto Projeto/SCI/Atividade passa para a 7.5**, após a verificação funcional. Etapas 7.6 e 7.7 permanecem posteriores.
+
+**Backend:** catálogo de Soluções e tipo `Pedido.SOLUCAO` foram implementados na branch homônima; em 13/10 o responsável confirmou suíte verde e inicialização normal. **Teste de fluxo pela interface ainda não confirmado.**
+
+**Frontend — primeira implementação na branch `collab/etapa-7-unidades-solucoes-contexto`:**
+- módulo `src/modules/solucoes`: DTOs/tipos, serviço API, estilos e views dedicadas;
+- usuário solicitante: `/minhas-solucoes`, `/solucoes/solicitar?nova=1`;
+- gestor: `/solucoes` e `/solucoes/nova?nova=1`, com gestão de solicitações e do catálogo;
+- menu e rotas integrados, filtros para que Soluções não poluam listagens convencionais de Pedidos;
+- catálogo: criar, editar, inativar, ativar via edição, copiar composição de Pedido para modelo;
+- fluxo: compor Solução com produtos e medidas; aprovação integral; `EM_PREPARACAO`; confirmar entrega; cancelar com/sem preparo e consulta de movimentações.
+
+**A validar localmente:** `npm run build`, navegação nos dois perfis, chamadas REST com unidade correta, e teste de saldos antes/após aprovação, entrega e cancelamentos. Evitar merge antes da validação. **Margem de erro continua como extra futuro**, fora do escopo atual.
+
+**Limites do MVP:** o solicitante acompanha o Pedido; o cancelamento operacional é confirmado pelo gestor, pois o backend ainda não possui entidade separada de "pedido de cancelamento". Identidade/autorização real permanece pendência de segurança para produção.
