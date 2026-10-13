@@ -69,3 +69,50 @@ body.sgl-dark-active .residuos-gestao-page.sol-gestao .status-pill[data-status='
 body.sgl-dark-active .residuos-gestao-page.sol-gestao .sol-status[data-status='PENDENTE'] {color:var(--sgl-warning-light,#f6d28a);}
 body.sgl-dark-active .residuos-gestao-page.sol-gestao .sol-status[data-status='EM_PREPARACAO'] {color:var(--sgl-primary-light);}
 body.sgl-dark-active .residuos-gestao-page.sol-gestao .sol-status[data-status='ENTREGUE'] {color:var(--sgl-green-light);}
+
+
+/* Botoes de confirmacao dos modais de Solucoes: mesma base de altura,
+   espaçamento e raio dos controles institucionais; criticidade explicita. */
+.residuos-gestao-page.sol-gestao .modal-card > footer {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.residuos-gestao-page.sol-gestao .modal-card > footer > button {
+  min-height:40px;
+  padding:0 16px;
+  border:1px solid var(--sgl-border-strong);
+  border-radius:var(--sgl-radius-control);
+  font:inherit;
+  font-size:var(--sgl-font-body);
+  font-weight:700;
+  cursor:pointer;
+}
+.residuos-gestao-page.sol-gestao .modal-card > footer > .secondary-action {
+  background:var(--sgl-surface);
+  color:var(--sgl-text);
+  border-color:var(--sgl-border-strong);
+}
+.residuos-gestao-page.sol-gestao .modal-card > footer > .primary-action {
+  background:var(--sgl-primary);
+  border-color:var(--sgl-primary);
+  color:#fff;
+}
+.residuos-gestao-page.sol-gestao .modal-card > footer > .admin-cancel-action {
+  background:#b42318;
+  border-color:#b42318;
+  color:#fff;
+}
+.residuos-gestao-page.sol-gestao .modal-card > footer > button:hover:not(:disabled) {
+  filter:brightness(.94);
+}
+.residuos-gestao-page.sol-gestao .modal-card > footer > button:disabled {
+  opacity:.55;
+  cursor:not-allowed;
+}
+.residuos-gestao-page.sol-gestao .modal-card > footer > button:focus-visible {
+  outline:2px solid var(--sgl-primary);
+  outline-offset:2px;
+}
