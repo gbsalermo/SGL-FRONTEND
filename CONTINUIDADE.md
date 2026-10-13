@@ -854,3 +854,12 @@ O responsável autorizou solucionar os desvios da auditoria visual integral, con
 **Regra terminológica:** *Rejeitar* = decisão da gestão sobre solicitação pendente, sem estoque retirado; *Cancelar* = interromper Solução anteriormente aprovada, verificando preparo físico e reversão possível. Não confundir rejeição com cancelamento.
 
 **QA pendente:** build, rechecagem das ações e aparência dos detalhes/chip Light/Dark; não fazer merge.
+
+
+### 7.4 — Solução avulsa rejeitada por contrato API (13/10/2026)
+
+**Achado:** o formulário Fora do catálogo apresentava erro genérico "Um ou mais campos estão inválidos" mesmo com campos preenchidos. Causa: componentes com DTO de **Modelo** (`produtoId, quantidade, unidadeMedida`) eram enviados diretamente para endpoint de **Pedido**; API exige `produtoId, quantidadeSolicitada, unidadeMedidaSolicitada`. Além disso, backend requeria embalagem de Pedido comum, corrigido separadamente.
+
+**Correção frontend:** `solucaoService.solicitar` converte os itens para o contrato de Pedido exclusivamente na requisição. Contratos de cadastro/edição dos Modelos permanecem inalterados. `erroSolucao` lê corretamente `ApiError.fieldErrors` (lista de objetos `{field, message}`) e prioriza mensagens específicas em vez do texto genérico.
+
+**Testes necessários:** atualizar backend e frontend na branch; `mvn test`, `npm run build`, criar Solução excepcional com Produto unidade `REACAO` ou `ML` sem campos de embalagem, conferir PENDENTE e listagem; validar catálogo padrão e novo Pedido de Produtos como regressões. Nenhum merge.
