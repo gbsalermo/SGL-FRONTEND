@@ -35,7 +35,17 @@ export const solucaoService = {
     return data.filter(p => p.tipo === 'SOLUCAO')
   },
   async solicitar(payload: SolucaoInput) {
-    const { data } = await http.post<PedidoSolucao>('/v1/solucoes/pedidos', payload)
+    // O catalogo usa 'quantidade/unidadeMedida'; o Pedido de Solucao recebe
+    // 'quantidadeSolicitada/unidadeMedidaSolicitada'. Nao misturar DTOs.
+    const itens = payload.itens.map((item) => ({
+      produtoId: item.produtoId,
+      quantidadeSolicitada: item.quantidade,
+      unidadeMedidaSolicitada: item.unidadeMedida,
+    }))
+    const { data } = await http.post<PedidoSolucao>('/v1/solucoes/pedidos', {
+      ...payload,
+      itens,
+    })
     return data
   },
   async aprovar(id: string, usuarioAprovadorId: string, itens: PedidoSolucao['itens'], observacao: string) {
