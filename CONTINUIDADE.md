@@ -863,3 +863,12 @@ O responsável autorizou solucionar os desvios da auditoria visual integral, con
 **Correção frontend:** `solucaoService.solicitar` converte os itens para o contrato de Pedido exclusivamente na requisição. Contratos de cadastro/edição dos Modelos permanecem inalterados. `erroSolucao` lê corretamente `ApiError.fieldErrors` (lista de objetos `{field, message}`) e prioriza mensagens específicas em vez do texto genérico.
 
 **Testes necessários:** atualizar backend e frontend na branch; `mvn test`, `npm run build`, criar Solução excepcional com Produto unidade `REACAO` ou `ML` sem campos de embalagem, conferir PENDENTE e listagem; validar catálogo padrão e novo Pedido de Produtos como regressões. Nenhum merge.
+
+
+### 7.4 — Status consolidado após os dois cancelamentos validados (13/10/2026)
+
+**Registro mais recente, que substitui indicações anteriores de “Teste 3 pendente”:** o responsável confirmou seis cenários funcionais pela interface: cadastro de Solução padrão, solicitação padrão, aprovação/baixa/entrega sem segunda baixa, solicitação fora do catálogo, cancelamento antes do preparo com reversão e cancelamento após preparo mantendo consumo. **Fluxo operacional principal validado.**
+
+A etapa **7.4 ainda não está formalmente encerrada**: resta confirmar os testes de regressão de Rejeição pendente, Pedidos comuns, edição/inativação de modelos e snapshots históricos, isolamento de Unidade e o build/testes automatizados na versão final. A matriz atualizada está em `docs/ETAPA_7_4_TESTE_FLUXO_SOLUCOES.md`.
+
+**Roadmap:** 7.5 é contexto operacional (Projeto → SCI → Atividade); não iniciar merge sem autorização. Margem de erro segue adiada.
