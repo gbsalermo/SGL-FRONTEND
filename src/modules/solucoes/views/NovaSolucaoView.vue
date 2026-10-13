@@ -259,10 +259,10 @@ onMounted(() => { void carregar() })
 .context-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
 .context-grid article { padding: 15px 17px; border: 1px solid var(--sgl-border); border-radius: 8px; background: var(--sgl-surface); }
 .context-grid span, .context-grid small { display: block; color: var(--sgl-text-muted); }
-.context-grid span { margin-bottom: 5px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.context-grid span { margin-bottom: 5px; font-size: 12px; font-weight: 800; text-transform: uppercase; }
 .context-grid strong { display: block; font-size: 14px; }
 .context-grid small { margin-top: 3px; font-size: 11px; }
-.request-surface { overflow: hidden; border: 1px solid var(--sgl-border); border-radius: 10px; background: var(--sgl-surface); box-shadow:none; }
+.request-surface { overflow: hidden; border: 1px solid var(--sgl-border); border-radius: 8px; background: var(--sgl-surface); box-shadow:none; }
 .form-section { padding: 22px; border-bottom: 1px solid var(--sgl-border); }
 .section-title { margin-bottom: 18px; }
 .section-title, .section-title > div, .section-title--action { display: flex; align-items: flex-start; gap: 12px; }
@@ -275,11 +275,11 @@ onMounted(() => { void carregar() })
 .field > span, .field-label { color: var(--sgl-text); font-size: 12px; font-weight: 750; }
 .field > span small, .field-label small { color: var(--sgl-text-muted); font-weight: 500; }
 .field select, .field input, .field textarea { width: 100%; border: 1px solid var(--sgl-border-strong); border-radius: 6px; background: var(--sgl-surface); color: var(--sgl-text); font: inherit; outline: 0; box-sizing: border-box; }
-.field select, .field input { min-height: 44px; padding: 0 12px; }
+.field select, .field input { min-height: 40px; padding: 0 12px; }
 .field textarea { resize: vertical; padding: 11px 12px; }
 .field select:focus, .field input:focus, .field textarea:focus { border-color: var(--sgl-primary); box-shadow: 0 0 0 3px rgb(26 77 161 / 8%); }
 .field > small { color: var(--sgl-text-muted); font-size: 10px; line-height: 1.35; }
-.package-guidance { color: var(--sgl-warning) !important; font-weight: 700; }
+.package-guidance { color: var(--sgl-warning) ; font-weight: 700; }
 .urgency-field { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px; border: 1px solid var(--sgl-border); border-radius: 8px; background: var(--sgl-surface-soft); }
 .urgency-field p { margin: 4px 0 0; color: var(--sgl-text-muted); font-size: 11px; }
 .urgency-toggle { min-height: 40px; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid var(--sgl-border-strong); border-radius: 6px; background: var(--sgl-surface); color: var(--sgl-text); font-weight: 750; cursor: pointer; }
@@ -316,7 +316,7 @@ onMounted(() => { void carregar() })
 .recipe-composition {border-top:1px solid var(--sgl-border);padding-top:12px;margin-top:12px;}
 .recipe-composition strong {font-size:13px;}
 .recipe-composition ul {margin:9px 0 0;padding-left:20px;font-size:13px;}
-.recipe-instructions {white-space:pre-wrap;line-height:1.6;color:var(--sgl-text)!important;}
+.recipe-instructions {white-space:pre-wrap;line-height:1.6;color:var(--sgl-text);}
 .form-guidance {color:var(--sgl-text-muted);font-size:12px;margin:0 0 16px;}
 .nova-solucao-page .section-title--action {margin-bottom:14px;}
 .nova-solucao-page .section-title--action > div {display:flex;gap:10px;align-items:center;}
