@@ -130,7 +130,7 @@ onMounted(() => { void carregar() })
       <button class="secondary-action" type="button" :disabled="carregando" @click="carregar">Atualizar dados</button>
     </header>
 
-    <div class="metrics-grid sol-metrics">
+    <div class="metrics-grid metrics-grid--solucoes">
       <article v-for="item in indicadores" :key="item.status">
         <span>{{ item.titulo }}</span>
         <strong>{{ total(item.status) }}</strong>
