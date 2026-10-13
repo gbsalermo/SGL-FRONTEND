@@ -395,4 +395,26 @@ body.sgl-dark-active .models-page .backdrop {
 .modelos-solucao-admin .editor--promover .editor-body label select,
 .modelos-solucao-admin .editor--promover .editor-body label input { width:100%; min-height:40px; background:var(--sgl-surface); color:var(--sgl-text); border:1px solid var(--sgl-border-strong); border-radius:7px; padding:8px 11px; }
 @media(max-width:760px) { .modelos-solucao-admin .grid.three { grid-template-columns:1fr; } }
+
+/* Complemento institucional de tema e controles: nao alterar a base Modelos de Residuos. */
+.modelos-solucao-admin .page-header h1 { font-size:var(--sgl-font-page-title); }
+.modelos-solucao-admin .workspace,
+.modelos-solucao-admin .model-card,
+.modelos-solucao-admin .editor { background:var(--sgl-surface); border-color:var(--sgl-border); color:var(--sgl-text); border-radius:var(--sgl-radius-surface); }
+.modelos-solucao-admin .notice { border-color:var(--sgl-border); background:var(--sgl-surface-interactive); color:var(--sgl-text); }
+.modelos-solucao-admin .feedback.success { border-color:var(--sgl-border); background:var(--sgl-surface-interactive); color:var(--sgl-success); }
+.modelos-solucao-admin .feedback.error { border-color:var(--sgl-border); background:var(--sgl-surface-interactive); color:var(--sgl-error); }
+.modelos-solucao-admin :is(.toolbar input[type=search],.editor input:not([type=checkbox]),.editor select,.editor textarea) { min-height:40px; border-radius:var(--sgl-radius-control); border-color:var(--sgl-border-strong); background:var(--sgl-surface); color:var(--sgl-text); }
+.modelos-solucao-admin :is(.primary,.ghost,.danger,.component-actions button) { min-height:40px; border-radius:var(--sgl-radius-control); font-size:var(--sgl-font-body); }
+.modelos-solucao-admin .ghost { background:var(--sgl-surface); border-color:var(--sgl-border-strong); color:var(--sgl-text); }
+.modelos-solucao-admin .danger { background:var(--sgl-surface-interactive); border-color:var(--sgl-border-strong); color:var(--sgl-error); }
+.modelos-solucao-admin .model-card :is(h2,dd),.modelos-solucao-admin .editor :is(h2,strong) { color:var(--sgl-text); }
+.modelos-solucao-admin .model-card dt,
+.modelos-solucao-admin .editor label > span { color:var(--sgl-text-muted); font-size:var(--sgl-font-label); }
+.modelos-solucao-admin .backdrop { backdrop-filter:blur(3px); background:rgb(7 17 31 / 55%); }
+.modelos-solucao-admin .editor > header,
+.modelos-solucao-admin .editor > footer,
+.modelos-solucao-admin .components article { border-color:var(--sgl-border); background:var(--sgl-surface); }
+.modelos-solucao-admin .editor > header > button { width:40px; height:40px; border-radius:var(--sgl-radius-control); font-size:24px; }
+
 </style>
