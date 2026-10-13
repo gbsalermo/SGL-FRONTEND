@@ -686,14 +686,13 @@ onBeforeUnmount(() => {
 
         <template v-if="ehAdministrador">
           <p v-show="!recolhida" class="gestao-nav__group">ADMINISTRAÇÃO</p>
-          <div class="gestao-nav__future" title="Cadastros — etapa de Administração">
+          <router-link to="/administracao/cadastros" title="Cadastros administrativos">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="9" cy="8" r="3" />
               <path d="M3 20v-2a6 6 0 0 1 12 0v2M17 8h4M19 6v4" />
             </svg>
             <span v-show="!recolhida">Cadastros</span>
-            <small v-show="!recolhida">em breve</small>
-          </div>
+          </router-link>
         </template>
       </nav>
 

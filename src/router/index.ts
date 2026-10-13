@@ -169,9 +169,21 @@ export const router = createRouter({
           meta: { requiresSession: true, perfis: PERFIS_ADMIN },
         },
         {
+          path: 'administracao/cadastros/residuos-solucoes',
+          name: 'admin-catalogos-residuos-solucoes',
+          component: () => import('@/modules/admin/views/CatalogosResiduosSolucoesView.vue'),
+          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+        },
+        {
           path: 'administracao/cadastros/modelos-residuo',
           name: 'admin-modelos-residuo',
-          component: () => import('@/modules/admin/views/ModelosResiduoAdminView.vue'),
+          redirect: '/administracao/cadastros/residuos-solucoes?tipo=residuos',
+          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+        },
+        {
+          path: 'administracao/cadastros/modelos-solucao',
+          name: 'admin-modelos-solucao',
+          redirect: '/administracao/cadastros/residuos-solucoes?tipo=solucoes',
           meta: { requiresSession: true, perfis: PERFIS_ADMIN },
         },
         {
