@@ -778,3 +778,14 @@ O responsável comparou visualmente `NovoPedidoView.vue` (referência aprovada) 
 - **Não alterar as regras de negócio por motivo visual**. A cartilha da Solução persiste como snapshot no backend (V38).
 
 **Validação pendente:** executar `npm run build`, conferir visual claro/escuro lado a lado com Novo Pedido e testar envio. Não marcar como concluído ou realizar merge antes da revisão do responsável.
+
+
+### Padronização "Minhas soluções" com "Meus pedidos" (13/10/2026)
+
+Por solicitação expressa do responsável, a página `src/modules/solucoes/views/SolucoesSolicitanteView.vue` foi **reestruturada a partir da interface consolidada `MeusPedidosView.vue`**, replicando: largura central de 1260px, cabeçalho institucional, ação primária, três indicadores compactos, busca + filtro de status na mesma superfície, tabela administrativa de histórico, detalhe expansível com seta e painel de informações.
+
+Diferenças de domínio mantidas: status `EM_PREPARACAO` (no lugar de `APROVADO`), identificação da preparação/modelo, componentes, **snapshot das instruções da cartilha**, exigências do pedido, rastreabilidade de cancelamento antes/depois do preparo. A busca foi limitada aos pedidos de Soluções do usuário, sem reaproveitar a lista de Pedidos comuns.
+
+**Tema:** preservada a estrutura da tela de referência com ajustes de fundo/bordas pelos tokens do SGL para contraste no tema escuro. A composição foi copiada intencionalmente para manter a identidade, sem introduzir uma terceira linguagem.
+
+**Validação local ainda necessária:** executar `npm run build`, comparar lado a lado com `Meus pedidos` nos temas claro/escuro e testar expansão/filtros/detalhes após gerar solicitação. Nenhum merge.
