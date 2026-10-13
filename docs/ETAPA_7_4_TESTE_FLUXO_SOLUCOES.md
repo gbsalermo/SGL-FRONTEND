@@ -122,3 +122,12 @@ Este registro **prevalece sobre os estados históricos de planejamento** anterio
 **Validado pelo responsável em teste local:** rejeitar uma solicitação de Solução no status `PENDENTE`, com justificativa, sem saída de componentes do estoque. Este resultado complementa os seis cenários funcionais já confirmados, totalizando **sete cenários principais validados**.
 
 **Próxima regressão:** realizar um Pedido convencional de Produtos (com forma de retirada/embalagem exigida), analisar/aprovar, conferir movimentação e recebimento, garantindo que as mudanças de `ItemPedidoRequestDTO` e `PedidoRequestDTO` não afetaram esse fluxo. Ainda pendentes: inativação/edição de modelo e snapshot da cartilha, segregação de Unidade/perfis, builds/suíte finais e autorização expressa para fechamento/merge.
+
+
+### Regressão de Pedidos comuns — validada
+
+**Confirmação do responsável:** o teste de regressão do fluxo convencional de Pedido de Produtos foi **VALIDADO** após as correções de contrato de Soluções. A validação solicitada abrangeu criação com forma de retirada/embalagem, aprovação pela Gestão, movimentação de estoque e confirmação de entrega sem segunda baixa.
+
+**Status:** sete cenários de Soluções validados anteriormente **mais regressão de Pedidos comuns validada**. Ainda **não** considerar toda a matriz S01–S17 concluída.
+
+**Próximos testes:** edição de Modelo Padrão e snapshot de composição/cartilha em pedidos antigos; inativação e ocultação do modelo em novas solicitações; eventual promoção explícita de Solução avulsa; isolamento entre Unidades/perfis. Registrar build/suíte verde com a versão atual antes de encerrar e solicitar autorização de merge.
