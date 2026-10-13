@@ -98,9 +98,21 @@ export function unidadesCompativeis(base?: string): UnidadeSolucao[] {
 }
 export function erroSolucao(erro: unknown): string {
   if (typeof erro === 'object' && erro !== null && 'response' in erro) {
-    const axiosLike = erro as { response?: { data?: { message?: string; fieldErrors?: Record<string, string> } } }
+    const axiosLike = erro as {
+      response?: { data?: {
+        message?: string
+        fieldErrors?: Array<{ field: string; message: string }> | Record<string, string>
+      } }
+    }
     const api = axiosLike.response?.data
-    return api?.message || Object.values(api?.fieldErrors || {}).join('; ') || 'Não foi possível concluir a operação.'
+    const fields = api?.fieldErrors
+    const detalhes = Array.isArray(fields)
+      ? fields.map(item => item.message || item.field).filter(Boolean)
+      : Object.values(fields || {}).filter(Boolean)
+    // A API devolve uma mensagem generica para erro de validacao; priorizar
+    // os detalhes de cada campo, sem ocultar a causa real da recusa.
+    return detalhes.length > 0 ? detalhes.join('; ') :
+      api?.message || 'Não foi possível concluir a operação.'
   }
   return erro instanceof Error ? erro.message : 'Não foi possível concluir a operação.'
 }
