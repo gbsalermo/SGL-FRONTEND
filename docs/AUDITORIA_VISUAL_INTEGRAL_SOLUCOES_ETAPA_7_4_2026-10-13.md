@@ -68,3 +68,23 @@
 - Testes funcionais 1 e 2 foram confirmados pelo responsável; **Teste 3 continua pausado** para revisão visual.
 - Não foi feita validação de runtime, console, acessibilidade automatizada, DOM, navegadores ou testes em dispositivos.
 - Não executar merge sem validação e autorização expressa do responsável.
+
+
+---
+
+## Rodada de correções implementadas após auditoria (13/10/2026)
+
+**Escopo:** apenas frontend, branch de trabalho; nenhum merge e nenhuma alteração nas regras de estoque, migrations ou API.
+
+- **AV-01:** `src/modules/solucoes/styles/solucoes.css` reduzido de aproximadamente 16 kB para 5,5 kB. Eliminadas famílias de CSS que não eram mais utilizadas (`sol-btn`, `sol-card`, `sol-workspace`, `sol-dialog`, KPIs/tabs próprias e cores Dark duplicadas); preservadas somente regras de domínio da Central que se apoiam na base de Resíduos.
+- **AV-04/05/10/11:** `SolucoesGestaoView.vue` mantém KPIs/tabela/abas/modais da fundação de Resíduos; botão semântico, navegável por teclado e com `aria-expanded` para abrir os detalhes; modais de aprovação, entrega, rejeição e cancelamento possuem rótulos próprios no botão de confirmação, campos acessíveis e fundo/contraste via tokens. Regras de status em Light/Dark mantidas na folha de domínio.
+- **AV-03:** `SolucoesSolicitanteView.vue` mantém layout aprovado de `MeusPedidosView.vue`, substituindo as cores hex locais por tokens de cor; ajuste de título, controles e raios. Preservada a redução de fonte dos componentes pedida no Teste 2.
+- **AV-07:** `NovaSolucaoView.vue` mantém composição de `NovoPedidoView.vue`; corrigidos pequenos desvios de dimensão/legibilidade e retirados `!important`.
+- **AV-02/06/12:** `ModelosSolucaoAdminView.vue` mantém o template do cadastro de Resíduos, mas corrige dimensões dos controles, títulos, tema dos campos/cards/modais, substitui cores fixas por tokens, remove regras de uma segunda paleta Dark e limpa `!important`. Alterações não atingiram `ModelosResiduoAdminView.vue`.
+- **AV-08/09/13/14:** organização de Cadastros segue com aba de Resíduos e Soluções; pendências de extração transversal de componentes e microcopy foram mantidas como polimento futuro para **não refatorar módulos aprovados só por padronização local**.
+
+**Verificação realizada via GitHub:** re-leitura das quatro Views e CSS; verificação estática de abertura/fechamento de elementos de template sem incompatibilidades detectadas. Isto não substitui compilação Vue/TypeScript.
+
+**Não verificado:** `npm run build`, runtime, testes de console e inspeção Light/Dark na interface. Portanto os campos da matriz continuam `PEND.` até confirmação local. As correções estão **publicadas, não homologadas**.
+
+**Próxima validação obrigatória:** build, Central nos cinco estados e quatro modais em Light/Dark; depois as duas Views do solicitante, catálogo administrativo e telas de 720p/1080p/1440p/mobile. Reabrir Teste 3 somente após essa conferência.
