@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
-import { SglBreadcrumb, SglButton } from '@/components/common'
+
 import { solucaoService } from '../services/solucaoService'
 import {
   erroSolucao, exibirQuantidade, unidadesCompativeis,
@@ -36,6 +36,7 @@ const ingredientes = ref<ComponenteForm[]>([{ produtoId: '', quantidade: 1, unid
 const modeloSelecionado = computed(() => modelos.value.find(x => x.id === modeloId.value))
 const podeAdicionar = computed(() =>
   ingredientes.value.length < produtos.value.length && ingredientes.value.every(i => Boolean(i.produtoId)))
+const usuario = computed(() => session.usuario)
 const produtosDisponiveis = computed(() => produtos.value.filter(p => p.quantidadeAtual > 0))
 
 function produtoPorId(id: string) { return produtos.value.find(p => p.id === id) }
@@ -121,93 +122,191 @@ onMounted(() => { void carregar() })
 </script>
 
 <template>
-  <section class="sol-page sol-novo-pedido">
-    <header class="sol-header">
+  <section class="nova-solucao-page">
+    <header class="page-heading">
       <div>
-        <SglBreadcrumb :items="[{label:'Soluções',to:'/minhas-solucoes'},{label:'Solicitar solução'}]" />
+        <p class="breadcrumb">Soluções / Solicitar solução</p>
         <h1>Solicitar solução</h1>
-        <p>Selecione uma preparação da cartilha ou descreva uma solicitação excepcional para análise.</p>
+        <p>Escolha uma preparação da cartilha ou descreva uma solicitação excepcional.</p>
       </div>
-      <SglButton variant="secondary" @click="router.push('/minhas-solucoes')">Voltar para minhas soluções</SglButton>
+      <button class="secondary-action" type="button" @click="router.push('/minhas-solucoes')">Voltar para minhas soluções</button>
     </header>
-    <p v-if="erro" class="sol-error" role="alert">{{ erro }}</p>
-    <div class="sol-card" style="margin-bottom:20px">
-      <h2>1. Contexto da solicitação</h2>
-      <div class="sol-form">
-        <div class="sol-note">Escolha preferencialmente uma preparação do catálogo. O laboratório seguirá a composição e as orientações aprovadas para esse modelo.</div>
-        <div class="sol-form-row">
-          <label class="sol-field"><span>Projeto responsável *</span>
-            <select v-model="projetoId" :disabled="carregando" required>
-              <option value="">Selecione o Projeto</option>
-              <option v-for="p in projetos" :key="p.id" :value="p.id">{{ p.nome }}</option>
-            </select>
-          </label>
-          <label class="sol-field"><span>Laboratório</span>
-            <input :value="session.usuario?.laboratorioNome || 'Não vinculado'" disabled />
-          </label>
-        </div>
-        <h2 style="margin:16px 0 4px">2. Escolha da solução</h2><div class="sol-field"><span>O que deseja solicitar?</span>
-          <div class="sol-segment" role="group" aria-label="Origem da composição">
-            <button type="button" :class="{ active: origem === 'PADRAO' }" @click="origem = 'PADRAO'">Solução padrão</button>
-            <button type="button" :class="{ active: origem === 'PERSONALIZADA' }" @click="origem = 'PERSONALIZADA'">Fora do catálogo</button>
-          </div>
-        </div>
 
+    <div class="context-grid">
+      <article><span>Solicitante</span><strong>{{ usuario?.nome }}</strong><small>{{ usuario?.email }}</small></article>
+      <article><span>Laboratório</span><strong>{{ usuario?.laboratorioNome ?? 'Não vinculado' }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
+    </div>
+
+    <form class="request-surface" @submit.prevent="solicitar">
+      <section class="form-section">
+        <div class="section-title"><div><span>1</span><div><h2>Contexto da solicitação</h2><p>Vincule o pedido ao Projeto responsável pela utilização.</p></div></div></div>
+        <label class="field">
+          <span>Projeto <small>(obrigatório)</small></span>
+          <select v-model="projetoId" required :disabled="carregando">
+            <option value="">Selecione o Projeto</option>
+            <option v-for="p in projetos" :key="p.id" :value="p.id">{{ p.nome }}</option>
+          </select>
+        </label>
+        <div class="urgency-field">
+          <div><span class="field-label">Urgência <small>(opcional)</small></span><p>A marcação apenas informa a gestão e não altera automaticamente a prioridade.</p></div>
+          <button type="button" class="urgency-toggle" :class="{ 'urgency-toggle--active': urgente }" :aria-pressed="urgente" @click="urgente = !urgente">
+            <span class="urgency-toggle__indicator" aria-hidden="true" />{{ urgente ? 'Solicitação urgente' : 'Marcar como urgente' }}
+          </button>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="section-title"><div><span>2</span><div><h2>Solução solicitada</h2><p>Prefira uma preparação da cartilha de Soluções do laboratório.</p></div></div></div>
+        <div class="sol-type-options" role="group" aria-label="Tipo de solicitação">
+          <button type="button" :class="{ active: origem === 'PADRAO' }" @click="origem = 'PADRAO'">Solução padrão</button>
+          <button type="button" :class="{ active: origem === 'PERSONALIZADA' }" @click="origem = 'PERSONALIZADA'">Fora do catálogo</button>
+        </div>
         <template v-if="origem === 'PADRAO'">
-          <label class="sol-field"><span>Solução do catálogo *</span>
-            <select v-model="modeloId" :disabled="modelos.length === 0">
-              <option value="">Selecione a Solução que deseja receber</option>
+          <label class="field">
+            <span>Solução da cartilha <small>(obrigatório)</small></span>
+            <select v-model="modeloId" required :disabled="!modelos.length">
+              <option value="">Selecione a preparação desejada</option>
               <option v-for="m in modelos" :key="m.id" :value="m.id">{{ m.nome }}</option>
             </select>
           </label>
-          <div v-if="modelos.length === 0" class="sol-note">Ainda não há soluções padrões ativas. Você pode solicitar uma composição personalizada.</div>
-          <div v-if="modeloSelecionado" class="sol-card" style="background:var(--sgl-surface-soft,#f5f8fc)">
+          <div v-if="!modelos.length" class="state-box">Nenhuma Solução padrão disponível no catálogo da Unidade.</div>
+          <div v-if="modeloSelecionado" class="sol-recipe-preview">
             <h3>{{ modeloSelecionado.nome }}</h3>
-            <p class="sol-muted">{{ modeloSelecionado.descricao || 'Preparação cadastrada no catálogo da Unidade.' }}</p>
-            <ul class="sol-detail-list">
-              <li v-for="c in modeloSelecionado.componentes" :key="c.id">
-                <span>{{ c.produtoNome }}</span><b>{{ exibirQuantidade(c.quantidade) }} {{ c.unidadeMedida }}</b>
-              </li>
-            </ul>
-            <div class="sol-note"><strong>Cartilha / instruções de preparo</strong><p style="white-space:pre-wrap">{{ modeloSelecionado.instrucoesPreparo || 'O cadastro ainda não possui instruções. A gestão deve complementar a cartilha antes de atender o pedido.' }}</p></div>
+            <p>{{ modeloSelecionado.descricao || 'Preparação cadastrada na cartilha da Unidade.' }}</p>
+            <div class="recipe-composition">
+              <strong>Composição</strong>
+              <ul><li v-for="c in modeloSelecionado.componentes" :key="c.id">{{ c.produtoNome }} — {{ exibirQuantidade(c.quantidade) }} {{ c.unidadeMedida }}</li></ul>
+            </div>
+            <div class="recipe-composition">
+              <strong>Cartilha de preparo</strong>
+              <p class="recipe-instructions">{{ modeloSelecionado.instrucoesPreparo || 'Ainda não há instruções registradas neste modelo.' }}</p>
+            </div>
           </div>
         </template>
         <template v-else>
-          <label class="sol-field"><span>Qual solução deseja? *</span>
-            <input v-model="nomeSolucao" maxlength="150" placeholder="Ex.: Solução tampão para projeto" required />
-          </label>
-          <p class="sol-note">Não encontrou a Solução na cartilha? Informe o nome desejado, os componentes conhecidos e as exigências. Esta modalidade depende de análise da gestão.</p><div class="sol-list-head"><h3>Componentes solicitados (quando conhecidos)</h3><SglButton variant="secondary" class="sol-btn " type="button" :disabled="!podeAdicionar" @click="adicionarComponente">+ Adicionar produto</SglButton></div>
-          <div v-if="produtosDisponiveis.length === 0" class="sol-note">Não há Produtos com estoque positivo disponíveis nesta Unidade.</div>
-          <div v-for="(item, index) in ingredientes" :key="index" class="sol-ingredient">
-            <label class="sol-field"><span>Produto {{ index + 1 }} *</span>
-              <select v-model="item.produtoId" @change="atualizarProduto(item)">
-                <option value="">Selecione</option>
-                <option v-for="p in produtosDisponiveis" :key="p.id" :value="p.id" :disabled="ingredientes.some((outro, i) => i !== index && outro.produtoId === p.id)">
-                  {{ p.nome }} ({{ exibirQuantidade(p.quantidadeAtual) }} {{ p.unidadeMedida }})
-                </option>
-              </select>
-            </label>
-            <label class="sol-field"><span>Quantidade *</span>
-              <input v-model.number="item.quantidade" type="number" step="any" min="0.000001" placeholder="Ex.: 10" required />
-            </label>
-            <label class="sol-field"><span>Unidade *</span>
-              <select v-model="item.unidadeMedida" :disabled="!item.produtoId">
-                <option value="">Selecione</option>
-                <option v-for="u in unidadesCompativeis(produtoPorId(item.produtoId)?.unidadeMedida)" :key="u" :value="u">{{ u }}</option>
-              </select>
-            </label>
-            <SglButton variant="secondary" class="sol-btn" type="button" :disabled="ingredientes.length === 1" @click="removerComponente(index)">Retirar</SglButton>
+          <label class="field"><span>Nome da Solução <small>(obrigatório)</small></span><input v-model="nomeSolucao" required maxlength="150" placeholder="Informe qual preparação deseja solicitar" /></label>
+          <p class="form-guidance">Solicitações fora da cartilha exigem análise da gestão. Informe os componentes conhecidos e descreva as exigências no campo seguinte.</p>
+          <div class="section-title section-title--action">
+            <div><div><h2>Componentes informados</h2><p>Produtos conhecidos e quantidades da preparação excepcional.</p></div></div>
+            <button type="button" :disabled="!podeAdicionar" @click="adicionarComponente">+ Adicionar item</button>
+          </div>
+          <div class="items-list">
+            <div v-for="(item,index) in ingredientes" :key="index" class="item-row">
+              <label class="field item-product"><span>Produto</span>
+                <select v-model="item.produtoId" required @change="atualizarProduto(item)">
+                  <option value="">Selecione um Produto</option>
+                  <option v-for="p in produtosDisponiveis" :key="p.id" :value="p.id" :disabled="ingredientes.some((outro,i) => i !== index && outro.produtoId === p.id)">{{ p.nome }}</option>
+                </select>
+              </label>
+              <label class="field"><span>Unidade</span>
+                <select v-model="item.unidadeMedida" required :disabled="!item.produtoId">
+                  <option value="">Selecione</option>
+                  <option v-for="u in unidadesCompativeis(produtoPorId(item.produtoId)?.unidadeMedida)" :key="u" :value="u">{{ u }}</option>
+                </select>
+              </label>
+              <label class="field"><span>Quantidade</span><input v-model.number="item.quantidade" type="number" min="0.000001" step="any" required /></label>
+              <button class="remove-item" type="button" :disabled="ingredientes.length===1" aria-label="Retirar componente" @click="removerComponente(index)">×</button>
+            </div>
           </div>
         </template>
-        <h2 style="margin:16px 0 4px">3. Exigências e confirmação</h2><label class="sol-field"><span>Finalidade ou exigências especiais</span><textarea v-model="observacao" maxlength="1500" placeholder="Para uma Solução fora do catálogo, informe concentração, volume final, finalidade e quaisquer exigências de preparo." /></label>
-        <label class="sol-check"><input v-model="urgente" type="checkbox" /> Sinalizar urgência (a gestão analisará a prioridade)</label>
-        <div class="sol-actions" style="justify-content:flex-end">
-          <SglButton variant="secondary" class="sol-btn" type="button" @click="router.push('/minhas-solucoes')">Cancelar edição</SglButton>
-          <SglButton variant="primary" class="sol-btn " type="button" :disabled="enviando || carregando" @click="solicitar">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</SglButton>
-        </div>
-      </div>
-    </div>
+      </section>
 
-
+      <section class="form-section">
+        <div class="section-title"><div><span>3</span><div><h2>Exigências e finalidade</h2><p>Informe orientações adicionais relevantes para análise e atendimento.</p></div></div></div>
+        <label class="field observation-field"><span>Observação / exigências <small>(opcional)</small></span>
+          <textarea v-model="observacao" rows="3" maxlength="1500" :placeholder="origem === 'PADRAO' ? 'Informe a finalidade ou alguma observação sobre a preparação...' : 'Informe concentração, volume final, finalidade e exigências especiais de preparo...'" />
+        </label>
+      </section>
+      <div v-if="erro" class="error-banner" role="alert">{{ erro }}</div>
+      <footer class="form-footer">
+        <p>O pedido ficará pendente até a análise da gestão.<span class="urgent-footer-note">A preparação deverá seguir a cartilha registrada no pedido.</span></p>
+        <button class="primary-action" type="submit" :disabled="enviando || carregando">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
+      </footer>
+    </form>
   </section>
 </template>
+
+<style scoped>
+.nova-solucao-page { width: min(100%, 1180px); margin: 0 auto; }
+.page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.breadcrumb { margin: 0 0 10px; color: var(--sgl-text-muted); font-size: 13px; }
+.page-heading h1 { margin: 0; font-size: clamp(28px, 3vw, 38px); letter-spacing: -0.035em; }
+.page-heading > div > p:last-child { margin: 8px 0 0; color: var(--sgl-text-muted); font-size: 14px; }
+.secondary-action, .section-title--action button { min-height: 40px; padding: 0 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #344258; font-weight: 700; cursor: pointer; }
+.secondary-action:hover, .section-title--action button:hover:not(:disabled) { border-color: var(--sgl-primary); color: var(--sgl-primary); }
+.section-title--action button:disabled { opacity: .5; cursor: not-allowed; }
+.context-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.context-grid article { padding: 15px 17px; border: 1px solid var(--sgl-border); border-radius: 8px; background: #fff; }
+.context-grid span, .context-grid small { display: block; color: var(--sgl-text-muted); }
+.context-grid span { margin-bottom: 5px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.context-grid strong { display: block; font-size: 14px; }
+.context-grid small { margin-top: 3px; font-size: 11px; }
+.request-surface { overflow: hidden; border: 1px solid var(--sgl-border); border-radius: 10px; background: #fff; box-shadow: 0 8px 26px rgb(15 37 71 / 5%); }
+.form-section { padding: 22px; border-bottom: 1px solid var(--sgl-border); }
+.section-title { margin-bottom: 18px; }
+.section-title, .section-title > div, .section-title--action { display: flex; align-items: flex-start; gap: 12px; }
+.section-title--action { justify-content: space-between; }
+.section-title > div > span { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #eaf1ff; color: var(--sgl-primary); font-size: 12px; font-weight: 800; }
+.section-title h2 { margin: 0; font-size: 16px; }
+.section-title p { margin: 4px 0 0; color: var(--sgl-text-muted); font-size: 12px; }
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field + .field, .urgency-field + .field, .field + .urgency-field, .urgency-guidance + .field { margin-top: 16px; }
+.field > span, .field-label { color: #2b374c; font-size: 12px; font-weight: 750; }
+.field > span small, .field-label small { color: var(--sgl-text-muted); font-weight: 500; }
+.field select, .field input, .field textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: var(--sgl-text); font: inherit; outline: 0; box-sizing: border-box; }
+.field select, .field input { min-height: 44px; padding: 0 12px; }
+.field textarea { resize: vertical; padding: 11px 12px; }
+.field select:focus, .field input:focus, .field textarea:focus { border-color: var(--sgl-primary); box-shadow: 0 0 0 3px rgb(26 77 161 / 8%); }
+.field > small { color: var(--sgl-text-muted); font-size: 10px; line-height: 1.35; }
+.package-guidance { color: #946200 !important; font-weight: 700; }
+.urgency-field { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px; border: 1px solid #e5eaf1; border-radius: 8px; background: #fbfcfe; }
+.urgency-field p { margin: 4px 0 0; color: var(--sgl-text-muted); font-size: 11px; }
+.urgency-toggle { min-height: 40px; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #344258; font-weight: 750; cursor: pointer; }
+.urgency-toggle:hover { border-color: #dc2626; color: #b42318; }
+.urgency-toggle--active { border-color: #fecaca; background: #fff1f1; color: #b42318; }
+.urgency-toggle__indicator { width: 9px; height: 9px; border: 2px solid currentColor; border-radius: 50%; }
+.urgency-toggle--active .urgency-toggle__indicator { background: currentColor; }
+.urgency-guidance { margin-top: 12px; padding: 10px 12px; border-left: 3px solid #dc2626; border-radius: 4px; background: #fff7f7; color: #8f2d24; font-size: 11px; line-height: 1.45; }
+.observation-field textarea { min-height: 96px; }
+.items-list { display: flex; flex-direction: column; gap: 12px; }
+.item-row { display: grid; grid-template-columns: minmax(250px, 1.25fr) minmax(250px, 1fr) 120px 38px; align-items: start; gap: 12px; padding: 14px; border: 1px solid #e5eaf1; border-radius: 8px; background: #fbfcfe; }
+.item-row .field { align-self: start; }
+.item-row .field > small { display: block; min-height: 16px; margin-top: 6px; }
+.item-row .field + .field { margin-top: 0; }
+.remove-item { width: 38px; height: 44px; align-self: start; margin-top: 26px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; color: #b42318; font-size: 20px; cursor: pointer; }
+.remove-item:disabled { color: #cbd5e1; cursor: not-allowed; }
+.state-box { padding: 24px; color: var(--sgl-text-muted); text-align: center; }
+.error-banner { margin: 18px 22px 0; padding: 12px 14px; border: 1px solid #fecaca; border-radius: 7px; background: #fff1f1; color: #b42318; font-size: 12px; }
+.form-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 22px; background: #fbfcfe; }
+.form-footer p { margin: 0; color: var(--sgl-text-muted); font-size: 12px; }
+.urgent-footer-note { display: block; margin-top: 4px; color: #1a4da1; font-weight: 700; }
+.primary-action { min-height: 44px; padding: 0 20px; border: 0; border-radius: 6px; background: var(--sgl-primary); color: #fff; font-weight: 800; cursor: pointer; }
+.primary-action:hover:not(:disabled) { background: var(--sgl-primary-dark); }
+.primary-action:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 900px) { .item-row { grid-template-columns: 1fr 1fr; } .remove-item { width: 100%; } }
+@media (max-width: 720px) { .page-heading, .form-footer, .section-title--action, .urgency-field { align-items: stretch; flex-direction: column; } .secondary-action, .primary-action, .section-title--action button, .urgency-toggle { align-self: flex-start; } .context-grid, .item-row { grid-template-columns: 1fr; } }
+
+.sol-type-options {display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.sol-type-options button {min-height:40px;border:1px solid var(--sgl-border-strong);border-radius:6px;background:var(--sgl-surface);color:var(--sgl-text);padding:0 16px;font-weight:700;cursor:pointer;}
+.sol-type-options button.active {border-color:var(--sgl-primary);color:var(--sgl-primary);background:var(--sgl-surface-interactive);}
+.sol-recipe-preview {border:1px solid var(--sgl-border);border-radius:8px;background:var(--sgl-surface-soft);padding:16px;margin-top:14px;color:var(--sgl-text);}
+.sol-recipe-preview h3 {font-size:16px;margin:0 0 8px;}
+.sol-recipe-preview p {font-size:13px;color:var(--sgl-text-muted);}
+.recipe-composition {border-top:1px solid var(--sgl-border);padding-top:12px;margin-top:12px;}
+.recipe-composition strong {font-size:13px;}
+.recipe-composition ul {margin:9px 0 0;padding-left:20px;font-size:13px;}
+.recipe-instructions {white-space:pre-wrap;line-height:1.6;color:var(--sgl-text)!important;}
+.form-guidance {color:var(--sgl-text-muted);font-size:12px;margin:0 0 16px;}
+.nova-solucao-page .section-title--action {margin-bottom:14px;}
+.nova-solucao-page .section-title--action > div {display:flex;gap:10px;align-items:center;}
+.nova-solucao-page .section-title--action button {min-height:34px;padding:0 12px;border:1px solid var(--sgl-border-strong);border-radius:6px;color:var(--sgl-text);background:var(--sgl-surface);cursor:pointer;}
+.nova-solucao-page .item-row {grid-template-columns:minmax(210px,2.5fr) minmax(125px,1fr) minmax(100px,1fr) 40px;}
+/* Modal/form theme parity derives from institutional SGL tokens instead of a second palette. */
+.nova-solucao-page .context-grid article,.nova-solucao-page .request-surface,.nova-solucao-page .item-row {background:var(--sgl-surface);border-color:var(--sgl-border);}
+.nova-solucao-page .field :is(input,select,textarea) {background:var(--sgl-surface-elevated);color:var(--sgl-text);border-color:var(--sgl-border-strong);}
+.nova-solucao-page .form-footer,.nova-solucao-page .urgency-field {background:var(--sgl-surface-soft);border-color:var(--sgl-border);}
+.nova-solucao-page .section-title h2,.nova-solucao-page .page-heading h1 {color:var(--sgl-text);}
+@media(max-width:900px){.nova-solucao-page .item-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:720px){.nova-solucao-page .item-row{grid-template-columns:1fr;}}
+</style>
+
