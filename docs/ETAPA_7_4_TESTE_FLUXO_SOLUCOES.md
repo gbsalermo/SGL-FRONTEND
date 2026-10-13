@@ -73,3 +73,12 @@ A configuração DEV padrão aponta para `http://localhost:8080/api`, salvo vari
 [ ] Documentação sincronizada com resultados
 [ ] Merge apenas após autorização expressa
 ```
+
+
+### Ajuste no roteiro de validação — separação administrativa
+
+Os cenários **S01, S02, S13 e S14** agora são realizados por usuário **Administrador**, em **Cadastros → Resíduos e Soluções → Modelos de soluções**, não mais pela área operacional da Gestão de Soluções.
+
+A **Central de Soluções** do Gestor contém apenas a operação: listagem de Pedidos, aprovação, rejeição, preparação, entrega, cancelamento e movimentações. Confirme que um perfil `GESTOR` comum **não possui acesso de navegação** aos modelos administrativos, enquanto um `ADMINISTRADOR` pode cadastrar/editar/inativar/importar. Esta é **somente uma conferência de interface**: autorização real de API ainda não existe no DEV.
+
+Verificar também o novo layout: cinco cards de status, filtros em abas com quantidade por status, busca dentro da superfície, tabela de Pedidos; testar tema claro/escuro e os modais. Não marcar como concluído antes de `npm run build` e inspeção visual.
