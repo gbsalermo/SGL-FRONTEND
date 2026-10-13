@@ -162,13 +162,13 @@ onMounted(() => { void carregar() })
         <table class="sol-table--records">
           <thead><tr><th>Status</th><th>Solução / Solicitante</th><th>Laboratório / Projeto</th><th>Componentes</th><th>Solicitação</th><th>Ações</th></tr></thead>
           <tbody v-for="p in pedidosFiltrados" :key="p.id">
-            <tr class="solution-row" @click="alternarDetalhes(p)">
+            <tr class="solution-row">
               <td><span class="status-pill" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span></td>
-              <td><strong>{{ p.nomeSolucao || 'Solução' }}</strong><small>{{ p.usuarioNome }}</small></td>
+              <td><button type="button" class="solution-expand" :aria-expanded="expandidoId === p.id" @click="alternarDetalhes(p)"><strong>{{ p.nomeSolucao || 'Solução' }}</strong><small>{{ p.usuarioNome }}</small></button></td>
               <td>{{ p.laboratorioNome }}<small>{{ p.projetoNome || 'Sem Projeto' }}</small></td>
               <td>{{ p.itens.length }} produto(s)</td>
               <td>{{ new Date(p.dataSolicitacao).toLocaleDateString('pt-BR') }}</td>
-              <td class="actions-column" @click.stop>
+              <td class="actions-column">
                 <button v-if="p.status === 'PENDENTE'" class="analysis-action" type="button" @click="abrirAcao(p,'APROVAR')">Analisar</button>
                 <button v-else-if="p.status === 'EM_PREPARACAO'" class="primary-action" type="button" @click="abrirAcao(p,'ENTREGAR')">Entregar</button>
                 <button v-else class="details-action" type="button" @click="alternarDetalhes(p)">Detalhes</button>
@@ -192,7 +192,7 @@ onMounted(() => { void carregar() })
                   <div v-if="p.status === 'CANCELADO'" class="sol-note">
                     {{ p.solucaoPreparadaNoCancelamento ? 'Preparação realizada: os ingredientes permanecem consumidos.' : p.estoqueRevertidoNoCancelamento ? 'Preparação não realizada: componentes retornaram ao estoque.' : 'Cancelamento sem saída de estoque.' }}
                   </div>
-                  <h3>Instruções de preparo</h3><p class="sol-note" style="white-space:pre-wrap">{{ p.instrucoesPreparoSolucao || 'Sem instruções de preparo registradas neste pedido.' }}</p>
+                  <h3>Instruções de preparo</h3><p class="sol-note">{{ p.instrucoesPreparoSolucao || 'Sem instruções de preparo registradas neste pedido.' }}</p>
                   <section v-if="p.status === 'PENDENTE' || p.status === 'EM_PREPARACAO'" class="sol-detail-actions">
                     <div><h3>Ações da solução</h3><p class="sol-muted">Confira a composição e a cartilha antes de realizar a operação.</p></div>
                     <div class="sol-detail-buttons">
@@ -237,7 +237,7 @@ onMounted(() => { void carregar() })
         <p v-if="acaoAberta === 'ENTREGAR'" class="sol-note">Confirme somente após o recebimento real. O estoque já foi debitado na aprovação e não sofrerá uma segunda baixa.</p>
         <template v-if="acaoAberta === 'CANCELAR'">
           <p v-if="pedidoAlvo.status === 'EM_PREPARACAO'" class="sol-note">A Solução já foi preparada fisicamente? Essa confirmação define a reversão dos componentes.</p>
-          <div v-if="pedidoAlvo.status === 'EM_PREPARACAO'" class="sol-form" style="margin:12px 0">
+          <div v-if="pedidoAlvo.status === 'EM_PREPARACAO'" class="sol-form sol-preparo-opcoes">
             <label class="sol-check"><input v-model="preparada" name="preparo-cancelamento" type="radio" value="NAO" /> Não, não foi preparada — reverter componentes</label>
             <label class="sol-check"><input v-model="preparada" name="preparo-cancelamento" type="radio" value="SIM" /> Sim, foi preparada — manter consumo</label>
           </div>
@@ -248,7 +248,7 @@ onMounted(() => { void carregar() })
         </div>
         <footer>
           <button class="secondary-action" type="button" :disabled="executando" @click="fecharAcao">Voltar</button>
-          <button :class="acaoAberta === 'CANCELAR' || acaoAberta === 'REJEITAR' ? 'admin-cancel-action' : 'primary-action'" type="button" :disabled="executando" @click="executarAcao">{{ executando ? 'Processando...' : 'Confirmar' }}</button>
+          <button :class="acaoAberta === 'CANCELAR' || acaoAberta === 'REJEITAR' ? 'admin-cancel-action' : 'primary-action'" type="button" :disabled="executando" @click="executarAcao">{{ executando ? 'Processando...' : acaoAberta === 'APROVAR' ? 'Aprovar solução' : acaoAberta === 'ENTREGAR' ? 'Confirmar entrega' : acaoAberta === 'CANCELAR' ? 'Cancelar solução' : 'Rejeitar solicitação' }}</button>
         </footer>
       </section>
     </div>
