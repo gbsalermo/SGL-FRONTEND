@@ -13,6 +13,7 @@ import type {
   TipoEmbalagemPedido,
 } from '@/modules/pedidos/types/pedido'
 import { useSessionStore } from '@/stores/session'
+import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 
 interface ItemForm {
   produtoId: string
@@ -34,6 +35,11 @@ const router = useRouter()
 const session = useSessionStore()
 
 const projetos = ref<ProjetoResponse[]>([])
+const laboratorios = ref<LaboratorioOperacional[]>([])
+const laboratorioSelecionadoId = ref('')
+const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
+const laboratorioOperacionalId = computed(() => gestao.value ? laboratorioSelecionadoId.value : (session.usuario?.laboratorioId || ''))
+const laboratorioOperacional = computed(() => laboratorios.value.find(x => x.id === laboratorioOperacionalId.value))
 const estoques = ref<EstoqueCentralResponse[]>([])
 const lotesPorEstoque = ref<Record<string, LotePedidoResponse[]>>({})
 const projetoId = ref('')
@@ -88,10 +94,10 @@ function mensagemErro(error: unknown) {
 }
 
 async function carregarDados() {
-  const laboratorioId = usuario.value?.laboratorioId
+  const laboratorioId = laboratorioOperacionalId.value
   const unidadeId = usuario.value?.unidadeId
 
-  if (!laboratorioId || !unidadeId) {
+  if (!unidadeId || (!gestao.value && !laboratorioId)) {
     erro.value = 'Seu usuário precisa estar vinculado a laboratório e unidade para criar pedidos.'
     return
   }
@@ -100,8 +106,12 @@ async function carregarDados() {
   erro.value = ''
 
   try {
+    if (gestao.value) {
+      laboratorios.value = await listarLaboratoriosOperacionais(unidadeId)
+      if (laboratorioId && !laboratorios.value.some(x => x.id === laboratorioId)) laboratorioSelecionadoId.value = ''
+    }
     const [projetosData, estoqueData] = await Promise.all([
-      pedidoService.listarProjetosPorLaboratorio(laboratorioId),
+      laboratorioOperacionalId.value ? pedidoService.listarProjetosPorLaboratorio(laboratorioOperacionalId.value) : Promise.resolve([] as ProjetoResponse[]),
       pedidoService.listarEstoquePorUnidade(unidadeId),
     ])
     projetos.value = projetosData
@@ -111,6 +121,14 @@ async function carregarDados() {
   } finally {
     carregandoDados.value = false
   }
+}
+
+async function selecionarLaboratorio() {
+  projetoId.value = ''
+  projetos.value = []
+  if (!laboratorioOperacionalId.value) return
+  try { projetos.value = await pedidoService.listarProjetosPorLaboratorio(laboratorioOperacionalId.value) }
+  catch (e) { erro.value = mensagemErro(e) }
 }
 
 function adicionarItem() {
@@ -223,7 +241,7 @@ function alternarUrgencia() {
 }
 
 function validarFormulario() {
-  if (!usuario.value?.id || !usuario.value.laboratorioId) throw new Error('Sessão sem usuário ou laboratório válido.')
+  if (!usuario.value?.id || !laboratorioOperacionalId.value) throw new Error('Selecione um laboratório ativo para encaminhar o pedido.')
 
   if (itens.value.some((item) => !item.produtoId || !item.tipoEmbalagemSolicitada || item.quantidadeForma < 1)) {
     throw new Error('Preencha produto, tipo de unidade e quantidade de todos os itens.')
@@ -248,7 +266,7 @@ async function enviarPedido() {
 
     const payload: PedidoRequest = {
       usuarioId: usuario.value!.id,
-      laboratorioId: usuario.value!.laboratorioId!,
+      laboratorioId: laboratorioOperacionalId.value,
       projetoId: projetoId.value || null,
       urgente: urgente.value,
       motivoUrgencia: null,
@@ -289,13 +307,20 @@ onMounted(carregarDados)
 
     <div class="context-grid">
       <article><span>Solicitante</span><strong>{{ usuario?.nome }}</strong><small>{{ usuario?.email }}</small></article>
-      <article><span>Laboratório</span><strong>{{ usuario?.laboratorioNome ?? 'Não vinculado' }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
+      <article><span>Laboratório de destino</span><strong>{{ laboratorioOperacional?.nome || (gestao ? 'Escolha o laboratório abaixo' : usuario?.laboratorioNome || 'Não vinculado') }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
     </div>
 
     <form class="request-surface" @submit.prevent="enviarPedido">
       <section class="form-section">
         <div class="section-title"><div><span>1</span><div><h2>Contexto da solicitação</h2><p>Vincule um projeto e informe dados que ajudem a gestão a compreender o pedido.</p></div></div></div>
 
+        <label v-if="gestao" class="field">
+          <span>Laboratório de destino <small>(obrigatório)</small></span>
+          <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
+            <option value="">Selecione um laboratório ativo da Unidade</option>
+            <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+          </select>
+        </label>
         <label class="field">
           <span>Projeto <small>(opcional)</small></span>
           <select v-model="projetoId" :disabled="carregandoDados">
