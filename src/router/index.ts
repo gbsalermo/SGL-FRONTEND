@@ -143,6 +143,11 @@ export const router = createRouter({
           component: () => import('@/modules/solucoes/views/NovaSolucaoView.vue'),
         },
         {
+          path: 'residuos/informar',
+          name: 'gestao-informar-residuo',
+          component: () => import('@/modules/residuos/views/solicitante/InformarResiduoView.vue'),
+        },
+        {
           path: 'residuos',
           name: 'gestao-residuos',
           component: () => import('@/modules/residuos/views/gestao/ResiduosGestaoCompletoView.vue'),
