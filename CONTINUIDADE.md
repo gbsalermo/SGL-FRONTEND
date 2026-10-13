@@ -872,3 +872,10 @@ O responsável autorizou solucionar os desvios da auditoria visual integral, con
 A etapa **7.4 ainda não está formalmente encerrada**: resta confirmar os testes de regressão de Rejeição pendente, Pedidos comuns, edição/inativação de modelos e snapshots históricos, isolamento de Unidade e o build/testes automatizados na versão final. A matriz atualizada está em `docs/ETAPA_7_4_TESTE_FLUXO_SOLUCOES.md`.
 
 **Roadmap:** 7.5 é contexto operacional (Projeto → SCI → Atividade); não iniciar merge sem autorização. Margem de erro segue adiada.
+
+
+### 7.4 — Regressão funcional de Pedido comum confirmada
+
+Após validar os sete cenários principais de Soluções (incluindo rejeição pendente), o responsável confirmou **VALIDADO** o teste de regressão do fluxo convencional de Pedido de Produtos: solicitação com forma de retirada, aprovação e recebimento sem dupla baixa de estoque.
+
+Continuam pendentes antes do encerramento formal: edição/inativação de catálogo com preservação dos snapshots históricos, promoção de avulsa quando pertinente, isolamento entre Unidades/perfis e comprovação atualizada de builds e suíte. Não houve merge nesta confirmação.
