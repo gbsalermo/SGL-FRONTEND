@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
+import { SglBreadcrumb, SglButton, SglCard, SglStatusChip } from '@/components/common'
 import { solucaoService } from '../services/solucaoService'
 import {
   erroSolucao, exibirQuantidade, statusSolucaoLabel,
@@ -124,22 +125,22 @@ onMounted(() => { void carregar() })
   <section class="sol-page sol-gestao">
     <header class="sol-header">
       <div>
-        <div class="sol-breadcrumb">OPERAÇÃO / SOLUÇÕES</div>
+        <SglBreadcrumb :items="[{ label: 'Operação' }, { label: 'Soluções' }]" />
         <h1>Central de soluções</h1>
         <p>Analise solicitações, acompanhe preparações, confirme entregas e gerencie os cancelamentos.</p>
       </div>
       <div class="sol-actions">
-        <button class="sol-btn" type="button" :disabled="carregando" @click="carregar">Atualizar dados</button>
-        <button class="sol-btn sol-btn--primary" type="button" @click="router.push('/solucoes/nova?nova=1')">+ Nova solicitação</button>
+        <SglButton variant="secondary" class="sol-btn" type="button" :disabled="carregando" @click="carregar">Atualizar dados</SglButton>
+        <SglButton variant="primary" class="sol-btn " type="button" @click="router.push('/solucoes/nova?nova=1')">+ Nova solicitação</SglButton>
       </div>
     </header>
 
     <div class="sol-metrics">
-      <article v-for="item in indicadores" :key="item.status" class="sol-metric">
+      <SglCard v-for="item in indicadores" :key="item.status" variant="kpi" class="sol-metric">
         <span>{{ item.titulo }}</span>
         <strong>{{ total(item.status) }}</strong>
         <small>{{ item.detalhe }}</small>
-      </article>
+      </SglCard>
     </div>
 
     <div v-if="sucesso" class="sol-success" role="status">{{ sucesso }}</div>
@@ -168,18 +169,18 @@ onMounted(() => { void carregar() })
           <thead><tr><th>Status</th><th>Solução / Solicitante</th><th>Laboratório / Projeto</th><th>Componentes</th><th>Solicitação</th><th>Ações</th></tr></thead>
           <tbody v-for="p in pedidosFiltrados" :key="p.id">
             <tr>
-              <td><span class="sol-pill" :class="'sol-pill--' + p.status">{{ statusSolucaoLabel[p.status] }}</span></td>
+              <td><SglStatusChip :tone="p.status === 'ENTREGUE' ? 'success' : p.status === 'PENDENTE' ? 'warning' : p.status === 'EM_PREPARACAO' ? 'info' : p.status === 'REJEITADO' ? 'error' : 'neutral'">{{ statusSolucaoLabel[p.status] }}</SglStatusChip></td>
               <td><strong>{{ p.nomeSolucao || 'Solução' }}</strong><small>{{ p.usuarioNome }}</small></td>
               <td>{{ p.laboratorioNome }}<small>{{ p.projetoNome || 'Sem Projeto' }}</small></td>
               <td>{{ p.itens.length }} produto(s)</td>
               <td>{{ new Date(p.dataSolicitacao).toLocaleDateString('pt-BR') }}</td>
               <td>
                 <div class="sol-actions sol-actions--compact">
-                  <button v-if="p.status === 'PENDENTE'" class="sol-btn sol-btn--primary" type="button" @click="abrirAcao(p,'APROVAR')">Analisar</button>
-                  <button v-if="p.status === 'EM_PREPARACAO'" class="sol-btn sol-btn--primary" type="button" @click="abrirAcao(p,'ENTREGAR')">Entregar</button>
-                  <button v-if="p.status === 'PENDENTE'" class="sol-btn" type="button" @click="abrirAcao(p,'REJEITAR')">Rejeitar</button>
-                  <button v-if="p.status === 'PENDENTE' || p.status === 'EM_PREPARACAO'" class="sol-btn sol-btn--danger" type="button" @click="abrirAcao(p,'CANCELAR')">Cancelar</button>
-                  <button class="sol-btn" type="button" :aria-expanded="expandidoId === p.id" @click="alternarDetalhes(p)">{{ expandidoId === p.id ? 'Ocultar' : 'Detalhes' }}</button>
+                  <SglButton variant="primary" v-if="p.status === 'PENDENTE'" class="sol-btn " type="button" @click="abrirAcao(p,'APROVAR')">Analisar</SglButton>
+                  <SglButton variant="primary" v-if="p.status === 'EM_PREPARACAO'" class="sol-btn " type="button" @click="abrirAcao(p,'ENTREGAR')">Entregar</SglButton>
+                  <SglButton variant="secondary" v-if="p.status === 'PENDENTE'" class="sol-btn" type="button" @click="abrirAcao(p,'REJEITAR')">Rejeitar</SglButton>
+                  <SglButton variant="danger" v-if="p.status === 'PENDENTE' || p.status === 'EM_PREPARACAO'" class="sol-btn " type="button" @click="abrirAcao(p,'CANCELAR')">Cancelar</SglButton>
+                  <SglButton variant="secondary" class="sol-btn" type="button" :aria-expanded="expandidoId === p.id" @click="alternarDetalhes(p)">{{ expandidoId === p.id ? 'Ocultar' : 'Detalhes' }}</SglButton>
                 </div>
               </td>
             </tr>
@@ -239,8 +240,8 @@ onMounted(() => { void carregar() })
         </template>
         <label v-if="acaoAberta === 'REJEITAR'" class="sol-field"><span>Justificativa *</span><textarea v-model="justificativa" placeholder="Explique a rejeição" /></label>
         <div class="sol-dialog-footer">
-          <button class="sol-btn" type="button" :disabled="executando" @click="fecharAcao">Voltar</button>
-          <button class="sol-btn" :class="acaoAberta === 'CANCELAR' || acaoAberta === 'REJEITAR' ? 'sol-btn--danger' : 'sol-btn--primary'" type="button" :disabled="executando" @click="executarAcao">{{ executando ? 'Processando...' : 'Confirmar' }}</button>
+          <SglButton variant="secondary" class="sol-btn" type="button" :disabled="executando" @click="fecharAcao">Voltar</SglButton>
+          <SglButton variant="danger" class="sol-btn" :class="acaoAberta === 'CANCELAR' || acaoAberta === 'REJEITAR' ? '' : ''" type="button" :disabled="executando" @click="executarAcao">{{ executando ? 'Processando...' : 'Confirmar' }}</SglButton>
         </div>
       </section>
     </div>
