@@ -199,6 +199,7 @@ onMounted(() => { void carregar() })
                   <div v-if="p.status === 'CANCELADO'" class="sol-note">
                     {{ p.solucaoPreparadaNoCancelamento ? 'Preparação realizada: os ingredientes permanecem consumidos.' : p.estoqueRevertidoNoCancelamento ? 'Preparação não realizada: componentes retornaram ao estoque.' : 'Cancelamento sem saída de estoque.' }}
                   </div>
+                  <h3>Instruções de preparo</h3><p class="sol-note" style="white-space:pre-wrap">{{ p.instrucoesPreparoSolucao || 'Sem instruções de preparo registradas neste pedido.' }}</p>
                   <h3>Movimentações vinculadas</h3>
                   <div v-if="carregandoMovimentos[p.id]" class="sol-muted">Carregando movimentações...</div>
                   <div v-else-if="!(movimentacoes[p.id] || []).length" class="sol-muted">Nenhuma movimentação registrada neste Pedido.</div>

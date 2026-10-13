@@ -67,7 +67,7 @@ export const router = createRouter({
         {
           path: 'solucoes/solicitar',
           name: 'solicitante-nova-solucao',
-          component: () => import('@/modules/solucoes/views/SolucoesSolicitanteView.vue'),
+          component: () => import('@/modules/solucoes/views/NovaSolucaoView.vue'),
           props: true,
         },
         {
@@ -140,7 +140,7 @@ export const router = createRouter({
         {
           path: 'solucoes/nova',
           name: 'gestao-nova-solucao',
-          component: () => import('@/modules/solucoes/views/SolucoesSolicitanteView.vue'),
+          component: () => import('@/modules/solucoes/views/NovaSolucaoView.vue'),
         },
         {
           path: 'residuos',

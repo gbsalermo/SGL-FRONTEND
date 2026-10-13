@@ -95,7 +95,7 @@ async function solicitar() {
   try {
     validar()
     enviando.value = true
-    const personalizadas: ComponenteModeloInput[] = ingredientes.value.map(i => ({
+    const personalizadas: ComponenteModeloInput[] = origem.value === 'PADRAO' ? [] : ingredientes.value.map(i => ({
       produtoId: i.produtoId,
       quantidade: Number(i.quantidade),
       unidadeMedida: i.unidadeMedida as UnidadeSolucao,
@@ -173,7 +173,7 @@ onMounted(() => { void carregar() })
           </div>
         </template>
         <template v-else>
-          <label class="sol-field"><span>Nome da solução *</span>
+          <label class="sol-field"><span>Qual solução deseja? *</span>
             <input v-model="nomeSolucao" maxlength="150" placeholder="Ex.: Solução tampão para projeto" required />
           </label>
           <p class="sol-note">Não encontrou sua Solução no catálogo? Descreva as exigências específicas. A gestão avaliará se a preparação pode ser atendida.</p><div class="sol-list-head"><h3>Componentes solicitados (quando conhecidos)</h3><SglButton variant="secondary" class="sol-btn " type="button" :disabled="!podeAdicionar" @click="adicionarComponente">+ Adicionar produto</SglButton></div>

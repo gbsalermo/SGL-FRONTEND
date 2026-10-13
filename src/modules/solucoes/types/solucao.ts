@@ -42,6 +42,7 @@ export interface PedidoSolucao {
   id: string
   tipo: 'SOLUCAO'
   nomeSolucao: string
+  instrucoesPreparoSolucao?: string | null
   modeloSolucaoId: string | null
   usuarioId: string
   usuarioNome: string
