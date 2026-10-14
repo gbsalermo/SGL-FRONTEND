@@ -879,3 +879,10 @@ A etapa **7.4 ainda não está formalmente encerrada**: resta confirmar os teste
 Após validar os sete cenários principais de Soluções (incluindo rejeição pendente), o responsável confirmou **VALIDADO** o teste de regressão do fluxo convencional de Pedido de Produtos: solicitação com forma de retirada, aprovação e recebimento sem dupla baixa de estoque.
 
 Continuam pendentes antes do encerramento formal: edição/inativação de catálogo com preservação dos snapshots históricos, promoção de avulsa quando pertinente, isolamento entre Unidades/perfis e comprovação atualizada de builds e suíte. Não houve merge nesta confirmação.
+
+
+### 7.4 — Histórico e inativação dos modelos validados (14/10/2026)
+
+O responsável confirmou **VALIDADO** o teste do catálogo: editar nome/quantidades/instruções de um Modelo padrão, preservar composição e cartilha de solicitações antigas, refletir a receita editada em nova solicitação e inativar o modelo ocultando-o de novos pedidos sem alterar histórico. O ciclo principal, rejeição, os dois cancelamentos e regressão dos Pedidos comuns já haviam sido validados.
+
+**Pendências antes de declarar a 7.4 encerrada:** promoção explícita de Pedido avulso ao catálogo, isolamento entre Unidades/perfis, testes/build finais e inspeção Light/Dark. Não houve merge.
