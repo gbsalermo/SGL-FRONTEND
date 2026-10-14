@@ -165,3 +165,14 @@ Este resultado conclui o cenário S13 da matriz funcional. Permanecem **não con
 - [ ] Build `npm run build`, tema claro/escuro e navegação do menu.
 
 **Resultado:** alteração de frontend registrada, ainda **não homologada localmente**. Não confundir esta pendência com os cenários funcionais de Soluções já validados anteriormente. Não fazer merge sem confirmação expressa.
+
+
+### Confirmação do responsável — integração Pedidos/Soluções (14/10/2026)
+
+O responsável confirmou que a atualização da **visão integrada de Pedidos, Soluções, Dashboard e Alertas operacionais** funcionou conforme esperado, considerando o implementado até agora **VALIDADO**. Esta confirmação **substitui a observação histórica anterior** que dizia que a integração ainda não estava homologada visual/funcionalmente. Sem inventar resultados numéricos de build: o comando `npm run build` não teve log final anexado à conversa.
+
+**Precisa de atenção:** o código já inclui Soluções urgentes `PENDENTE`, com rota para o pedido correspondente em `/solucoes?pedido=...`. Confirmado como parte do comportamento existente.
+
+**Últimas movimentações — melhoria ainda NÃO feita:** o painel registra eventos de estoque e histórico de Resíduos. Não exibe, por si só, rejeição, entrega nem cancelamento de Solução após preparo quando não há movimentação de estoque. A proposta de ampliar para **Últimas atividades operacionais** depende de histórico confiável de transições e segue pendente de implementação e testes; não marcar como concluída.
+
+**Pendências de fechamento:** isolamento entre Unidades e perfis; conferência técnica final da versão atual e eventual evolução de histórico operacional, mediante decisão do responsável. Sem merge.
