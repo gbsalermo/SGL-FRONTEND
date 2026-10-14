@@ -51,3 +51,14 @@ Documentar como o mesmo componente será utilizado em `NovoPedidoView.vue` e `No
 ## Riscos conhecidos
 
 A API DEV ainda está em fase de autenticação/autorização temporária. Exibir dados no frontend por filtro não é autorização. O endpoint de leitura definitivo deve validar Unidade, perfil e titularidade em backend e ser reavaliado na etapa de segurança antes de produção.
+
+
+## Checkpoint de disponibilidade do backend — 14/10/2026 (7.5.2)
+
+A 7.5.1 recebeu confirmação de testes JUnit e boot pelo responsável. A 7.5.2 foi publicada no backend, ainda **pendente de JUnit/boot/HTTP**.
+
+**API disponível após validação:** `GET /api/v1/contextos-operacionais/projetos/{projetoId}/participacoes`; o frontend utiliza o prefixo `/v1` configurado pelo cliente HTTP. Uma chamada por Projeto é suficiente para reunir as participações das Atividades daquele Projeto. Também existem `GET /api/v1/contextos-operacionais/atividades/{atividadeId}/participacoes` e `/usuarios/{usuarioId}`.
+
+**DTO:** `ContextoOperacionalResponseDTO` com `origem`, `participacaoId`, `vinculoEstagioId`, `usuarioId`, `usuarioNome`, `atividadeId`, `atividadeNome`, `atividadeCodigoSeg`, `sciId`, `sciNome`, `projetoId`, `projetoNome`, `laboratorioId`, `laboratorioNome`, `unidadeId`, `dataInicioParticipacao`, `dataFimParticipacao`, `aberta`, `elegivel` e `motivoInelegibilidade`.
+
+**7.5.3 após backend verde:** adicionar `projetosService.listarParticipacoesProjeto(projetoId)`, agrupar `atividadeId`, apresentar participantes atuais e históricos no card da Atividade com deduplicação apenas para visualização atual (preservando todas as ocorrências históricas), e revalidar tema/responsividade. A classificação de **atual/histórico** considera `aberta`, enquanto a habilitação de novas operações utiliza `elegivel`; nunca confundir os dois campos. Não implementar mutações pelo hub. **Nenhuma tela foi modificada nesse checkpoint.**
