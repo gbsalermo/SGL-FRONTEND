@@ -3,7 +3,7 @@
 
 **Decisão:** a antiga 7.5 (Frontend) foi antecipada para **7.4**, para testar o ciclo solicitante ↔ gestor ↔ estoque. O antigo contexto operacional da 7.4 será desenvolvido na **7.5**.
 
-**Estado:** implementação frontend publicada na branch `collab/etapa-7-unidades-solucoes-contexto`. Backend da 7.3: suite Maven e inicialização local confirmadas como verdes pelo desenvolvedor. **Build do frontend e smoke funcional não verificados no momento da publicação**.
+**Estado atualizado (14/10/2026): 7.4 ENCERRADA POR ACEITE FUNCIONAL DO RESPONSÁVEL.** Os testes de fluxo principais foram validados localmente pelo responsável; o build final, isolamento de Unidades/perfis e QA transversal foram transferidos para 7.6/7.7. O roteiro abaixo contém instruções e pendências históricas; observar a nota final de encerramento.
 
 ## Preparar o ambiente
 
@@ -176,3 +176,12 @@ O responsável confirmou que a atualização da **visão integrada de Pedidos, S
 **Últimas movimentações — melhoria ainda NÃO feita:** o painel registra eventos de estoque e histórico de Resíduos. Não exibe, por si só, rejeição, entrega nem cancelamento de Solução após preparo quando não há movimentação de estoque. A proposta de ampliar para **Últimas atividades operacionais** depende de histórico confiável de transições e segue pendente de implementação e testes; não marcar como concluída.
 
 **Pendências de fechamento:** isolamento entre Unidades e perfis; conferência técnica final da versão atual e eventual evolução de histórico operacional, mediante decisão do responsável. Sem merge.
+
+
+## Encerramento autorizado — 14/10/2026
+
+**Status: 7.4 concluída por aceite funcional**, após confirmação expressa do responsável. Os resultados acumulados estão registrados cronologicamente acima e compreendem Soluções padrão e personalizadas, modelos e snapshots, promoção explícita ao catálogo, aprovação/entrega, rejeição, cancelamento com e sem preparo, regressão de Pedidos comuns e visibilidade unificada de Produtos/Soluções em Pedidos, Dashboard e Alertas.
+
+As caixas de conclusão mais antigas **não foram marcadas como executadas automaticamente**. Pendências técnicas assumidas e transferidas: `npm run build` final, `mvn test` final, QA Light/Dark/responsividade, isolamento IB/IQ e verificação de perfis e tenant; a segurança real dos endpoints permanece assunto obrigatório antes de produção. A proposta de expandir `Últimas movimentações` para `Últimas atividades operacionais` ainda não foi construída nem testada.
+
+**Próximo bloco:** 7.5 — contexto operacional Projeto/SCI/Atividade; 7.6 — dados DEV/DEMO e testes; 7.7 — QA e documentação final. Não houve merge; aguardar comando expresso para integração, e confirmar roadmap antes de implementar a 7.5.
