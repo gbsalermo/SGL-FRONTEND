@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { pedidoService } from '@/modules/pedidos/services/pedidoService'
 import type { MovimentacaoPedidoResponse, PedidoResponse, StatusPedido } from '@/modules/pedidos/types/pedido'
+import { exibirQuantidade } from '@/modules/solucoes/types/solucao'
 import { useSessionStore } from '@/stores/session'
 
 const route = useRoute()
@@ -18,6 +19,7 @@ const erro = ref('')
 const busca = ref('')
 const filtrosAbertos = ref(false)
 const status = ref<StatusPedido | 'TODOS'>('TODOS')
+const tipoPedido = ref<'TODOS' | 'PRODUTOS' | 'SOLUCAO'>('TODOS')
 const urgencia = ref<'TODOS' | 'URGENTE' | 'NORMAL'>('TODOS')
 const laboratorio = ref('TODOS')
 const dataInicio = ref('')
@@ -38,6 +40,7 @@ const statusOptions: Array<{ label: string; value: StatusPedido | 'TODOS' }> = [
   { label: 'Todos', value: 'TODOS' },
   { label: 'Pendentes', value: 'PENDENTE' },
   { label: 'Aprovados', value: 'APROVADO' },
+  { label: 'Em preparação', value: 'EM_PREPARACAO' },
   { label: 'Rejeitados', value: 'REJEITADO' },
   { label: 'Entregues', value: 'ENTREGUE' },
   { label: 'Cancelados', value: 'CANCELADO' },
@@ -51,7 +54,7 @@ const pedidoAlvo = computed(() => {
 const totais = computed(() => ({
   pendentes: pedidos.value.filter((pedido) => pedido.status === 'PENDENTE').length,
   urgentes: pedidos.value.filter((pedido) => pedido.urgente).length,
-  aprovados: pedidos.value.filter((pedido) => pedido.status === 'APROVADO').length,
+  aprovados: pedidos.value.filter((pedido) => pedido.status === 'APROVADO' || pedido.status === 'EM_PREPARACAO').length,
   entregues: pedidos.value.filter((pedido) => pedido.status === 'ENTREGUE').length,
 }))
 
@@ -71,6 +74,7 @@ const pedidosFiltrados = computed(() => {
 
   const filtrados = pedidos.value.filter((pedido) => {
     if (status.value !== 'TODOS' && pedido.status !== status.value) return false
+    if (tipoPedido.value !== 'TODOS' && (pedido.tipo ?? 'PRODUTOS') !== tipoPedido.value) return false
     if (urgencia.value === 'URGENTE' && !pedido.urgente) return false
     if (urgencia.value === 'NORMAL' && pedido.urgente) return false
     if (laboratorio.value !== 'TODOS' && pedido.laboratorioNome !== laboratorio.value) return false
@@ -79,7 +83,7 @@ const pedidosFiltrados = computed(() => {
     if (fim !== null && dataPedido > fim) return false
     if (!termo) return true
 
-    return [pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.status, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
+    return [pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.status, pedido.tipo, pedido.nomeSolucao, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
       .filter(Boolean).join(' ').toLowerCase().includes(termo)
   })
 
@@ -150,7 +154,7 @@ async function alternarDetalhe(pedido: PedidoResponse) {
     return
   }
   pedidoExpandido.value = pedido.id
-  prepararPedido(pedido)
+  if (pedido.tipo !== 'SOLUCAO') prepararPedido(pedido)
   await carregarMovimentacoesPedido(pedido)
 }
 
@@ -160,7 +164,7 @@ async function abrirPedidoDaRota() {
   if (!pedido) return
 
   pedidoExpandido.value = pedido.id
-  prepararPedido(pedido)
+  if (pedido.tipo !== 'SOLUCAO') prepararPedido(pedido)
   await carregarMovimentacoesPedido(pedido)
 
   requestAnimationFrame(() => {
@@ -182,6 +186,7 @@ function atualizarPedido(atualizado: PedidoResponse) {
 }
 
 async function aprovar(pedido: PedidoResponse) {
+  if (pedido.tipo === 'SOLUCAO') return
   erroAcao.value = ''
   sucessoAcao.value = ''
   const aprovadorId = session.usuario?.id
@@ -232,6 +237,7 @@ async function aprovar(pedido: PedidoResponse) {
 }
 
 async function confirmarAcaoJustificada(pedido: PedidoResponse) {
+  if (pedido.tipo === 'SOLUCAO') return
   erroAcao.value = ''
   sucessoAcao.value = ''
   const motivo = justificativa.value.trim()
@@ -255,6 +261,7 @@ async function confirmarAcaoJustificada(pedido: PedidoResponse) {
 }
 
 async function entregar(pedido: PedidoResponse) {
+  if (pedido.tipo === 'SOLUCAO') return
   erroAcao.value = ''
   sucessoAcao.value = ''
   if (!window.confirm('Confirma que os materiais deste pedido foram entregues?')) return
@@ -269,7 +276,7 @@ async function entregar(pedido: PedidoResponse) {
 }
 
 function limparFiltros() {
-  busca.value = ''; status.value = 'TODOS'; urgencia.value = 'TODOS'; laboratorio.value = 'TODOS'; dataInicio.value = ''; dataFim.value = ''; ordenarPor.value = 'DATA'; direcao.value = 'DESC'
+  busca.value = ''; status.value = 'TODOS'; tipoPedido.value = 'TODOS'; urgencia.value = 'TODOS'; laboratorio.value = 'TODOS'; dataInicio.value = ''; dataFim.value = ''; ordenarPor.value = 'DATA'; direcao.value = 'DESC'
   pedidoExpandido.value = null
   if (Object.keys(route.query).length > 0) router.replace({ path: '/pedidos' })
 }
@@ -278,7 +285,7 @@ async function carregar() {
   carregando.value = true
   erro.value = ''
   try {
-    pedidos.value = await pedidoService.listarTodos()
+    pedidos.value = await pedidoService.listarTodosComSolucoes()
     await abrirPedidoDaRota()
   } catch {
     erro.value = 'Não foi possível carregar os pedidos. Verifique a conexão com a API.'
@@ -289,9 +296,14 @@ async function carregar() {
 
 watch(() => route.query.status, (valor) => {
   const statusRota = typeof valor === 'string' ? valor.toUpperCase() : ''
-  const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
+  const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'EM_PREPARACAO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
   status.value = validos.includes(statusRota as StatusPedido) ? statusRota as StatusPedido : 'TODOS'
   if (status.value !== 'TODOS') filtrosAbertos.value = true
+}, { immediate: true })
+
+watch(() => route.query.tipo, (valor) => {
+  tipoPedido.value = valor === 'SOLUCAO' || valor === 'PRODUTOS' ? valor : 'TODOS'
+  if (tipoPedido.value !== 'TODOS') filtrosAbertos.value = true
 }, { immediate: true })
 
 watch(() => route.query.urgencia, (valor) => {
@@ -318,7 +330,7 @@ onMounted(carregar)
     <div class="gestao-summary">
       <article><span>Pendentes</span><strong>{{ totais.pendentes }}</strong><small>Aguardando análise</small></article>
       <article :class="{ 'gestao-summary__urgent': totais.urgentes > 0 }"><span>Urgentes</span><strong>{{ totais.urgentes }}</strong><small>Marcação informativa</small></article>
-      <article><span>Aprovados</span><strong>{{ totais.aprovados }}</strong><small>Aguardando entrega</small></article>
+      <article><span>Em atendimento</span><strong>{{ totais.aprovados }}</strong><small>Aprovados ou em preparação</small></article>
       <article><span>Entregues</span><strong>{{ totais.entregues }}</strong><small>Concluídos</small></article>
     </div>
 
@@ -328,6 +340,7 @@ onMounted(carregar)
         <button class="filter-toggle" type="button" :aria-expanded="filtrosAbertos" @click="filtrosAbertos = !filtrosAbertos"><span>Filtros</span><strong>{{ filtrosAbertos ? '⌃' : '⌄' }}</strong></button>
       </div>
       <div v-if="filtrosAbertos" class="gestao-filter-grid gestao-filter-grid--advanced">
+        <label><span>Tipo de pedido</span><select v-model="tipoPedido"><option value="TODOS">Produtos e soluções</option><option value="PRODUTOS">Somente produtos</option><option value="SOLUCAO">Somente soluções</option></select></label>
         <label><span>Status</span><select v-model="status"><option v-for="option in statusOptions" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>
         <label><span>Urgência</span><select v-model="urgencia"><option value="TODOS">Todos</option><option value="URGENTE">Somente urgentes</option><option value="NORMAL">Somente normais</option></select></label>
         <label><span>Laboratório</span><select v-model="laboratorio"><option value="TODOS">Todos os laboratórios</option><option v-for="nome in laboratorios" :key="nome" :value="nome">{{ nome }}</option></select></label>
@@ -345,13 +358,13 @@ onMounted(carregar)
 
     <div v-else class="gestao-table-wrap">
       <table class="gestao-table">
-        <thead><tr><th>Data</th><th>Solicitante / Projeto</th><th>Produtos</th><th>Laboratório</th><th>Status</th><th>Urgência</th><th></th></tr></thead>
+        <thead><tr><th>Data</th><th>Solicitante / Projeto</th><th>Pedido / Itens</th><th>Laboratório</th><th>Status</th><th>Urgência</th><th></th></tr></thead>
         <tbody>
           <template v-for="pedido in pedidosFiltrados" :key="pedido.id">
             <tr :id="`pedido-${pedido.id}`" :class="{ 'pedido-alvo': pedidoAlvo === pedido.id }">
               <td>{{ dataFormatada(pedido.dataSolicitacao) }}</td>
               <td><strong>{{ pedido.usuarioNome }}</strong><small>{{ pedido.projetoNome ?? 'Sem projeto' }}</small></td>
-              <td><strong>{{ produtosResumo(pedido) }}</strong><small>{{ pedido.itens.length }} {{ pedido.itens.length === 1 ? 'item' : 'itens' }}</small></td>
+              <td><strong>{{ pedido.tipo === 'SOLUCAO' ? (pedido.nomeSolucao || 'Solução personalizada') : produtosResumo(pedido) }}</strong><small><span class="pedido-type-chip" :data-tipo="pedido.tipo ?? 'PRODUTOS'">{{ pedido.tipo === 'SOLUCAO' ? 'Solução' : 'Produtos' }}</span> · {{ pedido.itens.length }} {{ pedido.itens.length === 1 ? 'componente/item' : 'componentes/itens' }}</small></td>
               <td>{{ pedido.laboratorioNome }}</td>
               <td><span class="status-chip" :data-status="pedido.status">{{ pedido.status }}</span></td>
               <td><span v-if="pedido.urgente" class="urgent-chip">URGENTE</span><span v-else class="neutral-copy">Normal</span></td>
@@ -360,7 +373,27 @@ onMounted(carregar)
 
             <tr v-if="pedidoExpandido === pedido.id" class="gestao-detail-row" :class="{ 'gestao-detail-row--alvo': pedidoAlvo === pedido.id }">
               <td colspan="7">
-                <div class="gestao-detail">
+                <div v-if="pedido.tipo === 'SOLUCAO'" class="gestao-detail gestao-detail--solucao">
+                  <div class="gestao-detail__items">
+                    <h3>Preparação solicitada: {{ pedido.nomeSolucao || 'Solução' }}</h3>
+                    <p class="gestao-solucao-explainer">Este registro pertence à Central de Soluções. A aprovação, o preparo e o cancelamento são realizados exclusivamente lá.</p>
+                    <div v-for="item in pedido.itens" :key="item.id" class="gestao-solucao-componente">
+                      <span>{{ item.produtoNome }}</span>
+                      <strong>{{ exibirQuantidade(item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada) }} {{ item.unidadeMedidaSolicitada || '' }}</strong>
+                    </div>
+                    <div v-if="pedido.instrucoesPreparoSolucao" class="gestao-solucao-cartilha"><strong>Cartilha de preparo</strong><p>{{ pedido.instrucoesPreparoSolucao }}</p></div>
+                    <div v-if="pedido.observacao" class="gestao-solucao-cartilha"><strong>Finalidade / observações</strong><p>{{ pedido.observacao }}</p></div>
+                  </div>
+                  <div class="gestao-detail__context">
+                    <h3>Contexto da solicitação</h3>
+                    <p><span>Status</span><strong>{{ pedido.status === 'EM_PREPARACAO' ? 'Em preparação' : pedido.status }}</strong></p>
+                    <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p>
+                    <p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p>
+                    <p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p>
+                    <button class="action-button action-button--deliver gestao-solucao-open" type="button" @click="router.push({ path: '/solucoes', query: { pedido: pedido.id } })">Abrir na Central de Soluções</button>
+                  </div>
+                </div>
+                <div v-else class="gestao-detail">
                   <div class="gestao-detail__items">
                     <h3>Materiais solicitados</h3>
                     <div v-for="item in pedido.itens" :key="item.id" class="gestao-detail__item">
@@ -490,4 +523,13 @@ onMounted(carregar)
 .gestao-state { padding: 34px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #64748b; text-align: center; }.gestao-state--error { border-color: #fecaca; color: #b42318; background: #fffafa; }
 @media (max-width: 900px) { .gestao-summary, .gestao-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.gestao-detail { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .gestao-pedidos__header { flex-direction: column; }.gestao-summary, .gestao-filter-grid, .gestao-filter-top { grid-template-columns: 1fr; }.gestao-detail__item { grid-template-columns: 1fr; }.delivered-lot { flex-direction: column; } }
+.pedido-type-chip { display:inline-flex; align-items:center; padding:2px 6px; border:1px solid var(--sgl-border); border-radius:var(--sgl-radius-control); background:var(--sgl-surface-interactive); color:var(--sgl-text); font-weight:750; font-size:10px; }
+.pedido-type-chip[data-tipo='SOLUCAO'] { color:var(--sgl-primary); }
+.gestao-solucao-explainer { color:var(--sgl-text-muted); font-size:12px; line-height:1.6; }
+.gestao-solucao-componente { display:flex; justify-content:space-between; gap:14px; padding:11px 0; border-bottom:1px solid var(--sgl-border); color:var(--sgl-text); font-size:12px; }
+.gestao-solucao-componente strong { white-space:nowrap; font-size:12px; }
+.gestao-solucao-cartilha { margin-top:15px; padding:12px; border:1px solid var(--sgl-border); border-radius:var(--sgl-radius-control); background:var(--sgl-surface); color:var(--sgl-text); }
+.gestao-solucao-cartilha p { white-space:pre-wrap; font-size:12px; line-height:1.5; }
+.gestao-solucao-open { margin-top:15px; }
+.status-chip[data-status='EM_PREPARACAO'] { background:var(--sgl-surface-interactive);color:var(--sgl-primary); }
 </style>
