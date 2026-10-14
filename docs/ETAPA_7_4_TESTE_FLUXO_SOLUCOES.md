@@ -140,3 +140,10 @@ Este registro **prevalece sobre os estados históricos de planejamento** anterio
 **Implicação funcional:** snapshots de composição e instruções associados aos Pedidos de Solução estão preservados no cenário testado; alterações no catálogo não modificam pedidos anteriores. Os testes são confirmações do responsável, não execuções automatizadas pelo assistente.
 
 **Restante do fechamento:** testar promoção administrativa de uma Solução avulsa ao catálogo (se disponível no fluxo); isolamento de catálogo/pedidos entre Unidades e permissões por perfil; executar/registrar `mvn test` e `npm run build` nas últimas versões e inspecionar Light/Dark. O teste de rejeição e a regressão de Pedidos comuns já estão validados em registros anteriores. Não realizar merge sem autorização expressa.
+
+
+### Validação de promoção administrativa de Solução avulsa — 14/10/2026
+
+**VALIDADO pelo responsável em teste local:** em `Administração → Cadastros → Resíduos e Soluções → Modelos de soluções → Importar de solicitação`, foi selecionada uma Solução personalizada anteriormente solicitada e cadastrada como Modelo reutilizável. Foi confirmado que a composição passou a integrar o catálogo e que o Pedido de origem e suas movimentações permaneceram inalterados.
+
+Este resultado conclui o cenário S13 da matriz funcional. Permanecem **não confirmados nesta validação**: isolamento de modelos e pedidos entre Unidades, permissões por perfil no frontend (não confundir com proteção real de API, ainda pendente), execução final de `mvn test`, `npm run build` e QA Light/Dark. Não realizar merge sem autorização expressa do responsável.
