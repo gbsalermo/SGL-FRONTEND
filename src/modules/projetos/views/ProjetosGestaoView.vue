@@ -1185,7 +1185,7 @@ onMounted(carregar)
                       </span>
                     </button>
 
-                    <div v-if="participantesAtividadeAbertaId === atividade.id"
+                    <div v-show="participantesAtividadeAbertaId === atividade.id"
                       :id="`participantes-atividade-${atividade.id}`"
                       class="activity-participations__content">
                       <p v-if="carregandoParticipacoes" class="activity-participations__message">Carregando participações...</p>
@@ -2822,7 +2822,7 @@ onMounted(carregar)
   border-radius: var(--sgl-radius-control);
 }
 
-.activity-participations__title {
+.activity-item .activity-participations__title {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -2899,7 +2899,9 @@ onMounted(carregar)
   font-size: var(--sgl-font-helper);
 }
 
-.activity-participations__status {
+.activity-item .activity-participations__person > .activity-participations__status {
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
   max-width: 58%;
   padding: 5px 8px;
@@ -2911,8 +2913,8 @@ onMounted(carregar)
   text-align: right;
 }
 
-.activity-participations__status--warning,
-.activity-participations__status--historico {
+.activity-item .activity-participations__person > .activity-participations__status--warning,
+.activity-item .activity-participations__person > .activity-participations__status--historico {
   background: var(--sgl-surface-interactive);
   color: var(--sgl-text-muted);
 }
