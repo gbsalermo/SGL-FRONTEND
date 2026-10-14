@@ -102,6 +102,7 @@ function statusLabel(valor: StatusPedido) {
   const labels: Record<StatusPedido, string> = {
     PENDENTE: 'Pendente',
     APROVADO: 'Aprovado',
+    EM_PREPARACAO: 'Em preparação',
     REJEITADO: 'Rejeitado',
     ENTREGUE: 'Entregue',
     CANCELADO: 'Cancelado',
