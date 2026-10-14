@@ -364,7 +364,7 @@ onMounted(carregar)
             <tr :id="`pedido-${pedido.id}`" :class="{ 'pedido-alvo': pedidoAlvo === pedido.id }">
               <td>{{ dataFormatada(pedido.dataSolicitacao) }}</td>
               <td><strong>{{ pedido.usuarioNome }}</strong><small>{{ pedido.projetoNome ?? 'Sem projeto' }}</small></td>
-              <td><strong>{{ pedido.tipo === 'SOLUCAO' ? (pedido.nomeSolucao || 'Solução personalizada') : produtosResumo(pedido) }}</strong><small><span class="pedido-type-chip" :data-tipo="pedido.tipo ?? 'PRODUTOS'">{{ pedido.tipo === 'SOLUCAO' ? 'Solução' : 'Produtos' }}</span> · {{ pedido.itens.length }} {{ pedido.itens.length === 1 ? 'componente/item' : 'componentes/itens' }}</small></td>
+              <td><strong>{{ pedido.tipo === 'SOLUCAO' ? (pedido.nomeSolucao || 'Solução personalizada') : produtosResumo(pedido) }}</strong><small><span class="pedido-type-chip" :data-tipo="pedido.tipo ?? 'PRODUTOS'">{{ pedido.tipo === 'SOLUCAO' ? 'Solução' : 'Produtos' }}</span> · {{ pedido.itens.length }} {{ pedido.tipo === 'SOLUCAO' ? (pedido.itens.length === 1 ? 'componente' : 'componentes') : (pedido.itens.length === 1 ? 'item' : 'itens') }}</small></td>
               <td>{{ pedido.laboratorioNome }}</td>
               <td><span class="status-chip" :data-status="pedido.status">{{ pedido.status }}</span></td>
               <td><span v-if="pedido.urgente" class="urgent-chip">URGENTE</span><span v-else class="neutral-copy">Normal</span></td>
