@@ -3,7 +3,7 @@
 **Projeto:** SGL — Sistema de Gestão de Laboratórios  
 **Frontend:** `gbsalermo/SGL-FRONTEND`  
 **Backend:** `gbsalermo/Sistema-SGL`  
-**Última atualização:** 24/09/2026  
+**Última atualização:** 14/10/2026  
 **Branch estável:** `main` do GitLab institucional  
 **Branch histórica da Etapa 4:** `feat/etapa-4-residuos` — referência; não mergear integralmente  
 **Branch atual de trabalho:** `collab/etapa-7-unidades-solucoes-contexto`  
