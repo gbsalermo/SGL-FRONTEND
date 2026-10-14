@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 import { solucaoService } from '../services/solucaoService'
 import {
@@ -11,6 +12,7 @@ import '../styles/solucoes.css'
 type Operacao = 'APROVAR' | 'ENTREGAR' | 'REJEITAR' | 'CANCELAR'
 type Filtro = StatusSolucao | 'TODOS'
 const session = useSessionStore()
+const route = useRoute()
 const carregando = ref(true)
 const executando = ref(false)
 const erro = ref('')
@@ -115,7 +117,21 @@ async function executarAcao() {
   } catch(e) { erroAcao.value = erroSolucao(e) }
   finally { executando.value = false }
 }
-onMounted(() => { void carregar() })
+async function abrirPedidoDaRota() {
+  const id = typeof route.query.pedido === 'string' ? route.query.pedido : ''
+  if (!id) return
+  const pedido = pedidos.value.find(p => p.id === id)
+  if (!pedido) return
+  filtroStatus.value = 'TODOS'
+  busca.value = ''
+  if (expandidoId.value !== pedido.id) await alternarDetalhes(pedido)
+  await nextTick()
+  document.getElementById(`solucao-${pedido.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+watch(() => route.query.pedido, () => {
+  if (!carregando.value) void abrirPedidoDaRota()
+})
+onMounted(async () => { await carregar(); await abrirPedidoDaRota() })
 </script>
 
 <template>
@@ -162,7 +178,7 @@ onMounted(() => { void carregar() })
         <table class="sol-table--records">
           <thead><tr><th>Status</th><th>Solução / Solicitante</th><th>Laboratório / Projeto</th><th>Componentes</th><th>Solicitação</th><th>Ações</th></tr></thead>
           <tbody v-for="p in pedidosFiltrados" :key="p.id">
-            <tr class="solution-row">
+            <tr :id="`solucao-${p.id}`" class="solution-row">
               <td><span class="sol-status" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span></td>
               <td><button type="button" class="solution-expand" :aria-expanded="expandidoId === p.id" @click="alternarDetalhes(p)"><strong>{{ p.nomeSolucao || 'Solução' }}</strong><small>{{ p.usuarioNome }}</small></button></td>
               <td>{{ p.laboratorioNome }}<small>{{ p.projetoNome || 'Sem Projeto' }}</small></td>
