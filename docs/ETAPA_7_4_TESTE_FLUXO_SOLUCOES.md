@@ -131,3 +131,12 @@ Este registro **prevalece sobre os estados históricos de planejamento** anterio
 **Status:** sete cenários de Soluções validados anteriormente **mais regressão de Pedidos comuns validada**. Ainda **não** considerar toda a matriz S01–S17 concluída.
 
 **Próximos testes:** edição de Modelo Padrão e snapshot de composição/cartilha em pedidos antigos; inativação e ocultação do modelo em novas solicitações; eventual promoção explícita de Solução avulsa; isolamento entre Unidades/perfis. Registrar build/suíte verde com a versão atual antes de encerrar e solicitar autorização de merge.
+
+
+### Validação de catálogo e preservação histórica — 14/10/2026
+
+**VALIDADO pelo responsável por meio de testes locais na interface:** edição de Modelo de Solução padrão (composição e instruções de preparo); consulta a pedidos antigos preservando composição e cartilha originalmente solicitadas; nova solicitação refletindo os dados atualizados do modelo; inativação do modelo com retirada do catálogo de novas solicitações, sem apagar nem modificar o histórico existente.
+
+**Implicação funcional:** snapshots de composição e instruções associados aos Pedidos de Solução estão preservados no cenário testado; alterações no catálogo não modificam pedidos anteriores. Os testes são confirmações do responsável, não execuções automatizadas pelo assistente.
+
+**Restante do fechamento:** testar promoção administrativa de uma Solução avulsa ao catálogo (se disponível no fluxo); isolamento de catálogo/pedidos entre Unidades e permissões por perfil; executar/registrar `mvn test` e `npm run build` nas últimas versões e inspecionar Light/Dark. O teste de rejeição e a regressão de Pedidos comuns já estão validados em registros anteriores. Não realizar merge sem autorização expressa.
