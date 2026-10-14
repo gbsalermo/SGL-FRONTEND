@@ -15,7 +15,7 @@
 **Polimento de informação do 6.5:** a tabela passou a priorizar os campos que o cliente já consulta diretamente: `Status`, `Estagiário`, `Formação`, `Contexto operacional` e `Período`. Bolsa/modalidade saiu da listagem e ficou no drawer. `Não iniciado` é um status visual derivado apenas quando o vínculo existe e ainda nunca teve participação em Atividade; `Prorrogado`, `Em andamento` e `Encerrado` permanecem visíveis na coluna de Status. O nome do Orientador aparece abaixo do Estagiário e Curso abaixo de Formação.  
 **Etapa 4:** 4.1–4.4 reconciliados e validados ponta a ponta ✅
 **Plano canônico:** `gbsalermo/Sistema-SGL/docs/PLANO_PRE_PRODUCAO.md`  
-**Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_5_2026-09-24.md`
+**Handoff da etapa atual:** `gbsalermo/Sistema-SGL/docs/CONTINUIDADE_ETAPA_7_2026-10-06.md` — 7.4 encerrada por aceite funcional em 14/10; próxima 7.5
 
 Este é o checkpoint principal para retomada do frontend. Contratos HTTP devem ser confirmados no Swagger/OpenAPI do backend.
 
@@ -917,3 +917,14 @@ O responsável confirmou **VALIDADO** o cenário de importar uma solicitação p
 **Delimitação essencial:** o quadro `Últimas movimentações` **ainda não apresenta o histórico administrativo completo de transições** de Pedidos/Soluções. Ele atualmente combina movimentações físicas de estoque e histórico de Resíduos. Aprovação de Solução com saída física e reversões podem aparecer como movimentações de estoque; rejeição, entrega e cancelamento após preparo não geram necessariamente movimentação física e não devem ser tratados como eventos já exibidos. Foi **proposta**, mas NÃO implementada nem validada, a evolução desse quadro para `Últimas atividades operacionais` com histórico datado e auditável das decisões. Preservar as transições com datas reais, sem inventar eventos retrospectivos.
 
 **Status de fechamento 7.4:** fluxos principais de Soluções e regressão convencional previamente validados; visão unificada confirmada. **Ainda falta** teste específico de isolamento entre Unidades/perfis e comprovação final de build/suíte/QA técnico. Não fazer merge sem autorização expressa.
+
+
+### Fechamento da 7.4 por aceite funcional e passagem à 7.5 — 14/10/2026
+
+**Autorizado pelo responsável:** encerrar a implementação/validação funcional da **7.4 — Soluções**, confirmar o roadmap antes de começar a 7.5. O encerramento decorre das confirmações de todos os fluxos principais de Soluções, cadastro/edição/inativação/importação de modelos e snapshots, solicitação padrão/fora catálogo, aprovação/rejeição/entrega/cancelamentos, regressão de Pedidos comuns e visão unificada com Dashboard/Alertas. **Status: 7.4 encerrada por aceite funcional.**
+
+**Conferências técnicas não atestadas no aceite, repassadas para 7.6/7.7:** `npm run build` e `mvn test` finais na versão consolidada, QA completo de Light/Dark/responsividade, isolamento entre Unidades/perfis e testes de regressão complementares. O teste anterior de usuário IB foi interrompido por uma divergência de contagem, resolvida e validada na interface; isso **não** comprova isolamento entre IB/IQ nem autorização real na API. A ausência de principal autenticado/backend `permitAll` é risco de segurança de pré-produção, não pode ser considerada resolvida na 7.4.
+
+**Histórico operacional:** o quadro `Últimas movimentações` permanece baseado em movimentações físicas do estoque e histórico de Resíduos; a ideia de exibir decisões administrativas (incluindo rejeição, confirmação de entrega e cancelamento após preparo) em `Últimas atividades operacionais` **não foi implementada**. Registrar como refinamento futuro com eventos reais/auditáveis, sem inventar dados históricos.
+
+**Próximo escopo:** `7.5 — Contrato de contexto operacional Projeto/SCI/Atividade`, com participações ativas de Estagiários e derivação coerente de Projeto/Laboratório/Unidade, sem antecipar todas as mudanças em Pedidos da Etapa 8. Depois: 7.6 massa DEV/DEMO + testes; 7.7 consolidação/QA/documentação. Sem merge; aguardar confirmação do roadmap antes da implementação.
