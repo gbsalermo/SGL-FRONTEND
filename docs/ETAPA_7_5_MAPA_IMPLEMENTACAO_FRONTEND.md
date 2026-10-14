@@ -62,3 +62,30 @@ A 7.5.1 recebeu confirmação de testes JUnit e boot pelo responsável. A 7.5.2 
 **DTO:** `ContextoOperacionalResponseDTO` com `origem`, `participacaoId`, `vinculoEstagioId`, `usuarioId`, `usuarioNome`, `atividadeId`, `atividadeNome`, `atividadeCodigoSeg`, `sciId`, `sciNome`, `projetoId`, `projetoNome`, `laboratorioId`, `laboratorioNome`, `unidadeId`, `dataInicioParticipacao`, `dataFimParticipacao`, `aberta`, `elegivel` e `motivoInelegibilidade`.
 
 **7.5.3 após backend verde:** adicionar `projetosService.listarParticipacoesProjeto(projetoId)`, agrupar `atividadeId`, apresentar participantes atuais e históricos no card da Atividade com deduplicação apenas para visualização atual (preservando todas as ocorrências históricas), e revalidar tema/responsividade. A classificação de **atual/histórico** considera `aberta`, enquanto a habilitação de novas operações utiliza `elegivel`; nunca confundir os dois campos. Não implementar mutações pelo hub. **Nenhuma tela foi modificada nesse checkpoint.**
+
+
+## Implementação 7.5.3 — Hub Projetos → SCI → Atividade (14/10/2026)
+
+**Status:** código frontend publicado, **aguardando `npm run build` e aceite visual local**. A 7.5.2 backend foi confirmada verde pelo responsável.
+
+### Funcionamento
+
+1. A seleção do Projeto chama `projetosService.listarParticipacoesProjeto(projetoId)` uma única vez, além das consultas de SCI/Atividades existentes.
+2. Cada Atividade possui o botão expansível **Estagiários vinculados**, com contadores de participações **abertas** (atuais) e encerradas (histórico). Contagens de atuais deduplicam usuário na Atividade, sem duplicar o card; a listagem histórica preserva registros distintos.
+3. Ao expandir, mostra nomes, início/fim, estado operacional elegível/inelegível com motivo. Se não há participantes, informa vazio; se a API falha, informa indisponibilidade sem zerar falsamente a contagem.
+4. Se o usuário alternar rapidamente o Projeto, respostas de Projeto anterior são ignoradas. Falha na consulta de participantes não oculta Projeto/SCI/Atividades.
+5. Responsável institucional da Atividade continua visível. Sem cadastrar/editar participantes por essa nova área; o vínculo continua no módulo Estagiários.
+6. A camada usa tokens de tema e grid responsivo, com `aria-expanded`/`aria-controls` na área expansível.
+
+### Teste local da 7.5.3
+
+- [ ] Rodar `npm run build` no frontend na branch `collab/etapa-7-unidades-solucoes-contexto`.
+- [ ] Entrar no perfil Gestor/Admin em DEV, abrir **Gestão → Projetos** e escolher um Projeto com Estagiários associados em atividades.
+- [ ] Expandir Estagiários vinculados na Atividade correta: nomes visíveis, quantidade de atuais coerente e responsável original preservado.
+- [ ] Conferir outra Atividade sem participantes: indicador `0 atuais · 0 no histórico`; a seção indica ausência de vínculos.
+- [ ] Encerrar uma participação pelo módulo Estagiários (somente se houver massa DEV preparada), atualizar Projetos e conferir registro no histórico, não na lista atual.
+- [ ] Conferir caso de participação aberta porém inelegível: UI diferencia estado de vínculo e elegibilidade, sem tratá-la como encerrada.
+- [ ] Alternar Projetos rapidamente: dados não se misturam. Simular erro HTTP: hierarquia permanece carregada e seção não disfarça erro como zero participantes.
+- [ ] Verificar Light/Dark, escala 100%, desktop/mobile, ausência de regressão em edição, prorrogação e correção SEG de SCI/Atividade.
+
+**Nenhuma migration ou alteração de payload de Pedido/Solução**; isso continua para a Etapa 8. Não marcar como concluída/validada antes do build e do teste visual.
