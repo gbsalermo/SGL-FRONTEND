@@ -1164,6 +1164,65 @@ onMounted(carregar)
                       </button>
                     </div>
                   </div>
+
+                  <section class="activity-participations" :aria-label="`Estagiários vinculados a ${atividade.nome}`">
+                    <button
+                      class="activity-participations__toggle"
+                      type="button"
+                      :aria-expanded="participantesAtividadeAbertaId === atividade.id"
+                      :aria-controls="`participantes-atividade-${atividade.id}`"
+                      @click="alternarParticipantes(atividade.id)"
+                    >
+                      <span class="activity-participations__title">
+                        <span class="activity-participations__arrow" :class="{ 'is-open': participantesAtividadeAbertaId === atividade.id }" aria-hidden="true">›</span>
+                        Estagiários vinculados
+                      </span>
+                      <span v-if="carregandoParticipacoes" class="activity-participations__counts">Carregando...</span>
+                      <span v-else-if="erroParticipacoes" class="activity-participations__counts">Consulta indisponível</span>
+                      <span v-else class="activity-participations__counts">
+                        {{ participantesAbertos(atividade.id).length }} {{ participantesAbertos(atividade.id).length === 1 ? 'atual' : 'atuais' }}
+                        · {{ historicoParticipacoes(atividade.id).length }} no histórico
+                      </span>
+                    </button>
+
+                    <div v-if="participantesAtividadeAbertaId === atividade.id"
+                      :id="`participantes-atividade-${atividade.id}`"
+                      class="activity-participations__content">
+                      <p v-if="carregandoParticipacoes" class="activity-participations__message">Carregando participações...</p>
+                      <p v-else-if="erroParticipacoes" class="activity-participations__message activity-participations__message--error" role="alert">
+                        {{ erroParticipacoes }}
+                      </p>
+                      <p v-else-if="participacoesDaAtividade(atividade.id).length === 0" class="activity-participations__message">
+                        Nenhum Estagiário vinculado a esta Atividade.
+                      </p>
+                      <template v-else>
+                        <div v-if="participantesAbertos(atividade.id).length" class="activity-participations__group">
+                          <p class="activity-participations__heading">Participações abertas</p>
+                          <div v-for="p in participantesAbertos(atividade.id)" :key="p.participacaoId" class="activity-participations__person">
+                            <div class="activity-participations__person-info">
+                              <strong>{{ p.usuarioNome || 'Estagiário não identificado' }}</strong>
+                              <small>Desde {{ formatarData(p.dataInicioParticipacao) }}</small>
+                            </div>
+                            <span class="activity-participations__status" :class="{ 'activity-participations__status--warning': !p.elegivel }"
+                              :title="p.elegivel ? 'Contexto elegível para novas solicitações' : descricaoInelegibilidade(p.motivoInelegibilidade)">
+                              {{ p.elegivel ? 'Contexto elegível' : descricaoInelegibilidade(p.motivoInelegibilidade) }}
+                            </span>
+                          </div>
+                        </div>
+                        <div v-if="historicoParticipacoes(atividade.id).length" class="activity-participations__group">
+                          <p class="activity-participations__heading">Histórico de participações</p>
+                          <div v-for="p in historicoParticipacoes(atividade.id)" :key="p.participacaoId" class="activity-participations__person">
+                            <div class="activity-participations__person-info">
+                              <strong>{{ p.usuarioNome || 'Estagiário não identificado' }}</strong>
+                              <small>{{ formatarData(p.dataInicioParticipacao) }} → {{ formatarData(p.dataFimParticipacao) }}</small>
+                            </div>
+                            <span class="activity-participations__status activity-participations__status--historico">Encerrada</span>
+                          </div>
+                        </div>
+                        <p class="activity-participations__footnote">Participação aberta não garante elegibilidade para novas solicitações.</p>
+                      </template>
+                    </div>
+                  </section>
                 </article>
               </div>
             </article>
@@ -2728,6 +2787,163 @@ onMounted(carregar)
 .projects-page .history-section > header > span {
   font-size: var(--sgl-font-helper);
   font-weight: var(--sgl-font-weight-semibold);
+}
+
+/* Etapa 7.5.3 — Participacoes de Estagiarios nas Atividades (somente consulta). */
+.activity-participations {
+  grid-column: 1 / -1;
+  min-width: 0;
+  border-top: 1px solid var(--sgl-border);
+}
+
+.activity-participations__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  width: 100%;
+  padding: 11px 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--sgl-text);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.activity-participations__toggle:hover .activity-participations__title {
+  color: var(--sgl-primary);
+}
+
+.activity-participations__toggle:focus-visible {
+  outline: 2px solid var(--sgl-primary);
+  outline-offset: 3px;
+  border-radius: var(--sgl-radius-control);
+}
+
+.activity-participations__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+.activity-participations__arrow {
+  display: inline-block !important;
+  margin: 0 !important;
+  font-size: 19px !important;
+  line-height: 1;
+  color: var(--sgl-text-muted);
+  transition: transform 160ms ease;
+}
+
+.activity-participations__arrow.is-open {
+  transform: rotate(90deg);
+}
+
+.activity-participations__counts {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+.activity-participations__content {
+  display: grid;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface-soft);
+}
+
+.activity-participations__group {
+  display: grid;
+  gap: 6px;
+}
+
+.activity-participations__heading {
+  margin: 0 0 3px;
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+.activity-participations__person {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 9px 11px;
+  border: 1px solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+}
+
+.activity-participations__person-info {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.activity-participations__person-info strong {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--sgl-font-body);
+}
+
+.activity-participations__person-info small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+.activity-participations__status {
+  flex-shrink: 0;
+  max-width: 58%;
+  padding: 5px 8px;
+  border-radius: var(--sgl-radius-control);
+  background: color-mix(in srgb, var(--sgl-primary) 8%, var(--sgl-surface));
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+  text-align: right;
+}
+
+.activity-participations__status--warning,
+.activity-participations__status--historico {
+  background: var(--sgl-surface-interactive);
+  color: var(--sgl-text-muted);
+}
+
+.activity-participations__message,
+.activity-participations__footnote {
+  margin: 0;
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: 1.55;
+}
+
+.activity-participations__message--error {
+  color: var(--sgl-text);
+}
+
+@media (max-width: 680px) {
+  .activity-participations__toggle,
+  .activity-participations__person {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .activity-participations__status {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .activity-participations__content {
+    padding: 10px;
+  }
 }
 
 </style>
