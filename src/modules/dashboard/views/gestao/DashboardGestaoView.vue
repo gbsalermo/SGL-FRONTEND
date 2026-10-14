@@ -144,12 +144,12 @@ const itensAtencao = computed<ItemAtencao[]>(() => {
     itens.push({
       id: `pedido-${pedido.id}`,
       tipo: 'pedido',
-      categoria: 'Pedido urgente',
-      titulo: `Pedido ${codigoCurto(pedido.id)} · ${pedido.usuarioNome}`,
+      categoria: pedido.tipo === 'SOLUCAO' ? 'Solução urgente' : 'Pedido urgente',
+      titulo: `${pedido.tipo === 'SOLUCAO' ? 'Solução' : 'Pedido'} ${codigoCurto(pedido.id)} · ${pedido.usuarioNome}`, 
       descricao: pedido.itens.map((item) => item.produtoNome).slice(0, 2).join(' · ') || 'Solicitação sem itens',
       detalhe: tempoDesde(pedido.dataSolicitacao),
       nivel: 'critico',
-      rota: `/pedidos?status=PENDENTE&urgencia=URGENTE&pedido=${encodeURIComponent(pedido.id)}`,
+      rota: pedido.tipo === 'SOLUCAO' ? `/solucoes?pedido=${encodeURIComponent(pedido.id)}` : `/pedidos?status=PENDENTE&urgencia=URGENTE&pedido=${encodeURIComponent(pedido.id)}`, 
     })
   })
 
@@ -327,7 +327,7 @@ async function carregarDashboard() {
       laboratoriosResult,
       usuariosResult,
     ] = await Promise.allSettled([
-      pedidoService.listarTodos(),
+      pedidoService.listarTodosComSolucoes(),
       unidadeId.value ? estoqueService.listarPorUnidade(unidadeId.value) : Promise.resolve([]),
       unidadeId.value ? estoqueService.listarEstoqueBaixo(unidadeId.value) : Promise.resolve([]),
       residuoService.listarTodos(),
@@ -534,7 +534,7 @@ onMounted(carregarDashboard)
     <div class="dashboard-kpis" aria-label="Indicadores principais">
       <button class="kpi-card kpi-card--blue" type="button" @click="abrir('/pedidos?status=PENDENTE')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5zM8 9h8M8 13h8M8 17h5" /></svg></span>
-        <span><small>Pedidos</small><strong>{{ pedidosPendentes.length }}</strong><em>Solicitações pendentes</em></span>
+        <span><small>Pedidos</small><strong>{{ pedidosPendentes.length }}</strong><em>Produtos e soluções pendentes</em></span>
       </button>
       <button class="kpi-card kpi-card--red" type="button" @click="abrir('/pedidos?status=PENDENTE&urgencia=URGENTE')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 17h.01" /></svg></span>
@@ -736,7 +736,7 @@ onMounted(carregarDashboard)
             </div>
             <div class="quick-summary-card quick-summary-card--wide quick-summary-card--pending">
               <span class="quick-summary-icon"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="1" /><path d="M8 8h8M8 12h8M8 16h5" /></svg></span>
-              <span><small>Pedidos pendentes</small><strong>{{ pedidosPendentes.length }}</strong><em>aguardando andamento da gestão</em></span>
+              <span><small>Solicitações pendentes</small><strong>{{ pedidosPendentes.length }}</strong><em>Produtos e soluções aguardando gestão</em></span>
             </div>
             <div class="quick-summary-card quick-summary-card--entry">
               <span class="quick-summary-icon"><svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14" /></svg></span>
