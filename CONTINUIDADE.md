@@ -949,3 +949,15 @@ O backend adicionou uma política pura de **elegibilidade do contexto operaciona
 O backend agora possui três endpoints read-only preparados para o frontend: `GET /v1/contextos-operacionais/usuarios/{usuarioId}`, `/atividades/{atividadeId}/participacoes` e `/projetos/{projetoId}/participacoes` (relativos ao prefixo HTTP `/api`). O retorno `ContextoOperacionalResponseDTO` distingue participação `aberta` de `elegivel`, informa motivo e deriva Atividade, SCI, Projeto, Laboratório e Unidade. Consulta de Projeto é em lote e permite exibir várias Atividades sem uma requisição por card.
 
 **Etapa 7.5.2 publicada, não validada ainda em JUnit/boot/HTTP.** A 7.5.1 teve JUnit e boot confirmados pelo responsável. **Nenhuma interface foi alterada nesta 7.5.2.** A 7.5.3 será o hub Projetos com estagiários por Atividade (atuais e históricos), após backend verde. Não usar apenas `aberta` como sinal de elegibilidade. Endpoint DEV ainda não tem autorização real; uso em produção depende da fase de segurança. Sem merge.
+
+
+### 7.5.3 — Estagiários vinculados ao hub de Projetos (14/10/2026)
+
+O responsável confirmou **"subiu verde"** após os testes/boot da 7.5.2. Com base nesse aceite, publicada a implementação frontend da **7.5.3**, ainda **não validada em build e smoke visual**.
+
+Alterações:
+- `src/modules/projetos/types/projetos.ts`: tipo `ContextoParticipacaoOperacional` espelhando o DTO backend;
+- `src/modules/projetos/services/projetosService.ts`: `listarParticipacoesProjeto(projetoId)`, chamada única à API `/v1/contextos-operacionais/projetos/{projetoId}/participacoes`;
+- `src/modules/projetos/views/ProjetosGestaoView.vue`: cada Atividade possui seção expansível **Estagiários vinculados** com contadores de **participações abertas (atuais)** e **histórico de participações encerradas**; lista participantes, início/fim, elegibilidade e motivo de inelegibilidade. Contagem de abertos deduplica por usuário na mesma Atividade; histórico mantém registros distintos. Busca por Projeto com proteção contra seleção assíncrona defasada. Se a consulta de participantes falhar, a hierarquia Projeto/SCI/Atividade permanece disponível e a seção exibe erro real, sem fabricar contagem 0. Layout com tokens SGL e ajuste mobile.
+
+**Limites:** participação aberta `aberta=true` não significa contexto elegível; a UI não permite associar/encerrar participantes nem cria novas relações. Nenhuma alteração em Pedido/Solução. O serviço é read-only e a API DEV depende de filtro por tenant temporário, não equivalendo à autorização real. Pedir `npm run build` e smoke local, depois concluir 7.5.3; nenhum merge.
