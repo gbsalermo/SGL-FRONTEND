@@ -1,6 +1,7 @@
 import { http } from '@/services/http'
 import type {
   AtividadeOperacional,
+  ContextoParticipacaoOperacional,
   AtividadeRequest,
   CorrecaoCodigoSegRequest,
   HistoricoCorrecaoCodigoSeg,
@@ -21,6 +22,14 @@ export const projetosService = {
     const { data } = await http.get<SciOperacional[]>('/v1/scis/por-projeto', {
       params: { projetoId },
     })
+    return data
+  },
+
+  /** Consulta em lote por Projeto: uma chamada agrega participantes de todas as Atividades. */
+  async listarParticipacoesProjeto(projetoId: string) {
+    const { data } = await http.get<ContextoParticipacaoOperacional[]>(
+      `/v1/contextos-operacionais/projetos/${projetoId}/participacoes`,
+    )
     return data
   },
 
