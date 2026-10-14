@@ -908,3 +908,12 @@ O responsável confirmou **VALIDADO** o cenário de importar uma solicitação p
 - `StatusPedido`: enum de exibição compartilhado recebe `EM_PREPARACAO`; mapas de rótulo dos dois componentes de solicitante atualizados para manter tipagem íntegra. O frontend do solicitante continua com **Meus pedidos** e **Minhas soluções** separados, preservando seus fluxos anteriores.
 
 **Sem alterações de API, banco ou regra de estoque.** Correção ainda exige `npm run build` e smoke local: IB (1 Pedido comum + 1 Solução pendente) deve mostrar **2** no Dashboard, **2** no Alerta e **2** em Pedidos/Todos; filtros por tipo devem retornar 1 cada no exemplo. Expandir Solução não deve apresentar campos de embalagem ou controles de aprovação de Produto; CTA deve abrir registro específico na Central. Verificar status EM_PREPARACAO, Urgentes, tema Light/Dark e ausência de regressão em aprovação comum. **Sem merge.**
+
+
+### 7.4 — Validação da visão unificada confirmada (14/10/2026)
+
+**Confirmação do responsável:** após atualizar e testar localmente, a integração de **Pedidos convencionais e Soluções** em `Pedidos`, `Dashboard` e `Alertas operacionais` foi considerada **VALIDADA**; a experiência integrada foi aprovada. Registra-se também o comportamento de **Solução urgente em Precisa de atenção**, que, pelo código atual, inclui Soluções pendentes e urgentes e as direciona à Central de Soluções.
+
+**Delimitação essencial:** o quadro `Últimas movimentações` **ainda não apresenta o histórico administrativo completo de transições** de Pedidos/Soluções. Ele atualmente combina movimentações físicas de estoque e histórico de Resíduos. Aprovação de Solução com saída física e reversões podem aparecer como movimentações de estoque; rejeição, entrega e cancelamento após preparo não geram necessariamente movimentação física e não devem ser tratados como eventos já exibidos. Foi **proposta**, mas NÃO implementada nem validada, a evolução desse quadro para `Últimas atividades operacionais` com histórico datado e auditável das decisões. Preservar as transições com datas reais, sem inventar eventos retrospectivos.
+
+**Status de fechamento 7.4:** fluxos principais de Soluções e regressão convencional previamente validados; visão unificada confirmada. **Ainda falta** teste específico de isolamento entre Unidades/perfis e comprovação final de build/suíte/QA técnico. Não fazer merge sem autorização expressa.
