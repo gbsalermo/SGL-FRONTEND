@@ -893,3 +893,18 @@ O responsável confirmou **VALIDADO** o teste do catálogo: editar nome/quantida
 O responsável confirmou **VALIDADO** o cenário de importar uma solicitação personalizada para novo Modelo no catálogo administrativo, com composição reutilizável e preservação do Pedido original e suas movimentações. Os testes anteriores incluem pedido/entrega, rejeição, cancelamentos antes/depois do preparo, regressão de Pedido comum, edição e inativação com snapshots preservados.
 
 **Últimas conferências da 7.4:** isolamento entre Unidades e perfis (separar verificação de navegação no frontend de autorização real na API), suíte e build finais e QA de interface. Não houve merge.
+
+
+### 7.4 — Visão unificada de Pedidos e Soluções na Gestão (14/10/2026)
+
+**Achado pelo responsável na validação multitenant do IB:** o painel mostrava 1 Pedido pendente e a listagem de Pedidos também 1, enquanto os alertas do menu mostravam 2 pendentes (Pedido de Produtos + Pedido de Solução). **Causa confirmada no código:** `pedidoService.listarTodos()` filtra `tipo !== 'SOLUCAO'`, mas `gestaoShellService.listarPedidosPendentes()` consulta diretamente `/v1/pedidos/por-status` sem filtrar tipo. O backend já representa Solução como subtipo de Pedido.
+
+**Decisão aplicada no frontend:** unificar **consulta/visibilidade**, não misturar **operações**.
+- `pedidoService.listarTodosComSolucoes()`: consulta todos os pedidos; enriquece apenas Pedidos convencionais com metadados de embalagem e risco, sem aplicar regras de embalagem a Soluções.
+- `DashboardGestaoView`: contadores pendentes/urgentes e resumo por laboratório incluem Produtos + Soluções. Links de atenção urgente direcionam Soluções à Central especializada.
+- `PedidosGestaoView`: lista completa, filtro Tipo (Todos/Produtos/Soluções), status `EM_PREPARACAO`, chip de tipo e painel de leitura de componentes/cartilha da Solução; botão **Abrir na Central de Soluções**. Operações convencionais de aprovar/rejeitar/cancelar/entregar continuam exclusivas de Pedidos de Produtos; três handlers têm guard adicional para Soluções.
+- `SolucoesGestaoView`: aceita query `pedido=id` e expande/posiciona a Solução para navegação direta.
+- `GestaoLayout`: alertas especificam quantos Pedidos de Produtos e quantas Soluções estão pendentes; clique leva à lista unificada. Busca global diferencia rótulo Solução; subnavegação inclui Em preparação.
+- `StatusPedido`: enum de exibição compartilhado recebe `EM_PREPARACAO`; mapas de rótulo dos dois componentes de solicitante atualizados para manter tipagem íntegra. O frontend do solicitante continua com **Meus pedidos** e **Minhas soluções** separados, preservando seus fluxos anteriores.
+
+**Sem alterações de API, banco ou regra de estoque.** Correção ainda exige `npm run build` e smoke local: IB (1 Pedido comum + 1 Solução pendente) deve mostrar **2** no Dashboard, **2** no Alerta e **2** em Pedidos/Todos; filtros por tipo devem retornar 1 cada no exemplo. Expandir Solução não deve apresentar campos de embalagem ou controles de aprovação de Produto; CTA deve abrir registro específico na Central. Verificar status EM_PREPARACAO, Urgentes, tema Light/Dark e ausência de regressão em aprovação comum. **Sem merge.**
