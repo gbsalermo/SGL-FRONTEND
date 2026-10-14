@@ -6,6 +6,7 @@ import { projetosService } from '@/modules/projetos/services/projetosService'
 import type {
   AtividadeOperacional,
   AtividadeRequest,
+  ContextoParticipacaoOperacional,
   HistoricoCorrecaoCodigoSeg,
   HistoricoProrrogacao,
   ProjetoOperacional,
@@ -58,6 +59,10 @@ const session = useSessionStore()
 const projetos = ref<ProjetoOperacional[]>([])
 const scis = ref<SciOperacional[]>([])
 const atividades = ref<AtividadeOperacional[]>([])
+const participacoesProjeto = ref<ContextoParticipacaoOperacional[]>([])
+const carregandoParticipacoes = ref(false)
+const erroParticipacoes = ref('')
+const participantesAtividadeAbertaId = ref<string | null>(null)
 const projetoSelecionadoId = ref<string | null>(null)
 
 const busca = ref('')
@@ -176,6 +181,49 @@ const atividadesSemSci = computed(() =>
 
 function atividadesDoSci(sciId: string) {
   return atividades.value.filter((atividade) => atividade.sciId === sciId)
+}
+
+/** A elegibilidade de pedidos é distinta de uma participação estar aberta. */
+function participacoesDaAtividade(atividadeId: string) {
+  return participacoesProjeto.value.filter((item) => item.atividadeId === atividadeId)
+}
+
+function participantesAbertos(atividadeId: string) {
+  const encontrados = new Set<string>()
+  return participacoesDaAtividade(atividadeId).filter((item) => {
+    if (!item.aberta) return false
+    const usuario = item.usuarioId || item.participacaoId
+    if (encontrados.has(usuario)) return false
+    encontrados.add(usuario)
+    return true
+  })
+}
+
+function historicoParticipacoes(atividadeId: string) {
+  return participacoesDaAtividade(atividadeId).filter((item) => !item.aberta)
+}
+
+function alternarParticipantes(atividadeId: string) {
+  participantesAtividadeAbertaId.value = participantesAtividadeAbertaId.value === atividadeId
+    ? null
+    : atividadeId
+}
+
+function descricaoInelegibilidade(motivo: string | null) {
+  const mensagens: Record<string, string> = {
+    CONTEXTO_INCOMPLETO: 'Contexto institucional incompleto',
+    PERFIL_INCOMPATIVEL: 'Perfil incompatível',
+    USUARIO_INATIVO: 'Usuário inativo',
+    VINCULO_FINALIZADO: 'Vínculo finalizado',
+    VINCULO_FORA_DA_VIGENCIA: 'Vínculo fora do período vigente',
+    PARTICIPACAO_ENCERRADA: 'Participação encerrada',
+    PARTICIPACAO_FORA_DA_VIGENCIA: 'Participação fora do período vigente',
+    UNIDADE_DIVERGENTE: 'Unidade divergente',
+    HIERARQUIA_INATIVA: 'Projeto, SCI, Atividade ou Laboratório inativo',
+    HIERARQUIA_NAO_OPERACIONAL: 'Hierarquia sem condição operacional',
+    HIERARQUIA_FORA_DA_VIGENCIA: 'Projeto, SCI ou Atividade fora do período vigente',
+  }
+  return motivo ? mensagens[motivo] ?? 'Contexto indisponível para novas solicitações' : 'Contexto indisponível'
 }
 
 function mensagemErro(error: unknown, fallback: string) {
@@ -638,6 +686,10 @@ async function salvarAtividade() {
 async function carregarDetalhes(projetoId: string) {
   projetoSelecionadoId.value = projetoId
   carregandoDetalhes.value = true
+  carregandoParticipacoes.value = true
+  erroParticipacoes.value = ''
+  participacoesProjeto.value = []
+  participantesAtividadeAbertaId.value = null
   erro.value = ''
   sucesso.value = ''
 
@@ -646,17 +698,31 @@ async function carregarDetalhes(projetoId: string) {
       projetosService.listarScisPorProjeto(projetoId),
       projetosService.listarAtividadesPorProjeto(projetoId),
     ])
-
     if (projetoSelecionadoId.value !== projetoId) return
 
     scis.value = listaScis
     atividades.value = listaAtividades
+
+    // Falha desta consulta nao deve ocultar a hierarquia ja carregada.
+    try {
+      const listaParticipacoes = await projetosService.listarParticipacoesProjeto(projetoId)
+      if (projetoSelecionadoId.value !== projetoId) return
+      participacoesProjeto.value = listaParticipacoes
+    } catch (error) {
+      if (projetoSelecionadoId.value !== projetoId) return
+      erroParticipacoes.value = mensagemErro(error, 'Não foi possível consultar os Estagiários das Atividades.')
+    }
   } catch (error) {
+    if (projetoSelecionadoId.value !== projetoId) return
     scis.value = []
     atividades.value = []
+    participacoesProjeto.value = []
     erro.value = mensagemErro(error, 'Não foi possível carregar a hierarquia do projeto.')
   } finally {
-    carregandoDetalhes.value = false
+    if (projetoSelecionadoId.value === projetoId) {
+      carregandoDetalhes.value = false
+      carregandoParticipacoes.value = false
+    }
   }
 }
 
@@ -685,6 +751,10 @@ async function carregar() {
       projetoSelecionadoId.value = null
       scis.value = []
       atividades.value = []
+      participacoesProjeto.value = []
+      erroParticipacoes.value = ''
+      carregandoParticipacoes.value = false
+      participantesAtividadeAbertaId.value = null
     }
   } catch (error) {
     erro.value = mensagemErro(error, 'Não foi possível carregar os projetos da Unidade.')
