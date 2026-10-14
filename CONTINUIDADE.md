@@ -935,3 +935,10 @@ O responsável confirmou **VALIDADO** o cenário de importar uma solicitação p
 **Roadmap confirmado e 7.5 iniciada.** Auditoria das telas `NovoPedidoView.vue`, `NovaSolucaoView.vue`, `ProjetosGestaoView.vue`, `EstagiariosGestaoView.vue` realizada. O desenho frontend e seu checklist de aceite estão em **`docs/ETAPA_7_5_MAPA_IMPLEMENTACAO_FRONTEND.md`**; o contrato técnico do backend em `gbsalermo/Sistema-SGL/docs/ETAPA_7_5_AUDITORIA_E_CONTRATO_CONTEXTO_OPERACIONAL.md`.
 
 **Achados:** Estagiários já exibem a origem por participação Atividade/SCI/Projeto/Laboratório na gestão. Novo Pedido/Nova Solução ainda tomam laboratório da sessão para não Gestores, em vez de contexto por participação ou Projeto; a correção efetiva de Payload de Pedido é Etapa 8. O hub de Projetos ainda não exibe participantes da Atividade. **Próximo:** preparar camada read-only de contexto elegível e adicionar participantes no hub quando a consulta tenant-safe estiver disponível; preservar tema visual e os fluxos aprovados 7.4. Nenhum código funcional alterado nesta primeira auditoria; nenhum merge.
+
+
+### 7.5.1 — Contrato backend preparado; integração frontend aguarda 7.5.2 (14/10/2026)
+
+O backend adicionou uma política pura de **elegibilidade do contexto operacional de Estagiário**, separando “participação aberta/histórica” de “elegível para nova solicitação”. A assinatura preparada é `ElegibilidadeContextoOperacional.avaliar(participacao, dataReferencia, unidadeSolicitante)`, com resultado booleano e motivo determinístico; não depende do `Usuario.laboratorio` legado. Foram acrescentados testes unitários de períodos, Unidade/tenant, hierarquia e múltiplas participações em diferentes Laboratórios.
+
+**Ainda não existe API de consulta de contextos na branch nem campos novos em Pedido/Solução**; frontend permanece inalterado. Próxima integração após 7.5.2: consumir DTO read-only e mostrar participantes por Atividade no hub Projetos (7.5.3), mantendo visual SGL, sem quebrar Pedidos/Soluções homologados na 7.4. Não criar UI que infira elegibilidade apenas de `dataFimParticipacao == null`. Sem merge.
