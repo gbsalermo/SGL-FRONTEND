@@ -1,6 +1,7 @@
 export type StatusPedido =
   | 'PENDENTE'
   | 'APROVADO'
+  | 'EM_PREPARACAO'
   | 'REJEITADO'
   | 'ENTREGUE'
   | 'CANCELADO'
@@ -20,6 +21,8 @@ export interface ItemPedidoResponse {
   produtoCondicoesArmazenamento: string | null
   quantidadeSolicitada: number
   quantidadeAprovada: number | null
+  unidadeMedidaSolicitada?: string | null
+  quantidadeNaUnidadeSolicitada?: number | null
   tipoEmbalagemSolicitada: TipoEmbalagemPedido
   quantidadeEmbalagensSolicitada: number
   multiplicadorSolicitado: number
@@ -39,6 +42,8 @@ export interface PedidoResponse {
   dataSolicitacao: string
   status: StatusPedido
   tipo?: 'PRODUTOS' | 'SOLUCAO'
+  nomeSolucao?: string | null
+  instrucoesPreparoSolucao?: string | null
   urgente: boolean
   motivoUrgencia: string | null
   observacao: string | null
