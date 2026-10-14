@@ -886,3 +886,10 @@ Continuam pendentes antes do encerramento formal: edição/inativação de catá
 O responsável confirmou **VALIDADO** o teste do catálogo: editar nome/quantidades/instruções de um Modelo padrão, preservar composição e cartilha de solicitações antigas, refletir a receita editada em nova solicitação e inativar o modelo ocultando-o de novos pedidos sem alterar histórico. O ciclo principal, rejeição, os dois cancelamentos e regressão dos Pedidos comuns já haviam sido validados.
 
 **Pendências antes de declarar a 7.4 encerrada:** promoção explícita de Pedido avulso ao catálogo, isolamento entre Unidades/perfis, testes/build finais e inspeção Light/Dark. Não houve merge.
+
+
+### 7.4 — Importação administrativa de Solução avulsa validada (14/10/2026)
+
+O responsável confirmou **VALIDADO** o cenário de importar uma solicitação personalizada para novo Modelo no catálogo administrativo, com composição reutilizável e preservação do Pedido original e suas movimentações. Os testes anteriores incluem pedido/entrega, rejeição, cancelamentos antes/depois do preparo, regressão de Pedido comum, edição e inativação com snapshots preservados.
+
+**Últimas conferências da 7.4:** isolamento entre Unidades e perfis (separar verificação de navegação no frontend de autorização real na API), suíte e build finais e QA de interface. Não houve merge.
