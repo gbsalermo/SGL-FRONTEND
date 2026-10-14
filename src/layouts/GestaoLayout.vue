@@ -11,6 +11,8 @@ type TipoResultadoBusca = 'pedido' | 'produto' | 'laboratorio' | 'usuario'
 
 type ResumoAlertas = {
   pedidosPendentes: number
+  pedidosProdutosPendentes: number
+  solucoesPendentes: number
   pedidosUrgentes: number
   estoqueBaixo: number
   proximosVencimento: number
@@ -40,6 +42,8 @@ const erroAlertas = ref('')
 const ultimaAtualizacaoAlertas = ref('')
 const alertas = ref<ResumoAlertas>({
   pedidosPendentes: 0,
+  pedidosProdutosPendentes: 0,
+  solucoesPendentes: 0,
   pedidosUrgentes: 0,
   estoqueBaixo: 0,
   proximosVencimento: 0,
@@ -96,6 +100,8 @@ const resultadosBusca = computed<ResultadoBuscaGlobal[]>(() => {
       pedido.laboratorioNome,
       pedido.projetoNome,
       pedido.status,
+      pedido.tipo,
+      pedido.nomeSolucao,
       pedido.observacao,
       pedido.motivoUrgencia,
       ...pedido.itens.map((item) => item.produtoNome),
@@ -106,7 +112,7 @@ const resultadosBusca = computed<ResultadoBuscaGlobal[]>(() => {
     resultados.push({
       id: `pedido-${pedido.id}`,
       tipo: 'pedido',
-      titulo: `Pedido · ${pedido.usuarioNome}`,
+      titulo: `${pedido.tipo === 'SOLUCAO' ? 'Solução' : 'Pedido'} · ${pedido.usuarioNome}`, 
       descricao: `${pedido.laboratorioNome} · ${rotuloStatusPedido(pedido.status)}`,
       detalhe: pedido.urgente ? 'URGENTE' : `ID ${pedido.id.slice(0, 8)}`,
       termos,
@@ -249,6 +255,8 @@ async function carregarAlertas() {
 
   if (pedidos.status === 'fulfilled') {
     alertas.value.pedidosPendentes = pedidos.value.length
+    alertas.value.pedidosProdutosPendentes = pedidos.value.filter(p => p.tipo !== 'SOLUCAO').length
+    alertas.value.solucoesPendentes = pedidos.value.filter(p => p.tipo === 'SOLUCAO').length
     alertas.value.pedidosUrgentes = pedidos.value.filter((pedido) => pedido.urgente).length
   } else {
     falhas.push('pedidos')
@@ -538,9 +546,8 @@ onBeforeUnmount(() => {
                 <button type="button" @click="navegarAlerta('pendentes')">
                   <span class="gestao-alert-dot" :class="{ 'gestao-alert-dot--critical': alertas.pedidosUrgentes > 0 }" />
                   <span>
-                    <strong>Pedidos pendentes</strong>
-                    <small v-if="alertas.pedidosUrgentes > 0">{{ alertas.pedidosUrgentes }} urgente(s) aguardando análise</small>
-                    <small v-else>Pedidos aguardando análise da gestão</small>
+                    <strong>Solicitações pendentes</strong>
+                    <small>{{ alertas.pedidosProdutosPendentes }} pedido(s) de produtos · {{ alertas.solucoesPendentes }} solução(ões)<span v-if="alertas.pedidosUrgentes > 0"> · {{ alertas.pedidosUrgentes }} urgente(s)</span></small>
                   </span>
                   <b>{{ alertas.pedidosPendentes }}</b>
                 </button>
@@ -616,6 +623,7 @@ onBeforeUnmount(() => {
           <router-link :to="{ path: '/pedidos' }" :class="{ 'gestao-subnav--active': !route.query.status }">Todos os pedidos</router-link>
           <router-link :to="{ path: '/pedidos', query: { status: 'PENDENTE' } }">Pendentes</router-link>
           <router-link :to="{ path: '/pedidos', query: { status: 'APROVADO' } }">Aprovados</router-link>
+          <router-link :to="{ path: '/pedidos', query: { status: 'EM_PREPARACAO' } }">Em preparação</router-link>
           <router-link :to="{ path: '/pedidos', query: { status: 'ENTREGUE' } }">Entregues</router-link>
           <router-link :to="{ path: '/pedidos', query: { status: 'REJEITADO' } }">Rejeitados</router-link>
           <router-link :to="{ path: '/pedidos', query: { status: 'CANCELADO' } }">Cancelados</router-link>
