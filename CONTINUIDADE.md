@@ -928,3 +928,10 @@ O responsável confirmou **VALIDADO** o cenário de importar uma solicitação p
 **Histórico operacional:** o quadro `Últimas movimentações` permanece baseado em movimentações físicas do estoque e histórico de Resíduos; a ideia de exibir decisões administrativas (incluindo rejeição, confirmação de entrega e cancelamento após preparo) em `Últimas atividades operacionais` **não foi implementada**. Registrar como refinamento futuro com eventos reais/auditáveis, sem inventar dados históricos.
 
 **Próximo escopo:** `7.5 — Contrato de contexto operacional Projeto/SCI/Atividade`, com participações ativas de Estagiários e derivação coerente de Projeto/Laboratório/Unidade, sem antecipar todas as mudanças em Pedidos da Etapa 8. Depois: 7.6 massa DEV/DEMO + testes; 7.7 consolidação/QA/documentação. Sem merge; aguardar confirmação do roadmap antes da implementação.
+
+
+### Início técnico da 7.5 — auditoria das telas e contrato de contexto (14/10/2026)
+
+**Roadmap confirmado e 7.5 iniciada.** Auditoria das telas `NovoPedidoView.vue`, `NovaSolucaoView.vue`, `ProjetosGestaoView.vue`, `EstagiariosGestaoView.vue` realizada. O desenho frontend e seu checklist de aceite estão em **`docs/ETAPA_7_5_MAPA_IMPLEMENTACAO_FRONTEND.md`**; o contrato técnico do backend em `gbsalermo/Sistema-SGL/docs/ETAPA_7_5_AUDITORIA_E_CONTRATO_CONTEXTO_OPERACIONAL.md`.
+
+**Achados:** Estagiários já exibem a origem por participação Atividade/SCI/Projeto/Laboratório na gestão. Novo Pedido/Nova Solução ainda tomam laboratório da sessão para não Gestores, em vez de contexto por participação ou Projeto; a correção efetiva de Payload de Pedido é Etapa 8. O hub de Projetos ainda não exibe participantes da Atividade. **Próximo:** preparar camada read-only de contexto elegível e adicionar participantes no hub quando a consulta tenant-safe estiver disponível; preservar tema visual e os fluxos aprovados 7.4. Nenhum código funcional alterado nesta primeira auditoria; nenhum merge.
