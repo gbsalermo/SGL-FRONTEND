@@ -547,7 +547,7 @@ onBeforeUnmount(() => {
                   <span class="gestao-alert-dot" :class="{ 'gestao-alert-dot--critical': alertas.pedidosUrgentes > 0 }" />
                   <span>
                     <strong>Solicitações pendentes</strong>
-                    <small>{{ alertas.pedidosProdutosPendentes }} pedido(s) de produtos · {{ alertas.solucoesPendentes }} solução(ões)<span v-if="alertas.pedidosUrgentes > 0"> · {{ alertas.pedidosUrgentes }} urgente(s)</span></small>
+                    <small>{{ alertas.pedidosProdutosPendentes }} {{ alertas.pedidosProdutosPendentes === 1 ? 'pedido' : 'pedidos' }} de produtos · {{ alertas.solucoesPendentes }} {{ alertas.solucoesPendentes === 1 ? 'solução' : 'soluções' }}<span v-if="alertas.pedidosUrgentes > 0"> · {{ alertas.pedidosUrgentes }} urgente(s)</span></small>
                   </span>
                   <b>{{ alertas.pedidosPendentes }}</b>
                 </button>
