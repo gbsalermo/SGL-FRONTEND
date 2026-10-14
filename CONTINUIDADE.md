@@ -942,3 +942,10 @@ O responsável confirmou **VALIDADO** o cenário de importar uma solicitação p
 O backend adicionou uma política pura de **elegibilidade do contexto operacional de Estagiário**, separando “participação aberta/histórica” de “elegível para nova solicitação”. A assinatura preparada é `ElegibilidadeContextoOperacional.avaliar(participacao, dataReferencia, unidadeSolicitante)`, com resultado booleano e motivo determinístico; não depende do `Usuario.laboratorio` legado. Foram acrescentados testes unitários de períodos, Unidade/tenant, hierarquia e múltiplas participações em diferentes Laboratórios.
 
 **Ainda não existe API de consulta de contextos na branch nem campos novos em Pedido/Solução**; frontend permanece inalterado. Próxima integração após 7.5.2: consumir DTO read-only e mostrar participantes por Atividade no hub Projetos (7.5.3), mantendo visual SGL, sem quebrar Pedidos/Soluções homologados na 7.4. Não criar UI que infira elegibilidade apenas de `dataFimParticipacao == null`. Sem merge.
+
+
+### 7.5.2 — Backend da consulta de participantes publicado (14/10/2026)
+
+O backend agora possui três endpoints read-only preparados para o frontend: `GET /v1/contextos-operacionais/usuarios/{usuarioId}`, `/atividades/{atividadeId}/participacoes` e `/projetos/{projetoId}/participacoes` (relativos ao prefixo HTTP `/api`). O retorno `ContextoOperacionalResponseDTO` distingue participação `aberta` de `elegivel`, informa motivo e deriva Atividade, SCI, Projeto, Laboratório e Unidade. Consulta de Projeto é em lote e permite exibir várias Atividades sem uma requisição por card.
+
+**Etapa 7.5.2 publicada, não validada ainda em JUnit/boot/HTTP.** A 7.5.1 teve JUnit e boot confirmados pelo responsável. **Nenhuma interface foi alterada nesta 7.5.2.** A 7.5.3 será o hub Projetos com estagiários por Atividade (atuais e históricos), após backend verde. Não usar apenas `aberta` como sinal de elegibilidade. Endpoint DEV ainda não tem autorização real; uso em produção depende da fase de segurança. Sem merge.
