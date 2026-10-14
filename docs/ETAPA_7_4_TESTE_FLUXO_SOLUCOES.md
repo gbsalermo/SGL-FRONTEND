@@ -147,3 +147,21 @@ Este registro **prevalece sobre os estados históricos de planejamento** anterio
 **VALIDADO pelo responsável em teste local:** em `Administração → Cadastros → Resíduos e Soluções → Modelos de soluções → Importar de solicitação`, foi selecionada uma Solução personalizada anteriormente solicitada e cadastrada como Modelo reutilizável. Foi confirmado que a composição passou a integrar o catálogo e que o Pedido de origem e suas movimentações permaneceram inalterados.
 
 Este resultado conclui o cenário S13 da matriz funcional. Permanecem **não confirmados nesta validação**: isolamento de modelos e pedidos entre Unidades, permissões por perfil no frontend (não confundir com proteção real de API, ainda pendente), execução final de `mvn test`, `npm run build` e QA Light/Dark. Não realizar merge sem autorização expressa do responsável.
+
+
+### Ajuste de coerência operacional — Pedidos e Soluções juntos na visão geral
+
+**Observado em teste IB (14/10/2026):** painel e Pedidos mostravam 1 pendente, mas os alertas 2. Raiz: `pedidoService.listarTodos` excluía Soluções, enquanto os alertas consultavam todos os Pedidos na API.
+
+**Implementação publicada na branch, aguardando validação:** `Dashboard` agrega Pedidos de Produtos e Soluções; `Pedidos` geral lista os dois com filtro por tipo, status `EM_PREPARACAO` e detalhe de leitura para Soluções; CTA específico navega à Central de Soluções. A aprovação, rejeição, entrega e cancelamento de Soluções permanecem **somente na Central de Soluções**, evitando executar indevidamente os controles de quantidades/embalagem de Pedidos comuns. Alertas mostram composição numérica Produtos/Soluções.
+
+**Roteiro de smoke adicional:**
+- [ ] IB Administrador: a situação das capturas (1 Pedido comum e 1 Solução pendente) resulta em **2** no Dashboard, **2** no painel de Alertas e **2** em Pedidos/Todos.
+- [ ] Filtro `Produtos` mostra o Pedido comum e `Soluções` mostra a Solução.
+- [ ] Expandir Solução só informa composição/cartilha/observações; nenhum controle de embalagem ou aprovação convencional.
+- [ ] `Abrir na Central de Soluções` abre a Solução correta e ações originais permanecem disponíveis.
+- [ ] Pedidos convencionais seguem permitindo aprovação/rejeição/entrega com regras de embalagem.
+- [ ] Pedidos urgentes dos dois tipos são contados e encaminhados adequadamente; `EM_PREPARACAO` tem rótulo adequado.
+- [ ] Build `npm run build`, tema claro/escuro e navegação do menu.
+
+**Resultado:** alteração de frontend registrada, ainda **não homologada localmente**. Não confundir esta pendência com os cenários funcionais de Soluções já validados anteriormente. Não fazer merge sem confirmação expressa.
