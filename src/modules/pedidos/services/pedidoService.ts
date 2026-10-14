@@ -108,6 +108,13 @@ async function aplicarContextoOperacionalLista(pedidos: PedidoResponse[]) {
 }
 
 export const pedidoService = {
+  /** Visão geral: inclui Produtos e Soluções, sem aplicar regras de embalagem às Soluções. */
+  async listarTodosComSolucoes() {
+    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos')
+    return Promise.all(data.map((pedido) => pedido.tipo === 'SOLUCAO'
+      ? Promise.resolve(pedido)
+      : aplicarContextoOperacional(pedido)))
+  },
   async listarTodos() {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos')
     return aplicarContextoOperacionalLista(data.filter((p) => p.tipo !== 'SOLUCAO'))
