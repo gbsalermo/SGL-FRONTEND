@@ -1,7 +1,7 @@
 import { http } from '@/services/http'
+import { contextoOperacionalService } from '@/modules/operacao/services/contextoOperacionalService'
 import type {
   AtividadeOperacional,
-  ContextoParticipacaoOperacional,
   AtividadeRequest,
   CorrecaoCodigoSegRequest,
   HistoricoCorrecaoCodigoSeg,
@@ -25,12 +25,9 @@ export const projetosService = {
     return data
   },
 
-  /** Consulta em lote por Projeto: uma chamada agrega participantes de todas as Atividades. */
+  /** Consulta read-only em lote mantida para compatibilidade com o hub. */
   async listarParticipacoesProjeto(projetoId: string) {
-    const { data } = await http.get<ContextoParticipacaoOperacional[]>(
-      `/v1/contextos-operacionais/projetos/${projetoId}/participacoes`,
-    )
-    return data
+    return contextoOperacionalService.listarParticipacoesProjeto(projetoId)
   },
 
   async listarAtividadesPorProjeto(projetoId: string) {
