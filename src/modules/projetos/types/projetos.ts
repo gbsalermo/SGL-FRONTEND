@@ -26,33 +26,8 @@ export interface ProjetoOperacional {
   ativo: boolean
 }
 
-/**
- * Consulta de participacoes do Estagiario, derivada do backend na Etapa 7.5.
- * "aberta" representa ausencia de encerramento; "elegivel" e uma regra
- * adicional de contexto para novas solicitacoes (Etapa 8).
- */
-export interface ContextoParticipacaoOperacional {
-  origem: 'PARTICIPACAO_ESTAGIO'
-  participacaoId: string
-  vinculoEstagioId: string | null
-  usuarioId: string | null
-  usuarioNome: string | null
-  atividadeId: string | null
-  atividadeNome: string | null
-  atividadeCodigoSeg: string | null
-  sciId: string | null
-  sciNome: string | null
-  projetoId: string | null
-  projetoNome: string | null
-  laboratorioId: string | null
-  laboratorioNome: string | null
-  unidadeId: string | null
-  dataInicioParticipacao: string | null
-  dataFimParticipacao: string | null
-  aberta: boolean
-  elegivel: boolean
-  motivoInelegibilidade: string | null
-}
+// Alias de compatibilidade: o contrato canonico agora pertence a Operacao (7.5.4).
+export type { ContextoParticipacaoOperacional } from '@/modules/operacao/types/contextoOperacional'
 
 export interface ProjetoRequest {
   laboratorioId: string
