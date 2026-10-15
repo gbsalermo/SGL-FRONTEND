@@ -988,3 +988,12 @@ O responsável confirmou expressamente **a 7.5.3 como validada** ao solicitar o 
 **Não alterados:** `NovoPedidoView.vue`, `NovaSolucaoView.vue`, DTOs/migrations de Pedido, ações de estoque. **Não ligar seleção a Pedido até o backend revalidar/persistir participação na Etapa 8.**
 
 **Próxima verificação (um passo por vez):** `npm run build` no frontend atualizado. Após build verde + regressão mínima no hub, registrar aceite da 7.5.4 e avançar à 7.6. QA transversal ainda devida em 7.7, autorização definitiva antes de produção, nenhum merge sem autorização expressa.
+
+
+### Fechamento funcional da 7.5 após build verde — 15/10/2026
+
+O responsável executou `npm run build` após atualizar a branch e confirmou **"agora foi"**, validando o build frontend da **7.5.4**. O primeiro build falhou com TS2339 em `CadastrosAdminView.vue:881` por `codigoSeg` e `status` serem usados na linha de **Laboratório** (que não define esses campos). Correção final: linha de Laboratórios voltou a exibir nome/descrição; linha de Projetos exibe SEG/status/descrição, commit frontend `f7dfc79`. **Build verde confirmado pelo responsável**, não executado nesta sessão.
+
+**7.5 concluída em implementação e aceita funcionalmente:** 7.5.1 elegibilidade; 7.5.2 consultas; 7.5.3 hub de Estagiários vinculados por Atividade (aceite expresso); 7.5.4 cliente/tipos e seleção preparada no módulo `operacao`, sem modificar Pedidos/Soluções existentes. A integração do `participacaoId` ao Pedido permanece **Etapa 8**, após validação backend da escolha da participação. Detalhes em `docs/ETAPA_7_5_MAPA_IMPLEMENTACAO_FRONTEND.md` e `gbsalermo/Sistema-SGL/docs/CONTRATO_CONTEXTOS_PEDIDOS_ETAPA_8.md`.
+
+**Próximo bloco:** 7.6 massa DEV/DEMO e regressões de Produtos/Soluções/Estagiários/Projetos, suíte e boot final. QA cross-tenant/perfis, responsividade Light/Dark e segurança real ainda não foram considerados homologados. **Sem merge.**
