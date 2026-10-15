@@ -313,7 +313,8 @@ function inicioProgramadoParticipacao(participacao: VinculoEstagioAtividadeRespo
 function rotuloEstadoParticipacao(participacao: VinculoEstagioAtividadeResponse) {
   if (!participacao.ativa) return 'Participação encerrada'
   if (inicioProgramadoParticipacao(participacao)) return 'Início programado'
-  return 'Participação em andamento'
+  // Aberta e diferente de elegivel: prazos e estado da hierarquia sao avaliados separadamente.
+  return 'Participação aberta'
 }
 
 function participacaoSelecionadaParaEncerrar() {
