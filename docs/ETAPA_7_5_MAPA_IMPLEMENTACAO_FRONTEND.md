@@ -133,3 +133,14 @@ A 7.5.1 recebeu confirmação de testes JUnit e boot pelo responsável. A 7.5.2 
 3. QA abrangente, DEV/DEMO, IB/IQ, Light/Dark, responsividade e suíte final seguem **7.6/7.7**. Não confundir build verde com autorização API real.
 
 **Não fazer merge sem autorização expressa.**
+
+
+## Fechamento da implementação da 7.5 — 15/10/2026
+
+**Situação:** `7.5.1–7.5.4` concluídas em implementação; **build frontend da 7.5.4 verde segundo confirmação expressa do responsável** após correção de TS2339 no cadastro administrativo. A 7.5.3 já havia recebido aceite funcional (hub de Estagiários por Atividade); o polimento de datas e o botão Salvar referência foram aplicados, sem regra de backend nova.
+
+**Correção de build:** `src/modules/admin/views/CadastrosAdminView.vue` tinha `codigoSeg` e `status` acessados dentro de `laboratoriosFiltrados` (linha 881), quando ambos pertencem a `ProjetoCadastro`. Agora Laboratórios exibem nome/descrição e Projetos exibem Código SEG/status/descrição. Commit corretivo final: `f7dfc79`.
+
+**Escopo preservado:** os dois formulários de solicitação, payload do Pedido e seu armazenamento permanecem inalterados. `src/modules/operacao/types/contextoOperacional.ts` e `src/modules/operacao/services/contextoOperacionalService.ts` foram preparados para aplicação efetiva na **Etapa 8**, com revalidação no backend. Sem migration nem merge.
+
+**Testes ainda devidos:** `7.6` massa DEV/DEMO, regressão de casos 0/1/N, testes finais `mvn test`, boot, `npm run build` no HEAD consolidado; `7.7` QA de perfis, Unidade/tenant, Light/Dark e responsividade. O build verde não prova autorização em endpoints DEV; autenticação definitiva permanece obrigatória antes de produção. A integração efetiva das seleções 0/1/N ao Pedido será testada na Etapa 8.
