@@ -129,7 +129,7 @@ function passoAprovacao(item: PedidoResponse['itens'][number]) {
   return modoMedida(item) ? 'any' : String(item.tipoEmbalagemSolicitada === 'UNITARIO' ? 1 : item.multiplicadorSolicitado ?? 1)
 }
 function formaSolicitada(item: PedidoResponse['itens'][number]) {
-  if (modoMedida(item)) return `Por medida: ${quantidadeOriginal(item)}`
+  if (modoMedida(item)) return quantidadeOriginal(item)
   const rotulos: Record<string, [string, string]> = {
     UNITARIO: ['unidade', 'unidades'], KIT: ['kit', 'kits'], CAIXA: ['caixa', 'caixas'], GARRAFA: ['garrafa', 'garrafas'], GALAO: ['galão', 'galões'],
   }
@@ -422,17 +422,32 @@ onMounted(carregar)
                 <div v-else class="gestao-detail">
                   <div class="gestao-detail__items">
                     <h3>Materiais solicitados</h3>
-                    <div v-for="item in pedido.itens" :key="item.id" class="gestao-detail__item">
-                      <div><strong>{{ item.produtoNome }}</strong><small>{{ item.produtoUnidadeArmazenamento }}</small><small class="requested-form">Solicitado como: {{ formaSolicitada(item) }}</small></div>
-                      <div class="quantity-card requested-quantity"><strong>SOLICITADA</strong><span>{{ quantidadeLegivel(item.quantidadeSolicitada) }}</span><small>{{ modoMedida(item) ? 'Unidade-base do estoque' : 'Quantidade total' }}</small></div>
-
-                      <label v-if="pedido.status === 'PENDENTE'" class="quantity-card approval-quantity">
-                        <span>QUANTIDADE A APROVAR</span>
-                        <input v-model.number="quantidadesAprovadas[item.id]" type="number" :min="modoMedida(item) ? 0.000001 : 1" :max="item.quantidadeSolicitada" :step="passoAprovacao(item)" />
-                         <small>{{ modoMedida(item) ? 'Na unidade-base; até 6 casas decimais' : 'Respeite a embalagem solicitada' }}</small>
-                      </label>
-                      <div v-else-if="item.quantidadeAprovada !== null" class="quantity-card approved-quantity"><strong>{{ pedido.status === 'ENTREGUE' ? 'ENTREGUE' : 'APROVADA' }}</strong><span>{{ quantidadeLegivel(item.quantidadeAprovada) }}</span><small>{{ modoMedida(item) ? 'Unidade-base do estoque' : 'Quantidade total' }}</small></div>
-
+                    <div v-for="item in pedido.itens" :key="item.id" class="gestao-approval-item">
+                      <div class="gestao-approval-item__product">
+                        <strong>{{ item.produtoNome }}</strong>
+                        <small>{{ item.produtoUnidadeArmazenamento }}</small>
+                      </div>
+                      <div class="gestao-approval-item__layout">
+                        <div class="gestao-approval-summary">
+                          <span class="gestao-approval-label">Solicitação original</span>
+                          <strong>{{ modoMedida(item) ? 'Quantidade por medida' : 'Unidade ou embalagem' }}</strong>
+                          <p>{{ formaSolicitada(item) }}</p>
+                          <small v-if="modoMedida(item)">Equivalente no estoque: {{ quantidadeLegivel(item.quantidadeSolicitada) }} {{ rotuloMedida(item.unidadeMedidaSolicitada) }}</small>
+                          <small v-else>Quantidade total correspondente: {{ quantidadeLegivel(item.quantidadeSolicitada) }} na unidade-base</small>
+                        </div>
+                        <div class="gestao-approval-decision">
+                          <label v-if="pedido.status === 'PENDENTE'" :for="`aprovar-quantidade-${item.id}`" class="gestao-approval-label">Quantidade a aprovar</label>
+                          <span v-else class="gestao-approval-label">{{ pedido.status === 'ENTREGUE' ? 'Quantidade entregue' : 'Quantidade aprovada' }}</span>
+                          <div v-if="pedido.status === 'PENDENTE'" class="gestao-approval-input-group">
+                            <input :id="`aprovar-quantidade-${item.id}`" v-model.number="quantidadesAprovadas[item.id]" type="number"
+                              :min="modoMedida(item) ? 0.000001 : 1" :max="item.quantidadeSolicitada" :step="passoAprovacao(item)" />
+                            <span>{{ modoMedida(item) ? rotuloMedida(item.unidadeMedidaSolicitada) : 'na unidade-base' }}</span>
+                          </div>
+                          <strong v-else class="gestao-approval-result">{{ quantidadeLegivel(item.quantidadeAprovada ?? 0) }} {{ modoMedida(item) ? rotuloMedida(item.unidadeMedidaSolicitada) : 'na unidade-base' }}</strong>
+                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item) ? 'Aceita valores decimais com até 6 casas.' : 'Informe um valor inteiro compatível com a embalagem.' }}</small>
+                          <small v-else>Valor registrado na aprovação.</small>
+                        </div>
+                      </div>
                       <div v-if="pedido.status === 'ENTREGUE'" class="delivered-lots">
                         <strong>LOTES UTILIZADOS NA SAÍDA</strong>
                         <span v-if="carregandoMovimentacoes[pedido.id]">Carregando lotes...</span>
@@ -559,4 +574,23 @@ onMounted(carregar)
 .gestao-solucao-cartilha p { white-space:pre-wrap; font-size:12px; line-height:1.5; }
 .gestao-solucao-open { margin-top:15px; }
 .status-chip[data-status='EM_PREPARACAO'] { background:var(--sgl-surface-interactive);color:var(--sgl-primary); }
+
+/* 7.6-D: bloco operacional independente dos cards legados de quantidade. */
+.gestao-approval-item { min-width: 0; padding: var(--sgl-space-4) 0; border-bottom: 1px solid var(--sgl-border); }
+.gestao-approval-item__product { display: flex; flex-direction: column; gap: var(--sgl-space-1); margin-bottom: var(--sgl-space-3); }
+.gestao-approval-item__product > strong { font-size: var(--sgl-font-card-title); color: var(--sgl-text); }
+.gestao-approval-item__product > small { font-size: var(--sgl-font-helper); color: var(--sgl-text-muted); line-height: 1.5; }
+.gestao-approval-item__layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(230px, .8fr); gap: var(--sgl-space-3); align-items: stretch; }
+.gestao-approval-summary, .gestao-approval-decision { min-width: 0; display: flex; flex-direction: column; gap: var(--sgl-space-2); padding: var(--sgl-space-4); border: 1px solid var(--sgl-border); border-radius: var(--sgl-radius-surface); background: var(--sgl-surface); }
+.gestao-approval-summary { background: var(--sgl-surface-soft); }
+.gestao-approval-label { font-size: var(--sgl-font-label); font-weight: var(--sgl-font-weight-semibold); color: var(--sgl-text-muted); }
+.gestao-approval-summary > strong { font-size: var(--sgl-font-body); color: var(--sgl-text); }
+.gestao-approval-summary > p { margin: 0; font-size: var(--sgl-font-section-title); font-weight: var(--sgl-font-weight-bold); color: var(--sgl-primary); line-height: 1.4; overflow-wrap: anywhere; }
+.gestao-approval-summary > small, .gestao-approval-decision > small { font-size: var(--sgl-font-helper); color: var(--sgl-text-muted); line-height: 1.5; }
+.gestao-approval-input-group { display: flex; align-items: center; gap: var(--sgl-space-2); flex-wrap: wrap; }
+.gestao-approval-input-group input { min-width: 100px; flex: 1 1 125px; width: 100%; min-height: var(--sgl-control-height); box-sizing: border-box; padding: 0 var(--sgl-space-3); border: 1px solid var(--sgl-border-strong); border-radius: var(--sgl-radius-control); background: var(--sgl-surface); color: var(--sgl-text); font-size: var(--sgl-font-body); font-weight: var(--sgl-font-weight-semibold); }
+.gestao-approval-input-group input:focus-visible { outline: var(--sgl-focus-width) solid var(--sgl-focus); outline-offset: var(--sgl-focus-offset); }
+.gestao-approval-input-group > span { flex: 0 1 auto; font-size: var(--sgl-font-body); color: var(--sgl-text); font-weight: var(--sgl-font-weight-semibold); }
+.gestao-approval-result { font-size: var(--sgl-font-section-title); color: var(--sgl-success); }
+@media (max-width: 760px) { .gestao-approval-item__layout { grid-template-columns: 1fr; } }
 </style>
