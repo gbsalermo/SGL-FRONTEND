@@ -23,11 +23,11 @@ export interface ItemPedidoResponse {
   produtoCondicoesArmazenamento: string | null
   quantidadeSolicitada: number
   quantidadeAprovada: number | null
-  unidadeMedidaSolicitada?: string | null
+  unidadeMedidaSolicitada?: UnidadeMedidaPedido | null
   quantidadeNaUnidadeSolicitada?: number | null
-  tipoEmbalagemSolicitada: TipoEmbalagemPedido
-  quantidadeEmbalagensSolicitada: number
-  multiplicadorSolicitado: number
+  tipoEmbalagemSolicitada: TipoEmbalagemPedido | null
+  quantidadeEmbalagensSolicitada: number | null
+  multiplicadorSolicitado: number | null
 }
 
 export interface PedidoResponse {
