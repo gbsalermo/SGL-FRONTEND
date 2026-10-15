@@ -25,9 +25,9 @@ export interface ItemPedidoResponse {
   quantidadeAprovada: number | null
   unidadeMedidaSolicitada?: string | null
   quantidadeNaUnidadeSolicitada?: number | null
-  tipoEmbalagemSolicitada: TipoEmbalagemPedido | null
-  quantidadeEmbalagensSolicitada: number | null
-  multiplicadorSolicitado: number | null
+  tipoEmbalagemSolicitada: TipoEmbalagemPedido
+  quantidadeEmbalagensSolicitada: number
+  multiplicadorSolicitado: number
 }
 
 export interface PedidoResponse {
