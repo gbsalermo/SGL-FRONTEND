@@ -8,7 +8,7 @@ export type StatusPedido =
 
 export type UnidadeMedidaPedido = 'ML' | 'L' | 'MG' | 'G' | 'KG' | 'METRO' | 'UNIDADE' | 'REACAO'
 
-export type TipoEmbalagemPedido = 'UNITARIO' | 'KIT' | 'CAIXA' | 'GARRAFA' | 'GALAO'
+export type TipoEmbalagemPedido = 'UNITARIO' | 'FRASCO' | 'AMPOLA' | 'GARRAFA' | 'GALAO' | 'CAIXA' | 'KIT' | 'PACOTE' | 'SACO' | 'TUBO' | 'POTE' | 'PAR' | 'OUTRO'
 
 export interface ItemPedidoResponse {
   id: string
