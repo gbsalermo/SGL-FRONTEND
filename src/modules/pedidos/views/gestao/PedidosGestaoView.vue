@@ -432,7 +432,7 @@ onMounted(carregar)
                           <span class="gestao-approval-label">Solicitação original</span>
                           <strong>{{ modoMedida(item) ? 'Quantidade por medida' : 'Unidade ou embalagem' }}</strong>
                           <p>{{ formaSolicitada(item) }}</p>
-                          <small v-if="modoMedida(item)">Equivalente no estoque: {{ quantidadeLegivel(item.quantidadeSolicitada) }} {{ rotuloMedida(item.unidadeMedidaSolicitada) }}</small>
+                          <small v-if="modoMedida(item)">Total convertido para a unidade-base do estoque: {{ quantidadeLegivel(item.quantidadeSolicitada) }}</small>
                           <small v-else>Quantidade total correspondente: {{ quantidadeLegivel(item.quantidadeSolicitada) }} na unidade-base</small>
                         </div>
                         <div class="gestao-approval-decision">
@@ -441,10 +441,10 @@ onMounted(carregar)
                           <div v-if="pedido.status === 'PENDENTE'" class="gestao-approval-input-group">
                             <input :id="`aprovar-quantidade-${item.id}`" v-model.number="quantidadesAprovadas[item.id]" type="number"
                               :min="modoMedida(item) ? 0.000001 : 1" :max="item.quantidadeSolicitada" :step="passoAprovacao(item)" />
-                            <span>{{ modoMedida(item) ? rotuloMedida(item.unidadeMedidaSolicitada) : 'na unidade-base' }}</span>
+                            <span>na unidade-base</span>
                           </div>
-                          <strong v-else class="gestao-approval-result">{{ quantidadeLegivel(item.quantidadeAprovada ?? 0) }} {{ modoMedida(item) ? rotuloMedida(item.unidadeMedidaSolicitada) : 'na unidade-base' }}</strong>
-                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item) ? 'Aceita valores decimais com até 6 casas.' : 'Informe um valor inteiro compatível com a embalagem.' }}</small>
+                          <strong v-else class="gestao-approval-result">{{ quantidadeLegivel(item.quantidadeAprovada ?? 0) }} na unidade-base</strong>
+                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item) ? 'Aceita decimais com até 6 casas, na unidade-base do estoque.' : 'Informe um valor inteiro compatível com a embalagem.' }}</small>
                           <small v-else>Valor registrado na aprovação.</small>
                         </div>
                       </div>
