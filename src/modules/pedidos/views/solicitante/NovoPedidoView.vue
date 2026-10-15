@@ -119,6 +119,14 @@ const podeAdicionarItem = computed(() => {
 function rotuloTipo(tipo: TipoEmbalagemPedido, plural = false) {
   const singular: Record<TipoEmbalagemPedido, string> = {
     UNITARIO: 'Unitário',
+    OUTRO: 'Embalagem',
+    PAR: 'Par',
+    POTE: 'Pote',
+    TUBO: 'Tubo',
+    SACO: 'Saco',
+    PACOTE: 'Pacote',
+    AMPOLA: 'Ampola',
+    FRASCO: 'Frasco',
     KIT: 'Kit',
     CAIXA: 'Caixa',
     GARRAFA: 'Garrafa',
@@ -126,6 +134,14 @@ function rotuloTipo(tipo: TipoEmbalagemPedido, plural = false) {
   }
   const plurais: Record<TipoEmbalagemPedido, string> = {
     UNITARIO: 'Unidades',
+    OUTRO: 'Embalagens',
+    PAR: 'Pares',
+    POTE: 'Potes',
+    TUBO: 'Tubos',
+    SACO: 'Sacos',
+    PACOTE: 'Pacotes',
+    AMPOLA: 'Ampolas',
+    FRASCO: 'Frascos',
     KIT: 'Kits',
     CAIXA: 'Caixas',
     GARRAFA: 'Garrafas',
