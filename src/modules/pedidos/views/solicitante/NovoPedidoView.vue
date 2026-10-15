@@ -85,6 +85,10 @@ const rotulosUnidade: Record<UnidadeMedidaPedido, string> = {
 function unidadeBase(item: ItemForm) {
   return produtoSelecionado(item.produtoId)?.produtoUnidadeMedida
 }
+function permiteQuantidadeLivre(item: ItemForm) {
+  const base = unidadeBase(item)
+  return base !== undefined && base !== 'UNIDADE' && base !== 'REACAO'
+}
 function opcoesUnidade(item: ItemForm) {
   const base = unidadeBase(item)
   return base ? unidadesCompativeis[base] ?? [] : []
@@ -95,7 +99,7 @@ function quantidadeCanonica(item: ItemForm) {
   return item.quantidadeFisica * fatorParaBase[item.unidadeFisica] / fatorParaBase[base]
 }
 function alterarModo(item: ItemForm, modo: ItemForm['modo']) {
-  item.modo = modo
+  item.modo = modo === 'FISICA' && !permiteQuantidadeLivre(item) ? 'APRESENTACAO' : modo
   item.tipoEmbalagemSolicitada = ''
   item.multiplicadorSolicitado = 1
   item.quantidadeForma = 1
@@ -297,6 +301,7 @@ function validarFormulario() {
     if (!estoque) throw new Error('O produto selecionado não está disponível.')
 
     if (item.modo === 'FISICA') {
+      if (!permiteQuantidadeLivre(item)) throw new Error('Este produto deve ser pedido em unidades ou kits inteiros.')
       const quantidade = quantidadeCanonica(item)
       if (!item.unidadeFisica || !opcoesUnidade(item).includes(item.unidadeFisica)
           || !Number.isFinite(item.quantidadeFisica) || item.quantidadeFisica <= 0
@@ -418,7 +423,7 @@ onMounted(carregarDados)
 
       <section class="form-section">
         <div class="section-title section-title--action">
-          <div><span>2</span><div><h2>Materiais solicitados</h2><p>Escolha o produto e solicite por apresentação inteira ou quantidade física.</p></div></div>
+          <div><span>2</span><div><h2>Materiais solicitados</h2><p>Escolha seus produtos e informe se deseja embalagens completas ou uma quantidade específica.</p></div></div>
           <button type="button" :disabled="!podeAdicionarItem" @click="adicionarItem">+ Adicionar item</button>
         </div>
 
@@ -436,17 +441,18 @@ onMounted(carregarDados)
             </label>
 
             <label class="field item-mode">
-              <span>Forma de solicitação</span>
+              <span>Como deseja pedir?</span>
               <select :value="item.modo" :disabled="!item.produtoId || item.carregandoLotes"
                 @change="alterarModo(item, ($event.target as HTMLSelectElement).value as ItemForm['modo'])">
-                <option value="APRESENTACAO">Apresentação inteira</option>
-                <option value="FISICA">Quantidade física</option>
+                <option value="APRESENTACAO">Por unidade ou embalagem</option>
+                <option v-if="permiteQuantidadeLivre(item)" value="FISICA">Informar medida (ex.: mL ou g)</option>
               </select>
-              <small>O estoque seleciona os lotes e recipientes na aprovação.</small>
+              <small v-if="permiteQuantidadeLivre(item)">Escolha a embalagem ou informe a medida necessária.</small>
+              <small v-else>Peça unidades ou kits completos, conforme disponibilidade.</small>
             </label>
 
             <label v-if="item.modo === 'APRESENTACAO'" class="field item-package">
-              <span>Tipo de unidade</span>
+              <span>Unidade ou embalagem</span>
               <select :value="chaveForma(item)" :disabled="!item.produtoId || item.carregandoLotes" required @change="alterarForma(item, ($event.target as HTMLSelectElement).value)">
                 <option value="" disabled>{{ item.carregandoLotes ? 'Carregando...' : 'Selecione' }}</option>
                 <option v-for="opcao in opcoesRetirada(item)" :key="opcao.chave" :value="opcao.chave">
@@ -454,7 +460,7 @@ onMounted(carregarDados)
                 </option>
               </select>
               <small v-if="item.produtoId && !item.carregandoLotes && !possuiKit(item)" class="package-guidance">
-                Não há kits disponíveis. Solicite por unidade ou por outra embalagem disponível.
+                Escolha uma das opções disponíveis para este produto.
               </small>
               <small v-else-if="opcaoAtual(item)">
                 {{ opcaoAtual(item)?.multiplicador }} unit. por {{ rotuloTipo(opcaoAtual(item)!.tipo).toLowerCase() }}.
@@ -468,7 +474,7 @@ onMounted(carregarDados)
             </label>
 
             <label v-if="item.modo === 'FISICA'" class="field item-quantity">
-              <span>Quantidade física</span>
+              <span>Quanto você precisa?</span>
               <input v-model.number="item.quantidadeFisica" type="number" min="0.000001" step="any" required />
               <small v-if="item.unidadeFisica && unidadeBase(item)">
                 Equivale a {{ formatarQuantidade(quantidadeCanonica(item)) }} {{ rotulosUnidade[unidadeBase(item)!] }} na base do estoque.
@@ -476,7 +482,7 @@ onMounted(carregarDados)
             </label>
 
             <label v-if="item.modo === 'FISICA'" class="field item-unit">
-              <span>Unidade</span>
+              <span>Medida</span>
               <select v-model="item.unidadeFisica" required>
                 <option v-for="unidade in opcoesUnidade(item)" :key="unidade" :value="unidade">
                   {{ rotulosUnidade[unidade] }}
@@ -493,7 +499,7 @@ onMounted(carregarDados)
       <div v-if="erro" class="error-banner">{{ erro }}</div>
 
       <footer class="form-footer">
-        <p>O pedido ficará pendente até análise da gestão.<span class="urgent-footer-note">A forma de retirada escolhida será respeitada no atendimento.</span></p>
+        <p>O pedido ficará pendente até análise da gestão.<span class="urgent-footer-note">A quantidade e as embalagens serão confirmadas conforme a disponibilidade no momento da aprovação.</span></p>
         <button class="primary-action" type="submit" :disabled="enviando || carregandoDados">{{ enviando ? 'Enviando...' : 'Enviar pedido' }}</button>
       </footer>
     </form>
