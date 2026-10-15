@@ -972,3 +972,19 @@ O responsável confirmou expressamente **a 7.5.3 como validada** ao solicitar o 
 **Regra conferida em código:** o cadastro e a edição permitem escolher `dataInicioParticipacao` futura, desde que início >= início do vínculo/Atividade, e não ultrapasse fim previsto do vínculo nem limite fim Atividade/Projeto. A elegibilidade 7.5.1 bloqueia nova solicitação enquanto a participação não começa.
 
 **Validação solicitada:** `npm run build`; tela Gestão → Estagiários → Participações, conferir 1) atividade com fim, 2) somente projeto com fim, 3) sem prazo, 4) encerramento efetivo, 5) início futuro e edição, 6) temas Light/Dark e responsividade. **A validação da 7.5.3 prévia não implica aceite automático deste polimento.** Sem merge; próxima 7.5.4 após smoke.
+
+
+### 7.5.4 — Biblioteca comum de contexto operacional e handoff para Etapa 8 (15/10/2026)
+
+**Confirmação do responsável:** etapa 7.5.3 (Estagiários no hub de Projetos) foi validada; após ajuste direto no botão **Salvar referência**, o usuário confirmou **"feito... vamos voltar ao fluxo"**. Aceitar o polimento pontual, sem presumir build final ou QA completa de Light/Dark.
+
+**Entregue na 7.5.4:**
+- `src/modules/operacao/types/contextoOperacional.ts`: fonte compartilhada de `ContextoParticipacaoOperacional` e funções puras `prepararSelecaoContextoEstagiario` e `resolverContextoEstagiario`; retorno 0 `SEM_CONTEXTO_ELEGIVEL`, 1 `PRE_SELECIONAVEL`, N `ESCOLHA_OBRIGATORIA`.
+- `src/modules/operacao/services/contextoOperacionalService.ts`: 3 consultas read-only ao backend (por usuário, Atividade ou Projeto); atenção à autorização por titularidade, ainda não implementada em DEV.
+- `src/modules/projetos/types/projetos.ts`: reexporta o tipo do módulo Operação para compatibilidade.
+- `src/modules/projetos/services/projetosService.ts`: mantém `listarParticipacoesProjeto`, mas delega ao serviço compartilhado; hub Projetos continua com contrato de chamada inalterado.
+- Detalhes e próximo checklist em `docs/ETAPA_7_5_MAPA_IMPLEMENTACAO_FRONTEND.md`. Contrato canônico de backend para Etapa 8 em `gbsalermo/Sistema-SGL/docs/CONTRATO_CONTEXTOS_PEDIDOS_ETAPA_8.md`.
+
+**Não alterados:** `NovoPedidoView.vue`, `NovaSolucaoView.vue`, DTOs/migrations de Pedido, ações de estoque. **Não ligar seleção a Pedido até o backend revalidar/persistir participação na Etapa 8.**
+
+**Próxima verificação (um passo por vez):** `npm run build` no frontend atualizado. Após build verde + regressão mínima no hub, registrar aceite da 7.5.4 e avançar à 7.6. QA transversal ainda devida em 7.7, autorização definitiva antes de produção, nenhum merge sem autorização expressa.
