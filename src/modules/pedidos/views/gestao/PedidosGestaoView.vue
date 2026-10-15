@@ -107,15 +107,37 @@ function produtosResumo(pedido: PedidoResponse) {
   return `${nomes.slice(0, 2).join(', ')} +${nomes.length - 2}`
 }
 
+function modoMedida(item: PedidoResponse['itens'][number]) {
+  return item.unidadeMedidaSolicitada != null
+}
+function quantidadeLegivel(valor: number) {
+  return exibirQuantidade(valor)
+}
+function rotuloMedida(unidade: string | null | undefined) {
+  const rotulos: Record<string, string> = {
+    ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg',
+    METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
+  }
+  return unidade ? rotulos[unidade] ?? unidade : ''
+}
+function quantidadeOriginal(item: PedidoResponse['itens'][number]) {
+  return modoMedida(item)
+    ? `${quantidadeLegivel(item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada)} ${rotuloMedida(item.unidadeMedidaSolicitada)}`
+    : `${quantidadeLegivel(item.quantidadeSolicitada)} na unidade-base`
+}
+function passoAprovacao(item: PedidoResponse['itens'][number]) {
+  return modoMedida(item) ? 'any' : String(item.tipoEmbalagemSolicitada === 'UNITARIO' ? 1 : item.multiplicadorSolicitado ?? 1)
+}
 function formaSolicitada(item: PedidoResponse['itens'][number]) {
+  if (modoMedida(item)) return `Por medida: ${quantidadeOriginal(item)}`
   const rotulos: Record<string, [string, string]> = {
     UNITARIO: ['unidade', 'unidades'], KIT: ['kit', 'kits'], CAIXA: ['caixa', 'caixas'], GARRAFA: ['garrafa', 'garrafas'], GALAO: ['galão', 'galões'],
   }
   const quantidade = item.quantidadeEmbalagensSolicitada ?? item.quantidadeSolicitada
-  const [singular, plural] = rotulos[item.tipoEmbalagemSolicitada] ?? ['unidade', 'unidades']
+  const [singular, plural] = rotulos[item.tipoEmbalagemSolicitada ?? 'UNITARIO'] ?? ['unidade', 'unidades']
   const nome = quantidade === 1 ? singular : plural
   if (item.tipoEmbalagemSolicitada === 'UNITARIO') return `${quantidade} ${nome}`
-  return `${quantidade} ${nome} · ${item.multiplicadorSolicitado} unit. cada`
+  return `${quantidade} ${nome} · ${item.multiplicadorSolicitado} na unidade-base cada`
 }
 
 function movimentosDoItem(pedidoId: string, produtoId: string) {
@@ -194,16 +216,11 @@ async function aprovar(pedido: PedidoResponse) {
 
   const itens = pedido.itens.map((item) => ({ itemId: item.id, quantidadeAprovada: Number(quantidadesAprovadas.value[item.id]) }))
 
-  // Correção de bug: quando o item não é UNITARIO, "multiplicadorSolicitado"
-  // é obrigatório para a conta de resto (%) fazer sentido. Antes, se esse
-  // campo viesse nulo/indefinido da API, "quantidade % undefined" resultava
-  // em NaN, o que sempre marcava o item como inválido — mas com a MESMA
-  // mensagem genérica usada para quantidade errada, confundindo quem está
-  // aprovando (parecia um erro de digitação do usuário, quando na verdade é
-  // um dado incompleto vindo do backend).
+  // Pedidos por medida não possuem embalagem ou multiplicador.
+  // Pedidos por apresentação preservam o contrato legado e exigem multiplicador.
   const itemComEmbalagemIncompleta = pedido.itens.find(
-    (item) => item.tipoEmbalagemSolicitada !== 'UNITARIO'
-      && (item.multiplicadorSolicitado === null || item.multiplicadorSolicitado === undefined || item.multiplicadorSolicitado <= 0),
+    (item) => !modoMedida(item) && item.tipoEmbalagemSolicitada !== 'UNITARIO'
+      && (item.multiplicadorSolicitado == null || item.multiplicadorSolicitado <= 0),
   )
   if (itemComEmbalagemIncompleta) {
     erroAcao.value = `O item "${itemComEmbalagemIncompleta.produtoNome}" está com a embalagem solicitada incompleta (sem multiplicador definido) e não pode ser aprovado. Contate o suporte.`
@@ -212,12 +229,21 @@ async function aprovar(pedido: PedidoResponse) {
 
   const invalido = itens.some((aprovacao, index) => {
     const item = pedido.itens[index]!
-    if (!Number.isInteger(aprovacao.quantidadeAprovada) || aprovacao.quantidadeAprovada < 1 || aprovacao.quantidadeAprovada > item.quantidadeSolicitada) return true
-    return item.tipoEmbalagemSolicitada !== 'UNITARIO' && aprovacao.quantidadeAprovada % item.multiplicadorSolicitado !== 0
+    const valor = aprovacao.quantidadeAprovada
+    if (!Number.isFinite(valor) || valor <= 0 || valor > item.quantidadeSolicitada) return true
+    if (modoMedida(item)) {
+      // A persistência física usa BigDecimal(19,6); não arredondar silenciosamente.
+      return Math.abs(valor - Number(valor.toFixed(6))) > 1e-9
+    }
+    if (!Number.isInteger(valor)) return true
+    if (item.tipoEmbalagemSolicitada === 'UNITARIO') return false
+    const multiplicador = item.multiplicadorSolicitado
+    return multiplicador == null || multiplicador <= 0
+      || Math.abs(valor / multiplicador - Math.round(valor / multiplicador)) > 1e-9
   })
 
   if (invalido) {
-    erroAcao.value = 'As quantidades aprovadas devem respeitar a quantidade solicitada e a embalagem escolhida pelo solicitante.'
+    erroAcao.value = 'Confira as quantidades aprovadas: use até seis casas decimais para medidas e múltiplos inteiros para embalagens.'
     return
   }
 
@@ -398,13 +424,14 @@ onMounted(carregar)
                     <h3>Materiais solicitados</h3>
                     <div v-for="item in pedido.itens" :key="item.id" class="gestao-detail__item">
                       <div><strong>{{ item.produtoNome }}</strong><small>{{ item.produtoUnidadeArmazenamento }}</small><small class="requested-form">Solicitado como: {{ formaSolicitada(item) }}</small></div>
-                      <div class="quantity-card requested-quantity"><strong>SOLICITADA</strong><span>{{ item.quantidadeSolicitada }}</span></div>
+                      <div class="quantity-card requested-quantity"><strong>SOLICITADA</strong><span>{{ quantidadeLegivel(item.quantidadeSolicitada) }}</span><small>{{ modoMedida(item) ? 'Unidade-base do estoque' : 'Quantidade total' }}</small></div>
 
                       <label v-if="pedido.status === 'PENDENTE'" class="quantity-card approval-quantity">
                         <span>QUANTIDADE A APROVAR</span>
-                        <input v-model.number="quantidadesAprovadas[item.id]" type="number" min="1" :max="item.quantidadeSolicitada" :step="item.tipoEmbalagemSolicitada === 'UNITARIO' ? 1 : item.multiplicadorSolicitado" />
+                        <input v-model.number="quantidadesAprovadas[item.id]" type="number" :min="modoMedida(item) ? 0.000001 : 1" :max="item.quantidadeSolicitada" :step="passoAprovacao(item)" />
+                         <small>{{ modoMedida(item) ? 'Na unidade-base; até 6 casas decimais' : 'Respeite a embalagem solicitada' }}</small>
                       </label>
-                      <div v-else-if="item.quantidadeAprovada !== null" class="quantity-card approved-quantity"><strong>{{ pedido.status === 'ENTREGUE' ? 'ENTREGUE' : 'APROVADA' }}</strong><span>{{ item.quantidadeAprovada }}</span></div>
+                      <div v-else-if="item.quantidadeAprovada !== null" class="quantity-card approved-quantity"><strong>{{ pedido.status === 'ENTREGUE' ? 'ENTREGUE' : 'APROVADA' }}</strong><span>{{ quantidadeLegivel(item.quantidadeAprovada) }}</span><small>{{ modoMedida(item) ? 'Unidade-base do estoque' : 'Quantidade total' }}</small></div>
 
                       <div v-if="pedido.status === 'ENTREGUE'" class="delivered-lots">
                         <strong>LOTES UTILIZADOS NA SAÍDA</strong>
@@ -412,7 +439,7 @@ onMounted(carregar)
                         <span v-else-if="movimentosDoItem(pedido.id, item.produtoId).length === 0">Nenhuma movimentação de saída encontrada.</span>
                         <div v-for="mov in movimentosDoItem(pedido.id, item.produtoId)" :key="mov.id" class="delivered-lot">
                           <b>{{ mov.codigoInternoLote || 'Lote sem código SGL' }}</b>
-                          <span>{{ mov.quantidadeMovimentada }} unit. · saída em {{ dataFormatada(mov.dataMovimentacao) }}</span>
+                          <span>{{ quantidadeLegivel(mov.quantidadeMovimentada) }} na unidade-base · saída em {{ dataFormatada(mov.dataMovimentacao) }}</span>
                         </div>
                       </div>
                     </div>
