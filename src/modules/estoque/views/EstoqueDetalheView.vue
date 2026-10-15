@@ -49,6 +49,14 @@ const formularioDescarte = ref({ quantidade: 0, justificativa: '' })
 
 const tiposEmbalagem: Array<{ value: TipoEmbalagem; label: string }> = [
   { value: 'UNITARIO', label: 'Unitário' },
+  { value: 'FRASCO', label: 'Frasco' },
+  { value: 'AMPOLA', label: 'Ampola' },
+  { value: 'PACOTE', label: 'Pacote' },
+  { value: 'SACO', label: 'Saco' },
+  { value: 'TUBO', label: 'Tubo' },
+  { value: 'POTE', label: 'Pote' },
+  { value: 'PAR', label: 'Par' },
+  { value: 'OUTRO', label: 'Outro' },
   { value: 'KIT', label: 'Kit' },
   { value: 'CAIXA', label: 'Caixa' },
   { value: 'GARRAFA', label: 'Garrafa' },
@@ -96,18 +104,34 @@ const saidasLote = computed(() => movimentacoesLote.value.filter((movimentacao) 
 
 function rotuloTipoEmbalagem(tipo?: TipoEmbalagem | null, quantidade = 1) {
   const singular: Record<TipoEmbalagem, string> = {
-    UNITARIO: 'unit.',
-    KIT: 'kit',
-    CAIXA: 'caixa',
+    UNITARIO: 'un.',
+    FRASCO: 'frasco',
+    AMPOLA: 'ampola',
     GARRAFA: 'garrafa',
     GALAO: 'galão',
+    CAIXA: 'caixa',
+    KIT: 'kit',
+    PACOTE: 'pacote',
+    SACO: 'saco',
+    TUBO: 'tubo',
+    POTE: 'pote',
+    PAR: 'par',
+    OUTRO: 'embalagem',
   }
   const plural: Record<TipoEmbalagem, string> = {
-    UNITARIO: 'unit.',
-    KIT: 'kits',
-    CAIXA: 'caixas',
+    UNITARIO: 'un.',
+    FRASCO: 'frascos',
+    AMPOLA: 'ampolas',
     GARRAFA: 'garrafas',
     GALAO: 'galões',
+    CAIXA: 'caixas',
+    KIT: 'kits',
+    PACOTE: 'pacotes',
+    SACO: 'sacos',
+    TUBO: 'tubos',
+    POTE: 'potes',
+    PAR: 'pares',
+    OUTRO: 'embalagens',
   }
   const chave = tipo || 'UNITARIO'
   return quantidade === 1 ? singular[chave] : plural[chave]
