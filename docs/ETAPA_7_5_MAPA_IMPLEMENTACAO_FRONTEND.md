@@ -89,3 +89,16 @@ A 7.5.1 recebeu confirmação de testes JUnit e boot pelo responsável. A 7.5.2 
 - [ ] Verificar Light/Dark, escala 100%, desktop/mobile, ausência de regressão em edição, prorrogação e correção SEG de SCI/Atividade.
 
 **Nenhuma migration ou alteração de payload de Pedido/Solução**; isso continua para a Etapa 8. Não marcar como concluída/validada antes do build e do teste visual.
+
+
+## Validação da 7.5.3 e polimento da data final — 15/10/2026
+
+**7.5.3 validada pelo responsável** (integração de Estagiários por Atividade no hub Projetos). Os checkboxes históricos acima continuam como roteiro técnico detalhado, mas o aceite funcional foi confirmado na conversa.
+
+**Ajuste visual posterior, publicado e ainda não testado localmente:**
+- Gestão → Estagiários → Drawer → Participações em atividades: 3 campos independentes de **Início da participação**, **Prazo da Atividade/Projeto**, **Encerramento efetivo**. Se participação sem `dataFimParticipacao`, mostrar **Não registrado**; data prevista do Projeto/Atividade jamais substitui o encerramento efetivo.
+- Para `dataInicioParticipacao > hoje` e participação aberta: rótulo **Início programado** (não afirmar que o trabalho já começou). A definição do `ativa` legado não muda, pois representa associação ainda não encerrada.
+- Cadastro e edição da participação: campos de data inicial permanecem editáveis e permitem início futuro nas regras existentes; textos auxiliares explicam isso. No encerramento, campo renomeado para **Data de encerramento efetivo**.
+- Estilos dos três campos usam tokens existentes (tema e quebra mobile), sem mudar modelo, serviço ou migrações.
+
+**Smoke visual pendente:** `npm run build`, abertura dos cards com datas planejadas/efetivas, registro de início futuro, edição antes de iniciar, alternância Light/Dark e tela estreita. Não marcar esta alteração como validada até retorno. Sem merge.
