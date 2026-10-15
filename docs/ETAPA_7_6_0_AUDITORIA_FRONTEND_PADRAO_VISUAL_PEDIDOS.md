@@ -48,7 +48,7 @@ Usar os exports de `src/components/common/index.ts` onde couber:
 
 | Arquivo | O que já faz | O que adaptar |
 |---|---|---|
-| `src/modules/pedidos/views/solicitante/NovoPedidoView.vue` | Produto → lotes → opções UNITARIO ou embalagem; `quantidadeForma` inteira; `Math.floor(saldo/fator)` | Escolha explícita **embalagem completa** versus **quantidade fracionada**; unidade física; disponibilidade fiel à condição do recipiente, sem prometer lacre só pelo saldo agregado; feedback de invalidação |
+| `src/modules/pedidos/views/solicitante/NovoPedidoView.vue` | Produto → lotes → opções UNITARIO ou embalagem; `quantidadeForma` inteira; `Math.floor(saldo/fator)` | Permitir solicitar **quantidade física com unidade compatível** além de apresentação inteira, preservando preferências de retirada do contrato original, sem prometer lacre por saldo agregado |
 | `src/modules/pedidos/types/pedido.ts` | Tipos do Pedido e lote; enum restrito a cinco apresentações; `LotePedidoResponse` sem `unidadeBase` | Tipar contratos completos do backend; adaptar request/response de forma retrocompatível depois que contrato backend for estabilizado |
 | `src/modules/pedidos/services/pedidoService.ts` | Faz consulta de lotes e submit; aplica enriquecimento/filtragem de produto | Manter cliente HTTP central; não duplicar algoritmo de alocação nem gerar movimentação direta |
 | `src/modules/pedidos/views/gestao/PedidosGestaoView.vue` | Aprovação com `Number.isInteger` e input min 1/step de embalagem | Validar decimals e unidades no novo modo; manter integridade de apresentações inteiras; mostrar contexto físico e confirmação da aprovação |
@@ -58,11 +58,15 @@ Usar os exports de `src/components/common/index.ts` onde couber:
 
 ## 4. Regras de experiência do usuário previstas
 
-- **Dois modos claramente rotulados**: `Embalagem completa` (quantidade inteira e, quando prometido, lacre físico) e `Quantidade fracionada` (valor decimal + unidade física).
+**Fonte funcional vinculante:** o contrato de retirada **já foi aprovado**, não depende de nova decisão sobre prioridade dos recipientes. Ver backend `docs/CONTINUIDADE_ETAPA_7_2026-10-06.md`, §9.9 e §9.13, e auditoria corrigida `docs/ETAPA_7_6_0_AUDITORIA_CONTRATO_PEDIDOS_ESTOQUE_FISICO.md`. A implementação de `MovimentacaoEstoqueService.consumirRecipientes` já cobre inteiros fechados antes das frações abertas. Pedido 700 mL com aberto 300 mL + fechados 500 mL → fechado 500 + aberto 200. O frontend **não seleciona nem ordena recipientes**, apenas informa quantidade/unidade/forma solicitada.
+
+
+
+- **Duas formas de informar a necessidade**, sem criar política nova: `Apresentação física` (contagem inteira de embalagens) e `Quantidade física` (valor decimal + unidade compatível, inclusive quantidades grandes). Esses são caminhos de entrada do Pedido para a MESMA política FEFO/FIFO/ABERTO/FECHADO já definida na Etapa 7.
 - Explicação objetiva no próprio campo; não presumir que `UNITARIO` significa necessariamente contagem de embalagem ou que unidade física é sempre “unit.”.
 - O formulário deve obter as unidades compatíveis da unidade canônica do Produto; para uma contagem não divisível, não oferecer fração arbitrária.
 - Mostrar o saldo de modo inteligível (ex.: `750 mL` com recipiente aberto), mas deixar claro quando disponibilidade/quantidade de lacrados é apenas aproximada, nunca simular garantia.
-- A Gestão aprova no **mesmo modo/unidade originalmente solicitados**, sem conversões silenciosas; exibir ao lado a quantidade canônica e avisos de conflito/estoque alterado.
+- A Gestão vê a forma e a unidade originalmente solicitadas e aprova um total fisicamente consistente, com conversão explícita para a quantidade canônica no backend, limites corretos e mensagens de conflito. Não confundir forma de entrada com escolha manual de recipiente.
 - Ao mudar Produto/modo/forma, limpar seleções obsoletas, revalidar dados e evitar envio de payload inconsistente.
 - Não exigir seleção manual de lote/recipiente por solicitante ou gestor como solução para FEFO/FIFO. A alocação física é automática e autoritativa pelo servidor.
 - Todas as quantidades exibidas de forma consistente, com rótulo de unidade e precisão adequada; não resolver dinheiro/quantidade com arredondamento silencioso para inteiro.
@@ -78,10 +82,10 @@ Usar os exports de `src/components/common/index.ts` onde couber:
 ## 6. Plano de implementação frontend após contrato backend validado
 
 1. **Tipos/cliente HTTP:** alinhar todos os campos/enum de Lote e Pedido, sem modificar comportamento visual ainda.
-2. **Novo Pedido:** apresentar modos de retirada e campos corretos, validar a escolha, montar payload; manter laboratório/Projeto da versão atual (evolução por participação só Etapa 8).
+2. **Novo Pedido:** apresentar contagem inteira de apresentações ou quantidade física decimal, com unidade e rotulagem compreensíveis. O backend decide **FEFO/FIFO → FECHADOS para parte inteira → ABERTOS para fração → abrir FECHADO só se necessário**. Manter laboratório/Projeto atuais (participação na Etapa 8).
 3. **Aprovação Gestão:** adaptar quantitativos físicos e apresentações, mostrar a intenção de retirada e confirmar; atenção aos estados `PENDENTE`, `APROVADO`, `ENTREGUE`, `CANCELADO`.
 4. **CSS:** alterar preferencialmente estilos existentes dos mesmos módulos usando `--sgl-*`, `Sgl*`; não mexer no tema global, Login ou shell. Remover overrides pontuais somente com conferência dos consumidores.
-5. **Teste incremental:** `npm run build` e depois smoke DEV de 1 pedido completo, 1 fracionado, 1 tentativa inválida, 1 conflito de estoque, cancelamento, Light/Dark e viewport 720p/1080p/1440p/mobile. Adicionar testes automatizados apropriados quando houver infraestrutura, sem simular sua execução.
+5. **Teste incremental:** `npm run build` e smoke DEV com 200 mL, 500 mL, 700 mL, fração grande que preserva os fechados inteiros e minimiza novas aberturas; lote FEFO prioritário; lote não fracionável; conflito e cancelamento. Depois verificar Light/Dark e 720p/1080p/1440p/mobile; não simular execução.
 
 ## 7. Checklist de aceite obrigatório
 
