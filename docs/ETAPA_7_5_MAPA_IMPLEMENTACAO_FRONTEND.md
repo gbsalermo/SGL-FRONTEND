@@ -102,3 +102,34 @@ A 7.5.1 recebeu confirmação de testes JUnit e boot pelo responsável. A 7.5.2 
 - Estilos dos três campos usam tokens existentes (tema e quebra mobile), sem mudar modelo, serviço ou migrações.
 
 **Smoke visual pendente:** `npm run build`, abertura dos cards com datas planejadas/efetivas, registro de início futuro, edição antes de iniciar, alternância Light/Dark e tela estreita. Não marcar esta alteração como validada até retorno. Sem merge.
+
+
+## Implementação 7.5.4 — serviço compartilhado e passagem para Etapa 8 (15/10/2026)
+
+**Status:** implementação publicada, revisão estática feita, **`npm run build` ainda não executado nesta sessão**. O responsável confirmou o aceite da 7.5.3 e do pequeno polimento do botão **Salvar referência**; não presumir daí a suíte técnica final.
+
+### Arquivos de código
+
+- `src/modules/operacao/types/contextoOperacional.ts` — fonte única do tipo `ContextoParticipacaoOperacional`. Funções puras de **preparação de opções** e **resolução de uma participação explicitamente escolhida**.
+- `src/modules/operacao/services/contextoOperacionalService.ts` — serviço read-only para os três endpoints da 7.5.2; **não** faz escrita nem seleciona contexto pela conta do usuário.
+- `src/modules/projetos/types/projetos.ts` — reexportação de compatibilidade do tipo, sem duplicá-lo.
+- `src/modules/projetos/services/projetosService.ts` — usa `contextoOperacionalService.listarParticipacoesProjeto`; a interface do hub mantém o método existente, sem mudança de comportamento.
+
+### Contrato preparado para os formulários da Etapa 8
+
+`prepararSelecaoContextoEstagiario(contextos, unidadeId)` aceita participações retornadas pelo backend, inclui somente registros **elegíveis**, com participação/Atividade/SCI/Projeto/Laboratório/Unidade preenchidos e Unidade compatível, e gera:
+- `SEM_CONTEXTO_ELEGIVEL` — lista vazia, sem fallback para Laboratório legado;
+- `PRE_SELECIONAVEL` — uma participação elegível, ID sugerido;
+- `ESCOLHA_OBRIGATORIA` — múltiplas participações, ID sugerido **nulo** (usuário precisa escolher).
+
+`resolverContextoEstagiario(opcoes, participacaoId, unidadeId)` retorna o conjunto derivado de IDs para exibição/revisão do contexto escolhido, ou `null` se inválido. **Esses IDs não são autorização; o backend deve recalcular e persistir a derivação ao criar o Pedido, na Etapa 8.**
+
+**Limite de versão:** a API atual de `GET .../usuarios/{usuarioId}` aceita somente o perfil Estagiário. Técnico/Analista/Pesquisador e Gestor/Admin exigem contrato de resolução por Projeto/Laboratório na Etapa 8, descrito no documento de passagem do backend `docs/CONTRATO_CONTEXTOS_PEDIDOS_ETAPA_8.md`. **Nenhum trecho de `NovoPedidoView.vue` ou `NovaSolucaoView.vue` foi alterado nesta 7.5.4**, porque a validação persistente da participação e as permissões ainda não existem no Pedido atual.
+
+### Validação local pendente (uma coisa de cada vez)
+
+1. Executar `npm run build` no SGL-FRONTEND, branch `collab/etapa-7-unidades-solucoes-contexto`; comprovar `vue-tsc` + Vite sem erro.
+2. Verificar rápida regressão: hub de Projetos consulta Estagiários por Atividade, sem interferência; Pedidos convencionais e Soluções continuam abrindo como antes.
+3. QA abrangente, DEV/DEMO, IB/IQ, Light/Dark, responsividade e suíte final seguem **7.6/7.7**. Não confundir build verde com autorização API real.
+
+**Não fazer merge sem autorização expressa.**
