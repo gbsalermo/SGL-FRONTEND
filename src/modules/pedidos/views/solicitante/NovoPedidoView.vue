@@ -11,12 +11,16 @@ import type {
   PedidoRequest,
   ProjetoResponse,
   TipoEmbalagemPedido,
+  UnidadeMedidaPedido,
 } from '@/modules/pedidos/types/pedido'
 import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 
 interface ItemForm {
   produtoId: string
+  modo: 'APRESENTACAO' | 'FISICA'
+  unidadeFisica: UnidadeMedidaPedido | ''
+  quantidadeFisica: number
   tipoEmbalagemSolicitada: TipoEmbalagemPedido | ''
   multiplicadorSolicitado: number
   quantidadeForma: number
@@ -55,11 +59,51 @@ const usuario = computed(() => session.usuario)
 function novoItem(): ItemForm {
   return {
     produtoId: '',
+    modo: 'APRESENTACAO',
+    unidadeFisica: '',
+    quantidadeFisica: 1,
     tipoEmbalagemSolicitada: '',
     multiplicadorSolicitado: 1,
     quantidadeForma: 1,
     carregandoLotes: false,
   }
+}
+
+const unidadesCompativeis: Record<UnidadeMedidaPedido, UnidadeMedidaPedido[]> = {
+  ML: ['ML', 'L'], L: ['ML', 'L'],
+  MG: ['MG', 'G', 'KG'], G: ['MG', 'G', 'KG'], KG: ['MG', 'G', 'KG'],
+  METRO: ['METRO'], UNIDADE: ['UNIDADE'], REACAO: ['REACAO'],
+}
+const fatorParaBase: Record<UnidadeMedidaPedido, number> = {
+  ML: 1, L: 1000, MG: 1, G: 1000, KG: 1000000,
+  METRO: 1, UNIDADE: 1, REACAO: 1,
+}
+const rotulosUnidade: Record<UnidadeMedidaPedido, string> = {
+  ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg',
+  METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
+}
+function unidadeBase(item: ItemForm) {
+  return produtoSelecionado(item.produtoId)?.produtoUnidadeMedida
+}
+function opcoesUnidade(item: ItemForm) {
+  const base = unidadeBase(item)
+  return base ? unidadesCompativeis[base] ?? [] : []
+}
+function quantidadeCanonica(item: ItemForm) {
+  const base = unidadeBase(item)
+  if (!base || !item.unidadeFisica) return NaN
+  return item.quantidadeFisica * fatorParaBase[item.unidadeFisica] / fatorParaBase[base]
+}
+function alterarModo(item: ItemForm, modo: ItemForm['modo']) {
+  item.modo = modo
+  item.tipoEmbalagemSolicitada = ''
+  item.multiplicadorSolicitado = 1
+  item.quantidadeForma = 1
+  item.unidadeFisica = unidadeBase(item) ?? ''
+  item.quantidadeFisica = 1
+}
+function formatarQuantidade(valor: number) {
+  return new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 6 }).format(valor)
 }
 
 const podeAdicionarItem = computed(() => {
@@ -210,6 +254,9 @@ async function alterarProduto(item: ItemForm) {
   item.tipoEmbalagemSolicitada = ''
   item.multiplicadorSolicitado = 1
   item.quantidadeForma = 1
+  item.modo = 'APRESENTACAO'
+  item.unidadeFisica = unidadeBase(item) ?? ''
+  item.quantidadeFisica = 1
   const estoque = produtoSelecionado(item.produtoId)
   if (!estoque || lotesPorEstoque.value[estoque.id]) return
 
@@ -241,22 +288,36 @@ function alternarUrgencia() {
 }
 
 function validarFormulario() {
-  if (!usuario.value?.id || !laboratorioOperacionalId.value) throw new Error('Selecione um laboratório ativo para encaminhar o pedido.')
-
-  if (itens.value.some((item) => !item.produtoId || !item.tipoEmbalagemSolicitada || item.quantidadeForma < 1)) {
-    throw new Error('Preencha produto, tipo de unidade e quantidade de todos os itens.')
-  }
+  if (!usuario.value?.id || !laboratorioOperacionalId.value)
+    throw new Error('Selecione um laboratório ativo para encaminhar o pedido.')
 
   for (const item of itens.value) {
-    const opcao = opcaoAtual(item)
-    if (!opcao) throw new Error('A forma de retirada selecionada não está mais disponível.')
-    if (item.quantidadeForma > opcao.disponivel) {
-      throw new Error(`Quantidade maior que o disponível para ${rotuloTipo(opcao.tipo).toLowerCase()}.`)
+    if (!item.produtoId) throw new Error('Selecione o produto de todos os itens.')
+    const estoque = produtoSelecionado(item.produtoId)
+    if (!estoque) throw new Error('O produto selecionado não está disponível.')
+
+    if (item.modo === 'FISICA') {
+      const quantidade = quantidadeCanonica(item)
+      if (!item.unidadeFisica || !opcoesUnidade(item).includes(item.unidadeFisica)
+          || !Number.isFinite(item.quantidadeFisica) || item.quantidadeFisica <= 0
+          || !Number.isFinite(quantidade) || quantidade <= 0
+          || Math.abs(quantidade - Number(quantidade.toFixed(6))) > 1e-8)
+        throw new Error('Informe quantidade física positiva, unidade compatível e precisão de até seis casas na unidade-base.')
+      if (quantidade > estoque.quantidadeAtual + 1e-9)
+        throw new Error('A quantidade física solicitada ultrapassa o saldo total disponível.')
+      // O servidor decide compatibilidade por lote, FEFO/FIFO e recipientes.
+    } else {
+      const opcao = opcaoAtual(item)
+      if (!opcao || !Number.isInteger(item.quantidadeForma) || item.quantidadeForma < 1)
+        throw new Error('Escolha uma apresentação e informe uma quantidade inteira positiva.')
+      if (item.quantidadeForma > opcao.disponivel)
+        throw new Error('A quantidade solicitada ultrapassa a disponibilidade estimada da apresentação.')
     }
   }
 
   const produtos = itens.value.map((item) => item.produtoId)
-  if (new Set(produtos).size !== produtos.length) throw new Error('O mesmo produto não pode ser adicionado mais de uma vez.')
+  if (new Set(produtos).size !== produtos.length)
+    throw new Error('O mesmo produto não pode ser adicionado mais de uma vez.')
 }
 
 async function enviarPedido() {
@@ -272,13 +333,23 @@ async function enviarPedido() {
       motivoUrgencia: null,
       observacao: observacao.value.trim() || null,
       arquivoDocumento: null,
-      itens: itens.value.map((item) => ({
-        produtoId: item.produtoId,
-        quantidadeSolicitada: item.quantidadeForma * item.multiplicadorSolicitado,
-        tipoEmbalagemSolicitada: item.tipoEmbalagemSolicitada as TipoEmbalagemPedido,
-        quantidadeEmbalagensSolicitada: item.quantidadeForma,
-        multiplicadorSolicitado: item.multiplicadorSolicitado,
-      })),
+      itens: itens.value.map((item) => item.modo === 'FISICA'
+        ? {
+            produtoId: item.produtoId,
+            quantidadeSolicitada: item.quantidadeFisica,
+            unidadeMedidaSolicitada: item.unidadeFisica as UnidadeMedidaPedido,
+            tipoEmbalagemSolicitada: null,
+            quantidadeEmbalagensSolicitada: null,
+            multiplicadorSolicitado: null,
+          }
+        : {
+            produtoId: item.produtoId,
+            quantidadeSolicitada: item.quantidadeForma * item.multiplicadorSolicitado,
+            unidadeMedidaSolicitada: null,
+            tipoEmbalagemSolicitada: item.tipoEmbalagemSolicitada as TipoEmbalagemPedido,
+            quantidadeEmbalagensSolicitada: item.quantidadeForma,
+            multiplicadorSolicitado: item.multiplicadorSolicitado,
+          }),
     }
 
     enviando.value = true
@@ -347,7 +418,7 @@ onMounted(carregarDados)
 
       <section class="form-section">
         <div class="section-title section-title--action">
-          <div><span>2</span><div><h2>Materiais solicitados</h2><p>Escolha o produto, a forma de retirada disponível e a quantidade desejada.</p></div></div>
+          <div><span>2</span><div><h2>Materiais solicitados</h2><p>Escolha o produto e solicite por apresentação inteira ou quantidade física.</p></div></div>
           <button type="button" :disabled="!podeAdicionarItem" @click="adicionarItem">+ Adicionar item</button>
         </div>
 
@@ -361,10 +432,20 @@ onMounted(carregarDados)
                 <option value="" disabled>Selecione um produto</option>
                 <option v-for="estoque in opcoesProduto(index)" :key="estoque.id" :value="estoque.produtoId">{{ estoque.produtoNome }}</option>
               </select>
-              <small v-if="produtoSelecionado(item.produtoId)">Disponível no estoque: {{ produtoSelecionado(item.produtoId)?.quantidadeAtual }} unit.</small>
+              <small v-if="produtoSelecionado(item.produtoId)">Saldo consolidado: {{ formatarQuantidade(produtoSelecionado(item.produtoId)!.quantidadeAtual) }} {{ rotulosUnidade[produtoSelecionado(item.produtoId)!.produtoUnidadeMedida] }}</small>
             </label>
 
-            <label class="field item-package">
+            <label class="field item-mode">
+              <span>Forma de solicitação</span>
+              <select :value="item.modo" :disabled="!item.produtoId || item.carregandoLotes"
+                @change="alterarModo(item, ($event.target as HTMLSelectElement).value as ItemForm['modo'])">
+                <option value="APRESENTACAO">Apresentação inteira</option>
+                <option value="FISICA">Quantidade física</option>
+              </select>
+              <small>O estoque seleciona os lotes e recipientes na aprovação.</small>
+            </label>
+
+            <label v-if="item.modo === 'APRESENTACAO'" class="field item-package">
               <span>Tipo de unidade</span>
               <select :value="chaveForma(item)" :disabled="!item.produtoId || item.carregandoLotes" required @change="alterarForma(item, ($event.target as HTMLSelectElement).value)">
                 <option value="" disabled>{{ item.carregandoLotes ? 'Carregando...' : 'Selecione' }}</option>
@@ -380,10 +461,28 @@ onMounted(carregarDados)
               </small>
             </label>
 
-            <label class="field item-quantity">
+            <label v-if="item.modo === 'APRESENTACAO'" class="field item-quantity">
               <span>Quantidade</span>
-              <input v-model.number="item.quantidadeForma" type="number" min="1" :max="opcaoAtual(item)?.disponivel" required />
+              <input v-model.number="item.quantidadeForma" type="number" min="1" step="1" :max="opcaoAtual(item)?.disponivel" required />
               <small v-if="opcaoAtual(item)">{{ item.quantidadeForma }} {{ rotuloTipo(opcaoAtual(item)!.tipo, item.quantidadeForma !== 1).toLowerCase() }}</small>
+            </label>
+
+            <label v-if="item.modo === 'FISICA'" class="field item-quantity">
+              <span>Quantidade física</span>
+              <input v-model.number="item.quantidadeFisica" type="number" min="0.000001" step="any" required />
+              <small v-if="item.unidadeFisica && unidadeBase(item)">
+                Equivale a {{ formatarQuantidade(quantidadeCanonica(item)) }} {{ rotulosUnidade[unidadeBase(item)!] }} na base do estoque.
+              </small>
+            </label>
+
+            <label v-if="item.modo === 'FISICA'" class="field item-unit">
+              <span>Unidade</span>
+              <select v-model="item.unidadeFisica" required>
+                <option v-for="unidade in opcoesUnidade(item)" :key="unidade" :value="unidade">
+                  {{ rotulosUnidade[unidade] }}
+                </option>
+              </select>
+              <small>A disponibilidade por lote será confirmada na aprovação.</small>
             </label>
 
             <button class="remove-item" type="button" :disabled="itens.length === 1" aria-label="Remover item" @click="removerItem(index)">×</button>
@@ -444,7 +543,7 @@ onMounted(carregarDados)
 .urgency-guidance { margin-top: 12px; padding: 10px 12px; border-left: 3px solid #dc2626; border-radius: 4px; background: #fff7f7; color: #8f2d24; font-size: 11px; line-height: 1.45; }
 .observation-field textarea { min-height: 96px; }
 .items-list { display: flex; flex-direction: column; gap: 12px; }
-.item-row { display: grid; grid-template-columns: minmax(250px, 1.25fr) minmax(250px, 1fr) 120px 38px; align-items: start; gap: 12px; padding: 14px; border: 1px solid #e5eaf1; border-radius: 8px; background: #fbfcfe; }
+.item-row { display: grid; grid-template-columns: minmax(210px, 1.2fr) minmax(165px, .85fr) minmax(210px, 1fr) minmax(130px, .7fr) 38px; align-items: start; gap: 12px; padding: 14px; border: 1px solid #e5eaf1; border-radius: 8px; background: #fbfcfe; }
 .item-row .field { align-self: start; }
 .item-row .field > small { display: block; min-height: 16px; margin-top: 6px; }
 .item-row .field + .field { margin-top: 0; }
@@ -461,3 +560,4 @@ onMounted(carregarDados)
 @media (max-width: 900px) { .item-row { grid-template-columns: 1fr 1fr; } .remove-item { width: 100%; } }
 @media (max-width: 720px) { .page-heading, .form-footer, .section-title--action, .urgency-field { align-items: stretch; flex-direction: column; } .secondary-action, .primary-action, .section-title--action button, .urgency-toggle { align-self: flex-start; } .context-grid, .item-row { grid-template-columns: 1fr; } }
 </style>
+
