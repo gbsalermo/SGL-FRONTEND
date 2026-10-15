@@ -1,4 +1,4 @@
-export type TipoEmbalagem = 'UNITARIO' | 'KIT' | 'CAIXA' | 'GARRAFA' | 'GALAO'
+export type TipoEmbalagem = 'UNITARIO' | 'FRASCO' | 'AMPOLA' | 'GARRAFA' | 'GALAO' | 'CAIXA' | 'KIT' | 'PACOTE' | 'SACO' | 'TUBO' | 'POTE' | 'PAR' | 'OUTRO'
 
 export interface EstoqueCentralResponse {
   id: string
