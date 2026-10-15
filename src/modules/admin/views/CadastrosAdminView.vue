@@ -878,7 +878,7 @@ onMounted(() => {
             <tbody>
               <tr v-for="item in laboratoriosFiltrados" :key="item.id">
                 <td><span class="status" :class="item.ativo ? 'status--active' : 'status--inactive'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td>
-                <td><strong>{{ item.nome }}</strong><small>{{ item.codigoSeg || 'SEG não definido' }} · {{ rotuloEnum(item.status) }}</small></td>
+                <td><strong>{{ item.nome }}</strong><small>{{ item.codigoSeg || 'SEG não definido' }} · {{ rotuloEnum(item.status) }}</small><small>{{ item.descricao || 'Sem descrição' }}</small></td>
                 <td>{{ unidadeNome(item.unidadeId) }}</td>
                 <td>{{ item.responsavelNome || 'Não definido' }}</td>
                 <td class="actions">
