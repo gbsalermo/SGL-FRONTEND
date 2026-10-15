@@ -1008,3 +1008,10 @@ Por decisão do responsável, a **7.6.0 vem antes de 7.6.1/7.7** para alinhar o 
 **Risco visual existente:** `src/styles/main.css` possui overrides globais de Pedidos com cores claras e `!important`, textos operacionais de 6,5–7,5px, além de CSS locais. Preferir adaptar os arquivos de origem e tokens oficiais; usar `src/components/common` em vez de classes paralelas. Dark não atinge Login. Efeitos devem continuar discretos, com blur no backdrop e modal nítido.
 
 **Estado:** auditoria e documentação publicadas, **sem alterações funcionais de Vue/CSS/DTO/Backend nesta rodada**, `npm run build` não executado. Próximo passo de implementação após contrato backend mínimo e testes do modo de retirada. Sem merge.
+
+
+### Retificação contratual da 7.6.0 — priorização física já definida (15/10/2026)
+
+Após a leitura do contrato original de Estoque §9.9/§9.13 (`Sistema-SGL/docs/CONTINUIDADE_ETAPA_7_2026-10-06.md`), o responsável apontou corretamente que não há motivo para decidir novamente a seleção física: **FEFO/FIFO entre lotes, FECHADOS para apresentações completas, ABERTOS para frações, novas aberturas apenas na falta de saldo apropriado e minimização de recipientes parcialmente abertos em pedidos grandes**. Exemplos já aprovados: 500 mL → 1 FECHADO; 200 mL → ABERTO; 700 mL → 500 FECHADO + 200 ABERTO, sempre no lote de precedência superior.
+
+`docs/ETAPA_7_6_0_AUDITORIA_FRONTEND_PADRAO_VISUAL_PEDIDOS.md` corrigido: apresentação física e quantidade decimal são **formas de informar a solicitação**; não significam criação de nova política física ou promessa automática de recipiente lacrado. O frontend só exibe e transmite a intenção e a unidade; `MovimentacaoEstoqueService` decide recipientes de forma transacional. Próximo trabalho é adequação mínima do request e UI de Pedidos, com regressão de FEFO/FIFO e tema visual SGL. **Sem modificação funcional nesta retificação, sem merge.**
