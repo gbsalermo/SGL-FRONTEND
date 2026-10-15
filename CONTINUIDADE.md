@@ -997,3 +997,14 @@ O responsável executou `npm run build` após atualizar a branch e confirmou **"
 **7.5 concluída em implementação e aceita funcionalmente:** 7.5.1 elegibilidade; 7.5.2 consultas; 7.5.3 hub de Estagiários vinculados por Atividade (aceite expresso); 7.5.4 cliente/tipos e seleção preparada no módulo `operacao`, sem modificar Pedidos/Soluções existentes. A integração do `participacaoId` ao Pedido permanece **Etapa 8**, após validação backend da escolha da participação. Detalhes em `docs/ETAPA_7_5_MAPA_IMPLEMENTACAO_FRONTEND.md` e `gbsalermo/Sistema-SGL/docs/CONTRATO_CONTEXTOS_PEDIDOS_ETAPA_8.md`.
 
 **Próximo bloco:** 7.6 massa DEV/DEMO e regressões de Produtos/Soluções/Estagiários/Projetos, suíte e boot final. QA cross-tenant/perfis, responsividade Light/Dark e segurança real ainda não foram considerados homologados. **Sem merge.**
+
+
+### Início da 7.6.0 — auditoria de Pedidos fracionados e padrão SGL (15/10/2026)
+
+Por decisão do responsável, a **7.6.0 vem antes de 7.6.1/7.7** para alinhar o Pedido convencional ao estoque físico 7.1/7.2. Antes de tocar na interface, foi feita revisão das decisões e do backend (unidade canônica, decimais, lote, recipiente, FEFO/FIFO, rastreio, concorrência, devolução) e das regras visuais atuais (fonte Inter, tokens, componentes Sgl*, dimensões, light/dark, modais, microinterações). Resultados em `docs/ETAPA_7_6_0_AUDITORIA_FRONTEND_PADRAO_VISUAL_PEDIDOS.md` e no backend `docs/ETAPA_7_6_0_AUDITORIA_CONTRATO_PEDIDOS_ESTOQUE_FISICO.md`.
+
+**Lacunas confirmadas:** NovoPedido usa inteiro de embalagens (`quantidadeForma` min=1), estimativa de embalagens pela quantidade agregada do Lote, enum de apresentação desatualizado e falta unidade física; PedidosGestao exige `Number.isInteger`/input min=1. A mudança precisa de contrato backend para diferenciar embalagem completa/lacrada e volume/massa fracionado, sem confiar na UI. **Evitar replicar FEFO/FIFO no navegador.**
+
+**Risco visual existente:** `src/styles/main.css` possui overrides globais de Pedidos com cores claras e `!important`, textos operacionais de 6,5–7,5px, além de CSS locais. Preferir adaptar os arquivos de origem e tokens oficiais; usar `src/components/common` em vez de classes paralelas. Dark não atinge Login. Efeitos devem continuar discretos, com blur no backdrop e modal nítido.
+
+**Estado:** auditoria e documentação publicadas, **sem alterações funcionais de Vue/CSS/DTO/Backend nesta rodada**, `npm run build` não executado. Próximo passo de implementação após contrato backend mínimo e testes do modo de retirada. Sem merge.
