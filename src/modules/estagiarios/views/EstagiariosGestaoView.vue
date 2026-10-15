@@ -291,19 +291,29 @@ function nomesCulturas(participacao: VinculoEstagioAtividadeResponse) {
     : 'Nenhuma cultura associada'
 }
 
-function fimReferenciaParticipacao(participacao: VinculoEstagioAtividadeResponse) {
-  return participacao.dataFimParticipacao
-    || participacao.atividadeDataFim
-    || participacao.projetoDataFim
-    || null
+/** Prazo do plano institucional — nunca confundir com encerramento efetivo da participação. */
+function prazoReferenciaParticipacao(participacao: VinculoEstagioAtividadeResponse) {
+  if (participacao.atividadeDataFim) return {
+    rotulo: 'Prazo da Atividade',
+    data: participacao.atividadeDataFim,
+  }
+  if (participacao.projetoDataFim) return {
+    rotulo: 'Prazo do Projeto',
+    data: participacao.projetoDataFim,
+  }
+  return { rotulo: 'Prazo de referência', data: null }
 }
 
-function usaPrazoDoProjeto(participacao: VinculoEstagioAtividadeResponse) {
-  return Boolean(
-    participacao.ativa
-    && !participacao.atividadeDataFim
-    && participacao.projetoDataFim,
-  )
+function inicioProgramadoParticipacao(participacao: VinculoEstagioAtividadeResponse) {
+  return participacao.ativa
+    && Boolean(participacao.dataInicioParticipacao)
+    && participacao.dataInicioParticipacao > hojeIso()
+}
+
+function rotuloEstadoParticipacao(participacao: VinculoEstagioAtividadeResponse) {
+  if (!participacao.ativa) return 'Participação encerrada'
+  if (inicioProgramadoParticipacao(participacao)) return 'Início programado'
+  return 'Participação em andamento'
 }
 
 function participacaoSelecionadaParaEncerrar() {
@@ -1493,15 +1503,15 @@ onMounted(carregar)
                 >
                   <div class="participation-header">
                     <div>
-                      <span class="participation-dot" :class="{ 'participation-dot--closed': !participacao.ativa }" />
+                      <span class="participation-dot" :class="{ 'participation-dot--closed': !participacao.ativa, 'participation-dot--scheduled': inicioProgramadoParticipacao(participacao) }" />
                       <strong>{{ participacao.atividadeNome || 'Atividade sem nome' }}</strong>
                     </div>
 
                     <span
                       class="participation-state"
-                      :class="{ 'participation-state--closed': !participacao.ativa }"
+                      :class="{ 'participation-state--closed': !participacao.ativa, 'participation-state--scheduled': inicioProgramadoParticipacao(participacao) }"
                     >
-                      {{ participacao.ativa ? 'Participação ativa' : 'Participação encerrada' }}
+                      {{ rotuloEstadoParticipacao(participacao) }}
                     </span>
                   </div>
 
@@ -1540,11 +1550,21 @@ onMounted(carregar)
                     </button>
                   </div>
 
-                  <div class="participation-period">
-                    {{ formatarData(participacao.dataInicioParticipacao) }}
-                    <span>até</span>
-                    {{ fimReferenciaParticipacao(participacao) ? formatarData(fimReferenciaParticipacao(participacao)) : 'atual' }}
-                    <small v-if="usaPrazoDoProjeto(participacao)">prazo do Projeto</small>
+                  <div class="participation-period" aria-label="Datas da participação">
+                    <div class="participation-period__item">
+                      <span>{{ inicioProgramadoParticipacao(participacao) ? 'Início programado' : 'Início da participação' }}</span>
+                      <strong>{{ formatarData(participacao.dataInicioParticipacao) }}</strong>
+                    </div>
+                    <div class="participation-period__item">
+                      <span>{{ prazoReferenciaParticipacao(participacao).rotulo }}</span>
+                      <strong>{{ prazoReferenciaParticipacao(participacao).data ? formatarData(prazoReferenciaParticipacao(participacao).data) : 'Não definido' }}</strong>
+                      <small>Previsão institucional, não encerramento</small>
+                    </div>
+                    <div class="participation-period__item">
+                      <span>Encerramento efetivo</span>
+                      <strong>{{ participacao.dataFimParticipacao ? formatarData(participacao.dataFimParticipacao) : 'Não registrado' }}</strong>
+                      <small v-if="participacao.ativa">Participação ainda aberta</small>
+                    </div>
                   </div>
                 </article>
               </div>
@@ -1901,6 +1921,7 @@ onMounted(carregar)
           <label class="action-field">
             <span>Início da participação</span>
             <input v-model="atividadeInicio" type="date" />
+            <small>Você pode agendar uma data futura. O contexto só ficará elegível quando a participação começar.</small>
           </label>
 
           <label class="action-field">
@@ -1964,6 +1985,7 @@ onMounted(carregar)
           <label class="action-field">
             <span>Início da participação</span>
             <input v-model="participacaoEdicaoInicio" type="date" />
+            <small>A data pode ser corrigida, inclusive para um início futuro, respeitando a vigência do vínculo e da Atividade.</small>
           </label>
 
           <label class="action-field">
@@ -2039,8 +2061,9 @@ onMounted(carregar)
           </div>
 
           <label class="action-field">
-            <span>Data final da participação</span>
+            <span>Data de encerramento efetivo</span>
             <input v-model="participacaoDataFim" type="date" />
+            <small>Esta data registra o fim da participação do Estagiário; não é o prazo previsto do Projeto ou da Atividade.</small>
             <small>
               A regra da Etapa 6 continua válida: a última participação ativa não pode ser encerrada
               enquanto o vínculo de estágio estiver em andamento.
@@ -3905,6 +3928,62 @@ tbody tr:hover .history-preview {
 
   .culture-create-row {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Etapa 7.5.3 — datas institucionais separadas do fim efetivo de participação. */
+.participation-card .participation-period {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin: 13px 0 0 17px;
+  font-weight: normal;
+}
+
+.participation-period__item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+}
+
+.participation-card .participation-period__item > span {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+.participation-card .participation-period__item > strong {
+  color: var(--sgl-text);
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+.participation-card .participation-period__item > small {
+  margin: 0;
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  font-weight: normal;
+  line-height: 1.4;
+}
+
+.participation-card .participation-dot--scheduled {
+  background: var(--sgl-primary);
+}
+
+.participation-card .participation-state--scheduled {
+  background: color-mix(in srgb, var(--sgl-primary) 10%, var(--sgl-surface));
+  color: var(--sgl-primary);
+}
+
+@media (max-width: 920px) {
+  .participation-card .participation-period {
+    grid-template-columns: 1fr;
+    margin-left: 0;
   }
 }
 
