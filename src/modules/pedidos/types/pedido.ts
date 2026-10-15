@@ -6,6 +6,8 @@ export type StatusPedido =
   | 'ENTREGUE'
   | 'CANCELADO'
 
+export type UnidadeMedidaPedido = 'ML' | 'L' | 'MG' | 'G' | 'KG' | 'METRO' | 'UNIDADE' | 'REACAO'
+
 export type TipoEmbalagemPedido = 'UNITARIO' | 'KIT' | 'CAIXA' | 'GARRAFA' | 'GALAO'
 
 export interface ItemPedidoResponse {
@@ -23,9 +25,9 @@ export interface ItemPedidoResponse {
   quantidadeAprovada: number | null
   unidadeMedidaSolicitada?: string | null
   quantidadeNaUnidadeSolicitada?: number | null
-  tipoEmbalagemSolicitada: TipoEmbalagemPedido
-  quantidadeEmbalagensSolicitada: number
-  multiplicadorSolicitado: number
+  tipoEmbalagemSolicitada: TipoEmbalagemPedido | null
+  quantidadeEmbalagensSolicitada: number | null
+  multiplicadorSolicitado: number | null
 }
 
 export interface PedidoResponse {
@@ -62,9 +64,10 @@ export interface PedidoRequest {
   itens: Array<{
     produtoId: string
     quantidadeSolicitada: number
-    tipoEmbalagemSolicitada: TipoEmbalagemPedido
-    quantidadeEmbalagensSolicitada: number
-    multiplicadorSolicitado: number
+    unidadeMedidaSolicitada?: UnidadeMedidaPedido | null
+    tipoEmbalagemSolicitada: TipoEmbalagemPedido | null
+    quantidadeEmbalagensSolicitada: number | null
+    multiplicadorSolicitado: number | null
   }>
 }
 
@@ -94,6 +97,7 @@ export interface EstoqueCentralResponse {
   produtoId: string
   produtoNome: string
   produtoUnidadeArmazenamento: string
+  produtoUnidadeMedida: UnidadeMedidaPedido
   quantidadeAtual: number
   quantidadeMinima: number
   ativo: boolean
@@ -108,6 +112,7 @@ export interface LotePedidoResponse {
   apresentacao: string | null
   quantidadeApresentacoes: number | null
   conteudoPorApresentacao: number | null
+  unidadeBase: UnidadeMedidaPedido
   fracionavel: boolean | null
   quantidadeDisponivel: number
   dataValidade: string | null
