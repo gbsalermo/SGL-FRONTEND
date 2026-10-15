@@ -3403,6 +3403,35 @@ tbody tr:hover .history-preview {
   font-weight: 400;
 }
 
+/* Alinha a referência institucional e sua ação na mesma linha. */
+.scholarship-reference-edit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.scholarship-reference-edit input {
+  min-width: 0;
+}
+
+.scholarship-reference-edit .drawer-action {
+  min-height: 45px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .scholarship-reference-edit {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .scholarship-reference-edit .drawer-action {
+    width: 100%;
+  }
+}
+
 .scholarship-mode-selector {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
