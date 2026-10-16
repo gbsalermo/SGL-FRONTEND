@@ -15,6 +15,7 @@ export interface ItemPedidoResponse {
   produtoId: string
   produtoNome: string
   produtoUnidadeArmazenamento: string
+  produtoUnidadeMedida?: UnidadeMedidaPedido | null
   produtoRisco: string | null
   produtoTipoRisco: string | null
   produtoDescricaoRisco: string | null
