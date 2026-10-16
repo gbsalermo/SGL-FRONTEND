@@ -227,17 +227,22 @@ function opcoesRetirada(item: ItemForm): OpcaoRetirada[] {
   const lotes = lotesDoItem(item)
   const opcoes = new Map<string, OpcaoRetirada>()
 
-  // UNITARIO é uma apresentação física cadastrada, não sinônimo de
-  // quantidade fracionável. Produtos em frascos devem usar o modo por medida
-  // para solicitar mL/g, sem fabricar uma opção "unidade" inexistente.
-  const saldoUnitario = lotes
-    .filter((lote) => lote.tipoEmbalagem === 'UNITARIO')
+  // Para produtos contáveis, UNITARIO representa a menor unidade de consumo
+  // (uma reação ou uma unidade), inclusive quando ela está dentro de um KIT.
+  // Para produtos medidos em massa/volume, retirar parte do frasco pertence ao
+  // modo "Informar medida"; não criar uma apresentação unitária fictícia.
+  const base = unidadeBase(item)
+  const contavel = base === 'UNIDADE' || base === 'REACAO'
+  const saldoIndividual = lotes
+    .filter((lote) => lote.tipoEmbalagem === 'UNITARIO'
+      || (contavel && lote.fracionavel === true))
     .reduce((total, lote) => total + lote.quantidadeDisponivel, 0)
 
-  if (saldoUnitario > 0) {
+  if (saldoIndividual >= 1) {
     opcoes.set('UNITARIO::1', {
       chave: 'UNITARIO::1', tipo: 'UNITARIO', multiplicador: 1,
-      label: 'Unidade individual', disponivel: Math.floor(saldoUnitario),
+      label: base === 'REACAO' ? 'Reação individual' : 'Unidade individual',
+      disponivel: Math.floor(saldoIndividual),
     })
   }
 
