@@ -32,6 +32,13 @@ export const estoqueService = {
     return data
   },
 
+  async atualizarMinimo(item: EstoqueCentralResponse, quantidadeMinima: number, minimoTipoEmbalagem: import('@/modules/estoque/types/estoque').TipoEmbalagem | null, minimoMultiplicador: number | null) {
+    const { data } = await http.put<EstoqueCentralResponse>(`/v1/estoque-central/${item.id}`, {
+      unidadeId: item.unidadeId, produtoId: item.produtoId, quantidadeMinima,
+      minimoTipoEmbalagem, minimoMultiplicador, ativo: item.ativo,
+    })
+    return data
+  },
   async listarEstoqueBaixo(unidadeId: string) {
     const { data } = await http.get<EstoqueCentralResponse[]>('/v1/estoque-central/estoque-baixo', { params: { unidadeId } })
     return data
