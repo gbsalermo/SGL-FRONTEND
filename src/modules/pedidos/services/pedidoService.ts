@@ -12,6 +12,7 @@ import type {
 
 type ProdutoDetalhe = {
   id: string
+  unidadeMedida: import('@/modules/pedidos/types/pedido').UnidadeMedidaPedido
   risco: string | null
   tipoRisco: string | null
   descricaoRisco: string | null
@@ -48,7 +49,7 @@ function descricaoOperacionalProduto(item: PedidoResponse['itens'][number]) {
 }
 
 function itemSemContextoProduto(item: PedidoResponse['itens'][number]) {
-  return item.produtoRisco === undefined || item.produtoPerecivel === undefined || item.produtoTipoRisco === undefined
+  return !item.produtoUnidadeMedida || item.produtoRisco === undefined || item.produtoPerecivel === undefined || item.produtoTipoRisco === undefined
 }
 
 function loteUtilizavel(lote: LotePedidoResponse) {
@@ -80,6 +81,7 @@ async function enriquecerItensComProduto(pedido: PedidoResponse): Promise<Pedido
       if (!produto) return item
       return {
         ...item,
+        produtoUnidadeMedida: produto.unidadeMedida,
         produtoRisco: produto.risco,
         produtoTipoRisco: produto.tipoRisco,
         produtoDescricaoRisco: produto.descricaoRisco,
@@ -108,17 +110,24 @@ async function aplicarContextoOperacionalLista(pedidos: PedidoResponse[]) {
 }
 
 export const pedidoService = {
+  /** Visão geral: inclui Produtos e Soluções, sem aplicar regras de embalagem às Soluções. */
+  async listarTodosComSolucoes() {
+    const { data } = await http.get<PedidoResponse[]>('/v1/pedidos')
+    return Promise.all(data.map((pedido) => pedido.tipo === 'SOLUCAO'
+      ? Promise.resolve(pedido)
+      : aplicarContextoOperacional(pedido)))
+  },
   async listarTodos() {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos')
-    return aplicarContextoOperacionalLista(data)
+    return aplicarContextoOperacionalLista(data.filter((p) => p.tipo !== 'SOLUCAO'))
   },
   async listarPorStatus(status: StatusPedido) {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-status', { params: { status } })
-    return aplicarContextoOperacionalLista(data)
+    return aplicarContextoOperacionalLista(data.filter((p) => p.tipo !== 'SOLUCAO'))
   },
   async listarPorUrgencia(urgente: boolean) {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-urgencia', { params: { urgente } })
-    return aplicarContextoOperacionalLista(data)
+    return aplicarContextoOperacionalLista(data.filter((p) => p.tipo !== 'SOLUCAO'))
   },
   async buscarPorId(id: string) {
     const { data } = await http.get<PedidoResponse>(`/v1/pedidos/${id}`)
@@ -142,7 +151,7 @@ export const pedidoService = {
   },
   async listarPorUsuario(usuarioId: string) {
     const { data } = await http.get<PedidoResponse[]>('/v1/pedidos/por-usuario', { params: { usuarioId } })
-    return aplicarContextoOperacionalLista(data)
+    return aplicarContextoOperacionalLista(data.filter((p) => p.tipo !== 'SOLUCAO'))
   },
   async criar(payload: PedidoRequest) {
     const { data } = await http.post<PedidoResponse>('/v1/pedidos', payload)

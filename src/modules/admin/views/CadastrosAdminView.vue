@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import CatalogosResiduosSolucoesView from '@/modules/admin/views/CatalogosResiduosSolucoesView.vue'
 
 import type { PerfilUsuario } from '@/modules/auth/types/session'
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
@@ -29,7 +31,7 @@ import type {
 } from '@/modules/admin/types/cadastros'
 import { useSessionStore } from '@/stores/session'
 
-type AbaCadastro = 'laboratorios' | 'projetos' | 'produtos' | 'classes-residuo' | 'locais-armazenamento' | 'permissoes'
+type AbaCadastro = 'laboratorios' | 'projetos' | 'produtos' | 'residuos-solucoes' | 'classes-residuo' | 'locais-armazenamento' | 'permissoes'
 type ModalCadastro = 'laboratorio' | 'projeto' | 'produto' | 'classe-residuo' | 'local-armazenamento' | null
 
 interface LaboratorioForm {
@@ -90,6 +92,7 @@ interface LocalArmazenamentoForm {
 }
 
 const session = useSessionStore()
+const route = useRoute()
 const aba = ref<AbaCadastro>('laboratorios')
 const unidades = ref<UnidadeCadastro[]>([])
 const laboratorios = ref<LaboratorioCadastro[]>([])
@@ -160,6 +163,7 @@ const abas: Array<{ id: AbaCadastro; titulo: string; descricao: string }> = [
   { id: 'laboratorios', titulo: 'Laboratórios', descricao: 'Estrutura, unidade e responsável' },
   { id: 'projetos', titulo: 'Projetos', descricao: 'Eixo operacional, Código SEG e contexto laboratorial' },
   { id: 'produtos', titulo: 'Produtos', descricao: 'Catálogo-base de materiais do SGL' },
+  { id: 'residuos-solucoes', titulo: 'Resíduos e Soluções', descricao: 'Modelos reutilizáveis e composições por Unidade' },
   { id: 'classes-residuo', titulo: 'Classes de resíduo', descricao: 'Classificações disponíveis para a Unidade' },
   { id: 'locais-armazenamento', titulo: 'Locais de armazenamento', descricao: 'Locais temporários disponíveis para Resíduos' },
   { id: 'permissoes', titulo: 'Permissões', descricao: 'Perfis de acesso dos usuários existentes' },
@@ -783,7 +787,11 @@ async function carregar() {
   }
 }
 
-onMounted(carregar)
+onMounted(() => {
+  const secao = route.query.secao
+  if (secao === 'residuos-solucoes') aba.value = 'residuos-solucoes'
+  void carregar()
+})
 </script>
 
 <template>
@@ -839,16 +847,17 @@ onMounted(carregar)
             <p v-if="aba === 'laboratorios'">Cadastre a estrutura dos laboratórios e defina o responsável institucional.</p>
             <p v-else-if="aba === 'projetos'">Mantenha os projetos associados aos laboratórios.</p>
             <p v-else-if="aba === 'produtos'">Mantenha o catálogo de produtos; estoque e lotes continuam em suas áreas operacionais.</p>
+            <p v-else-if="aba === 'residuos-solucoes'">Gerencie os modelos de resíduos e soluções em um mesmo espaço administrativo. Pedidos e preparações permanecem nas áreas operacionais.</p>
             <p v-else-if="aba === 'classes-residuo'">Mantenha as classes disponíveis para classificação de resíduos nesta Unidade.</p>
             <p v-else-if="aba === 'locais-armazenamento'">Mantenha os locais temporários que poderão ser selecionados no fluxo de Resíduos.</p>
             <p v-else>Usuários são criados pelo fluxo institucional. Aqui é alterado somente o perfil de acesso.</p>
           </div>
-          <button v-if="aba !== 'permissoes'" class="btn btn--primary" type="button" @click="abrirNovo">
+          <button v-if="aba !== 'permissoes' && aba !== 'residuos-solucoes'" class="btn btn--primary" type="button" @click="abrirNovo">
             + Novo {{ rotuloNovoCadastro }}
           </button>
         </header>
 
-        <div class="toolbar">
+        <div v-if="aba !== 'residuos-solucoes'" class="toolbar">
           <label class="search-field">
             <span>Buscar</span>
             <input v-model="busca" type="search" :placeholder="aba === 'permissoes' ? 'Nome, e-mail, unidade, laboratório ou perfil...' : 'Nome, código, responsável ou descrição...'" />
@@ -859,7 +868,9 @@ onMounted(carregar)
           </label>
         </div>
 
-        <div v-if="carregando" class="empty-state">Carregando dados...</div>
+        <div v-if="carregando && aba !== 'residuos-solucoes'" class="empty-state">Carregando dados...</div>
+
+        <CatalogosResiduosSolucoesView v-else-if="aba === 'residuos-solucoes'" :embedded="true" />
 
         <div v-else-if="aba === 'laboratorios'" class="table-wrap">
           <table>
@@ -867,7 +878,7 @@ onMounted(carregar)
             <tbody>
               <tr v-for="item in laboratoriosFiltrados" :key="item.id">
                 <td><span class="status" :class="item.ativo ? 'status--active' : 'status--inactive'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td>
-                <td><strong>{{ item.nome }}</strong><small>{{ item.codigoSeg || 'SEG não definido' }} · {{ rotuloEnum(item.status) }}</small></td>
+                <td><strong>{{ item.nome }}</strong><small>{{ item.descricao || 'Sem descrição' }}</small></td>
                 <td>{{ unidadeNome(item.unidadeId) }}</td>
                 <td>{{ item.responsavelNome || 'Não definido' }}</td>
                 <td class="actions">
@@ -886,7 +897,7 @@ onMounted(carregar)
             <tbody>
               <tr v-for="item in projetosFiltrados" :key="item.id">
                 <td><span class="status" :class="item.ativo ? 'status--active' : 'status--inactive'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td>
-                <td><strong>{{ item.nome }}</strong><small>{{ item.descricao || 'Sem descrição' }}</small></td>
+                <td><strong>{{ item.nome }}</strong><small>{{ item.codigoSeg || 'SEG não definido' }} · {{ rotuloEnum(item.status) }}</small><small>{{ item.descricao || 'Sem descrição' }}</small></td>
                 <td>{{ item.laboratorioNome }}</td>
                 <td>{{ item.responsavel || 'Não informado' }}</td>
                 <td>{{ formatarData(item.dataInicio) }} → {{ formatarData(item.dataFim) }}</td>

@@ -19,6 +19,8 @@ import type {
 } from '@/modules/admin/types/cadastros'
 import { useSessionStore } from '@/stores/session'
 
+defineProps<{ embedded?: boolean }>()
+
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
 
 interface ComponenteForm {
@@ -342,12 +344,12 @@ onMounted(carregar)
   <section class="models-page">
     <header class="page-header">
       <div>
-        <p>ADMINISTRAÇÃO / CADASTROS / RESÍDUOS</p>
+        <p v-if="!embedded">ADMINISTRAÇÃO / CADASTROS / RESÍDUOS E SOLUÇÕES</p>
         <h1>Modelos de resíduo</h1>
         <span>Cadastre definições reutilizáveis para acelerar a informação de resíduos recorrentes da Unidade.</span>
       </div>
       <div class="header-actions">
-        <button class="ghost" type="button" @click="router.push('/administracao/cadastros')">Voltar aos cadastros</button>
+        <button v-if="!embedded" class="ghost" type="button" @click="router.push('/administracao/cadastros')">Voltar aos cadastros</button>
         <button class="primary" type="button" @click="abrirNovo">+ Novo modelo</button>
       </div>
     </header>

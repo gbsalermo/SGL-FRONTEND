@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import { pedidoService } from '@/modules/pedidos/services/pedidoService'
 import type { MovimentacaoPedidoResponse, PedidoResponse, StatusPedido } from '@/modules/pedidos/types/pedido'
+import { exibirQuantidade } from '@/modules/solucoes/types/solucao'
 import { useSessionStore } from '@/stores/session'
 
 const route = useRoute()
@@ -18,6 +19,7 @@ const erro = ref('')
 const busca = ref('')
 const filtrosAbertos = ref(false)
 const status = ref<StatusPedido | 'TODOS'>('TODOS')
+const tipoPedido = ref<'TODOS' | 'PRODUTOS' | 'SOLUCAO'>('TODOS')
 const urgencia = ref<'TODOS' | 'URGENTE' | 'NORMAL'>('TODOS')
 const laboratorio = ref('TODOS')
 const dataInicio = ref('')
@@ -38,6 +40,7 @@ const statusOptions: Array<{ label: string; value: StatusPedido | 'TODOS' }> = [
   { label: 'Todos', value: 'TODOS' },
   { label: 'Pendentes', value: 'PENDENTE' },
   { label: 'Aprovados', value: 'APROVADO' },
+  { label: 'Em preparação', value: 'EM_PREPARACAO' },
   { label: 'Rejeitados', value: 'REJEITADO' },
   { label: 'Entregues', value: 'ENTREGUE' },
   { label: 'Cancelados', value: 'CANCELADO' },
@@ -51,7 +54,7 @@ const pedidoAlvo = computed(() => {
 const totais = computed(() => ({
   pendentes: pedidos.value.filter((pedido) => pedido.status === 'PENDENTE').length,
   urgentes: pedidos.value.filter((pedido) => pedido.urgente).length,
-  aprovados: pedidos.value.filter((pedido) => pedido.status === 'APROVADO').length,
+  aprovados: pedidos.value.filter((pedido) => pedido.status === 'APROVADO' || pedido.status === 'EM_PREPARACAO').length,
   entregues: pedidos.value.filter((pedido) => pedido.status === 'ENTREGUE').length,
 }))
 
@@ -71,6 +74,7 @@ const pedidosFiltrados = computed(() => {
 
   const filtrados = pedidos.value.filter((pedido) => {
     if (status.value !== 'TODOS' && pedido.status !== status.value) return false
+    if (tipoPedido.value !== 'TODOS' && (pedido.tipo ?? 'PRODUTOS') !== tipoPedido.value) return false
     if (urgencia.value === 'URGENTE' && !pedido.urgente) return false
     if (urgencia.value === 'NORMAL' && pedido.urgente) return false
     if (laboratorio.value !== 'TODOS' && pedido.laboratorioNome !== laboratorio.value) return false
@@ -79,7 +83,7 @@ const pedidosFiltrados = computed(() => {
     if (fim !== null && dataPedido > fim) return false
     if (!termo) return true
 
-    return [pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.status, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
+    return [pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.status, pedido.tipo, pedido.nomeSolucao, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
       .filter(Boolean).join(' ').toLowerCase().includes(termo)
   })
 
@@ -103,15 +107,66 @@ function produtosResumo(pedido: PedidoResponse) {
   return `${nomes.slice(0, 2).join(', ')} +${nomes.length - 2}`
 }
 
+function modoMedida(item: PedidoResponse['itens'][number]) {
+  return item.unidadeMedidaSolicitada != null
+}
+function quantidadeLegivel(valor: number) {
+  return exibirQuantidade(valor)
+}
+function rotuloMedida(unidade: string | null | undefined) {
+  const rotulos: Record<string, string> = {
+    ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg',
+    METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
+  }
+  return unidade ? rotulos[unidade] ?? unidade : ''
+}
+function medidaDeAprovacao(item: PedidoResponse['itens'][number]) {
+  return rotuloMedida(item.produtoUnidadeMedida ?? item.unidadeMedidaSolicitada) || 'unidade do produto'
+}
+function quantidadeOriginal(item: PedidoResponse['itens'][number]) {
+  return modoMedida(item)
+    ? `${quantidadeLegivel(item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada)} ${rotuloMedida(item.unidadeMedidaSolicitada)}`
+    : `${quantidadeLegivel(item.quantidadeSolicitada)} ${medidaDeAprovacao(item)}`
+}
+function quantidadeEmbalagens(item: PedidoResponse['itens'][number]) {
+  return item.quantidadeEmbalagensSolicitada ?? (
+    item.multiplicadorSolicitado && item.multiplicadorSolicitado > 0
+      ? item.quantidadeSolicitada / item.multiplicadorSolicitado
+      : item.quantidadeSolicitada
+  )
+}
+function multiplicadorEmbalagem(item: PedidoResponse['itens'][number]) {
+  return item.tipoEmbalagemSolicitada === 'UNITARIO' ? 1 : item.multiplicadorSolicitado ?? 0
+}
+function quantidadeCanonicaAprovacao(item: PedidoResponse['itens'][number], valor: number) {
+  return modoMedida(item) ? valor : Number((valor * multiplicadorEmbalagem(item)).toFixed(6))
+}
+function nomeEmbalagem(item: PedidoResponse['itens'][number], quantidade: number) {
+  const nomes: Record<string, [string, string]> = {
+    UNITARIO: ['unidade', 'unidades'], FRASCO: ['frasco', 'frascos'],
+    AMPOLA: ['ampola', 'ampolas'], GARRAFA: ['garrafa', 'garrafas'],
+    GALAO: ['galão', 'galões'], CAIXA: ['caixa', 'caixas'], KIT: ['kit', 'kits'],
+    PACOTE: ['pacote', 'pacotes'], SACO: ['saco', 'sacos'], TUBO: ['tubo', 'tubos'],
+    POTE: ['pote', 'potes'], PAR: ['par', 'pares'], OUTRO: ['embalagem', 'embalagens'],
+  }
+  const [singular, plural] = nomes[item.tipoEmbalagemSolicitada ?? 'UNITARIO'] ?? nomes.UNITARIO!
+  return quantidade === 1 ? singular : plural
+}
 function formaSolicitada(item: PedidoResponse['itens'][number]) {
+  if (modoMedida(item)) return quantidadeOriginal(item)
   const rotulos: Record<string, [string, string]> = {
-    UNITARIO: ['unidade', 'unidades'], KIT: ['kit', 'kits'], CAIXA: ['caixa', 'caixas'], GARRAFA: ['garrafa', 'garrafas'], GALAO: ['galão', 'galões'],
+    UNITARIO: ['unidade', 'unidades'], FRASCO: ['frasco', 'frascos'],
+    AMPOLA: ['ampola', 'ampolas'], GARRAFA: ['garrafa', 'garrafas'],
+    GALAO: ['galão', 'galões'], CAIXA: ['caixa', 'caixas'],
+    KIT: ['kit', 'kits'], PACOTE: ['pacote', 'pacotes'],
+    SACO: ['saco', 'sacos'], TUBO: ['tubo', 'tubos'],
+    POTE: ['pote', 'potes'], PAR: ['par', 'pares'], OUTRO: ['embalagem', 'embalagens'],
   }
   const quantidade = item.quantidadeEmbalagensSolicitada ?? item.quantidadeSolicitada
-  const [singular, plural] = rotulos[item.tipoEmbalagemSolicitada] ?? ['unidade', 'unidades']
-  const nome = quantidade === 1 ? singular : plural
-  if (item.tipoEmbalagemSolicitada === 'UNITARIO') return `${quantidade} ${nome}`
-  return `${quantidade} ${nome} · ${item.multiplicadorSolicitado} unit. cada`
+  const [singular, plural] = rotulos[item.tipoEmbalagemSolicitada ?? 'UNITARIO'] ?? ['unidade', 'unidades']
+  if (item.tipoEmbalagemSolicitada === 'UNITARIO') return quantidadeOriginal(item)
+  const apresentacao = quantidade === 1 ? singular : plural
+  return `${quantidadeLegivel(quantidade)} ${apresentacao} de ${quantidadeLegivel(item.multiplicadorSolicitado ?? 1)} ${medidaDeAprovacao(item)}`
 }
 
 function movimentosDoItem(pedidoId: string, produtoId: string) {
@@ -139,7 +194,13 @@ function limparAcao() {
 }
 
 function prepararPedido(pedido: PedidoResponse) {
-  quantidadesAprovadas.value = Object.fromEntries(pedido.itens.map((item) => [item.id, item.quantidadeAprovada ?? item.quantidadeSolicitada]))
+  quantidadesAprovadas.value = Object.fromEntries(pedido.itens.map((item) => [
+    item.id, modoMedida(item)
+      ? item.quantidadeAprovada ?? item.quantidadeSolicitada
+      : item.quantidadeAprovada != null
+        ? item.quantidadeAprovada / multiplicadorEmbalagem(item)
+        : quantidadeEmbalagens(item),
+  ]))
   limparAcao()
 }
 
@@ -150,7 +211,7 @@ async function alternarDetalhe(pedido: PedidoResponse) {
     return
   }
   pedidoExpandido.value = pedido.id
-  prepararPedido(pedido)
+  if (pedido.tipo !== 'SOLUCAO') prepararPedido(pedido)
   await carregarMovimentacoesPedido(pedido)
 }
 
@@ -160,7 +221,7 @@ async function abrirPedidoDaRota() {
   if (!pedido) return
 
   pedidoExpandido.value = pedido.id
-  prepararPedido(pedido)
+  if (pedido.tipo !== 'SOLUCAO') prepararPedido(pedido)
   await carregarMovimentacoesPedido(pedido)
 
   requestAnimationFrame(() => {
@@ -182,37 +243,41 @@ function atualizarPedido(atualizado: PedidoResponse) {
 }
 
 async function aprovar(pedido: PedidoResponse) {
+  if (pedido.tipo === 'SOLUCAO') return
   erroAcao.value = ''
   sucessoAcao.value = ''
   const aprovadorId = session.usuario?.id
   if (!aprovadorId) return void (erroAcao.value = 'Usuário aprovador não identificado na sessão.')
 
-  const itens = pedido.itens.map((item) => ({ itemId: item.id, quantidadeAprovada: Number(quantidadesAprovadas.value[item.id]) }))
+  const itens = pedido.itens.map((item) => ({
+    itemId: item.id,
+    quantidadeAprovada: quantidadeCanonicaAprovacao(item, Number(quantidadesAprovadas.value[item.id])),
+  }))
 
-  // Correção de bug: quando o item não é UNITARIO, "multiplicadorSolicitado"
-  // é obrigatório para a conta de resto (%) fazer sentido. Antes, se esse
-  // campo viesse nulo/indefinido da API, "quantidade % undefined" resultava
-  // em NaN, o que sempre marcava o item como inválido — mas com a MESMA
-  // mensagem genérica usada para quantidade errada, confundindo quem está
-  // aprovando (parecia um erro de digitação do usuário, quando na verdade é
-  // um dado incompleto vindo do backend).
+  // Pedidos por medida não possuem embalagem ou multiplicador.
+  // Pedidos por apresentação preservam o contrato legado e exigem multiplicador.
   const itemComEmbalagemIncompleta = pedido.itens.find(
-    (item) => item.tipoEmbalagemSolicitada !== 'UNITARIO'
-      && (item.multiplicadorSolicitado === null || item.multiplicadorSolicitado === undefined || item.multiplicadorSolicitado <= 0),
+    (item) => !modoMedida(item) && item.tipoEmbalagemSolicitada !== 'UNITARIO'
+      && (item.multiplicadorSolicitado == null || item.multiplicadorSolicitado <= 0),
   )
   if (itemComEmbalagemIncompleta) {
     erroAcao.value = `O item "${itemComEmbalagemIncompleta.produtoNome}" está com a embalagem solicitada incompleta (sem multiplicador definido) e não pode ser aprovado. Contate o suporte.`
     return
   }
 
-  const invalido = itens.some((aprovacao, index) => {
-    const item = pedido.itens[index]!
-    if (!Number.isInteger(aprovacao.quantidadeAprovada) || aprovacao.quantidadeAprovada < 1 || aprovacao.quantidadeAprovada > item.quantidadeSolicitada) return true
-    return item.tipoEmbalagemSolicitada !== 'UNITARIO' && aprovacao.quantidadeAprovada % item.multiplicadorSolicitado !== 0
+  const invalido = pedido.itens.some((item, index) => {
+    const valorDigitado = Number(quantidadesAprovadas.value[item.id])
+    const totalCanonico = itens[index]!.quantidadeAprovada
+    if (!Number.isFinite(valorDigitado) || valorDigitado <= 0) return true
+    if (!Number.isFinite(totalCanonico) || totalCanonico <= 0
+        || totalCanonico > item.quantidadeSolicitada + 1e-9) return true
+    if (Math.abs(totalCanonico - Number(totalCanonico.toFixed(6))) > 1e-9) return true
+    if (modoMedida(item)) return false
+    return !Number.isInteger(valorDigitado) || valorDigitado > quantidadeEmbalagens(item)
   })
 
   if (invalido) {
-    erroAcao.value = 'As quantidades aprovadas devem respeitar a quantidade solicitada e a embalagem escolhida pelo solicitante.'
+    erroAcao.value = 'Confira as quantidades: informe embalagens inteiras ou medidas com até seis casas decimais, sem exceder o solicitado.'
     return
   }
 
@@ -232,6 +297,7 @@ async function aprovar(pedido: PedidoResponse) {
 }
 
 async function confirmarAcaoJustificada(pedido: PedidoResponse) {
+  if (pedido.tipo === 'SOLUCAO') return
   erroAcao.value = ''
   sucessoAcao.value = ''
   const motivo = justificativa.value.trim()
@@ -255,6 +321,7 @@ async function confirmarAcaoJustificada(pedido: PedidoResponse) {
 }
 
 async function entregar(pedido: PedidoResponse) {
+  if (pedido.tipo === 'SOLUCAO') return
   erroAcao.value = ''
   sucessoAcao.value = ''
   if (!window.confirm('Confirma que os materiais deste pedido foram entregues?')) return
@@ -269,7 +336,7 @@ async function entregar(pedido: PedidoResponse) {
 }
 
 function limparFiltros() {
-  busca.value = ''; status.value = 'TODOS'; urgencia.value = 'TODOS'; laboratorio.value = 'TODOS'; dataInicio.value = ''; dataFim.value = ''; ordenarPor.value = 'DATA'; direcao.value = 'DESC'
+  busca.value = ''; status.value = 'TODOS'; tipoPedido.value = 'TODOS'; urgencia.value = 'TODOS'; laboratorio.value = 'TODOS'; dataInicio.value = ''; dataFim.value = ''; ordenarPor.value = 'DATA'; direcao.value = 'DESC'
   pedidoExpandido.value = null
   if (Object.keys(route.query).length > 0) router.replace({ path: '/pedidos' })
 }
@@ -278,7 +345,7 @@ async function carregar() {
   carregando.value = true
   erro.value = ''
   try {
-    pedidos.value = await pedidoService.listarTodos()
+    pedidos.value = await pedidoService.listarTodosComSolucoes()
     await abrirPedidoDaRota()
   } catch {
     erro.value = 'Não foi possível carregar os pedidos. Verifique a conexão com a API.'
@@ -289,9 +356,14 @@ async function carregar() {
 
 watch(() => route.query.status, (valor) => {
   const statusRota = typeof valor === 'string' ? valor.toUpperCase() : ''
-  const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
+  const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'EM_PREPARACAO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
   status.value = validos.includes(statusRota as StatusPedido) ? statusRota as StatusPedido : 'TODOS'
   if (status.value !== 'TODOS') filtrosAbertos.value = true
+}, { immediate: true })
+
+watch(() => route.query.tipo, (valor) => {
+  tipoPedido.value = valor === 'SOLUCAO' || valor === 'PRODUTOS' ? valor : 'TODOS'
+  if (tipoPedido.value !== 'TODOS') filtrosAbertos.value = true
 }, { immediate: true })
 
 watch(() => route.query.urgencia, (valor) => {
@@ -318,7 +390,7 @@ onMounted(carregar)
     <div class="gestao-summary">
       <article><span>Pendentes</span><strong>{{ totais.pendentes }}</strong><small>Aguardando análise</small></article>
       <article :class="{ 'gestao-summary__urgent': totais.urgentes > 0 }"><span>Urgentes</span><strong>{{ totais.urgentes }}</strong><small>Marcação informativa</small></article>
-      <article><span>Aprovados</span><strong>{{ totais.aprovados }}</strong><small>Aguardando entrega</small></article>
+      <article><span>Em atendimento</span><strong>{{ totais.aprovados }}</strong><small>Aprovados ou em preparação</small></article>
       <article><span>Entregues</span><strong>{{ totais.entregues }}</strong><small>Concluídos</small></article>
     </div>
 
@@ -328,6 +400,7 @@ onMounted(carregar)
         <button class="filter-toggle" type="button" :aria-expanded="filtrosAbertos" @click="filtrosAbertos = !filtrosAbertos"><span>Filtros</span><strong>{{ filtrosAbertos ? '⌃' : '⌄' }}</strong></button>
       </div>
       <div v-if="filtrosAbertos" class="gestao-filter-grid gestao-filter-grid--advanced">
+        <label><span>Tipo de pedido</span><select v-model="tipoPedido"><option value="TODOS">Produtos e soluções</option><option value="PRODUTOS">Somente produtos</option><option value="SOLUCAO">Somente soluções</option></select></label>
         <label><span>Status</span><select v-model="status"><option v-for="option in statusOptions" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>
         <label><span>Urgência</span><select v-model="urgencia"><option value="TODOS">Todos</option><option value="URGENTE">Somente urgentes</option><option value="NORMAL">Somente normais</option></select></label>
         <label><span>Laboratório</span><select v-model="laboratorio"><option value="TODOS">Todos os laboratórios</option><option v-for="nome in laboratorios" :key="nome" :value="nome">{{ nome }}</option></select></label>
@@ -345,13 +418,13 @@ onMounted(carregar)
 
     <div v-else class="gestao-table-wrap">
       <table class="gestao-table">
-        <thead><tr><th>Data</th><th>Solicitante / Projeto</th><th>Produtos</th><th>Laboratório</th><th>Status</th><th>Urgência</th><th></th></tr></thead>
+        <thead><tr><th>Data</th><th>Solicitante / Projeto</th><th>Pedido / Itens</th><th>Laboratório</th><th>Status</th><th>Urgência</th><th></th></tr></thead>
         <tbody>
           <template v-for="pedido in pedidosFiltrados" :key="pedido.id">
             <tr :id="`pedido-${pedido.id}`" :class="{ 'pedido-alvo': pedidoAlvo === pedido.id }">
               <td>{{ dataFormatada(pedido.dataSolicitacao) }}</td>
               <td><strong>{{ pedido.usuarioNome }}</strong><small>{{ pedido.projetoNome ?? 'Sem projeto' }}</small></td>
-              <td><strong>{{ produtosResumo(pedido) }}</strong><small>{{ pedido.itens.length }} {{ pedido.itens.length === 1 ? 'item' : 'itens' }}</small></td>
+              <td><strong>{{ pedido.tipo === 'SOLUCAO' ? (pedido.nomeSolucao || 'Solução personalizada') : produtosResumo(pedido) }}</strong><small><span class="pedido-type-chip" :data-tipo="pedido.tipo ?? 'PRODUTOS'">{{ pedido.tipo === 'SOLUCAO' ? 'Solução' : 'Produtos' }}</span> · {{ pedido.itens.length }} {{ pedido.tipo === 'SOLUCAO' ? (pedido.itens.length === 1 ? 'componente' : 'componentes') : (pedido.itens.length === 1 ? 'item' : 'itens') }}</small></td>
               <td>{{ pedido.laboratorioNome }}</td>
               <td><span class="status-chip" :data-status="pedido.status">{{ pedido.status }}</span></td>
               <td><span v-if="pedido.urgente" class="urgent-chip">URGENTE</span><span v-else class="neutral-copy">Normal</span></td>
@@ -360,26 +433,66 @@ onMounted(carregar)
 
             <tr v-if="pedidoExpandido === pedido.id" class="gestao-detail-row" :class="{ 'gestao-detail-row--alvo': pedidoAlvo === pedido.id }">
               <td colspan="7">
-                <div class="gestao-detail">
+                <div v-if="pedido.tipo === 'SOLUCAO'" class="gestao-detail gestao-detail--solucao">
+                  <div class="gestao-detail__items">
+                    <h3>Preparação solicitada: {{ pedido.nomeSolucao || 'Solução' }}</h3>
+                    <p class="gestao-solucao-explainer">Este registro pertence à Central de Soluções. A aprovação, o preparo e o cancelamento são realizados exclusivamente lá.</p>
+                    <div v-for="item in pedido.itens" :key="item.id" class="gestao-solucao-componente">
+                      <span>{{ item.produtoNome }}</span>
+                      <strong>{{ exibirQuantidade(item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada) }} {{ item.unidadeMedidaSolicitada || '' }}</strong>
+                    </div>
+                    <div v-if="pedido.instrucoesPreparoSolucao" class="gestao-solucao-cartilha"><strong>Cartilha de preparo</strong><p>{{ pedido.instrucoesPreparoSolucao }}</p></div>
+                    <div v-if="pedido.observacao" class="gestao-solucao-cartilha"><strong>Finalidade / observações</strong><p>{{ pedido.observacao }}</p></div>
+                  </div>
+                  <div class="gestao-detail__context">
+                    <h3>Contexto da solicitação</h3>
+                    <p><span>Status</span><strong>{{ pedido.status === 'EM_PREPARACAO' ? 'Em preparação' : pedido.status }}</strong></p>
+                    <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p>
+                    <p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p>
+                    <p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p>
+                    <button class="action-button action-button--deliver gestao-solucao-open" type="button" @click="router.push({ path: '/solucoes', query: { pedido: pedido.id } })">Abrir na Central de Soluções</button>
+                  </div>
+                </div>
+                <div v-else class="gestao-detail">
                   <div class="gestao-detail__items">
                     <h3>Materiais solicitados</h3>
-                    <div v-for="item in pedido.itens" :key="item.id" class="gestao-detail__item">
-                      <div><strong>{{ item.produtoNome }}</strong><small>{{ item.produtoUnidadeArmazenamento }}</small><small class="requested-form">Solicitado como: {{ formaSolicitada(item) }}</small></div>
-                      <div class="quantity-card requested-quantity"><strong>SOLICITADA</strong><span>{{ item.quantidadeSolicitada }}</span></div>
-
-                      <label v-if="pedido.status === 'PENDENTE'" class="quantity-card approval-quantity">
-                        <span>QUANTIDADE A APROVAR</span>
-                        <input v-model.number="quantidadesAprovadas[item.id]" type="number" min="1" :max="item.quantidadeSolicitada" :step="item.tipoEmbalagemSolicitada === 'UNITARIO' ? 1 : item.multiplicadorSolicitado" />
-                      </label>
-                      <div v-else-if="item.quantidadeAprovada !== null" class="quantity-card approved-quantity"><strong>{{ pedido.status === 'ENTREGUE' ? 'ENTREGUE' : 'APROVADA' }}</strong><span>{{ item.quantidadeAprovada }}</span></div>
-
+                    <div v-for="item in pedido.itens" :key="item.id" class="gestao-approval-item">
+                      <div class="gestao-approval-item__product">
+                        <strong>{{ item.produtoNome }}</strong>
+                        <small>{{ item.produtoUnidadeArmazenamento }}</small>
+                      </div>
+                      <div class="gestao-approval-item__layout">
+                        <div class="gestao-approval-summary">
+                          <span class="gestao-approval-label">Solicitação original</span>
+                          <strong>{{ modoMedida(item) ? 'Quantidade por medida' : 'Unidade ou embalagem' }}</strong>
+                          <p>{{ formaSolicitada(item) }}</p>
+                          <small v-if="modoMedida(item)">Equivalente no estoque: {{ quantidadeLegivel(item.quantidadeSolicitada) }} {{ medidaDeAprovacao(item) }}</small>
+                          <small v-else>Total solicitado: {{ quantidadeLegivel(item.quantidadeSolicitada) }} {{ medidaDeAprovacao(item) }}</small>
+                        </div>
+                        <div class="gestao-approval-decision">
+                          <label v-if="pedido.status === 'PENDENTE'" :for="`aprovar-quantidade-${item.id}`" class="gestao-approval-label">Quantidade a aprovar</label>
+                          <span v-else class="gestao-approval-label">{{ pedido.status === 'ENTREGUE' ? 'Quantidade entregue' : 'Quantidade aprovada' }}</span>
+                          <div v-if="pedido.status === 'PENDENTE'" class="gestao-approval-input-group">
+                            <input :id="`aprovar-quantidade-${item.id}`" v-model.number="quantidadesAprovadas[item.id]" type="number"
+                              :min="modoMedida(item) ? 0.000001 : 1" :max="modoMedida(item) ? item.quantidadeSolicitada : quantidadeEmbalagens(item)" :step="modoMedida(item) ? 'any' : 1" />
+                            <span>{{ modoMedida(item) ? medidaDeAprovacao(item) : nomeEmbalagem(item, Number(quantidadesAprovadas[item.id])) }}</span>
+                          </div>
+                          <strong v-else class="gestao-approval-result">{{ modoMedida(item)
+                            ? quantidadeLegivel(item.quantidadeAprovada ?? 0) + ' ' + medidaDeAprovacao(item)
+                            : quantidadeLegivel((item.quantidadeAprovada ?? 0) / multiplicadorEmbalagem(item)) + ' ' + nomeEmbalagem(item, (item.quantidadeAprovada ?? 0) / multiplicadorEmbalagem(item)) }}</strong>
+                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item)
+                            ? 'Aceita até 6 casas decimais na medida do estoque.'
+                            : 'Aprovação em embalagens inteiras. Equivalente: ' + quantidadeLegivel(quantidadeCanonicaAprovacao(item, Number(quantidadesAprovadas[item.id]))) + ' ' + medidaDeAprovacao(item) }}</small>
+                          <small v-else>Valor registrado na aprovação.</small>
+                        </div>
+                      </div>
                       <div v-if="pedido.status === 'ENTREGUE'" class="delivered-lots">
                         <strong>LOTES UTILIZADOS NA SAÍDA</strong>
                         <span v-if="carregandoMovimentacoes[pedido.id]">Carregando lotes...</span>
                         <span v-else-if="movimentosDoItem(pedido.id, item.produtoId).length === 0">Nenhuma movimentação de saída encontrada.</span>
                         <div v-for="mov in movimentosDoItem(pedido.id, item.produtoId)" :key="mov.id" class="delivered-lot">
                           <b>{{ mov.codigoInternoLote || 'Lote sem código SGL' }}</b>
-                          <span>{{ mov.quantidadeMovimentada }} unit. · saída em {{ dataFormatada(mov.dataMovimentacao) }}</span>
+                          <span>{{ quantidadeLegivel(mov.quantidadeMovimentada) }} {{ medidaDeAprovacao(item) }} · saída em {{ dataFormatada(mov.dataMovimentacao) }}</span>
                         </div>
                       </div>
                     </div>
@@ -490,4 +603,32 @@ onMounted(carregar)
 .gestao-state { padding: 34px; border: 1px dashed #cbd5e1; border-radius: 10px; background: #fff; color: #64748b; text-align: center; }.gestao-state--error { border-color: #fecaca; color: #b42318; background: #fffafa; }
 @media (max-width: 900px) { .gestao-summary, .gestao-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.gestao-detail { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .gestao-pedidos__header { flex-direction: column; }.gestao-summary, .gestao-filter-grid, .gestao-filter-top { grid-template-columns: 1fr; }.gestao-detail__item { grid-template-columns: 1fr; }.delivered-lot { flex-direction: column; } }
+.pedido-type-chip { display:inline-flex; align-items:center; padding:2px 6px; border:1px solid var(--sgl-border); border-radius:var(--sgl-radius-control); background:var(--sgl-surface-interactive); color:var(--sgl-text); font-weight:750; font-size:10px; }
+.pedido-type-chip[data-tipo='SOLUCAO'] { color:var(--sgl-primary); }
+.gestao-solucao-explainer { color:var(--sgl-text-muted); font-size:12px; line-height:1.6; }
+.gestao-solucao-componente { display:flex; justify-content:space-between; gap:14px; padding:11px 0; border-bottom:1px solid var(--sgl-border); color:var(--sgl-text); font-size:12px; }
+.gestao-solucao-componente strong { white-space:nowrap; font-size:12px; }
+.gestao-solucao-cartilha { margin-top:15px; padding:12px; border:1px solid var(--sgl-border); border-radius:var(--sgl-radius-control); background:var(--sgl-surface); color:var(--sgl-text); }
+.gestao-solucao-cartilha p { white-space:pre-wrap; font-size:12px; line-height:1.5; }
+.gestao-solucao-open { margin-top:15px; }
+.status-chip[data-status='EM_PREPARACAO'] { background:var(--sgl-surface-interactive);color:var(--sgl-primary); }
+
+/* 7.6-D: bloco operacional independente dos cards legados de quantidade. */
+.gestao-approval-item { min-width: 0; padding: var(--sgl-space-4) 0; border-bottom: 1px solid var(--sgl-border); }
+.gestao-approval-item__product { display: flex; flex-direction: column; gap: var(--sgl-space-1); margin-bottom: var(--sgl-space-3); }
+.gestao-approval-item__product > strong { font-size: var(--sgl-font-card-title); color: var(--sgl-text); }
+.gestao-approval-item__product > small { font-size: var(--sgl-font-helper); color: var(--sgl-text-muted); line-height: 1.5; }
+.gestao-approval-item__layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(230px, .8fr); gap: var(--sgl-space-3); align-items: stretch; }
+.gestao-approval-summary, .gestao-approval-decision { min-width: 0; display: flex; flex-direction: column; gap: var(--sgl-space-2); padding: var(--sgl-space-4); border: 1px solid var(--sgl-border); border-radius: var(--sgl-radius-surface); background: var(--sgl-surface); }
+.gestao-approval-summary { background: var(--sgl-surface-soft); }
+.gestao-approval-label { font-size: var(--sgl-font-label); font-weight: var(--sgl-font-weight-semibold); color: var(--sgl-text-muted); }
+.gestao-approval-summary > strong { font-size: var(--sgl-font-body); color: var(--sgl-text); }
+.gestao-approval-summary > p { margin: 0; font-size: var(--sgl-font-section-title); font-weight: var(--sgl-font-weight-bold); color: var(--sgl-primary); line-height: 1.4; overflow-wrap: anywhere; }
+.gestao-approval-summary > small, .gestao-approval-decision > small { font-size: var(--sgl-font-helper); color: var(--sgl-text-muted); line-height: 1.5; }
+.gestao-approval-input-group { display: flex; align-items: center; gap: var(--sgl-space-2); flex-wrap: wrap; }
+.gestao-approval-input-group input { min-width: 100px; flex: 1 1 125px; width: 100%; min-height: var(--sgl-control-height); box-sizing: border-box; padding: 0 var(--sgl-space-3); border: 1px solid var(--sgl-border-strong); border-radius: var(--sgl-radius-control); background: var(--sgl-surface); color: var(--sgl-text); font-size: var(--sgl-font-body); font-weight: var(--sgl-font-weight-semibold); }
+.gestao-approval-input-group input:focus-visible { outline: var(--sgl-focus-width) solid var(--sgl-focus); outline-offset: var(--sgl-focus-offset); }
+.gestao-approval-input-group > span { flex: 0 1 auto; font-size: var(--sgl-font-body); color: var(--sgl-text); font-weight: var(--sgl-font-weight-semibold); }
+.gestao-approval-result { font-size: var(--sgl-font-section-title); color: var(--sgl-success); }
+@media (max-width: 760px) { .gestao-approval-item__layout { grid-template-columns: 1fr; } }
 </style>

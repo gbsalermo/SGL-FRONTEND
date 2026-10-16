@@ -298,6 +298,7 @@ function statusPedidoRotulo(status: StatusPedido) {
   const mapa: Record<StatusPedido, string> = {
     PENDENTE: 'Em análise',
     APROVADO: 'Aprovado',
+    EM_PREPARACAO: 'Em preparação',
     REJEITADO: 'Rejeitado',
     ENTREGUE: 'Entregue',
     CANCELADO: 'Cancelado',
@@ -309,6 +310,7 @@ function mensagemPedido(pedido: PedidoResponse) {
   const mapa: Record<StatusPedido, string> = {
     PENDENTE: 'Seu pedido está aguardando análise da equipe de gestão.',
     APROVADO: 'Seu pedido foi aprovado e está pronto para seguir para entrega.',
+    EM_PREPARACAO: 'A solução solicitada está em preparação.',
     REJEITADO: 'Seu pedido foi analisado e rejeitado. Consulte os detalhes para verificar a observação.',
     ENTREGUE: 'Seu pedido foi concluído e registrado como entregue.',
     CANCELADO: 'Este pedido foi cancelado e não seguirá para atendimento.',

@@ -1,4 +1,5 @@
 import { http } from '@/services/http'
+import { contextoOperacionalService } from '@/modules/operacao/services/contextoOperacionalService'
 import type {
   AtividadeOperacional,
   AtividadeRequest,
@@ -22,6 +23,11 @@ export const projetosService = {
       params: { projetoId },
     })
     return data
+  },
+
+  /** Consulta read-only em lote mantida para compatibilidade com o hub. */
+  async listarParticipacoesProjeto(projetoId: string) {
+    return contextoOperacionalService.listarParticipacoesProjeto(projetoId)
   },
 
   async listarAtividadesPorProjeto(projetoId: string) {

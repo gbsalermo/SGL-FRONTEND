@@ -1,17 +1,21 @@
 export type StatusPedido =
   | 'PENDENTE'
   | 'APROVADO'
+  | 'EM_PREPARACAO'
   | 'REJEITADO'
   | 'ENTREGUE'
   | 'CANCELADO'
 
-export type TipoEmbalagemPedido = 'UNITARIO' | 'KIT' | 'CAIXA' | 'GARRAFA' | 'GALAO'
+export type UnidadeMedidaPedido = 'ML' | 'L' | 'MG' | 'G' | 'KG' | 'METRO' | 'UNIDADE' | 'REACAO'
+
+export type TipoEmbalagemPedido = 'UNITARIO' | 'FRASCO' | 'AMPOLA' | 'GARRAFA' | 'GALAO' | 'CAIXA' | 'KIT' | 'PACOTE' | 'SACO' | 'TUBO' | 'POTE' | 'PAR' | 'OUTRO'
 
 export interface ItemPedidoResponse {
   id: string
   produtoId: string
   produtoNome: string
   produtoUnidadeArmazenamento: string
+  produtoUnidadeMedida?: UnidadeMedidaPedido | null
   produtoRisco: string | null
   produtoTipoRisco: string | null
   produtoDescricaoRisco: string | null
@@ -20,9 +24,11 @@ export interface ItemPedidoResponse {
   produtoCondicoesArmazenamento: string | null
   quantidadeSolicitada: number
   quantidadeAprovada: number | null
-  tipoEmbalagemSolicitada: TipoEmbalagemPedido
-  quantidadeEmbalagensSolicitada: number
-  multiplicadorSolicitado: number
+  unidadeMedidaSolicitada?: UnidadeMedidaPedido | null
+  quantidadeNaUnidadeSolicitada?: number | null
+  tipoEmbalagemSolicitada: TipoEmbalagemPedido | null
+  quantidadeEmbalagensSolicitada: number | null
+  multiplicadorSolicitado: number | null
 }
 
 export interface PedidoResponse {
@@ -38,6 +44,9 @@ export interface PedidoResponse {
   projetoNome: string | null
   dataSolicitacao: string
   status: StatusPedido
+  tipo?: 'PRODUTOS' | 'SOLUCAO'
+  nomeSolucao?: string | null
+  instrucoesPreparoSolucao?: string | null
   urgente: boolean
   motivoUrgencia: string | null
   observacao: string | null
@@ -56,9 +65,10 @@ export interface PedidoRequest {
   itens: Array<{
     produtoId: string
     quantidadeSolicitada: number
-    tipoEmbalagemSolicitada: TipoEmbalagemPedido
-    quantidadeEmbalagensSolicitada: number
-    multiplicadorSolicitado: number
+    unidadeMedidaSolicitada?: UnidadeMedidaPedido | null
+    tipoEmbalagemSolicitada: TipoEmbalagemPedido | null
+    quantidadeEmbalagensSolicitada: number | null
+    multiplicadorSolicitado: number | null
   }>
 }
 
@@ -88,6 +98,7 @@ export interface EstoqueCentralResponse {
   produtoId: string
   produtoNome: string
   produtoUnidadeArmazenamento: string
+  produtoUnidadeMedida: UnidadeMedidaPedido
   quantidadeAtual: number
   quantidadeMinima: number
   ativo: boolean
@@ -102,6 +113,7 @@ export interface LotePedidoResponse {
   apresentacao: string | null
   quantidadeApresentacoes: number | null
   conteudoPorApresentacao: number | null
+  unidadeBase: UnidadeMedidaPedido
   fracionavel: boolean | null
   quantidadeDisponivel: number
   dataValidade: string | null

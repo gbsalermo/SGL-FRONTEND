@@ -26,6 +26,9 @@ export interface ProjetoOperacional {
   ativo: boolean
 }
 
+// Alias de compatibilidade: o contrato canonico agora pertence a Operacao (7.5.4).
+export type { ContextoParticipacaoOperacional } from '@/modules/operacao/types/contextoOperacional'
+
 export interface ProjetoRequest {
   laboratorioId: string
   nome: string

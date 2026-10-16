@@ -11,7 +11,7 @@ import type {
 function validarContratoLote(lote: LoteResponse) {
   if (!lote.codigoInterno || !lote.tipoEmbalagem) {
     throw new Error(
-      'O backend em execução está desatualizado para o fluxo atual de lotes. Reinicie a API com a main mais recente e confirme as migrations V7 e V8.',
+      'O backend em execução não retornou os campos obrigatórios do lote. Confirme a versão da API e as migrations aplicadas no ambiente.',
     )
   }
   return lote
@@ -32,6 +32,13 @@ export const estoqueService = {
     return data
   },
 
+  async atualizarMinimo(item: EstoqueCentralResponse, quantidadeMinima: number, minimoTipoEmbalagem: import('@/modules/estoque/types/estoque').TipoEmbalagem | null, minimoMultiplicador: number | null) {
+    const { data } = await http.put<EstoqueCentralResponse>(`/v1/estoque-central/${item.id}`, {
+      unidadeId: item.unidadeId, produtoId: item.produtoId, quantidadeMinima,
+      minimoTipoEmbalagem, minimoMultiplicador, ativo: item.ativo,
+    })
+    return data
+  },
   async listarEstoqueBaixo(unidadeId: string) {
     const { data } = await http.get<EstoqueCentralResponse[]>('/v1/estoque-central/estoque-baixo', { params: { unidadeId } })
     return data

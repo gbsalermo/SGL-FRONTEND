@@ -1,4 +1,13 @@
-export type TipoEmbalagem = 'UNITARIO' | 'KIT' | 'CAIXA' | 'GARRAFA' | 'GALAO'
+export type TipoEmbalagem = 'UNITARIO' | 'FRASCO' | 'AMPOLA' | 'GARRAFA' | 'GALAO' | 'CAIXA' | 'KIT' | 'PACOTE' | 'SACO' | 'TUBO' | 'POTE' | 'PAR' | 'OUTRO'
+
+export interface ApresentacaoFisicaEstoque {
+  tipoEmbalagem: TipoEmbalagem
+  capacidade: number
+  unidadeMedida: string
+  fechados: number
+  abertos: number
+  esgotados: number
+}
 
 export interface EstoqueCentralResponse {
   id: string
@@ -11,8 +20,11 @@ export interface EstoqueCentralResponse {
   produtoLocalizacaoFisica: string | null
   produtoUnidadeArmazenamento: string
   produtoUnidadeMedida: string
+  apresentacoesFisicas?: ApresentacaoFisicaEstoque[]
   quantidadeAtual: number
   quantidadeMinima: number
+  minimoTipoEmbalagem?: TipoEmbalagem | null
+  minimoMultiplicador?: number | null
   ativo: boolean
 }
 

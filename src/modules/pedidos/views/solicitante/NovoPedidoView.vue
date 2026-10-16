@@ -11,11 +11,16 @@ import type {
   PedidoRequest,
   ProjetoResponse,
   TipoEmbalagemPedido,
+  UnidadeMedidaPedido,
 } from '@/modules/pedidos/types/pedido'
 import { useSessionStore } from '@/stores/session'
+import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 
 interface ItemForm {
   produtoId: string
+  modo: 'APRESENTACAO' | 'FISICA'
+  unidadeFisica: UnidadeMedidaPedido | ''
+  quantidadeFisica: number
   tipoEmbalagemSolicitada: TipoEmbalagemPedido | ''
   multiplicadorSolicitado: number
   quantidadeForma: number
@@ -34,6 +39,11 @@ const router = useRouter()
 const session = useSessionStore()
 
 const projetos = ref<ProjetoResponse[]>([])
+const laboratorios = ref<LaboratorioOperacional[]>([])
+const laboratorioSelecionadoId = ref('')
+const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
+const laboratorioOperacionalId = computed(() => gestao.value ? laboratorioSelecionadoId.value : (session.usuario?.laboratorioId || ''))
+const laboratorioOperacional = computed(() => laboratorios.value.find(x => x.id === laboratorioOperacionalId.value))
 const estoques = ref<EstoqueCentralResponse[]>([])
 const lotesPorEstoque = ref<Record<string, LotePedidoResponse[]>>({})
 const projetoId = ref('')
@@ -49,11 +59,55 @@ const usuario = computed(() => session.usuario)
 function novoItem(): ItemForm {
   return {
     produtoId: '',
+    modo: 'APRESENTACAO',
+    unidadeFisica: '',
+    quantidadeFisica: 1,
     tipoEmbalagemSolicitada: '',
     multiplicadorSolicitado: 1,
     quantidadeForma: 1,
     carregandoLotes: false,
   }
+}
+
+const unidadesCompativeis: Record<UnidadeMedidaPedido, UnidadeMedidaPedido[]> = {
+  ML: ['ML', 'L'], L: ['ML', 'L'],
+  MG: ['MG', 'G', 'KG'], G: ['MG', 'G', 'KG'], KG: ['MG', 'G', 'KG'],
+  METRO: ['METRO'], UNIDADE: ['UNIDADE'], REACAO: ['REACAO'],
+}
+const fatorParaBase: Record<UnidadeMedidaPedido, number> = {
+  ML: 1, L: 1000, MG: 1, G: 1000, KG: 1000000,
+  METRO: 1, UNIDADE: 1, REACAO: 1,
+}
+const rotulosUnidade: Record<UnidadeMedidaPedido, string> = {
+  ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg',
+  METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
+}
+function unidadeBase(item: ItemForm) {
+  return produtoSelecionado(item.produtoId)?.produtoUnidadeMedida
+}
+function permiteQuantidadeLivre(item: ItemForm) {
+  const base = unidadeBase(item)
+  return base !== undefined && base !== 'UNIDADE' && base !== 'REACAO'
+}
+function opcoesUnidade(item: ItemForm) {
+  const base = unidadeBase(item)
+  return base ? unidadesCompativeis[base] ?? [] : []
+}
+function quantidadeCanonica(item: ItemForm) {
+  const base = unidadeBase(item)
+  if (!base || !item.unidadeFisica) return NaN
+  return item.quantidadeFisica * fatorParaBase[item.unidadeFisica] / fatorParaBase[base]
+}
+function alterarModo(item: ItemForm, modo: ItemForm['modo']) {
+  item.modo = modo === 'FISICA' && !permiteQuantidadeLivre(item) ? 'APRESENTACAO' : modo
+  item.tipoEmbalagemSolicitada = ''
+  item.multiplicadorSolicitado = 1
+  item.quantidadeForma = 1
+  item.unidadeFisica = unidadeBase(item) ?? ''
+  item.quantidadeFisica = 1
+}
+function formatarQuantidade(valor: number) {
+  return new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 6 }).format(valor)
 }
 
 const podeAdicionarItem = computed(() => {
@@ -65,6 +119,14 @@ const podeAdicionarItem = computed(() => {
 function rotuloTipo(tipo: TipoEmbalagemPedido, plural = false) {
   const singular: Record<TipoEmbalagemPedido, string> = {
     UNITARIO: 'Unitário',
+    OUTRO: 'Embalagem',
+    PAR: 'Par',
+    POTE: 'Pote',
+    TUBO: 'Tubo',
+    SACO: 'Saco',
+    PACOTE: 'Pacote',
+    AMPOLA: 'Ampola',
+    FRASCO: 'Frasco',
     KIT: 'Kit',
     CAIXA: 'Caixa',
     GARRAFA: 'Garrafa',
@@ -72,6 +134,14 @@ function rotuloTipo(tipo: TipoEmbalagemPedido, plural = false) {
   }
   const plurais: Record<TipoEmbalagemPedido, string> = {
     UNITARIO: 'Unidades',
+    OUTRO: 'Embalagens',
+    PAR: 'Pares',
+    POTE: 'Potes',
+    TUBO: 'Tubos',
+    SACO: 'Sacos',
+    PACOTE: 'Pacotes',
+    AMPOLA: 'Ampolas',
+    FRASCO: 'Frascos',
     KIT: 'Kits',
     CAIXA: 'Caixas',
     GARRAFA: 'Garrafas',
@@ -88,10 +158,10 @@ function mensagemErro(error: unknown) {
 }
 
 async function carregarDados() {
-  const laboratorioId = usuario.value?.laboratorioId
+  const laboratorioId = laboratorioOperacionalId.value
   const unidadeId = usuario.value?.unidadeId
 
-  if (!laboratorioId || !unidadeId) {
+  if (!unidadeId || (!gestao.value && !laboratorioId)) {
     erro.value = 'Seu usuário precisa estar vinculado a laboratório e unidade para criar pedidos.'
     return
   }
@@ -100,8 +170,12 @@ async function carregarDados() {
   erro.value = ''
 
   try {
+    if (gestao.value) {
+      laboratorios.value = await listarLaboratoriosOperacionais(unidadeId)
+      if (laboratorioId && !laboratorios.value.some(x => x.id === laboratorioId)) laboratorioSelecionadoId.value = ''
+    }
     const [projetosData, estoqueData] = await Promise.all([
-      pedidoService.listarProjetosPorLaboratorio(laboratorioId),
+      laboratorioOperacionalId.value ? pedidoService.listarProjetosPorLaboratorio(laboratorioOperacionalId.value) : Promise.resolve([] as ProjetoResponse[]),
       pedidoService.listarEstoquePorUnidade(unidadeId),
     ])
     projetos.value = projetosData
@@ -111,6 +185,14 @@ async function carregarDados() {
   } finally {
     carregandoDados.value = false
   }
+}
+
+async function selecionarLaboratorio() {
+  projetoId.value = ''
+  projetos.value = []
+  if (!laboratorioOperacionalId.value) return
+  try { projetos.value = await pedidoService.listarProjetosPorLaboratorio(laboratorioOperacionalId.value) }
+  catch (e) { erro.value = mensagemErro(e) }
 }
 
 function adicionarItem() {
@@ -145,14 +227,22 @@ function opcoesRetirada(item: ItemForm): OpcaoRetirada[] {
   const lotes = lotesDoItem(item)
   const opcoes = new Map<string, OpcaoRetirada>()
 
-  const saldoUnitario = lotes
-    .filter((lote) => lote.tipoEmbalagem === 'UNITARIO' || lote.fracionavel === true)
+  // Para produtos contáveis, UNITARIO representa a menor unidade de consumo
+  // (uma reação ou uma unidade), inclusive quando ela está dentro de um KIT.
+  // Para produtos medidos em massa/volume, retirar parte do frasco pertence ao
+  // modo "Informar medida"; não criar uma apresentação unitária fictícia.
+  const base = unidadeBase(item)
+  const contavel = base === 'UNIDADE' || base === 'REACAO'
+  const saldoIndividual = lotes
+    .filter((lote) => lote.tipoEmbalagem === 'UNITARIO'
+      || (contavel && lote.fracionavel === true))
     .reduce((total, lote) => total + lote.quantidadeDisponivel, 0)
 
-  if (saldoUnitario > 0) {
+  if (saldoIndividual >= 1) {
     opcoes.set('UNITARIO::1', {
       chave: 'UNITARIO::1', tipo: 'UNITARIO', multiplicador: 1,
-      label: `Unitário — ${saldoUnitario} unit. disponíveis`, disponivel: saldoUnitario,
+      label: base === 'REACAO' ? 'Reação individual' : 'Unidade individual',
+      disponivel: Math.floor(saldoIndividual),
     })
   }
 
@@ -169,7 +259,7 @@ function opcoesRetirada(item: ItemForm): OpcaoRetirada[] {
         chave,
         tipo: lote.tipoEmbalagem,
         multiplicador,
-        label: `${rotuloTipo(lote.tipoEmbalagem, true)} — ${multiplicador} unit. cada`,
+        label: `${rotuloTipo(lote.tipoEmbalagem, true)} — ${formatarQuantidade(multiplicador)} ${rotulosUnidade[unidadeBase(item)!] ?? unidadeBase(item) ?? ''} cada`,
         disponivel: quantidade,
       })
     }
@@ -192,6 +282,9 @@ async function alterarProduto(item: ItemForm) {
   item.tipoEmbalagemSolicitada = ''
   item.multiplicadorSolicitado = 1
   item.quantidadeForma = 1
+  item.modo = 'APRESENTACAO'
+  item.unidadeFisica = unidadeBase(item) ?? ''
+  item.quantidadeFisica = 1
   const estoque = produtoSelecionado(item.produtoId)
   if (!estoque || lotesPorEstoque.value[estoque.id]) return
 
@@ -223,22 +316,37 @@ function alternarUrgencia() {
 }
 
 function validarFormulario() {
-  if (!usuario.value?.id || !usuario.value.laboratorioId) throw new Error('Sessão sem usuário ou laboratório válido.')
-
-  if (itens.value.some((item) => !item.produtoId || !item.tipoEmbalagemSolicitada || item.quantidadeForma < 1)) {
-    throw new Error('Preencha produto, tipo de unidade e quantidade de todos os itens.')
-  }
+  if (!usuario.value?.id || !laboratorioOperacionalId.value)
+    throw new Error('Selecione um laboratório ativo para encaminhar o pedido.')
 
   for (const item of itens.value) {
-    const opcao = opcaoAtual(item)
-    if (!opcao) throw new Error('A forma de retirada selecionada não está mais disponível.')
-    if (item.quantidadeForma > opcao.disponivel) {
-      throw new Error(`Quantidade maior que o disponível para ${rotuloTipo(opcao.tipo).toLowerCase()}.`)
+    if (!item.produtoId) throw new Error('Selecione o produto de todos os itens.')
+    const estoque = produtoSelecionado(item.produtoId)
+    if (!estoque) throw new Error('O produto selecionado não está disponível.')
+
+    if (item.modo === 'FISICA') {
+      if (!permiteQuantidadeLivre(item)) throw new Error('Este produto deve ser pedido em unidades ou kits inteiros.')
+      const quantidade = quantidadeCanonica(item)
+      if (!item.unidadeFisica || !opcoesUnidade(item).includes(item.unidadeFisica)
+          || !Number.isFinite(item.quantidadeFisica) || item.quantidadeFisica <= 0
+          || !Number.isFinite(quantidade) || quantidade <= 0
+          || Math.abs(quantidade - Number(quantidade.toFixed(6))) > 1e-8)
+        throw new Error('Informe quantidade física positiva, unidade compatível e precisão de até seis casas na unidade-base.')
+      if (quantidade > estoque.quantidadeAtual + 1e-9)
+        throw new Error('A quantidade física solicitada ultrapassa o saldo total disponível.')
+      // O servidor decide compatibilidade por lote, FEFO/FIFO e recipientes.
+    } else {
+      const opcao = opcaoAtual(item)
+      if (!opcao || !Number.isInteger(item.quantidadeForma) || item.quantidadeForma < 1)
+        throw new Error('Escolha uma apresentação e informe uma quantidade inteira positiva.')
+      if (item.quantidadeForma > opcao.disponivel)
+        throw new Error('A quantidade solicitada ultrapassa a disponibilidade estimada da apresentação.')
     }
   }
 
   const produtos = itens.value.map((item) => item.produtoId)
-  if (new Set(produtos).size !== produtos.length) throw new Error('O mesmo produto não pode ser adicionado mais de uma vez.')
+  if (new Set(produtos).size !== produtos.length)
+    throw new Error('O mesmo produto não pode ser adicionado mais de uma vez.')
 }
 
 async function enviarPedido() {
@@ -248,19 +356,29 @@ async function enviarPedido() {
 
     const payload: PedidoRequest = {
       usuarioId: usuario.value!.id,
-      laboratorioId: usuario.value!.laboratorioId!,
+      laboratorioId: laboratorioOperacionalId.value,
       projetoId: projetoId.value || null,
       urgente: urgente.value,
       motivoUrgencia: null,
       observacao: observacao.value.trim() || null,
       arquivoDocumento: null,
-      itens: itens.value.map((item) => ({
-        produtoId: item.produtoId,
-        quantidadeSolicitada: item.quantidadeForma * item.multiplicadorSolicitado,
-        tipoEmbalagemSolicitada: item.tipoEmbalagemSolicitada as TipoEmbalagemPedido,
-        quantidadeEmbalagensSolicitada: item.quantidadeForma,
-        multiplicadorSolicitado: item.multiplicadorSolicitado,
-      })),
+      itens: itens.value.map((item) => item.modo === 'FISICA'
+        ? {
+            produtoId: item.produtoId,
+            quantidadeSolicitada: item.quantidadeFisica,
+            unidadeMedidaSolicitada: item.unidadeFisica as UnidadeMedidaPedido,
+            tipoEmbalagemSolicitada: null,
+            quantidadeEmbalagensSolicitada: null,
+            multiplicadorSolicitado: null,
+          }
+        : {
+            produtoId: item.produtoId,
+            quantidadeSolicitada: item.quantidadeForma * item.multiplicadorSolicitado,
+            unidadeMedidaSolicitada: null,
+            tipoEmbalagemSolicitada: item.tipoEmbalagemSolicitada as TipoEmbalagemPedido,
+            quantidadeEmbalagensSolicitada: item.quantidadeForma,
+            multiplicadorSolicitado: item.multiplicadorSolicitado,
+          }),
     }
 
     enviando.value = true
@@ -289,13 +407,20 @@ onMounted(carregarDados)
 
     <div class="context-grid">
       <article><span>Solicitante</span><strong>{{ usuario?.nome }}</strong><small>{{ usuario?.email }}</small></article>
-      <article><span>Laboratório</span><strong>{{ usuario?.laboratorioNome ?? 'Não vinculado' }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
+      <article><span>Laboratório de destino</span><strong>{{ laboratorioOperacional?.nome || (gestao ? 'Escolha o laboratório abaixo' : usuario?.laboratorioNome || 'Não vinculado') }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
     </div>
 
     <form class="request-surface" @submit.prevent="enviarPedido">
       <section class="form-section">
         <div class="section-title"><div><span>1</span><div><h2>Contexto da solicitação</h2><p>Vincule um projeto e informe dados que ajudem a gestão a compreender o pedido.</p></div></div></div>
 
+        <label v-if="gestao" class="field">
+          <span>Laboratório de destino <small>(obrigatório)</small></span>
+          <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
+            <option value="">Selecione um laboratório ativo da Unidade</option>
+            <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+          </select>
+        </label>
         <label class="field">
           <span>Projeto <small>(opcional)</small></span>
           <select v-model="projetoId" :disabled="carregandoDados">
@@ -322,7 +447,7 @@ onMounted(carregarDados)
 
       <section class="form-section">
         <div class="section-title section-title--action">
-          <div><span>2</span><div><h2>Materiais solicitados</h2><p>Escolha o produto, a forma de retirada disponível e a quantidade desejada.</p></div></div>
+          <div><span>2</span><div><h2>Materiais solicitados</h2><p>Escolha seus produtos e informe se deseja embalagens completas ou uma quantidade específica.</p></div></div>
           <button type="button" :disabled="!podeAdicionarItem" @click="adicionarItem">+ Adicionar item</button>
         </div>
 
@@ -336,11 +461,22 @@ onMounted(carregarDados)
                 <option value="" disabled>Selecione um produto</option>
                 <option v-for="estoque in opcoesProduto(index)" :key="estoque.id" :value="estoque.produtoId">{{ estoque.produtoNome }}</option>
               </select>
-              <small v-if="produtoSelecionado(item.produtoId)">Disponível no estoque: {{ produtoSelecionado(item.produtoId)?.quantidadeAtual }} unit.</small>
+              <small v-if="produtoSelecionado(item.produtoId)">Saldo consolidado: {{ formatarQuantidade(produtoSelecionado(item.produtoId)!.quantidadeAtual) }} {{ rotulosUnidade[produtoSelecionado(item.produtoId)!.produtoUnidadeMedida] }}</small>
             </label>
 
-            <label class="field item-package">
-              <span>Tipo de unidade</span>
+            <label class="field item-mode">
+              <span>Como deseja pedir?</span>
+              <select :value="item.modo" :disabled="!item.produtoId || item.carregandoLotes"
+                @change="alterarModo(item, ($event.target as HTMLSelectElement).value as ItemForm['modo'])">
+                <option value="APRESENTACAO">Por unidade ou embalagem</option>
+                <option v-if="permiteQuantidadeLivre(item)" value="FISICA">Informar medida (ex.: mL ou g)</option>
+              </select>
+              <small v-if="permiteQuantidadeLivre(item)">Escolha a embalagem ou informe a medida necessária.</small>
+              <small v-else>Peça unidades ou kits completos, conforme disponibilidade.</small>
+            </label>
+
+            <label v-if="item.modo === 'APRESENTACAO'" class="field item-package">
+              <span>Unidade ou embalagem</span>
               <select :value="chaveForma(item)" :disabled="!item.produtoId || item.carregandoLotes" required @change="alterarForma(item, ($event.target as HTMLSelectElement).value)">
                 <option value="" disabled>{{ item.carregandoLotes ? 'Carregando...' : 'Selecione' }}</option>
                 <option v-for="opcao in opcoesRetirada(item)" :key="opcao.chave" :value="opcao.chave">
@@ -348,17 +484,35 @@ onMounted(carregarDados)
                 </option>
               </select>
               <small v-if="item.produtoId && !item.carregandoLotes && !possuiKit(item)" class="package-guidance">
-                Não há kits disponíveis. Solicite por unidade ou por outra embalagem disponível.
+                Escolha uma das opções disponíveis para este produto.
               </small>
               <small v-else-if="opcaoAtual(item)">
-                {{ opcaoAtual(item)?.multiplicador }} unit. por {{ rotuloTipo(opcaoAtual(item)!.tipo).toLowerCase() }}.
+                {{ formatarQuantidade(opcaoAtual(item)!.multiplicador) }} {{ rotulosUnidade[unidadeBase(item)!] ?? unidadeBase(item) }} por {{ rotuloTipo(opcaoAtual(item)!.tipo).toLowerCase() }}.
               </small>
             </label>
 
-            <label class="field item-quantity">
+            <label v-if="item.modo === 'APRESENTACAO'" class="field item-quantity">
               <span>Quantidade</span>
-              <input v-model.number="item.quantidadeForma" type="number" min="1" :max="opcaoAtual(item)?.disponivel" required />
+              <input v-model.number="item.quantidadeForma" type="number" min="1" step="1" :max="opcaoAtual(item)?.disponivel" required />
               <small v-if="opcaoAtual(item)">{{ item.quantidadeForma }} {{ rotuloTipo(opcaoAtual(item)!.tipo, item.quantidadeForma !== 1).toLowerCase() }}</small>
+            </label>
+
+            <label v-if="item.modo === 'FISICA'" class="field item-quantity">
+              <span>Quanto você precisa?</span>
+              <input v-model.number="item.quantidadeFisica" type="number" min="0.000001" step="any" required />
+              <small v-if="item.unidadeFisica && unidadeBase(item)">
+                Equivale a {{ formatarQuantidade(quantidadeCanonica(item)) }} {{ rotulosUnidade[unidadeBase(item)!] }} na base do estoque.
+              </small>
+            </label>
+
+            <label v-if="item.modo === 'FISICA'" class="field item-unit">
+              <span>Medida</span>
+              <select v-model="item.unidadeFisica" required>
+                <option v-for="unidade in opcoesUnidade(item)" :key="unidade" :value="unidade">
+                  {{ rotulosUnidade[unidade] }}
+                </option>
+              </select>
+              <small>A disponibilidade por lote será confirmada na aprovação.</small>
             </label>
 
             <button class="remove-item" type="button" :disabled="itens.length === 1" aria-label="Remover item" @click="removerItem(index)">×</button>
@@ -369,7 +523,7 @@ onMounted(carregarDados)
       <div v-if="erro" class="error-banner">{{ erro }}</div>
 
       <footer class="form-footer">
-        <p>O pedido ficará pendente até análise da gestão.<span class="urgent-footer-note">A forma de retirada escolhida será respeitada no atendimento.</span></p>
+        <p>O pedido ficará pendente até análise da gestão.<span class="urgent-footer-note">A quantidade e as embalagens serão confirmadas conforme a disponibilidade no momento da aprovação.</span></p>
         <button class="primary-action" type="submit" :disabled="enviando || carregandoDados">{{ enviando ? 'Enviando...' : 'Enviar pedido' }}</button>
       </footer>
     </form>
@@ -380,59 +534,60 @@ onMounted(carregarDados)
 .novo-pedido-page { width: min(100%, 1180px); margin: 0 auto; }
 .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
 .breadcrumb { margin: 0 0 10px; color: var(--sgl-text-muted); font-size: 13px; }
-.page-heading h1 { margin: 0; font-size: clamp(28px, 3vw, 38px); letter-spacing: -0.035em; }
+.page-heading h1 { margin: 0; font-size: var(--sgl-font-page-title); letter-spacing: -0.035em; }
 .page-heading > div > p:last-child { margin: 8px 0 0; color: var(--sgl-text-muted); font-size: 14px; }
-.secondary-action, .section-title--action button { min-height: 40px; padding: 0 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #344258; font-weight: 700; cursor: pointer; }
+.secondary-action, .section-title--action button { min-height: 40px; padding: 0 13px; border: 1px solid var(--sgl-border-strong); border-radius: 6px; background: var(--sgl-surface); color: var(--sgl-text); font-weight: 700; cursor: pointer; }
 .secondary-action:hover, .section-title--action button:hover:not(:disabled) { border-color: var(--sgl-primary); color: var(--sgl-primary); }
 .section-title--action button:disabled { opacity: .5; cursor: not-allowed; }
 .context-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
-.context-grid article { padding: 15px 17px; border: 1px solid var(--sgl-border); border-radius: 8px; background: #fff; }
+.context-grid article { padding: 15px 17px; border: 1px solid var(--sgl-border); border-radius: 8px; background: var(--sgl-surface); }
 .context-grid span, .context-grid small { display: block; color: var(--sgl-text-muted); }
-.context-grid span { margin-bottom: 5px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.context-grid span { margin-bottom: 5px; font-size: var(--sgl-font-helper); font-weight: 800; text-transform: uppercase; }
 .context-grid strong { display: block; font-size: 14px; }
-.context-grid small { margin-top: 3px; font-size: 11px; }
-.request-surface { overflow: hidden; border: 1px solid var(--sgl-border); border-radius: 10px; background: #fff; box-shadow: 0 8px 26px rgb(15 37 71 / 5%); }
+.context-grid small { margin-top: 3px; font-size: var(--sgl-font-helper); }
+.request-surface { overflow: hidden; border: 1px solid var(--sgl-border); border-radius: 10px; background: var(--sgl-surface); box-shadow: 0 8px 26px rgb(15 37 71 / 5%); }
 .form-section { padding: 22px; border-bottom: 1px solid var(--sgl-border); }
 .section-title { margin-bottom: 18px; }
 .section-title, .section-title > div, .section-title--action { display: flex; align-items: flex-start; gap: 12px; }
 .section-title--action { justify-content: space-between; }
-.section-title > div > span { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #eaf1ff; color: var(--sgl-primary); font-size: 12px; font-weight: 800; }
-.section-title h2 { margin: 0; font-size: 16px; }
-.section-title p { margin: 4px 0 0; color: var(--sgl-text-muted); font-size: 12px; }
+.section-title > div > span { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--sgl-surface-interactive); color: var(--sgl-primary); font-size: var(--sgl-font-helper); font-weight: 800; }
+.section-title h2 { margin: 0; font-size: var(--sgl-font-section-title); }
+.section-title p { margin: 4px 0 0; color: var(--sgl-text-muted); font-size: var(--sgl-font-helper); }
 .field { display: flex; flex-direction: column; gap: 7px; }
 .field + .field, .urgency-field + .field, .field + .urgency-field, .urgency-guidance + .field { margin-top: 16px; }
-.field > span, .field-label { color: #2b374c; font-size: 12px; font-weight: 750; }
+.field > span, .field-label { color: var(--sgl-text); font-size: var(--sgl-font-helper); font-weight: 750; }
 .field > span small, .field-label small { color: var(--sgl-text-muted); font-weight: 500; }
-.field select, .field input, .field textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: var(--sgl-text); font: inherit; outline: 0; box-sizing: border-box; }
+.field select, .field input, .field textarea { width: 100%; border: 1px solid var(--sgl-border-strong); border-radius: 6px; background: var(--sgl-surface); color: var(--sgl-text); font: inherit; outline: 0; box-sizing: border-box; }
 .field select, .field input { min-height: 44px; padding: 0 12px; }
 .field textarea { resize: vertical; padding: 11px 12px; }
 .field select:focus, .field input:focus, .field textarea:focus { border-color: var(--sgl-primary); box-shadow: 0 0 0 3px rgb(26 77 161 / 8%); }
-.field > small { color: var(--sgl-text-muted); font-size: 10px; line-height: 1.35; }
-.package-guidance { color: #946200 !important; font-weight: 700; }
-.urgency-field { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px; border: 1px solid #e5eaf1; border-radius: 8px; background: #fbfcfe; }
-.urgency-field p { margin: 4px 0 0; color: var(--sgl-text-muted); font-size: 11px; }
-.urgency-toggle { min-height: 40px; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #344258; font-weight: 750; cursor: pointer; }
-.urgency-toggle:hover { border-color: #dc2626; color: #b42318; }
-.urgency-toggle--active { border-color: #fecaca; background: #fff1f1; color: #b42318; }
+.field > small { color: var(--sgl-text-muted); font-size: var(--sgl-font-helper); line-height: 1.35; }
+.package-guidance { color: var(--sgl-warning); font-weight: 600; }
+.urgency-field { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px; border: 1px solid var(--sgl-border); border-radius: 8px; background: var(--sgl-surface-soft); }
+.urgency-field p { margin: 4px 0 0; color: var(--sgl-text-muted); font-size: var(--sgl-font-helper); }
+.urgency-toggle { min-height: 40px; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid var(--sgl-border-strong); border-radius: 6px; background: var(--sgl-surface); color: var(--sgl-text); font-weight: 750; cursor: pointer; }
+.urgency-toggle:hover { border-color: #dc2626; color: var(--sgl-error); }
+.urgency-toggle--active { border-color: #fecaca; background: var(--sgl-surface)1f1; color: var(--sgl-error); }
 .urgency-toggle__indicator { width: 9px; height: 9px; border: 2px solid currentColor; border-radius: 50%; }
 .urgency-toggle--active .urgency-toggle__indicator { background: currentColor; }
-.urgency-guidance { margin-top: 12px; padding: 10px 12px; border-left: 3px solid #dc2626; border-radius: 4px; background: #fff7f7; color: #8f2d24; font-size: 11px; line-height: 1.45; }
+.urgency-guidance { margin-top: 12px; padding: 10px 12px; border-left: 3px solid #dc2626; border-radius: 4px; background: var(--sgl-surface)7f7; color: var(--sgl-error); font-size: var(--sgl-font-helper); line-height: 1.45; }
 .observation-field textarea { min-height: 96px; }
 .items-list { display: flex; flex-direction: column; gap: 12px; }
-.item-row { display: grid; grid-template-columns: minmax(250px, 1.25fr) minmax(250px, 1fr) 120px 38px; align-items: start; gap: 12px; padding: 14px; border: 1px solid #e5eaf1; border-radius: 8px; background: #fbfcfe; }
+.item-row { display: grid; grid-template-columns: minmax(210px, 1.2fr) minmax(165px, .85fr) minmax(210px, 1fr) minmax(130px, .7fr) 38px; align-items: start; gap: 12px; padding: 14px; border: 1px solid var(--sgl-border); border-radius: 8px; background: var(--sgl-surface-soft); }
 .item-row .field { align-self: start; }
 .item-row .field > small { display: block; min-height: 16px; margin-top: 6px; }
 .item-row .field + .field { margin-top: 0; }
-.remove-item { width: 38px; height: 44px; align-self: start; margin-top: 26px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; color: #b42318; font-size: 20px; cursor: pointer; }
+.remove-item { width: 38px; height: 44px; align-self: start; margin-top: 26px; border: 1px solid var(--sgl-border); border-radius: 6px; background: var(--sgl-surface); color: var(--sgl-error); font-size: 20px; cursor: pointer; }
 .remove-item:disabled { color: #cbd5e1; cursor: not-allowed; }
 .state-box { padding: 24px; color: var(--sgl-text-muted); text-align: center; }
-.error-banner { margin: 18px 22px 0; padding: 12px 14px; border: 1px solid #fecaca; border-radius: 7px; background: #fff1f1; color: #b42318; font-size: 12px; }
-.form-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 22px; background: #fbfcfe; }
-.form-footer p { margin: 0; color: var(--sgl-text-muted); font-size: 12px; }
-.urgent-footer-note { display: block; margin-top: 4px; color: #1a4da1; font-weight: 700; }
+.error-banner { margin: 18px 22px 0; padding: 12px 14px; border: 1px solid var(--sgl-error); border-radius: 7px; background: var(--sgl-surface)1f1; color: var(--sgl-error); font-size: var(--sgl-font-helper); }
+.form-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 22px; background: var(--sgl-surface-soft); }
+.form-footer p { margin: 0; color: var(--sgl-text-muted); font-size: var(--sgl-font-helper); }
+.urgent-footer-note { display: block; margin-top: 4px; color: var(--sgl-primary); font-weight: 700; }
 .primary-action { min-height: 44px; padding: 0 20px; border: 0; border-radius: 6px; background: var(--sgl-primary); color: #fff; font-weight: 800; cursor: pointer; }
 .primary-action:hover:not(:disabled) { background: var(--sgl-primary-dark); }
 .primary-action:disabled { opacity: .6; cursor: wait; }
-@media (max-width: 900px) { .item-row { grid-template-columns: 1fr 1fr; } .remove-item { width: 100%; } }
+@media (max-width: 900px) { .item-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .remove-item { width: 100%; } }
 @media (max-width: 720px) { .page-heading, .form-footer, .section-title--action, .urgency-field { align-items: stretch; flex-direction: column; } .secondary-action, .primary-action, .section-title--action button, .urgency-toggle { align-self: flex-start; } .context-grid, .item-row { grid-template-columns: 1fr; } }
 </style>
+

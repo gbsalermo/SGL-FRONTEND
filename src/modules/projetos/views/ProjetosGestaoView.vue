@@ -6,6 +6,7 @@ import { projetosService } from '@/modules/projetos/services/projetosService'
 import type {
   AtividadeOperacional,
   AtividadeRequest,
+  ContextoParticipacaoOperacional,
   HistoricoCorrecaoCodigoSeg,
   HistoricoProrrogacao,
   ProjetoOperacional,
@@ -58,6 +59,10 @@ const session = useSessionStore()
 const projetos = ref<ProjetoOperacional[]>([])
 const scis = ref<SciOperacional[]>([])
 const atividades = ref<AtividadeOperacional[]>([])
+const participacoesProjeto = ref<ContextoParticipacaoOperacional[]>([])
+const carregandoParticipacoes = ref(false)
+const erroParticipacoes = ref('')
+const participantesAtividadeAbertaId = ref<string | null>(null)
 const projetoSelecionadoId = ref<string | null>(null)
 
 const busca = ref('')
@@ -176,6 +181,49 @@ const atividadesSemSci = computed(() =>
 
 function atividadesDoSci(sciId: string) {
   return atividades.value.filter((atividade) => atividade.sciId === sciId)
+}
+
+/** A elegibilidade de pedidos é distinta de uma participação estar aberta. */
+function participacoesDaAtividade(atividadeId: string) {
+  return participacoesProjeto.value.filter((item) => item.atividadeId === atividadeId)
+}
+
+function participantesAbertos(atividadeId: string) {
+  const encontrados = new Set<string>()
+  return participacoesDaAtividade(atividadeId).filter((item) => {
+    if (!item.aberta) return false
+    const usuario = item.usuarioId || item.participacaoId
+    if (encontrados.has(usuario)) return false
+    encontrados.add(usuario)
+    return true
+  })
+}
+
+function historicoParticipacoes(atividadeId: string) {
+  return participacoesDaAtividade(atividadeId).filter((item) => !item.aberta)
+}
+
+function alternarParticipantes(atividadeId: string) {
+  participantesAtividadeAbertaId.value = participantesAtividadeAbertaId.value === atividadeId
+    ? null
+    : atividadeId
+}
+
+function descricaoInelegibilidade(motivo: string | null) {
+  const mensagens: Record<string, string> = {
+    CONTEXTO_INCOMPLETO: 'Contexto institucional incompleto',
+    PERFIL_INCOMPATIVEL: 'Perfil incompatível',
+    USUARIO_INATIVO: 'Usuário inativo',
+    VINCULO_FINALIZADO: 'Vínculo finalizado',
+    VINCULO_FORA_DA_VIGENCIA: 'Vínculo fora do período vigente',
+    PARTICIPACAO_ENCERRADA: 'Participação encerrada',
+    PARTICIPACAO_FORA_DA_VIGENCIA: 'Participação fora do período vigente',
+    UNIDADE_DIVERGENTE: 'Unidade divergente',
+    HIERARQUIA_INATIVA: 'Projeto, SCI, Atividade ou Laboratório inativo',
+    HIERARQUIA_NAO_OPERACIONAL: 'Hierarquia sem condição operacional',
+    HIERARQUIA_FORA_DA_VIGENCIA: 'Projeto, SCI ou Atividade fora do período vigente',
+  }
+  return motivo ? mensagens[motivo] ?? 'Contexto indisponível para novas solicitações' : 'Contexto indisponível'
 }
 
 function mensagemErro(error: unknown, fallback: string) {
@@ -638,6 +686,10 @@ async function salvarAtividade() {
 async function carregarDetalhes(projetoId: string) {
   projetoSelecionadoId.value = projetoId
   carregandoDetalhes.value = true
+  carregandoParticipacoes.value = true
+  erroParticipacoes.value = ''
+  participacoesProjeto.value = []
+  participantesAtividadeAbertaId.value = null
   erro.value = ''
   sucesso.value = ''
 
@@ -646,17 +698,31 @@ async function carregarDetalhes(projetoId: string) {
       projetosService.listarScisPorProjeto(projetoId),
       projetosService.listarAtividadesPorProjeto(projetoId),
     ])
-
     if (projetoSelecionadoId.value !== projetoId) return
 
     scis.value = listaScis
     atividades.value = listaAtividades
+
+    // Falha desta consulta nao deve ocultar a hierarquia ja carregada.
+    try {
+      const listaParticipacoes = await projetosService.listarParticipacoesProjeto(projetoId)
+      if (projetoSelecionadoId.value !== projetoId) return
+      participacoesProjeto.value = listaParticipacoes
+    } catch (error) {
+      if (projetoSelecionadoId.value !== projetoId) return
+      erroParticipacoes.value = mensagemErro(error, 'Não foi possível consultar os Estagiários das Atividades.')
+    }
   } catch (error) {
+    if (projetoSelecionadoId.value !== projetoId) return
     scis.value = []
     atividades.value = []
+    participacoesProjeto.value = []
     erro.value = mensagemErro(error, 'Não foi possível carregar a hierarquia do projeto.')
   } finally {
-    carregandoDetalhes.value = false
+    if (projetoSelecionadoId.value === projetoId) {
+      carregandoDetalhes.value = false
+      carregandoParticipacoes.value = false
+    }
   }
 }
 
@@ -685,6 +751,10 @@ async function carregar() {
       projetoSelecionadoId.value = null
       scis.value = []
       atividades.value = []
+      participacoesProjeto.value = []
+      erroParticipacoes.value = ''
+      carregandoParticipacoes.value = false
+      participantesAtividadeAbertaId.value = null
     }
   } catch (error) {
     erro.value = mensagemErro(error, 'Não foi possível carregar os projetos da Unidade.')
@@ -1094,6 +1164,65 @@ onMounted(carregar)
                       </button>
                     </div>
                   </div>
+
+                  <section class="activity-participations" :aria-label="`Estagiários vinculados a ${atividade.nome}`">
+                    <button
+                      class="activity-participations__toggle"
+                      type="button"
+                      :aria-expanded="participantesAtividadeAbertaId === atividade.id"
+                      :aria-controls="`participantes-atividade-${atividade.id}`"
+                      @click="alternarParticipantes(atividade.id)"
+                    >
+                      <span class="activity-participations__title">
+                        <span class="activity-participations__arrow" :class="{ 'is-open': participantesAtividadeAbertaId === atividade.id }" aria-hidden="true">›</span>
+                        Estagiários vinculados
+                      </span>
+                      <span v-if="carregandoParticipacoes" class="activity-participations__counts">Carregando...</span>
+                      <span v-else-if="erroParticipacoes" class="activity-participations__counts">Consulta indisponível</span>
+                      <span v-else class="activity-participations__counts">
+                        {{ participantesAbertos(atividade.id).length }} {{ participantesAbertos(atividade.id).length === 1 ? 'atual' : 'atuais' }}
+                        · {{ historicoParticipacoes(atividade.id).length }} no histórico
+                      </span>
+                    </button>
+
+                    <div v-show="participantesAtividadeAbertaId === atividade.id"
+                      :id="`participantes-atividade-${atividade.id}`"
+                      class="activity-participations__content">
+                      <p v-if="carregandoParticipacoes" class="activity-participations__message">Carregando participações...</p>
+                      <p v-else-if="erroParticipacoes" class="activity-participations__message activity-participations__message--error" role="alert">
+                        {{ erroParticipacoes }}
+                      </p>
+                      <p v-else-if="participacoesDaAtividade(atividade.id).length === 0" class="activity-participations__message">
+                        Nenhum Estagiário vinculado a esta Atividade.
+                      </p>
+                      <template v-else>
+                        <div v-if="participantesAbertos(atividade.id).length" class="activity-participations__group">
+                          <p class="activity-participations__heading">Participações abertas</p>
+                          <div v-for="p in participantesAbertos(atividade.id)" :key="p.participacaoId" class="activity-participations__person">
+                            <div class="activity-participations__person-info">
+                              <strong>{{ p.usuarioNome || 'Estagiário não identificado' }}</strong>
+                              <small>Desde {{ formatarData(p.dataInicioParticipacao) }}</small>
+                            </div>
+                            <span class="activity-participations__status" :class="{ 'activity-participations__status--warning': !p.elegivel }"
+                              :title="p.elegivel ? 'Contexto elegível para novas solicitações' : descricaoInelegibilidade(p.motivoInelegibilidade)">
+                              {{ p.elegivel ? 'Contexto elegível' : descricaoInelegibilidade(p.motivoInelegibilidade) }}
+                            </span>
+                          </div>
+                        </div>
+                        <div v-if="historicoParticipacoes(atividade.id).length" class="activity-participations__group">
+                          <p class="activity-participations__heading">Histórico de participações</p>
+                          <div v-for="p in historicoParticipacoes(atividade.id)" :key="p.participacaoId" class="activity-participations__person">
+                            <div class="activity-participations__person-info">
+                              <strong>{{ p.usuarioNome || 'Estagiário não identificado' }}</strong>
+                              <small>{{ formatarData(p.dataInicioParticipacao) }} → {{ formatarData(p.dataFimParticipacao) }}</small>
+                            </div>
+                            <span class="activity-participations__status activity-participations__status--historico">Encerrada</span>
+                          </div>
+                        </div>
+                        <p class="activity-participations__footnote">Participação aberta não garante elegibilidade para novas solicitações.</p>
+                      </template>
+                    </div>
+                  </section>
                 </article>
               </div>
             </article>
@@ -2658,6 +2787,165 @@ onMounted(carregar)
 .projects-page .history-section > header > span {
   font-size: var(--sgl-font-helper);
   font-weight: var(--sgl-font-weight-semibold);
+}
+
+/* Etapa 7.5.3 — Participacoes de Estagiarios nas Atividades (somente consulta). */
+.activity-participations {
+  grid-column: 1 / -1;
+  min-width: 0;
+  border-top: 1px solid var(--sgl-border);
+}
+
+.activity-participations__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  width: 100%;
+  padding: 11px 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--sgl-text);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.activity-participations__toggle:hover .activity-participations__title {
+  color: var(--sgl-primary);
+}
+
+.activity-participations__toggle:focus-visible {
+  outline: 2px solid var(--sgl-primary);
+  outline-offset: 3px;
+  border-radius: var(--sgl-radius-control);
+}
+
+.activity-item .activity-participations__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--sgl-font-body);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+.activity-participations__arrow {
+  display: inline-block !important;
+  margin: 0 !important;
+  font-size: 19px !important;
+  line-height: 1;
+  color: var(--sgl-text-muted);
+  transition: transform 160ms ease;
+}
+
+.activity-participations__arrow.is-open {
+  transform: rotate(90deg);
+}
+
+.activity-participations__counts {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+.activity-participations__content {
+  display: grid;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface-soft);
+}
+
+.activity-participations__group {
+  display: grid;
+  gap: 6px;
+}
+
+.activity-participations__heading {
+  margin: 0 0 3px;
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-label);
+  font-weight: var(--sgl-font-weight-semibold);
+}
+
+.activity-participations__person {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 9px 11px;
+  border: 1px solid var(--sgl-border);
+  border-radius: var(--sgl-radius-control);
+  background: var(--sgl-surface);
+}
+
+.activity-participations__person-info {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.activity-participations__person-info strong {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--sgl-font-body);
+}
+
+.activity-participations__person-info small {
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+}
+
+.activity-item .activity-participations__person > .activity-participations__status {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  max-width: 58%;
+  padding: 5px 8px;
+  border-radius: var(--sgl-radius-control);
+  background: color-mix(in srgb, var(--sgl-primary) 8%, var(--sgl-surface));
+  color: var(--sgl-primary);
+  font-size: var(--sgl-font-helper);
+  font-weight: var(--sgl-font-weight-semibold);
+  text-align: right;
+}
+
+.activity-item .activity-participations__person > .activity-participations__status--warning,
+.activity-item .activity-participations__person > .activity-participations__status--historico {
+  background: var(--sgl-surface-interactive);
+  color: var(--sgl-text-muted);
+}
+
+.activity-participations__message,
+.activity-participations__footnote {
+  margin: 0;
+  color: var(--sgl-text-muted);
+  font-size: var(--sgl-font-helper);
+  line-height: 1.55;
+}
+
+.activity-participations__message--error {
+  color: var(--sgl-text);
+}
+
+@media (max-width: 680px) {
+  .activity-participations__toggle,
+  .activity-participations__person {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .activity-participations__status {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .activity-participations__content {
+    padding: 10px;
+  }
 }
 
 </style>

@@ -60,6 +60,17 @@ export const router = createRouter({
           component: () => import('@/modules/pedidos/views/solicitante/MeusPedidosView.vue'),
         },
         {
+          path: 'minhas-solucoes',
+          name: 'solicitante-solucoes',
+          component: () => import('@/modules/solucoes/views/SolucoesSolicitanteView.vue'),
+        },
+        {
+          path: 'solucoes/solicitar',
+          name: 'solicitante-nova-solucao',
+          component: () => import('@/modules/solucoes/views/NovaSolucaoView.vue'),
+          props: true,
+        },
+        {
           path: 'meus-residuos',
           name: 'meus-residuos',
           component: () => import('@/modules/residuos/views/solicitante/MeusResiduosView.vue'),
@@ -122,6 +133,21 @@ export const router = createRouter({
           component: () => import('@/modules/estagiarios/views/EstagiariosGestaoView.vue'),
         },
         {
+          path: 'solucoes',
+          name: 'gestao-solucoes',
+          component: () => import('@/modules/solucoes/views/SolucoesGestaoView.vue'),
+        },
+        {
+          path: 'solucoes/nova',
+          name: 'gestao-nova-solucao',
+          component: () => import('@/modules/solucoes/views/NovaSolucaoView.vue'),
+        },
+        {
+          path: 'residuos/informar',
+          name: 'gestao-informar-residuo',
+          component: () => import('@/modules/residuos/views/solicitante/InformarResiduoView.vue'),
+        },
+        {
           path: 'residuos',
           name: 'gestao-residuos',
           component: () => import('@/modules/residuos/views/gestao/ResiduosGestaoCompletoView.vue'),
@@ -148,9 +174,21 @@ export const router = createRouter({
           meta: { requiresSession: true, perfis: PERFIS_ADMIN },
         },
         {
+          path: 'administracao/cadastros/residuos-solucoes',
+          name: 'admin-catalogos-residuos-solucoes',
+          component: () => import('@/modules/admin/views/CatalogosResiduosSolucoesView.vue'),
+          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+        },
+        {
           path: 'administracao/cadastros/modelos-residuo',
           name: 'admin-modelos-residuo',
-          component: () => import('@/modules/admin/views/ModelosResiduoAdminView.vue'),
+          redirect: '/administracao/cadastros/residuos-solucoes?tipo=residuos',
+          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+        },
+        {
+          path: 'administracao/cadastros/modelos-solucao',
+          name: 'admin-modelos-solucao',
+          redirect: '/administracao/cadastros/residuos-solucoes?tipo=solucoes',
           meta: { requiresSession: true, perfis: PERFIS_ADMIN },
         },
         {

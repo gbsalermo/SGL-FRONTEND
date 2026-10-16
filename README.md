@@ -13,9 +13,9 @@
 
 ---
 
-## Estado atual — 01/10/2026
+## Estado atual — 16/10/2026
 
-O primeiro protótipo do SGL foi **funcionalmente aprovado**. As **Etapas 1–5 da pré-produção foram concluídas e validadas**. A **Etapa 6 — Estagiários e vínculos** está em andamento: o backend dos blocos **6.1–6.3 está concluído e validado**, o **6.4 foi concluído e validado no backend** e o **6.5 — frontend integrado** foi implementado, com validação visual/local pendente.
+O primeiro protótipo do SGL foi aprovado funcionalmente, e as **Etapas 1–7 da pré-produção foram concluídas e validadas pelo responsável**. A Etapa 7 consolidou unidades e apresentações, recipientes físicos, medidas decimais, Soluções, Pedidos por embalagem ou medida, abertura parcial de embalagens, alertas de estoque mínimo configuráveis e integração backend/frontend. **A Etapa 8 é a próxima**, com contexto de participação dos Estagiários em Pedidos/Soluções e teste operacional completo. A homologação integral e a autenticação/autorização definitiva ainda são trabalhos posteriores.
 
 Estado consolidado:
 

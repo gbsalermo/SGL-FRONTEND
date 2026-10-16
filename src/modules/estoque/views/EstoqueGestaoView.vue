@@ -28,6 +28,54 @@ const ordemQuantitativa = computed(() => ordenarPor.value === 'QUANTIDADE' || or
 const rotuloOrdem = computed(() => ordemQuantitativa.value ? 'Ordem por quantidade' : 'Ordem alfabética')
 const filtroAtivo = computed(() => buscaEmFoco.value || filtrosAbertos.value)
 
+const medidas: Record<string, string> = { ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg', METRO: 'm', UNIDADE: 'un.', REACAO: 'reações' }
+const embalagens: Record<string, [string, string]> = {
+  UNITARIO: ['unidade', 'unidades'], FRASCO: ['frasco', 'frascos'], AMPOLA: ['ampola', 'ampolas'],
+  GARRAFA: ['garrafa', 'garrafas'], GALAO: ['galão', 'galões'], CAIXA: ['caixa', 'caixas'],
+  KIT: ['kit', 'kits'], PACOTE: ['pacote', 'pacotes'], SACO: ['saco', 'sacos'],
+  TUBO: ['tubo', 'tubos'], POTE: ['pote', 'potes'], PAR: ['par', 'pares'],
+  OUTRO: ['embalagem', 'embalagens'],
+}
+const numero = (valor: number) => new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 6 }).format(valor)
+const medida = (unidade: string) => medidas[unidade] ?? unidade
+function gruposDisponiveis(item: EstoqueCentralResponse) {
+  return (item.apresentacoesFisicas ?? []).filter((g) => g.fechados + g.abertos > 0)
+}
+function legendaGrupo(grupo: NonNullable<EstoqueCentralResponse['apresentacoesFisicas']>[number]) {
+  const qtd = grupo.fechados + grupo.abertos
+  const rotulo = embalagens[grupo.tipoEmbalagem] ?? ['embalagem', 'embalagens']
+  return `${numero(qtd)} ${qtd === 1 ? rotulo[0] : rotulo[1]}`
+}
+function tituloQuantidade(item: EstoqueCentralResponse) {
+  const grupos = gruposDisponiveis(item)
+  if (!grupos.length) return `${numero(item.quantidadeAtual)} ${medida(item.produtoUnidadeMedida)}`
+  return grupos.length === 1 ? legendaGrupo(grupos[0]!) : 'Apresentações variadas'
+}
+function resumoApresentacoes(item: EstoqueCentralResponse) {
+  return gruposDisponiveis(item).map((g) =>
+    `${gruposDisponiveis(item).length > 1 ? legendaGrupo(g) + ' · ' : ''}${numero(g.capacidade)} ${medida(g.unidadeMedida)} por embalagem`
+  ).join(' / ')
+}
+function minimoApresentado(item: EstoqueCentralResponse) {
+  if (item.minimoTipoEmbalagem && item.minimoMultiplicador && item.minimoMultiplicador > 0) {
+    const quantidade = item.quantidadeMinima / item.minimoMultiplicador
+    const rotulo = embalagens[item.minimoTipoEmbalagem] ?? ['embalagem', 'embalagens']
+    return `${numero(quantidade)} ${quantidade === 1 ? rotulo[0] : rotulo[1]}`
+  }
+  return `${numero(item.quantidadeMinima)} ${medida(item.produtoUnidadeMedida)}`
+}
+function minimoDetalhe(item: EstoqueCentralResponse) {
+  return item.minimoTipoEmbalagem && item.minimoMultiplicador
+    ? `${numero(item.minimoMultiplicador)} ${medida(item.produtoUnidadeMedida)} cada`
+    : ''
+}
+function estadoRecipientes(item: EstoqueCentralResponse) {
+  const grupos = item.apresentacoesFisicas ?? []
+  const fechados = grupos.reduce((acc, g) => acc + g.fechados, 0)
+  const abertos = grupos.reduce((acc, g) => acc + g.abertos, 0)
+  return `${fechados} fechados · ${abertos} abertos`
+}
+
 function estoqueBaixo(item: EstoqueCentralResponse) {
   return item.quantidadeAtual < item.quantidadeMinima
 }
@@ -165,15 +213,15 @@ onMounted(carregar)
     <header class="page-header">
       <div>
         <h1>Estoque</h1>
-        <p>Acompanhe quantidades em unidades, níveis mínimos, localização e situação dos lotes.</p>
+        <p>Acompanhe embalagens, saldos por medida, níveis mínimos, localização e situação dos lotes.</p>
       </div>
       <button class="secondary-action" type="button" @click="carregar">Atualizar</button>
     </header>
 
     <div class="summary-grid">
       <article><span>Produtos em estoque</span><strong>{{ resumo.produtos }}</strong><small>Registros ativos</small></article>
-      <article :class="{ warning: resumo.baixo > 0 }"><span>Estoque baixo</span><strong>{{ resumo.baixo }}</strong><small>Abaixo do mínimo em unidades</small></article>
-      <article :class="{ danger: resumo.zerados > 0 }"><span>Zerados</span><strong>{{ resumo.zerados }}</strong><small>Sem unidades disponíveis</small></article>
+      <article :class="{ warning: resumo.baixo > 0 }"><span>Estoque baixo</span><strong>{{ resumo.baixo }}</strong><small>Abaixo do mínimo cadastrado</small></article>
+      <article :class="{ danger: resumo.zerados > 0 }"><span>Zerados</span><strong>{{ resumo.zerados }}</strong><small>Sem saldo disponível</small></article>
       <article :class="{ danger: resumo.vencidos > 0 }"><span>Produtos com lote vencido</span><strong>{{ resumo.vencidos }}</strong><small>Somente vencidos que ainda possuem saldo</small></article>
     </div>
 
@@ -207,10 +255,16 @@ onMounted(carregar)
         <tbody>
           <tr v-for="item in estoquesFiltrados" :key="item.id" @click="abrirDetalhe(item)">
             <td><strong>{{ item.produtoNome }}</strong><small v-if="item.produtoCodigoReferencia">{{ item.produtoCodigoReferencia }}</small></td>
-            <td><strong>{{ item.produtoUnidadeArmazenamento || 'Não informada' }}</strong><small>Saldo geral contado em unidades</small></td>
+            <td><strong>{{ item.produtoUnidadeArmazenamento || 'Não informada' }}</strong><small>Apresentação de referência</small></td>
             <td>{{ item.produtoLocalizacaoFisica || 'Não informada' }}</td>
-            <td><strong class="quantity">{{ item.quantidadeAtual }}</strong> unidades</td>
-            <td>{{ item.quantidadeMinima }} unidades</td>
+            <td class="estoque-quantidade-cell">
+              <strong class="quantity">{{ tituloQuantidade(item) }}</strong>
+              <small v-if="gruposDisponiveis(item).length">{{ resumoApresentacoes(item) }}</small>
+              <small>Saldo total: {{ numero(item.quantidadeAtual) }} {{ medida(item.produtoUnidadeMedida) }}</small>
+              <small v-if="item.apresentacoesFisicas?.length">{{ estadoRecipientes(item) }}</small>
+              <small v-else>Resumo dos recipientes indisponível</small>
+            </td>
+            <td><strong>{{ minimoApresentado(item) }}</strong><small v-if="minimoDetalhe(item)">{{ minimoDetalhe(item) }}</small></td>
             <td>
               <span v-if="estoqueZerado(item)" class="chip danger-chip">ZERADO</span>
               <span v-else-if="possuiLoteVencido(item)" class="chip danger-chip">LOTE VENCIDO</span>
@@ -262,6 +316,7 @@ tbody tr:hover { background: #fbfdff; }
 td strong { color: #1e293b; }
 td small { display: block; margin-top: 3px; color: #94a3b8; font-size: 10px; }
 .quantity { color: #0d2b5e; font-size: 15px; }
+.estoque-quantidade-cell small { line-height: 1.5; overflow-wrap: anywhere; font-size: var(--sgl-font-helper); color: var(--sgl-text-muted); }
 .chip { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; font-size: 9px; font-weight: 800; }
 .ok-chip { background: #e7f7ed; color: #007a3d; }
 .warning-chip { background: #fff7d6; color: #946200; }

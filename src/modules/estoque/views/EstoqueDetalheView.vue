@@ -49,6 +49,14 @@ const formularioDescarte = ref({ quantidade: 0, justificativa: '' })
 
 const tiposEmbalagem: Array<{ value: TipoEmbalagem; label: string }> = [
   { value: 'UNITARIO', label: 'Unitário' },
+  { value: 'FRASCO', label: 'Frasco' },
+  { value: 'AMPOLA', label: 'Ampola' },
+  { value: 'PACOTE', label: 'Pacote' },
+  { value: 'SACO', label: 'Saco' },
+  { value: 'TUBO', label: 'Tubo' },
+  { value: 'POTE', label: 'Pote' },
+  { value: 'PAR', label: 'Par' },
+  { value: 'OUTRO', label: 'Outro' },
   { value: 'KIT', label: 'Kit' },
   { value: 'CAIXA', label: 'Caixa' },
   { value: 'GARRAFA', label: 'Garrafa' },
@@ -88,22 +96,42 @@ const proximos = computed(() => lotesAtivos.value.filter(loteProximoVencimento).
 const lotesVencidosComSaldo = computed(() => lotesAtivos.value.filter((lote) => loteVencido(lote) && lote.quantidadeDisponivel > 0))
 const vencidos = computed(() => lotesVencidosComSaldo.value.length)
 const quantidadeVencida = computed(() => lotesVencidosComSaldo.value.reduce((total, lote) => total + lote.quantidadeDisponivel, 0))
+const rotulosMedida: Record<string, string> = { ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg', METRO: 'm', UNIDADE: 'un.', REACAO: 'reações' }
+const medidaEstoque = computed(() => rotulosMedida[estoque.value?.produtoUnidadeMedida ?? ''] ?? estoque.value?.produtoUnidadeMedida ?? 'un.')
+const formatoQuantidade = (valor: number) => new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 6 }).format(valor)
+const quantidadeComMedida = (valor: number) => `${formatoQuantidade(valor)} ${medidaEstoque.value}`
 const saidasLote = computed(() => movimentacoesLote.value.filter((movimentacao) => movimentacao.tipoMovimentacao === 'SAIDA'))
 
 function rotuloTipoEmbalagem(tipo?: TipoEmbalagem | null, quantidade = 1) {
   const singular: Record<TipoEmbalagem, string> = {
-    UNITARIO: 'unit.',
-    KIT: 'kit',
-    CAIXA: 'caixa',
+    UNITARIO: 'un.',
+    FRASCO: 'frasco',
+    AMPOLA: 'ampola',
     GARRAFA: 'garrafa',
     GALAO: 'galão',
+    CAIXA: 'caixa',
+    KIT: 'kit',
+    PACOTE: 'pacote',
+    SACO: 'saco',
+    TUBO: 'tubo',
+    POTE: 'pote',
+    PAR: 'par',
+    OUTRO: 'embalagem',
   }
   const plural: Record<TipoEmbalagem, string> = {
-    UNITARIO: 'unit.',
-    KIT: 'kits',
-    CAIXA: 'caixas',
+    UNITARIO: 'un.',
+    FRASCO: 'frascos',
+    AMPOLA: 'ampolas',
     GARRAFA: 'garrafas',
     GALAO: 'galões',
+    CAIXA: 'caixas',
+    KIT: 'kits',
+    PACOTE: 'pacotes',
+    SACO: 'sacos',
+    TUBO: 'tubos',
+    POTE: 'potes',
+    PAR: 'pares',
+    OUTRO: 'embalagens',
   }
   const chave = tipo || 'UNITARIO'
   return quantidade === 1 ? singular[chave] : plural[chave]
@@ -141,17 +169,17 @@ const quantidadeExibida = computed(() => {
 })
 
 const rotuloQuantidadeExibida = computed(() => {
-  if (visualizacaoQuantidade.value === 'UNITARIA') return `${quantidadeExibida.value} unit.`
+  if (visualizacaoQuantidade.value === 'UNITARIA') return quantidadeComMedida(quantidadeExibida.value)
   const opcao = embalagemSelecionada.value
   if (!opcao) return '0 embalagens'
   return `${quantidadeExibida.value} ${rotuloTipoEmbalagem(opcao.tipo, quantidadeExibida.value)}`
 })
 
 const legendaQuantidade = computed(() => {
-  if (visualizacaoQuantidade.value === 'UNITARIA') return 'Total geral convertido para unidades individuais.'
+  if (visualizacaoQuantidade.value === 'UNITARIA') return 'Saldo total consolidado na unidade de medida do produto.'
   const opcao = embalagemSelecionada.value
   if (!opcao) return ''
-  return `${opcao.multiplicador} unit. por ${rotuloTipoEmbalagem(opcao.tipo)}. Outras embalagens não entram neste filtro.`
+  return `${formatoQuantidade(opcao.multiplicador)} ${medidaEstoque.value} por ${rotuloTipoEmbalagem(opcao.tipo)}. Outras embalagens não entram neste filtro.`
 })
 
 function dataFormatada(data: string | null) {
@@ -216,18 +244,18 @@ function destacarLoteDaRota() {
 
 function quantidadeFisica(lote: LoteResponse) {
   const recebida = Number(lote.quantidadeApresentacoes)
-  if (recebida > 0) return recebida
+  if (Number.isFinite(recebida) && recebida > 0) return recebida
   if ((lote.tipoEmbalagem || 'UNITARIO') === 'UNITARIO') return lote.quantidadeInicial
   return 0
 }
 
 function resumoRecebido(lote: LoteResponse) {
   const quantidade = quantidadeFisica(lote)
-  return `${quantidade} ${rotuloTipoEmbalagem(lote.tipoEmbalagem, quantidade)}`
+  return `${formatoQuantidade(quantidade)} ${rotuloTipoEmbalagem(lote.tipoEmbalagem, quantidade)}`
 }
 
 function resumoDisponivel(lote: LoteResponse) {
-  return `${Math.max(0, lote.quantidadeDisponivel)} unit.`
+  return quantidadeComMedida(Math.max(0, lote.quantidadeDisponivel))
 }
 
 function mensagemErro(error: unknown, fallback: string) {
@@ -263,6 +291,65 @@ async function carregar() {
   }
 }
 
+const minimoModo = ref('BASE')
+const minimoValor = ref<number>(0)
+const editandoMinimo = ref(false)
+const salvandoMinimo = ref(false)
+const erroMinimo = ref('')
+const sucessoMinimo = ref('')
+const minimoOpcao = computed(() => opcoesEmbalagem.value.find(o => o.chave === minimoModo.value))
+const minimoEquivalente = computed(() => minimoValor.value * (minimoOpcao.value?.multiplicador ?? 1))
+function selecionarMinimoModo() {
+  minimoValor.value = estoque.value
+    ? estoque.value.quantidadeMinima / (minimoOpcao.value?.multiplicador ?? 1)
+    : 0
+}
+function mostrarMinimo() {
+  if (!estoque.value) return ''
+  const fator = estoque.value.minimoMultiplicador
+  if (estoque.value.minimoTipoEmbalagem && fator && fator > 0) {
+    const numero = estoque.value.quantidadeMinima / fator
+    return `${formatoQuantidade(numero)} ${rotuloTipoEmbalagem(estoque.value.minimoTipoEmbalagem, numero)} de ${formatoQuantidade(fator)} ${medidaEstoque.value}`
+  }
+  return quantidadeComMedida(estoque.value.quantidadeMinima)
+}
+function abrirEdicaoMinimo() {
+  if (!estoque.value) return
+  const tipo = estoque.value.minimoTipoEmbalagem
+  const fator = estoque.value.minimoMultiplicador
+  const chave = `${tipo}::${fator}`
+  minimoModo.value = tipo && opcoesEmbalagem.value.some(o => o.chave === chave) ? chave : 'BASE'
+  minimoValor.value = estoque.value.quantidadeMinima / (minimoOpcao.value?.multiplicador ?? 1)
+  erroMinimo.value = ''
+  sucessoMinimo.value = ''
+  editandoMinimo.value = true
+}
+async function salvarMinimo() {
+  if (!estoque.value) return
+  const opcao = minimoOpcao.value
+  const valor = minimoValor.value
+  const convertido = minimoEquivalente.value
+  if (!Number.isFinite(valor) || valor < 0 || (opcao && !Number.isInteger(valor))
+      || !Number.isFinite(convertido) || convertido < 0
+      || Math.abs(convertido - Number(convertido.toFixed(6))) > 1e-9) {
+    erroMinimo.value = 'Informe uma quantidade válida; embalagens exigem números inteiros.'
+    return
+  }
+  salvandoMinimo.value = true
+  erroMinimo.value = ''
+  try {
+    estoque.value = await estoqueService.atualizarMinimo(
+      estoque.value, Number(convertido.toFixed(6)), opcao?.tipo ?? null, opcao?.multiplicador ?? null,
+    )
+    sucessoMinimo.value = 'Estoque mínimo atualizado.'
+    editandoMinimo.value = false
+  } catch (error) {
+    erroMinimo.value = mensagemErro(error, 'Não foi possível atualizar o estoque mínimo.')
+  } finally {
+    salvandoMinimo.value = false
+  }
+}
+
 function abrirEntrada() {
   erroEntrada.value = ''
   sucessoEntrada.value = ''
@@ -285,7 +372,9 @@ async function registrarEntrada() {
   if (!loteFornecedor) return void (erroEntrada.value = 'Informe o lote ou referência do fornecedor.')
   if (!especificacao) return void (erroEntrada.value = 'Especifique a embalagem recebida.')
   if (!Number.isInteger(Number(formularioEntrada.value.quantidade)) || Number(formularioEntrada.value.quantidade) <= 0) return void (erroEntrada.value = 'Informe quantas unidades ou embalagens foram recebidas.')
-  if (!Number.isInteger(Number(formularioEntrada.value.conteudoPorApresentacao)) || Number(formularioEntrada.value.conteudoPorApresentacao) <= 0) return void (erroEntrada.value = 'Informe um multiplicador válido.')
+  const conteudo = Number(formularioEntrada.value.conteudoPorApresentacao)
+  if (!Number.isFinite(conteudo) || conteudo <= 0 || Math.abs(conteudo - Number(conteudo.toFixed(6))) > 1e-9)
+    return void (erroEntrada.value = 'Informe conteúdo positivo, com até 6 casas decimais.')
 
   salvandoEntrada.value = true
   erroEntrada.value = ''
@@ -434,24 +523,42 @@ onMounted(carregar)
       <header class="page-header"><h1>{{ estoque.produtoNome }}</h1><p>{{ estoque.produtoCodigoReferencia || 'Sem código de referência' }} · {{ estoque.unidadeNome }}</p></header>
 
       <section class="product-context">
-        <div><span>Contagem padrão</span><strong>Unidades individuais</strong></div>
+        <div><span>Unidade de controle</span><strong>{{ medidaEstoque }}</strong></div>
         <div><span>Embalagem mais comum</span><strong>{{ estoque.produtoUnidadeArmazenamento || 'Não informada' }}</strong></div>
         <div><span>Localização</span><strong>{{ estoque.produtoLocalizacaoFisica || 'Não informada' }}</strong></div>
-        <div><span>Avisar quando restarem</span><strong>{{ estoque.quantidadeMinima }} unit.</strong></div>
+        <div><span>Avisar quando restarem</span><strong>{{ mostrarMinimo() }}</strong><button class="minimum-edit-action" type="button" @click="abrirEdicaoMinimo">Editar mínimo</button></div>
       </section>
 
+      <section v-if="editandoMinimo" class="minimum-editor">
+        <div class="minimum-editor__fields">
+          <label><span>Considerar o mínimo em</span>
+            <select v-model="minimoModo" @change="selecionarMinimoModo">
+              <option value="BASE">Medida do produto ({{ medidaEstoque }})</option>
+              <option v-for="opcao in opcoesEmbalagem" :key="opcao.chave" :value="opcao.chave">{{ rotuloTipoEmbalagem(opcao.tipo, 2) }} — {{ formatoQuantidade(opcao.multiplicador) }} {{ medidaEstoque }} cada</option>
+            </select>
+          </label>
+          <label><span>Quantidade mínima</span><input v-model.number="minimoValor" type="number" :step="minimoOpcao ? 1 : 'any'" min="0" /></label>
+        </div>
+        <small>Equivalente para alerta: {{ formatoQuantidade(minimoEquivalente) }} {{ medidaEstoque }}. O alerta compara o saldo total do produto.</small>
+        <p v-if="erroMinimo" class="minimum-editor__error">{{ erroMinimo }}</p>
+        <div class="minimum-editor__actions">
+          <button class="secondary-action" type="button" @click="editandoMinimo = false">Cancelar</button>
+          <button class="primary-action" type="button" :disabled="salvandoMinimo" @click="salvarMinimo">Salvar mínimo</button>
+        </div>
+      </section>
+      <p v-if="sucessoMinimo" class="minimum-editor__success">{{ sucessoMinimo }}</p>
       <div class="summary-grid">
         <article class="quantity-card"><span>Quantidade disponível</span><strong>{{ rotuloQuantidadeExibida }}</strong><small>{{ legendaQuantidade }}</small></article>
-        <article class="view-card"><label for="quantity-view">Visualizar por embalagem</label><select id="quantity-view" v-model="visualizacaoQuantidade"><option value="UNITARIA">Unidades individuais</option><option v-for="opcao in opcoesEmbalagem" :key="opcao.chave" :value="opcao.chave">{{ rotuloTipoEmbalagem(opcao.tipo, 2) }} — {{ opcao.multiplicador }} unit. por embalagem</option></select><small>O filtro muda apenas a forma de visualizar o mesmo saldo.</small></article>
+        <article class="view-card"><label for="quantity-view">Visualizar por embalagem</label><select id="quantity-view" v-model="visualizacaoQuantidade"><option value="UNITARIA">Saldo total ({{ medidaEstoque }})</option><option v-for="opcao in opcoesEmbalagem" :key="opcao.chave" :value="opcao.chave">{{ rotuloTipoEmbalagem(opcao.tipo, 2) }} — {{ formatoQuantidade(opcao.multiplicador) }} {{ medidaEstoque }} por embalagem</option></select><small>O filtro muda apenas a forma de visualizar o mesmo saldo.</small></article>
         <article :class="{ warning: proximos > 0 }"><span>Vencem em até 30 dias</span><strong>{{ proximos }}</strong><small>{{ proximos === 1 ? 'lote próximo do vencimento' : 'lotes próximos do vencimento' }}</small></article>
-        <article :class="{ danger: vencidos > 0 }"><span>Lotes vencidos</span><strong>{{ vencidos }}</strong><small>{{ vencidos > 0 ? `${quantidadeVencida} unit. aguardando descarte` : 'Nenhum vencido com saldo' }}</small></article>
+        <article :class="{ danger: vencidos > 0 }"><span>Lotes vencidos</span><strong>{{ vencidos }}</strong><small>{{ vencidos > 0 ? `${quantidadeComMedida(quantidadeVencida)} aguardando descarte` : 'Nenhum vencido com saldo' }}</small></article>
       </div>
 
       <div v-if="sucessoEntrada" class="success-box">{{ sucessoEntrada }}</div>
       <div v-if="sucessoDescarte" class="success-box">{{ sucessoDescarte }}</div>
 
       <section class="lot-card">
-        <div class="lot-card__heading"><div><h2>Lotes</h2><p>O saldo disponível é mostrado em unidades. Embalagem e multiplicador preservam a forma física da entrada.</p></div><div class="lot-actions"><button v-if="quantidadeVencida > 0" class="danger-action" type="button" @click="abrirDescarte">Descartar vencidos</button><button class="primary-action" type="button" @click="abrirEntrada">+ Nova entrada de lote</button></div></div>
+        <div class="lot-card__heading"><div><h2>Lotes</h2><p>O saldo disponível usa a unidade de controle do produto; a apresentação identifica a embalagem.</p></div><div class="lot-actions"><button v-if="quantidadeVencida > 0" class="danger-action" type="button" @click="abrirDescarte">Descartar vencidos</button><button class="primary-action" type="button" @click="abrirEntrada">+ Nova entrada de lote</button></div></div>
 
         <div class="lot-filter-bar">
           <label><span>Buscar lote</span><input v-model="buscaLote" type="search" placeholder="Código SGL, fornecedor ou embalagem..." /></label>
@@ -479,10 +586,10 @@ onMounted(carregar)
       <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="entrada-lote-title">
         <header class="modal-card__header"><div><span>Estoque / Entrada</span><h2 id="entrada-lote-title">Nova entrada de lote</h2><p v-if="estoque">{{ estoque.produtoNome }} · o código SGL será gerado automaticamente</p></div><button type="button" class="modal-close" @click="fecharEntrada">×</button></header>
         <form class="entry-form" @submit.prevent="registrarEntrada">
-          <div class="entry-grid"><label><span>Lote / referência do fornecedor *</span><input v-model="formularioEntrada.numeroLote" type="text" maxlength="120" placeholder="Ex.: FAB-2026-8841" autofocus /></label><label><span>Tipo de unidade *</span><select v-model="formularioEntrada.tipoEmbalagem"><option v-for="tipo in tiposEmbalagem" :key="tipo.value" :value="tipo.value">{{ tipo.label }}</option></select></label><label><span>Especificar embalagem *</span><input v-model="formularioEntrada.apresentacao" type="text" maxlength="120" placeholder="Ex.: kit com 50 unidades, garrafa de 1 L" /></label><label><span>Quantos chegaram? *</span><input v-model.number="formularioEntrada.quantidade" type="number" min="1" step="1" /></label><label><span>Multiplicador de unidades *</span><div class="input-with-unit"><input v-model.number="formularioEntrada.conteudoPorApresentacao" type="number" min="1" step="1" /><b>unit.</b></div><small>Kit com 50 → 50; unitário → 1.</small></label><label><span>Data de validade</span><input v-model="formularioEntrada.dataValidade" type="date" /></label><label><span>Origem da entrada *</span><select v-model="formularioEntrada.origem"><option value="COMPRA">Compra</option><option value="DEVOLUCAO">Devolução</option><option value="AJUSTE">Ajuste</option><option value="INVENTARIO">Inventário</option></select></label></div>
-          <label class="fraction-option"><input v-model="formularioEntrada.fracionavel" type="checkbox" /><span><strong>Pode retirar unidades separadamente?</strong><small>Desmarque quando a embalagem precisar sair sempre completa. Se liberar depois, essa decisão não poderá ser revertida.</small></span></label>
+          <div class="entry-grid"><label><span>Lote / referência do fornecedor *</span><input v-model="formularioEntrada.numeroLote" type="text" maxlength="120" placeholder="Ex.: FAB-2026-8841" autofocus /></label><label><span>Tipo de unidade *</span><select v-model="formularioEntrada.tipoEmbalagem"><option v-for="tipo in tiposEmbalagem" :key="tipo.value" :value="tipo.value">{{ tipo.label }}</option></select></label><label><span>Especificar embalagem *</span><input v-model="formularioEntrada.apresentacao" type="text" maxlength="120" placeholder="Ex.: kit com 50 unidades, garrafa de 1 L" /></label><label><span>Quantos chegaram? *</span><input v-model.number="formularioEntrada.quantidade" type="number" min="1" step="1" /></label><label><span>Conteúdo por embalagem *</span><div class="input-with-unit"><input v-model.number="formularioEntrada.conteudoPorApresentacao" type="number" min="0.000001" step="any" /><b>{{ medidaEstoque }}</b></div><small>Informe o conteúdo de cada embalagem na unidade de controle do produto.</small></label><label><span>Data de validade</span><input v-model="formularioEntrada.dataValidade" type="date" /></label><label><span>Origem da entrada *</span><select v-model="formularioEntrada.origem"><option value="COMPRA">Compra</option><option value="DEVOLUCAO">Devolução</option><option value="AJUSTE">Ajuste</option><option value="INVENTARIO">Inventário</option></select></label></div>
+          <label class="fraction-option"><input v-model="formularioEntrada.fracionavel" type="checkbox" /><span><strong>Permitir retirar parte do conteúdo desta embalagem?</strong><small>Marque para permitir abrir o recipiente e retirar porções (ex.: 100 mL de um frasco ou 1 reação de um kit). A unidade mínima, como 1 reação, continua indivisível. Desmarque para exigir a embalagem completa. Depois de liberar, não será possível bloquear novamente.</small></span></label>
           <label class="entry-observation"><span>Observação</span><textarea v-model="formularioEntrada.observacao" rows="3" maxlength="500"></textarea></label>
-          <div class="entry-preview"><strong>Entrada física</strong><span>{{ formularioEntrada.quantidade || 0 }} {{ rotuloTipoEmbalagem(formularioEntrada.tipoEmbalagem, Number(formularioEntrada.quantidade) || 0) }} · {{ formularioEntrada.apresentacao || 'sem especificação' }}</span><small>O sistema atualiza o saldo em unidades automaticamente.</small></div>
+          <div class="entry-preview"><strong>Entrada física</strong><span>{{ formularioEntrada.quantidade || 0 }} {{ rotuloTipoEmbalagem(formularioEntrada.tipoEmbalagem, Number(formularioEntrada.quantidade) || 0) }} · {{ formularioEntrada.apresentacao || 'sem especificação' }}</span><small>O sistema atualiza o saldo na unidade de controle do produto.</small></div>
           <div v-if="erroEntrada" class="form-error">{{ erroEntrada }}</div><footer class="modal-actions"><button type="button" class="secondary-action" :disabled="salvandoEntrada" @click="fecharEntrada">Cancelar</button><button type="submit" class="primary-action" :disabled="salvandoEntrada">{{ salvandoEntrada ? 'Registrando...' : 'Confirmar entrada' }}</button></footer>
         </form>
       </section>
@@ -495,7 +602,7 @@ onMounted(carregar)
         <div v-if="!editandoLote" class="lot-detail-body">
           <div v-if="sucessoLote" class="success-box">{{ sucessoLote }}</div>
           <div class="lot-detail-highlight"><div><span>Unidade recebida</span><strong>{{ resumoRecebido(loteSelecionado) }}</strong><small>{{ loteSelecionado.apresentacao }}</small></div><div><span>Disponível agora</span><strong>{{ resumoDisponivel(loteSelecionado) }}</strong></div></div>
-          <div class="lot-detail-grid"><div><span>Código SGL</span><strong>{{ loteSelecionado.codigoInterno }}</strong></div><div><span>Lote do fornecedor</span><strong>{{ loteSelecionado.numeroLote }}</strong></div><div><span>Tipo de unidade</span><strong>{{ rotuloTipoEmbalagem(loteSelecionado.tipoEmbalagem) }}</strong></div><div><span>Especificação</span><strong>{{ loteSelecionado.apresentacao || 'Não informada' }}</strong></div><div><span>Multiplicador</span><strong>{{ loteSelecionado.conteudoPorApresentacao || 1 }} unit. por embalagem</strong></div><div><span>Entrada</span><strong>{{ dataFormatada(loteSelecionado.dataEntrada) }}</strong></div><div><span>Validade</span><strong>{{ dataFormatada(loteSelecionado.dataValidade) }}</strong></div><div><span>Retirada unitária</span><strong>{{ loteSelecionado.fracionavel === false ? 'Não — somente embalagem completa' : 'Sim — liberada definitivamente' }}</strong></div><div class="lot-detail-wide"><span>Observação</span><strong>{{ loteSelecionado.observacao || 'Nenhuma observação registrada.' }}</strong></div></div>
+          <div class="lot-detail-grid"><div><span>Código SGL</span><strong>{{ loteSelecionado.codigoInterno }}</strong></div><div><span>Lote do fornecedor</span><strong>{{ loteSelecionado.numeroLote }}</strong></div><div><span>Tipo de unidade</span><strong>{{ rotuloTipoEmbalagem(loteSelecionado.tipoEmbalagem) }}</strong></div><div><span>Especificação</span><strong>{{ loteSelecionado.apresentacao || 'Não informada' }}</strong></div><div><span>Multiplicador</span><strong>{{ formatoQuantidade(loteSelecionado.conteudoPorApresentacao || 1) }} {{ medidaEstoque }} por embalagem</strong></div><div><span>Entrada</span><strong>{{ dataFormatada(loteSelecionado.dataEntrada) }}</strong></div><div><span>Validade</span><strong>{{ dataFormatada(loteSelecionado.dataValidade) }}</strong></div><div><span>Retirada parcial da embalagem</span><strong>{{ loteSelecionado.fracionavel === false ? 'Não — somente embalagem completa' : 'Sim — abertura permitida' }}</strong></div><div class="lot-detail-wide"><span>Observação</span><strong>{{ loteSelecionado.observacao || 'Nenhuma observação registrada.' }}</strong></div></div>
 
           <section class="lot-output-history">
             <div class="lot-output-history__heading"><div><h3>Saídas deste lote</h3><p>Pedidos que utilizaram material deste lote.</p></div><span>{{ saidasLote.length }} saída(s)</span></div>
@@ -515,9 +622,9 @@ onMounted(carregar)
         <form v-else class="entry-form" @submit.prevent="salvarLote">
           <div class="immutable-code-box"><span>Código SGL</span><strong>{{ loteSelecionado.codigoInterno }}</strong><small>Gerado automaticamente e imutável.</small></div>
           <div class="entry-grid"><label><span>Lote / referência do fornecedor *</span><input v-model="formularioLote.numeroLote" type="text" maxlength="120" /></label><div class="read-only-field"><span>Tipo de unidade</span><strong>{{ rotuloTipoEmbalagem(loteSelecionado.tipoEmbalagem) }}</strong><small>O tipo original da embalagem não pode ser alterado.</small></div><label><span>Especificar embalagem</span><input v-model="formularioLote.apresentacao" type="text" maxlength="120" /></label><label><span>Data de validade</span><input v-model="formularioLote.dataValidade" type="date" /></label></div>
-          <label class="fraction-option" :class="{ 'fraction-option--locked': loteSelecionado.fracionavel !== false }"><input v-model="formularioLote.fracionavel" type="checkbox" :disabled="loteSelecionado.fracionavel !== false" /><span><strong>Pode retirar unidades separadamente?</strong><small v-if="loteSelecionado.fracionavel !== false">Retirada unitária já foi liberada e não pode voltar para embalagem obrigatoriamente fechada.</small><small v-else>Você pode liberar retirada unitária. Depois de salvar, essa mudança será definitiva.</small></span></label>
+          <label class="fraction-option" :class="{ 'fraction-option--locked': loteSelecionado.fracionavel !== false }"><input v-model="formularioLote.fracionavel" type="checkbox" :disabled="loteSelecionado.fracionavel !== false" /><span><strong>Permitir retirar parte do conteúdo da embalagem?</strong><small v-if="loteSelecionado.fracionavel !== false">Abertura para retirada parcial já foi liberada e não pode ser revertida. Unidades contáveis continuam inteiras.</small><small v-else>Você pode liberar retirada parcial do conteúdo. A mudança será definitiva para este lote.</small></span></label>
           <label class="entry-observation"><span>Observação</span><textarea v-model="formularioLote.observacao" rows="3" maxlength="500"></textarea></label>
-          <div class="locked-info"><strong>Quantidade e multiplicador originais</strong><span>{{ resumoRecebido(loteSelecionado) }} · {{ loteSelecionado.conteudoPorApresentacao || 1 }} unit. por embalagem</span><small>Esses valores ficam bloqueados para preservar o histórico físico do lote.</small></div><div v-if="erroLote" class="form-error">{{ erroLote }}</div><footer class="modal-actions"><button type="button" class="secondary-action" :disabled="salvandoLote" @click="editandoLote = false">Cancelar</button><button type="submit" class="primary-action" :disabled="salvandoLote">{{ salvandoLote ? 'Salvando...' : 'Salvar alterações' }}</button></footer>
+          <div class="locked-info"><strong>Quantidade e multiplicador originais</strong><span>{{ resumoRecebido(loteSelecionado) }} · {{ formatoQuantidade(loteSelecionado.conteudoPorApresentacao || 1) }} {{ medidaEstoque }} por embalagem</span><small>Esses valores ficam bloqueados para preservar o histórico físico do lote.</small></div><div v-if="erroLote" class="form-error">{{ erroLote }}</div><footer class="modal-actions"><button type="button" class="secondary-action" :disabled="salvandoLote" @click="editandoLote = false">Cancelar</button><button type="submit" class="primary-action" :disabled="salvandoLote">{{ salvandoLote ? 'Salvando...' : 'Salvar alterações' }}</button></footer>
         </form>
       </section>
     </div>
@@ -527,7 +634,7 @@ onMounted(carregar)
         <header class="modal-card__header"><div><span>Estoque / Descarte</span><h2 id="descarte-title">Descartar material vencido</h2><p>{{ estoque?.produtoNome }}</p></div><button type="button" class="modal-close" @click="fecharDescarte">×</button></header>
         <form class="entry-form" @submit.prevent="registrarDescarte">
           <div class="discard-summary"><div><span>Lotes vencidos com saldo</span><strong>{{ vencidos }}</strong></div><div><span>Total vencido</span><strong>{{ quantidadeVencida }} unit.</strong></div></div>
-          <div class="expired-list"><div v-for="lote in lotesVencidosComSaldo" :key="lote.id" class="expired-item"><div><strong>{{ lote.codigoInterno }}</strong><small>{{ lote.apresentacao }} · validade {{ dataFormatada(lote.dataValidade) }}</small></div><div class="expired-item__qty"><strong>{{ lote.quantidadeDisponivel }} unit.</strong><small v-if="lote.fracionavel === false">múltiplos de {{ lote.conteudoPorApresentacao || 1 }} unit.</small><small v-else>pode ser fracionado</small></div></div></div>
+          <div class="expired-list"><div v-for="lote in lotesVencidosComSaldo" :key="lote.id" class="expired-item"><div><strong>{{ lote.codigoInterno }}</strong><small>{{ lote.apresentacao }} · validade {{ dataFormatada(lote.dataValidade) }}</small></div><div class="expired-item__qty"><strong>{{ quantidadeComMedida(lote.quantidadeDisponivel) }}</strong><small v-if="lote.fracionavel === false">embalagem completa: {{ formatoQuantidade(lote.conteudoPorApresentacao || 1) }} {{ medidaEstoque }}</small><small v-else>pode ser fracionado</small></div></div></div>
           <div class="entry-grid discard-fields"><label><span>Quantidade a descartar *</span><div class="input-with-unit"><input v-model.number="formularioDescarte.quantidade" type="number" min="1" :max="quantidadeVencida" step="1" /><b>unit.</b></div><small>Lotes não fracionáveis só permitem descarte compatível com a embalagem completa.</small></label></div>
           <label class="entry-observation"><span>Justificativa *</span><textarea v-model="formularioDescarte.justificativa" rows="4" maxlength="500" placeholder="Ex.: Material vencido identificado durante conferência mensal."></textarea></label>
           <div class="discard-warning">O sistema baixa primeiro os lotes vencidos mais antigos e registra cada movimentação separadamente. A operação é cancelada inteira se a quantidade exigir fracionar uma embalagem fechada.</div><div v-if="erroDescarte" class="form-error">{{ erroDescarte }}</div><footer class="modal-actions"><button type="button" class="secondary-action" :disabled="salvandoDescarte" @click="fecharDescarte">Cancelar</button><button type="submit" class="danger-action" :disabled="salvandoDescarte">{{ salvandoDescarte ? 'Descartando...' : 'Confirmar descarte' }}</button></footer>
@@ -568,4 +675,15 @@ onMounted(carregar)
 @media (max-width: 1150px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lot-filter-bar { grid-template-columns: 1fr 1fr; } .lot-filter-result { grid-column: 1 / -1; } }
 @media (max-width: 900px) { .product-context { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .summary-grid, .entry-grid, .product-context, .lot-detail-highlight, .lot-detail-grid, .discard-summary, .lot-filter-bar { grid-template-columns: 1fr; } .lot-filter-result { grid-column: auto; } .lot-detail-wide { grid-column: auto; } .lot-card__heading { flex-direction: column; } .lot-actions, .primary-action, .danger-action { width: 100%; } .lot-actions { flex-direction: column; } .modal-actions { flex-direction: column-reverse; } .expired-item, .lot-output-list article { align-items: flex-start; flex-direction: column; } .expired-item__qty { text-align: left; } }
+
+.minimum-edit-action { display: block; margin-top: var(--sgl-space-2); border: none; background: transparent; color: var(--sgl-primary); font: inherit; font-size: var(--sgl-font-helper); cursor: pointer; padding: 0; text-align: left; }
+.minimum-editor { border: 1px solid var(--sgl-border); border-radius: var(--sgl-radius-surface); padding: var(--sgl-space-4); margin-top: var(--sgl-space-3); background: var(--sgl-surface); color: var(--sgl-text); }
+.minimum-editor__fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(140px, 1fr); gap: var(--sgl-space-3); }
+.minimum-editor__fields label { display: flex; flex-direction: column; gap: var(--sgl-space-2); font-size: var(--sgl-font-label); }
+.minimum-editor__fields input, .minimum-editor__fields select { min-height: var(--sgl-control-height); padding: 0 var(--sgl-space-3); border: 1px solid var(--sgl-border); border-radius: var(--sgl-radius-control); background: var(--sgl-surface); color: var(--sgl-text); }
+.minimum-editor > small { display: block; margin-top: var(--sgl-space-3); color: var(--sgl-text-muted); font-size: var(--sgl-font-helper); }
+.minimum-editor__actions { display: flex; gap: var(--sgl-space-2); justify-content: flex-end; margin-top: var(--sgl-space-3); }
+.minimum-editor__error { color: var(--sgl-danger); }
+.minimum-editor__success { color: var(--sgl-success); }
+@media(max-width:640px) { .minimum-editor__fields { grid-template-columns: 1fr; } }
 </style>
