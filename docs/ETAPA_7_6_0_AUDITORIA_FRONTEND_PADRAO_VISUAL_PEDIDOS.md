@@ -101,3 +101,11 @@ Usar os exports de `src/components/common/index.ts` onde couber:
 - [ ] Documentação sincronizada; **sem merge** sem autorização expressa.
 
 **Esta rodada é somente auditoria.** Não afirmar build/teste ou implantação funcional da 7.6.0 a partir dela.
+
+## Aceite final e preparação de merge — 16/10/2026
+
+O responsável confirmou testes e funcionamento satisfatórios após o último ciclo da Etapa 7; os ajustes da 7.7 (fracionamento por lote e unidade mínima de consumo, massa DEMO, mínimo configurável por apresentação, DTOs, tabela de Estoque e aprovação por embalagem) estão **aceitos funcionalmente**. Testes Maven/JUnit, inicialização da API e build frontend foram relatados verdes, além da validação manual dos cenários exercitados.
+
+**Etapa 7 encerrada funcionalmente.** Manter o teste exaustivo de cadastro → entrada → Pedido → aprovação → entrega → rastreabilidade na Etapa 8. A aprovação funcional não comprova homologação integral para produção. **Nenhum merge foi efetuado pelo assistente**: o responsável fará a integração de ambos os repositórios e verificará o alinhamento com o GitLab/main canônico.
+
+Referências atuais: `CONTINUIDADE.md` em ambos os repositórios, `docs/PLANO_PRE_PRODUCAO.md` no backend e o documento de continuidade da Etapa 7. Trechos anteriores marcados “pendente” refletem o estado na data em que foram redigidos e não são o checkpoint de encerramento.
