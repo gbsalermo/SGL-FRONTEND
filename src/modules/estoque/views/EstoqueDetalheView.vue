@@ -291,6 +291,65 @@ async function carregar() {
   }
 }
 
+const minimoModo = ref('BASE')
+const minimoValor = ref<number>(0)
+const editandoMinimo = ref(false)
+const salvandoMinimo = ref(false)
+const erroMinimo = ref('')
+const sucessoMinimo = ref('')
+const minimoOpcao = computed(() => opcoesEmbalagem.value.find(o => o.chave === minimoModo.value))
+const minimoEquivalente = computed(() => minimoValor.value * (minimoOpcao.value?.multiplicador ?? 1))
+function selecionarMinimoModo() {
+  minimoValor.value = estoque.value
+    ? estoque.value.quantidadeMinima / (minimoOpcao.value?.multiplicador ?? 1)
+    : 0
+}
+function mostrarMinimo() {
+  if (!estoque.value) return ''
+  const fator = estoque.value.minimoMultiplicador
+  if (estoque.value.minimoTipoEmbalagem && fator && fator > 0) {
+    const numero = estoque.value.quantidadeMinima / fator
+    return `${formatoQuantidade(numero)} ${rotuloTipoEmbalagem(estoque.value.minimoTipoEmbalagem, numero)} de ${formatoQuantidade(fator)} ${medidaEstoque.value}`
+  }
+  return quantidadeComMedida(estoque.value.quantidadeMinima)
+}
+function abrirEdicaoMinimo() {
+  if (!estoque.value) return
+  const tipo = estoque.value.minimoTipoEmbalagem
+  const fator = estoque.value.minimoMultiplicador
+  const chave = `${tipo}::${fator}`
+  minimoModo.value = tipo && opcoesEmbalagem.value.some(o => o.chave === chave) ? chave : 'BASE'
+  minimoValor.value = estoque.value.quantidadeMinima / (minimoOpcao.value?.multiplicador ?? 1)
+  erroMinimo.value = ''
+  sucessoMinimo.value = ''
+  editandoMinimo.value = true
+}
+async function salvarMinimo() {
+  if (!estoque.value) return
+  const opcao = minimoOpcao.value
+  const valor = minimoValor.value
+  const convertido = minimoEquivalente.value
+  if (!Number.isFinite(valor) || valor < 0 || (opcao && !Number.isInteger(valor))
+      || !Number.isFinite(convertido) || convertido < 0
+      || Math.abs(convertido - Number(convertido.toFixed(6))) > 1e-9) {
+    erroMinimo.value = 'Informe uma quantidade válida; embalagens exigem números inteiros.'
+    return
+  }
+  salvandoMinimo.value = true
+  erroMinimo.value = ''
+  try {
+    estoque.value = await estoqueService.atualizarMinimo(
+      estoque.value, Number(convertido.toFixed(6)), opcao?.tipo ?? null, opcao?.multiplicador ?? null,
+    )
+    sucessoMinimo.value = 'Estoque mínimo atualizado.'
+    editandoMinimo.value = false
+  } catch (error) {
+    erroMinimo.value = mensagemErro(error, 'Não foi possível atualizar o estoque mínimo.')
+  } finally {
+    salvandoMinimo.value = false
+  }
+}
+
 function abrirEntrada() {
   erroEntrada.value = ''
   sucessoEntrada.value = ''
@@ -465,9 +524,27 @@ onMounted(carregar)
         <div><span>Unidade de controle</span><strong>{{ medidaEstoque }}</strong></div>
         <div><span>Embalagem mais comum</span><strong>{{ estoque.produtoUnidadeArmazenamento || 'Não informada' }}</strong></div>
         <div><span>Localização</span><strong>{{ estoque.produtoLocalizacaoFisica || 'Não informada' }}</strong></div>
-        <div><span>Avisar quando restarem</span><strong>{{ quantidadeComMedida(estoque.quantidadeMinima) }}</strong></div>
+        <div><span>Avisar quando restarem</span><strong>{{ mostrarMinimo() }}</strong><button class="minimum-edit-action" type="button" @click="abrirEdicaoMinimo">Editar mínimo</button></div>
       </section>
 
+      <section v-if="editandoMinimo" class="minimum-editor">
+        <div class="minimum-editor__fields">
+          <label><span>Considerar o mínimo em</span>
+            <select v-model="minimoModo" @change="selecionarMinimoModo">
+              <option value="BASE">Medida do produto ({{ medidaEstoque }})</option>
+              <option v-for="opcao in opcoesEmbalagem" :key="opcao.chave" :value="opcao.chave">{{ rotuloTipoEmbalagem(opcao.tipo, 2) }} — {{ formatoQuantidade(opcao.multiplicador) }} {{ medidaEstoque }} cada</option>
+            </select>
+          </label>
+          <label><span>Quantidade mínima</span><input v-model.number="minimoValor" type="number" :step="minimoOpcao ? 1 : 'any'" min="0" /></label>
+        </div>
+        <small>Equivalente para alerta: {{ formatoQuantidade(minimoEquivalente) }} {{ medidaEstoque }}. O alerta compara o saldo total do produto.</small>
+        <p v-if="erroMinimo" class="minimum-editor__error">{{ erroMinimo }}</p>
+        <div class="minimum-editor__actions">
+          <button class="secondary-action" type="button" @click="editandoMinimo = false">Cancelar</button>
+          <button class="primary-action" type="button" :disabled="salvandoMinimo" @click="salvarMinimo">Salvar mínimo</button>
+        </div>
+      </section>
+      <p v-if="sucessoMinimo" class="minimum-editor__success">{{ sucessoMinimo }}</p>
       <div class="summary-grid">
         <article class="quantity-card"><span>Quantidade disponível</span><strong>{{ rotuloQuantidadeExibida }}</strong><small>{{ legendaQuantidade }}</small></article>
         <article class="view-card"><label for="quantity-view">Visualizar por embalagem</label><select id="quantity-view" v-model="visualizacaoQuantidade"><option value="UNITARIA">Saldo total ({{ medidaEstoque }})</option><option v-for="opcao in opcoesEmbalagem" :key="opcao.chave" :value="opcao.chave">{{ rotuloTipoEmbalagem(opcao.tipo, 2) }} — {{ formatoQuantidade(opcao.multiplicador) }} {{ medidaEstoque }} por embalagem</option></select><small>O filtro muda apenas a forma de visualizar o mesmo saldo.</small></article>
@@ -596,4 +673,15 @@ onMounted(carregar)
 @media (max-width: 1150px) { .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lot-filter-bar { grid-template-columns: 1fr 1fr; } .lot-filter-result { grid-column: 1 / -1; } }
 @media (max-width: 900px) { .product-context { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .summary-grid, .entry-grid, .product-context, .lot-detail-highlight, .lot-detail-grid, .discard-summary, .lot-filter-bar { grid-template-columns: 1fr; } .lot-filter-result { grid-column: auto; } .lot-detail-wide { grid-column: auto; } .lot-card__heading { flex-direction: column; } .lot-actions, .primary-action, .danger-action { width: 100%; } .lot-actions { flex-direction: column; } .modal-actions { flex-direction: column-reverse; } .expired-item, .lot-output-list article { align-items: flex-start; flex-direction: column; } .expired-item__qty { text-align: left; } }
+
+.minimum-edit-action { display: block; margin-top: var(--sgl-space-2); border: none; background: transparent; color: var(--sgl-primary); font: inherit; font-size: var(--sgl-font-helper); cursor: pointer; padding: 0; text-align: left; }
+.minimum-editor { border: 1px solid var(--sgl-border); border-radius: var(--sgl-radius-surface); padding: var(--sgl-space-4); margin-top: var(--sgl-space-3); background: var(--sgl-surface); color: var(--sgl-text); }
+.minimum-editor__fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(140px, 1fr); gap: var(--sgl-space-3); }
+.minimum-editor__fields label { display: flex; flex-direction: column; gap: var(--sgl-space-2); font-size: var(--sgl-font-label); }
+.minimum-editor__fields input, .minimum-editor__fields select { min-height: var(--sgl-control-height); padding: 0 var(--sgl-space-3); border: 1px solid var(--sgl-border); border-radius: var(--sgl-radius-control); background: var(--sgl-surface); color: var(--sgl-text); }
+.minimum-editor > small { display: block; margin-top: var(--sgl-space-3); color: var(--sgl-text-muted); font-size: var(--sgl-font-helper); }
+.minimum-editor__actions { display: flex; gap: var(--sgl-space-2); justify-content: flex-end; margin-top: var(--sgl-space-3); }
+.minimum-editor__error { color: var(--sgl-danger); }
+.minimum-editor__success { color: var(--sgl-success); }
+@media(max-width:640px) { .minimum-editor__fields { grid-template-columns: 1fr; } }
 </style>
