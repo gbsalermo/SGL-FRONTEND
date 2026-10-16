@@ -12,6 +12,7 @@ import type {
 
 type ProdutoDetalhe = {
   id: string
+  unidadeMedida: import('@/modules/pedidos/types/pedido').UnidadeMedidaPedido
   risco: string | null
   tipoRisco: string | null
   descricaoRisco: string | null
@@ -48,7 +49,7 @@ function descricaoOperacionalProduto(item: PedidoResponse['itens'][number]) {
 }
 
 function itemSemContextoProduto(item: PedidoResponse['itens'][number]) {
-  return item.produtoRisco === undefined || item.produtoPerecivel === undefined || item.produtoTipoRisco === undefined
+  return !item.produtoUnidadeMedida || item.produtoRisco === undefined || item.produtoPerecivel === undefined || item.produtoTipoRisco === undefined
 }
 
 function loteUtilizavel(lote: LotePedidoResponse) {
@@ -80,6 +81,7 @@ async function enriquecerItensComProduto(pedido: PedidoResponse): Promise<Pedido
       if (!produto) return item
       return {
         ...item,
+        produtoUnidadeMedida: produto.unidadeMedida,
         produtoRisco: produto.risco,
         produtoTipoRisco: produto.tipoRisco,
         produtoDescricaoRisco: produto.descricaoRisco,
