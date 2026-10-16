@@ -120,6 +120,14 @@ function rotuloMedida(unidade: string | null | undefined) {
   }
   return unidade ? rotulos[unidade] ?? unidade : ''
 }
+function medidaDeAprovacao(item: PedidoResponse['itens'][number]) {
+  if (!modoMedida(item) || !item.unidadeMedidaSolicitada) return 'unidades de controle'
+  const base: Record<string, string> = {
+    ML: 'mL', L: 'mL', MG: 'mg', G: 'mg', KG: 'mg',
+    METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
+  }
+  return base[item.unidadeMedidaSolicitada] ?? rotuloMedida(item.unidadeMedidaSolicitada)
+}
 function quantidadeOriginal(item: PedidoResponse['itens'][number]) {
   return modoMedida(item)
     ? `${quantidadeLegivel(item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada)} ${rotuloMedida(item.unidadeMedidaSolicitada)}`
@@ -433,7 +441,7 @@ onMounted(carregar)
                           <strong>{{ modoMedida(item) ? 'Quantidade por medida' : 'Unidade ou embalagem' }}</strong>
                           <p>{{ formaSolicitada(item) }}</p>
                           <small v-if="modoMedida(item)">Total convertido para a unidade-base do estoque: {{ quantidadeLegivel(item.quantidadeSolicitada) }}</small>
-                          <small v-else>Quantidade total correspondente: {{ quantidadeLegivel(item.quantidadeSolicitada) }} na unidade-base</small>
+                          <small v-else>Quantidade total correspondente: {{ quantidadeLegivel(item.quantidadeSolicitada) }} {{ medidaDeAprovacao(item) }}</small>
                         </div>
                         <div class="gestao-approval-decision">
                           <label v-if="pedido.status === 'PENDENTE'" :for="`aprovar-quantidade-${item.id}`" class="gestao-approval-label">Quantidade a aprovar</label>
@@ -441,10 +449,10 @@ onMounted(carregar)
                           <div v-if="pedido.status === 'PENDENTE'" class="gestao-approval-input-group">
                             <input :id="`aprovar-quantidade-${item.id}`" v-model.number="quantidadesAprovadas[item.id]" type="number"
                               :min="modoMedida(item) ? 0.000001 : 1" :max="item.quantidadeSolicitada" :step="passoAprovacao(item)" />
-                            <span>na unidade-base</span>
+                            <span>{{ medidaDeAprovacao(item) }}</span>
                           </div>
-                          <strong v-else class="gestao-approval-result">{{ quantidadeLegivel(item.quantidadeAprovada ?? 0) }} na unidade-base</strong>
-                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item) ? 'Aceita decimais com até 6 casas, na unidade-base do estoque.' : 'Informe um valor inteiro compatível com a embalagem.' }}</small>
+                          <strong v-else class="gestao-approval-result">{{ quantidadeLegivel(item.quantidadeAprovada ?? 0) }} {{ medidaDeAprovacao(item) }}</strong>
+                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item) ? 'Aceita até 6 casas decimais. O valor informado é a quantidade efetivamente liberada.' : 'Informe a quantidade total em unidades de controle, respeitando a embalagem solicitada.' }}</small>
                           <small v-else>Valor registrado na aprovação.</small>
                         </div>
                       </div>
@@ -454,7 +462,7 @@ onMounted(carregar)
                         <span v-else-if="movimentosDoItem(pedido.id, item.produtoId).length === 0">Nenhuma movimentação de saída encontrada.</span>
                         <div v-for="mov in movimentosDoItem(pedido.id, item.produtoId)" :key="mov.id" class="delivered-lot">
                           <b>{{ mov.codigoInternoLote || 'Lote sem código SGL' }}</b>
-                          <span>{{ quantidadeLegivel(mov.quantidadeMovimentada) }} na unidade-base · saída em {{ dataFormatada(mov.dataMovimentacao) }}</span>
+                          <span>{{ quantidadeLegivel(mov.quantidadeMovimentada) }} {{ medidaDeAprovacao(item) }} · saída em {{ dataFormatada(mov.dataMovimentacao) }}</span>
                         </div>
                       </div>
                     </div>
