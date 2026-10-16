@@ -227,14 +227,17 @@ function opcoesRetirada(item: ItemForm): OpcaoRetirada[] {
   const lotes = lotesDoItem(item)
   const opcoes = new Map<string, OpcaoRetirada>()
 
+  // UNITARIO é uma apresentação física cadastrada, não sinônimo de
+  // quantidade fracionável. Produtos em frascos devem usar o modo por medida
+  // para solicitar mL/g, sem fabricar uma opção "unidade" inexistente.
   const saldoUnitario = lotes
-    .filter((lote) => lote.tipoEmbalagem === 'UNITARIO' || lote.fracionavel === true)
+    .filter((lote) => lote.tipoEmbalagem === 'UNITARIO')
     .reduce((total, lote) => total + lote.quantidadeDisponivel, 0)
 
   if (saldoUnitario > 0) {
     opcoes.set('UNITARIO::1', {
       chave: 'UNITARIO::1', tipo: 'UNITARIO', multiplicador: 1,
-      label: `Unitário — ${saldoUnitario} unit. disponíveis`, disponivel: saldoUnitario,
+      label: 'Unidade individual', disponivel: Math.floor(saldoUnitario),
     })
   }
 
@@ -251,7 +254,7 @@ function opcoesRetirada(item: ItemForm): OpcaoRetirada[] {
         chave,
         tipo: lote.tipoEmbalagem,
         multiplicador,
-        label: `${rotuloTipo(lote.tipoEmbalagem, true)} — ${multiplicador} unit. cada`,
+        label: `${rotuloTipo(lote.tipoEmbalagem, true)} — ${formatarQuantidade(multiplicador)} ${rotulosUnidade[unidadeBase(item)!] ?? unidadeBase(item) ?? ''} cada`,
         disponivel: quantidade,
       })
     }
@@ -479,7 +482,7 @@ onMounted(carregarDados)
                 Escolha uma das opções disponíveis para este produto.
               </small>
               <small v-else-if="opcaoAtual(item)">
-                {{ opcaoAtual(item)?.multiplicador }} unit. por {{ rotuloTipo(opcaoAtual(item)!.tipo).toLowerCase() }}.
+                {{ formatarQuantidade(opcaoAtual(item)!.multiplicador) }} {{ rotulosUnidade[unidadeBase(item)!] ?? unidadeBase(item) }} por {{ rotuloTipo(opcaoAtual(item)!.tipo).toLowerCase() }}.
               </small>
             </label>
 
