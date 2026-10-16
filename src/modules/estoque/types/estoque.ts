@@ -23,6 +23,8 @@ export interface EstoqueCentralResponse {
   apresentacoesFisicas?: ApresentacaoFisicaEstoque[]
   quantidadeAtual: number
   quantidadeMinima: number
+  minimoTipoEmbalagem?: TipoEmbalagem | null
+  minimoMultiplicador?: number | null
   ativo: boolean
 }
 
