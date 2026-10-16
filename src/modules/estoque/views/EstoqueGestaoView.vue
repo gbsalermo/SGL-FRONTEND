@@ -56,6 +56,19 @@ function resumoApresentacoes(item: EstoqueCentralResponse) {
     `${gruposDisponiveis(item).length > 1 ? legendaGrupo(g) + ' · ' : ''}${numero(g.capacidade)} ${medida(g.unidadeMedida)} por embalagem`
   ).join(' / ')
 }
+function minimoApresentado(item: EstoqueCentralResponse) {
+  if (item.minimoTipoEmbalagem && item.minimoMultiplicador && item.minimoMultiplicador > 0) {
+    const quantidade = item.quantidadeMinima / item.minimoMultiplicador
+    const rotulo = embalagens[item.minimoTipoEmbalagem] ?? ['embalagem', 'embalagens']
+    return `${numero(quantidade)} ${quantidade === 1 ? rotulo[0] : rotulo[1]}`
+  }
+  return `${numero(item.quantidadeMinima)} ${medida(item.produtoUnidadeMedida)}`
+}
+function minimoDetalhe(item: EstoqueCentralResponse) {
+  return item.minimoTipoEmbalagem && item.minimoMultiplicador
+    ? `${numero(item.minimoMultiplicador)} ${medida(item.produtoUnidadeMedida)} cada`
+    : ''
+}
 function estadoRecipientes(item: EstoqueCentralResponse) {
   const grupos = item.apresentacoesFisicas ?? []
   const fechados = grupos.reduce((acc, g) => acc + g.fechados, 0)
@@ -251,7 +264,7 @@ onMounted(carregar)
               <small v-if="item.apresentacoesFisicas?.length">{{ estadoRecipientes(item) }}</small>
               <small v-else>Resumo dos recipientes indisponível</small>
             </td>
-            <td>{{ numero(item.quantidadeMinima) }} {{ medida(item.produtoUnidadeMedida) }}</td>
+            <td><strong>{{ minimoApresentado(item) }}</strong><small v-if="minimoDetalhe(item)">{{ minimoDetalhe(item) }}</small></td>
             <td>
               <span v-if="estoqueZerado(item)" class="chip danger-chip">ZERADO</span>
               <span v-else-if="possuiLoteVencido(item)" class="chip danger-chip">LOTE VENCIDO</span>
