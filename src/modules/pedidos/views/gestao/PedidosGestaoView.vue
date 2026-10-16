@@ -121,17 +121,12 @@ function rotuloMedida(unidade: string | null | undefined) {
   return unidade ? rotulos[unidade] ?? unidade : ''
 }
 function medidaDeAprovacao(item: PedidoResponse['itens'][number]) {
-  if (!modoMedida(item) || !item.unidadeMedidaSolicitada) return 'unidades de controle'
-  const base: Record<string, string> = {
-    ML: 'mL', L: 'mL', MG: 'mg', G: 'mg', KG: 'mg',
-    METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
-  }
-  return base[item.unidadeMedidaSolicitada] ?? rotuloMedida(item.unidadeMedidaSolicitada)
+  return rotuloMedida(item.produtoUnidadeMedida ?? item.unidadeMedidaSolicitada) || 'unidade do produto'
 }
 function quantidadeOriginal(item: PedidoResponse['itens'][number]) {
   return modoMedida(item)
     ? `${quantidadeLegivel(item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada)} ${rotuloMedida(item.unidadeMedidaSolicitada)}`
-    : `${quantidadeLegivel(item.quantidadeSolicitada)} na unidade-base`
+    : `${quantidadeLegivel(item.quantidadeSolicitada)} ${medidaDeAprovacao(item)}`
 }
 function passoAprovacao(item: PedidoResponse['itens'][number]) {
   return modoMedida(item) ? 'any' : String(item.tipoEmbalagemSolicitada === 'UNITARIO' ? 1 : item.multiplicadorSolicitado ?? 1)
@@ -139,13 +134,18 @@ function passoAprovacao(item: PedidoResponse['itens'][number]) {
 function formaSolicitada(item: PedidoResponse['itens'][number]) {
   if (modoMedida(item)) return quantidadeOriginal(item)
   const rotulos: Record<string, [string, string]> = {
-    UNITARIO: ['unidade', 'unidades'], KIT: ['kit', 'kits'], CAIXA: ['caixa', 'caixas'], GARRAFA: ['garrafa', 'garrafas'], GALAO: ['galão', 'galões'],
+    UNITARIO: ['unidade', 'unidades'], FRASCO: ['frasco', 'frascos'],
+    AMPOLA: ['ampola', 'ampolas'], GARRAFA: ['garrafa', 'garrafas'],
+    GALAO: ['galão', 'galões'], CAIXA: ['caixa', 'caixas'],
+    KIT: ['kit', 'kits'], PACOTE: ['pacote', 'pacotes'],
+    SACO: ['saco', 'sacos'], TUBO: ['tubo', 'tubos'],
+    POTE: ['pote', 'potes'], PAR: ['par', 'pares'], OUTRO: ['embalagem', 'embalagens'],
   }
   const quantidade = item.quantidadeEmbalagensSolicitada ?? item.quantidadeSolicitada
   const [singular, plural] = rotulos[item.tipoEmbalagemSolicitada ?? 'UNITARIO'] ?? ['unidade', 'unidades']
-  const nome = quantidade === 1 ? singular : plural
-  if (item.tipoEmbalagemSolicitada === 'UNITARIO') return `${quantidade} ${nome}`
-  return `${quantidade} ${nome} · ${item.multiplicadorSolicitado} na unidade-base cada`
+  if (item.tipoEmbalagemSolicitada === 'UNITARIO') return quantidadeOriginal(item)
+  const apresentacao = quantidade === 1 ? singular : plural
+  return `${quantidadeLegivel(quantidade)} ${apresentacao} de ${quantidadeLegivel(item.multiplicadorSolicitado ?? 1)} ${medidaDeAprovacao(item)}`
 }
 
 function movimentosDoItem(pedidoId: string, produtoId: string) {
@@ -440,8 +440,8 @@ onMounted(carregar)
                           <span class="gestao-approval-label">Solicitação original</span>
                           <strong>{{ modoMedida(item) ? 'Quantidade por medida' : 'Unidade ou embalagem' }}</strong>
                           <p>{{ formaSolicitada(item) }}</p>
-                          <small v-if="modoMedida(item)">Total convertido para a unidade-base do estoque: {{ quantidadeLegivel(item.quantidadeSolicitada) }}</small>
-                          <small v-else>Quantidade total correspondente: {{ quantidadeLegivel(item.quantidadeSolicitada) }} {{ medidaDeAprovacao(item) }}</small>
+                          <small v-if="modoMedida(item)">Equivalente no estoque: {{ quantidadeLegivel(item.quantidadeSolicitada) }} {{ medidaDeAprovacao(item) }}</small>
+                          <small v-else>Total solicitado: {{ quantidadeLegivel(item.quantidadeSolicitada) }} {{ medidaDeAprovacao(item) }}</small>
                         </div>
                         <div class="gestao-approval-decision">
                           <label v-if="pedido.status === 'PENDENTE'" :for="`aprovar-quantidade-${item.id}`" class="gestao-approval-label">Quantidade a aprovar</label>
@@ -452,7 +452,7 @@ onMounted(carregar)
                             <span>{{ medidaDeAprovacao(item) }}</span>
                           </div>
                           <strong v-else class="gestao-approval-result">{{ quantidadeLegivel(item.quantidadeAprovada ?? 0) }} {{ medidaDeAprovacao(item) }}</strong>
-                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item) ? 'Aceita até 6 casas decimais. O valor informado é a quantidade efetivamente liberada.' : 'Informe a quantidade total em unidades de controle, respeitando a embalagem solicitada.' }}</small>
+                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item) ? 'Aceita até 6 casas decimais. O valor informado é a quantidade efetivamente liberada.' : 'Informe o total na medida do produto, respeitando o múltiplo da embalagem solicitada.' }}</small>
                           <small v-else>Valor registrado na aprovação.</small>
                         </div>
                       </div>
