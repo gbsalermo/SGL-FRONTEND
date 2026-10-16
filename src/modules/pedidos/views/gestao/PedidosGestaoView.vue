@@ -128,8 +128,29 @@ function quantidadeOriginal(item: PedidoResponse['itens'][number]) {
     ? `${quantidadeLegivel(item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada)} ${rotuloMedida(item.unidadeMedidaSolicitada)}`
     : `${quantidadeLegivel(item.quantidadeSolicitada)} ${medidaDeAprovacao(item)}`
 }
-function passoAprovacao(item: PedidoResponse['itens'][number]) {
-  return modoMedida(item) ? 'any' : String(item.tipoEmbalagemSolicitada === 'UNITARIO' ? 1 : item.multiplicadorSolicitado ?? 1)
+function quantidadeEmbalagens(item: PedidoResponse['itens'][number]) {
+  return item.quantidadeEmbalagensSolicitada ?? (
+    item.multiplicadorSolicitado && item.multiplicadorSolicitado > 0
+      ? item.quantidadeSolicitada / item.multiplicadorSolicitado
+      : item.quantidadeSolicitada
+  )
+}
+function multiplicadorEmbalagem(item: PedidoResponse['itens'][number]) {
+  return item.tipoEmbalagemSolicitada === 'UNITARIO' ? 1 : item.multiplicadorSolicitado ?? 0
+}
+function quantidadeCanonicaAprovacao(item: PedidoResponse['itens'][number], valor: number) {
+  return modoMedida(item) ? valor : Number((valor * multiplicadorEmbalagem(item)).toFixed(6))
+}
+function nomeEmbalagem(item: PedidoResponse['itens'][number], quantidade: number) {
+  const nomes: Record<string, [string, string]> = {
+    UNITARIO: ['unidade', 'unidades'], FRASCO: ['frasco', 'frascos'],
+    AMPOLA: ['ampola', 'ampolas'], GARRAFA: ['garrafa', 'garrafas'],
+    GALAO: ['galão', 'galões'], CAIXA: ['caixa', 'caixas'], KIT: ['kit', 'kits'],
+    PACOTE: ['pacote', 'pacotes'], SACO: ['saco', 'sacos'], TUBO: ['tubo', 'tubos'],
+    POTE: ['pote', 'potes'], PAR: ['par', 'pares'], OUTRO: ['embalagem', 'embalagens'],
+  }
+  const [singular, plural] = nomes[item.tipoEmbalagemSolicitada ?? 'UNITARIO'] ?? nomes.UNITARIO!
+  return quantidade === 1 ? singular : plural
 }
 function formaSolicitada(item: PedidoResponse['itens'][number]) {
   if (modoMedida(item)) return quantidadeOriginal(item)
@@ -173,7 +194,13 @@ function limparAcao() {
 }
 
 function prepararPedido(pedido: PedidoResponse) {
-  quantidadesAprovadas.value = Object.fromEntries(pedido.itens.map((item) => [item.id, item.quantidadeAprovada ?? item.quantidadeSolicitada]))
+  quantidadesAprovadas.value = Object.fromEntries(pedido.itens.map((item) => [
+    item.id, modoMedida(item)
+      ? item.quantidadeAprovada ?? item.quantidadeSolicitada
+      : item.quantidadeAprovada != null
+        ? item.quantidadeAprovada / multiplicadorEmbalagem(item)
+        : quantidadeEmbalagens(item),
+  ]))
   limparAcao()
 }
 
@@ -222,7 +249,10 @@ async function aprovar(pedido: PedidoResponse) {
   const aprovadorId = session.usuario?.id
   if (!aprovadorId) return void (erroAcao.value = 'Usuário aprovador não identificado na sessão.')
 
-  const itens = pedido.itens.map((item) => ({ itemId: item.id, quantidadeAprovada: Number(quantidadesAprovadas.value[item.id]) }))
+  const itens = pedido.itens.map((item) => ({
+    itemId: item.id,
+    quantidadeAprovada: quantidadeCanonicaAprovacao(item, Number(quantidadesAprovadas.value[item.id])),
+  }))
 
   // Pedidos por medida não possuem embalagem ou multiplicador.
   // Pedidos por apresentação preservam o contrato legado e exigem multiplicador.
@@ -235,23 +265,19 @@ async function aprovar(pedido: PedidoResponse) {
     return
   }
 
-  const invalido = itens.some((aprovacao, index) => {
-    const item = pedido.itens[index]!
-    const valor = aprovacao.quantidadeAprovada
-    if (!Number.isFinite(valor) || valor <= 0 || valor > item.quantidadeSolicitada) return true
-    if (modoMedida(item)) {
-      // A persistência física usa BigDecimal(19,6); não arredondar silenciosamente.
-      return Math.abs(valor - Number(valor.toFixed(6))) > 1e-9
-    }
-    if (!Number.isInteger(valor)) return true
-    if (item.tipoEmbalagemSolicitada === 'UNITARIO') return false
-    const multiplicador = item.multiplicadorSolicitado
-    return multiplicador == null || multiplicador <= 0
-      || Math.abs(valor / multiplicador - Math.round(valor / multiplicador)) > 1e-9
+  const invalido = pedido.itens.some((item, index) => {
+    const valorDigitado = Number(quantidadesAprovadas.value[item.id])
+    const totalCanonico = itens[index]!.quantidadeAprovada
+    if (!Number.isFinite(valorDigitado) || valorDigitado <= 0) return true
+    if (!Number.isFinite(totalCanonico) || totalCanonico <= 0
+        || totalCanonico > item.quantidadeSolicitada + 1e-9) return true
+    if (Math.abs(totalCanonico - Number(totalCanonico.toFixed(6))) > 1e-9) return true
+    if (modoMedida(item)) return false
+    return !Number.isInteger(valorDigitado) || valorDigitado > quantidadeEmbalagens(item)
   })
 
   if (invalido) {
-    erroAcao.value = 'Confira as quantidades aprovadas: use até seis casas decimais para medidas e múltiplos inteiros para embalagens.'
+    erroAcao.value = 'Confira as quantidades: informe embalagens inteiras ou medidas com até seis casas decimais, sem exceder o solicitado.'
     return
   }
 
@@ -448,11 +474,15 @@ onMounted(carregar)
                           <span v-else class="gestao-approval-label">{{ pedido.status === 'ENTREGUE' ? 'Quantidade entregue' : 'Quantidade aprovada' }}</span>
                           <div v-if="pedido.status === 'PENDENTE'" class="gestao-approval-input-group">
                             <input :id="`aprovar-quantidade-${item.id}`" v-model.number="quantidadesAprovadas[item.id]" type="number"
-                              :min="modoMedida(item) ? 0.000001 : 1" :max="item.quantidadeSolicitada" :step="passoAprovacao(item)" />
-                            <span>{{ medidaDeAprovacao(item) }}</span>
+                              :min="modoMedida(item) ? 0.000001 : 1" :max="modoMedida(item) ? item.quantidadeSolicitada : quantidadeEmbalagens(item)" :step="modoMedida(item) ? 'any' : 1" />
+                            <span>{{ modoMedida(item) ? medidaDeAprovacao(item) : nomeEmbalagem(item, Number(quantidadesAprovadas[item.id])) }}</span>
                           </div>
-                          <strong v-else class="gestao-approval-result">{{ quantidadeLegivel(item.quantidadeAprovada ?? 0) }} {{ medidaDeAprovacao(item) }}</strong>
-                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item) ? 'Aceita até 6 casas decimais. O valor informado é a quantidade efetivamente liberada.' : 'Informe o total na medida do produto, respeitando o múltiplo da embalagem solicitada.' }}</small>
+                          <strong v-else class="gestao-approval-result">{{ modoMedida(item)
+                            ? quantidadeLegivel(item.quantidadeAprovada ?? 0) + ' ' + medidaDeAprovacao(item)
+                            : quantidadeLegivel((item.quantidadeAprovada ?? 0) / multiplicadorEmbalagem(item)) + ' ' + nomeEmbalagem(item, (item.quantidadeAprovada ?? 0) / multiplicadorEmbalagem(item)) }}</strong>
+                          <small v-if="pedido.status === 'PENDENTE'">{{ modoMedida(item)
+                            ? 'Aceita até 6 casas decimais na medida do estoque.'
+                            : 'Aprovação em embalagens inteiras. Equivalente: ' + quantidadeLegivel(quantidadeCanonicaAprovacao(item, Number(quantidadesAprovadas[item.id]))) + ' ' + medidaDeAprovacao(item) }}</small>
                           <small v-else>Valor registrado na aprovação.</small>
                         </div>
                       </div>
