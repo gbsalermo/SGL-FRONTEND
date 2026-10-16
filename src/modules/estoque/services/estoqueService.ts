@@ -11,7 +11,7 @@ import type {
 function validarContratoLote(lote: LoteResponse) {
   if (!lote.codigoInterno || !lote.tipoEmbalagem) {
     throw new Error(
-      'O backend em execução está desatualizado para o fluxo atual de lotes. Reinicie a API com a main mais recente e confirme as migrations V7 e V8.',
+      'O backend em execução não retornou os campos obrigatórios do lote. Confirme a versão da API e as migrations aplicadas no ambiente.',
     )
   }
   return lote
