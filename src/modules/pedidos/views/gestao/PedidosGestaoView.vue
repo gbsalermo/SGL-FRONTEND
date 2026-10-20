@@ -83,7 +83,7 @@ const pedidosFiltrados = computed(() => {
     if (fim !== null && dataPedido > fim) return false
     if (!termo) return true
 
-    return [pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.status, pedido.tipo, pedido.nomeSolucao, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
+    return [pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.atividadeOrigemNome, pedido.sciOrigemNome, pedido.status, pedido.tipo, pedido.nomeSolucao, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
       .filter(Boolean).join(' ').toLowerCase().includes(termo)
   })
 
@@ -447,6 +447,8 @@ onMounted(carregar)
                   <div class="gestao-detail__context">
                     <h3>Contexto da solicitação</h3>
                     <p><span>Status</span><strong>{{ pedido.status === 'EM_PREPARACAO' ? 'Em preparação' : pedido.status }}</strong></p>
+                    <p v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId"><span>Atividade</span><strong>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</strong></p>
+                    <p v-if="pedido.sciOrigemNome || pedido.sciOrigemId"><span>SCI</span><strong>{{ pedido.sciOrigemNome || 'Origem registrada' }}</strong></p>
                     <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p>
                     <p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p>
                     <p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p>
@@ -500,7 +502,10 @@ onMounted(carregar)
 
                   <div class="gestao-detail__context">
                     <h3>Contexto</h3>
-                    <p><span>Status</span><strong>{{ pedido.status }}</strong></p><p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p><p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p><p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p><p><span>Urgência</span><strong>{{ pedido.urgente ? 'Pedido urgente' : 'Normal' }}</strong></p>
+                    <p><span>Status</span><strong>{{ pedido.status }}</strong></p>
+                    <p v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId"><span>Atividade</span><strong>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</strong></p>
+                    <p v-if="pedido.sciOrigemNome || pedido.sciOrigemId"><span>SCI</span><strong>{{ pedido.sciOrigemNome || 'Origem registrada' }}</strong></p>
+                    <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p><p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p><p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p><p><span>Urgência</span><strong>{{ pedido.urgente ? 'Pedido urgente' : 'Normal' }}</strong></p>
                   </div>
 
                   <div v-if="pedido.observacao || pedido.motivoUrgencia" class="gestao-detail__note"><h3>Observação / descrição</h3><p>{{ pedido.observacao || pedido.motivoUrgencia }}</p><p v-if="pedido.observacao && pedido.motivoUrgencia && pedido.motivoUrgencia !== pedido.observacao">{{ pedido.motivoUrgencia }}</p></div>
