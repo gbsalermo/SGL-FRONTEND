@@ -32,6 +32,8 @@ const pedidosFiltrados = computed(() => {
     return [
       pedido.projetoNome,
       pedido.laboratorioNome,
+      pedido.atividadeOrigemNome,
+      pedido.sciOrigemNome,
       pedido.status,
       pedido.urgente ? 'urgente' : null,
       pedido.motivoUrgencia,
@@ -326,6 +328,14 @@ onMounted(carregarPedidos)
                           <div>
                             <dt>Status</dt>
                             <dd>{{ statusLabel(pedido.status) }}</dd>
+                          </div>
+                          <div v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId">
+                            <dt>Atividade</dt>
+                            <dd>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</dd>
+                          </div>
+                          <div v-if="pedido.sciOrigemNome || pedido.sciOrigemId">
+                            <dt>SCI</dt>
+                            <dd>{{ pedido.sciOrigemNome || 'Origem registrada' }}</dd>
                           </div>
                           <div>
                             <dt>Projeto</dt>
