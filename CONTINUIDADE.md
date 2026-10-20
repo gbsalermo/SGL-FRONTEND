@@ -434,18 +434,23 @@ Etapa 8 — Pedidos + Soluções + participação do Estagiário
 Etapa 9 — relatórios consolidados
 Etapa 10 — rótulos + impressão operacional
 Etapa 11 — Manual + delete lógico
-Etapa 12 — testes automatizados frontend
-Etapa 13 — revisão estrutural e legibilidade
+Etapa 12 — arquitetura, carga, E2E e testes automatizados frontend
+Etapa 13 — revisão estrutural e auditoria final integral
 ```
 
-Etapa 12:
+Etapa 12 — validação transversal de arquitetura, carga, E2E e frontend (ampliada em 20/10/2026):
 
-```text
-Vitest + Vue Test Utils
-Cypress
-```
+- **Frontend:** Vitest + Vue Test Utils; Cypress para fluxos E2E; testes de formulário, estados de carregamento/erro, acessibilidade, Light/Dark, mobile e zoom 100%.
+- **Arquitetura:** auditar chamadas duplicadas/recarregamentos integrais, rotas, memória/bundle, integração HTTP, paginação, índices, N+1, consultas críticas e cache.
+- **Backend e banco:** JUnit, integração PostgreSQL/Flyway, tenant, estoque/baixa, concorrência e contratos API; verificar dados persistidos, não apenas mocks.
+- **Carga e desempenho:** baseline, nominal, picos, stress/soak e recuperação com k6 ou equivalente em ambiente isolado; medir p50/p95/p99, timeouts, consumo de memória, pool e queries. Aprovar metas após obter dados reais, sem inventar SLA.
+- **Fluxos ponta a ponta:** Projeto/SCI/Atividade/Estágio → Pedido/Estoque/Solução; Resíduos, relatórios, rótulos, manual, perfis/Unidades e tratamento de falhas.
+- **Estabilidade/implantação:** Flyway sem conflito, health/restart, database/TLS/timeout, arquivos, rotas SPA, revisão publicada correta e ausência de tela branca.
+- **Execução:** suites leves durante desenvolvimento; bateria abrangente antes de homologação; não criar Actions barulhentos/duplicados.
 
-Etapa 13 revisará classes grandes como `Residuo` no backend, Services, DTOs e Controllers, sem alterar comportamento e com reexecução dos testes.
+O plano oficial detalhado pertence ao backend: `docs/ETAPA_12_PLANO_QUALIDADE_ARQUITETURA_CARGA_E2E.md` e `docs/PLANO_PRE_PRODUCAO.md`.
+
+**Etapa 13:** refactor controlado a partir dos achados da 12, seguido de **nova revisão integral de arquitetura, desempenho/carga, UI, fluxos e resiliência**. Entregar dossiê técnico, métricas antes/depois, limitações e parecer go/no-go. Não confundir com autorização institucional de produção.
 
 ---
 
