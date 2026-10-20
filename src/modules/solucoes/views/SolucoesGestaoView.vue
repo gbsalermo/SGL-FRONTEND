@@ -48,7 +48,7 @@ const indicadores: Array<{status: StatusSolucao; titulo: string; detalhe: string
 const pedidosFiltrados = computed(() => pedidos.value
   .filter(p => filtroStatus.value === 'TODOS' || p.status === filtroStatus.value)
   .filter(p => !busca.value.trim() || [
-    p.nomeSolucao, p.usuarioNome, p.projetoNome, p.laboratorioNome, p.status,
+    p.nomeSolucao, p.usuarioNome, p.projetoNome, p.laboratorioNome, p.atividadeOrigemNome, p.sciOrigemNome, p.status,
     ...p.itens.map(i => i.produtoNome),
   ].some(v => String(v || '').toLocaleLowerCase('pt-BR').includes(busca.value.trim().toLocaleLowerCase('pt-BR'))))
   .sort((a, b) => b.dataSolicitacao.localeCompare(a.dataSolicitacao)))
@@ -197,6 +197,12 @@ onMounted(async () => { await carregar(); await abrirPedidoDaRota() })
                 <div class="sol-details">
                   <div class="sol-detail-heading"><div><h3>{{ p.nomeSolucao }}</h3><p class="sol-muted">{{ p.usuarioNome }} · {{ p.laboratorioNome }}</p></div>
                     <span class="sol-status" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span>
+                  </div>
+                  <div v-if="p.atividadeOrigemNome || p.sciOrigemNome" class="sol-request-context">
+                    <strong>Contexto operacional registrado no pedido</strong>
+                    <p v-if="p.atividadeOrigemNome">Atividade: {{ p.atividadeOrigemNome }}</p>
+                    <p v-if="p.sciOrigemNome">SCI: {{ p.sciOrigemNome }}</p>
+                    <p>Projeto: {{ p.projetoNome || 'Sem projeto' }} · Laboratório: {{ p.laboratorioNome }}</p>
                   </div>
                   <div class="sol-request-context"><strong>Finalidade e exigências do solicitante</strong><p>{{ p.observacao || 'Não foram informadas exigências adicionais.' }}</p></div>
                   <div class="sol-table-wrap"><table class="sol-table">
