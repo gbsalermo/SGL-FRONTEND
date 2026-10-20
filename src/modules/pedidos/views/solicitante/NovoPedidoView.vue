@@ -14,6 +14,13 @@ import type {
   UnidadeMedidaPedido,
 } from '@/modules/pedidos/types/pedido'
 import { useSessionStore } from '@/stores/session'
+import SeletorParticipacaoOperacional from '@/modules/operacao/components/SeletorParticipacaoOperacional.vue'
+import { contextoOperacionalService } from '@/modules/operacao/services/contextoOperacionalService'
+import {
+  prepararSelecaoContextoEstagiario,
+  resolverContextoEstagiario,
+  type ContextoParticipacaoOperacional,
+} from '@/modules/operacao/types/contextoOperacional'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 
 interface ItemForm {
@@ -42,7 +49,18 @@ const projetos = ref<ProjetoResponse[]>([])
 const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
-const laboratorioOperacionalId = computed(() => gestao.value ? laboratorioSelecionadoId.value : (session.usuario?.laboratorioId || ''))
+const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
+const contextos = ref<ContextoParticipacaoOperacional[]>([])
+const participacaoSelecionadaId = ref('')
+const opcoesContexto = computed(() => prepararSelecaoContextoEstagiario(contextos.value, session.usuario?.unidadeId || ''))
+const contextoResolvido = computed(() => resolverContextoEstagiario(
+  opcoesContexto.value, participacaoSelecionadaId.value, session.usuario?.unidadeId || '',
+))
+const participacaoSelecionada = computed(() => opcoesContexto.value.contextosElegiveis
+  .find(x => x.participacaoId === participacaoSelecionadaId.value))
+const laboratorioOperacionalId = computed(() => estagiario.value
+  ? contextoResolvido.value?.laboratorioId || ''
+  : gestao.value ? laboratorioSelecionadoId.value : (session.usuario?.laboratorioId || ''))
 const laboratorioOperacional = computed(() => laboratorios.value.find(x => x.id === laboratorioOperacionalId.value))
 const estoques = ref<EstoqueCentralResponse[]>([])
 const lotesPorEstoque = ref<Record<string, LotePedidoResponse[]>>({})
@@ -161,7 +179,7 @@ async function carregarDados() {
   const laboratorioId = laboratorioOperacionalId.value
   const unidadeId = usuario.value?.unidadeId
 
-  if (!unidadeId || (!gestao.value && !laboratorioId)) {
+  if (!unidadeId || (!gestao.value && !estagiario.value && !laboratorioId)) {
     erro.value = 'Seu usuário precisa estar vinculado a laboratório e unidade para criar pedidos.'
     return
   }
@@ -174,10 +192,19 @@ async function carregarDados() {
       laboratorios.value = await listarLaboratoriosOperacionais(unidadeId)
       if (laboratorioId && !laboratorios.value.some(x => x.id === laboratorioId)) laboratorioSelecionadoId.value = ''
     }
-    const [projetosData, estoqueData] = await Promise.all([
-      laboratorioOperacionalId.value ? pedidoService.listarProjetosPorLaboratorio(laboratorioOperacionalId.value) : Promise.resolve([] as ProjetoResponse[]),
+    const [projetosData, estoqueData, contextosData] = await Promise.all([
+      !estagiario.value && laboratorioOperacionalId.value
+        ? pedidoService.listarProjetosPorLaboratorio(laboratorioOperacionalId.value)
+        : Promise.resolve([] as ProjetoResponse[]),
       pedidoService.listarEstoquePorUnidade(unidadeId),
+      estagiario.value && usuario.value?.id
+        ? contextoOperacionalService.listarParticipacoesEstagiario(usuario.value.id)
+        : Promise.resolve([] as ContextoParticipacaoOperacional[]),
     ])
+    contextos.value = contextosData
+    participacaoSelecionadaId.value = estagiario.value
+      ? prepararSelecaoContextoEstagiario(contextosData, unidadeId).participacaoSugeridaId || ''
+      : ''
     projetos.value = projetosData
     estoques.value = estoqueData.filter((estoque) => estoque.ativo && estoque.quantidadeAtual > 0)
   } catch (error) {
@@ -316,7 +343,10 @@ function alternarUrgencia() {
 }
 
 function validarFormulario() {
-  if (!usuario.value?.id || !laboratorioOperacionalId.value)
+  if (!usuario.value?.id) throw new Error('Não foi possível identificar o solicitante.')
+  if (estagiario.value && !contextoResolvido.value)
+    throw new Error('Selecione uma participação elegível para encaminhar o pedido.')
+  if (!laboratorioOperacionalId.value)
     throw new Error('Selecione um laboratório ativo para encaminhar o pedido.')
 
   for (const item of itens.value) {
@@ -356,8 +386,9 @@ async function enviarPedido() {
 
     const payload: PedidoRequest = {
       usuarioId: usuario.value!.id,
-      laboratorioId: laboratorioOperacionalId.value,
-      projetoId: projetoId.value || null,
+      ...(estagiario.value
+        ? { participacaoId: contextoResolvido.value!.participacaoId }
+        : { laboratorioId: laboratorioOperacionalId.value, projetoId: projetoId.value || null }),
       urgente: urgente.value,
       motivoUrgencia: null,
       observacao: observacao.value.trim() || null,
@@ -400,14 +431,14 @@ onMounted(carregarDados)
       <div>
         <p class="breadcrumb">Pedidos / Novo pedido</p>
         <h1>Novo pedido</h1>
-        <p>Solicite materiais disponíveis na unidade vinculada ao seu laboratório.</p>
+        <p>Solicite materiais disponíveis na sua Unidade, vinculando-os ao contexto operacional correto.</p>
       </div>
       <button class="secondary-action" type="button" @click="router.push('/meus-pedidos')">Voltar para meus pedidos</button>
     </header>
 
     <div class="context-grid">
       <article><span>Solicitante</span><strong>{{ usuario?.nome }}</strong><small>{{ usuario?.email }}</small></article>
-      <article><span>Laboratório de destino</span><strong>{{ laboratorioOperacional?.nome || (gestao ? 'Escolha o laboratório abaixo' : usuario?.laboratorioNome || 'Não vinculado') }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
+      <article><span>Laboratório de destino</span><strong>{{ estagiario ? (participacaoSelecionada?.laboratorioNome || 'Selecione uma participação abaixo') : (laboratorioOperacional?.nome || (gestao ? 'Escolha o laboratório abaixo' : usuario?.laboratorioNome || 'Não vinculado')) }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
     </div>
 
     <form class="request-surface" @submit.prevent="enviarPedido">
@@ -421,7 +452,13 @@ onMounted(carregarDados)
             <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
           </select>
         </label>
-        <label class="field">
+        <SeletorParticipacaoOperacional
+          v-if="estagiario"
+          v-model="participacaoSelecionadaId"
+          :opcoes="opcoesContexto"
+          :carregando="carregandoDados"
+        />
+        <label v-if="!estagiario" class="field">
           <span>Projeto <small>(opcional)</small></span>
           <select v-model="projetoId" :disabled="carregandoDados">
             <option value="">Sem projeto vinculado</option>
@@ -524,7 +561,7 @@ onMounted(carregarDados)
 
       <footer class="form-footer">
         <p>O pedido ficará pendente até análise da gestão.<span class="urgent-footer-note">A quantidade e as embalagens serão confirmadas conforme a disponibilidade no momento da aprovação.</span></p>
-        <button class="primary-action" type="submit" :disabled="enviando || carregandoDados">{{ enviando ? 'Enviando...' : 'Enviar pedido' }}</button>
+        <button class="primary-action" type="submit" :disabled="enviando || carregandoDados || (estagiario && !contextoResolvido)">{{ enviando ? 'Enviando...' : 'Enviar pedido' }}</button>
       </footer>
     </form>
   </section>
