@@ -5,8 +5,8 @@ import type { ContextoParticipacaoOperacional } from '@/modules/operacao/types/c
  * APIs de leitura da 7.5.2. O endpoint pessoal exige autorizar a identidade
  * do titular no backend antes de uso real. A sessao DEV nao e autenticacao.
  *
- * Esta camada ainda NAO e conectada a NovoPedido/NovaSolucao: o endpoint
- * de criacao precisa derivar o contexto de participacaoId na Etapa 8.
+ * A Etapa 8 utiliza esta consulta nos formularios de Pedidos e Solucoes.
+ * O backend resolve e valida a participacao na criacao do Pedido.
  */
 export const contextoOperacionalService = {
   async listarParticipacoesEstagiario(usuarioId: string) {
