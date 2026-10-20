@@ -42,6 +42,13 @@ export interface PedidoResponse {
   laboratorioNome: string
   projetoId: string | null
   projetoNome: string | null
+  participacaoId?: string | null
+  atividadeOrigemId?: string | null
+  atividadeOrigemNome?: string | null
+  sciOrigemId?: string | null
+  sciOrigemNome?: string | null
+  projetoOrigemNome?: string | null
+  laboratorioOrigemNome?: string | null
   dataSolicitacao: string
   status: StatusPedido
   tipo?: 'PRODUTOS' | 'SOLUCAO'
@@ -56,8 +63,9 @@ export interface PedidoResponse {
 
 export interface PedidoRequest {
   usuarioId: string
-  laboratorioId: string
-  projetoId: string | null
+  participacaoId?: string
+  laboratorioId?: string
+  projetoId?: string | null
   urgente: boolean
   motivoUrgencia: string | null
   observacao: string | null
