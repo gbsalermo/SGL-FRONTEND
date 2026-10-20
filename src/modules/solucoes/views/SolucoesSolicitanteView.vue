@@ -23,7 +23,7 @@ const pedidosFiltrados = computed(() => {
     .filter(p => p.usuarioId === session.usuario?.id)
     .filter(p => status.value === 'TODOS' || p.status === status.value)
     .filter(p => !termo || [
-      p.nomeSolucao, p.projetoNome, p.laboratorioNome, p.status,
+      p.nomeSolucao, p.projetoNome, p.laboratorioNome, p.atividadeOrigemNome, p.sciOrigemNome, p.status,
       p.urgente ? 'urgente' : '', p.observacao,
       ...p.itens.map(item => item.produtoNome),
     ].some(texto => String(texto || '').toLocaleLowerCase('pt-BR').includes(termo)))
@@ -199,6 +199,8 @@ onMounted(carregarPedidos)
                         <dl class="info-list">
                           <div><dt>Status</dt><dd>{{ statusSolucaoLabel[pedido.status] }}</dd></div>
                           <div><dt>Tipo</dt><dd>{{ pedido.modeloSolucaoId ? 'Solução padrão' : 'Fora do catálogo' }}</dd></div>
+                          <div v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId"><dt>Atividade</dt><dd>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</dd></div>
+                          <div v-if="pedido.sciOrigemNome || pedido.sciOrigemId"><dt>SCI</dt><dd>{{ pedido.sciOrigemNome || 'Origem registrada' }}</dd></div>
                           <div><dt>Projeto</dt><dd>{{ pedido.projetoNome || 'Sem projeto' }}</dd></div>
                           <div><dt>Laboratório</dt><dd>{{ pedido.laboratorioNome }}</dd></div>
                         </dl>
