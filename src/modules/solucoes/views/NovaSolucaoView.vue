@@ -2,6 +2,13 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
+import SeletorParticipacaoOperacional from '@/modules/operacao/components/SeletorParticipacaoOperacional.vue'
+import { contextoOperacionalService } from '@/modules/operacao/services/contextoOperacionalService'
+import {
+  prepararSelecaoContextoEstagiario,
+  resolverContextoEstagiario,
+  type ContextoParticipacaoOperacional,
+} from '@/modules/operacao/types/contextoOperacional'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 
 import { solucaoService } from '../services/solucaoService'
@@ -29,7 +36,18 @@ const projetos = ref<ProjetoSolucao[]>([])
 const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
-const laboratorioOperacionalId = computed(() => gestao.value ? laboratorioSelecionadoId.value : session.usuario?.laboratorioId || '')
+const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
+const contextos = ref<ContextoParticipacaoOperacional[]>([])
+const participacaoSelecionadaId = ref('')
+const opcoesContexto = computed(() => prepararSelecaoContextoEstagiario(contextos.value, session.usuario?.unidadeId || ''))
+const contextoResolvido = computed(() => resolverContextoEstagiario(
+  opcoesContexto.value, participacaoSelecionadaId.value, session.usuario?.unidadeId || '',
+))
+const participacaoSelecionada = computed(() => opcoesContexto.value.contextosElegiveis
+  .find(x => x.participacaoId === participacaoSelecionadaId.value))
+const laboratorioOperacionalId = computed(() => estagiario.value
+  ? contextoResolvido.value?.laboratorioId || ''
+  : gestao.value ? laboratorioSelecionadoId.value : session.usuario?.laboratorioId || '')
 const laboratorioOperacional = computed(() => laboratorios.value.find(l => l.id === laboratorioOperacionalId.value))
 const produtos = ref<UnidadeProduto[]>([])
 const projetoId = ref('')
@@ -63,13 +81,22 @@ async function carregar() {
   try {
     const laboratorio = laboratorioOperacionalId.value
     const unidade = session.usuario?.unidadeId
-    if (!unidade || (!gestao.value && !laboratorio)) throw new Error('Unidade e laboratório operacional são necessários.')
+    if (!unidade || (!gestao.value && !estagiario.value && !laboratorio)) throw new Error('Unidade e laboratório operacional são necessários.')
     if (gestao.value) laboratorios.value = await listarLaboratoriosOperacionais(unidade)
-    const [catalogo, projetosData, produtosData] = await Promise.all([
+    const [catalogo, projetosData, produtosData, contextosData] = await Promise.all([
       solucaoService.listarModelos(true),
-      laboratorio ? solucaoService.listarProjetosPorLaboratorio(laboratorio) : Promise.resolve([] as ProjetoSolucao[]),
+      !estagiario.value && laboratorio
+        ? solucaoService.listarProjetosPorLaboratorio(laboratorio)
+        : Promise.resolve([] as ProjetoSolucao[]),
       solucaoService.listarProdutos(unidade),
+      estagiario.value && session.usuario?.id
+        ? contextoOperacionalService.listarParticipacoesEstagiario(session.usuario.id)
+        : Promise.resolve([] as ContextoParticipacaoOperacional[]),
     ])
+    contextos.value = contextosData
+    participacaoSelecionadaId.value = estagiario.value
+      ? prepararSelecaoContextoEstagiario(contextosData, unidade).participacaoSugeridaId || ''
+      : ''
     modelos.value = catalogo
     projetos.value = projetosData
     produtos.value = produtosData
@@ -84,8 +111,12 @@ async function selecionarLaboratorio() {
   catch (e) { erro.value = erroSolucao(e) }
 }
 function validar() {
-  if (!session.usuario?.id || !laboratorioOperacionalId.value) throw new Error('Selecione o laboratório de destino.')
-  if (!projetoId.value) throw new Error('Selecione o projeto ao qual a Solução será vinculada.')
+  if (!session.usuario?.id) throw new Error('Não foi possível identificar o solicitante.')
+  if (estagiario.value && !contextoResolvido.value)
+    throw new Error('Selecione uma participação elegível para solicitar a Solução.')
+  if (!laboratorioOperacionalId.value) throw new Error('Selecione o laboratório de destino.')
+  if (!estagiario.value && !projetoId.value)
+    throw new Error('Selecione o projeto ao qual a Solução será vinculada.')
   if (origem.value === 'PADRAO') {
     if (!modeloId.value || !modeloSelecionado.value) throw new Error('Selecione um modelo de Solução.')
     if (modeloSelecionado.value.componentes.length === 0) throw new Error('O modelo não possui componentes.')
@@ -118,8 +149,9 @@ async function solicitar() {
     await solucaoService.solicitar({
       tipo: 'SOLUCAO',
       usuarioId: session.usuario!.id,
-      laboratorioId: laboratorioOperacionalId.value,
-      projetoId: projetoId.value,
+      ...(estagiario.value
+        ? { participacaoId: contextoResolvido.value!.participacaoId }
+        : { laboratorioId: laboratorioOperacionalId.value, projetoId: projetoId.value }),
       nomeSolucao: origem.value === 'PERSONALIZADA' ? nomeSolucao.value.trim() : undefined,
       modeloSolucaoId: origem.value === 'PADRAO' ? modeloId.value : undefined,
       urgente: urgente.value,
@@ -148,7 +180,7 @@ onMounted(() => { void carregar() })
 
     <div class="context-grid">
       <article><span>Solicitante</span><strong>{{ usuario?.nome }}</strong><small>{{ usuario?.email }}</small></article>
-      <article><span>Laboratório de destino</span><strong>{{ laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : usuario?.laboratorioNome || 'Não vinculado') }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
+      <article><span>Laboratório de destino</span><strong>{{ estagiario ? (participacaoSelecionada?.laboratorioNome || 'Selecione uma participação abaixo') : (laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : usuario?.laboratorioNome || 'Não vinculado')) }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
     </div>
 
     <form class="request-surface" @submit.prevent="solicitar">
@@ -161,7 +193,13 @@ onMounted(() => { void carregar() })
             <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
           </select>
         </label>
-        <label class="field">
+        <SeletorParticipacaoOperacional
+          v-if="estagiario"
+          v-model="participacaoSelecionadaId"
+          :opcoes="opcoesContexto"
+          :carregando="carregando"
+        />
+        <label v-if="!estagiario" class="field">
           <span>Projeto <small>(obrigatório)</small></span>
           <select v-model="projetoId" required :disabled="carregando">
             <option value="">Selecione o Projeto</option>
@@ -241,7 +279,7 @@ onMounted(() => { void carregar() })
       <div v-if="erro" class="error-banner" role="alert">{{ erro }}</div>
       <footer class="form-footer">
         <p>O pedido ficará pendente até a análise da gestão.<span class="urgent-footer-note">A preparação deverá seguir a cartilha registrada no pedido.</span></p>
-        <button class="primary-action" type="submit" :disabled="enviando || carregando">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
+        <button class="primary-action" type="submit" :disabled="enviando || carregando || (estagiario && !contextoResolvido)">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
       </footer>
     </form>
   </section>
