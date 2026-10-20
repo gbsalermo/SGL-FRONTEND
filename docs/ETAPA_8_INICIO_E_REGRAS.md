@@ -58,3 +58,11 @@ Integrar o contexto de participação aos formulários de Pedidos e Soluções d
 6. Segurança definitiva: o endpoint pessoal de participações depende de autenticação de titular ou Gestor/Admin; o header DEV não equivale a identidade.
 
 **Limites:** alterações somente em `collab/etapa-8-contextos-pedidos`, GitLab/main preservada; não declarar produção pronta sem autenticação institucional e QA.
+
+### QA visual/funcional de Pedido — 20/10/2026
+
+- **Evidência manual:** Ana Costa (`ana.costa.estagio@iq.sgl.local`) entrou no formulário Novo Pedido com única participação elegível pré-selecionada. O resumo exibiu Atividade `Preparação dos eletrodos sensores`, SCI `Plataforma eletroquímica de detecção`, Projeto `Biossensores para Monitoramento Ambiental` e `Laboratorio de Quimica Organica`.
+- **Criação real observada pelo usuário:** Pedido `A5C9B0B7` com item de Formaldeído 37%, status `PENDENTE`, Projeto/Laboratório apresentados em Meus Pedidos. Aprovação do **cenário de criação e seleção única**; nenhuma aprovação de movimentação de estoque ou outras participações implícita.
+- **Lacuna detectada:** detalhes de Meus Pedidos exibiam Projeto e Laboratório, mas omitiram Atividade e SCI históricos do retorno da API.
+- **Correção aplicada na branch colaborativa:** em `MeusPedidosView.vue`, `SolucoesSolicitanteView.vue`, `PedidosGestaoView.vue` e `SolucoesGestaoView.vue` adicionada apresentação de Atividade e SCI quando o Pedido traz a origem. Pedidos legados continuam sem seções vazias; busca por nomes de Atividade e SCI foi ampliada. Nenhum backend/estoque alterado.
+- **Pendente:** `npm run build` após estas alterações, revisão visual 100%/mobile/Light/Dark, validação de múltiplas participações com João Silva, ausência de contexto com Lucas Ferreira, Soluções e confirmação da resposta histórica ao longo de alterações posteriores.
