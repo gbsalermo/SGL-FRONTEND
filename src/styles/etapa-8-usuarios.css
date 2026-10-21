@@ -64,7 +64,7 @@
 .people-link-card>strong{font-size:13px;color:#172c52;overflow-wrap:anywhere}
 .people-link-card>small{font-size:11px;color:#66748a;overflow-wrap:anywhere;line-height:1.5}
 .people-link-card>p{margin:2px 0;color:#52617c;font-size:12px}
-.people-link-card>.people-danger-outline{align-self:flex-end}
+.people-link-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .people-link-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .people-context-type{font-size:10px;font-weight:850;letter-spacing:.07em;color:#2a5cb8;text-transform:uppercase}
 .people-link-meta{display:flex;flex-wrap:wrap;gap:14px;color:#75829a;font-size:11px}
