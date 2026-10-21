@@ -57,7 +57,7 @@ export const router = createRouter({
         {
           path: 'pedidos-orientandos',
           name: 'pedidos-orientandos',
-          component: () => import('@/modules/pedidos/views/solicitante/PedidosOrientandosView.vue'),
+          redirect: { path: '/meus-pedidos', query: { visao: 'orientandos' } },
           meta: { perfis: ['PESQUISADOR', 'ANALISTA'] },
         },
         {
