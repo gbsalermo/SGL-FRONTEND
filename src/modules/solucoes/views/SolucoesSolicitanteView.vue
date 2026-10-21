@@ -199,7 +199,7 @@ onMounted(carregarPedidos)
                         <dl class="info-list">
                           <div><dt>Status</dt><dd>{{ statusSolucaoLabel[pedido.status] }}</dd></div>
                           <div><dt>Tipo</dt><dd>{{ pedido.modeloSolucaoId ? 'Solução padrão' : 'Fora do catálogo' }}</dd></div>
-                          <div v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId"><dt>Atividade</dt><dd>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</dd></div>
+                          <div><dt>Atividade</dt><dd>{{ pedido.atividadeOrigemNome || (pedido.atividadeOrigemId ? 'Atividade vinculada' : 'Não registrada nesta solicitação') }}</dd></div>
                           <div v-if="pedido.sciOrigemNome || pedido.sciOrigemId"><dt>SCI</dt><dd>{{ pedido.sciOrigemNome || 'Origem registrada' }}</dd></div>
                           <div><dt>Projeto</dt><dd>{{ pedido.projetoNome || 'Sem projeto' }}</dd></div>
                           <div><dt>Laboratório</dt><dd>{{ pedido.laboratorioNome }}</dd></div>
