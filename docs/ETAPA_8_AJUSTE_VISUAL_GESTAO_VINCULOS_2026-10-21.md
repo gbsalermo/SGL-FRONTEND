@@ -30,3 +30,14 @@ Homologação 1.1–1.4 validada, porém a interface de vínculos foi considerad
 - Correção: estilos para `:root[data-theme='dark']` no próprio arquivo de domínio, referenciando exclusivamente tokens oficiais `--sgl-*` para fundos, cards, tabelas, campos, modais, drawer, estados, focos, bordas e botões; sem nova paleta ou mecanismo de preferência.
 - Preservados: interface aprovada, desktop/mobile, lógica de vínculos, navegação e comportamento dos modais.
 - Validação pendente: alternar Light/Dark em tela inicial, lista com busca e filtros, drawer aberto, modais de criar/editar/encerrar, estados pendente/ativo/encerrado e largura mobile. `npm run build` e inspeção em navegador ainda não executados nesta sessão.
+
+
+## Consolidação de Pedidos orientados na interface existente — 21/10/2026
+- Motivação: a tela isolada `PedidosOrientandosView.vue` estava fora do padrão consolidado em `MeusPedidosView.vue` e duplicava navegação e estilos.
+- Para perfis `PESQUISADOR` e `ANALISTA`, `MeusPedidosView.vue` passa a ter as abas **Meus pedidos** e **Pedidos dos orientandos**. Ambas usam os KPIs, a pesquisa, os filtros, os status, a tabela, a visualização de itens/unidades e os detalhes expansíveis existentes.
+- A aba dos orientandos identifica o solicitante em cada pedido; a busca também encontra nome do orientando. **Somente leitura**, sem aprovação e sem novas permissões.
+- Dados próprios continuam obtidos por `pedidoService.listarPorUsuario`; dados dos orientandos continuam obtidos no endpoint DEV `/v1/pedidos-orientados/orientadores/{usuarioId}`, com requisição apenas quando a aba é aberta e recarga manual.
+- Removido o link `Pedidos orientados` do menu lateral para evitar duplicidade. A rota antiga passa a redirecionar para `/meus-pedidos?visao=orientandos`. A view antiga não é mais usada pela rota.
+- As abas usam os tokens oficiais `--sgl-*` e adaptam-se ao Dark Mode global, sem segunda paleta visual.
+- Pendente: executar `npm run build` e teste manual com perfil Pesquisador/Analista (com e sem orientandos), além de Técnico/Estagiário, Light/Dark, mobile e navegação por link antigo.
+- Nenhuma alteração no backend, estoque, fluxos de aprovação, migrations ou sincronização GitLab nesta rodada.
