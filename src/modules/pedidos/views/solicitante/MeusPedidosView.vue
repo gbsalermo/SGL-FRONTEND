@@ -69,7 +69,7 @@ function mensagemErro(error: unknown) {
 
 function aplicarStatusDaRota() {
   const valor = typeof route.query.status === 'string' ? route.query.status.toUpperCase() : ''
-  const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
+  const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'EM_PREPARACAO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
   status.value = validos.includes(valor as StatusPedido) ? valor as StatusPedido : 'TODOS'
 }
 
@@ -93,8 +93,10 @@ async function carregarPedidos() {
 
   try {
     pedidos.value = await pedidoService.listarPorUsuario(usuarioId)
-    aplicarStatusDaRota()
-    abrirPedidoDaRota()
+    if (visao.value === 'MEUS') {
+      aplicarStatusDaRota()
+      abrirPedidoDaRota()
+    }
   } catch (error) {
     erro.value = mensagemErro(error)
   } finally {
@@ -263,6 +265,7 @@ watch(() => route.query.visao, valor => {
           <option value="TODOS">Todos</option>
           <option value="PENDENTE">Pendente</option>
           <option value="APROVADO">Aprovado</option>
+          <option value="EM_PREPARACAO">Em preparação</option>
           <option value="REJEITADO">Rejeitado</option>
           <option value="ENTREGUE">Entregue</option>
           <option value="CANCELADO">Cancelado</option>
