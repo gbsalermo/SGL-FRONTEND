@@ -13,6 +13,7 @@ export interface VinculoOperacional {
   atividadeNome: string | null
   dataInicio: string
   dataFim: string | null
+  encerrado: boolean
   observacao: string | null
 }
 export interface NovoVinculoOperacional {
