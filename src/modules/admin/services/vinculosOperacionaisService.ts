@@ -26,7 +26,17 @@ export interface NovoVinculoOperacional {
   dataFim: string | null
   observacao: string | null
 }
+export interface ResumoVinculosUsuario {
+  usuarioId: string
+  vinculosVigentes: number
+  vinculosEncerrados: number
+  laboratoriosAdicionais: string[]
+}
 export const vinculosOperacionaisService = {
+  async resumo() {
+    const { data } = await http.get<ResumoVinculosUsuario[]>('/v1/vinculos-operacionais/resumo')
+    return data
+  },
   async listar(usuarioId: string) {
     const { data } = await http.get<VinculoOperacional[]>(`/v1/vinculos-operacionais/usuarios/${usuarioId}`)
     return data
