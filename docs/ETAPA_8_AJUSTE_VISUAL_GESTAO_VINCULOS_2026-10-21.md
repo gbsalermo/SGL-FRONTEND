@@ -22,3 +22,11 @@ Homologação 1.1–1.4 validada, porém a interface de vínculos foi considerad
 - Alterar previsão de término/observação e conferir integridade de contexto.
 - Backend Maven e frontend build/testes **não executados nesta sessão**, alterações **não homologadas**.
 - Login DEV ainda não representa autenticação/autorização institucional. Não implantar endpoints DEV em produção.
+
+
+## Revisão Dark Mode — 21/10/2026
+- Referências lidas: `docs/PADRAO_VISUAL_PRE_PRODUCAO.md`, `docs/SHELL_VISUAL.md`, `docs/AUDITORIA_VISUAL_INTEGRAL_SOLUCOES_ETAPA_7_4_2026-10-13.md`, `src/styles/tokens.css`, `src/styles/etapa-2-dark-foundation.css` e referência de Estagiários `src/styles/etapa-2-gestao-estagiarios.css`.
+- Causa: `src/styles/etapa-8-usuarios.css` tinha superfícies e textos fixos de Light Mode e não respondia à troca global de tema.
+- Correção: estilos para `:root[data-theme='dark']` no próprio arquivo de domínio, referenciando exclusivamente tokens oficiais `--sgl-*` para fundos, cards, tabelas, campos, modais, drawer, estados, focos, bordas e botões; sem nova paleta ou mecanismo de preferência.
+- Preservados: interface aprovada, desktop/mobile, lógica de vínculos, navegação e comportamento dos modais.
+- Validação pendente: alternar Light/Dark em tela inicial, lista com busca e filtros, drawer aberto, modais de criar/editar/encerrar, estados pendente/ativo/encerrado e largura mobile. `npm run build` e inspeção em navegador ainda não executados nesta sessão.
