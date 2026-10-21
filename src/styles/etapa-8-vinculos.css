@@ -1,0 +1,22 @@
+/* Alertas contextuais da Etapa 8, neutros em relação ao modo claro/escuro. */
+.warning-note {
+  display: block;
+  margin: .75rem 0;
+  padding: .75rem 1rem;
+  border: 1px solid rgba(217, 146, 29, .45);
+  border-left: 4px solid rgba(217, 146, 29, .9);
+  border-radius: 8px;
+  background: rgba(217, 146, 29, .085);
+  color: inherit;
+  font-size: .875rem;
+  line-height: 1.5;
+}
+.vinculos-adm h3,
+.vinculos-adm h4 { color: inherit; }
+.vinculos-adm .table-wrap { overflow-x: auto; }
+.vinculos-adm select,
+.vinculos-adm input { max-width: 100%; }
+@media (max-width: 760px) {
+  .vinculos-adm__form { flex-direction: column; align-items: stretch; }
+  .vinculos-adm__form .field { min-width: 0; width: 100%; }
+}
