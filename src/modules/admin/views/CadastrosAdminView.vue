@@ -3,7 +3,6 @@ import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import CatalogosResiduosSolucoesView from '@/modules/admin/views/CatalogosResiduosSolucoesView.vue'
-import VinculosUsuariosCadastro from '@/modules/admin/components/VinculosUsuariosCadastro.vue'
 
 import type { PerfilUsuario } from '@/modules/auth/types/session'
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
@@ -968,7 +967,8 @@ onMounted(() => {
         </div>
 
         <div v-else>
-          <VinculosUsuariosCadastro :usuarios="usuarios" :laboratorios="laboratorios" :projetos="projetos" />
+          <p class="scope-note">Para atribuir laboratórios, projetos, SCIs e atividades, acesse a gestão específica de vínculos operacionais.</p>
+          <router-link class="btn btn--primary" to="/administracao/cadastros/vinculos">Gerenciar vínculos de usuários →</router-link>
           <div class="table-wrap">
           <table class="permissions-table">
             <thead><tr><th>Usuário</th><th>Unidade / laboratório</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
