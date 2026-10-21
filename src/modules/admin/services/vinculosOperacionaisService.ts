@@ -45,6 +45,10 @@ export const vinculosOperacionaisService = {
     const { data } = await http.post<VinculoOperacional>('/v1/vinculos-operacionais', payload)
     return data
   },
+  async editar(id: string, payload: { dataFim: string | null; observacao: string | null }) {
+    const { data } = await http.put<VinculoOperacional>('/v1/vinculos-operacionais/' + id, payload)
+    return data
+  },
   async encerrar(id: string) {
     const { data } = await http.put<VinculoOperacional>(`/v1/vinculos-operacionais/${id}/encerrar`)
     return data
