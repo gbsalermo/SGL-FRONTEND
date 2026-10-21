@@ -43,6 +43,7 @@ export interface PedidoResponse {
   projetoId: string | null
   projetoNome: string | null
   participacaoId?: string | null
+  projetoSemVinculoDireto?: boolean
   atividadeOrigemId?: string | null
   atividadeOrigemNome?: string | null
   sciOrigemId?: string | null
