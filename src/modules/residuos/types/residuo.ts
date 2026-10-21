@@ -151,6 +151,11 @@ export interface ResiduoResponse {
   usuarioGeradorNome: string
   projetoId: string | null
   projetoNome: string | null
+  participacaoId?: string | null
+  atividadeOrigemNome?: string | null
+  sciOrigemNome?: string | null
+  projetoOrigemNome?: string | null
+  laboratorioOrigemNome?: string | null
   gestorRecebedorInicialId: string | null
   gestorRecebedorInicialNome: string | null
   descricao: string
