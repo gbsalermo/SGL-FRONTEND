@@ -21,6 +21,7 @@ import type {
 } from '@/modules/residuos/types/residuo'
 import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
+import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
 type ModoPreenchimento = 'MANUAL' | 'MODELO'
@@ -91,6 +92,11 @@ const session = useSessionStore()
 const projetos = ref<ProjetoResiduoResponse[]>([])
 const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
+const vinculosAdicionais = ref<VinculoOperacional[]>([])
+const laboratoriosPermitidos = computed(() => gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
+  l.id === session.usuario?.laboratorioId || vinculosAdicionais.value.some(v =>
+    v.laboratorioId === l.id && v.dataInicio <= new Date().toLocaleDateString('en-CA')
+    && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA')))))
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
 const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
 const participacoes = ref<ContextoParticipacaoOperacional[]>([])
@@ -98,7 +104,7 @@ const participacaoSelecionadaId = ref('')
 const participacaoSelecionada = computed(() => participacoes.value.find(p => p.participacaoId === participacaoSelecionadaId.value))
 const laboratorioOperacionalId = computed(() => estagiario.value
   ? participacaoSelecionada.value?.laboratorioId || ''
-  : gestao.value ? laboratorioSelecionadoId.value : session.usuario?.laboratorioId || '')
+  : laboratorioSelecionadoId.value)
 const laboratorioOperacional = computed(() => laboratorios.value.find(l => l.id === laboratorioOperacionalId.value))
 const produtos = ref<ProdutoResiduoResponse[]>([])
 const classesResiduo = ref<ClasseResiduoResponse[]>([])
@@ -197,16 +203,22 @@ async function carregarDados() {
       return
     }
   }
+  const laboratorioBase = usuario.value.laboratorioId || ''
+  if (!estagiario.value) {
+    try {
+      laboratorios.value = await listarLaboratoriosOperacionais(usuario.value.unidadeId!)
+      if (!gestao.value) {
+        vinculosAdicionais.value = await vinculosOperacionaisService.listar(usuario.value.id)
+      }
+      laboratorioSelecionadoId.value = laboratoriosPermitidos.value.some(l => l.id === laboratorioBase)
+        ? laboratorioBase : laboratoriosPermitidos.value[0]?.id || ''
+    } catch(e) { erro.value = mensagemErro(e); carregandoDados.value = false; return }
+  }
   const laboratorioId = laboratorioOperacionalId.value
-  if (!gestao.value && !estagiario.value && !laboratorioId) {
-    erro.value = 'Laboratório operacional não identificado.'
+  if (!estagiario.value && !gestao.value && !laboratorioId) {
+    erro.value = 'Nenhum laboratório autorizado para informar resíduos.'
     carregandoDados.value = false
     return
-  }
-
-  if (gestao.value) {
-    try { laboratorios.value = await listarLaboratoriosOperacionais(usuario.value.unidadeId!) }
-    catch(e) { erro.value = mensagemErro(e); carregandoDados.value = false; return }
   }
   const [projetosResult, produtosResult, classesResult, modelosResult] = await Promise.allSettled([
     laboratorioId ? residuoService.listarProjetosPorLaboratorio(laboratorioId) : Promise.resolve([] as ProjetoResiduoResponse[]),
@@ -618,11 +630,11 @@ onMounted(carregarDados)
           </div>
         </div>
 
-        <label v-if="gestao" class="field">
+        <label v-if="!estagiario" class="field">
           <span>Laboratório de origem <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
             <option value="">Selecione um laboratório ativo da Unidade</option>
-            <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+            <option v-for="laboratorio in laboratoriosPermitidos" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
           </select>
         </label>
 
