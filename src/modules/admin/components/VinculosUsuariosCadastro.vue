@@ -191,8 +191,8 @@ watch(() => props.usuarios, () => {
           <tbody>
             <tr v-for="v in vinculos" :key="v.id">
               <td><strong>{{ v.atividadeNome || v.sciNome || v.projetoNome || v.laboratorioNome }}</strong><small>{{ v.laboratorioNome }}{{ v.projetoNome ? ' / ' + v.projetoNome : '' }}</small></td>
-              <td>{{ v.dataInicio }}</td><td>{{ v.dataFim || 'Vigente' }}</td>
-              <td><button type="button" :disabled="salvando || !!v.dataFim" @click="encerrar(v.id)">Encerrar</button></td>
+              <td>{{ v.dataInicio }}</td><td>{{ v.encerrado ? 'Encerrado' : (v.dataFim || 'Vigente') }}</td>
+              <td><button type="button" :disabled="salvando || v.encerrado" @click="encerrar(v.id)">Encerrar</button></td>
             </tr>
             <tr v-if="!vinculos.length"><td colspan="4">Nenhum vínculo adicional.</td></tr>
           </tbody>
