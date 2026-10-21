@@ -168,6 +168,12 @@ export const router = createRouter({
           component: () => import('@/modules/relatorios/views/RelatorioPessoasLaboratorioView.vue'),
         },
         {
+          path: 'administracao/cadastros/vinculos',
+          name: 'gestao-vinculos-cadastros',
+          component: () => import('@/modules/admin/views/VinculosOperacionaisGestaoView.vue'),
+          meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+        },
+        {
           path: 'administracao/cadastros',
           name: 'admin-cadastros',
           component: () => import('@/modules/admin/views/CadastrosAdminView.vue'),
