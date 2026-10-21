@@ -114,6 +114,10 @@ function sair() {
           <span>Dashboard</span>
         </router-link>
 
+        <router-link v-if="session.usuario?.perfil === 'PESQUISADOR' || session.usuario?.perfil === 'ANALISTA'" class="solicitante-nav__item" to="/pedidos-orientandos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7" r="3" /><path d="M2 21v-3a6 6 0 0 1 12 0v3M16 6h6M16 11h6M16 16h6"/></svg>
+          <span>Pedidos orientados</span>
+        </router-link>
         <router-link class="solicitante-nav__item" to="/meus-pedidos">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 4h14v16H5z" />
