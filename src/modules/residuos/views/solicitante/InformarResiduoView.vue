@@ -642,7 +642,8 @@ onMounted(carregarDados)
         <div class="form-grid form-grid--two">
           <label class="field">
             <span>Projeto <small>{{ estagiario ? '(derivado da atividade)' : '(opcional)' }}</small></span>
-            <select v-model="projetoId" :disabled="carregandoDados || estagiario">
+            <input v-if="estagiario" :value="participacaoSelecionada?.projetoNome || 'Selecione uma participação'" readonly />
+            <select v-else v-model="projetoId" :disabled="carregandoDados">
               <option value="">Sem projeto vinculado</option>
               <option v-for="projeto in projetos" :key="projeto.id" :value="projeto.id">{{ projeto.nome }}</option>
             </select>
