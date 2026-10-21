@@ -30,6 +30,9 @@ const erro = ref('')
 const sucesso = ref('')
 const carregandoResumo = ref(false)
 const modalEdicao = ref(false)
+const modalEditarVinculo = ref<VinculoOperacional | null>(null)
+const edicaoDataFim = ref('')
+const edicaoObservacao = ref('')
 const modalEncerramento = ref<VinculoOperacional | null>(null)
 const laboratorioBaseId = ref('')
 const laboratorioId = ref('')
@@ -231,6 +234,28 @@ async function salvarVinculo() {
   } catch(e) { erro.value = mensagem(e, 'Não foi possível cadastrar o vínculo.') }
   finally { salvando.value = false }
 }
+function abrirEdicaoVinculo(v: VinculoOperacional) {
+  if (!vigente(v)) return
+  modalEditarVinculo.value = v
+  edicaoDataFim.value = v.dataFim || ''
+  edicaoObservacao.value = v.observacao || ''
+  erro.value = ''
+}
+async function salvarEdicaoVinculo() {
+  if (!modalEditarVinculo.value || salvando.value) return
+  erro.value = ''
+  sucesso.value = ''
+  salvando.value = true
+  try {
+    await vinculosOperacionaisService.editar(modalEditarVinculo.value.id, {
+      dataFim: edicaoDataFim.value || null, observacao: edicaoObservacao.value.trim() || null,
+    })
+    modalEditarVinculo.value = null
+    await Promise.all([carregarVinculos(), carregarResumo()])
+    sucesso.value = 'Dados do vínculo atualizados. O contexto e o histórico foram preservados.'
+  } catch(e) { erro.value = mensagem(e, 'Não foi possível atualizar o vínculo.') }
+  finally { salvando.value = false }
+}
 function solicitarEncerramento(v: VinculoOperacional) {
   if (!vigente(v)) return
   erro.value = ''
@@ -354,7 +379,7 @@ onMounted(() => { void carregarResumo() })
               <strong>{{ contextoTitulo(v) }}</strong><small>{{ v.laboratorioNome }}{{ v.projetoNome ? ' → ' + v.projetoNome : '' }}{{ v.sciNome ? ' → ' + v.sciNome : '' }}</small>
               <div class="people-link-meta"><span>Início: {{ dataFormatada(v.dataInicio) }}</span><span>Fim: {{ v.encerrado ? dataFormatada(v.dataFim) : v.dataFim ? dataFormatada(v.dataFim) : 'Indeterminado' }}</span></div>
               <p v-if="v.observacao">{{ v.observacao }}</p>
-              <button v-if="vigente(v)" type="button" class="people-danger-outline" :disabled="salvando" @click="solicitarEncerramento(v)">Encerrar vínculo</button>
+              <div v-if="vigente(v)" class="people-link-actions"><button type="button" class="people-outline" :disabled="salvando" @click="abrirEdicaoVinculo(v)">Editar vínculo</button><button type="button" class="people-danger-outline" :disabled="salvando" @click="solicitarEncerramento(v)">Encerrar vínculo</button></div>
             </div>
           </section>
           <div class="people-footnote">Homologação DEV/DEMO. As permissões institucionais reais serão integradas posteriormente.</div>
@@ -379,6 +404,18 @@ onMounted(() => { void carregarResumo() })
       </section>
     </div>
 
+    <div v-if="modalEditarVinculo" class="people-modal-backdrop" @click.self="modalEditarVinculo=null">
+      <section class="people-modal people-modal--confirm" role="dialog" aria-modal="true" aria-label="Editar vínculo">
+        <header><div><span class="people-eyebrow">ATUALIZAÇÃO DO VÍNCULO</span><h2>Editar informações</h2><p>{{ contextoTitulo(modalEditarVinculo) }} · {{ modalEditarVinculo.laboratorioNome }}</p></div><button type="button" class="people-close" @click="modalEditarVinculo=null">×</button></header>
+        <div class="people-modal-body">
+          <p>O vínculo foi iniciado em {{ dataFormatada(modalEditarVinculo.dataInicio) }}. Para trocar o Laboratório, Projeto, SCI ou Atividade, encerre este vínculo e cadastre outro.</p>
+          <label class="people-field"><span>Fim previsto (opcional)</span><input v-model="edicaoDataFim" type="date" :min="modalEditarVinculo.dataInicio" /></label>
+          <label class="people-field"><span>Observação</span><textarea v-model="edicaoObservacao" rows="3" /></label>
+          <div v-if="erro" role="alert" class="people-feedback people-feedback--error">{{ erro }}</div>
+        </div>
+        <footer><button type="button" class="people-outline" :disabled="salvando" @click="modalEditarVinculo=null">Cancelar</button><button type="button" class="people-primary" :disabled="salvando" @click="salvarEdicaoVinculo">{{ salvando?'Salvando...':'Salvar alterações' }}</button></footer>
+      </section>
+    </div>
     <div v-if="modalEncerramento" class="people-modal-backdrop" @click.self="modalEncerramento=null">
       <section class="people-modal people-modal--confirm" role="alertdialog" aria-modal="true" aria-label="Confirmar encerramento do vínculo">
         <header><div><span class="people-eyebrow">CONFIRMAR ENCERRAMENTO</span><h2>Encerrar este vínculo?</h2></div></header>
