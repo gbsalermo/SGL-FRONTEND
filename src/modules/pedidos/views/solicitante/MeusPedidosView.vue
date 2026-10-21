@@ -342,9 +342,9 @@ onMounted(carregarPedidos)
                             <dt>Status</dt>
                             <dd>{{ statusLabel(pedido.status) }}</dd>
                           </div>
-                          <div v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId">
+                          <div>
                             <dt>Atividade</dt>
-                            <dd>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</dd>
+                            <dd>{{ pedido.atividadeOrigemNome || (pedido.atividadeOrigemId ? 'Atividade vinculada' : 'Não registrada neste pedido') }}</dd>
                           </div>
                           <div v-if="pedido.sciOrigemNome || pedido.sciOrigemId">
                             <dt>SCI</dt>
