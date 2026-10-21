@@ -21,3 +21,10 @@
 - Verificar regressão de resíduos para Gestor, Administrador, Pesquisador e Técnico.
 - Reabrir as novas solicitações de Pedido/Solução e checar `atividadeOrigemNome` e `sciOrigemNome` na resposta real.
 - Não realizar merge sem validação manual.
+
+## Complemento — Detalhes de resíduos na interface (21/10)
+- `MeusResiduosView.vue`: exibe Atividade e SCI quando há participação/origem registrada.
+- `ResiduosGestaoCompletoView.vue`: exibe Atividade e SCI na identificação de origem para a Gestão.
+- `ResiduoResponse`: tipa os campos de participação e snapshots históricos da API.
+- Registros anteriores à V41 podem não possuir atividade/SCI; não preencher retroativamente sem evidência.
+- Pendente executar build e conferir a resposta real da API nos dois drawers.
