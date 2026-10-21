@@ -102,3 +102,182 @@
  .people-modal footer>*{flex:1}
 }
 @media(max-width:360px){.people-metrics{grid-template-columns:1fr}}
+
+
+/*
+ * Dark Mode SGL — Etapa 2 (padrão definitivo).
+ * O tema é controlado exclusivamente por :root[data-theme='dark'] no
+ * themeService.ts; não há segunda paleta, armazenamento ou seletor local.
+ * Escopo da página e dos overlays pertencentes à gestão de vínculos.
+ */
+:root[data-theme='dark'] .people-management {
+  color: var(--sgl-text);
+  color-scheme: dark;
+}
+:root[data-theme='dark'] .people-metric,
+:root[data-theme='dark'] .people-workspace,
+:root[data-theme='dark'] .people-section,
+:root[data-theme='dark'] .people-modal {
+  background: var(--sgl-surface);
+  border-color: var(--sgl-border);
+  color: var(--sgl-text);
+}
+:root[data-theme='dark'] .people-metric>span,
+:root[data-theme='dark'] .people-metric>small,
+:root[data-theme='dark'] .people-field,
+:root[data-theme='dark'] .people-table td,
+:root[data-theme='dark'] .people-table td small,
+:root[data-theme='dark'] .people-results,
+:root[data-theme='dark'] .people-section>p,
+:root[data-theme='dark'] .people-link-card>small,
+:root[data-theme='dark'] .people-link-meta,
+:root[data-theme='dark'] .people-footnote,
+:root[data-theme='dark'] .people-modal-body>p,
+:root[data-theme='dark'] .people-modal header p,
+:root[data-theme='dark'] .people-drawer-header p,
+:root[data-theme='dark'] .people-empty,
+:root[data-theme='dark'] .people-empty-inline {
+  color: var(--sgl-text-muted);
+}
+:root[data-theme='dark'] .people-metric>strong,
+:root[data-theme='dark'] .people-results strong,
+:root[data-theme='dark'] .people-table td strong,
+:root[data-theme='dark'] .people-section-head h3,
+:root[data-theme='dark'] .people-lab-card strong,
+:root[data-theme='dark'] .people-link-card>strong,
+:root[data-theme='dark'] .people-drawer-header h2,
+:root[data-theme='dark'] .people-modal header h2 {
+  color: var(--sgl-text);
+}
+:root[data-theme='dark'] .people-results,
+:root[data-theme='dark'] .people-table th,
+:root[data-theme='dark'] .people-tabs button,
+:root[data-theme='dark'] .people-lab-card,
+:root[data-theme='dark'] .people-empty-inline {
+  background: var(--sgl-surface-soft);
+  border-color: var(--sgl-border);
+}
+:root[data-theme='dark'] .people-table th {
+  color: var(--sgl-text-muted);
+}
+:root[data-theme='dark'] .people-table td,
+:root[data-theme='dark'] .people-results,
+:root[data-theme='dark'] .people-tabs,
+:root[data-theme='dark'] .people-modal header,
+:root[data-theme='dark'] .people-modal footer {
+  border-color: var(--sgl-border);
+}
+:root[data-theme='dark'] .people-table tr:hover td {
+  background: var(--sgl-surface-interactive);
+}
+:root[data-theme='dark'] .people-field input,
+:root[data-theme='dark'] .people-field select,
+:root[data-theme='dark'] .people-field textarea {
+  background: var(--sgl-surface-elevated);
+  border-color: var(--sgl-border-strong);
+  color: var(--sgl-text);
+}
+:root[data-theme='dark'] .people-field input::placeholder,
+:root[data-theme='dark'] .people-field textarea::placeholder {
+  color: var(--sgl-text-muted);
+}
+:root[data-theme='dark'] .people-field input:focus-visible,
+:root[data-theme='dark'] .people-field select:focus-visible,
+:root[data-theme='dark'] .people-field textarea:focus-visible,
+:root[data-theme='dark'] .people-outline:focus-visible,
+:root[data-theme='dark'] .people-primary:focus-visible,
+:root[data-theme='dark'] .people-close:focus-visible {
+  outline: var(--sgl-focus-width) solid var(--sgl-focus);
+  outline-offset: var(--sgl-focus-offset);
+}
+:root[data-theme='dark'] .people-link,
+:root[data-theme='dark'] .people-eyebrow,
+:root[data-theme='dark'] .people-section-number,
+:root[data-theme='dark'] .people-context-type,
+:root[data-theme='dark'] .people-lab-card span {
+  color: var(--sgl-primary);
+}
+:root[data-theme='dark'] .people-primary {
+  background: var(--sgl-action-primary);
+  border-color: var(--sgl-action-primary-border);
+  color: var(--sgl-text);
+}
+:root[data-theme='dark'] .people-primary:hover:not(:disabled) {
+  background: var(--sgl-action-primary-hover);
+  filter: none;
+}
+:root[data-theme='dark'] .people-outline,
+:root[data-theme='dark'] .people-close {
+  background: var(--sgl-surface-elevated);
+  color: var(--sgl-primary);
+  border-color: var(--sgl-border-strong);
+}
+:root[data-theme='dark'] .people-close {
+  color: var(--sgl-text);
+}
+:root[data-theme='dark'] .people-danger-outline {
+  background: var(--sgl-surface-elevated);
+  color: var(--sgl-error);
+  border-color: var(--sgl-error);
+}
+:root[data-theme='dark'] .people-danger {
+  background: var(--sgl-error);
+  color: var(--sgl-background-deep);
+  border-color: var(--sgl-error);
+}
+:root[data-theme='dark'] .people-pill {
+  background: var(--sgl-neutral-soft);
+  color: var(--sgl-text-muted);
+}
+:root[data-theme='dark'] .people-pill--vinculado {
+  background: var(--sgl-green-soft);
+  color: var(--sgl-success);
+}
+:root[data-theme='dark'] .people-pill--pendente {
+  background: var(--sgl-surface-interactive);
+  color: var(--sgl-warning);
+}
+:root[data-theme='dark'] .people-pill--inativo {
+  background: var(--sgl-neutral-soft);
+  color: var(--sgl-text-muted);
+}
+:root[data-theme='dark'] .people-metric--ok {
+  border-top-color: var(--sgl-success);
+}
+:root[data-theme='dark'] .people-metric--pending {
+  border-top-color: var(--sgl-warning);
+}
+:root[data-theme='dark'] .people-drawer {
+  background: var(--sgl-background);
+  color: var(--sgl-text);
+}
+:root[data-theme='dark'] .people-drawer-header {
+  background: var(--sgl-surface-elevated);
+  border-color: var(--sgl-border);
+}
+:root[data-theme='dark'] .people-link-card {
+  background: var(--sgl-surface-soft);
+  border-color: var(--sgl-border);
+}
+:root[data-theme='dark'] .people-tabs button {
+  color: var(--sgl-text-muted);
+}
+:root[data-theme='dark'] .people-tabs button.active {
+  background: var(--sgl-surface-interactive);
+  color: var(--sgl-primary);
+}
+:root[data-theme='dark'] .people-pending-message {
+  background: var(--sgl-surface-interactive);
+  border-left-color: var(--sgl-warning);
+  color: var(--sgl-warning);
+}
+:root[data-theme='dark'] .people-feedback--error {
+  background: var(--sgl-surface-interactive);
+  color: var(--sgl-error);
+  border-color: var(--sgl-error);
+}
+:root[data-theme='dark'] .people-feedback--success {
+  background: var(--sgl-green-soft);
+  color: var(--sgl-success);
+  border-color: var(--sgl-success);
+}
