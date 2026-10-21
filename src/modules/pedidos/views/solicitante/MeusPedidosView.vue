@@ -108,7 +108,11 @@ function quantidadeExibida(item: PedidoResponse['itens'][number], aprovada = fal
   if (item.tipoEmbalagemSolicitada && item.quantidadeEmbalagensSolicitada != null) {
     const nome = item.tipoEmbalagemSolicitada.toLowerCase().replaceAll('_', ' ')
     const n = item.quantidadeEmbalagensSolicitada
-    return `${n} ${nome}${n === 1 ? '' : 's'}${item.produtoUnidadeArmazenamento ? ' — ' + item.produtoUnidadeArmazenamento : ''}`
+    const descricao = item.produtoUnidadeArmazenamento?.trim() || ''
+    if (descricao.toLowerCase().startsWith(nome)) {
+      return `${n} ${descricao}`
+    }
+    return `${n} ${nome}${n === 1 ? '' : 's'}${descricao ? ' — ' + descricao : ''}`
   }
   return `${item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada} ${item.unidadeMedidaSolicitada || item.produtoUnidadeMedida || 'unidades'}`
 }
