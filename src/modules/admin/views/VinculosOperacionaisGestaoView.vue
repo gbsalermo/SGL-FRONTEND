@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import axios from 'axios'
 import VinculosUsuariosCadastro from '@/modules/admin/components/VinculosUsuariosCadastro.vue'
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
 import type { UsuarioPermissao, LaboratorioCadastro, ProjetoCadastro } from '@/modules/admin/types/cadastros'
@@ -21,7 +22,7 @@ async function carregar() {
     laboratorios.value = l
     projetos.value = p
   } catch(e) {
-    erro.value = e instanceof Error ? e.message : 'Falha ao carregar cadastros.'
+    erro.value = axios.isAxiosError(e) ? (e.response?.data?.message ?? 'Não foi possível carregar os cadastros.') : e instanceof Error ? e.message : 'Falha ao carregar cadastros.'
   } finally { carregando.value = false }
 }
 onMounted(carregar)
@@ -32,7 +33,7 @@ onMounted(carregar)
       <div>
         <p class="eyebrow">ADMINISTRAÇÃO / CADASTROS</p>
         <h1>Vínculos operacionais</h1>
-        <span>Gerencie o laboratório-base e as associações de usuários de teste.</span>
+        <span>Identifique usuários pendentes, consulte vínculos ativos e históricos e gerencie suas associações operacionais.</span>
       </div>
       <button class="btn btn--ghost" type="button" :disabled="carregando" @click="carregar">Atualizar</button>
     </header>
