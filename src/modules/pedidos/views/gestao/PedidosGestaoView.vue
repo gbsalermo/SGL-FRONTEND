@@ -450,6 +450,9 @@ onMounted(carregar)
                     <p v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId"><span>Atividade</span><strong>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</strong></p>
                     <p v-if="pedido.sciOrigemNome || pedido.sciOrigemId"><span>SCI</span><strong>{{ pedido.sciOrigemNome || 'Origem registrada' }}</strong></p>
                     <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p>
+                    <p v-if="pedido.projetoSemVinculoDireto" role="alert" class="warning-note">
+                      Atenção: solicitante sem vínculo direto com este projeto. Pedido permitido por vínculo com o laboratório. Verifique antes de aprovar.
+                    </p>
                     <p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p>
                     <p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p>
                     <button class="action-button action-button--deliver gestao-solucao-open" type="button" @click="router.push({ path: '/solucoes', query: { pedido: pedido.id } })">Abrir na Central de Soluções</button>
