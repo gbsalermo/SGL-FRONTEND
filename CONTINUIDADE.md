@@ -1037,3 +1037,11 @@ Por decisão do responsável, a **7.6.0 vem antes de 7.6.1/7.7** para alinhar o 
 Após a leitura do contrato original de Estoque §9.9/§9.13 (`Sistema-SGL/docs/CONTINUIDADE_ETAPA_7_2026-10-06.md`), o responsável apontou corretamente que não há motivo para decidir novamente a seleção física: **FEFO/FIFO entre lotes, FECHADOS para apresentações completas, ABERTOS para frações, novas aberturas apenas na falta de saldo apropriado e minimização de recipientes parcialmente abertos em pedidos grandes**. Exemplos já aprovados: 500 mL → 1 FECHADO; 200 mL → ABERTO; 700 mL → 500 FECHADO + 200 ABERTO, sempre no lote de precedência superior.
 
 `docs/ETAPA_7_6_0_AUDITORIA_FRONTEND_PADRAO_VISUAL_PEDIDOS.md` corrigido: apresentação física e quantidade decimal são **formas de informar a solicitação**; não significam criação de nova política física ou promessa automática de recipiente lacrado. O frontend só exibe e transmite a intenção e a unidade; `MovimentacaoEstoqueService` decide recipientes de forma transacional. Próximo trabalho é adequação mínima do request e UI de Pedidos, com regressão de FEFO/FIFO e tema visual SGL. **Sem modificação funcional nesta retificação, sem merge.**
+
+
+## Etapa 8 — Vínculos operacionais de funcionários (21/10/2026, DEV)
+- Contrato de adaptação registrado em `docs/ETAPA_8_IMPLEMENTACAO_VINCULOS_DEV_2026-10-21.md`.
+- Gerenciamento de laboratório-base e vínculos adicionais no módulo Cadastros; Pedido/Solução/Resíduo usam laboratório autorizado e sinalizam projeto sem vínculo direto para aprovação consciente.
+- Supervisão DEV de orientandos limitada ao laboratório autorizado.
+- Login de desenvolvimento mantido; futuro login institucional não implementado e endpoints administrativos DEV/DEMO não são adequados para produção.
+- **Código enviado, compilação/build/Flyway/testes ainda pendentes. Não realizar merge até homologação.**
