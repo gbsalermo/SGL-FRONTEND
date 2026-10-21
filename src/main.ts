@@ -44,6 +44,7 @@ import './styles/etapa-2-gestao-relatorios.css'
 import './styles/etapa-2-gestao-cadastros.css'
 import './styles/etapa-2-validation-system.css'
 import './styles/etapa-8-vinculos.css'
+import './styles/etapa-8-usuarios.css'
 
 const app = createApp(App)
 const pinia = createPinia()
