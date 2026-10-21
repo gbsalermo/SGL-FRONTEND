@@ -51,6 +51,7 @@ export interface PedidoSolucao {
   laboratorioNome: string
   projetoId: string | null
   projetoNome: string | null
+  projetoSemVinculoDireto?: boolean
   participacaoId?: string | null
   atividadeOrigemId?: string | null
   atividadeOrigemNome?: string | null
