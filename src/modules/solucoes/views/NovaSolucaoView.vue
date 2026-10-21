@@ -102,8 +102,8 @@ async function carregar() {
     }
     const [catalogo, projetosData, produtosData, contextosData] = await Promise.all([
       solucaoService.listarModelos(true),
-      !estagiario.value && laboratorio
-        ? solucaoService.listarProjetosPorLaboratorio(laboratorio)
+      !estagiario.value && laboratorioOperacionalId.value
+        ? solucaoService.listarProjetosPorLaboratorio(laboratorioOperacionalId.value)
         : Promise.resolve([] as ProjetoSolucao[]),
       solucaoService.listarProdutos(unidade),
       estagiario.value && session.usuario?.id
