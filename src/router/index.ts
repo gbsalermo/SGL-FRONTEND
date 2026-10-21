@@ -55,6 +55,12 @@ export const router = createRouter({
           component: () => import('@/modules/dashboard/views/solicitante/DashboardSolicitanteView.vue'),
         },
         {
+          path: 'pedidos-orientandos',
+          name: 'pedidos-orientandos',
+          component: () => import('@/modules/pedidos/views/solicitante/PedidosOrientandosView.vue'),
+          meta: { perfis: ['PESQUISADOR', 'ANALISTA'] },
+        },
+        {
           path: 'meus-pedidos',
           name: 'meus-pedidos',
           component: () => import('@/modules/pedidos/views/solicitante/MeusPedidosView.vue'),
