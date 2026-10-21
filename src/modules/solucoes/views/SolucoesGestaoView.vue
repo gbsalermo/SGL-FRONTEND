@@ -94,6 +94,9 @@ async function executarAcao() {
       throw new Error('Confirme se a Solução já foi preparada.')
     executando.value = true
     if (action === 'APROVAR') {
+      if (p.projetoSemVinculoDireto && !window.confirm(
+        'ATENÇÃO: solicitante sem vínculo direto com o projeto. Confirma que está ciente e deseja aprovar a solução?',
+      )) { executando.value = false; return }
       await solucaoService.aprovar(p.id, session.usuario!.id, p.itens, obsAprovacao.value)
     } else if (action === 'ENTREGAR') {
       await solucaoService.entregar(p.id)
