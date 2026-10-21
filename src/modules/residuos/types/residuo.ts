@@ -80,6 +80,7 @@ export interface CriarResiduoRequest {
   usuarioGeradorId: string
   laboratorioId: string
   projetoId: string | null
+  participacaoId?: string | null
   descricao: string
   processoOrigem: string
   estadoFisico: EstadoFisicoResiduo
