@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { computed, nextTick, onMounted, ref } from 'vue'
+import { contextoOperacionalService } from '@/modules/operacao/services/contextoOperacionalService'
+import { prepararSelecaoContextoEstagiario, type ContextoParticipacaoOperacional } from '@/modules/operacao/types/contextoOperacional'
 
 import { residuoService } from '@/modules/residuos/services/residuoService'
 import type {
@@ -90,7 +92,13 @@ const projetos = ref<ProjetoResiduoResponse[]>([])
 const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
-const laboratorioOperacionalId = computed(() => gestao.value ? laboratorioSelecionadoId.value : session.usuario?.laboratorioId || '')
+const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
+const participacoes = ref<ContextoParticipacaoOperacional[]>([])
+const participacaoSelecionadaId = ref('')
+const participacaoSelecionada = computed(() => participacoes.value.find(p => p.participacaoId === participacaoSelecionadaId.value))
+const laboratorioOperacionalId = computed(() => estagiario.value
+  ? participacaoSelecionada.value?.laboratorioId || ''
+  : gestao.value ? laboratorioSelecionadoId.value : session.usuario?.laboratorioId || '')
 const laboratorioOperacional = computed(() => laboratorios.value.find(l => l.id === laboratorioOperacionalId.value))
 const produtos = ref<ProdutoResiduoResponse[]>([])
 const classesResiduo = ref<ClasseResiduoResponse[]>([])
@@ -166,15 +174,35 @@ function mensagemErro(error: unknown) {
 }
 
 async function carregarDados() {
-  const laboratorioId = laboratorioOperacionalId.value
-  if (!usuario.value?.unidadeId || (!gestao.value && !laboratorioId)) {
-    erro.value = 'Unidade e laboratório operacional são necessários para informar resíduos.'
+  if (!usuario.value?.unidadeId || !usuario.value?.id) {
+    erro.value = 'Unidade e usuário são necessários para informar resíduos.'
     return
   }
-
   carregandoDados.value = true
   erro.value = ''
   avisoDados.value = ''
+  if (estagiario.value) {
+    try {
+      const registros = await contextoOperacionalService.listarParticipacoesEstagiario(usuario.value.id)
+      const selecao = prepararSelecaoContextoEstagiario(registros, usuario.value.unidadeId)
+      participacoes.value = selecao.contextosElegiveis
+      participacaoSelecionadaId.value = selecao.participacaoSugeridaId || ''
+      projetoId.value = participacaoSelecionada.value?.projetoId || ''
+      if (!participacoes.value.length) {
+        avisoDados.value = 'Nenhuma participação elegível. Não é possível informar resíduos até que haja uma atividade ativa.'
+      }
+    } catch (error) {
+      erro.value = mensagemErro(error)
+      carregandoDados.value = false
+      return
+    }
+  }
+  const laboratorioId = laboratorioOperacionalId.value
+  if (!gestao.value && !estagiario.value && !laboratorioId) {
+    erro.value = 'Laboratório operacional não identificado.'
+    carregandoDados.value = false
+    return
+  }
 
   if (gestao.value) {
     try { laboratorios.value = await listarLaboratoriosOperacionais(usuario.value.unidadeId!) }
@@ -365,12 +393,21 @@ async function selecionarLaboratorio() {
   catch(e) { erro.value = mensagemErro(e) }
 }
 
+function selecionarParticipacao() {
+  // Projeto e laboratório nunca vêm de seleção livre para estagiários.
+  projetoId.value = participacaoSelecionada.value?.projetoId || ''
+  errosFormulario.value = {}
+}
+
 function validarFormulario() {
   if (!usuario.value?.id || !laboratorioOperacionalId.value) {
     throw new Error('Sessão sem usuário ou laboratório válido.')
   }
 
   const erros: Record<string, string> = {}
+  if (estagiario.value && !participacaoSelecionada.value?.elegivel) {
+    erros.participacao = 'Selecione uma participação ativa e elegível.'
+  }
 
   if (nivelRiscoInformado.value !== 'NENHUM' && riscosInformados.value.length === 0) {
     erros.riscos = 'Selecione pelo menos um risco percebido ou marque o nível como Nenhum.'
@@ -409,6 +446,7 @@ function montarPayload(): CriarResiduoRequest {
     usuarioGeradorId: usuario.value!.id,
     laboratorioId: laboratorioOperacionalId.value,
     projetoId: projetoId.value || null,
+    ...(estagiario.value ? { participacaoId: participacaoSelecionadaId.value } : {}),
     descricao: descricao.value.trim(),
     processoOrigem: processoOrigem.value.trim(),
     estadoFisico: estadoFisico.value,
@@ -452,7 +490,7 @@ async function enviarResiduo() {
 function limparFormulario() {
   modoPreenchimento.value = 'MANUAL'
   modeloResiduoId.value = ''
-  projetoId.value = ''
+  projetoId.value = estagiario.value ? participacaoSelecionada.value?.projetoId || '' : ''
   descricao.value = ''
   processoOrigem.value = ''
   estadoFisico.value = 'LIQUIDO'
@@ -500,7 +538,7 @@ onMounted(carregarDados)
       </article>
       <article>
         <span>Laboratório de origem</span>
-        <strong>{{ laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : usuario?.laboratorioNome || 'Não vinculado') }}</strong>
+        <strong>{{ estagiario ? (participacaoSelecionada?.laboratorioNome || 'Selecione uma participação') : laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : usuario?.laboratorioNome || 'Não vinculado') }}</strong>
         <small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small>
       </article>
     </div>
@@ -576,7 +614,7 @@ onMounted(carregarDados)
           <span>1</span>
           <div>
             <h2>Origem do resíduo</h2>
-            <p>Explique o que foi gerado e em qual processo. O projeto é opcional.</p>
+            <p>Explique o que foi gerado e em qual processo. {{ estagiario ? 'Selecione a participação que originou o resíduo.' : 'O projeto é opcional.' }}</p>
           </div>
         </div>
 
@@ -588,10 +626,23 @@ onMounted(carregarDados)
           </select>
         </label>
 
+        <label v-if="estagiario" class="field">
+          <span>Participação / Atividade <small>(obrigatório)</small></span>
+          <select v-model="participacaoSelecionadaId" required :disabled="carregandoDados || enviando" :data-form-error="Boolean(errosFormulario.participacao)" @change="selecionarParticipacao">
+            <option value="">Selecione uma participação elegível</option>
+            <option v-for="participacao in participacoes" :key="participacao.participacaoId" :value="participacao.participacaoId">
+              {{ participacao.atividadeNome || participacao.atividadeCodigoSeg }} — {{ participacao.projetoNome }} / {{ participacao.laboratorioNome }}
+            </option>
+          </select>
+          <small v-if="errosFormulario.participacao">{{ errosFormulario.participacao }}</small>
+          <small v-if="participacaoSelecionada">SCI: {{ participacaoSelecionada.sciNome || 'Não informado' }} · Projeto: {{ participacaoSelecionada.projetoNome }} · Laboratório: {{ participacaoSelecionada.laboratorioNome }}</small>
+          <small v-if="!carregandoDados && !participacoes.length">Não existem participações elegíveis para informar resíduos.</small>
+        </label>
+
         <div class="form-grid form-grid--two">
           <label class="field">
-            <span>Projeto <small>(opcional)</small></span>
-            <select v-model="projetoId" :disabled="carregandoDados">
+            <span>Projeto <small>{{ estagiario ? '(derivado da atividade)' : '(opcional)' }}</small></span>
+            <select v-model="projetoId" :disabled="carregandoDados || estagiario">
               <option value="">Sem projeto vinculado</option>
               <option v-for="projeto in projetos" :key="projeto.id" :value="projeto.id">{{ projeto.nome }}</option>
             </select>
