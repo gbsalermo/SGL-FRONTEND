@@ -749,7 +749,9 @@ onMounted(carregar)
           <section class="origin-grid">
             <article><span>Gerador</span><strong>{{ selecionado.usuarioGeradorNome }}</strong></article>
             <article><span>Laboratório</span><strong>{{ selecionado.laboratorioNome }}</strong></article>
-            <article><span>Projeto</span><strong>{{ selecionado.projetoNome ?? 'Sem projeto' }}</strong></article>
+            <article><span>Projeto</span><strong>{{ selecionado.projetoOrigemNome || selecionado.projetoNome || 'Sem projeto' }}</strong></article>
+            <article v-if="selecionado.participacaoId || selecionado.atividadeOrigemNome"><span>Atividade</span><strong>{{ selecionado.atividadeOrigemNome || 'Origem registrada' }}</strong></article>
+            <article v-if="selecionado.participacaoId || selecionado.sciOrigemNome"><span>SCI</span><strong>{{ selecionado.sciOrigemNome || 'Origem registrada' }}</strong></article>
             <article><span>Recipiente</span><strong>{{ selecionado.recipiente }}</strong></article>
           </section>
 
