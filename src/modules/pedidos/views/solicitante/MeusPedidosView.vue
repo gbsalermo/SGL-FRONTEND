@@ -100,6 +100,19 @@ function formatarData(valor: string) {
   }).format(new Date(valor))
 }
 
+function quantidadeExibida(item: PedidoResponse['itens'][number], aprovada = false) {
+  // A quantidade aprovada é canônica; não reutilizar a embalagem solicitada.
+  if (aprovada) {
+    return `${item.quantidadeAprovada ?? 0} ${item.produtoUnidadeMedida || item.unidadeMedidaSolicitada || 'unidades'}`
+  }
+  if (item.tipoEmbalagemSolicitada && item.quantidadeEmbalagensSolicitada != null) {
+    const nome = item.tipoEmbalagemSolicitada.toLowerCase().replaceAll('_', ' ')
+    const n = item.quantidadeEmbalagensSolicitada
+    return `${n} ${nome}${n === 1 ? '' : 's'}${item.produtoUnidadeArmazenamento ? ' — ' + item.produtoUnidadeArmazenamento : ''}`
+  }
+  return `${item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada} ${item.unidadeMedidaSolicitada || item.produtoUnidadeMedida || 'unidades'}`
+}
+
 function statusLabel(valor: StatusPedido) {
   const labels: Record<StatusPedido, string> = {
     PENDENTE: 'Pendente',
@@ -313,9 +326,9 @@ onMounted(carregarPedidos)
                               :class="{ 'material-quantity--approved': item.quantidadeAprovada != null }"
                             >
                               <span>{{ item.quantidadeAprovada != null ? 'Aprovado' : 'Solicitado' }}</span>
-                              <strong>{{ item.quantidadeAprovada ?? item.quantidadeSolicitada }}</strong>
+                              <strong>{{ quantidadeExibida(item, item.quantidadeAprovada != null) }}</strong>
                               <small v-if="item.quantidadeAprovada != null">
-                                Solicitado: {{ item.quantidadeSolicitada }}
+                                Solicitado: {{ quantidadeExibida(item) }}
                               </small>
                             </div>
                           </div>
