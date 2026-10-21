@@ -3,6 +3,7 @@ import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import CatalogosResiduosSolucoesView from '@/modules/admin/views/CatalogosResiduosSolucoesView.vue'
+import VinculosUsuariosCadastro from '@/modules/admin/components/VinculosUsuariosCadastro.vue'
 
 import type { PerfilUsuario } from '@/modules/auth/types/session'
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
@@ -966,7 +967,9 @@ onMounted(() => {
           </table>
         </div>
 
-        <div v-else class="table-wrap">
+        <div v-else>
+          <VinculosUsuariosCadastro :usuarios="usuarios" :laboratorios="laboratorios" :projetos="projetos" />
+          <div class="table-wrap">
           <table class="permissions-table">
             <thead><tr><th>Usuário</th><th>Unidade / laboratório</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
             <tbody>
@@ -994,6 +997,7 @@ onMounted(() => {
               <tr v-if="usuariosFiltrados.length === 0"><td colspan="6" class="empty-table">Nenhum usuário encontrado.</td></tr>
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </section>
