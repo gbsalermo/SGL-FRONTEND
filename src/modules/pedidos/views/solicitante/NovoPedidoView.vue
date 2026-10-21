@@ -22,6 +22,7 @@ import {
   type ContextoParticipacaoOperacional,
 } from '@/modules/operacao/types/contextoOperacional'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
+import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 
 interface ItemForm {
   produtoId: string
@@ -48,6 +49,11 @@ const session = useSessionStore()
 const projetos = ref<ProjetoResponse[]>([])
 const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
+const vinculosAdicionais = ref<VinculoOperacional[]>([])
+const laboratorioPermitido = computed(() => gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
+  l.id === session.usuario?.laboratorioId || vinculosAdicionais.value.some(v =>
+    v.laboratorioId === l.id && v.dataInicio <= new Date().toLocaleDateString('en-CA')
+    && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA')))))
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
 const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
 const contextos = ref<ContextoParticipacaoOperacional[]>([])
@@ -60,11 +66,15 @@ const participacaoSelecionada = computed(() => opcoesContexto.value.contextosEle
   .find(x => x.participacaoId === participacaoSelecionadaId.value))
 const laboratorioOperacionalId = computed(() => estagiario.value
   ? contextoResolvido.value?.laboratorioId || ''
-  : gestao.value ? laboratorioSelecionadoId.value : (session.usuario?.laboratorioId || ''))
+  : laboratorioSelecionadoId.value)
 const laboratorioOperacional = computed(() => laboratorios.value.find(x => x.id === laboratorioOperacionalId.value))
 const estoques = ref<EstoqueCentralResponse[]>([])
 const lotesPorEstoque = ref<Record<string, LotePedidoResponse[]>>({})
 const projetoId = ref('')
+const projetoSemVinculoDireto = computed(() => !estagiario.value && !gestao.value && !!projetoId.value
+  && !vinculosAdicionais.value.some(v => v.projetoId === projetoId.value
+    && v.dataInicio <= new Date().toLocaleDateString('en-CA')
+    && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA'))))
 const urgente = ref(false)
 const observacao = ref('')
 const itens = ref<ItemForm[]>([novoItem()])
@@ -179,7 +189,7 @@ async function carregarDados() {
   const laboratorioId = laboratorioOperacionalId.value
   const unidadeId = usuario.value?.unidadeId
 
-  if (!unidadeId || (!gestao.value && !estagiario.value && !laboratorioId)) {
+  if (!unidadeId) {
     erro.value = 'Seu usuário precisa estar vinculado a laboratório e unidade para criar pedidos.'
     return
   }
@@ -188,9 +198,13 @@ async function carregarDados() {
   erro.value = ''
 
   try {
-    if (gestao.value) {
+    if (!estagiario.value) {
       laboratorios.value = await listarLaboratoriosOperacionais(unidadeId)
-      if (laboratorioId && !laboratorios.value.some(x => x.id === laboratorioId)) laboratorioSelecionadoId.value = ''
+      if (!gestao.value && usuario.value?.id) {
+        vinculosAdicionais.value = await vinculosOperacionaisService.listar(usuario.value.id)
+      }
+      laboratorioSelecionadoId.value = laboratorioPermitido.value.some(l => l.id === laboratorioId)
+        ? laboratorioId : laboratorioPermitido.value[0]?.id || ''
     }
     const [projetosData, estoqueData, contextosData] = await Promise.all([
       !estagiario.value && laboratorioOperacionalId.value
@@ -445,11 +459,11 @@ onMounted(carregarDados)
       <section class="form-section">
         <div class="section-title"><div><span>1</span><div><h2>Contexto da solicitação</h2><p>Vincule um projeto e informe dados que ajudem a gestão a compreender o pedido.</p></div></div></div>
 
-        <label v-if="gestao" class="field">
+        <label v-if="!estagiario" class="field">
           <span>Laboratório de destino <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
             <option value="">Selecione um laboratório ativo da Unidade</option>
-            <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+            <option v-for="laboratorio in laboratorioPermitido" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
           </select>
         </label>
         <SeletorParticipacaoOperacional
@@ -466,6 +480,9 @@ onMounted(carregarDados)
           </select>
         </label>
 
+        <p v-if="projetoSemVinculoDireto" role="note" class="warning-note">
+          Você não possui vínculo direto com este projeto. A Gestão será informada ao analisar o pedido.
+        </p>
         <div class="urgency-field">
           <div><span class="field-label">Urgência <small>(opcional)</small></span><p>A marcação apenas informa a gestão e não altera automaticamente o fluxo do pedido.</p></div>
           <button class="urgency-toggle" :class="{ 'urgency-toggle--active': urgente }" type="button" :aria-pressed="urgente" @click="alternarUrgencia">
