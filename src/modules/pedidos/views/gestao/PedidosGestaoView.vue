@@ -281,6 +281,9 @@ async function aprovar(pedido: PedidoResponse) {
     return
   }
 
+  if (pedido.projetoSemVinculoDireto && !window.confirm(
+    'ATENÇÃO: o solicitante não tem vínculo direto com o projeto informado. Possui autorização para o laboratório, mas o pedido exige sua ciência. Deseja continuar com a aprovação?',
+  )) return
   if (!window.confirm('Confirma a aprovação deste pedido com as quantidades informadas?')) return
   executandoAcao.value = true
   try {
