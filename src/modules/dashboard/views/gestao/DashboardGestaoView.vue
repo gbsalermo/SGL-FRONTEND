@@ -247,6 +247,21 @@ const ultimasMovimentacoes = computed<MovimentacaoPainel[]>(() => {
     }
   })
 
+  // Entrega é evento administrativo distinto da baixa de estoque realizada na aprovação.
+  // A API já fornece a data real de entrega: não reutilizar o horário da movimentação.
+  const entregas: MovimentacaoPainel[] = pedidos.value
+    .filter(pedido => pedido.status === 'ENTREGUE' && !!pedido.dataEntrega)
+    .map(pedido => ({
+      id: `entrega-${pedido.id}`,
+      data: pedido.dataEntrega!,
+      rotulo: 'Pedido entregue',
+      detalhe: `${codigoCurto(pedido.id)} · ${pedido.usuarioNome} · ${pedido.laboratorioNome}`,
+      classe: 'devolucao' as ClasseMovimentacaoPainel,
+      rota: pedido.tipo === 'SOLUCAO'
+        ? `/solucoes?pedido=${encodeURIComponent(pedido.id)}`
+        : `/pedidos?pedido=${encodeURIComponent(pedido.id)}`,
+    }))
+
   const residuosHistorico: MovimentacaoPainel[] = historicoResiduos.value.map((evento) => {
     const meta = historicoResiduoMeta(evento.acao)
     const codigo = evento.residuoCodigoRastreio
@@ -267,7 +282,7 @@ const ultimasMovimentacoes = computed<MovimentacaoPainel[]>(() => {
     }
   })
 
-  return [...estoque, ...residuosHistorico]
+  return [...estoque, ...entregas, ...residuosHistorico]
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     .slice(0, 10)
 })
