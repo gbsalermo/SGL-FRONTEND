@@ -15,6 +15,17 @@ const route = useRoute()
 const session = useSessionStore()
 
 const movimentacoes = ref<MovimentacaoEstoqueResponse[]>([])
+const unidadesPorEstoque = ref<Record<string, string>>({})
+const rotulosUnidade: Record<string, string> = {
+  ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg', METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
+}
+function medidaMovimentacao(item: MovimentacaoEstoqueResponse): string {
+  const medida = unidadesPorEstoque.value[item.estoqueCentralId]
+  return medida ? (rotulosUnidade[medida] ?? medida) : 'un.'
+}
+function quantidadeComMedida(valor: number, item: MovimentacaoEstoqueResponse): string {
+  return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 6 }).format(valor)} ${medidaMovimentacao(item)}`
+}
 const carregando = ref(true)
 const erro = ref('')
 const busca = ref('')
@@ -161,6 +172,7 @@ async function carregar() {
     ])
 
     const estoquesPermitidos = new Set(estoquesDaUnidade.map((item) => item.id))
+    unidadesPorEstoque.value = Object.fromEntries(estoquesDaUnidade.map(item => [item.id, item.produtoUnidadeMedida]))
     movimentacoes.value = movimentacoesData.filter((item) => estoquesPermitidos.has(item.estoqueCentralId))
     abrirMovimentacaoDaRota()
   } catch {
@@ -246,11 +258,11 @@ onMounted(carregar)
               <td>{{ formatarData(item.dataMovimentacao) }}</td>
               <td><strong>{{ item.produtoNome }}</strong><small v-if="item.laboratorioNome">{{ item.laboratorioNome }}</small></td>
               <td><span :class="classeTipo(item.tipoMovimentacao)">{{ rotuloTipo(item.tipoMovimentacao) }}</span></td>
-              <td><strong class="quantity">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ item.quantidadeMovimentada }}</strong></td>
+              <td><strong class="quantity">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ quantidadeComMedida(item.quantidadeMovimentada, item) }}</strong></td>
               <td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Lote {{ item.numeroLote }}</small></td>
               <td>{{ rotuloOrigem(item.origem) }}</td>
               <td>{{ item.usuarioNome }}</td>
-              <td><strong>{{ item.quantidadeAnterior }}</strong> → <strong>{{ item.quantidadeAtual }}</strong></td>
+              <td><strong>{{ quantidadeComMedida(item.quantidadeAnterior, item) }}</strong> → <strong>{{ quantidadeComMedida(item.quantidadeAtual, item) }}</strong></td>
               <td><button class="detail-button" type="button" :aria-label="expandida === item.id ? 'Recolher detalhes' : 'Ver detalhes'" @click.stop="alternarDetalhe(item.id)">{{ expandida === item.id ? '⌃' : '⌄' }}</button></td>
             </tr>
             <tr v-if="expandida === item.id" class="detail-row" :class="{ 'detail-row--alvo': movimentacaoAlvo === item.id }">
