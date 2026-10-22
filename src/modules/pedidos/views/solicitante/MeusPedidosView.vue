@@ -558,6 +558,13 @@ th { color: #35415a; background: #fbfcfe; font-size: 11px; text-transform: upper
 .material-item:last-child { padding-bottom: 0; }
 .material-item > div:first-child { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
 .material-item > div:first-child strong { color: var(--sgl-text); font-size: 12px; }
+.material-item { min-width: 0; }
+.material-item > div:first-child { flex: 1 1 auto; overflow-wrap: anywhere; word-break: normal; }
+.material-item > div:first-child strong,
+.material-item > div:first-child span { display: block; max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+.material-quantity { min-width: 0; max-width: 52%; }
+.material-quantity strong { overflow-wrap: anywhere; }
+
 .material-item > div:first-child span { color: var(--sgl-text-muted); font-size: 10px; }
 .material-quantity { flex: 0 0 auto; display: grid; grid-template-columns: auto auto; align-items: baseline; justify-content: end; gap: 2px 8px; text-align: right; }
 .material-quantity span { color: var(--sgl-text-muted); font-size: 9px; text-transform: uppercase; }
