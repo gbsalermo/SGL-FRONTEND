@@ -584,7 +584,7 @@ onMounted(carregar)
 .detail-button { width: 30px; height: 30px; border: 0; border-radius: 7px; background: #f1f5f9; color: #0d2b5e; cursor: pointer; }
 .gestao-detail-row td { padding: 0; background: #f8fafc; }
 .gestao-detail { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, .8fr); gap: 18px; padding: 20px 22px; }
-.gestao-project-warning { grid-column: 1 / -1; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 12px 15px; border: 1px solid var(--sgl-warning, #d6a31a); border-left: 3px solid var(--sgl-warning, #d6a31a); border-radius: var(--sgl-radius-control, 7px); background: var(--sgl-surface-soft); color: var(--sgl-text); overflow-wrap: anywhere; }
+.gestao-project-warning { grid-column: 1 / -1; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 12px 15px; border: 1px solid var(--sgl-warning, #d6a31a); border-left: 3px solid var(--sgl-warning, #d6a31a); border-radius: var(--sgl-radius-control, 7px); background: color-mix(in srgb, var(--sgl-warning, #d6a31a) 9%, var(--sgl-surface)); color: var(--sgl-text); overflow-wrap: anywhere; }
 .gestao-project-warning strong { font-size: 12px; line-height: 1.4; }
 .gestao-project-warning span { font-size: 12px; line-height: 1.55; color: var(--sgl-text); }
 
