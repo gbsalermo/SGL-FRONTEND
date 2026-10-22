@@ -37,9 +37,10 @@ const projetos = ref<ProjetoSolucao[]>([])
 const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
 const vinculosAdicionais = ref<VinculoOperacional[]>([])
-const laboratorioPermitido = computed(() => gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
+const autorizacaoAtualizada = ref(false)
+const laboratorioPermitido = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
   l.id === session.usuario?.laboratorioId || vinculosAdicionais.value.some(v =>
-    v.laboratorioId === l.id && v.dataInicio <= new Date().toLocaleDateString('en-CA')
+    v.laboratorioId === l.id && !v.encerrado && v.dataInicio <= new Date().toLocaleDateString('en-CA')
     && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA')))))
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
 const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
@@ -93,10 +94,16 @@ async function carregar() {
     const unidade = session.usuario?.unidadeId
     if (!unidade) throw new Error('Unidade operacional obrigatória.')
     if (!estagiario.value) {
+      autorizacaoAtualizada.value = false
+      const usuarioAtualizado = await session.atualizarUsuarioAtual()
+      if (usuarioAtualizado.unidadeId !== unidade) {
+        throw new Error('A unidade de vínculo foi alterada. Atualize a página para continuar.')
+      }
       laboratorios.value = await listarLaboratoriosOperacionais(unidade)
       if (!gestao.value && session.usuario?.id) {
         vinculosAdicionais.value = await vinculosOperacionaisService.listar(session.usuario.id)
       }
+      autorizacaoAtualizada.value = true
       laboratorioSelecionadoId.value = laboratorioPermitido.value.some(l => l.id === laboratorio)
         ? laboratorio : laboratorioPermitido.value[0]?.id || ''
     }
@@ -131,7 +138,10 @@ function validar() {
   if (!session.usuario?.id) throw new Error('Não foi possível identificar o solicitante.')
   if (estagiario.value && !contextoResolvido.value)
     throw new Error('Selecione uma participação elegível para solicitar a Solução.')
-  if (!laboratorioOperacionalId.value) throw new Error('Selecione o laboratório de destino.')
+  if (!laboratorioOperacionalId.value)
+    throw new Error('Nenhum laboratório autorizado. Solicite a vinculação à Gestão.')
+  if (!estagiario.value && (!autorizacaoAtualizada.value || !laboratorioPermitido.value.some(l => l.id === laboratorioOperacionalId.value)))
+    throw new Error('O laboratório selecionado não está autorizado para este usuário.')
   if (!estagiario.value && !projetoId.value)
     throw new Error('Selecione o projeto ao qual a Solução será vinculada.')
   if (origem.value === 'PADRAO') {
@@ -197,7 +207,7 @@ onMounted(() => { void carregar() })
 
     <div class="context-grid">
       <article><span>Solicitante</span><strong>{{ usuario?.nome }}</strong><small>{{ usuario?.email }}</small></article>
-      <article><span>Laboratório de destino</span><strong>{{ estagiario ? (participacaoSelecionada?.laboratorioNome || 'Selecione uma participação abaixo') : (laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : usuario?.laboratorioNome || 'Não vinculado')) }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
+      <article><span>Laboratório de destino</span><strong>{{ estagiario ? (participacaoSelecionada?.laboratorioNome || 'Selecione uma participação abaixo') : (laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : 'Não vinculado')) }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
     </div>
 
     <form class="request-surface" @submit.prevent="solicitar">
@@ -206,10 +216,11 @@ onMounted(() => { void carregar() })
         <label v-if="!estagiario" class="field">
           <span>Laboratório de destino <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregando" @change="selecionarLaboratorio">
-            <option value="">Selecione um laboratório ativo da Unidade</option>
-            <option v-for="laboratorio in laboratorioPermitido" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+            <option value="">{{ laboratorioPermitido.length ? 'Selecione um laboratório autorizado' : 'Nenhum laboratório autorizado disponível' }}</option>
+            <option v-for="laboratorio in laboratorioPermitido" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && laboratorio.id === usuario?.laboratorioId ? ' (laboratório-base)' : !gestao ? ' (vínculo adicional)' : '' }}</option>
           </select>
         </label>
+        <p v-if="!estagiario && !carregando && autorizacaoAtualizada && laboratorioPermitido.length === 0" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório-base ou vínculo operacional vigente antes de solicitar soluções.</p>
         <SeletorParticipacaoOperacional
           v-if="estagiario"
           v-model="participacaoSelecionadaId"
@@ -299,7 +310,7 @@ onMounted(() => { void carregar() })
       <div v-if="erro" class="error-banner" role="alert">{{ erro }}</div>
       <footer class="form-footer">
         <p>O pedido ficará pendente até a análise da gestão.<span class="urgent-footer-note">A preparação deverá seguir a cartilha registrada no pedido.</span></p>
-        <button class="primary-action" type="submit" :disabled="enviando || carregando || (estagiario && !contextoResolvido)">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
+        <button class="primary-action" type="submit" :disabled="enviando || carregando || (!estagiario && (!autorizacaoAtualizada || !laboratorioPermitido.length)) || (estagiario && !contextoResolvido)">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
       </footer>
     </form>
   </section>
@@ -320,6 +331,7 @@ onMounted(() => { void carregar() })
 .context-grid span { margin-bottom: 5px; font-size: 12px; font-weight: 800; text-transform: uppercase; }
 .context-grid strong { display: block; font-size: 14px; }
 .context-grid small { margin-top: 3px; font-size: 11px; }
+.no-laboratory-notice { padding: 12px 14px; border: 1px solid var(--sgl-warning); border-radius: var(--sgl-radius-control); background: color-mix(in srgb, var(--sgl-warning) 9%, var(--sgl-surface)); color: var(--sgl-text); font-size: 13px; line-height: 1.5; }
 .request-surface { overflow: hidden; border: 1px solid var(--sgl-border); border-radius: 8px; background: var(--sgl-surface); box-shadow:none; }
 .form-section { padding: 22px; border-bottom: 1px solid var(--sgl-border); }
 .section-title { margin-bottom: 18px; }
