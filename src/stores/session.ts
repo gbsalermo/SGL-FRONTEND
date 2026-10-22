@@ -93,6 +93,19 @@ export const useSessionStore = defineStore('session', {
       return usuario
     },
 
+    async atualizarUsuarioAtual() {
+      if (!this.usuario) throw new Error('Sessão de usuário não encontrada.')
+      const { data } = await http.get<UsuarioSessao[]>('/v1/usuarios')
+      if (!Array.isArray(data)) throw new Error('Não foi possível consultar os dados atuais do usuário.')
+      const atualizado = data.find(item => item.id === this.usuario?.id && item.ativo)
+      if (!atualizado) throw new Error('O usuário não está mais ativo ou disponível.')
+      this.usuario = atualizado
+      if (this.expiraEm) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ usuario: atualizado, expiraEm: this.expiraEm }))
+      }
+      return atualizado
+    },
+
     expirarSeNecessario() {
       if (!this.usuario) return false
 
