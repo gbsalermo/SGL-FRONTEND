@@ -462,6 +462,10 @@ onMounted(carregar)
                   </div>
                 </div>
                 <div v-else class="gestao-detail">
+                  <div v-if="pedido.projetoSemVinculoDireto" role="alert" class="gestao-project-warning">
+                    <strong>Atenção: projeto sem vínculo direto</strong>
+                    <span>O solicitante não possui vínculo direto com este Projeto. O pedido foi permitido pela autorização no laboratório. A Gestão deve reconhecer essa condição antes de aprovar.</span>
+                  </div>
                   <div class="gestao-detail__items">
                     <h3>Materiais solicitados</h3>
                     <div v-for="item in pedido.itens" :key="item.id" class="gestao-approval-item">
@@ -512,7 +516,6 @@ onMounted(carregar)
                     <p v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId"><span>Atividade</span><strong>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</strong></p>
                     <p v-if="pedido.sciOrigemNome || pedido.sciOrigemId"><span>SCI</span><strong>{{ pedido.sciOrigemNome || 'Origem registrada' }}</strong></p>
                     <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p>
-                    <p v-if="pedido.projetoSemVinculoDireto" role="alert" class="warning-note">Atenção: o solicitante não possui vínculo direto com este Projeto. O pedido foi permitido por autorização no laboratório. A Gestão deve reconhecer esta condição antes de aprovar.</p>
                     <p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p><p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p><p><span>Urgência</span><strong>{{ pedido.urgente ? 'Pedido urgente' : 'Normal' }}</strong></p>
                   </div>
 
@@ -581,6 +584,10 @@ onMounted(carregar)
 .detail-button { width: 30px; height: 30px; border: 0; border-radius: 7px; background: #f1f5f9; color: #0d2b5e; cursor: pointer; }
 .gestao-detail-row td { padding: 0; background: #f8fafc; }
 .gestao-detail { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, .8fr); gap: 18px; padding: 20px 22px; }
+.gestao-project-warning { grid-column: 1 / -1; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 12px 15px; border: 1px solid var(--sgl-warning, #d6a31a); border-left: 3px solid var(--sgl-warning, #d6a31a); border-radius: var(--sgl-radius-control, 7px); background: var(--sgl-surface-soft); color: var(--sgl-text); overflow-wrap: anywhere; }
+.gestao-project-warning strong { font-size: 12px; line-height: 1.4; }
+.gestao-project-warning span { font-size: 12px; line-height: 1.55; color: var(--sgl-text); }
+
 .gestao-detail h3 { margin: 0 0 10px; color: #0d2b5e; font-size: 12px; }
 .gestao-detail__item { display: grid; grid-template-columns: minmax(0, 1fr) 150px 200px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #dbe3ec; }
 .requested-form { color: #1a4da1 !important; font-weight: 700; }
