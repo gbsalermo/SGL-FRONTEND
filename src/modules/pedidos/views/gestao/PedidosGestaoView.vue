@@ -39,7 +39,7 @@ const sucessoAcao = ref('')
 const statusOptions: Array<{ label: string; value: StatusPedido | 'TODOS' }> = [
   { label: 'Todos', value: 'TODOS' },
   { label: 'Pendentes', value: 'PENDENTE' },
-  { label: 'Aprovados', value: 'APROVADO' },
+  { label: 'Aprovados · aguardando entrega', value: 'APROVADO' },
   { label: 'Em preparação', value: 'EM_PREPARACAO' },
   { label: 'Rejeitados', value: 'REJEITADO' },
   { label: 'Entregues', value: 'ENTREGUE' },
@@ -517,15 +517,15 @@ onMounted(carregar)
                   <div v-if="pedido.observacao || pedido.motivoUrgencia" class="gestao-detail__note"><h3>Observação / descrição</h3><p>{{ pedido.observacao || pedido.motivoUrgencia }}</p><p v-if="pedido.observacao && pedido.motivoUrgencia && pedido.motivoUrgencia !== pedido.observacao">{{ pedido.motivoUrgencia }}</p></div>
 
                   <section v-if="pedido.status === 'PENDENTE' || pedido.status === 'APROVADO'" class="gestao-actions-panel">
-                    <div class="gestao-actions-panel__heading"><div><h3>Ações do pedido</h3><p>Confira os dados acima antes de alterar o andamento.</p></div><span class="status-chip" :data-status="pedido.status">{{ pedido.status }}</span></div>
+                    <div class="gestao-actions-panel__heading"><div><h3>{{ pedido.status === 'APROVADO' ? 'Entrega pendente de confirmação' : 'Ações do pedido' }}</h3><p>{{ pedido.status === 'APROVADO' ? 'O estoque foi baixado na aprovação, mas o pedido só será concluído após o registro da entrega física.' : 'Confira os dados acima antes de alterar o andamento.' }}</p></div><span class="status-chip" :data-status="pedido.status">{{ pedido.status === 'APROVADO' ? 'AGUARDANDO ENTREGA' : pedido.status }}</span></div>
                     <label v-if="pedido.status === 'PENDENTE'" class="action-observation"><span>Observação da aprovação (opcional)</span><textarea v-model="observacaoAprovacao" rows="2" placeholder="Ex.: aprovado para atendimento parcial..." /></label>
                     <div class="gestao-actions-buttons">
                       <button v-if="pedido.status === 'PENDENTE'" class="action-button action-button--approve" type="button" :disabled="executandoAcao" @click="aprovar(pedido)">Aprovar pedido</button>
                       <button v-if="pedido.status === 'PENDENTE'" class="action-button action-button--reject" type="button" :disabled="executandoAcao" @click="acaoJustificada = 'REJEITAR'; justificativa = ''; erroAcao = ''; sucessoAcao = ''">Rejeitar</button>
-                      <button v-if="pedido.status === 'APROVADO'" class="action-button action-button--deliver" type="button" :disabled="executandoAcao" @click="entregar(pedido)">Registrar entrega</button>
+                      <button v-if="pedido.status === 'APROVADO'" class="action-button action-button--deliver" type="button" :disabled="executandoAcao" @click="entregar(pedido)">Confirmar entrega física</button>
                       <button class="action-button action-button--cancel" type="button" :disabled="executandoAcao" @click="acaoJustificada = 'CANCELAR'; justificativa = ''; erroAcao = ''; sucessoAcao = ''">Cancelar pedido</button>
                     </div>
-                    <div v-if="acaoJustificada" class="justification-box"><label><span>{{ acaoJustificada === 'REJEITAR' ? 'Motivo da rejeição' : 'Motivo do cancelamento' }}</span><textarea v-model="justificativa" rows="3" /></label><div><button type="button" @click="acaoJustificada = null; justificativa = ''">Voltar</button><button class="confirm-danger" type="button" @click="confirmarAcaoJustificada(pedido)">Confirmar {{ acaoJustificada === 'REJEITAR' ? 'rejeição' : 'cancelamento' }}</button></div></div>
+                    <div v-if="acaoJustificada" class="justification-box"><p v-if="acaoJustificada === 'CANCELAR' && pedido.status === 'APROVADO'" role="alert">Atenção: a aprovação já baixou o estoque. Só cancele se o material ainda não foi entregue fisicamente; caso já tenha sido entregue, registre a entrega para manter a rastreabilidade correta.</p><label><span>{{ acaoJustificada === 'REJEITAR' ? 'Motivo da rejeição' : 'Motivo do cancelamento' }}</span><textarea v-model="justificativa" rows="3" /></label><div><button type="button" @click="acaoJustificada = null; justificativa = ''">Voltar</button><button class="confirm-danger" type="button" @click="confirmarAcaoJustificada(pedido)">Confirmar {{ acaoJustificada === 'REJEITAR' ? 'rejeição' : 'cancelamento' }}</button></div></div>
                     <p v-if="erroAcao" class="operation-message operation-message--error">{{ erroAcao }}</p><p v-if="sucessoAcao" class="operation-message operation-message--success">{{ sucessoAcao }}</p>
                   </section>
                 </div>
