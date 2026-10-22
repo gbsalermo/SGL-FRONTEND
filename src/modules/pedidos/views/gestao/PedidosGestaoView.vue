@@ -511,7 +511,9 @@ onMounted(carregar)
                     <p><span>Status</span><strong>{{ pedido.status }}</strong></p>
                     <p v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId"><span>Atividade</span><strong>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</strong></p>
                     <p v-if="pedido.sciOrigemNome || pedido.sciOrigemId"><span>SCI</span><strong>{{ pedido.sciOrigemNome || 'Origem registrada' }}</strong></p>
-                    <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p><p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p><p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p><p><span>Urgência</span><strong>{{ pedido.urgente ? 'Pedido urgente' : 'Normal' }}</strong></p>
+                    <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p>
+                    <p v-if="pedido.projetoSemVinculoDireto" role="alert" class="warning-note">Atenção: o solicitante não possui vínculo direto com este Projeto. O pedido foi permitido por autorização no laboratório. A Gestão deve reconhecer esta condição antes de aprovar.</p>
+                    <p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p><p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p><p><span>Urgência</span><strong>{{ pedido.urgente ? 'Pedido urgente' : 'Normal' }}</strong></p>
                   </div>
 
                   <div v-if="pedido.observacao || pedido.motivoUrgencia" class="gestao-detail__note"><h3>Observação / descrição</h3><p>{{ pedido.observacao || pedido.motivoUrgencia }}</p><p v-if="pedido.observacao && pedido.motivoUrgencia && pedido.motivoUrgencia !== pedido.observacao">{{ pedido.motivoUrgencia }}</p></div>
