@@ -228,16 +228,19 @@ const itensAtencao = computed<ItemAtencao[]>(() => {
 })
 
 const ultimasMovimentacoes = computed<MovimentacaoPainel[]>(() => {
+  const statusPorPedido = new Map(pedidos.value.map(pedido => [pedido.id, pedido.status]))
   const estoque: MovimentacaoPainel[] = movimentacoes.value.map((movimentacao) => {
     const meta = movimentoMeta(movimentacao.tipoMovimentacao)
+    const baixaPedido = movimentacao.tipoMovimentacao === 'SAIDA' && !!movimentacao.pedidoId
+    const entregue = baixaPedido && statusPorPedido.get(movimentacao.pedidoId!) === 'ENTREGUE'
     return {
       id: `estoque-${movimentacao.id}`,
       data: movimentacao.dataMovimentacao,
-      rotulo: movimentacao.tipoMovimentacao === 'SAIDA' && movimentacao.pedidoId
-        ? 'Baixa de estoque na aprovação'
+      rotulo: baixaPedido
+        ? (entregue ? 'Baixa de estoque · pedido entregue' : 'Baixa de estoque na aprovação')
         : `${meta.rotulo} registrada`,
-      detalhe: movimentacao.tipoMovimentacao === 'SAIDA' && movimentacao.pedidoId
-        ? `${descricaoMovimentacao(movimentacao)} · entrega física não confirmada por esta movimentação`
+      detalhe: baixaPedido
+        ? `${descricaoMovimentacao(movimentacao)} · ${entregue ? 'entrega confirmada' : 'a entrega não é confirmada por esta movimentação'}`
         : descricaoMovimentacao(movimentacao),
       classe: meta.classe as ClasseMovimentacaoPainel,
       rota: rotaMovimentacaoEstoque(movimentacao),
