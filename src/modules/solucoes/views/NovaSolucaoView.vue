@@ -216,7 +216,7 @@ onMounted(() => { void carregar() })
         <label v-if="!estagiario" class="field">
           <span>Laboratório de destino <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregando" @change="selecionarLaboratorio">
-            <option value="">{{ laboratorioPermitido.length ? 'Selecione um laboratório autorizado' : 'Nenhum laboratório autorizado disponível' }}</option>
+            <option v-if="!laboratorioPermitido.length" value="" disabled>Nenhum laboratório autorizado disponível</option>
             <option v-for="laboratorio in laboratorioPermitido" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && laboratorio.id === usuario?.laboratorioId ? ' (laboratório-base)' : !gestao ? ' (vínculo adicional)' : '' }}</option>
           </select>
         </label>
