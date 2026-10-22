@@ -83,7 +83,7 @@ const pedidosFiltrados = computed(() => {
     if (fim !== null && dataPedido > fim) return false
     if (!termo) return true
 
-    return [pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.atividadeOrigemNome, pedido.sciOrigemNome, pedido.status, pedido.tipo, pedido.nomeSolucao, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
+    return [pedido.id, pedido.id.slice(0, 8), pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.atividadeOrigemNome, pedido.sciOrigemNome, pedido.status, pedido.tipo, pedido.nomeSolucao, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
       .filter(Boolean).join(' ').toLowerCase().includes(termo)
   })
 
@@ -399,7 +399,7 @@ onMounted(carregar)
 
     <section class="gestao-filter-card" aria-label="Busca, filtros e ordenação">
       <div class="gestao-filter-top">
-        <label class="gestao-search"><span>Buscar</span><input v-model="busca" type="search" placeholder="Produto, solicitante, laboratório, projeto, urgência..." /></label>
+        <label class="gestao-search"><span>Buscar</span><input v-model="busca" type="search" placeholder="Código do pedido, produto, solicitante, laboratório, projeto..." /></label>
         <button class="filter-toggle" type="button" :aria-expanded="filtrosAbertos" @click="filtrosAbertos = !filtrosAbertos"><span>Filtros</span><strong>{{ filtrosAbertos ? '⌃' : '⌄' }}</strong></button>
       </div>
       <div v-if="filtrosAbertos" class="gestao-filter-grid gestao-filter-grid--advanced">
@@ -425,7 +425,7 @@ onMounted(carregar)
         <tbody>
           <template v-for="pedido in pedidosFiltrados" :key="pedido.id">
             <tr :id="`pedido-${pedido.id}`" :class="{ 'pedido-alvo': pedidoAlvo === pedido.id }">
-              <td>{{ dataFormatada(pedido.dataSolicitacao) }}</td>
+              <td>{{ dataFormatada(pedido.dataSolicitacao) }}<small class="gestao-pedido-codigo">Pedido {{ pedido.id.slice(0, 8).toUpperCase() }}</small></td>
               <td><strong>{{ pedido.usuarioNome }}</strong><small>{{ pedido.projetoNome ?? 'Sem projeto' }}</small></td>
               <td><strong>{{ pedido.tipo === 'SOLUCAO' ? (pedido.nomeSolucao || 'Solução personalizada') : produtosResumo(pedido) }}</strong><small><span class="pedido-type-chip" :data-tipo="pedido.tipo ?? 'PRODUTOS'">{{ pedido.tipo === 'SOLUCAO' ? 'Solução' : 'Produtos' }}</span> · {{ pedido.itens.length }} {{ pedido.tipo === 'SOLUCAO' ? (pedido.itens.length === 1 ? 'componente' : 'componentes') : (pedido.itens.length === 1 ? 'item' : 'itens') }}</small></td>
               <td>{{ pedido.laboratorioNome }}</td>
@@ -569,6 +569,7 @@ onMounted(carregar)
 .gestao-table td { padding: 12px 13px; border-bottom: 1px solid #eef2f7; color: #334155; font-size: 12px; vertical-align: middle; }
 .gestao-table td strong { display: block; color: #1e293b; font-size: 12px; }
 .gestao-table td small { display: block; margin-top: 3px; color: #94a3b8; font-size: 10px; }
+.gestao-table td .gestao-pedido-codigo { color: var(--sgl-primary); font-weight: 750; letter-spacing: .025em; }
 .pedido-alvo { position: relative; background: #fff8e8 !important; box-shadow: inset 4px 0 0 #e79a1c; animation: destaque-pedido 900ms ease-out; }
 .gestao-detail-row--alvo td { background: #fffcf4; }
 @keyframes destaque-pedido { from { background: #ffe6a8; } to { background: #fff8e8; } }
