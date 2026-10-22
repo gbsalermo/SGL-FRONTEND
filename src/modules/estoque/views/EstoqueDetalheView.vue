@@ -611,7 +611,7 @@ onMounted(carregar)
             <div v-else class="lot-output-list">
               <article v-for="movimentacao in saidasLote" :key="movimentacao.id">
                 <div><strong>{{ movimentacao.pedidoSolicitanteNome || 'Solicitante não identificado' }}</strong><small>{{ dataHoraFormatada(movimentacao.dataMovimentacao) }}</small></div>
-                <strong>{{ movimentacao.quantidadeMovimentada }} unit.</strong>
+                <strong>{{ quantidadeComMedida(movimentacao.quantidadeMovimentada) }}</strong>
               </article>
             </div>
           </section>
