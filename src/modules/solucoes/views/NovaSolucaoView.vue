@@ -142,8 +142,6 @@ function validar() {
     throw new Error('Nenhum laboratório autorizado. Solicite a vinculação à Gestão.')
   if (!estagiario.value && (!autorizacaoAtualizada.value || !laboratorioPermitido.value.some(l => l.id === laboratorioOperacionalId.value)))
     throw new Error('O laboratório selecionado não está autorizado para este usuário.')
-  if (!estagiario.value && !projetoId.value)
-    throw new Error('Selecione o projeto ao qual a Solução será vinculada.')
   if (origem.value === 'PADRAO') {
     if (!modeloId.value || !modeloSelecionado.value) throw new Error('Selecione um modelo de Solução.')
     if (modeloSelecionado.value.componentes.length === 0) throw new Error('O modelo não possui componentes.')
@@ -178,7 +176,7 @@ async function solicitar() {
       usuarioId: session.usuario!.id,
       ...(estagiario.value
         ? { participacaoId: contextoResolvido.value!.participacaoId }
-        : { laboratorioId: laboratorioOperacionalId.value, projetoId: projetoId.value }),
+        : { laboratorioId: laboratorioOperacionalId.value, projetoId: projetoId.value || null }),
       nomeSolucao: origem.value === 'PERSONALIZADA' ? nomeSolucao.value.trim() : undefined,
       modeloSolucaoId: origem.value === 'PADRAO' ? modeloId.value : undefined,
       urgente: urgente.value,
@@ -228,9 +226,9 @@ onMounted(() => { void carregar() })
           :carregando="carregando"
         />
         <label v-if="!estagiario" class="field">
-          <span>Projeto <small>(obrigatório)</small></span>
-          <select v-model="projetoId" required :disabled="carregando">
-            <option value="">Selecione o Projeto</option>
+          <span>Projeto <small>(opcional)</small></span>
+          <select v-model="projetoId" :disabled="carregando">
+            <option value="">Sem projeto vinculado</option>
             <option v-for="p in projetos" :key="p.id" :value="p.id">{{ p.nome }}</option>
           </select>
         </label>
