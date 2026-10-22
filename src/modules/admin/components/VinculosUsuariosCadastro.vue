@@ -109,7 +109,16 @@ const laboratoriosAssociados = computed(() => {
   for (const v of ativos.value) ids.add(v.laboratorioId)
   return [...ids].map(id => ({ id, nome: labNome(id), base: id === (usuario.value ? baseAtual(usuario.value) : null) }))
 })
-const podeSalvar = computed(() => !!usuario.value?.ativo && !!laboratorioId.value
+const baseRedundante = computed(() => nivel.value === 'LABORATORIO'
+  && !!laboratorioId.value && !!usuario.value
+  && baseAtual(usuario.value) === laboratorioId.value)
+const vinculoGenericoNaBase = computed(() => usuario.value ? ativos.value.some(v =>
+  v.laboratorioId === baseAtual(usuario.value) && !v.projetoId && !v.sciId && !v.atividadeId
+) : false)
+const baseEmVinculoGenerico = computed(() => !!laboratorioBaseId.value && ativos.value.some(v =>
+  v.laboratorioId === laboratorioBaseId.value && !v.projetoId && !v.sciId && !v.atividadeId
+))
+const podeSalvar = computed(() => !baseRedundante.value && !!usuario.value?.ativo && !!laboratorioId.value
   && (nivel.value === 'LABORATORIO' || !!projetoId.value)
   && (nivel.value !== 'SCI' && nivel.value !== 'ATIVIDADE' || !!sciId.value)
   && (nivel.value !== 'ATIVIDADE' || !!atividadeId.value)
@@ -201,6 +210,10 @@ async function salvarBase() {
     sucesso.value = 'Nenhuma alteração no laboratório-base.'
     return
   }
+  if (baseEmVinculoGenerico.value && laboratorioBaseId.value !== baseAtual(usuario.value)) {
+    erro.value = 'Este laboratório já tem um vínculo adicional vigente. Encerre o vínculo genérico antes de torná-lo laboratório-base.'
+    return
+  }
   salvando.value = true
   try {
     await vinculosOperacionaisService.atualizarBase(usuario.value.id, laboratorioBaseId.value || null)
@@ -214,6 +227,10 @@ async function salvarVinculo() {
   if (!usuario.value || !podeSalvar.value) return
   erro.value = ''
   sucesso.value = ''
+  if (baseRedundante.value) {
+    erro.value = 'Este já é o laboratório-base do usuário. Você pode vincular um Projeto, SCI ou Atividade nesse laboratório.'
+    return
+  }
   if (nivel.value === 'LABORATORIO' && ativos.value.some(v => !v.projetoId && !v.sciId
       && !v.atividadeId && v.laboratorioId === laboratorioId.value)) {
     erro.value = 'Este usuário já possui um vínculo vigente com o laboratório selecionado.'
@@ -371,6 +388,10 @@ onMounted(() => { void carregarResumo() })
             <div class="people-section-head"><div><span class="people-section-number">03</span><h3>Participações e vínculos</h3></div>
               <button class="people-primary" type="button" :disabled="!usuario.ativo || salvando" @click="abrirNovoVinculo">+ Adicionar vínculo</button>
             </div>
+            <div v-if="vinculoGenericoNaBase" class="people-pending-message">
+              <strong>Vínculo genérico redundante identificado.</strong>
+              <p>O laboratório-base já autoriza este laboratório. O vínculo genérico pré-existente pode ser encerrado para evitar duplicidade, sem retirar o acesso pelo laboratório-base. Vínculos com Projeto, SCI ou Atividade devem ser mantidos.</p>
+            </div>
             <div class="people-tabs"><button type="button" :class="{active:tab==='ATIVOS'}" @click="tab='ATIVOS'">Vigentes ({{ ativos.length }})</button><button type="button" :class="{active:tab==='HISTORICO'}" @click="tab='HISTORICO'">Histórico ({{ historico.length }})</button></div>
             <div v-if="carregandoDetalhe" class="people-empty-inline">Carregando vínculos...</div>
             <div v-else-if="(tab==='ATIVOS'?ativos:historico).length === 0" class="people-empty-inline">{{ tab==='ATIVOS' ? 'Nenhum vínculo adicional vigente.' : 'Ainda não há registros encerrados.' }}</div>
@@ -393,7 +414,8 @@ onMounted(() => { void carregarResumo() })
         <div class="people-modal-body">
           <div v-if="erro" class="people-feedback people-feedback--error">{{ erro }}</div>
           <label class="people-field"><span>Tipo de vínculo</span><select v-model="nivel" @change="selecionarLaboratorio"><option value="LABORATORIO">Laboratório</option><option value="PROJETO">Projeto</option><option value="SCI">SCI</option><option value="ATIVIDADE">Atividade</option></select></label>
-          <label class="people-field"><span>Laboratório</span><select v-model="laboratorioId" @change="selecionarLaboratorio"><option value="">Selecione o laboratório</option><option v-for="l in laboratoriosValidos" :key="l.id" :value="l.id">{{ l.nome }}</option></select></label>
+          <label class="people-field"><span>Laboratório</span><select v-model="laboratorioId" @change="selecionarLaboratorio"><option value="">Selecione o laboratório</option><option v-for="l in laboratoriosValidos" :key="l.id" :value="l.id" :disabled="nivel === 'LABORATORIO' && l.id === (usuario ? baseAtual(usuario) : null)">{{ l.nome }}{{ nivel === 'LABORATORIO' && usuario && l.id === baseAtual(usuario) ? ' (já é laboratório-base)' : '' }}</option></select></label>
+          <p v-if="baseRedundante" class="people-feedback people-feedback--error">Este laboratório já é a base do usuário. Para ele, cadastre apenas vínculo com Projeto, SCI ou Atividade.</p>
           <label v-if="nivel!=='LABORATORIO'" class="people-field"><span>Projeto</span><select v-model="projetoId" :disabled="!laboratorioId" @change="selecionarProjeto"><option value="">Selecione o projeto</option><option v-for="p in projetosValidos" :key="p.id" :value="p.id">{{ p.nome }}</option></select></label>
           <label v-if="nivel==='SCI'||nivel==='ATIVIDADE'" class="people-field"><span>SCI</span><select v-model="sciId" :disabled="!projetoId" @change="selecionarSci"><option value="">Selecione o SCI</option><option v-for="s in scis" :key="s.id" :value="s.id">{{ s.nome }}</option></select></label>
           <label v-if="nivel==='ATIVIDADE'" class="people-field"><span>Atividade</span><select v-model="atividadeId" :disabled="!sciId"><option value="">Selecione a atividade</option><option v-for="a in atividadesValidas" :key="a.id" :value="a.id">{{ a.nome }}</option></select></label>
