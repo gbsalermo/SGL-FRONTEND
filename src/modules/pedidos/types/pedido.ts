@@ -51,6 +51,7 @@ export interface PedidoResponse {
   projetoOrigemNome?: string | null
   laboratorioOrigemNome?: string | null
   dataSolicitacao: string
+  dataEntrega?: string | null
   status: StatusPedido
   tipo?: 'PRODUTOS' | 'SOLUCAO'
   nomeSolucao?: string | null
