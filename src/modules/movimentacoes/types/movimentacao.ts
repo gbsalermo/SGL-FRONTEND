@@ -12,6 +12,7 @@ export interface MovimentacaoEstoqueResponse {
   usuarioNome: string
   estoqueCentralId: string
   pedidoId: string | null
+  pedidoTipo?: 'PRODUTOS' | 'SOLUCAO' | null
   pedidoSolicitanteNome: string | null
   loteId: string | null
   codigoInternoLote: string | null
