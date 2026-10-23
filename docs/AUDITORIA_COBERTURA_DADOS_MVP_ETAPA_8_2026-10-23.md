@@ -53,3 +53,6 @@
 ## Fechamento controlado
 
 A sincronização **documental de conteúdo** deve ser feita em ambas as branches GitHub; a sincronização **GitHub → GitLab** deve ser conferida por comparação de hashes/Actions, nunca presumida. Sem merge, sem force push e sem modificar `main`.
+
+## Sincronização de branches — evidência observada
+**Evidência disponível de espelhamento (frontend):** workflow `Sync collab branches to GitLab` completou com sucesso em `106eaf691386` (23/10/2026, execução GitHub Actions 40014768909). A execução de commit anterior cancelada não constitui falha do head. Ainda é recomendável confrontar refs locais GitLab/GitHub antes do MR.
