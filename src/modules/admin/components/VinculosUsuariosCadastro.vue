@@ -112,9 +112,13 @@ const laboratoriosAssociados = computed(() => {
 const baseRedundante = computed(() => nivel.value === 'LABORATORIO'
   && !!laboratorioId.value && !!usuario.value
   && baseAtual(usuario.value) === laboratorioId.value)
-const vinculoGenericoNaBase = computed(() => usuario.value ? ativos.value.some(v =>
-  v.laboratorioId === baseAtual(usuario.value) && !v.projetoId && !v.sciId && !v.atividadeId
-) : false)
+const vinculoGenericoNaBase = computed(() => {
+  const selecionado = usuario.value
+  if (!selecionado) return false
+  const baseId = baseAtual(selecionado)
+  return ativos.value.some(v =>
+    v.laboratorioId === baseId && !v.projetoId && !v.sciId && !v.atividadeId)
+})
 const baseEmVinculoGenerico = computed(() => !!laboratorioBaseId.value && ativos.value.some(v =>
   v.laboratorioId === laboratorioBaseId.value && !v.projetoId && !v.sciId && !v.atividadeId
 ))
