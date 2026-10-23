@@ -696,8 +696,12 @@ onBeforeUnmount(() => {
           <span v-show="!recolhida">Meus pedidos</span>
         </router-link>
 
+        <p v-show="!recolhida" class="gestao-nav__group">ADMINISTRAÇÃO</p>
+        <router-link to="/administracao/cadastros/vinculos" title="Gerenciar vínculos de usuários">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="3"/><circle cx="18" cy="7" r="3"/><path d="M2 20v-3a5 5 0 0 1 10 0v3M13 20v-3a5 5 0 0 1 9 0v3M10 12h5"/></svg>
+          <span v-show="!recolhida">Vínculos de usuários</span>
+        </router-link>
         <template v-if="ehAdministrador">
-          <p v-show="!recolhida" class="gestao-nav__group">ADMINISTRAÇÃO</p>
           <router-link to="/administracao/cadastros" title="Cadastros administrativos">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="9" cy="8" r="3" />

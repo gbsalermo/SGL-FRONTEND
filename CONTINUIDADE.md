@@ -1,5 +1,8 @@
 # Continuidade — SGL Frontend
 
+> **Checkpoint vigente — 23/10/2026 (Etapa 8, MVP em DEV):** blocos funcionais Vínculos, Pedidos, Soluções e Resíduos homologados manualmente; Pedido/Solução/Resíduo permitem Projeto opcional para os perfis elegíveis; vínculo específico por Projeto/SCI/Atividade deriva contexto operacional sem criar vínculos formais automaticamente. Backend PostgreSQL/Flyway validou 44 migrations; o frontend compilou e o ArchUnit passou 5/5 regras. Auditorias completas de carga/E2E e eventual identidade institucional permanecem fora deste aceite. **Auditoria de campos e entradas:** `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md` — há dependência de provisionamento externo/seed para Unidade, Usuário e cadastro inicial de Estagiário, embora os cadastros operacionais restantes tenham telas. **Sem merge; não presumir sincronização GitLab confirmada.** Trechos históricos datados abaixo descrevem o estado *àquela época*, não substituem este checkpoint.
+
+
 ## Checkpoint de encerramento funcional — Etapa 7 (16/10/2026)
 
 **Estado:** Etapa 7 (7.0–7.7) concluída funcionalmente e validada pelo responsável; código e documentação preparados na branch `collab/etapa-7-unidades-solucoes-contexto` para merge **a ser realizado pelo responsável**. Não afirmar que o merge, publicação ou homologação integral de produção ocorreram.
@@ -434,18 +437,23 @@ Etapa 8 — Pedidos + Soluções + participação do Estagiário
 Etapa 9 — relatórios consolidados
 Etapa 10 — rótulos + impressão operacional
 Etapa 11 — Manual + delete lógico
-Etapa 12 — testes automatizados frontend
-Etapa 13 — revisão estrutural e legibilidade
+Etapa 12 — arquitetura, carga, E2E e testes automatizados frontend
+Etapa 13 — revisão estrutural e auditoria final integral
 ```
 
-Etapa 12:
+Etapa 12 — validação transversal de arquitetura, carga, E2E e frontend (ampliada em 20/10/2026):
 
-```text
-Vitest + Vue Test Utils
-Cypress
-```
+- **Frontend:** Vitest + Vue Test Utils; Cypress para fluxos E2E; testes de formulário, estados de carregamento/erro, acessibilidade, Light/Dark, mobile e zoom 100%.
+- **Arquitetura:** auditar chamadas duplicadas/recarregamentos integrais, rotas, memória/bundle, integração HTTP, paginação, índices, N+1, consultas críticas e cache.
+- **Backend e banco:** JUnit, integração PostgreSQL/Flyway, tenant, estoque/baixa, concorrência e contratos API; verificar dados persistidos, não apenas mocks.
+- **Carga e desempenho:** baseline, nominal, picos, stress/soak e recuperação com k6 ou equivalente em ambiente isolado; medir p50/p95/p99, timeouts, consumo de memória, pool e queries. Aprovar metas após obter dados reais, sem inventar SLA.
+- **Fluxos ponta a ponta:** Projeto/SCI/Atividade/Estágio → Pedido/Estoque/Solução; Resíduos, relatórios, rótulos, manual, perfis/Unidades e tratamento de falhas.
+- **Estabilidade/implantação:** Flyway sem conflito, health/restart, database/TLS/timeout, arquivos, rotas SPA, revisão publicada correta e ausência de tela branca.
+- **Execução:** suites leves durante desenvolvimento; bateria abrangente antes de homologação; não criar Actions barulhentos/duplicados.
 
-Etapa 13 revisará classes grandes como `Residuo` no backend, Services, DTOs e Controllers, sem alterar comportamento e com reexecução dos testes.
+O plano oficial detalhado pertence ao backend: `docs/ETAPA_12_PLANO_QUALIDADE_ARQUITETURA_CARGA_E2E.md` e `docs/PLANO_PRE_PRODUCAO.md`.
+
+**Etapa 13:** refactor controlado a partir dos achados da 12, seguido de **nova revisão integral de arquitetura, desempenho/carga, UI, fluxos e resiliência**. Entregar dossiê técnico, métricas antes/depois, limitações e parecer go/no-go. Não confundir com autorização institucional de produção.
 
 ---
 
@@ -1032,3 +1040,11 @@ Por decisão do responsável, a **7.6.0 vem antes de 7.6.1/7.7** para alinhar o 
 Após a leitura do contrato original de Estoque §9.9/§9.13 (`Sistema-SGL/docs/CONTINUIDADE_ETAPA_7_2026-10-06.md`), o responsável apontou corretamente que não há motivo para decidir novamente a seleção física: **FEFO/FIFO entre lotes, FECHADOS para apresentações completas, ABERTOS para frações, novas aberturas apenas na falta de saldo apropriado e minimização de recipientes parcialmente abertos em pedidos grandes**. Exemplos já aprovados: 500 mL → 1 FECHADO; 200 mL → ABERTO; 700 mL → 500 FECHADO + 200 ABERTO, sempre no lote de precedência superior.
 
 `docs/ETAPA_7_6_0_AUDITORIA_FRONTEND_PADRAO_VISUAL_PEDIDOS.md` corrigido: apresentação física e quantidade decimal são **formas de informar a solicitação**; não significam criação de nova política física ou promessa automática de recipiente lacrado. O frontend só exibe e transmite a intenção e a unidade; `MovimentacaoEstoqueService` decide recipientes de forma transacional. Próximo trabalho é adequação mínima do request e UI de Pedidos, com regressão de FEFO/FIFO e tema visual SGL. **Sem modificação funcional nesta retificação, sem merge.**
+
+
+## Etapa 8 — Vínculos operacionais de funcionários (21/10/2026, DEV)
+- Contrato de adaptação registrado em `docs/ETAPA_8_IMPLEMENTACAO_VINCULOS_DEV_2026-10-21.md`.
+- Gerenciamento de laboratório-base e vínculos adicionais no módulo Cadastros; Pedido/Solução/Resíduo usam laboratório autorizado e sinalizam projeto sem vínculo direto para aprovação consciente.
+- Supervisão DEV de orientandos limitada ao laboratório autorizado.
+- Login de desenvolvimento mantido; futuro login institucional não implementado e endpoints administrativos DEV/DEMO não são adequados para produção.
+- **Código enviado, compilação/build/Flyway/testes ainda pendentes. Não realizar merge até homologação.**

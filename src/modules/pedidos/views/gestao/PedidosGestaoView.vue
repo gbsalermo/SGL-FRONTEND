@@ -39,7 +39,7 @@ const sucessoAcao = ref('')
 const statusOptions: Array<{ label: string; value: StatusPedido | 'TODOS' }> = [
   { label: 'Todos', value: 'TODOS' },
   { label: 'Pendentes', value: 'PENDENTE' },
-  { label: 'Aprovados', value: 'APROVADO' },
+  { label: 'Aprovados · aguardando entrega', value: 'APROVADO' },
   { label: 'Em preparação', value: 'EM_PREPARACAO' },
   { label: 'Rejeitados', value: 'REJEITADO' },
   { label: 'Entregues', value: 'ENTREGUE' },
@@ -83,7 +83,7 @@ const pedidosFiltrados = computed(() => {
     if (fim !== null && dataPedido > fim) return false
     if (!termo) return true
 
-    return [pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.status, pedido.tipo, pedido.nomeSolucao, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
+    return [pedido.id, pedido.id.slice(0, 8), pedido.usuarioNome, pedido.laboratorioNome, pedido.projetoNome, pedido.atividadeOrigemNome, pedido.sciOrigemNome, pedido.status, pedido.tipo, pedido.nomeSolucao, pedido.urgente ? 'urgente' : 'normal', pedido.observacao, pedido.motivoUrgencia, ...pedido.itens.map((item) => item.produtoNome)]
       .filter(Boolean).join(' ').toLowerCase().includes(termo)
   })
 
@@ -281,6 +281,9 @@ async function aprovar(pedido: PedidoResponse) {
     return
   }
 
+  if (pedido.projetoSemVinculoDireto && !window.confirm(
+    'ATENÇÃO: o solicitante não tem vínculo direto com o projeto informado. Possui autorização para o laboratório, mas o pedido exige sua ciência. Deseja continuar com a aprovação?',
+  )) return
   if (!window.confirm('Confirma a aprovação deste pedido com as quantidades informadas?')) return
   executandoAcao.value = true
   try {
@@ -396,7 +399,7 @@ onMounted(carregar)
 
     <section class="gestao-filter-card" aria-label="Busca, filtros e ordenação">
       <div class="gestao-filter-top">
-        <label class="gestao-search"><span>Buscar</span><input v-model="busca" type="search" placeholder="Produto, solicitante, laboratório, projeto, urgência..." /></label>
+        <label class="gestao-search"><span>Buscar</span><input v-model="busca" type="search" placeholder="Código do pedido, produto, solicitante, laboratório, projeto..." /></label>
         <button class="filter-toggle" type="button" :aria-expanded="filtrosAbertos" @click="filtrosAbertos = !filtrosAbertos"><span>Filtros</span><strong>{{ filtrosAbertos ? '⌃' : '⌄' }}</strong></button>
       </div>
       <div v-if="filtrosAbertos" class="gestao-filter-grid gestao-filter-grid--advanced">
@@ -422,7 +425,7 @@ onMounted(carregar)
         <tbody>
           <template v-for="pedido in pedidosFiltrados" :key="pedido.id">
             <tr :id="`pedido-${pedido.id}`" :class="{ 'pedido-alvo': pedidoAlvo === pedido.id }">
-              <td>{{ dataFormatada(pedido.dataSolicitacao) }}</td>
+              <td>{{ dataFormatada(pedido.dataSolicitacao) }}<small class="gestao-pedido-codigo">Pedido {{ pedido.id.slice(0, 8).toUpperCase() }}</small></td>
               <td><strong>{{ pedido.usuarioNome }}</strong><small>{{ pedido.projetoNome ?? 'Sem projeto' }}</small></td>
               <td><strong>{{ pedido.tipo === 'SOLUCAO' ? (pedido.nomeSolucao || 'Solução personalizada') : produtosResumo(pedido) }}</strong><small><span class="pedido-type-chip" :data-tipo="pedido.tipo ?? 'PRODUTOS'">{{ pedido.tipo === 'SOLUCAO' ? 'Solução' : 'Produtos' }}</span> · {{ pedido.itens.length }} {{ pedido.tipo === 'SOLUCAO' ? (pedido.itens.length === 1 ? 'componente' : 'componentes') : (pedido.itens.length === 1 ? 'item' : 'itens') }}</small></td>
               <td>{{ pedido.laboratorioNome }}</td>
@@ -447,7 +450,12 @@ onMounted(carregar)
                   <div class="gestao-detail__context">
                     <h3>Contexto da solicitação</h3>
                     <p><span>Status</span><strong>{{ pedido.status === 'EM_PREPARACAO' ? 'Em preparação' : pedido.status }}</strong></p>
+                    <p v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId"><span>Atividade</span><strong>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</strong></p>
+                    <p v-if="pedido.sciOrigemNome || pedido.sciOrigemId"><span>SCI</span><strong>{{ pedido.sciOrigemNome || 'Origem registrada' }}</strong></p>
                     <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p>
+                    <p v-if="pedido.projetoSemVinculoDireto" role="alert" class="warning-note">
+                      Atenção: solicitante sem vínculo direto com este projeto. Pedido permitido por vínculo com o laboratório. Verifique antes de aprovar.
+                    </p>
                     <p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p>
                     <p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p>
                     <button class="action-button action-button--deliver gestao-solucao-open" type="button" @click="router.push({ path: '/solucoes', query: { pedido: pedido.id } })">Abrir na Central de Soluções</button>
@@ -500,21 +508,25 @@ onMounted(carregar)
 
                   <div class="gestao-detail__context">
                     <h3>Contexto</h3>
-                    <p><span>Status</span><strong>{{ pedido.status }}</strong></p><p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p><p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p><p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p><p><span>Urgência</span><strong>{{ pedido.urgente ? 'Pedido urgente' : 'Normal' }}</strong></p>
+                    <p><span>Status</span><strong>{{ pedido.status }}</strong></p>
+                    <p v-if="pedido.atividadeOrigemNome || pedido.atividadeOrigemId"><span>Atividade</span><strong>{{ pedido.atividadeOrigemNome || 'Origem registrada' }}</strong></p>
+                    <p v-if="pedido.sciOrigemNome || pedido.sciOrigemId"><span>SCI</span><strong>{{ pedido.sciOrigemNome || 'Origem registrada' }}</strong></p>
+                    <p><span>Projeto</span><strong>{{ pedido.projetoNome ?? 'Sem projeto' }}</strong></p>
+                    <p><span>Laboratório</span><strong>{{ pedido.laboratorioNome }}</strong></p><p><span>Solicitante</span><strong>{{ pedido.usuarioNome }}</strong></p><p><span>Urgência</span><strong>{{ pedido.urgente ? 'Pedido urgente' : 'Normal' }}</strong></p>
                   </div>
 
                   <div v-if="pedido.observacao || pedido.motivoUrgencia" class="gestao-detail__note"><h3>Observação / descrição</h3><p>{{ pedido.observacao || pedido.motivoUrgencia }}</p><p v-if="pedido.observacao && pedido.motivoUrgencia && pedido.motivoUrgencia !== pedido.observacao">{{ pedido.motivoUrgencia }}</p></div>
 
                   <section v-if="pedido.status === 'PENDENTE' || pedido.status === 'APROVADO'" class="gestao-actions-panel">
-                    <div class="gestao-actions-panel__heading"><div><h3>Ações do pedido</h3><p>Confira os dados acima antes de alterar o andamento.</p></div><span class="status-chip" :data-status="pedido.status">{{ pedido.status }}</span></div>
+                    <div class="gestao-actions-panel__heading"><div><h3>{{ pedido.status === 'APROVADO' ? 'Entrega pendente de confirmação' : 'Ações do pedido' }}</h3><p>{{ pedido.status === 'APROVADO' ? 'O estoque foi baixado na aprovação, mas o pedido só será concluído após o registro da entrega física.' : 'Confira os dados acima antes de alterar o andamento.' }}</p></div><span class="status-chip" :data-status="pedido.status">{{ pedido.status === 'APROVADO' ? 'AGUARDANDO ENTREGA' : pedido.status }}</span></div>
                     <label v-if="pedido.status === 'PENDENTE'" class="action-observation"><span>Observação da aprovação (opcional)</span><textarea v-model="observacaoAprovacao" rows="2" placeholder="Ex.: aprovado para atendimento parcial..." /></label>
                     <div class="gestao-actions-buttons">
                       <button v-if="pedido.status === 'PENDENTE'" class="action-button action-button--approve" type="button" :disabled="executandoAcao" @click="aprovar(pedido)">Aprovar pedido</button>
                       <button v-if="pedido.status === 'PENDENTE'" class="action-button action-button--reject" type="button" :disabled="executandoAcao" @click="acaoJustificada = 'REJEITAR'; justificativa = ''; erroAcao = ''; sucessoAcao = ''">Rejeitar</button>
-                      <button v-if="pedido.status === 'APROVADO'" class="action-button action-button--deliver" type="button" :disabled="executandoAcao" @click="entregar(pedido)">Registrar entrega</button>
+                      <button v-if="pedido.status === 'APROVADO'" class="action-button action-button--deliver" type="button" :disabled="executandoAcao" @click="entregar(pedido)">Confirmar entrega física</button>
                       <button class="action-button action-button--cancel" type="button" :disabled="executandoAcao" @click="acaoJustificada = 'CANCELAR'; justificativa = ''; erroAcao = ''; sucessoAcao = ''">Cancelar pedido</button>
                     </div>
-                    <div v-if="acaoJustificada" class="justification-box"><label><span>{{ acaoJustificada === 'REJEITAR' ? 'Motivo da rejeição' : 'Motivo do cancelamento' }}</span><textarea v-model="justificativa" rows="3" /></label><div><button type="button" @click="acaoJustificada = null; justificativa = ''">Voltar</button><button class="confirm-danger" type="button" @click="confirmarAcaoJustificada(pedido)">Confirmar {{ acaoJustificada === 'REJEITAR' ? 'rejeição' : 'cancelamento' }}</button></div></div>
+                    <div v-if="acaoJustificada" class="justification-box"><p v-if="acaoJustificada === 'CANCELAR' && pedido.status === 'APROVADO'" role="alert">Atenção: a aprovação já baixou o estoque. Só cancele se o material ainda não foi entregue fisicamente; caso já tenha sido entregue, registre a entrega para manter a rastreabilidade correta.</p><label><span>{{ acaoJustificada === 'REJEITAR' ? 'Motivo da rejeição' : 'Motivo do cancelamento' }}</span><textarea v-model="justificativa" rows="3" /></label><div><button type="button" @click="acaoJustificada = null; justificativa = ''">Voltar</button><button class="confirm-danger" type="button" @click="confirmarAcaoJustificada(pedido)">Confirmar {{ acaoJustificada === 'REJEITAR' ? 'rejeição' : 'cancelamento' }}</button></div></div>
                     <p v-if="erroAcao" class="operation-message operation-message--error">{{ erroAcao }}</p><p v-if="sucessoAcao" class="operation-message operation-message--success">{{ sucessoAcao }}</p>
                   </section>
                 </div>
@@ -558,6 +570,7 @@ onMounted(carregar)
 .gestao-table td { padding: 12px 13px; border-bottom: 1px solid #eef2f7; color: #334155; font-size: 12px; vertical-align: middle; }
 .gestao-table td strong { display: block; color: #1e293b; font-size: 12px; }
 .gestao-table td small { display: block; margin-top: 3px; color: #94a3b8; font-size: 10px; }
+.gestao-table td .gestao-pedido-codigo { color: var(--sgl-primary); font-weight: 750; letter-spacing: .025em; }
 .pedido-alvo { position: relative; background: #fff8e8 !important; box-shadow: inset 4px 0 0 #e79a1c; animation: destaque-pedido 900ms ease-out; }
 .gestao-detail-row--alvo td { background: #fffcf4; }
 @keyframes destaque-pedido { from { background: #ffe6a8; } to { background: #fff8e8; } }
@@ -567,6 +580,7 @@ onMounted(carregar)
 .detail-button { width: 30px; height: 30px; border: 0; border-radius: 7px; background: #f1f5f9; color: #0d2b5e; cursor: pointer; }
 .gestao-detail-row td { padding: 0; background: #f8fafc; }
 .gestao-detail { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(260px, .8fr); gap: 18px; padding: 20px 22px; }
+
 .gestao-detail h3 { margin: 0 0 10px; color: #0d2b5e; font-size: 12px; }
 .gestao-detail__item { display: grid; grid-template-columns: minmax(0, 1fr) 150px 200px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #dbe3ec; }
 .requested-form { color: #1a4da1 !important; font-weight: 700; }

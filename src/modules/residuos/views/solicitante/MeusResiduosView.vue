@@ -238,7 +238,9 @@ onMounted(carregar)
             <h3>Origem</h3>
             <dl>
               <div><dt>Laboratório</dt><dd>{{ selecionado.laboratorioNome }}</dd></div>
-              <div><dt>Projeto</dt><dd>{{ selecionado.projetoNome ?? 'Sem projeto' }}</dd></div>
+              <div><dt>Projeto</dt><dd>{{ selecionado.projetoOrigemNome || selecionado.projetoNome || 'Sem projeto' }}</dd></div>
+              <div v-if="selecionado.participacaoId || selecionado.atividadeOrigemNome"><dt>Atividade</dt><dd>{{ selecionado.atividadeOrigemNome || 'Origem registrada' }}</dd></div>
+              <div v-if="selecionado.participacaoId || selecionado.sciOrigemNome"><dt>SCI</dt><dd>{{ selecionado.sciOrigemNome || 'Origem registrada' }}</dd></div>
               <div><dt>Procedência / uso</dt><dd>{{ selecionado.processoOrigem }}</dd></div>
               <div><dt>Estado físico</dt><dd>{{ selecionado.estadoFisico ? formatarRisco(selecionado.estadoFisico) : 'Não informado em registro histórico' }}</dd></div>
               <div><dt>Tratamento</dt><dd>{{ selecionado.tratamentoRealizado === null ? 'Não informado em registro histórico' : selecionado.tratamentoRealizado ? 'Sim' : 'Não' }}</dd></div>

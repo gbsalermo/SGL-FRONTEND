@@ -51,6 +51,14 @@ export interface PedidoSolucao {
   laboratorioNome: string
   projetoId: string | null
   projetoNome: string | null
+  projetoSemVinculoDireto?: boolean
+  participacaoId?: string | null
+  atividadeOrigemId?: string | null
+  atividadeOrigemNome?: string | null
+  sciOrigemId?: string | null
+  sciOrigemNome?: string | null
+  projetoOrigemNome?: string | null
+  laboratorioOrigemNome?: string | null
   dataSolicitacao: string
   dataEntrega: string | null
   status: StatusSolucao
@@ -63,8 +71,9 @@ export interface PedidoSolucao {
 export interface SolucaoInput {
   tipo: 'SOLUCAO'
   usuarioId: string
-  laboratorioId: string
-  projetoId: string
+  participacaoId?: string
+  laboratorioId?: string
+  projetoId?: string | null
   nomeSolucao?: string
   modeloSolucaoId?: string
   urgente: boolean

@@ -80,6 +80,7 @@ export interface CriarResiduoRequest {
   usuarioGeradorId: string
   laboratorioId: string
   projetoId: string | null
+  participacaoId?: string | null
   descricao: string
   processoOrigem: string
   estadoFisico: EstadoFisicoResiduo
@@ -150,6 +151,12 @@ export interface ResiduoResponse {
   usuarioGeradorNome: string
   projetoId: string | null
   projetoNome: string | null
+  projetoSemVinculoDireto?: boolean
+  participacaoId?: string | null
+  atividadeOrigemNome?: string | null
+  sciOrigemNome?: string | null
+  projetoOrigemNome?: string | null
+  laboratorioOrigemNome?: string | null
   gestorRecebedorInicialId: string | null
   gestorRecebedorInicialNome: string | null
   descricao: string

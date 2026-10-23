@@ -15,6 +15,17 @@ const route = useRoute()
 const session = useSessionStore()
 
 const movimentacoes = ref<MovimentacaoEstoqueResponse[]>([])
+const unidadesPorEstoque = ref<Record<string, string>>({})
+const rotulosUnidade: Record<string, string> = {
+  ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg', METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
+}
+function medidaMovimentacao(item: MovimentacaoEstoqueResponse): string {
+  const medida = unidadesPorEstoque.value[item.estoqueCentralId]
+  return medida ? (rotulosUnidade[medida] ?? medida) : 'un.'
+}
+function quantidadeComMedida(valor: number, item: MovimentacaoEstoqueResponse): string {
+  return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 6 }).format(valor)} ${medidaMovimentacao(item)}`
+}
 const carregando = ref(true)
 const erro = ref('')
 const busca = ref('')
@@ -76,6 +87,9 @@ const movimentacoesFiltradas = computed(() => {
       item.usuarioNome,
       item.laboratorioNome,
       item.pedidoSolicitanteNome,
+      item.pedidoId,
+      item.pedidoId?.slice(0, 8),
+      rotuloOrigemMovimentacao(item),
       item.observacao,
       rotuloTipo(item.tipoMovimentacao),
       rotuloOrigem(item.origem),
@@ -98,6 +112,15 @@ function rotuloTipo(valor: TipoMovimentacao) {
 
 function rotuloOrigem(valor: OrigemMovimentacao) {
   return origens.find((item) => item.valor === valor)?.rotulo ?? valor
+}
+function solucaoVinculada(item: MovimentacaoEstoqueResponse) {
+  return item.origem === 'PEDIDO' && item.pedidoTipo === 'SOLUCAO'
+}
+function rotuloOrigemMovimentacao(item: MovimentacaoEstoqueResponse) {
+  return solucaoVinculada(item) ? 'Solução' : rotuloOrigem(item.origem)
+}
+function codigoSolicitacao(id: string | null) {
+  return id ? id.slice(0, 8).toUpperCase() : 'Não vinculado'
 }
 
 function classeTipo(valor: TipoMovimentacao) {
@@ -161,6 +184,7 @@ async function carregar() {
     ])
 
     const estoquesPermitidos = new Set(estoquesDaUnidade.map((item) => item.id))
+    unidadesPorEstoque.value = Object.fromEntries(estoquesDaUnidade.map(item => [item.id, item.produtoUnidadeMedida]))
     movimentacoes.value = movimentacoesData.filter((item) => estoquesPermitidos.has(item.estoqueCentralId))
     abrirMovimentacaoDaRota()
   } catch {
@@ -200,7 +224,7 @@ onMounted(carregar)
       <div class="filter-top">
         <label class="search-field">
           <span>Buscar</span>
-          <input v-model="busca" type="search" placeholder="Produto, lote, usuário, laboratório, solicitante..." />
+          <input v-model="busca" type="search" placeholder="Produto, lote, código, usuário, laboratório, solicitante..." />
         </label>
         <button class="filter-toggle" :class="{ active: filtrosAbertos }" type="button" :aria-expanded="filtrosAbertos" title="Filtros avançados" @click="filtrosAbertos = !filtrosAbertos">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6.5 7.2v5.1L10.5 19v-6.8L4 5Z" /></svg>
@@ -246,19 +270,19 @@ onMounted(carregar)
               <td>{{ formatarData(item.dataMovimentacao) }}</td>
               <td><strong>{{ item.produtoNome }}</strong><small v-if="item.laboratorioNome">{{ item.laboratorioNome }}</small></td>
               <td><span :class="classeTipo(item.tipoMovimentacao)">{{ rotuloTipo(item.tipoMovimentacao) }}</span></td>
-              <td><strong class="quantity">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ item.quantidadeMovimentada }}</strong></td>
+              <td><strong class="quantity">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ quantidadeComMedida(item.quantidadeMovimentada, item) }}</strong></td>
               <td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Lote {{ item.numeroLote }}</small></td>
-              <td>{{ rotuloOrigem(item.origem) }}</td>
+              <td>{{ rotuloOrigemMovimentacao(item) }}</td>
               <td>{{ item.usuarioNome }}</td>
-              <td><strong>{{ item.quantidadeAnterior }}</strong> → <strong>{{ item.quantidadeAtual }}</strong></td>
+              <td><strong>{{ quantidadeComMedida(item.quantidadeAnterior, item) }}</strong> → <strong>{{ quantidadeComMedida(item.quantidadeAtual, item) }}</strong></td>
               <td><button class="detail-button" type="button" :aria-label="expandida === item.id ? 'Recolher detalhes' : 'Ver detalhes'" @click.stop="alternarDetalhe(item.id)">{{ expandida === item.id ? '⌃' : '⌄' }}</button></td>
             </tr>
             <tr v-if="expandida === item.id" class="detail-row" :class="{ 'detail-row--alvo': movimentacaoAlvo === item.id }">
               <td colspan="9">
                 <div class="detail-grid">
                   <div><span>Laboratório</span><strong>{{ item.laboratorioNome || 'Não vinculado' }}</strong></div>
-                  <div><span>Solicitante do pedido</span><strong>{{ item.pedidoSolicitanteNome || 'Não vinculado' }}</strong></div>
-                  <div><span>Pedido</span><strong>{{ item.pedidoId || 'Não vinculado' }}</strong></div>
+                  <div><span>{{ solucaoVinculada(item) ? 'Solicitante da solução' : 'Solicitante do pedido' }}</span><strong>{{ item.pedidoSolicitanteNome || 'Não vinculado' }}</strong></div>
+                  <div><span>{{ solucaoVinculada(item) ? 'Solução' : 'Pedido' }}</span><strong :title="item.pedidoId || undefined">{{ codigoSolicitacao(item.pedidoId) }}</strong></div>
                   <div><span>Lote</span><strong>{{ item.codigoInternoLote || item.numeroLote || 'Não vinculado' }}</strong></div>
                   <div class="detail-grid__wide"><span>Observação</span><strong>{{ item.observacao || 'Sem observação registrada.' }}</strong></div>
                 </div>

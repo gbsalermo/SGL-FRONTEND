@@ -4,6 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { pedidoService } from '@/modules/pedidos/services/pedidoService'
+import { http } from '@/services/http'
 import type { ApiErrorResponse, PedidoResponse, StatusPedido } from '@/modules/pedidos/types/pedido'
 import { useSessionStore } from '@/stores/session'
 
@@ -12,6 +13,13 @@ const router = useRouter()
 const session = useSessionStore()
 
 const pedidos = ref<PedidoResponse[]>([])
+const pedidosOrientandos = ref<PedidoResponse[]>([])
+const perfilOrientador = computed(() => session.usuario?.perfil === 'ANALISTA' || session.usuario?.perfil === 'PESQUISADOR')
+const visao = ref<'MEUS' | 'ORIENTANDOS'>(perfilOrientador.value && route.query.visao === 'orientandos' ? 'ORIENTANDOS' : 'MEUS')
+const listaAtual = computed(() => visao.value === 'ORIENTANDOS' ? pedidosOrientandos.value : pedidos.value)
+const orientandosCarregados = ref(false)
+const carregandoOrientandos = ref(false)
+const erroOrientandos = ref('')
 const carregando = ref(false)
 const erro = ref('')
 const busca = ref('')
@@ -24,14 +32,17 @@ const pedidoAlvo = computed(() => typeof route.query.pedido === 'string' ? route
 const pedidosFiltrados = computed(() => {
   const termo = busca.value.trim().toLowerCase()
 
-  return pedidos.value.filter((pedido) => {
+  return listaAtual.value.filter((pedido) => {
     const statusOk = status.value === 'TODOS' || pedido.status === status.value
     if (!statusOk) return false
     if (!termo) return true
 
     return [
+      pedido.usuarioNome,
       pedido.projetoNome,
       pedido.laboratorioNome,
+      pedido.atividadeOrigemNome,
+      pedido.sciOrigemNome,
       pedido.status,
       pedido.urgente ? 'urgente' : null,
       pedido.motivoUrgencia,
@@ -44,9 +55,9 @@ const pedidosFiltrados = computed(() => {
 })
 
 const resumo = computed(() => ({
-  pendentes: pedidos.value.filter((pedido) => pedido.status === 'PENDENTE').length,
-  aprovados: pedidos.value.filter((pedido) => pedido.status === 'APROVADO').length,
-  entregues: pedidos.value.filter((pedido) => pedido.status === 'ENTREGUE').length,
+  pendentes: listaAtual.value.filter((pedido) => pedido.status === 'PENDENTE').length,
+  aprovados: listaAtual.value.filter((pedido) => pedido.status === 'APROVADO').length,
+  entregues: listaAtual.value.filter((pedido) => pedido.status === 'ENTREGUE').length,
 }))
 
 function mensagemErro(error: unknown) {
@@ -58,12 +69,12 @@ function mensagemErro(error: unknown) {
 
 function aplicarStatusDaRota() {
   const valor = typeof route.query.status === 'string' ? route.query.status.toUpperCase() : ''
-  const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
+  const validos: StatusPedido[] = ['PENDENTE', 'APROVADO', 'EM_PREPARACAO', 'REJEITADO', 'ENTREGUE', 'CANCELADO']
   status.value = validos.includes(valor as StatusPedido) ? valor as StatusPedido : 'TODOS'
 }
 
 function abrirPedidoDaRota() {
-  if (!pedidoAlvo.value || pedidos.value.length === 0) return
+  if (visao.value !== 'MEUS' || !pedidoAlvo.value || pedidos.value.length === 0) return
   const pedido = pedidos.value.find((item) => item.id === pedidoAlvo.value)
   if (!pedido) return
 
@@ -82,8 +93,10 @@ async function carregarPedidos() {
 
   try {
     pedidos.value = await pedidoService.listarPorUsuario(usuarioId)
-    aplicarStatusDaRota()
-    abrirPedidoDaRota()
+    if (visao.value === 'MEUS') {
+      aplicarStatusDaRota()
+      abrirPedidoDaRota()
+    }
   } catch (error) {
     erro.value = mensagemErro(error)
   } finally {
@@ -91,11 +104,59 @@ async function carregarPedidos() {
   }
 }
 
+async function carregarOrientandos(forcar = false) {
+  const usuarioId = session.usuario?.id
+  if (!perfilOrientador.value || !usuarioId || (orientandosCarregados.value && !forcar)) return
+  carregandoOrientandos.value = true
+  erroOrientandos.value = ''
+  try {
+    const { data } = await http.get<PedidoResponse[]>(
+      `/v1/pedidos-orientados/orientadores/${usuarioId}`)
+    pedidosOrientandos.value = data
+    orientandosCarregados.value = true
+  } catch (error) {
+    erroOrientandos.value = mensagemErro(error)
+  } finally {
+    carregandoOrientandos.value = false
+  }
+}
+
+function mudarVisao(nova: 'MEUS' | 'ORIENTANDOS') {
+  if (nova === 'ORIENTANDOS' && !perfilOrientador.value) return
+  visao.value = nova
+  busca.value = ''
+  status.value = 'TODOS'
+  pedidoExpandidoId.value = null
+  if (nova === 'ORIENTANDOS') void carregarOrientandos()
+}
+
+function atualizarLista() {
+  if (visao.value === 'ORIENTANDOS') void carregarOrientandos(true)
+  else void carregarPedidos()
+}
+
 function formatarData(valor: string) {
   return new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(valor))
+}
+
+function quantidadeExibida(item: PedidoResponse['itens'][number], aprovada = false) {
+  // A quantidade aprovada é canônica; não reutilizar a embalagem solicitada.
+  if (aprovada) {
+    return `${item.quantidadeAprovada ?? 0} ${item.produtoUnidadeMedida || item.unidadeMedidaSolicitada || 'unidades'}`
+  }
+  if (item.tipoEmbalagemSolicitada && item.quantidadeEmbalagensSolicitada != null) {
+    const nome = item.tipoEmbalagemSolicitada.toLowerCase().replaceAll('_', ' ')
+    const n = item.quantidadeEmbalagensSolicitada
+    const descricao = item.produtoUnidadeArmazenamento?.trim() || ''
+    if (descricao.toLowerCase().startsWith(nome)) {
+      return `${n} ${descricao}`
+    }
+    return `${n} ${nome}${n === 1 ? '' : 's'}${descricao ? ' — ' + descricao : ''}`
+  }
+  return `${item.quantidadeNaUnidadeSolicitada ?? item.quantidadeSolicitada} ${item.unidadeMedidaSolicitada || item.produtoUnidadeMedida || 'unidades'}`
 }
 
 function statusLabel(valor: StatusPedido) {
@@ -138,25 +199,36 @@ watch([() => route.query.status, () => route.query.pedido], () => {
   if (!carregando.value) abrirPedidoDaRota()
 })
 
-onMounted(carregarPedidos)
+onMounted(() => {
+  void carregarPedidos()
+  if (visao.value === 'ORIENTANDOS') void carregarOrientandos()
+})
+watch(() => route.query.visao, valor => {
+  if (perfilOrientador.value) mudarVisao(valor === 'orientandos' ? 'ORIENTANDOS' : 'MEUS')
+})
 </script>
 
 <template>
   <section class="pedidos-page">
     <header class="page-heading">
       <div>
-        <p class="breadcrumb">Pedidos / Meus pedidos</p>
-        <h1>Meus pedidos</h1>
-        <p class="page-subtitle">Acompanhe suas solicitações de materiais e o status de atendimento.</p>
+        <p class="breadcrumb">Pedidos / {{ visao === 'MEUS' ? 'Meus pedidos' : 'Orientandos' }}</p>
+        <h1>{{ visao === 'MEUS' ? 'Meus pedidos' : 'Pedidos dos orientandos' }}</h1>
+        <p class="page-subtitle">{{ visao === 'MEUS' ? 'Acompanhe suas solicitações de materiais e o status de atendimento.' : 'Acompanhe os pedidos dos estagiários sob sua orientação nos laboratórios autorizados. Consulta somente para leitura.' }}</p>
       </div>
 
-      <button class="primary-action" type="button" @click="router.push('/pedidos/novo')">
+      <button v-if="visao === 'MEUS'" class="primary-action" type="button" @click="router.push('/pedidos/novo')">
         <span>+</span>
         Novo pedido
       </button>
     </header>
 
-    <div v-if="criadoAgora" class="success-banner">
+    <div v-if="perfilOrientador" class="orders-view-tabs" role="group" aria-label="Visualização dos pedidos">
+      <button type="button" :class="{ 'orders-view-tab--active': visao === 'MEUS' }" :aria-pressed="visao === 'MEUS'" @click="mudarVisao('MEUS')">Meus pedidos</button>
+      <button type="button" :class="{ 'orders-view-tab--active': visao === 'ORIENTANDOS' }" :aria-pressed="visao === 'ORIENTANDOS'" @click="mudarVisao('ORIENTANDOS')">Pedidos dos orientandos</button>
+      <button class="orders-view-refresh" type="button" :disabled="carregando || carregandoOrientandos" @click="atualizarLista">Atualizar</button>
+    </div>
+    <div v-if="criadoAgora && visao === 'MEUS'" class="success-banner">
       Pedido enviado com sucesso. Ele já aparece na sua lista como pendente.
     </div>
 
@@ -184,7 +256,7 @@ onMounted(carregarPedidos)
           <circle cx="11" cy="11" r="6" />
           <path d="m16 16 4 4" />
         </svg>
-        <input v-model="busca" type="search" placeholder="Buscar por produto, projeto, urgência ou observação..." />
+        <input v-model="busca" type="search"  :placeholder="visao === 'ORIENTANDOS' ? 'Buscar orientando, produto, projeto, atividade ou laboratório...' : 'Buscar por produto, projeto, urgência ou observação...'" />
       </div>
 
       <label class="status-filter">
@@ -193,6 +265,7 @@ onMounted(carregarPedidos)
           <option value="TODOS">Todos</option>
           <option value="PENDENTE">Pendente</option>
           <option value="APROVADO">Aprovado</option>
+          <option value="EM_PREPARACAO">Em preparação</option>
           <option value="REJEITADO">Rejeitado</option>
           <option value="ENTREGUE">Entregue</option>
           <option value="CANCELADO">Cancelado</option>
@@ -201,17 +274,17 @@ onMounted(carregarPedidos)
     </section>
 
     <section class="table-surface">
-      <div v-if="carregando" class="state-box">Carregando seus pedidos...</div>
+      <div v-if="visao === 'ORIENTANDOS' ? carregandoOrientandos : carregando" class="state-box">Carregando {{ visao === 'MEUS' ? 'seus pedidos' : 'pedidos dos orientandos' }}...</div>
 
-      <div v-else-if="erro" class="state-box state-box--error">
+      <div v-else-if="visao === 'ORIENTANDOS' ? erroOrientandos : erro" class="state-box state-box--error">
         <strong>Não foi possível carregar.</strong>
-        <span>{{ erro }}</span>
-        <button type="button" @click="carregarPedidos">Tentar novamente</button>
+        <span>{{ visao === 'ORIENTANDOS' ? erroOrientandos : erro }}</span>
+        <button type="button" @click="atualizarLista">Tentar novamente</button>
       </div>
 
       <div v-else-if="pedidosFiltrados.length === 0" class="state-box">
         <strong>Nenhum pedido encontrado.</strong>
-        <span v-if="pedidos.length === 0">Sua primeira solicitação pode ser criada pelo botão “Novo pedido”.</span>
+        <span v-if="listaAtual.length === 0">{{ visao === 'MEUS' ? 'Sua primeira solicitação pode ser criada pelo botão “Novo pedido”.' : 'Não há pedidos de orientandos disponíveis no seu contexto autorizado.' }}</span>
         <span v-else>Altere a busca ou o filtro de status.</span>
       </div>
 
@@ -220,7 +293,7 @@ onMounted(carregarPedidos)
           <thead>
             <tr>
               <th>Data</th>
-              <th>Produtos</th>
+              <th>{{ visao === 'MEUS' ? 'Produtos' : 'Orientando / Produtos' }}</th>
               <th>Itens</th>
               <th>Status</th>
               <th>Laboratório</th>
@@ -244,6 +317,7 @@ onMounted(carregarPedidos)
 
                 <td class="products-column">
                   <div class="product-summary">
+                    <span v-if="visao === 'ORIENTANDOS'" class="orientando-nome">{{ pedido.usuarioNome || 'Solicitante não identificado' }}</span>
                     <strong v-for="item in produtosVisiveis(pedido)" :key="item.id">
                       {{ item.produtoNome }}
                     </strong>
@@ -292,7 +366,7 @@ onMounted(carregarPedidos)
                     <div class="expanded-heading">
                       <div>
                         <span>Pedido {{ pedido.id.slice(0, 8).toUpperCase() }}</span>
-                        <strong>Detalhes da solicitação</strong>
+                        <strong>Detalhes da solicitação{{ visao === 'ORIENTANDOS' ? ' do orientando' : '' }}</strong>
                       </div>
                       <span class="expanded-date">Solicitado em {{ formatarData(pedido.dataSolicitacao) }}</span>
                     </div>
@@ -311,9 +385,9 @@ onMounted(carregarPedidos)
                               :class="{ 'material-quantity--approved': item.quantidadeAprovada != null }"
                             >
                               <span>{{ item.quantidadeAprovada != null ? 'Aprovado' : 'Solicitado' }}</span>
-                              <strong>{{ item.quantidadeAprovada ?? item.quantidadeSolicitada }}</strong>
+                              <strong>{{ quantidadeExibida(item, item.quantidadeAprovada != null) }}</strong>
                               <small v-if="item.quantidadeAprovada != null">
-                                Solicitado: {{ item.quantidadeSolicitada }}
+                                Solicitado: {{ quantidadeExibida(item) }}
                               </small>
                             </div>
                           </div>
@@ -323,9 +397,18 @@ onMounted(carregarPedidos)
                       <section class="expanded-section">
                         <h3>Informações do pedido</h3>
                         <dl class="info-list">
+                          <div v-if="visao === 'ORIENTANDOS'"><dt>Solicitante</dt><dd>{{ pedido.usuarioNome || 'Não identificado' }}</dd></div>
                           <div>
                             <dt>Status</dt>
                             <dd>{{ statusLabel(pedido.status) }}</dd>
+                          </div>
+                          <div>
+                            <dt>Atividade</dt>
+                            <dd>{{ pedido.atividadeOrigemNome || (pedido.atividadeOrigemId ? 'Atividade vinculada' : 'Não registrada neste pedido') }}</dd>
+                          </div>
+                          <div v-if="pedido.sciOrigemNome || pedido.sciOrigemId">
+                            <dt>SCI</dt>
+                            <dd>{{ pedido.sciOrigemNome || 'Origem registrada' }}</dd>
                           </div>
                           <div>
                             <dt>Projeto</dt>
@@ -359,6 +442,14 @@ onMounted(carregarPedidos)
 
 <style scoped>
 .pedidos-page { width: min(100%, 1260px); margin: 0 auto; }
+.orders-view-tabs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 18px; padding: 6px; border: 1px solid var(--sgl-border); border-radius: var(--sgl-radius-surface); background: var(--sgl-surface); }
+.orders-view-tabs button { min-height: var(--sgl-control-height); padding: 0 15px; border: 1px solid transparent; border-radius: var(--sgl-radius-control); background: transparent; color: var(--sgl-text-muted); font: inherit; font-size: var(--sgl-font-label); font-weight: 650; cursor: pointer; }
+.orders-view-tabs button.orders-view-tab--active { background: var(--sgl-surface-interactive); color: var(--sgl-primary); border-color: var(--sgl-border); }
+.orders-view-tabs button.orders-view-refresh { margin-left: auto; border-color: var(--sgl-border); color: var(--sgl-primary); }
+.orders-view-tabs button:focus-visible { outline: 2px solid var(--sgl-focus); outline-offset: 2px; }
+.orders-view-tabs button:disabled { opacity: .6; cursor: wait; }
+.orientando-nome { color: var(--sgl-primary); font-size: 12px; font-weight: 750; }
+
 .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
 .breadcrumb { margin: 0 0 10px; color: var(--sgl-text-muted); font-size: 13px; }
 .page-heading h1 { margin: 0; font-size: clamp(28px, 3vw, 38px); line-height: 1.1; letter-spacing: -0.035em; }
@@ -467,6 +558,13 @@ th { color: #35415a; background: #fbfcfe; font-size: 11px; text-transform: upper
 .material-item:last-child { padding-bottom: 0; }
 .material-item > div:first-child { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
 .material-item > div:first-child strong { color: var(--sgl-text); font-size: 12px; }
+.material-item { min-width: 0; }
+.material-item > div:first-child { flex: 1 1 auto; overflow-wrap: anywhere; word-break: normal; }
+.material-item > div:first-child strong,
+.material-item > div:first-child span { display: block; max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+.material-quantity { min-width: 0; max-width: 52%; }
+.material-quantity strong { overflow-wrap: anywhere; }
+
 .material-item > div:first-child span { color: var(--sgl-text-muted); font-size: 10px; }
 .material-quantity { flex: 0 0 auto; display: grid; grid-template-columns: auto auto; align-items: baseline; justify-content: end; gap: 2px 8px; text-align: right; }
 .material-quantity span { color: var(--sgl-text-muted); font-size: 9px; text-transform: uppercase; }

@@ -2,7 +2,16 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
+import SeletorParticipacaoOperacional from '@/modules/operacao/components/SeletorParticipacaoOperacional.vue'
+import { contextoOperacionalService } from '@/modules/operacao/services/contextoOperacionalService'
+import {
+  prepararSelecaoContextoEstagiario,
+  resolverContextoEstagiario,
+  type ContextoParticipacaoOperacional,
+} from '@/modules/operacao/types/contextoOperacional'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
+import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
+import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
 
 import { solucaoService } from '../services/solucaoService'
 import {
@@ -28,11 +37,31 @@ const modelos = ref<ModeloSolucao[]>([])
 const projetos = ref<ProjetoSolucao[]>([])
 const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
+const vinculosAdicionais = ref<VinculoOperacional[]>([])
+const autorizacaoAtualizada = ref(false)
+const laboratorioPermitido = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
+  l.id === session.usuario?.laboratorioId || vinculosAdicionais.value.some(v =>
+    v.laboratorioId === l.id && !v.encerrado && v.dataInicio <= new Date().toLocaleDateString('en-CA')
+    && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA')))))
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
-const laboratorioOperacionalId = computed(() => gestao.value ? laboratorioSelecionadoId.value : session.usuario?.laboratorioId || '')
+const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
+const contextos = ref<ContextoParticipacaoOperacional[]>([])
+const participacaoSelecionadaId = ref('')
+const opcoesContexto = computed(() => prepararSelecaoContextoEstagiario(contextos.value, session.usuario?.unidadeId || ''))
+const contextoResolvido = computed(() => resolverContextoEstagiario(
+  opcoesContexto.value, participacaoSelecionadaId.value, session.usuario?.unidadeId || '',
+))
+const participacaoSelecionada = computed(() => opcoesContexto.value.contextosElegiveis
+  .find(x => x.participacaoId === participacaoSelecionadaId.value))
+const laboratorioOperacionalId = computed(() => estagiario.value
+  ? contextoResolvido.value?.laboratorioId || ''
+  : laboratorioSelecionadoId.value)
 const laboratorioOperacional = computed(() => laboratorios.value.find(l => l.id === laboratorioOperacionalId.value))
 const produtos = ref<UnidadeProduto[]>([])
 const projetoId = ref('')
+const projetoSemVinculoDireto = computed(() =>
+  !estagiario.value && !gestao.value && autorizacaoAtualizada.value && !!projetoId.value
+  && !possuiVinculoVigenteComProjeto(vinculosAdicionais.value, projetoId.value))
 const modeloId = ref('')
 const nomeSolucao = ref('')
 const observacao = ref('')
@@ -63,13 +92,35 @@ async function carregar() {
   try {
     const laboratorio = laboratorioOperacionalId.value
     const unidade = session.usuario?.unidadeId
-    if (!unidade || (!gestao.value && !laboratorio)) throw new Error('Unidade e laboratório operacional são necessários.')
-    if (gestao.value) laboratorios.value = await listarLaboratoriosOperacionais(unidade)
-    const [catalogo, projetosData, produtosData] = await Promise.all([
+    if (!unidade) throw new Error('Unidade operacional obrigatória.')
+    if (!estagiario.value) {
+      autorizacaoAtualizada.value = false
+      const usuarioAtualizado = await session.atualizarUsuarioAtual()
+      if (usuarioAtualizado.unidadeId !== unidade) {
+        throw new Error('A unidade de vínculo foi alterada. Atualize a página para continuar.')
+      }
+      laboratorios.value = await listarLaboratoriosOperacionais(unidade)
+      if (!gestao.value && session.usuario?.id) {
+        vinculosAdicionais.value = await vinculosOperacionaisService.listar(session.usuario.id)
+      }
+      autorizacaoAtualizada.value = true
+      laboratorioSelecionadoId.value = laboratorioPermitido.value.some(l => l.id === laboratorio)
+        ? laboratorio : laboratorioPermitido.value[0]?.id || ''
+    }
+    const [catalogo, projetosData, produtosData, contextosData] = await Promise.all([
       solucaoService.listarModelos(true),
-      laboratorio ? solucaoService.listarProjetosPorLaboratorio(laboratorio) : Promise.resolve([] as ProjetoSolucao[]),
+      !estagiario.value && laboratorioOperacionalId.value
+        ? solucaoService.listarProjetosPorLaboratorio(laboratorioOperacionalId.value)
+        : Promise.resolve([] as ProjetoSolucao[]),
       solucaoService.listarProdutos(unidade),
+      estagiario.value && session.usuario?.id
+        ? contextoOperacionalService.listarParticipacoesEstagiario(session.usuario.id)
+        : Promise.resolve([] as ContextoParticipacaoOperacional[]),
     ])
+    contextos.value = contextosData
+    participacaoSelecionadaId.value = estagiario.value
+      ? prepararSelecaoContextoEstagiario(contextosData, unidade).participacaoSugeridaId || ''
+      : ''
     modelos.value = catalogo
     projetos.value = projetosData
     produtos.value = produtosData
@@ -84,8 +135,13 @@ async function selecionarLaboratorio() {
   catch (e) { erro.value = erroSolucao(e) }
 }
 function validar() {
-  if (!session.usuario?.id || !laboratorioOperacionalId.value) throw new Error('Selecione o laboratório de destino.')
-  if (!projetoId.value) throw new Error('Selecione o projeto ao qual a Solução será vinculada.')
+  if (!session.usuario?.id) throw new Error('Não foi possível identificar o solicitante.')
+  if (estagiario.value && !contextoResolvido.value)
+    throw new Error('Selecione uma participação elegível para solicitar a Solução.')
+  if (!laboratorioOperacionalId.value)
+    throw new Error('Nenhum laboratório autorizado. Solicite a vinculação à Gestão.')
+  if (!estagiario.value && (!autorizacaoAtualizada.value || !laboratorioPermitido.value.some(l => l.id === laboratorioOperacionalId.value)))
+    throw new Error('O laboratório selecionado não está autorizado para este usuário.')
   if (origem.value === 'PADRAO') {
     if (!modeloId.value || !modeloSelecionado.value) throw new Error('Selecione um modelo de Solução.')
     if (modeloSelecionado.value.componentes.length === 0) throw new Error('O modelo não possui componentes.')
@@ -118,8 +174,9 @@ async function solicitar() {
     await solucaoService.solicitar({
       tipo: 'SOLUCAO',
       usuarioId: session.usuario!.id,
-      laboratorioId: laboratorioOperacionalId.value,
-      projetoId: projetoId.value,
+      ...(estagiario.value
+        ? { participacaoId: contextoResolvido.value!.participacaoId }
+        : { laboratorioId: laboratorioOperacionalId.value, projetoId: projetoId.value || null }),
       nomeSolucao: origem.value === 'PERSONALIZADA' ? nomeSolucao.value.trim() : undefined,
       modeloSolucaoId: origem.value === 'PADRAO' ? modeloId.value : undefined,
       urgente: urgente.value,
@@ -148,26 +205,36 @@ onMounted(() => { void carregar() })
 
     <div class="context-grid">
       <article><span>Solicitante</span><strong>{{ usuario?.nome }}</strong><small>{{ usuario?.email }}</small></article>
-      <article><span>Laboratório de destino</span><strong>{{ laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : usuario?.laboratorioNome || 'Não vinculado') }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
+      <article><span>Laboratório de destino</span><strong>{{ estagiario ? (participacaoSelecionada?.laboratorioNome || 'Selecione uma participação abaixo') : (laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : 'Não vinculado')) }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
     </div>
 
     <form class="request-surface" @submit.prevent="solicitar">
       <section class="form-section">
         <div class="section-title"><div><span>1</span><div><h2>Contexto da solicitação</h2><p>Vincule o pedido ao Projeto responsável pela utilização.</p></div></div></div>
-        <label v-if="gestao" class="field">
+        <label v-if="!estagiario" class="field">
           <span>Laboratório de destino <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregando" @change="selecionarLaboratorio">
-            <option value="">Selecione um laboratório ativo da Unidade</option>
-            <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+            <option v-if="!laboratorioPermitido.length" value="" disabled>Nenhum laboratório autorizado disponível</option>
+            <option v-for="laboratorio in laboratorioPermitido" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && laboratorio.id === usuario?.laboratorioId ? ' (laboratório-base)' : !gestao ? ' (vínculo adicional)' : '' }}</option>
           </select>
         </label>
-        <label class="field">
-          <span>Projeto <small>(obrigatório)</small></span>
-          <select v-model="projetoId" required :disabled="carregando">
-            <option value="">Selecione o Projeto</option>
+        <p v-if="!estagiario && !carregando && autorizacaoAtualizada && laboratorioPermitido.length === 0" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório-base ou vínculo operacional vigente antes de solicitar soluções.</p>
+        <SeletorParticipacaoOperacional
+          v-if="estagiario"
+          v-model="participacaoSelecionadaId"
+          :opcoes="opcoesContexto"
+          :carregando="carregando"
+        />
+        <label v-if="!estagiario" class="field">
+          <span>Projeto <small>(opcional)</small></span>
+          <select v-model="projetoId" :disabled="carregando">
+            <option value="">Sem projeto vinculado</option>
             <option v-for="p in projetos" :key="p.id" :value="p.id">{{ p.nome }}</option>
           </select>
         </label>
+        <p v-if="projetoSemVinculoDireto" role="note" class="warning-note">
+          Você não possui vínculo direto com este projeto. A Gestão será informada ao analisar o pedido.
+        </p>
         <div class="urgency-field">
           <div><span class="field-label">Urgência <small>(opcional)</small></span><p>A marcação apenas informa a gestão e não altera automaticamente a prioridade.</p></div>
           <button type="button" class="urgency-toggle" :class="{ 'urgency-toggle--active': urgente }" :aria-pressed="urgente" @click="urgente = !urgente">
@@ -241,7 +308,7 @@ onMounted(() => { void carregar() })
       <div v-if="erro" class="error-banner" role="alert">{{ erro }}</div>
       <footer class="form-footer">
         <p>O pedido ficará pendente até a análise da gestão.<span class="urgent-footer-note">A preparação deverá seguir a cartilha registrada no pedido.</span></p>
-        <button class="primary-action" type="submit" :disabled="enviando || carregando">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
+        <button class="primary-action" type="submit" :disabled="enviando || carregando || (!estagiario && (!autorizacaoAtualizada || !laboratorioPermitido.length)) || (estagiario && !contextoResolvido)">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
       </footer>
     </form>
   </section>
@@ -262,6 +329,7 @@ onMounted(() => { void carregar() })
 .context-grid span { margin-bottom: 5px; font-size: 12px; font-weight: 800; text-transform: uppercase; }
 .context-grid strong { display: block; font-size: 14px; }
 .context-grid small { margin-top: 3px; font-size: 11px; }
+.no-laboratory-notice { padding: 12px 14px; border: 1px solid var(--sgl-warning); border-radius: var(--sgl-radius-control); background: color-mix(in srgb, var(--sgl-warning) 9%, var(--sgl-surface)); color: var(--sgl-text); font-size: 13px; line-height: 1.5; }
 .request-surface { overflow: hidden; border: 1px solid var(--sgl-border); border-radius: 8px; background: var(--sgl-surface); box-shadow:none; }
 .form-section { padding: 22px; border-bottom: 1px solid var(--sgl-border); }
 .section-title { margin-bottom: 18px; }

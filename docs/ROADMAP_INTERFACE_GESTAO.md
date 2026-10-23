@@ -1,5 +1,8 @@
 # Roadmap Formal — SGL Frontend
 
+> **Checkpoint 23/10/2026:** o plano abaixo preserva decisões históricas. O estado funcional atual da Etapa 8 e a matriz de entrada de dados estão em `CONTINUIDADE.md` e `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md`. Usuários, Unidades e Estagiários novos dependem do fluxo de provisionamento institucional/seed, não de um CRUD manual completo.
+
+
 **Atualizado em:** 01/10/2026  
 **Estado do produto:** primeiro protótipo funcional aprovado.  
 **Uso deste documento:** sequência formal a ser retomada **depois** do bloco atual de ajustes de pré-produção.

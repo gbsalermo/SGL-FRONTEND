@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { computed, nextTick, onMounted, ref } from 'vue'
+import { contextoOperacionalService } from '@/modules/operacao/services/contextoOperacionalService'
+import { prepararSelecaoContextoEstagiario, type ContextoParticipacaoOperacional } from '@/modules/operacao/types/contextoOperacional'
 
 import { residuoService } from '@/modules/residuos/services/residuoService'
 import type {
@@ -19,6 +21,8 @@ import type {
 } from '@/modules/residuos/types/residuo'
 import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
+import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
+import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
 
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
 type ModoPreenchimento = 'MANUAL' | 'MODELO'
@@ -89,8 +93,20 @@ const session = useSessionStore()
 const projetos = ref<ProjetoResiduoResponse[]>([])
 const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
+const vinculosAdicionais = ref<VinculoOperacional[]>([])
+const autorizacaoAtualizada = ref(false)
+const laboratoriosPermitidos = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
+  l.id === session.usuario?.laboratorioId || vinculosAdicionais.value.some(v =>
+    v.laboratorioId === l.id && !v.encerrado && v.dataInicio <= new Date().toLocaleDateString('en-CA')
+    && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA')))))
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
-const laboratorioOperacionalId = computed(() => gestao.value ? laboratorioSelecionadoId.value : session.usuario?.laboratorioId || '')
+const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
+const participacoes = ref<ContextoParticipacaoOperacional[]>([])
+const participacaoSelecionadaId = ref('')
+const participacaoSelecionada = computed(() => participacoes.value.find(p => p.participacaoId === participacaoSelecionadaId.value))
+const laboratorioOperacionalId = computed(() => estagiario.value
+  ? participacaoSelecionada.value?.laboratorioId || ''
+  : laboratorioSelecionadoId.value)
 const laboratorioOperacional = computed(() => laboratorios.value.find(l => l.id === laboratorioOperacionalId.value))
 const produtos = ref<ProdutoResiduoResponse[]>([])
 const classesResiduo = ref<ClasseResiduoResponse[]>([])
@@ -98,6 +114,9 @@ const modelosResiduo = ref<ModeloResiduoResponse[]>([])
 const modoPreenchimento = ref<ModoPreenchimento>('MANUAL')
 const modeloResiduoId = ref('')
 const projetoId = ref('')
+const projetoSemVinculoDireto = computed(() =>
+  !estagiario.value && !gestao.value && autorizacaoAtualizada.value && !!projetoId.value
+  && !possuiVinculoVigenteComProjeto(vinculosAdicionais.value, projetoId.value))
 const descricao = ref('')
 const processoOrigem = ref('')
 const estadoFisico = ref<EstadoFisicoResiduo>('LIQUIDO')
@@ -166,20 +185,45 @@ function mensagemErro(error: unknown) {
 }
 
 async function carregarDados() {
-  const laboratorioId = laboratorioOperacionalId.value
-  if (!usuario.value?.unidadeId || (!gestao.value && !laboratorioId)) {
-    erro.value = 'Unidade e laboratório operacional são necessários para informar resíduos.'
+  if (!usuario.value?.unidadeId || !usuario.value?.id) {
+    erro.value = 'Unidade e usuário são necessários para informar resíduos.'
     return
   }
-
   carregandoDados.value = true
   erro.value = ''
   avisoDados.value = ''
-
-  if (gestao.value) {
-    try { laboratorios.value = await listarLaboratoriosOperacionais(usuario.value.unidadeId!) }
-    catch(e) { erro.value = mensagemErro(e); carregandoDados.value = false; return }
+  if (estagiario.value) {
+    try {
+      const registros = await contextoOperacionalService.listarParticipacoesEstagiario(usuario.value.id)
+      const selecao = prepararSelecaoContextoEstagiario(registros, usuario.value.unidadeId)
+      participacoes.value = selecao.contextosElegiveis
+      participacaoSelecionadaId.value = selecao.participacaoSugeridaId || ''
+      projetoId.value = participacaoSelecionada.value?.projetoId || ''
+      if (!participacoes.value.length) {
+        avisoDados.value = 'Nenhuma participação elegível. Não é possível informar resíduos até que haja uma atividade ativa.'
+      }
+    } catch (error) {
+      erro.value = mensagemErro(error)
+      carregandoDados.value = false
+      return
+    }
   }
+  if (!estagiario.value) {
+    try {
+      autorizacaoAtualizada.value = false
+      const usuarioAtualizado = await session.atualizarUsuarioAtual()
+      if (usuarioAtualizado.unidadeId !== usuario.value.unidadeId) throw new Error('A unidade foi alterada. Atualize a página.')
+      laboratorios.value = await listarLaboratoriosOperacionais(usuarioAtualizado.unidadeId!)
+      if (!gestao.value) {
+        vinculosAdicionais.value = await vinculosOperacionaisService.listar(usuarioAtualizado.id)
+      }
+      autorizacaoAtualizada.value = true
+      const laboratorioBase = usuarioAtualizado.laboratorioId || ''
+      laboratorioSelecionadoId.value = laboratoriosPermitidos.value.some(l => l.id === laboratorioBase)
+        ? laboratorioBase : laboratoriosPermitidos.value[0]?.id || ''
+    } catch(e) { erro.value = mensagemErro(e); carregandoDados.value = false; return }
+  }
+  const laboratorioId = laboratorioOperacionalId.value
   const [projetosResult, produtosResult, classesResult, modelosResult] = await Promise.allSettled([
     laboratorioId ? residuoService.listarProjetosPorLaboratorio(laboratorioId) : Promise.resolve([] as ProjetoResiduoResponse[]),
     residuoService.listarProdutosAtivos(),
@@ -365,12 +409,25 @@ async function selecionarLaboratorio() {
   catch(e) { erro.value = mensagemErro(e) }
 }
 
+function selecionarParticipacao() {
+  // Projeto e laboratório nunca vêm de seleção livre para estagiários.
+  projetoId.value = participacaoSelecionada.value?.projetoId || ''
+  errosFormulario.value = {}
+}
+
 function validarFormulario() {
   if (!usuario.value?.id || !laboratorioOperacionalId.value) {
-    throw new Error('Sessão sem usuário ou laboratório válido.')
+    throw new Error('Nenhum laboratório autorizado para informar resíduos. Solicite a vinculação à Gestão.')
+  }
+
+  if (!estagiario.value && (!autorizacaoAtualizada.value || !laboratoriosPermitidos.value.some(l => l.id === laboratorioOperacionalId.value))) {
+    throw new Error('O laboratório selecionado não está autorizado para este usuário.')
   }
 
   const erros: Record<string, string> = {}
+  if (estagiario.value && !participacaoSelecionada.value?.elegivel) {
+    erros.participacao = 'Selecione uma participação ativa e elegível.'
+  }
 
   if (nivelRiscoInformado.value !== 'NENHUM' && riscosInformados.value.length === 0) {
     erros.riscos = 'Selecione pelo menos um risco percebido ou marque o nível como Nenhum.'
@@ -409,6 +466,7 @@ function montarPayload(): CriarResiduoRequest {
     usuarioGeradorId: usuario.value!.id,
     laboratorioId: laboratorioOperacionalId.value,
     projetoId: projetoId.value || null,
+    ...(estagiario.value ? { participacaoId: participacaoSelecionadaId.value } : {}),
     descricao: descricao.value.trim(),
     processoOrigem: processoOrigem.value.trim(),
     estadoFisico: estadoFisico.value,
@@ -452,7 +510,7 @@ async function enviarResiduo() {
 function limparFormulario() {
   modoPreenchimento.value = 'MANUAL'
   modeloResiduoId.value = ''
-  projetoId.value = ''
+  projetoId.value = estagiario.value ? participacaoSelecionada.value?.projetoId || '' : ''
   descricao.value = ''
   processoOrigem.value = ''
   estadoFisico.value = 'LIQUIDO'
@@ -500,7 +558,7 @@ onMounted(carregarDados)
       </article>
       <article>
         <span>Laboratório de origem</span>
-        <strong>{{ laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : usuario?.laboratorioNome || 'Não vinculado') }}</strong>
+        <strong>{{ estagiario ? (participacaoSelecionada?.laboratorioNome || 'Selecione uma participação') : laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : 'Não vinculado') }}</strong>
         <small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small>
       </article>
     </div>
@@ -576,22 +634,38 @@ onMounted(carregarDados)
           <span>1</span>
           <div>
             <h2>Origem do resíduo</h2>
-            <p>Explique o que foi gerado e em qual processo. O projeto é opcional.</p>
+            <p>Explique o que foi gerado e em qual processo. {{ estagiario ? 'Selecione a participação que originou o resíduo.' : 'O projeto é opcional.' }}</p>
           </div>
         </div>
 
-        <label v-if="gestao" class="field">
+        <label v-if="!estagiario" class="field">
           <span>Laboratório de origem <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
-            <option value="">Selecione um laboratório ativo da Unidade</option>
-            <option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+            <option v-if="!laboratoriosPermitidos.length" value="" disabled>Nenhum laboratório autorizado disponível</option>
+            <option v-for="laboratorio in laboratoriosPermitidos" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && laboratorio.id === usuario?.laboratorioId ? ' (laboratório-base)' : !gestao ? ' (vínculo adicional)' : '' }}</option>
           </select>
+        </label>
+
+        <p v-if="!estagiario && !carregandoDados && autorizacaoAtualizada && !laboratoriosPermitidos.length" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório-base ou vínculo operacional vigente antes de informar resíduos.</p>
+
+        <label v-if="estagiario" class="field">
+          <span>Participação / Atividade <small>(obrigatório)</small></span>
+          <select v-model="participacaoSelecionadaId" required :disabled="carregandoDados || enviando" :data-form-error="Boolean(errosFormulario.participacao)" @change="selecionarParticipacao">
+            <option value="">Selecione uma participação elegível</option>
+            <option v-for="participacao in participacoes" :key="participacao.participacaoId" :value="participacao.participacaoId">
+              {{ participacao.atividadeNome || participacao.atividadeCodigoSeg }} — {{ participacao.projetoNome }} / {{ participacao.laboratorioNome }}
+            </option>
+          </select>
+          <small v-if="errosFormulario.participacao">{{ errosFormulario.participacao }}</small>
+          <small v-if="participacaoSelecionada">SCI: {{ participacaoSelecionada.sciNome || 'Não informado' }} · Projeto: {{ participacaoSelecionada.projetoNome }} · Laboratório: {{ participacaoSelecionada.laboratorioNome }}</small>
+          <small v-if="!carregandoDados && !participacoes.length">Não existem participações elegíveis para informar resíduos.</small>
         </label>
 
         <div class="form-grid form-grid--two">
           <label class="field">
-            <span>Projeto <small>(opcional)</small></span>
-            <select v-model="projetoId" :disabled="carregandoDados">
+            <span>Projeto <small>{{ estagiario ? '(derivado da atividade)' : '(opcional)' }}</small></span>
+            <input v-if="estagiario" :value="participacaoSelecionada?.projetoNome || 'Selecione uma participação'" readonly />
+            <select v-else v-model="projetoId" :disabled="carregandoDados">
               <option value="">Sem projeto vinculado</option>
               <option v-for="projeto in projetos" :key="projeto.id" :value="projeto.id">{{ projeto.nome }}</option>
             </select>
@@ -602,6 +676,8 @@ onMounted(carregarDados)
             <input v-model="descricao" required placeholder="Ex.: Mistura residual da extração de DNA" />
           </label>
         </div>
+
+        <p v-if="projetoSemVinculoDireto" role="note" class="project-link-notice">Você não possui vínculo direto com este projeto. O registro é permitido pelo vínculo com o laboratório de origem.</p>
 
         <label class="field">
           <span>Procedência / uso do Resíduo</span>
@@ -841,7 +917,7 @@ onMounted(carregarDados)
           <strong>Ao enviar</strong>
           <span>o resíduo entra como INFORMADO e aguarda o recebimento físico pela Gestão.</span>
         </div>
-        <button class="submit-action" type="submit" :disabled="enviando || carregandoDados">
+        <button class="submit-action" type="submit" :disabled="enviando || carregandoDados || (!estagiario && (!autorizacaoAtualizada || !laboratoriosPermitidos.length)) || (estagiario && !participacaoSelecionada?.elegivel)">
           {{ enviando ? 'Enviando...' : 'Informar resíduo' }}
         </button>
       </footer>
@@ -937,6 +1013,8 @@ onMounted(carregarDados)
 .notice { margin: 20px 32px 0; padding: 14px 16px; border-radius: 7px; font-size: 11.5px; line-height: 1.5; }
 .notice--error { border: 1px solid #f1b7b3; background: #fff3f2; color: #9f2018; }
 .notice--warning { border: 1px solid #ead8a6; background: #fffaf0; color: #7a5b12; }
+.project-link-notice { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--sgl-warning); border-radius: var(--sgl-radius-control); background: color-mix(in srgb, var(--sgl-warning) 9%, var(--sgl-surface)); color: var(--sgl-text); font-size: 13px; line-height: 1.5; }
+.no-laboratory-notice { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--sgl-warning); border-radius: var(--sgl-radius-control); background: color-mix(in srgb, var(--sgl-warning) 9%, var(--sgl-surface)); color: var(--sgl-text); font-size: 13px; line-height: 1.5; }
 .notice--model { border: 1px solid #b9d5ef; background: #f3f8ff; color: #28568f; }
 .form-footer { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 24px 32px; background: #f8fafc; }
 .form-footer > div { min-width: 0; display: flex; flex-direction: column; gap: 4px; }

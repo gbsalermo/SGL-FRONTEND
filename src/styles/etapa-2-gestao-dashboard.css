@@ -315,6 +315,23 @@ body.sgl-dark-active .gestao-main .dashboard-page .timeline-status--devolucao {
   background: #163629 !important;
   color: #72dba8 !important;
 }
+/* Eventos de resíduos usam a mesma superfície escura das demais etiquetas. */
+body.sgl-dark-active .gestao-main .dashboard-page .timeline-status--residuo {
+  border: 1px solid #594183 !important;
+  background: #2d2146 !important;
+  color: #ceb9ff !important;
+}
+body.sgl-dark-active .gestao-main .dashboard-page .timeline-status--retorno {
+  border: 1px solid #765d2a !important;
+  background: #352b17 !important;
+  color: #f2c45f !important;
+}
+body.sgl-dark-active .gestao-main .dashboard-page .timeline-status--cancelamento {
+  border: 1px solid #713845 !important;
+  background: #3a1d29 !important;
+  color: #ff8996 !important;
+}
+
 body.sgl-dark-active .gestao-main .dashboard-page .timeline-status--descarte {
   border: 1px solid #765d2a !important;
   background: #352b17 !important;

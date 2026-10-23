@@ -48,7 +48,7 @@ const indicadores: Array<{status: StatusSolucao; titulo: string; detalhe: string
 const pedidosFiltrados = computed(() => pedidos.value
   .filter(p => filtroStatus.value === 'TODOS' || p.status === filtroStatus.value)
   .filter(p => !busca.value.trim() || [
-    p.nomeSolucao, p.usuarioNome, p.projetoNome, p.laboratorioNome, p.status,
+    p.id, p.id.slice(0, 8), p.nomeSolucao, p.usuarioNome, p.projetoNome, p.laboratorioNome, p.atividadeOrigemNome, p.sciOrigemNome, p.status,
     ...p.itens.map(i => i.produtoNome),
   ].some(v => String(v || '').toLocaleLowerCase('pt-BR').includes(busca.value.trim().toLocaleLowerCase('pt-BR'))))
   .sort((a, b) => b.dataSolicitacao.localeCompare(a.dataSolicitacao)))
@@ -94,6 +94,9 @@ async function executarAcao() {
       throw new Error('Confirme se a Solução já foi preparada.')
     executando.value = true
     if (action === 'APROVAR') {
+      if (p.projetoSemVinculoDireto && !window.confirm(
+        'ATENÇÃO: solicitante sem vínculo direto com o projeto. Confirma que está ciente e deseja aprovar a solução?',
+      )) { executando.value = false; return }
       await solucaoService.aprovar(p.id, session.usuario!.id, p.itens, obsAprovacao.value)
     } else if (action === 'ENTREGAR') {
       await solucaoService.entregar(p.id)
@@ -167,7 +170,7 @@ onMounted(async () => { await carregar(); await abrirPedidoDaRota() })
       <div class="toolbar">
         <label>
           <span>Busca</span>
-          <input v-model="busca" type="search" placeholder="Solução, solicitante, laboratório, projeto ou produto..." />
+          <input v-model="busca" type="search" placeholder="Código, solução, solicitante, laboratório, projeto ou produto..." />
         </label>
         <div class="toolbar-note">{{ pedidosFiltrados.length }} registro(s) exibido(s)</div>
       </div>
@@ -180,7 +183,7 @@ onMounted(async () => { await carregar(); await abrirPedidoDaRota() })
           <tbody v-for="p in pedidosFiltrados" :key="p.id">
             <tr :id="`solucao-${p.id}`" class="solution-row">
               <td><span class="sol-status" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span></td>
-              <td><button type="button" class="solution-expand" :aria-expanded="expandidoId === p.id" @click="alternarDetalhes(p)"><strong>{{ p.nomeSolucao || 'Solução' }}</strong><small>{{ p.usuarioNome }}</small></button></td>
+              <td><button type="button" class="solution-expand" :aria-expanded="expandidoId === p.id" @click="alternarDetalhes(p)"><strong>{{ p.nomeSolucao || 'Solução' }}</strong><small>Código {{ p.id.slice(0, 8).toUpperCase() }}</small><small>{{ p.usuarioNome }}</small></button></td>
               <td>{{ p.laboratorioNome }}<small>{{ p.projetoNome || 'Sem Projeto' }}</small></td>
               <td>{{ p.itens.length }} produto(s)</td>
               <td>{{ new Date(p.dataSolicitacao).toLocaleDateString('pt-BR') }}</td>
@@ -195,8 +198,15 @@ onMounted(async () => { await carregar(); await abrirPedidoDaRota() })
             <tr v-if="expandidoId === p.id" class="sol-expanded-row">
               <td colspan="6">
                 <div class="sol-details">
-                  <div class="sol-detail-heading"><div><h3>{{ p.nomeSolucao }}</h3><p class="sol-muted">{{ p.usuarioNome }} · {{ p.laboratorioNome }}</p></div>
+                  <div class="sol-detail-heading"><div><h3>{{ p.nomeSolucao }}</h3><p class="sol-muted">Solução {{ p.id.slice(0, 8).toUpperCase() }} · {{ p.usuarioNome }} · {{ p.laboratorioNome }}</p></div>
                     <span class="sol-status" :data-status="p.status">{{ statusSolucaoLabel[p.status] }}</span>
+                  </div>
+                  <div v-if="p.atividadeOrigemNome || p.sciOrigemNome" class="sol-request-context">
+                    <strong>Contexto operacional registrado no pedido</strong>
+                    <p v-if="p.atividadeOrigemNome">Atividade: {{ p.atividadeOrigemNome }}</p>
+                    <p v-if="p.sciOrigemNome">SCI: {{ p.sciOrigemNome }}</p>
+                    <p>Projeto: {{ p.projetoNome || 'Sem projeto' }} · Laboratório: {{ p.laboratorioNome }}</p>
+                     <p v-if="p.projetoSemVinculoDireto" role="alert" class="warning-note">Atenção: solicitante sem vínculo direto com o projeto. Confira o contexto antes de aprovar.</p>
                   </div>
                   <div class="sol-request-context"><strong>Finalidade e exigências do solicitante</strong><p>{{ p.observacao || 'Não foram informadas exigências adicionais.' }}</p></div>
                   <div class="sol-table-wrap"><table class="sol-table">

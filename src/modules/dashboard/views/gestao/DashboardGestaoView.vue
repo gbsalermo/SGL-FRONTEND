@@ -83,6 +83,9 @@ const pedidosUrgentes = computed(() =>
 const pedidosPendentes = computed(() =>
   pedidos.value.filter((pedido) => pedido.status === 'PENDENTE'),
 )
+const pedidosAguardandoEntrega = computed(() =>
+  pedidos.value.filter((pedido) => pedido.tipo !== 'SOLUCAO' && pedido.status === 'APROVADO'),
+)
 
 const residuosPendentesAnalise = computed(() =>
   residuos.value.filter((residuo) => residuo.status === 'INFORMADO' || residuo.status === 'EM_ANALISE'),
@@ -153,6 +156,19 @@ const itensAtencao = computed<ItemAtencao[]>(() => {
     })
   })
 
+  pedidosAguardandoEntrega.value.forEach((pedido) => {
+    itens.push({
+      id: `entrega-pedido-${pedido.id}`,
+      tipo: 'pedido',
+      categoria: 'Pedido aprovado · aguardando entrega',
+      titulo: `Pedido ${codigoCurto(pedido.id)} · ${pedido.usuarioNome}`,
+      descricao: 'Estoque já baixado na aprovação. Confirme a entrega física para concluir o atendimento.',
+      detalhe: tempoDesde(pedido.dataSolicitacao),
+      nivel: 'alto',
+      rota: `/pedidos?status=APROVADO&pedido=${encodeURIComponent(pedido.id)}`,
+    })
+  })
+
   lotesVencidos.value.forEach((lote) => {
     itens.push({
       id: `lote-vencido-${lote.id}`,
@@ -212,17 +228,39 @@ const itensAtencao = computed<ItemAtencao[]>(() => {
 })
 
 const ultimasMovimentacoes = computed<MovimentacaoPainel[]>(() => {
+  const statusPorPedido = new Map(pedidos.value.map(pedido => [pedido.id, pedido.status]))
   const estoque: MovimentacaoPainel[] = movimentacoes.value.map((movimentacao) => {
     const meta = movimentoMeta(movimentacao.tipoMovimentacao)
+    const baixaPedido = movimentacao.tipoMovimentacao === 'SAIDA' && !!movimentacao.pedidoId
+    const entregue = baixaPedido && statusPorPedido.get(movimentacao.pedidoId!) === 'ENTREGUE'
     return {
       id: `estoque-${movimentacao.id}`,
       data: movimentacao.dataMovimentacao,
-      rotulo: `${meta.rotulo} registrada`,
-      detalhe: descricaoMovimentacao(movimentacao),
+      rotulo: baixaPedido
+        ? (entregue ? 'Baixa de estoque · pedido entregue' : 'Baixa de estoque na aprovação')
+        : `${meta.rotulo} registrada`,
+      detalhe: baixaPedido
+        ? `${descricaoMovimentacao(movimentacao)} · ${entregue ? 'entrega confirmada' : 'a entrega não é confirmada por esta movimentação'}`
+        : descricaoMovimentacao(movimentacao),
       classe: meta.classe as ClasseMovimentacaoPainel,
       rota: rotaMovimentacaoEstoque(movimentacao),
     }
   })
+
+  // Entrega é evento administrativo distinto da baixa de estoque realizada na aprovação.
+  // A API já fornece a data real de entrega: não reutilizar o horário da movimentação.
+  const entregas: MovimentacaoPainel[] = pedidos.value
+    .filter(pedido => pedido.status === 'ENTREGUE' && !!pedido.dataEntrega)
+    .map(pedido => ({
+      id: `entrega-${pedido.id}`,
+      data: pedido.dataEntrega!,
+      rotulo: 'Pedido entregue',
+      detalhe: `${codigoCurto(pedido.id)} · ${pedido.usuarioNome} · ${pedido.laboratorioNome}`,
+      classe: 'devolucao' as ClasseMovimentacaoPainel,
+      rota: pedido.tipo === 'SOLUCAO'
+        ? `/solucoes?pedido=${encodeURIComponent(pedido.id)}`
+        : `/pedidos?pedido=${encodeURIComponent(pedido.id)}`,
+    }))
 
   const residuosHistorico: MovimentacaoPainel[] = historicoResiduos.value.map((evento) => {
     const meta = historicoResiduoMeta(evento.acao)
@@ -244,7 +282,7 @@ const ultimasMovimentacoes = computed<MovimentacaoPainel[]>(() => {
     }
   })
 
-  return [...estoque, ...residuosHistorico]
+  return [...estoque, ...entregas, ...residuosHistorico]
     .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
     .slice(0, 10)
 })
@@ -534,7 +572,7 @@ onMounted(carregarDashboard)
     <div class="dashboard-kpis" aria-label="Indicadores principais">
       <button class="kpi-card kpi-card--blue" type="button" @click="abrir('/pedidos?status=PENDENTE')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M5 5h14v14H5zM8 9h8M8 13h8M8 17h5" /></svg></span>
-        <span><small>Pedidos</small><strong>{{ pedidosPendentes.length }}</strong><em>Produtos e soluções pendentes</em></span>
+        <span><small>Pedidos</small><strong>{{ pedidosPendentes.length }}</strong><em>Aguardando aprovação · {{ pedidosAguardandoEntrega.length }} entrega(s) pendente(s)</em></span>
       </button>
       <button class="kpi-card kpi-card--red" type="button" @click="abrir('/pedidos?status=PENDENTE&urgencia=URGENTE')">
         <span class="kpi-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 17h.01" /></svg></span>

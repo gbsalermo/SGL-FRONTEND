@@ -1,0 +1,43 @@
+# Ajuste visual e de fluxo — vínculos de usuários (21/10/2026)
+
+## Motivo
+Homologação 1.1–1.4 validada, porém a interface de vínculos foi considerada inadequada: item de navegação em Solicitações, campos crus sem hierarquia visual, difícil identificar usuário/status, ausência de histórico claro e encerramento sem confirmação. Erro 400 era exibido como mensagem HTTP genérica. Imagens anexadas pelo responsável foram usadas como referência da divergência visual. O teste 1.5 foi interrompido para ajustes.
+
+## Implementação na branch `collab/etapa-8-contextos-pedidos`
+- Sidebar Gestão: **Vínculos de usuários** movido para **Administração** (inclusive Gestor). `Cadastros > Permissões` mantém edição de perfis e contém atalho para o gerenciamento dedicado, sem duplicar formulário.
+- `VinculosUsuariosCadastro.vue` refeito seguindo o layout de Estagiários: cards de resumo; lista/tabela com busca, perfil, laboratório-base, vínculo e situação; drawer por usuário com identidade, laboratório-base, laboratórios autorizados, vínculos vigentes e histórico.
+- Status **Pendente de vinculação** se usuário ativo não tiver laboratório-base nem vínculo operacional vigente. Este estado **não** significa necessariamente primeiro login; o sistema ainda usa usuários DEV e não registra data de primeiro acesso.
+- Modal de criação com campos hierárquicos progressivos e descrição; modal de confirmação antes de encerrar, identificando claramente o vínculo; cards encerrados sem ação de novo encerramento.
+- Modal de edição **somente** para observação e data de término prevista, preservando identidade/escopo/histórico. Troca de escopo requer encerrar e criar novo vínculo.
+- Novas mensagens interpretam `AxiosError.response.data.message` quando disponível e identificam conflito de duplicidade de contexto sem mostrar apenas `Request failed with status code 400`.
+- CSS responsivo dedicado `src/styles/etapa-8-usuarios.css`, layout similar a Estagiários, com drawers e formulários ajustados para mobile.
+- Backend DEV/DEMO: `GET /api/v1/vinculos-operacionais/resumo` agrega por unidade em uma consulta, evitando uma chamada por usuário; `PUT /{id}` permite editar observação e previsão de fim, sem permitir alterações destrutivas de contexto.
+
+## Pendências para validar
+- Acesso da Gestão e Admin pela sidebar (e link Cadastros).
+- Estado pendente versus vinculado conforme laboratório-base e vínculo adicional.
+- Busca, perfil, responsividade desktop/mobile, abertura/fechamento drawer, leitura de histórico.
+- Duplicidade de vínculo aberto gera feedback legível, sem criar cópias; erros reais devem retornar mensagem do backend.
+- Encerrar gera confirmação e mantém histórico sem botão ativo após revogação.
+- Alterar previsão de término/observação e conferir integridade de contexto.
+- Backend Maven e frontend build/testes **não executados nesta sessão**, alterações **não homologadas**.
+- Login DEV ainda não representa autenticação/autorização institucional. Não implantar endpoints DEV em produção.
+
+
+## Revisão Dark Mode — 21/10/2026
+- Referências lidas: `docs/PADRAO_VISUAL_PRE_PRODUCAO.md`, `docs/SHELL_VISUAL.md`, `docs/AUDITORIA_VISUAL_INTEGRAL_SOLUCOES_ETAPA_7_4_2026-10-13.md`, `src/styles/tokens.css`, `src/styles/etapa-2-dark-foundation.css` e referência de Estagiários `src/styles/etapa-2-gestao-estagiarios.css`.
+- Causa: `src/styles/etapa-8-usuarios.css` tinha superfícies e textos fixos de Light Mode e não respondia à troca global de tema.
+- Correção: estilos para `:root[data-theme='dark']` no próprio arquivo de domínio, referenciando exclusivamente tokens oficiais `--sgl-*` para fundos, cards, tabelas, campos, modais, drawer, estados, focos, bordas e botões; sem nova paleta ou mecanismo de preferência.
+- Preservados: interface aprovada, desktop/mobile, lógica de vínculos, navegação e comportamento dos modais.
+- Validação pendente: alternar Light/Dark em tela inicial, lista com busca e filtros, drawer aberto, modais de criar/editar/encerrar, estados pendente/ativo/encerrado e largura mobile. `npm run build` e inspeção em navegador ainda não executados nesta sessão.
+
+
+## Consolidação de Pedidos orientados na interface existente — 21/10/2026
+- Motivação: a tela isolada `PedidosOrientandosView.vue` estava fora do padrão consolidado em `MeusPedidosView.vue` e duplicava navegação e estilos.
+- Para perfis `PESQUISADOR` e `ANALISTA`, `MeusPedidosView.vue` passa a ter as abas **Meus pedidos** e **Pedidos dos orientandos**. Ambas usam os KPIs, a pesquisa, os filtros, os status, a tabela, a visualização de itens/unidades e os detalhes expansíveis existentes.
+- A aba dos orientandos identifica o solicitante em cada pedido; a busca também encontra nome do orientando. **Somente leitura**, sem aprovação e sem novas permissões.
+- Dados próprios continuam obtidos por `pedidoService.listarPorUsuario`; dados dos orientandos continuam obtidos no endpoint DEV `/v1/pedidos-orientados/orientadores/{usuarioId}`, com requisição apenas quando a aba é aberta e recarga manual.
+- Removido o link `Pedidos orientados` do menu lateral para evitar duplicidade. A rota antiga passa a redirecionar para `/meus-pedidos?visao=orientandos`. A view antiga não é mais usada pela rota.
+- As abas usam os tokens oficiais `--sgl-*` e adaptam-se ao Dark Mode global, sem segunda paleta visual.
+- Pendente: executar `npm run build` e teste manual com perfil Pesquisador/Analista (com e sem orientandos), além de Técnico/Estagiário, Light/Dark, mobile e navegação por link antigo.
+- Nenhuma alteração no backend, estoque, fluxos de aprovação, migrations ou sincronização GitLab nesta rodada.

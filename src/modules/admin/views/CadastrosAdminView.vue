@@ -966,7 +966,10 @@ onMounted(() => {
           </table>
         </div>
 
-        <div v-else class="table-wrap">
+        <div v-else>
+          <p class="scope-note">Para atribuir laboratórios, projetos, SCIs e atividades, acesse a gestão específica de vínculos operacionais.</p>
+          <router-link class="btn btn--primary" to="/administracao/cadastros/vinculos">Gerenciar vínculos de usuários →</router-link>
+          <div class="table-wrap">
           <table class="permissions-table">
             <thead><tr><th>Usuário</th><th>Unidade / laboratório</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
             <tbody>
@@ -994,6 +997,7 @@ onMounted(() => {
               <tr v-if="usuariosFiltrados.length === 0"><td colspan="6" class="empty-table">Nenhum usuário encontrado.</td></tr>
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </section>

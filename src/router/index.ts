@@ -55,6 +55,12 @@ export const router = createRouter({
           component: () => import('@/modules/dashboard/views/solicitante/DashboardSolicitanteView.vue'),
         },
         {
+          path: 'pedidos-orientandos',
+          name: 'pedidos-orientandos',
+          redirect: { path: '/meus-pedidos', query: { visao: 'orientandos' } },
+          meta: { perfis: ['PESQUISADOR', 'ANALISTA'] },
+        },
+        {
           path: 'meus-pedidos',
           name: 'meus-pedidos',
           component: () => import('@/modules/pedidos/views/solicitante/MeusPedidosView.vue'),
@@ -166,6 +172,12 @@ export const router = createRouter({
           path: 'relatorios/pessoas-laboratorio',
           name: 'gestao-relatorio-pessoas-laboratorio',
           component: () => import('@/modules/relatorios/views/RelatorioPessoasLaboratorioView.vue'),
+        },
+        {
+          path: 'administracao/cadastros/vinculos',
+          name: 'gestao-vinculos-cadastros',
+          component: () => import('@/modules/admin/views/VinculosOperacionaisGestaoView.vue'),
+          meta: { requiresSession: true, perfis: PERFIS_GESTAO },
         },
         {
           path: 'administracao/cadastros',
