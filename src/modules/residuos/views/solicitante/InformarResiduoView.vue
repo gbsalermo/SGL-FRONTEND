@@ -22,6 +22,7 @@ import type {
 import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
+import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
 
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
 type ModoPreenchimento = 'MANUAL' | 'MODELO'
@@ -113,13 +114,9 @@ const modelosResiduo = ref<ModeloResiduoResponse[]>([])
 const modoPreenchimento = ref<ModoPreenchimento>('MANUAL')
 const modeloResiduoId = ref('')
 const projetoId = ref('')
-const projetoSemVinculoDireto = computed(() => {
-  if (estagiario.value || gestao.value || !autorizacaoAtualizada.value || !projetoId.value) return false
-  const hoje = new Date().toLocaleDateString('en-CA')
-  return !vinculosAdicionais.value.some(v =>
-    v.projetoId === projetoId.value && !v.encerrado
-    && v.dataInicio <= hoje && (!v.dataFim || v.dataFim >= hoje))
-})
+const projetoSemVinculoDireto = computed(() =>
+  !estagiario.value && !gestao.value && autorizacaoAtualizada.value && !!projetoId.value
+  && !possuiVinculoVigenteComProjeto(vinculosAdicionais.value, projetoId.value))
 const descricao = ref('')
 const processoOrigem = ref('')
 const estadoFisico = ref<EstadoFisicoResiduo>('LIQUIDO')
