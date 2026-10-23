@@ -1,5 +1,8 @@
 # Etapa 8 — Checkpoint de início | Frontend
 
+> **Checkpoint vigente — 23/10/2026 (Etapa 8):** blocos Vínculos, Pedidos, Soluções e Resíduos homologados manualmente em DEV. Projeto opcional; contexto herdado Projeto/SCI/Atividade. Flyway V44; build frontend aprovado; ArchUnit 5/5. Ver `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md`: cadastros operacionais possuem entrada, mas inicialização de Unidades, Usuários e novos Estagiários depende de provisionamento/seed; não há CRUD manual completo. Testes globais E2E/carga e login institucional são trilhos separados. Não houve merge nem comprovação de sincronização GitLab. Registros antigos permanecem históricos.
+
+
 **Data:** 20/10/2026
 **Branch:** `collab/etapa-8-contextos-pedidos`
 **Estado:** preparação documental; **nenhuma View, service ou type alterado funcionalmente**.
