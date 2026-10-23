@@ -73,7 +73,7 @@ export interface SolucaoInput {
   usuarioId: string
   participacaoId?: string
   laboratorioId?: string
-  projetoId?: string
+  projetoId?: string | null
   nomeSolucao?: string
   modeloSolucaoId?: string
   urgente: boolean
