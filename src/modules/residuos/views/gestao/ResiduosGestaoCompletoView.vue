@@ -344,6 +344,9 @@ function abrirRecebimento(residuo: ResiduoResponse) {
 
 async function confirmarRecebimento() {
   if (!selecionado.value || !session.usuario?.id) return
+  if (selecionado.value.projetoSemVinculoDireto && !window.confirm(
+    'ATENÇÃO: o gerador não possui vínculo direto com o projeto informado. O registro foi permitido pela autorização no laboratório. Confirma que está ciente e deseja receber este resíduo?',
+  )) return
   enviando.value = true
   erro.value = ''
   sucesso.value = ''
