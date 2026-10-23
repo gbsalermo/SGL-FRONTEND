@@ -113,6 +113,13 @@ const modelosResiduo = ref<ModeloResiduoResponse[]>([])
 const modoPreenchimento = ref<ModoPreenchimento>('MANUAL')
 const modeloResiduoId = ref('')
 const projetoId = ref('')
+const projetoSemVinculoDireto = computed(() => {
+  if (estagiario.value || gestao.value || !autorizacaoAtualizada.value || !projetoId.value) return false
+  const hoje = new Date().toLocaleDateString('en-CA')
+  return !vinculosAdicionais.value.some(v =>
+    v.projetoId === projetoId.value && !v.encerrado
+    && v.dataInicio <= hoje && (!v.dataFim || v.dataFim >= hoje))
+})
 const descricao = ref('')
 const processoOrigem = ref('')
 const estadoFisico = ref<EstadoFisicoResiduo>('LIQUIDO')
@@ -673,6 +680,8 @@ onMounted(carregarDados)
           </label>
         </div>
 
+        <p v-if="projetoSemVinculoDireto" role="note" class="project-link-notice">Você não possui vínculo direto com este projeto. O registro é permitido pelo vínculo com o laboratório de origem.</p>
+
         <label class="field">
           <span>Procedência / uso do Resíduo</span>
           <textarea v-model="processoOrigem" rows="3" required placeholder="Informe de qual processo, atividade ou uso surgiu o Resíduo..." />
@@ -1007,6 +1016,7 @@ onMounted(carregarDados)
 .notice { margin: 20px 32px 0; padding: 14px 16px; border-radius: 7px; font-size: 11.5px; line-height: 1.5; }
 .notice--error { border: 1px solid #f1b7b3; background: #fff3f2; color: #9f2018; }
 .notice--warning { border: 1px solid #ead8a6; background: #fffaf0; color: #7a5b12; }
+.project-link-notice { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--sgl-warning); border-radius: var(--sgl-radius-control); background: color-mix(in srgb, var(--sgl-warning) 9%, var(--sgl-surface)); color: var(--sgl-text); font-size: 13px; line-height: 1.5; }
 .no-laboratory-notice { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--sgl-warning); border-radius: var(--sgl-radius-control); background: color-mix(in srgb, var(--sgl-warning) 9%, var(--sgl-surface)); color: var(--sgl-text); font-size: 13px; line-height: 1.5; }
 .notice--model { border: 1px solid #b9d5ef; background: #f3f8ff; color: #28568f; }
 .form-footer { display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 24px 32px; background: #f8fafc; }
