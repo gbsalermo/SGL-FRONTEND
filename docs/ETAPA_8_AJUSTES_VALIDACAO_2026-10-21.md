@@ -28,3 +28,7 @@
 - `ResiduoResponse`: tipa os campos de participação e snapshots históricos da API.
 - Registros anteriores à V41 podem não possuir atividade/SCI; não preencher retroativamente sem evidência.
 - Pendente executar build e conferir a resposta real da API nos dois drawers.
+
+
+## Estado posterior validado — 23/10/2026 (adendo)
+O texto acima documenta a situação da data original, **não a situação final da Etapa 8**. Os blocos 1–4 (Vínculos, Pedidos, Soluções e Resíduos) foram homologados manualmente no DEV. Migrations V40–V44 validadas em PostgreSQL; build frontend e ArchUnit (5/5) aprovados. Projeto é opcional nos fluxos atuais de Pedidos, Soluções e Resíduos para perfis elegíveis. O escopo de identidade institucional permanece separado. Conferir `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md` antes do fechamento: unidades/usuários/novos estagiários dependem de provisionamento/seed. Não há merge autorizado, nem sincronização GitLab comprovada.
