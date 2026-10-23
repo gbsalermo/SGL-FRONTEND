@@ -11,6 +11,7 @@ import {
 } from '@/modules/operacao/types/contextoOperacional'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
+import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
 
 import { solucaoService } from '../services/solucaoService'
 import {
@@ -58,10 +59,9 @@ const laboratorioOperacionalId = computed(() => estagiario.value
 const laboratorioOperacional = computed(() => laboratorios.value.find(l => l.id === laboratorioOperacionalId.value))
 const produtos = ref<UnidadeProduto[]>([])
 const projetoId = ref('')
-const projetoSemVinculoDireto = computed(() => !estagiario.value && !gestao.value && !!projetoId.value
-  && !vinculosAdicionais.value.some(v => v.projetoId === projetoId.value
-    && v.dataInicio <= new Date().toLocaleDateString('en-CA')
-    && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA'))))
+const projetoSemVinculoDireto = computed(() =>
+  !estagiario.value && !gestao.value && autorizacaoAtualizada.value && !!projetoId.value
+  && !possuiVinculoVigenteComProjeto(vinculosAdicionais.value, projetoId.value))
 const modeloId = ref('')
 const nomeSolucao = ref('')
 const observacao = ref('')
