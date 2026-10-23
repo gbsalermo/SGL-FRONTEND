@@ -23,6 +23,7 @@ import {
 } from '@/modules/operacao/types/contextoOperacional'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
+import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
 
 interface ItemForm {
   produtoId: string
@@ -72,10 +73,9 @@ const laboratorioOperacional = computed(() => laboratorios.value.find(x => x.id 
 const estoques = ref<EstoqueCentralResponse[]>([])
 const lotesPorEstoque = ref<Record<string, LotePedidoResponse[]>>({})
 const projetoId = ref('')
-const projetoSemVinculoDireto = computed(() => !estagiario.value && !gestao.value && !!projetoId.value
-  && !vinculosAdicionais.value.some(v => v.projetoId === projetoId.value
-    && v.dataInicio <= new Date().toLocaleDateString('en-CA')
-    && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA'))))
+const projetoSemVinculoDireto = computed(() =>
+  !estagiario.value && !gestao.value && autorizacaoAtualizada.value && !!projetoId.value
+  && !possuiVinculoVigenteComProjeto(vinculosAdicionais.value, projetoId.value))
 const urgente = ref(false)
 const observacao = ref('')
 const itens = ref<ItemForm[]>([novoItem()])
