@@ -93,6 +93,7 @@ export interface RelatorioResumoProdutoRanking {
   produtoNome: string
   quantidade: number
   movimentacoes: number
+  unidadeMedida?: string | null
 }
 
 export interface RelatorioResumoLoteRanking {
@@ -107,6 +108,7 @@ export interface RelatorioResumoLoteRanking {
   quantidadeSaidas: number
   saldoAtual: number
   dataValidade: string | null
+  unidadeMedida?: string | null
 }
 
 export interface RelatorioResumoOperacionalResponse {
@@ -219,6 +221,7 @@ export interface RelatorioLoteItem {
   dataValidade: string | null
   ativo: boolean
   situacao: SituacaoLoteRelatorio
+  unidadeMedida?: string | null
 }
 
 export interface RelatorioEstoqueLotesResponse {
@@ -259,6 +262,7 @@ export interface RelatorioFiscalizacaoProduto {
   proximoVencimento: string | null
   quantidadeEntradas: number
   quantidadeSaidas: number
+  unidadeMedida?: string | null
 }
 
 export interface RelatorioFiscalizacaoMovimentacao {
@@ -282,6 +286,7 @@ export interface RelatorioFiscalizacaoMovimentacao {
   responsavelId: string
   responsavelNome: string
   saldoAposMovimentacao: number
+  unidadeMedida?: string | null
 }
 
 export interface RelatorioFiscalizacaoResponse {
