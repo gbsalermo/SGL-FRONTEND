@@ -29,6 +29,16 @@ A aplicação utiliza Vue e TypeScript, comunica-se com a API do SGL e busca ofe
 
 ---
 
+## Telas do sistema
+
+A interface organiza os fluxos de Solicitante, Gestão e Administração. A captura abaixo documenta a experiência visual aprovada do login no ambiente de desenvolvimento.
+
+![Tela de login do SGL](docs/screenshots/login-final.png)
+
+As demais telas são apresentadas pelos próprios módulos documentados neste repositório: Dashboard, Pedidos, Estoque e Lotes, Projetos, Resíduos e Relatórios. A galeria será ampliada com capturas reais aprovadas dessas interfaces, preservando a privacidade dos dados exibidos. O [inventário de telas](docs/INVENTARIO_TELAS.md) contém as rotas e funções disponíveis.
+
+---
+
 ## Papel do frontend
 
 A aplicação organiza três experiências:
@@ -143,7 +153,7 @@ TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO
 
 ## Sessão DEV e contexto de Unidade
 
-A sessão atual continua sendo um mecanismo de desenvolvimento, não autenticação de produção.
+O ambiente DEV utiliza uma sessão local para reproduzir a navegação e o contexto operacional dos usuários enquanto a identidade institucional é integrada.
 
 Fluxo:
 
@@ -175,7 +185,7 @@ X-SGL-Unidade-Id: <unidadeId>
 
 O backend usa esse contexto para restringir dados por Unidade.
 
-**Importante:** isso é isolamento funcional de desenvolvimento. Como o header ainda é controlado pelo cliente, ele não substitui a futura autorização baseada em identidade autenticada.
+A API usa o cabeçalho para identificar a Unidade no ambiente DEV. Na integração corporativa, a Unidade será associada à identidade autenticada e à autorização no servidor.
 
 ---
 
@@ -194,7 +204,7 @@ O backend usa esse contexto para restringir dados por Unidade.
 /pedidos
 ```
 
-Regras que não devem ser duplicadas no frontend:
+As operações seguem as regras de negócio executadas pelo backend:
 
 ```text
 criação → não baixa estoque
@@ -287,20 +297,6 @@ Modelos de resíduos pré-determinados permanecem possibilidade futura, não req
 ---
 
 
-### Estado atual de Estagiários para futura integração
-
-Contrato backend já estabilizado para a futura integração do 6.5:
-
-- vínculo institucional com histórico;
-- múltiplas participações em Atividades;
-- Formação + Curso por vínculo;
-- treinamento de segurança no vínculo;
-- Culturas associadas por participação;
-- cada participação deriva SCI, Projeto e Laboratório;
-- a interface futura não deve apresentar um único “Laboratório do Estagiário” como atributo definitivo.
-
-Até o 6.5, as telas atuais continuam sendo tratadas como compatibilidade visual e não como representação final desse domínio.
-
 ## Estagiários
 
 ```text
@@ -380,7 +376,7 @@ Pessoas por laboratório
 
 Pedidos entregues são recorte de Movimentações, não relatório separado.
 
-Prévia e exportação devem usar os mesmos filtros.
+Os mesmos filtros selecionados são utilizados na prévia e na exportação.
 
 ---
 
@@ -420,11 +416,11 @@ Persistência de preferência     ✅
 Responsividade                  ✅
 ```
 
-A tela de login não deve ser alterada pelo tema das interfaces autenticadas sem decisão explícita.
+O tema claro/escuro é aplicado às áreas autenticadas, mantendo a identidade visual própria da tela de acesso.
 
 ---
 
-## Segurança — interpretação correta
+## Identidade e controle de acesso
 
 ```text
 guardas de rota por perfil                    ✅ UX
@@ -436,38 +432,30 @@ auditoria por identidade autenticada           ⏳
 integração corporativa                          ⏳
 ```
 
-Não tratar visibilidade de menu/rota como segurança de produção.
+No ambiente DEV, a sessão e os controles de navegação organizam a experiência dos perfis. A integração institucional vinculará a sessão a uma identidade autenticada e à autorização aplicada no backend.
 
 ---
 
-## Sequência de trabalho
+## Evolução do projeto
 
-### Agora — pré-produção pós-aprovação
+O desenvolvimento de pré-produção evolui de forma incremental, preservando os fluxos homologados:
 
-```text
-Etapa 1 — padrão visual global                 ✅
-Etapa 2 — Dark Mode definitivo                 ✅
-Etapa 3 — refinamentos do fluxo de Resíduos    ✅
-Etapa 4 — expansão operacional de Resíduos     ✅
-Etapa 5 — Projetos e Atividades                ✅ concluída e validada
-Etapa 6 — Estagiários e vínculos               🔧 backend 6.1–6.4 validado; frontend 6.5 implementado, validação pendente
-Etapas 7 a 13                                  ⏳ sequenciais
-```
+| Etapa | Escopo | Situação |
+|---|---|---|
+| 1–4 | Padrão visual, experiência inicial, Resíduos e expansão operacional | Concluídas |
+| 5 | Projetos, SCI e Atividades | Concluída |
+| 6 | Estagiários, vínculos, participações e formação | Concluída |
+| 7 | Estoque físico, apresentações, fracionamento, FEFO/FIFO e Soluções | Concluída |
+| 8 | Contextos operacionais, Pedidos, Soluções, Resíduos e vínculos adicionais | Concluída e integrada |
+| 9 | Relatórios consolidados: Projetos e Movimentações (Resumo/Detalhamento) | Em preparação |
+| 10 | Rótulos e impressão operacional | Planejada |
+| 11 | Manual do usuário e revisão de inativação/delete lógico | Planejada |
+| 12 | Testes transversais de arquitetura, carga, E2E e regressão | Planejada |
+| 13 | Revisão estrutural e auditoria final integral | Planejada |
 
-### Depois — roadmap formal de produção
+**Preparação para produção:** após a estabilização funcional, o plano contempla matriz de permissões, congelamento, homologação integrada, correções, identidade e autorização definitivas, integração institucional e liberação controlada.
 
-```text
-1. matriz/diretrizes de permissões
-2. congelamento funcional
-3. homologação integrada final
-4. correção de falhas encontradas
-5. autenticação + autorização + auditoria definitiva
-6. integração corporativa / tenant confiável
-7. documentos/upload quando houver contrato
-8. refactors técnicos planejados
-```
-
-O roadmap formal continua válido; apenas começa após o bloco atual.
+O detalhamento das decisões, entregas e critérios de validação fica em [`CONTINUIDADE.md`](CONTINUIDADE.md) e no [plano de pré-produção](https://github.com/gbsalermo/Sistema-SGL/blob/main/docs/PLANO_PRE_PRODUCAO.md). Este README apresenta a arquitetura e as capacidades do sistema; não substitui os checkpoints técnicos.
 
 ---
 
