@@ -472,17 +472,17 @@ onMounted(async () => {
         <section class="card filtros-card">
           <div class="card-title"><h2>2. Filtros do relatório: {{ opcaoSelecionada.titulo }}</h2></div>
 
+          <div v-if="relatorioSelecionado === 'movimentacoes'" class="modo-movimentacoes">
+            <button type="button" :class="{ 'modo-ativo': modoMovimentacoes === 'resumo' }" @click="modoMovimentacoes = 'resumo'">Resumo</button>
+            <button type="button" :class="{ 'modo-ativo': modoMovimentacoes === 'detalhamento' }" @click="modoMovimentacoes = 'detalhamento'">Detalhamento</button>
+          </div>
+
           <div v-if="relatorioEstagiariosSelecionado" class="filtros-body">
             <div class="campo"><label for="situacao">Situação</label><select id="situacao" v-model="situacao"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select></div>
             <div class="campo"><label for="laboratorio">Laboratório</label><select id="laboratorio" v-model="laboratorioId"><option value="">Todos os laboratórios</option><option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option></select></div>
             <div class="campo campo--periodo"><label>Período do estágio</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
             <div class="campo"><label for="tipoBolsa">Tipo de bolsa</label><select id="tipoBolsa" v-model="tipoBolsa"><option value="">Todos</option><option v-for="tipo in tiposBolsa" :key="tipo" :value="tipo">{{ formatarRotulo(tipo) }}</option></select></div>
             <div class="campo campo--busca"><label for="busca">Buscar por nome ou email</label><input id="busca" v-model="busca" type="search" placeholder="Digite o nome ou email do estagiário" /></div>
-          </div>
-
-          <div v-if="relatorioSelecionado === 'movimentacoes'" class="modo-movimentacoes">
-            <button type="button" :class="{ 'modo-ativo': modoMovimentacoes === 'resumo' }" @click="modoMovimentacoes = 'resumo'">Resumo</button>
-            <button type="button" :class="{ 'modo-ativo': modoMovimentacoes === 'detalhamento' }" @click="modoMovimentacoes = 'detalhamento'">Detalhamento</button>
           </div>
 
           <div v-else-if="relatorioProdutosSelecionado" class="filtros-body filtros-body--produtos">
@@ -495,8 +495,8 @@ onMounted(async () => {
 
           <div v-else-if="relatorioProjetosSelecionado" class="filtros-body filtros-body--projetos">
             <div class="campo"><label for="projeto-laboratorio">Laboratório</label><select id="projeto-laboratorio" v-model="laboratorioId"><option value="">Todos os laboratórios</option><option v-for="lab in laboratorios" :key="lab.id" :value="lab.id">{{ lab.nome }}</option></select></div>
-            <div class="campo"><label for="projeto-status">Status</label><select id="projeto-status" v-model="projetoStatus"><option value="">Todos</option><option value="ATIVO">Ativo</option><option value="ENCERRADO_COM_AVALIACAO_PENDENTE">Encerrado com avaliação pendente</option></select></div>
-            <div class="campo"><label for="projeto-execucao">Situação de execução</label><select id="projeto-execucao" v-model="projetoExecucao"><option value="">Todas</option><option value="NAO_INFORMADO">Não informado</option><option value="EM_ANDAMENTO_ATRASADO">Em andamento atrasado</option></select></div>
+            <div class="campo"><label for="projeto-status">Status</label><select id="projeto-status" v-model="projetoStatus"><option value="">Todos</option><option value="ATIVO">Ativo</option><option value="ENCERRADO_COM_AVALIACAO_PENDENTE">Encerrado com avaliação pendente</option><option value="CONCLUIDO">Concluído</option></select></div>
+            <div class="campo"><label for="projeto-execucao">Situação de execução</label><select id="projeto-execucao" v-model="projetoExecucao"><option value="">Todas</option><option value="NAO_INFORMADO">Não informado</option><option value="EM_ANDAMENTO_NO_PRAZO">Em andamento no prazo</option><option value="EM_ANDAMENTO_ATRASADO">Em andamento atrasado</option><option value="EXECUCAO_CANCELADA">Execução cancelada</option></select></div>
             <div class="campo"><label for="projeto-ativo">Registro</label><select id="projeto-ativo" v-model="projetoAtivo"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select></div>
             <div class="campo"><label for="projeto-recurso">Recurso externo</label><select id="projeto-recurso" v-model="projetoRecurso"><option value="">Todos</option><option value="sim">Sim</option><option value="nao">Não</option></select></div>
             <div class="campo campo--periodo"><label>Período de execução</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Início do período" /><span>até</span><input v-model="dataFim" type="date" aria-label="Fim do período" /></div></div>
