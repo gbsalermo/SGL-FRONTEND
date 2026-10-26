@@ -410,6 +410,18 @@ function formatarOrgaos(valores: string[]) {
   return valores.map((item) => formatarRotulo(item)).join(', ')
 }
 
+function formatarQuantidadeComUnidade(valor: number, unidade?: string | null) {
+  const numero = Number(valor)
+  const formatado = Number.isFinite(numero)
+    ? new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 6 }).format(numero)
+    : String(valor)
+  const simbolos: Record<string, string> = {
+    ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg',
+    METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
+  }
+  return unidade ? `${formatado} ${simbolos[unidade] ?? unidade}` : formatado
+}
+
 function sinalQuantidade(tipo: TipoMovimentacaoRelatorio) {
   if (tipo === 'ENTRADA' || tipo === 'DEVOLUCAO') return '+'
   if (tipo === 'SAIDA' || tipo === 'DESCARTE_VENCIMENTO') return '−'
@@ -608,7 +620,7 @@ onMounted(async () => {
   }"
 >
   {{ formatarRotulo(item.tipoMovimentacao) }}
-</span></td><td class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ item.quantidadeMovimentada }} un.</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ formatarRotulo(item.origem) }}</td><td>{{ item.usuarioNome }}</td><td>{{ item.quantidadeAnterior }} → {{ item.quantidadeAtual }}</td></tr><tr v-if="resultadoMovimentacoes.itens.length === 0"><td colspan="9" class="table-empty">Nenhuma movimentação encontrada com os filtros informados.</td></tr></tbody></table></div>
+</span></td><td class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ formatarQuantidadeComUnidade(item.quantidadeMovimentada, item.unidadeMedida) }}</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ formatarRotulo(item.origem) }}</td><td>{{ item.usuarioNome }}</td><td>{{ formatarQuantidadeComUnidade(item.quantidadeAnterior, item.unidadeMedida) }} → {{ formatarQuantidadeComUnidade(item.quantidadeAtual, item.unidadeMedida) }}</td></tr><tr v-if="resultadoMovimentacoes.itens.length === 0"><td colspan="9" class="table-empty">Nenhuma movimentação encontrada com os filtros informados.</td></tr></tbody></table></div>
           </div>
 
           <div v-else-if="relatorioResumoSelecionado && resultadoResumoOperacional" class="preview-result">
