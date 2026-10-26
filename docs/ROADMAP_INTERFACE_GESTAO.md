@@ -1,5 +1,10 @@
 # Roadmap Formal — SGL Frontend
 
+## Estado vigente — 26/10/2026
+
+O desenvolvimento de pré-produção concluiu e integrou as **Etapas 1–8**; a **Etapa 9 (Relatórios consolidados)** foi aberta documentalmente na branch `collab/etapa-9-relatorios-consolidados`, sem nova implementação. O plano formal abaixo permanece **histórico e posterior** ao trilho atual; ele não redefine a próxima etapa. Consulte `CONTINUIDADE.md` e `docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`.
+
+
 > **Checkpoint 23/10/2026:** o plano abaixo preserva decisões históricas. O estado funcional atual da Etapa 8 e a matriz de entrada de dados estão em `CONTINUIDADE.md` e `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md`. Usuários, Unidades e Estagiários novos dependem do fluxo de provisionamento institucional/seed, não de um CRUD manual completo.
 
 
