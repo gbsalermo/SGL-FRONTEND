@@ -292,7 +292,7 @@ Relatório:
 /relatorios/residuos
 ```
 
-Modelos de resíduos pré-determinados permanecem possibilidade futura, não requisito atual.
+A interface permite utilizar modelos de resíduos cadastrados administrativamente, além do preenchimento manual, conforme o contrato do módulo.
 
 ---
 
