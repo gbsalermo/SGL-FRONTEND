@@ -29,16 +29,6 @@ A aplicação utiliza Vue e TypeScript, comunica-se com a API do SGL e busca ofe
 
 ---
 
-## Telas do sistema
-
-A interface organiza os fluxos de Solicitante, Gestão e Administração. A captura abaixo documenta a experiência visual aprovada do login no ambiente de desenvolvimento.
-
-![Tela de login do SGL](docs/screenshots/login-final.png)
-
-As demais telas são apresentadas pelos próprios módulos documentados neste repositório: Dashboard, Pedidos, Estoque e Lotes, Projetos, Resíduos e Relatórios. A galeria será ampliada com capturas reais aprovadas dessas interfaces, preservando a privacidade dos dados exibidos. O [inventário de telas](docs/INVENTARIO_TELAS.md) contém as rotas e funções disponíveis.
-
----
-
 ## Papel do frontend
 
 A aplicação organiza três experiências:
