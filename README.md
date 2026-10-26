@@ -11,52 +11,21 @@
 
 </div>
 
-## Estado atual — 26/10/2026
+## O que é o SGL?
 
-- **Etapa 8 concluída e integrada** à `main` de backend e frontend, via MRs institucionais `nti/sgl-api!10` e `nti/sgl-web!11`; sincronização GitLab → GitHub confirmada.
-- **Etapa 9 em preparação:** Relatórios consolidados, na branch `collab/etapa-9-relatorios-consolidados` de cada repositório. Ainda não há código funcional novo da Etapa 9.
-- Entregas planejadas: **Relatório de Projetos** com consulta/prévia/exportação e uma única opção **Movimentações** com modos **Resumo** e **Detalhamento**, preservando os endpoints atuais quando possível.
-- Referência canônica da etapa: [Contrato de início e checklist](docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md). Continuidade: [CONTINUIDADE.md](CONTINUIDADE.md); roadmap oficial do backend: `docs/PLANO_PRE_PRODUCAO.md`.
-- A autenticação e o provisionamento institucional permanecem em trilho separado; os testes globais de arquitetura, carga e E2E permanecem na Etapa 12.
+O **SGL (Sistema de Gestão de Laboratórios)** é uma plataforma voltada à organização e ao acompanhamento das operações laboratoriais. Em vez de manter informações dispersas sobre materiais, projetos, atividades, pessoas e resíduos, o sistema reúne esses processos em uma experiência integrada, com registros rastreáveis e informações acessíveis conforme o contexto operacional.
 
-> Trechos datados anteriores deste README são históricos e não devem reclassificar a Etapa 8 como pendente.
+A interface web organiza o trabalho em diferentes perspectivas:
 
+- **Solicitante:** consultar seu contexto, solicitar materiais e soluções, acompanhar pedidos e informar resíduos gerados nas atividades.
+- **Gestão:** acompanhar indicadores, analisar solicitações, administrar estoque e lotes, movimentações, resíduos, projetos, participações e relatórios.
+- **Administração:** manter os cadastros operacionais, as associações e os perfis previstos para a fase atual do sistema.
 
+O SGL considera a estrutura **Unidade → Laboratório → Projeto → SCI → Atividade** e os vínculos aplicáveis a cada pessoa. Isso permite relacionar solicitações e registros ao seu contexto de origem, enquanto o backend permanece responsável pelas decisões e validações oficiais.
 
----
+A aplicação utiliza Vue e TypeScript, comunica-se com a API do SGL e busca oferecer uma navegação consistente, responsiva e com suporte a temas claro e escuro. O projeto está em **evolução de pré-produção**; autenticação definitiva e integração institucional pertencem a fases posteriores.
 
-## Estado atual — 16/10/2026
-
-O primeiro protótipo do SGL foi aprovado funcionalmente, e as **Etapas 1–7 da pré-produção foram concluídas e validadas pelo responsável**. A Etapa 7 consolidou unidades e apresentações, recipientes físicos, medidas decimais, Soluções, Pedidos por embalagem ou medida, abertura parcial de embalagens, alertas de estoque mínimo configuráveis e integração backend/frontend. **A Etapa 8 é a próxima**, com contexto de participação dos Estagiários em Pedidos/Soluções e teste operacional completo. A homologação integral e a autenticação/autorização definitiva ainda são trabalhos posteriores.
-
-Estado consolidado:
-
-```text
-Login visual / sessão DEV                         ✅
-Expiração automática da sessão DEV em 5h          ✅
-Pedidos do Solicitante                            ✅
-Pedidos da Gestão                                 ✅
-Estoque / lotes                                   ✅
-Movimentações                                     ✅
-Relatórios / fiscalização                         ✅
-PDF/XLSX                                          ✅
-Resíduos — Solicitante e Gestão                   ✅
-Rótulos de Resíduo e Produto                      ✅
-Estagiários                                       ✅
-Pessoas por laboratório                           ✅
-Administração / Cadastros                         ✅
-Dashboard Gestão                                  ✅
-Dashboard Solicitante                             ✅
-Alertas operacionais                              ✅
-Busca global                                      ✅
-Modo claro/escuro definitivo + persistência       ✅
-404                                               ✅
-Contexto de Unidade enviado à API                 ✅
-Autenticação/autorização definitiva               ⏳ etapa formal posterior
-Integração corporativa                            ⏳ etapa formal posterior
-```
-
-> Para retomar o projeto, começar por [`CONTINUIDADE.md`](CONTINUIDADE.md), [`docs/SINCRONIZACAO_GITLAB_GITHUB.md`](docs/SINCRONIZACAO_GITLAB_GITHUB.md), pelo plano e handoff da Etapa 4 no backend, por [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) e `src/router/index.ts`. GitLab é a fonte canônica de `main`; contratos HTTP pertencem ao Swagger/OpenAPI do backend.
+> **Acompanhamento da evolução:** entregas, decisões e próximos passos estão em [`CONTINUIDADE.md`](CONTINUIDADE.md) e no roadmap do backend [`docs/PLANO_PRE_PRODUCAO.md`](https://github.com/gbsalermo/Sistema-SGL/blob/main/docs/PLANO_PRE_PRODUCAO.md). O contrato de início da Etapa 9 está em [`docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`](docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md).
 
 ---
 
