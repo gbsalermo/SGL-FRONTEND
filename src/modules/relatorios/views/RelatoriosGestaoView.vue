@@ -423,6 +423,19 @@ function classeSituacaoLote(situacaoLote: SituacaoLoteRelatorio) {
   return 'status--inativo'
 }
 
+watch([
+  situacao, laboratorioId, dataInicio, dataFim, tipoBolsa, busca,
+  produtoSituacao, produtoFiscalizado, produtoPerecivel, produtoRisco, produtoOrgao,
+  movimentoTipo, movimentoOrigem, movimentoProdutoId, movimentoUsuarioId, movimentoLoteId,
+  resumoProdutoId, resumoLimite, estoqueUnidadeId, estoqueProdutoId,
+  estoqueSituacao, estoqueNivel, estoqueSituacaoLote, estoqueDiasVencimento,
+  fiscalProdutoId, fiscalOrgao, fiscalUnidadeId, fiscalDiasVencimento,
+  projetoStatus, projetoExecucao, projetoAtivo, projetoRecurso,
+], () => {
+  ultimaConsultaRelatorio.value = null
+  limparResultados()
+})
+
 onMounted(async () => {
   const resultados = await Promise.allSettled([
     http.get<LaboratorioResumo[]>('/v1/laboratorios'),
