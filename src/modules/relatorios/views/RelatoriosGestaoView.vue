@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
-import { relatorioService } from '@/modules/relatorios/services/relatorioService'
+import { relatorioService, ultimaConsultaRelatorio } from '@/modules/relatorios/services/relatorioService'
+import type { RelatorioProjetosResponse } from '@/modules/relatorios/types/projetosRelatorio'
 import type {
   NivelRiscoRelatorio,
   OrigemMovimentacaoRelatorio,
@@ -21,7 +22,7 @@ type TipoRelatorio =
   | 'estagiarios'
   | 'produtos'
   | 'movimentacoes'
-  | 'resumo-operacional'
+  | 'projetos'
   | 'estoque-lotes'
   | 'residuos'
   | 'fiscalizacao'
@@ -67,14 +68,19 @@ interface RelatorioOpcao {
 const relatorios: RelatorioOpcao[] = [
   { id: 'estagiarios', titulo: 'Estagiários', descricao: 'Ativos, inativos ou todos, por laboratório', icone: 'documento' },
   { id: 'produtos', titulo: 'Produtos', descricao: 'Catálogo, riscos, perecibilidade e fiscalização', icone: 'produto' },
-  { id: 'movimentacoes', titulo: 'Movimentações', descricao: 'Entradas, saídas e recortes por pedido', icone: 'troca' },
-  { id: 'resumo-operacional', titulo: 'Resumo operacional', descricao: 'Principais entradas, saídas e lotes', icone: 'resumo' },
+  { id: 'movimentacoes', titulo: 'Movimentações', descricao: 'Resumo e detalhamento das operações', icone: 'troca' },
+  { id: 'projetos', titulo: 'Projetos', descricao: 'SCI, atividades, participações e execução', icone: 'documento' },
   { id: 'estoque-lotes', titulo: 'Estoque e lotes', descricao: 'Posição de estoque, mínimos e vencimentos', icone: 'estoque' },
   { id: 'residuos', titulo: 'Resíduos', descricao: 'Geração, riscos, armazenamento e despacho', icone: 'residuo' },
   { id: 'fiscalizacao', titulo: 'Fiscalização', descricao: 'Produtos fiscalizados e sua rastreabilidade', icone: 'escudo' },
 ]
 
 const relatorioSelecionado = ref<TipoRelatorio>('estagiarios')
+const modoMovimentacoes = ref<'resumo' | 'detalhamento'>('resumo')
+const projetoStatus = ref('')
+const projetoExecucao = ref('')
+const projetoAtivo = ref<SituacaoFiltro>('')
+const projetoRecurso = ref<SimNaoFiltro>('')
 
 const situacao = ref<SituacaoFiltro>('')
 const laboratorioId = ref('')
@@ -122,6 +128,7 @@ const resultadoMovimentacoes = ref<RelatorioMovimentacoesResponse | null>(null)
 const resultadoResumoOperacional = ref<RelatorioResumoOperacionalResponse | null>(null)
 const resultadoEstoqueLotes = ref<RelatorioEstoqueLotesResponse | null>(null)
 const resultadoFiscalizacao = ref<RelatorioFiscalizacaoResponse | null>(null)
+const resultadoProjetos = ref<RelatorioProjetosResponse | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 
@@ -131,11 +138,19 @@ const opcaoSelecionada = computed(
 
 const relatorioEstagiariosSelecionado = computed(() => relatorioSelecionado.value === 'estagiarios')
 const relatorioProdutosSelecionado = computed(() => relatorioSelecionado.value === 'produtos')
-const relatorioMovimentacoesSelecionado = computed(() => relatorioSelecionado.value === 'movimentacoes')
-const relatorioResumoSelecionado = computed(() => relatorioSelecionado.value === 'resumo-operacional')
+const relatorioMovimentacoesSelecionado = computed(() => relatorioSelecionado.value === 'movimentacoes' && modoMovimentacoes.value === 'detalhamento')
+const relatorioResumoSelecionado = computed(() => relatorioSelecionado.value === 'movimentacoes' && modoMovimentacoes.value === 'resumo')
+const relatorioProjetosSelecionado = computed(() => relatorioSelecionado.value === 'projetos')
 const relatorioEstoqueSelecionado = computed(() => relatorioSelecionado.value === 'estoque-lotes')
 const relatorioResiduosSelecionado = computed(() => relatorioSelecionado.value === 'residuos')
 const relatorioFiscalizacaoSelecionado = computed(() => relatorioSelecionado.value === 'fiscalizacao')
+
+watch(modoMovimentacoes, () => {
+  limparResultados()
+  ultimaConsultaRelatorio.value = null
+  erro.value = ''
+})
+
 
 const produtosFiscalizados = computed(() => produtos.value.filter((produto) => produto.fiscalizado))
 
@@ -145,6 +160,7 @@ const possuiResultado = computed(() => {
   if (relatorioMovimentacoesSelecionado.value) return Boolean(resultadoMovimentacoes.value)
   if (relatorioResumoSelecionado.value) return Boolean(resultadoResumoOperacional.value)
   if (relatorioEstoqueSelecionado.value) return Boolean(resultadoEstoqueLotes.value)
+  if (relatorioProjetosSelecionado.value) return Boolean(resultadoProjetos.value)
   if (relatorioFiscalizacaoSelecionado.value) return Boolean(resultadoFiscalizacao.value)
   return false
 })
@@ -155,6 +171,7 @@ const geradoEm = computed(() => {
   if (relatorioMovimentacoesSelecionado.value) return resultadoMovimentacoes.value?.geradoEm
   if (relatorioResumoSelecionado.value) return resultadoResumoOperacional.value?.geradoEm
   if (relatorioEstoqueSelecionado.value) return resultadoEstoqueLotes.value?.geradoEm
+  if (relatorioProjetosSelecionado.value) return resultadoProjetos.value?.geradoEm
   if (relatorioFiscalizacaoSelecionado.value) return resultadoFiscalizacao.value?.geradoEm
   return undefined
 })
@@ -193,11 +210,13 @@ function limparResultados() {
   resultadoResumoOperacional.value = null
   resultadoEstoqueLotes.value = null
   resultadoFiscalizacao.value = null
+  resultadoProjetos.value = null
 }
 
 function selecionarRelatorio(id: TipoRelatorio) {
   relatorioSelecionado.value = id
   limparResultados()
+  ultimaConsultaRelatorio.value = null
   erro.value = ''
 }
 
@@ -230,7 +249,12 @@ function limparFiltros() {
   fiscalOrgao.value = ''
   fiscalUnidadeId.value = ''
   fiscalDiasVencimento.value = 30
+  projetoStatus.value = ''
+  projetoExecucao.value = ''
+  projetoAtivo.value = ''
+  projetoRecurso.value = ''
   limparResultados()
+  ultimaConsultaRelatorio.value = null
   erro.value = ''
 }
 
@@ -255,6 +279,10 @@ async function visualizarRelatorio() {
     relatorioResumoSelecionado.value ||
     relatorioFiscalizacaoSelecionado.value
   if (usaPeriodo && !validarPeriodo()) return
+  if (relatorioProjetosSelecionado.value && dataInicio.value && dataFim.value && dataInicio.value > dataFim.value) {
+    erro.value = 'A data inicial não pode ser posterior à data final.'
+    return
+  }
 
   if (relatorioResiduosSelecionado.value) {
     erro.value = 'O relatório de Resíduos já faz parte da central e será ativado quando a branch do módulo de resíduos for integrada à base de Relatórios.'
@@ -262,7 +290,21 @@ async function visualizarRelatorio() {
   }
 
   carregando.value = true
+  ultimaConsultaRelatorio.value = null
   try {
+    if (relatorioProjetosSelecionado.value) {
+      limparResultados()
+      resultadoProjetos.value = await relatorioService.listarProjetos({
+        laboratorioId: laboratorioId.value || undefined,
+        status: projetoStatus.value || undefined,
+        situacaoExecucao: projetoExecucao.value || undefined,
+        ativo: projetoAtivo.value === '' ? undefined : projetoAtivo.value === 'ativo',
+        recursoExterno: projetoRecurso.value === '' ? undefined : projetoRecurso.value === 'sim',
+        dataInicio: dataInicio.value || undefined,
+        dataFim: dataFim.value || undefined,
+      })
+      return
+    }
     if (relatorioEstagiariosSelecionado.value) {
       limparResultados()
       resultadoEstagiarios.value = await relatorioService.listarEstagiarios({
@@ -438,12 +480,26 @@ onMounted(async () => {
             <div class="campo campo--busca"><label for="busca">Buscar por nome ou email</label><input id="busca" v-model="busca" type="search" placeholder="Digite o nome ou email do estagiário" /></div>
           </div>
 
+          <div v-if="relatorioSelecionado === 'movimentacoes'" class="modo-movimentacoes">
+            <button type="button" :class="{ 'modo-ativo': modoMovimentacoes === 'resumo' }" @click="modoMovimentacoes = 'resumo'">Resumo</button>
+            <button type="button" :class="{ 'modo-ativo': modoMovimentacoes === 'detalhamento' }" @click="modoMovimentacoes = 'detalhamento'">Detalhamento</button>
+          </div>
+
           <div v-else-if="relatorioProdutosSelecionado" class="filtros-body filtros-body--produtos">
             <div class="campo"><label for="produto-situacao">Situação</label><select id="produto-situacao" v-model="produtoSituacao"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select></div>
             <div class="campo"><label for="produto-fiscalizado">Fiscalizado</label><select id="produto-fiscalizado" v-model="produtoFiscalizado"><option value="">Todos</option><option value="sim">Sim</option><option value="nao">Não</option></select></div>
             <div class="campo"><label for="produto-perecivel">Perecível</label><select id="produto-perecivel" v-model="produtoPerecivel"><option value="">Todos</option><option value="sim">Sim</option><option value="nao">Não</option></select></div>
             <div class="campo"><label for="produto-risco">Nível de risco</label><select id="produto-risco" v-model="produtoRisco"><option value="">Todos</option><option value="NENHUM">Nenhum</option><option value="BAIXO">Baixo</option><option value="MEDIO">Médio</option><option value="ALTO">Alto</option></select></div>
             <div class="campo campo--busca"><label for="produto-orgao">Órgão fiscalizador</label><select id="produto-orgao" v-model="produtoOrgao"><option value="">Todos os órgãos</option><option value="POLICIA_FEDERAL">Polícia Federal</option><option value="VIGILANCIA_SANITARIA">Vigilância Sanitária</option><option value="ANVISA">ANVISA</option><option value="EXERCITO">Exército</option><option value="OUTRO">Outro</option></select></div>
+          </div>
+
+          <div v-else-if="relatorioProjetosSelecionado" class="filtros-body filtros-body--projetos">
+            <div class="campo"><label for="projeto-laboratorio">Laboratório</label><select id="projeto-laboratorio" v-model="laboratorioId"><option value="">Todos os laboratórios</option><option v-for="lab in laboratorios" :key="lab.id" :value="lab.id">{{ lab.nome }}</option></select></div>
+            <div class="campo"><label for="projeto-status">Status</label><select id="projeto-status" v-model="projetoStatus"><option value="">Todos</option><option value="ATIVO">Ativo</option><option value="ENCERRADO_COM_AVALIACAO_PENDENTE">Encerrado com avaliação pendente</option></select></div>
+            <div class="campo"><label for="projeto-execucao">Situação de execução</label><select id="projeto-execucao" v-model="projetoExecucao"><option value="">Todas</option><option value="NAO_INFORMADO">Não informado</option><option value="EM_ANDAMENTO_ATRASADO">Em andamento atrasado</option></select></div>
+            <div class="campo"><label for="projeto-ativo">Registro</label><select id="projeto-ativo" v-model="projetoAtivo"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select></div>
+            <div class="campo"><label for="projeto-recurso">Recurso externo</label><select id="projeto-recurso" v-model="projetoRecurso"><option value="">Todos</option><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+            <div class="campo campo--periodo"><label>Período de execução</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Início do período" /><span>até</span><input v-model="dataFim" type="date" aria-label="Fim do período" /></div></div>
           </div>
 
           <div v-else-if="relatorioMovimentacoesSelecionado" class="filtros-body filtros-body--movimentacoes">
@@ -500,6 +556,31 @@ onMounted(async () => {
           <div v-else-if="relatorioProdutosSelecionado && resultadoProdutos" class="preview-result">
             <div class="resumo-cards resumo-cards--produtos"><article><span>Produtos</span><strong>{{ resultadoProdutos.total }}</strong></article><article><span>Ativos</span><strong>{{ resultadoProdutos.ativos }}</strong></article><article><span>Inativos</span><strong>{{ resultadoProdutos.inativos }}</strong></article><article><span>Fiscalizados</span><strong>{{ resultadoProdutos.fiscalizados }}</strong></article><article><span>Perecíveis</span><strong>{{ resultadoProdutos.pereciveis }}</strong></article><article><span>Com risco</span><strong>{{ resultadoProdutos.comRisco }}</strong></article></div>
             <div class="table-wrap"><table class="produtos-table"><thead><tr><th>Produto</th><th>Código</th><th>Unidade</th><th>Risco</th><th>Perecível</th><th>Fiscalização</th><th>Situação</th></tr></thead><tbody><tr v-for="item in resultadoProdutos.itens" :key="item.id"><td><strong>{{ item.nome }}</strong><small>{{ item.localizacaoFisica || item.descricao || 'Sem informação complementar' }}</small></td><td>{{ item.codigoReferencia || '—' }}</td><td>{{ formatarRotulo(item.unidadeMedida) }}</td><td><span class="status" :class="item.risco === 'ALTO' ? 'status--risco-alto' : item.risco === 'MEDIO' ? 'status--risco-medio' : 'status--neutro'">{{ formatarRotulo(item.risco) }}</span></td><td>{{ item.perecivel ? 'Sim' : 'Não' }}</td><td><span v-if="item.fiscalizado" class="status status--fiscalizado">{{ formatarOrgaos(item.orgaosFiscalizadores) }}</span><span v-else>Não</span></td><td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td></tr><tr v-if="resultadoProdutos.itens.length === 0"><td colspan="7" class="table-empty">Nenhum produto encontrado com os filtros informados.</td></tr></tbody></table></div>
+          </div>
+
+          <div v-else-if="relatorioProjetosSelecionado && resultadoProjetos" class="preview-result">
+            <div class="resumo-cards">
+              <article><span>Projetos</span><strong>{{ resultadoProjetos.totalProjetos }}</strong></article>
+              <article><span>SCI</span><strong>{{ resultadoProjetos.totalScis }}</strong></article>
+              <article><span>Atividades</span><strong>{{ resultadoProjetos.totalAtividades }}</strong></article>
+              <article><span>Participações</span><strong>{{ resultadoProjetos.totalParticipacoes }}</strong></article>
+              <article><span>Estagiários distintos</span><strong>{{ resultadoProjetos.totalEstagiariosDistintos }}</strong></article>
+            </div>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Código SEG / Projeto</th><th>Laboratório</th><th>Responsável</th><th>Período</th><th>Status</th><th>Execução</th><th>Recurso externo</th><th>SCI</th><th>Atividades</th><th>Participações</th><th>Estagiários</th></tr></thead>
+              <tbody>
+                <tr v-for="item in resultadoProjetos.projetos" :key="item.id">
+                  <td><strong>{{ item.nome }}</strong><small>{{ item.codigoSeg || 'Sem código SEG' }}</small></td>
+                  <td>{{ item.laboratorioNome }}</td><td>{{ item.responsavel || '—' }}</td>
+                  <td>{{ formatarData(item.dataInicio) }} – {{ formatarData(item.dataFim) }}</td>
+                  <td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ formatarRotulo(item.status) }}</span></td>
+                  <td>{{ formatarRotulo(item.situacaoExecucao) }}</td>
+                  <td>{{ item.possuiRecursoExterno ? item.empresaRecursoExterno || 'Sim' : 'Não' }}</td>
+                  <td>{{ item.totalScis }}</td><td>{{ item.totalAtividades }}</td><td>{{ item.totalParticipacoes }}</td><td>{{ item.totalEstagiarios }}</td>
+                </tr>
+                <tr v-if="resultadoProjetos.projetos.length === 0"><td colspan="11" class="table-empty">Nenhum Projeto encontrado para os filtros informados.</td></tr>
+              </tbody>
+            </table></div>
           </div>
 
           <div v-else-if="relatorioMovimentacoesSelecionado && resultadoMovimentacoes" class="preview-result">
@@ -568,6 +649,11 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.modo-movimentacoes { display: flex; gap: 8px; padding: 16px 20px 0; }
+.modo-movimentacoes button { min-height: 40px; padding: 0 16px; border-radius: var(--sgl-radius-control, 6px); border: 1px solid var(--sgl-border, #cfd8e5); background: var(--sgl-surface, #fff); color: inherit; cursor: pointer; }
+.modo-movimentacoes .modo-ativo { border-color: var(--sgl-primary, #1a4da1); color: var(--sgl-primary, #1a4da1); font-weight: 700; }
+.filtros-body--projetos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
 .relatorios-page { width: 100%; max-width: 1500px; margin: 0 auto; padding: 30px 30px 38px; color: #1a2742; }
 .relatorios-header { margin-bottom: 20px; }
 .relatorios-header h1 { margin: 0; font-size: 30px; line-height: 1.15; color: #162541; letter-spacing: -.03em; }
