@@ -58,3 +58,7 @@
 - [ ] Auditoria detalhada dos endpoints/DTOs/filtros atuais (primeira atividade funcional da 9.1).
 - [ ] Contrato final do relatório de Projetos homologado.
 - [ ] Código, build e testes da Etapa 9 realizados.
+
+## Apresentação visual pública — após a Etapa 10
+
+A galeria de telas reais do SGL no `README.md` principal fica **adiada até a conclusão da Etapa 10 — Rótulos e impressão operacional**. Nesse momento, selecionar capturas finais de Dashboard, Pedidos, Estoque, Projetos, Resíduos, Relatórios e Rótulos; revisar dados exibidos e publicar apenas imagens reais e apropriadas para divulgação. Até lá, manter o README introdutório sem galeria provisória. Esta atividade não faz parte do escopo funcional da Etapa 9.
