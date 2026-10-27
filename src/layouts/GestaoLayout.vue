@@ -4,6 +4,7 @@ import { type RouteLocationRaw, useRoute, useRouter } from 'vue-router'
 import GestaoUserProfile from '@/components/GestaoUserProfile.vue'
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { gestaoShellService, type BaseBuscaGestao } from '@/services/gestaoShellService'
+import { ehPerfilAdmin } from '@/modules/auth/perfis'
 import { useSessionStore } from '@/stores/session'
 import { alternarTema, aplicarTema, tema } from '@/services/themeService'
 
@@ -65,7 +66,7 @@ const baseBusca = ref<BaseBuscaGestao>({
   falhas: [],
 })
 
-const ehAdministrador = computed(() => session.usuario?.perfil === 'ADMINISTRADOR')
+const ehAdministrador = computed(() => ehPerfilAdmin(session.usuario?.perfil))
 
 // O retorno no topbar é reservado a telas realmente aninhadas/detalhadas.
 // Seções principais acessadas pela sidebar não exibem uma seta de retorno.

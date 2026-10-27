@@ -17,6 +17,7 @@ import type {
   StatusResiduo,
   TipoRiscoResiduo,
 } from '@/modules/residuos/types/residuo'
+import { ehPerfilAdmin } from '@/modules/auth/perfis'
 import { useSessionStore } from '@/stores/session'
 
 type FiltroResiduo = StatusResiduo | 'TODOS'
@@ -107,7 +108,7 @@ const abas: Array<{ valor: FiltroResiduo; rotulo: string }> = [
 ]
 
 const residuoAlvo = computed(() => typeof route.query.residuo === 'string' ? route.query.residuo : '')
-const ehAdministrador = computed(() => session.usuario?.perfil === 'ADMINISTRADOR')
+const ehAdministrador = computed(() => ehPerfilAdmin(session.usuario?.perfil))
 
 const residuosFiltrados = computed(() => {
   const termo = busca.value.trim().toLocaleLowerCase('pt-BR')

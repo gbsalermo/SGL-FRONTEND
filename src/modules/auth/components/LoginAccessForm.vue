@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { mensagemDeErroDeLogin } from '@/modules/auth/loginErrors'
+import { ehPerfilGestao } from '@/modules/auth/perfis'
+import type { AuthConfig, UsuarioSessao } from '@/modules/auth/types/session'
+import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -12,25 +16,53 @@ const senha = ref('')
 const mostrarSenha = ref(false)
 const carregando = ref(false)
 const erro = ref('')
+const devLoginAtivo = ref(false)
 
-async function entrar() {
+onMounted(async () => {
+  try {
+    const { data } = await http.get<AuthConfig>('/v1/auth/config')
+    devLoginAtivo.value = data.devLoginAtivo
+  } catch {
+    // Without the config the developer shortcut simply stays hidden.
+    devLoginAtivo.value = false
+  }
+})
+
+async function irParaInicio(usuarioAutenticado: UsuarioSessao) {
+  if (usuarioAutenticado.situacao === 'PENDENTE_VINCULACAO') {
+    await router.replace('/aguardando-aprovacao')
+    return
+  }
+  await router.replace(ehPerfilGestao(usuarioAutenticado.perfil) ? '/dashboard' : '/inicio')
+}
+
+async function executar(acao: () => Promise<UsuarioSessao>) {
   erro.value = ''
   carregando.value = true
 
   try {
-    const usuarioAutenticado = await session.entrar(usuario.value, senha.value)
-    const perfil = usuarioAutenticado.perfil
-
-    await router.replace(
-      perfil === 'GESTOR' || perfil === 'ADMINISTRADOR'
-        ? '/dashboard'
-        : '/inicio',
-    )
+    await irParaInicio(await acao())
   } catch (error) {
-    erro.value = error instanceof Error ? error.message : 'Não foi possível acessar o sistema.'
+    erro.value = mensagemDeErroDeLogin(error)
   } finally {
     carregando.value = false
   }
+}
+
+function entrar() {
+  if (!usuario.value.trim() || !senha.value) {
+    erro.value = 'Informe usuário e senha para continuar.'
+    return
+  }
+  void executar(() => session.entrar(usuario.value, senha.value))
+}
+
+function entrarComoDesenvolvedor() {
+  if (!usuario.value.trim()) {
+    erro.value = 'Informe o login do usuário de desenvolvimento.'
+    return
+  }
+  void executar(() => session.entrarDesenvolvimento(usuario.value))
 }
 </script>
 
@@ -44,7 +76,7 @@ async function entrar() {
 
       <form class="login-form" @submit.prevent="entrar">
         <div class="login-field">
-          <label for="usuario">Usuário de colaborador</label>
+          <label for="usuario">Usuário (login de rede ou CPF)</label>
 
           <div class="login-field__control">
             <svg class="login-field__icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -58,13 +90,13 @@ async function entrar() {
               name="usuario"
               type="text"
               autocomplete="username"
-              placeholder="Digite seu usuário de colaborador"
+              placeholder="Ex.: m344136 ou seu CPF"
             />
           </div>
         </div>
 
         <div class="login-field">
-          <label for="senha">Senha</label>
+          <label for="senha">Senha da Embrapa</label>
 
           <div class="login-field__control">
             <svg class="login-field__icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -103,6 +135,16 @@ async function entrar() {
 
         <button class="login-submit" type="submit" :disabled="carregando">
           {{ carregando ? 'Entrando...' : 'Entrar' }}
+        </button>
+
+        <button
+          v-if="devLoginAtivo"
+          class="login-dev"
+          type="button"
+          :disabled="carregando"
+          @click="entrarComoDesenvolvedor"
+        >
+          Entrar como desenvolvedor
         </button>
       </form>
     </div>
@@ -284,6 +326,28 @@ async function entrar() {
 }
 
 .login-submit:focus-visible {
+  outline: 3px solid rgb(45 107 196 / 28%);
+  outline-offset: 3px;
+}
+
+.login-dev {
+  min-height: 48px;
+  margin-top: -12px;
+  border: 1px dashed var(--sgl-border, #e2e8f0);
+  border-radius: var(--sgl-radius-control, 6px);
+  background: transparent;
+  color: var(--sgl-text-muted, #64748b);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.login-dev:hover:not(:disabled) {
+  border-color: var(--sgl-primary, #1a4da1);
+  color: var(--sgl-primary, #1a4da1);
+}
+
+.login-dev:focus-visible {
   outline: 3px solid rgb(45 107 196 / 28%);
   outline-offset: 3px;
 }
