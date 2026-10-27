@@ -521,6 +521,7 @@ watch(movimentoApresentacao, (valor) => {
   if (valor === 'MEDIDA') {
     movimentoForma.value = 'POR_MEDIDA'
     movimentoEmbalagem.value = ''
+    movimentoMostrarQuantidades.value = true
   } else if (valor.startsWith('EMBALAGEM:')) {
     movimentoForma.value = 'COMPLETA'
     movimentoEmbalagem.value = valor.slice('EMBALAGEM:'.length)
