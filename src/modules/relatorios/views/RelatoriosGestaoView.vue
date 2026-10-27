@@ -104,7 +104,6 @@ const movimentoLoteId = ref('')
 const movimentoEmbalagem = ref('')
 
 const resumoProdutoId = ref('')
-const resumoLimite = ref(5)
 
 const estoqueUnidadeId = ref('')
 const estoqueProdutoId = ref('')
@@ -241,7 +240,6 @@ function limparFiltros() {
   movimentoLoteId.value = ''
   movimentoEmbalagem.value = ''
   resumoProdutoId.value = ''
-  resumoLimite.value = 5
   estoqueUnidadeId.value = ''
   estoqueProdutoId.value = ''
   estoqueSituacao.value = ''
@@ -353,7 +351,6 @@ async function visualizarRelatorio() {
         produtoId: resumoProdutoId.value || undefined,
         dataInicio: dataInicio.value || undefined,
         dataFim: dataFim.value || undefined,
-        limite: resumoLimite.value,
       })
       return
     }
@@ -447,7 +444,7 @@ watch([
   situacao, laboratorioId, dataInicio, dataFim, tipoBolsa, busca,
   produtoSituacao, produtoFiscalizado, produtoPerecivel, produtoRisco, produtoOrgao,
   movimentoTipo, movimentoOrigem, movimentoProdutoId, movimentoUsuarioId, movimentoLoteId, movimentoEmbalagem,
-  resumoProdutoId, resumoLimite, estoqueUnidadeId, estoqueProdutoId,
+  resumoProdutoId, estoqueUnidadeId, estoqueProdutoId,
   estoqueSituacao, estoqueNivel, estoqueSituacaoLote, estoqueDiasVencimento,
   fiscalProdutoId, fiscalOrgao, fiscalUnidadeId, fiscalDiasVencimento,
   projetoStatus, projetoExecucao, projetoAtivo, projetoRecurso,
@@ -549,7 +546,6 @@ onMounted(async () => {
           <div v-else-if="relatorioResumoSelecionado" class="filtros-body filtros-body--resumo">
             <div class="campo"><label for="resumo-produto">Produto</label><select id="resumo-produto" v-model="resumoProdutoId"><option value="">Todos os produtos</option><option v-for="produto in produtos" :key="produto.id" :value="produto.id">{{ produto.nome }}</option></select></div>
             <div class="campo campo--periodo"><label>Período analisado</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
-            <div class="campo"><label for="resumo-limite">Posições do ranking</label><select id="resumo-limite" v-model.number="resumoLimite"><option :value="5">Top 5</option><option :value="10">Top 10</option><option :value="20">Top 20</option></select></div>
           </div>
 
           <div v-else-if="relatorioEstoqueSelecionado" class="filtros-body filtros-body--estoque">
@@ -633,10 +629,15 @@ onMounted(async () => {
           </div>
 
           <div v-else-if="relatorioResumoSelecionado && resultadoResumoOperacional" class="preview-result">
-            <div class="resumo-cards resumo-cards--movimentacoes resumo-cards--operacional"><article><span>Movimentações</span><strong>{{ resultadoResumoOperacional.totalMovimentacoes }}</strong></article><article><span>Entradas</span><strong>Por produto</strong></article><article><span>Saídas</span><strong>Por produto</strong></article><article><span>Descartes</span><strong>Por produto</strong></article><article><span>Produtos</span><strong>{{ resultadoResumoOperacional.produtosMovimentados }}</strong></article><article><span>Lotes</span><strong>{{ resultadoResumoOperacional.lotesMovimentados }}</strong></article></div>
-            <div class="rankings-grid"><section class="ranking-card ranking-card--entrada"><h3>Principais entradas</h3><ol><li v-for="item in resultadoResumoOperacional.principaisEntradas" :key="item.produtoId"><div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div><b>+{{ formatarQuantidadeComUnidade(item.quantidade, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</b></li></ol><p v-if="resultadoResumoOperacional.principaisEntradas.length === 0" class="ranking-empty">Sem entradas no período.</p></section><section class="ranking-card ranking-card--saida"><h3>Principais saídas</h3><ol><li v-for="item in resultadoResumoOperacional.principaisSaidas" :key="item.produtoId"><div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div><b>−{{ formatarQuantidadeComUnidade(item.quantidade, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</b></li></ol><p v-if="resultadoResumoOperacional.principaisSaidas.length === 0" class="ranking-empty">Sem saídas no período.</p></section></div>
-            <div class="section-heading"><h3>Lotes mais movimentados</h3><span>Ranking por quantidade total movimentada</span></div>
-            <div class="table-wrap"><table><thead><tr><th>#</th><th>Lote</th><th>Produto</th><th>Movimentado</th><th>Entradas</th><th>Saídas</th><th>Saldo atual</th><th>Validade</th></tr></thead><tbody><tr v-for="(item, index) in resultadoResumoOperacional.lotesMaisMovimentados" :key="item.loteId"><td><strong>{{ index + 1 }}º</strong></td><td><strong>{{ item.codigoInterno || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.produtoNome || '—' }}</td><td>{{ formatarQuantidadeComUnidade(item.quantidadeMovimentada, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}<small>{{ item.movimentacoes }} operação(ões)</small></td><td class="quantidade quantidade--entrada">+{{ formatarQuantidadeComUnidade(item.quantidadeEntradas, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td class="quantidade quantidade--saida">−{{ formatarQuantidadeComUnidade(item.quantidadeSaidas, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td>{{ formatarQuantidadeComUnidade(item.saldoAtual, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td>{{ formatarData(item.dataValidade) }}</td></tr><tr v-if="resultadoResumoOperacional.lotesMaisMovimentados.length === 0"><td colspan="8" class="table-empty">Nenhum lote movimentado com os filtros informados.</td></tr></tbody></table></div>
+            <div class="resumo-cards resumo-cards--movimentacoes resumo-cards--operacional">
+              <article><span>Movimentações</span><strong>{{ resultadoResumoOperacional.totalMovimentacoes }}</strong></article>
+              <article><span>Entradas</span><strong>{{ resultadoResumoOperacional.totalEntradas ?? '—' }}</strong></article>
+              <article><span>Saídas</span><strong>{{ resultadoResumoOperacional.totalSaidas ?? '—' }}</strong></article>
+              <article><span>Devoluções</span><strong>{{ resultadoResumoOperacional.totalDevolucoes ?? '—' }}</strong></article>
+              <article><span>Ajustes</span><strong>{{ resultadoResumoOperacional.totalAjustes ?? '—' }}</strong></article>
+              <article><span>Descartes</span><strong>{{ resultadoResumoOperacional.totalDescartes ?? '—' }}</strong></article>
+            </div>
+            <p class="resumo-explicacao">Os indicadores representam o número de movimentações registradas, independentemente da unidade de medida. Para consultar os registros, acesse Detalhamento.</p>
           </div>
 
           <div v-else-if="relatorioEstoqueSelecionado && resultadoEstoqueLotes" class="preview-result">
@@ -683,6 +684,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.resumo-explicacao { padding: 0 20px 20px; color: var(--sgl-text-secondary, #64748b); font-size: 13px; }
+
 .modo-movimentacoes { display: flex; gap: 8px; padding: 16px 20px 0; }
 .modo-movimentacoes button { min-height: 40px; padding: 0 16px; border-radius: var(--sgl-radius-control, 6px); border: 1px solid var(--sgl-border, #cfd8e5); background: var(--sgl-surface, #fff); color: inherit; cursor: pointer; }
 .modo-movimentacoes .modo-ativo { border-color: var(--sgl-primary, #1a4da1); color: var(--sgl-primary, #1a4da1); font-weight: 700; }
