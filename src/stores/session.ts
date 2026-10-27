@@ -11,6 +11,7 @@ interface SessaoPersistida {
   usuario: UsuarioSessao
   expiraEm: number
   unidadeOperacaoId: string | null
+  unidadeOperacaoRotulo: string | null
 }
 
 function carregarSessao(): SessaoPersistida | null {
@@ -32,6 +33,7 @@ function carregarSessao(): SessaoPersistida | null {
       usuario: sessao.usuario,
       expiraEm: sessao.expiraEm,
       unidadeOperacaoId: sessao.unidadeOperacaoId ?? null,
+      unidadeOperacaoRotulo: sessao.unidadeOperacaoRotulo ?? null,
     }
   } catch {
     localStorage.removeItem(SESSION_STORAGE_KEY)
@@ -47,6 +49,8 @@ export const useSessionStore = defineStore('session', {
     usuario: sessaoInicial?.usuario ?? null as UsuarioSessao | null,
     expiraEm: sessaoInicial?.expiraEm ?? null as number | null,
     unidadeOperacaoId: sessaoInicial?.unidadeOperacaoId ?? null as string | null,
+    // Display label of the selected Unidade, so screens can show it without another request.
+    unidadeOperacaoRotulo: sessaoInicial?.unidadeOperacaoRotulo ?? null as string | null,
   }),
 
   getters: {
@@ -74,8 +78,9 @@ export const useSessionStore = defineStore('session', {
       return data
     },
 
-    selecionarUnidade(unidadeId: string | null) {
+    selecionarUnidade(unidadeId: string | null, rotulo: string | null = null) {
       this.unidadeOperacaoId = unidadeId
+      this.unidadeOperacaoRotulo = unidadeId ? rotulo : null
       this.persistir()
     },
 
@@ -95,6 +100,7 @@ export const useSessionStore = defineStore('session', {
       this.usuario = null
       this.expiraEm = null
       this.unidadeOperacaoId = null
+      this.unidadeOperacaoRotulo = null
       localStorage.removeItem(SESSION_STORAGE_KEY)
     },
 
@@ -103,6 +109,7 @@ export const useSessionStore = defineStore('session', {
       this.usuario = resposta.usuario
       this.expiraEm = Date.parse(resposta.expiraEm)
       this.unidadeOperacaoId = null
+      this.unidadeOperacaoRotulo = null
       this.persistir()
       return resposta.usuario
     },
@@ -114,6 +121,7 @@ export const useSessionStore = defineStore('session', {
         usuario: this.usuario,
         expiraEm: this.expiraEm,
         unidadeOperacaoId: this.unidadeOperacaoId,
+        unidadeOperacaoRotulo: this.unidadeOperacaoRotulo,
       }
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessao))
     },

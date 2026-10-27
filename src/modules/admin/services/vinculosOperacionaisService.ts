@@ -1,3 +1,4 @@
+import type { PerfilUsuario, UsuarioSessao } from '@/modules/auth/types/session'
 import { http } from '@/services/http'
 
 export interface VinculoOperacional {
@@ -32,7 +33,22 @@ export interface ResumoVinculosUsuario {
   vinculosEncerrados: number
   laboratoriosAdicionais: string[]
 }
+export interface AprovarUsuarioRequest {
+  perfil: PerfilUsuario
+  laboratorioBaseId: string
+}
 export const vinculosOperacionaisService = {
+  async listarPendentes() {
+    const { data } = await http.get<UsuarioSessao[]>('/v1/usuarios/pendentes')
+    return data
+  },
+  async aprovar(usuarioId: string, req: AprovarUsuarioRequest) {
+    const { data } = await http.post<UsuarioSessao>(`/v1/usuarios/${usuarioId}/aprovar`, req)
+    return data
+  },
+  async recusar(usuarioId: string) {
+    await http.delete(`/v1/usuarios/${usuarioId}/pendente`)
+  },
   async resumo() {
     const { data } = await http.get<ResumoVinculosUsuario[]>('/v1/vinculos-operacionais/resumo')
     return data

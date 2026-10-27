@@ -176,6 +176,12 @@ export const router = createRouter({
           component: () => import('@/modules/relatorios/views/RelatorioPessoasLaboratorioView.vue'),
         },
         {
+          path: 'administracao/cadastros/vinculos/importar',
+          name: 'gestao-vinculos-importar',
+          component: () => import('@/modules/admin/views/ImportarPessoasView.vue'),
+          meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+        },
+        {
           path: 'administracao/cadastros/vinculos',
           name: 'gestao-vinculos-cadastros',
           component: () => import('@/modules/admin/views/VinculosOperacionaisGestaoView.vue'),
