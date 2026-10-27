@@ -87,6 +87,7 @@ export interface RelatorioMovimentacoesFiltros {
   atividadeId?: string
   tipoEmbalagem?: string
   formaConsumo?: string
+  mostrarQuantidades?: boolean
   tipo?: TipoMovimentacaoRelatorio
   origem?: OrigemMovimentacaoRelatorio
   produtoId?: string
