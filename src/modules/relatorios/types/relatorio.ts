@@ -307,6 +307,8 @@ export interface RelatorioFiscalizacaoMovimentacao {
   responsavelId: string
   responsavelNome: string
   saldoAposMovimentacao: number
+  recipientesEnvolvidos?: number | null
+  embalagensEnvolvidas?: string | null
   unidadeMedida?: string | null
 }
 
