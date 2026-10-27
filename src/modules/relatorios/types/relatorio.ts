@@ -48,6 +48,8 @@ export interface RelatorioMovimentacaoItem {
   produtoId: string
   produtoNome: string
   unidadeMedida?: string | null
+  tipoEmbalagemConsultada?: string | null
+  recipientesUtilizados?: number | null
   laboratorioId: string | null
   laboratorioNome: string | null
   usuarioId: string
