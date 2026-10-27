@@ -216,11 +216,11 @@ const resumoEstagiarios = computed(() => ({
 }))
 
 const quantidadesAgrupadas = computed(() => {
-  const mapa = new Map<string, { id: string; nome: string; unidade: string | null; quantidade: number }>()
+  const mapa = new Map<string, { id: string; nome: string; unidade: string | null; tipo: string; quantidade: number }>()
   for (const item of resultadoMovimentacoes.value?.itens ?? []) {
     const unidade = item.unidadeMedida ?? unidadeProduto(item.produtoId)
-    const id = `${item.produtoId}:${unidade ?? ''}`
-    const atual = mapa.get(id) ?? { id, nome: item.produtoNome, unidade, quantidade: 0 }
+    const id = `${item.produtoId}:${item.tipoMovimentacao}:${unidade ?? ''}`
+    const atual = mapa.get(id) ?? { id, nome: item.produtoNome, unidade, tipo: item.tipoMovimentacao, quantidade: 0 }
     atual.quantidade += Number(item.quantidadeMovimentada)
     mapa.set(id, atual)
   }
@@ -693,7 +693,7 @@ onMounted(async () => {
             <div class="resumo-cards resumo-cards--movimentacoes"><article><span>Movimentações</span><strong>{{ resultadoMovimentacoes.totalMovimentacoes }}</strong></article><article><span>Entradas</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'ENTRADA').length }}</strong></article><article><span>Saídas</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'SAIDA').length }}</strong></article><article><span>Devoluções</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'DEVOLUCAO').length }}</strong></article><article><span>Descartes</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'DESCARTE_VENCIMENTO').length }}</strong></article><article><span>Ajustes</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'AJUSTE_ENTRADA' || item.tipoMovimentacao === 'AJUSTE_SAIDA').length }}</strong></article></div>
             <div v-if="movimentoMostrarQuantidades && resultadoMovimentacoes.itens.length" class="totais-produto">
               <strong>Quantidades por produto e unidade</strong>
-              <div v-for="grupo in quantidadesAgrupadas" :key="grupo.id">{{ grupo.nome }}: {{ formatarQuantidadeComUnidade(grupo.quantidade, grupo.unidade) }}</div>
+              <div v-for="grupo in quantidadesAgrupadas" :key="grupo.id">{{ grupo.nome }} · {{ formatarRotulo(grupo.tipo) }}: {{ formatarQuantidadeComUnidade(grupo.quantidade, grupo.unidade) }}</div>
             </div>
             <div class="table-wrap"><table class="movimentacoes-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th v-if="movimentoMostrarQuantidades">Quantidade</th><th>Lote</th><th>Laboratório</th><th>Origem</th><th>Responsável</th><th v-if="movimentoMostrarQuantidades">Saldo</th></tr></thead><tbody><tr v-for="item in resultadoMovimentacoes.itens" :key="item.id"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong><small v-if="item.pedidoSolicitanteNome">Solicitante: {{ item.pedidoSolicitanteNome }}</small></td><td><span
   class="status status--mov"
