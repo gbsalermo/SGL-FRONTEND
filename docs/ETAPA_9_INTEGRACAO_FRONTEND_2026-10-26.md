@@ -61,3 +61,17 @@ Um frasco de 500 mL de que saem 30 mL é **por medida** mesmo que o recipiente i
 A classificação atual é um **indicador derivado dos snapshots históricos**, não um novo campo de intenção do pedido persistido no momento da operação. Um registro de uma retirada integral de um recipiente cheio não prova por si só a intenção do usuário de solicitar uma apresentação inteira. Para auditoria normativa futura que dependa dessa intenção, a captura explícita da modalidade no fluxo de pedido/entrega precisa de contrato e migration próprios, sem reinterpretar retroativamente registros históricos.
 
 Todos os filtros na prévia são encaminhados também à exportação; o PDF/XLSX exibe a forma de consumo identificada. Testes de serviço e controller foram atualizados; suíte e build ainda requerem execução local.
+
+## Complemento — Consumo por apresentação e por medida
+
+Implementado filtro opcional `formaConsumo` em prévia e exportações:
+- `COMPLETA`: parcela de um recipiente cheio cuja retirada abrange exatamente sua capacidade inicial;
+- `POR_MEDIDA`: parcela registrada abaixo da capacidade de uma apresentação inteira;
+- `MISTA`: na mesma movimentação existem parcelas completas e por medida;
+- `NAO_DETERMINADA`: não há dados históricos suficientes.
+
+O tipo de embalagem (`FRASCO`, `KIT` etc.) continua sendo exclusivamente a **categoria física do recipiente**. Uma saída de 30 mL de um frasco de 500 mL pode ser filtrada como **FRASCO + POR_MEDIDA** e não se torna “um frasco completo”.
+
+**Limite de confiabilidade:** são categorias **inferidas do consumo efetivo**, não prova da intenção do solicitante. O sistema ainda não persiste a modalidade originalmente pedida como dado imutável. Para auditoria da modalidade intencional futura, prever captura explícita e migração própria, sem alterar o histórico.
+
+`mostrarQuantidades` é opcional na exportação de movimentações: por padrão os arquivos mostram contagem/ocorrências e colunas operacionais sem saldo/quantidade; quando verdadeiro incluem quantidade física e saldo. O método legado de exportação permanece compatível. Reexecutar testes backend e build frontend antes de homologar.
