@@ -215,6 +215,18 @@ const resumoEstagiarios = computed(() => ({
   inativos: itensEstagiariosFiltrados.value.filter((item) => !item.ativo).length,
 }))
 
+const quantidadesAgrupadas = computed(() => {
+  const mapa = new Map<string, { id: string; nome: string; unidade: string | null; quantidade: number }>()
+  for (const item of resultadoMovimentacoes.value?.itens ?? []) {
+    const unidade = item.unidadeMedida ?? unidadeProduto(item.produtoId)
+    const id = `${item.produtoId}:${unidade ?? ''}`
+    const atual = mapa.get(id) ?? { id, nome: item.produtoNome, unidade, quantidade: 0 }
+    atual.quantidade += Number(item.quantidadeMovimentada)
+    mapa.set(id, atual)
+  }
+  return [...mapa.values()]
+})
+
 function limparResultados() {
   resultadoEstagiarios.value = null
   resultadoProdutos.value = null
@@ -678,8 +690,12 @@ onMounted(async () => {
           </div>
 
           <div v-else-if="relatorioMovimentacoesSelecionado && resultadoMovimentacoes" class="preview-result">
-            <div class="resumo-cards resumo-cards--movimentacoes"><article><span>Movimentações</span><strong>{{ resultadoMovimentacoes.totalMovimentacoes }}</strong></article><article><span>Entradas</span><strong>Por produto</strong></article><article><span>Saídas</span><strong>Por produto</strong></article><article><span>Devoluções</span><strong>Por produto</strong></article><article><span>Descartes</span><strong>Por produto</strong></article><article><span>Ajustes</span><strong>Por produto</strong></article></div>
-            <div class="table-wrap"><table class="movimentacoes-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Lote</th><th>Laboratório</th><th>Origem</th><th>Responsável</th><th>Saldo</th></tr></thead><tbody><tr v-for="item in resultadoMovimentacoes.itens" :key="item.id"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong><small v-if="item.pedidoSolicitanteNome">Solicitante: {{ item.pedidoSolicitanteNome }}</small></td><td><span
+            <div class="resumo-cards resumo-cards--movimentacoes"><article><span>Movimentações</span><strong>{{ resultadoMovimentacoes.totalMovimentacoes }}</strong></article><article><span>Entradas</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'ENTRADA').length }}</strong></article><article><span>Saídas</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'SAIDA').length }}</strong></article><article><span>Devoluções</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'DEVOLUCAO').length }}</strong></article><article><span>Descartes</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'DESCARTE_VENCIMENTO').length }}</strong></article><article><span>Ajustes</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'AJUSTE_ENTRADA' || item.tipoMovimentacao === 'AJUSTE_SAIDA').length }}</strong></article></div>
+            <div v-if="movimentoMostrarQuantidades && resultadoMovimentacoes.itens.length" class="totais-produto">
+              <strong>Quantidades por produto e unidade</strong>
+              <div v-for="grupo in quantidadesAgrupadas" :key="grupo.id">{{ grupo.nome }}: {{ formatarQuantidadeComUnidade(grupo.quantidade, grupo.unidade) }}</div>
+            </div>
+            <div class="table-wrap"><table class="movimentacoes-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th v-if="movimentoMostrarQuantidades">Quantidade</th><th>Lote</th><th>Laboratório</th><th>Origem</th><th>Responsável</th><th v-if="movimentoMostrarQuantidades">Saldo</th></tr></thead><tbody><tr v-for="item in resultadoMovimentacoes.itens" :key="item.id"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong><small v-if="item.pedidoSolicitanteNome">Solicitante: {{ item.pedidoSolicitanteNome }}</small></td><td><span
   class="status status--mov"
   :class="{
     'status--mov-entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO',
@@ -689,7 +705,7 @@ onMounted(async () => {
   }"
 >
   {{ formatarRotulo(item.tipoMovimentacao) }}
-</span></td><td class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ formatarQuantidadeComUnidade(item.quantidadeMovimentada, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ formatarRotulo(item.origem) }}</td><td>{{ item.usuarioNome }}</td><td>{{ formatarQuantidadeComUnidade(item.quantidadeAnterior, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }} → {{ formatarQuantidadeComUnidade(item.quantidadeAtual, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td></tr><tr v-if="resultadoMovimentacoes.itens.length === 0"><td colspan="9" class="table-empty">Nenhuma movimentação encontrada com os filtros informados.</td></tr></tbody></table></div>
+</span></td><td v-if="movimentoMostrarQuantidades" class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ formatarQuantidadeComUnidade(item.quantidadeMovimentada, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ formatarRotulo(item.origem) }}</td><td>{{ item.usuarioNome }}</td><td v-if="movimentoMostrarQuantidades">{{ formatarQuantidadeComUnidade(item.quantidadeAnterior, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }} → {{ formatarQuantidadeComUnidade(item.quantidadeAtual, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td></tr><tr v-if="resultadoMovimentacoes.itens.length === 0"><td  :colspan="movimentoMostrarQuantidades ? 9 : 7" class="table-empty">Nenhuma movimentação encontrada com os filtros informados.</td></tr></tbody></table></div>
           </div>
 
           <div v-else-if="relatorioResumoSelecionado && resultadoResumoOperacional" class="preview-result">
@@ -748,6 +764,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.totais-produto { padding: 12px 20px; display: grid; gap: 6px; font-size: 13px; }
+.movimento-checkbox { display: flex !important; align-items: center; gap: 9px; }
+.movimento-checkbox input { width: auto; height: auto; }
+
 .resumo-explicacao { padding: 0 20px 20px; color: var(--sgl-text-secondary, #64748b); font-size: 13px; }
 
 .modo-movimentacoes { display: flex; gap: 8px; padding: 16px 20px 0; }
