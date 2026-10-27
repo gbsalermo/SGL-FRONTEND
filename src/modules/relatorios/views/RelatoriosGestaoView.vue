@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
-import { relatorioService } from '@/modules/relatorios/services/relatorioService'
+import { relatorioService, ultimaConsultaRelatorio } from '@/modules/relatorios/services/relatorioService'
+import type { RelatorioProjetosResponse } from '@/modules/relatorios/types/projetosRelatorio'
 import type {
   NivelRiscoRelatorio,
   OrigemMovimentacaoRelatorio,
@@ -16,12 +17,14 @@ import type {
   TipoMovimentacaoRelatorio,
 } from '@/modules/relatorios/types/relatorio'
 import { http } from '@/services/http'
+import { projetosService } from '@/modules/projetos/services/projetosService'
+import type { ProjetoOperacional, SciOperacional, AtividadeOperacional } from '@/modules/projetos/types/projetos'
 
 type TipoRelatorio =
   | 'estagiarios'
   | 'produtos'
   | 'movimentacoes'
-  | 'resumo-operacional'
+  | 'projetos'
   | 'estoque-lotes'
   | 'residuos'
   | 'fiscalizacao'
@@ -44,6 +47,7 @@ interface ProdutoResumo {
   id: string
   nome: string
   fiscalizado?: boolean
+  unidadeMedida?: string | null
 }
 
 interface UsuarioResumo {
@@ -67,14 +71,19 @@ interface RelatorioOpcao {
 const relatorios: RelatorioOpcao[] = [
   { id: 'estagiarios', titulo: 'Estagiários', descricao: 'Ativos, inativos ou todos, por laboratório', icone: 'documento' },
   { id: 'produtos', titulo: 'Produtos', descricao: 'Catálogo, riscos, perecibilidade e fiscalização', icone: 'produto' },
-  { id: 'movimentacoes', titulo: 'Movimentações', descricao: 'Entradas, saídas e recortes por pedido', icone: 'troca' },
-  { id: 'resumo-operacional', titulo: 'Resumo operacional', descricao: 'Principais entradas, saídas e lotes', icone: 'resumo' },
+  { id: 'movimentacoes', titulo: 'Movimentações', descricao: 'Resumo e detalhamento das operações', icone: 'troca' },
+  { id: 'projetos', titulo: 'Projetos', descricao: 'SCI, atividades, participações e execução', icone: 'documento' },
   { id: 'estoque-lotes', titulo: 'Estoque e lotes', descricao: 'Posição de estoque, mínimos e vencimentos', icone: 'estoque' },
   { id: 'residuos', titulo: 'Resíduos', descricao: 'Geração, riscos, armazenamento e despacho', icone: 'residuo' },
   { id: 'fiscalizacao', titulo: 'Fiscalização', descricao: 'Produtos fiscalizados e sua rastreabilidade', icone: 'escudo' },
 ]
 
 const relatorioSelecionado = ref<TipoRelatorio>('estagiarios')
+const modoMovimentacoes = ref<'resumo' | 'detalhamento'>('resumo')
+const projetoStatus = ref('')
+const projetoExecucao = ref('')
+const projetoAtivo = ref<SituacaoFiltro>('')
+const projetoRecurso = ref<SimNaoFiltro>('')
 
 const situacao = ref<SituacaoFiltro>('')
 const laboratorioId = ref('')
@@ -94,9 +103,20 @@ const movimentoOrigem = ref<'' | OrigemMovimentacaoRelatorio>('')
 const movimentoProdutoId = ref('')
 const movimentoUsuarioId = ref('')
 const movimentoLoteId = ref('')
+const movimentoEmbalagem = ref('')
+const movimentoForma = ref('')
+const movimentoApresentacao = ref('')
+const movimentoProjetoId = ref('')
+const movimentoSciId = ref('')
+const movimentoAtividadeId = ref('')
+const movimentoMostrarQuantidades = ref(false)
+const movimentoMaisFiltros = ref(false)
+const projetosContexto = ref<ProjetoOperacional[]>([])
+const scisContexto = ref<SciOperacional[]>([])
+const atividadesContexto = ref<AtividadeOperacional[]>([])
+const embalagensDisponiveis = ref<string[]>([])
 
 const resumoProdutoId = ref('')
-const resumoLimite = ref(5)
 
 const estoqueUnidadeId = ref('')
 const estoqueProdutoId = ref('')
@@ -122,6 +142,7 @@ const resultadoMovimentacoes = ref<RelatorioMovimentacoesResponse | null>(null)
 const resultadoResumoOperacional = ref<RelatorioResumoOperacionalResponse | null>(null)
 const resultadoEstoqueLotes = ref<RelatorioEstoqueLotesResponse | null>(null)
 const resultadoFiscalizacao = ref<RelatorioFiscalizacaoResponse | null>(null)
+const resultadoProjetos = ref<RelatorioProjetosResponse | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 
@@ -131,11 +152,19 @@ const opcaoSelecionada = computed(
 
 const relatorioEstagiariosSelecionado = computed(() => relatorioSelecionado.value === 'estagiarios')
 const relatorioProdutosSelecionado = computed(() => relatorioSelecionado.value === 'produtos')
-const relatorioMovimentacoesSelecionado = computed(() => relatorioSelecionado.value === 'movimentacoes')
-const relatorioResumoSelecionado = computed(() => relatorioSelecionado.value === 'resumo-operacional')
+const relatorioMovimentacoesSelecionado = computed(() => relatorioSelecionado.value === 'movimentacoes' && modoMovimentacoes.value === 'detalhamento')
+const relatorioResumoSelecionado = computed(() => relatorioSelecionado.value === 'movimentacoes' && modoMovimentacoes.value === 'resumo')
+const relatorioProjetosSelecionado = computed(() => relatorioSelecionado.value === 'projetos')
 const relatorioEstoqueSelecionado = computed(() => relatorioSelecionado.value === 'estoque-lotes')
 const relatorioResiduosSelecionado = computed(() => relatorioSelecionado.value === 'residuos')
 const relatorioFiscalizacaoSelecionado = computed(() => relatorioSelecionado.value === 'fiscalizacao')
+
+watch(modoMovimentacoes, () => {
+  limparResultados()
+  ultimaConsultaRelatorio.value = null
+  erro.value = ''
+})
+
 
 const produtosFiscalizados = computed(() => produtos.value.filter((produto) => produto.fiscalizado))
 
@@ -145,6 +174,7 @@ const possuiResultado = computed(() => {
   if (relatorioMovimentacoesSelecionado.value) return Boolean(resultadoMovimentacoes.value)
   if (relatorioResumoSelecionado.value) return Boolean(resultadoResumoOperacional.value)
   if (relatorioEstoqueSelecionado.value) return Boolean(resultadoEstoqueLotes.value)
+  if (relatorioProjetosSelecionado.value) return Boolean(resultadoProjetos.value)
   if (relatorioFiscalizacaoSelecionado.value) return Boolean(resultadoFiscalizacao.value)
   return false
 })
@@ -155,6 +185,7 @@ const geradoEm = computed(() => {
   if (relatorioMovimentacoesSelecionado.value) return resultadoMovimentacoes.value?.geradoEm
   if (relatorioResumoSelecionado.value) return resultadoResumoOperacional.value?.geradoEm
   if (relatorioEstoqueSelecionado.value) return resultadoEstoqueLotes.value?.geradoEm
+  if (relatorioProjetosSelecionado.value) return resultadoProjetos.value?.geradoEm
   if (relatorioFiscalizacaoSelecionado.value) return resultadoFiscalizacao.value?.geradoEm
   return undefined
 })
@@ -186,6 +217,18 @@ const resumoEstagiarios = computed(() => ({
   inativos: itensEstagiariosFiltrados.value.filter((item) => !item.ativo).length,
 }))
 
+const quantidadesAgrupadas = computed(() => {
+  const mapa = new Map<string, { id: string; nome: string; unidade: string | null; tipo: string; quantidade: number }>()
+  for (const item of resultadoMovimentacoes.value?.itens ?? []) {
+    const unidade = item.unidadeMedida ?? unidadeProduto(item.produtoId)
+    const id = `${item.produtoId}:${item.tipoMovimentacao}:${unidade ?? ''}`
+    const atual = mapa.get(id) ?? { id, nome: item.produtoNome, unidade, tipo: item.tipoMovimentacao, quantidade: 0 }
+    atual.quantidade += Number(item.quantidadeMovimentada)
+    mapa.set(id, atual)
+  }
+  return [...mapa.values()]
+})
+
 function limparResultados() {
   resultadoEstagiarios.value = null
   resultadoProdutos.value = null
@@ -193,11 +236,13 @@ function limparResultados() {
   resultadoResumoOperacional.value = null
   resultadoEstoqueLotes.value = null
   resultadoFiscalizacao.value = null
+  resultadoProjetos.value = null
 }
 
 function selecionarRelatorio(id: TipoRelatorio) {
   relatorioSelecionado.value = id
   limparResultados()
+  ultimaConsultaRelatorio.value = null
   erro.value = ''
 }
 
@@ -218,8 +263,15 @@ function limparFiltros() {
   movimentoProdutoId.value = ''
   movimentoUsuarioId.value = ''
   movimentoLoteId.value = ''
+  movimentoEmbalagem.value = ''
+  movimentoForma.value = ''
+  movimentoApresentacao.value = ''
+  movimentoProjetoId.value = ''
+  movimentoSciId.value = ''
+  movimentoAtividadeId.value = ''
+  movimentoMostrarQuantidades.value = false
+  movimentoMaisFiltros.value = false
   resumoProdutoId.value = ''
-  resumoLimite.value = 5
   estoqueUnidadeId.value = ''
   estoqueProdutoId.value = ''
   estoqueSituacao.value = ''
@@ -230,7 +282,12 @@ function limparFiltros() {
   fiscalOrgao.value = ''
   fiscalUnidadeId.value = ''
   fiscalDiasVencimento.value = 30
+  projetoStatus.value = ''
+  projetoExecucao.value = ''
+  projetoAtivo.value = ''
+  projetoRecurso.value = ''
   limparResultados()
+  ultimaConsultaRelatorio.value = null
   erro.value = ''
 }
 
@@ -255,6 +312,10 @@ async function visualizarRelatorio() {
     relatorioResumoSelecionado.value ||
     relatorioFiscalizacaoSelecionado.value
   if (usaPeriodo && !validarPeriodo()) return
+  if (relatorioProjetosSelecionado.value && dataInicio.value && dataFim.value && dataInicio.value > dataFim.value) {
+    erro.value = 'A data inicial não pode ser posterior à data final.'
+    return
+  }
 
   if (relatorioResiduosSelecionado.value) {
     erro.value = 'O relatório de Resíduos já faz parte da central e será ativado quando a branch do módulo de resíduos for integrada à base de Relatórios.'
@@ -262,7 +323,21 @@ async function visualizarRelatorio() {
   }
 
   carregando.value = true
+  ultimaConsultaRelatorio.value = null
   try {
+    if (relatorioProjetosSelecionado.value) {
+      limparResultados()
+      resultadoProjetos.value = await relatorioService.listarProjetos({
+        laboratorioId: laboratorioId.value || undefined,
+        status: projetoStatus.value || undefined,
+        situacaoExecucao: projetoExecucao.value || undefined,
+        ativo: projetoAtivo.value === '' ? undefined : projetoAtivo.value === 'ativo',
+        recursoExterno: projetoRecurso.value === '' ? undefined : projetoRecurso.value === 'sim',
+        dataInicio: dataInicio.value || undefined,
+        dataFim: dataFim.value || undefined,
+      })
+      return
+    }
     if (relatorioEstagiariosSelecionado.value) {
       limparResultados()
       resultadoEstagiarios.value = await relatorioService.listarEstagiarios({
@@ -295,6 +370,12 @@ async function visualizarRelatorio() {
         laboratorioId: laboratorioId.value || undefined,
         usuarioId: movimentoUsuarioId.value || undefined,
         loteId: movimentoLoteId.value || undefined,
+        tipoEmbalagem: movimentoEmbalagem.value || undefined,
+        formaConsumo: movimentoForma.value || undefined,
+        mostrarQuantidades: movimentoMostrarQuantidades.value,
+        projetoId: movimentoProjetoId.value || undefined,
+        sciId: movimentoSciId.value || undefined,
+        atividadeId: movimentoAtividadeId.value || undefined,
         dataInicio: dataInicio.value || undefined,
         dataFim: dataFim.value || undefined,
       })
@@ -307,7 +388,6 @@ async function visualizarRelatorio() {
         produtoId: resumoProdutoId.value || undefined,
         dataInicio: dataInicio.value || undefined,
         dataFim: dataFim.value || undefined,
-        limite: resumoLimite.value,
       })
       return
     }
@@ -368,6 +448,22 @@ function formatarOrgaos(valores: string[]) {
   return valores.map((item) => formatarRotulo(item)).join(', ')
 }
 
+function unidadeProduto(id?: string | null) {
+  return produtos.value.find((produto) => produto.id === id)?.unidadeMedida ?? null
+}
+
+function formatarQuantidadeComUnidade(valor: number, unidade?: string | null) {
+  const numero = Number(valor)
+  const formatado = Number.isFinite(numero)
+    ? new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 6 }).format(numero)
+    : String(valor)
+  const simbolos: Record<string, string> = {
+    ML: 'mL', L: 'L', MG: 'mg', G: 'g', KG: 'kg',
+    METRO: 'm', UNIDADE: 'un.', REACAO: 'reações',
+  }
+  return unidade ? `${formatado} ${simbolos[unidade] ?? unidade}` : formatado
+}
+
 function sinalQuantidade(tipo: TipoMovimentacaoRelatorio) {
   if (tipo === 'ENTRADA' || tipo === 'DEVOLUCAO') return '+'
   if (tipo === 'SAIDA' || tipo === 'DESCARTE_VENCIMENTO') return '−'
@@ -381,6 +477,72 @@ function classeSituacaoLote(situacaoLote: SituacaoLoteRelatorio) {
   return 'status--inativo'
 }
 
+watch([
+  situacao, laboratorioId, dataInicio, dataFim, tipoBolsa, busca,
+  produtoSituacao, produtoFiscalizado, produtoPerecivel, produtoRisco, produtoOrgao,
+  movimentoTipo, movimentoOrigem, movimentoProdutoId, movimentoUsuarioId, movimentoLoteId, movimentoEmbalagem,
+  movimentoProjetoId, movimentoSciId, movimentoAtividadeId, movimentoMostrarQuantidades, movimentoApresentacao,
+  resumoProdutoId, estoqueUnidadeId, estoqueProdutoId,
+  estoqueSituacao, estoqueNivel, estoqueSituacaoLote, estoqueDiasVencimento,
+  fiscalProdutoId, fiscalOrgao, fiscalUnidadeId, fiscalDiasVencimento,
+  projetoStatus, projetoExecucao, projetoAtivo, projetoRecurso,
+], () => {
+  ultimaConsultaRelatorio.value = null
+  limparResultados()
+})
+
+const projetosDoLaboratorio = computed(() =>
+  projetosContexto.value.filter((p) => !laboratorioId.value || p.laboratorioId === laboratorioId.value))
+watch(laboratorioId, () => {
+  movimentoProjetoId.value = ''
+  movimentoSciId.value = ''
+  movimentoAtividadeId.value = ''
+})
+watch(movimentoProjetoId, async (id) => {
+  movimentoSciId.value = ''
+  movimentoAtividadeId.value = ''
+  scisContexto.value = []
+  atividadesContexto.value = []
+  if (!id) return
+  try {
+    scisContexto.value = await projetosService.listarScisPorProjeto(id)
+  } catch (e) { console.error('Falha ao carregar SCIs', e) }
+})
+watch(movimentoSciId, async (id) => {
+  movimentoAtividadeId.value = ''
+  atividadesContexto.value = []
+  if (!id || !movimentoProjetoId.value) return
+  try {
+    atividadesContexto.value = (await projetosService.listarAtividadesPorProjeto(movimentoProjetoId.value))
+      .filter((a) => a.sciId === id)
+  } catch (e) { console.error('Falha ao carregar atividades', e) }
+})
+watch(movimentoApresentacao, (valor) => {
+  if (valor === 'MEDIDA') {
+    movimentoForma.value = 'POR_MEDIDA'
+    movimentoEmbalagem.value = ''
+    movimentoMostrarQuantidades.value = true
+  } else if (valor.startsWith('EMBALAGEM:')) {
+    movimentoForma.value = 'COMPLETA'
+    movimentoEmbalagem.value = valor.slice('EMBALAGEM:'.length)
+  } else {
+    movimentoForma.value = ''
+    movimentoEmbalagem.value = ''
+  }
+})
+
+watch(movimentoProdutoId, async (id) => {
+  movimentoApresentacao.value = ''
+  movimentoForma.value = ''
+  movimentoEmbalagem.value = ''
+  embalagensDisponiveis.value = []
+  if (!id) return
+  try {
+    const { data } = await http.get<string[]>('/v1/relatorios/movimentacoes/embalagens', { params: { produtoId: id } })
+    if (movimentoProdutoId.value === id) embalagensDisponiveis.value = data
+  } catch (e) { console.error('Falha ao consultar embalagens do produto', e) }
+})
+
 onMounted(async () => {
   const resultados = await Promise.allSettled([
     http.get<LaboratorioResumo[]>('/v1/laboratorios'),
@@ -391,6 +553,7 @@ onMounted(async () => {
   ])
 
   const [labs, units, prods, users, lots] = resultados
+  try { projetosContexto.value = await projetosService.listarProjetos() } catch (e) { console.error('Falha ao carregar Projetos', e) }
   if (labs.status === 'fulfilled') laboratorios.value = [...labs.value.data].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
   if (units.status === 'fulfilled') unidades.value = [...units.value.data].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
   if (prods.status === 'fulfilled') produtos.value = [...prods.value.data].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
@@ -430,6 +593,11 @@ onMounted(async () => {
         <section class="card filtros-card">
           <div class="card-title"><h2>2. Filtros do relatório: {{ opcaoSelecionada.titulo }}</h2></div>
 
+          <div v-if="relatorioSelecionado === 'movimentacoes'" class="modo-movimentacoes">
+            <button type="button" :class="{ 'modo-ativo': modoMovimentacoes === 'resumo' }" @click="modoMovimentacoes = 'resumo'">Resumo</button>
+            <button type="button" :class="{ 'modo-ativo': modoMovimentacoes === 'detalhamento' }" @click="modoMovimentacoes = 'detalhamento'">Detalhamento</button>
+          </div>
+
           <div v-if="relatorioEstagiariosSelecionado" class="filtros-body">
             <div class="campo"><label for="situacao">Situação</label><select id="situacao" v-model="situacao"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select></div>
             <div class="campo"><label for="laboratorio">Laboratório</label><select id="laboratorio" v-model="laboratorioId"><option value="">Todos os laboratórios</option><option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option></select></div>
@@ -446,20 +614,36 @@ onMounted(async () => {
             <div class="campo campo--busca"><label for="produto-orgao">Órgão fiscalizador</label><select id="produto-orgao" v-model="produtoOrgao"><option value="">Todos os órgãos</option><option value="POLICIA_FEDERAL">Polícia Federal</option><option value="VIGILANCIA_SANITARIA">Vigilância Sanitária</option><option value="ANVISA">ANVISA</option><option value="EXERCITO">Exército</option><option value="OUTRO">Outro</option></select></div>
           </div>
 
+          <div v-else-if="relatorioProjetosSelecionado" class="filtros-body filtros-body--projetos">
+            <div class="campo"><label for="projeto-laboratorio">Laboratório</label><select id="projeto-laboratorio" v-model="laboratorioId"><option value="">Todos os laboratórios</option><option v-for="lab in laboratorios" :key="lab.id" :value="lab.id">{{ lab.nome }}</option></select></div>
+            <div class="campo"><label for="projeto-status">Status</label><select id="projeto-status" v-model="projetoStatus"><option value="">Todos</option><option value="ATIVO">Ativo</option><option value="ENCERRADO_COM_AVALIACAO_PENDENTE">Encerrado com avaliação pendente</option><option value="CONCLUIDO">Concluído</option></select></div>
+            <div class="campo"><label for="projeto-execucao">Situação de execução</label><select id="projeto-execucao" v-model="projetoExecucao"><option value="">Todas</option><option value="NAO_INFORMADO">Não informado</option><option value="EM_ANDAMENTO_NO_PRAZO">Em andamento no prazo</option><option value="EM_ANDAMENTO_ATRASADO">Em andamento atrasado</option><option value="EXECUCAO_CANCELADA">Execução cancelada</option></select></div>
+            <div class="campo"><label for="projeto-ativo">Registro</label><select id="projeto-ativo" v-model="projetoAtivo"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select></div>
+            <div class="campo"><label for="projeto-recurso">Recurso externo</label><select id="projeto-recurso" v-model="projetoRecurso"><option value="">Todos</option><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+            <div class="campo campo--periodo"><label>Período de execução</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Início do período" /><span>até</span><input v-model="dataFim" type="date" aria-label="Fim do período" /></div></div>
+          </div>
+
           <div v-else-if="relatorioMovimentacoesSelecionado" class="filtros-body filtros-body--movimentacoes">
-            <div class="campo"><label for="mov-tipo">Tipo</label><select id="mov-tipo" v-model="movimentoTipo"><option value="">Todos</option><option value="ENTRADA">Entrada</option><option value="SAIDA">Saída</option><option value="AJUSTE">Ajuste</option><option value="DEVOLUCAO">Devolução</option><option value="DESCARTE_VENCIMENTO">Descarte por vencimento</option></select></div>
+            <div class="campo"><label for="mov-tipo">Movimentação</label><select id="mov-tipo" v-model="movimentoTipo"><option value="">Todas</option><option value="ENTRADA">Entrada</option><option value="SAIDA">Saída</option><option value="AJUSTE_ENTRADA">Ajuste de entrada</option><option value="AJUSTE_SAIDA">Ajuste de saída</option><option value="DEVOLUCAO">Devolução</option><option value="DESCARTE_VENCIMENTO">Descarte</option></select></div>
             <div class="campo"><label for="mov-origem">Origem</label><select id="mov-origem" v-model="movimentoOrigem"><option value="">Todas</option><option value="PEDIDO">Pedido</option><option value="COMPRA">Compra</option><option value="AJUSTE">Ajuste</option><option value="DEVOLUCAO">Devolução</option><option value="INVENTARIO">Inventário</option><option value="DESCARTE">Descarte</option></select></div>
-            <div class="campo campo--periodo"><label>Período da movimentação</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
+            <div class="campo"><label for="mov-lab">Laboratório</label><select id="mov-lab" v-model="laboratorioId"><option value="">Todos</option><option v-for="lab in laboratorios" :key="lab.id" :value="lab.id">{{ lab.nome }}</option></select></div>
+            <div class="campo"><label for="mov-projeto">Projeto</label><select id="mov-projeto" v-model="movimentoProjetoId"><option value="">Todos / Sem filtro</option><option v-for="projeto in projetosDoLaboratorio" :key="projeto.id" :value="projeto.id">{{ projeto.nome }}</option></select></div>
+            <div class="campo"><label for="mov-sci">SCI</label><select id="mov-sci" v-model="movimentoSciId" :disabled="!movimentoProjetoId"><option value="">Todos</option><option v-for="sci in scisContexto" :key="sci.id" :value="sci.id">{{ sci.nome }}</option></select></div>
+            <div class="campo"><label for="mov-atividade">Atividade</label><select id="mov-atividade" v-model="movimentoAtividadeId" :disabled="!movimentoSciId"><option value="">Todas</option><option v-for="atividade in atividadesContexto" :key="atividade.id" :value="atividade.id">{{ atividade.nome }}</option></select></div>
             <div class="campo"><label for="mov-produto">Produto</label><select id="mov-produto" v-model="movimentoProdutoId"><option value="">Todos os produtos</option><option v-for="produto in produtos" :key="produto.id" :value="produto.id">{{ produto.nome }}</option></select></div>
-            <div class="campo"><label for="mov-lab">Laboratório</label><select id="mov-lab" v-model="laboratorioId"><option value="">Todos os laboratórios</option><option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option></select></div>
-            <div class="campo"><label for="mov-usuario">Responsável pela operação</label><select id="mov-usuario" v-model="movimentoUsuarioId"><option value="">Todos os responsáveis</option><option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">{{ usuario.nome }}</option></select></div>
-            <div class="campo campo--busca"><label for="mov-lote">Lote</label><select id="mov-lote" v-model="movimentoLoteId"><option value="">Todos os lotes</option><option v-for="lote in lotes" :key="lote.id" :value="lote.id">{{ lote.codigoInterno || lote.numeroLote || lote.id }}</option></select></div>
+            <div class="campo"><label for="mov-apresentacao">Apresentação / Unidade</label><select id="mov-apresentacao" v-model="movimentoApresentacao" :disabled="!movimentoProdutoId"><option value="">Todas as apresentações</option><option value="MEDIDA">{{ unidadeProduto(movimentoProdutoId) === 'REACAO' ? 'Reação individual' : unidadeProduto(movimentoProdutoId) === 'UNIDADE' ? 'Unidade individual' : `Por medida (${formatarRotulo(unidadeProduto(movimentoProdutoId))})` }}</option><option v-for="emb in embalagensDisponiveis.filter(item => item !== 'UNITARIO')" :key="emb" :value="`EMBALAGEM:${emb}`">{{ formatarRotulo(emb) }} completo</option></select></div>
+            <div class="campo campo--periodo"><label>Período da movimentação</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
+            <div class="campo campo--quantidades"><label class="movimento-checkbox"><input v-model="movimentoMostrarQuantidades" type="checkbox" /><span>Mostrar quantidades físicas</span></label><small>Desmarcado: contar movimentações. Marcado: incluir quantidades do produto.</small></div>
+            <div class="campo campo--busca"><button type="button" class="btn btn--ghost" @click="movimentoMaisFiltros = !movimentoMaisFiltros">{{ movimentoMaisFiltros ? 'Ocultar filtros adicionais' : 'Mais filtros' }}</button></div>
+            <template v-if="movimentoMaisFiltros">
+              <div class="campo"><label for="mov-usuario">Responsável pela operação</label><select id="mov-usuario" v-model="movimentoUsuarioId"><option value="">Todos</option><option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">{{ usuario.nome }}</option></select></div>
+              <div class="campo"><label for="mov-lote">Lote</label><select id="mov-lote" v-model="movimentoLoteId"><option value="">Todos</option><option v-for="lote in lotes" :key="lote.id" :value="lote.id">{{ lote.codigoInterno || lote.numeroLote || lote.id }}</option></select></div>
+            </template>
           </div>
 
           <div v-else-if="relatorioResumoSelecionado" class="filtros-body filtros-body--resumo">
             <div class="campo"><label for="resumo-produto">Produto</label><select id="resumo-produto" v-model="resumoProdutoId"><option value="">Todos os produtos</option><option v-for="produto in produtos" :key="produto.id" :value="produto.id">{{ produto.nome }}</option></select></div>
             <div class="campo campo--periodo"><label>Período analisado</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
-            <div class="campo"><label for="resumo-limite">Posições do ranking</label><select id="resumo-limite" v-model.number="resumoLimite"><option :value="5">Top 5</option><option :value="10">Top 10</option><option :value="20">Top 20</option></select></div>
           </div>
 
           <div v-else-if="relatorioEstoqueSelecionado" class="filtros-body filtros-body--estoque">
@@ -502,62 +686,97 @@ onMounted(async () => {
             <div class="table-wrap"><table class="produtos-table"><thead><tr><th>Produto</th><th>Código</th><th>Unidade</th><th>Risco</th><th>Perecível</th><th>Fiscalização</th><th>Situação</th></tr></thead><tbody><tr v-for="item in resultadoProdutos.itens" :key="item.id"><td><strong>{{ item.nome }}</strong><small>{{ item.localizacaoFisica || item.descricao || 'Sem informação complementar' }}</small></td><td>{{ item.codigoReferencia || '—' }}</td><td>{{ formatarRotulo(item.unidadeMedida) }}</td><td><span class="status" :class="item.risco === 'ALTO' ? 'status--risco-alto' : item.risco === 'MEDIO' ? 'status--risco-medio' : 'status--neutro'">{{ formatarRotulo(item.risco) }}</span></td><td>{{ item.perecivel ? 'Sim' : 'Não' }}</td><td><span v-if="item.fiscalizado" class="status status--fiscalizado">{{ formatarOrgaos(item.orgaosFiscalizadores) }}</span><span v-else>Não</span></td><td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td></tr><tr v-if="resultadoProdutos.itens.length === 0"><td colspan="7" class="table-empty">Nenhum produto encontrado com os filtros informados.</td></tr></tbody></table></div>
           </div>
 
+          <div v-else-if="relatorioProjetosSelecionado && resultadoProjetos" class="preview-result">
+            <div class="resumo-cards">
+              <article><span>Projetos</span><strong>{{ resultadoProjetos.totalProjetos }}</strong></article>
+              <article><span>SCI</span><strong>{{ resultadoProjetos.totalScis }}</strong></article>
+              <article><span>Atividades</span><strong>{{ resultadoProjetos.totalAtividades }}</strong></article>
+              <article><span>Participações</span><strong>{{ resultadoProjetos.totalParticipacoes }}</strong></article>
+              <article><span>Estagiários distintos</span><strong>{{ resultadoProjetos.totalEstagiariosDistintos }}</strong></article>
+            </div>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Código SEG / Projeto</th><th>Laboratório</th><th>Responsável</th><th>Período</th><th>Status</th><th>Execução</th><th>Recurso externo</th><th>SCI</th><th>Atividades</th><th>Participações</th><th>Estagiários</th></tr></thead>
+              <tbody>
+                <tr v-for="item in resultadoProjetos.projetos" :key="item.id">
+                  <td><strong>{{ item.nome }}</strong><small>{{ item.codigoSeg || 'Sem código SEG' }}</small></td>
+                  <td>{{ item.laboratorioNome }}</td><td>{{ item.responsavel || '—' }}</td>
+                  <td>{{ formatarData(item.dataInicio) }} – {{ formatarData(item.dataFim) }}</td>
+                  <td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ formatarRotulo(item.status) }}</span></td>
+                  <td>{{ formatarRotulo(item.situacaoExecucao) }}</td>
+                  <td>{{ item.possuiRecursoExterno ? item.empresaRecursoExterno || 'Sim' : 'Não' }}</td>
+                  <td>{{ item.totalScis }}</td><td>{{ item.totalAtividades }}</td><td>{{ item.totalParticipacoes }}</td><td>{{ item.totalEstagiarios }}</td>
+                </tr>
+                <tr v-if="resultadoProjetos.projetos.length === 0"><td colspan="11" class="table-empty">Nenhum Projeto encontrado para os filtros informados.</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+
           <div v-else-if="relatorioMovimentacoesSelecionado && resultadoMovimentacoes" class="preview-result">
-            <div class="resumo-cards resumo-cards--movimentacoes"><article><span>Movimentações</span><strong>{{ resultadoMovimentacoes.totalMovimentacoes }}</strong></article><article><span>Entradas</span><strong>{{ resultadoMovimentacoes.quantidadeEntradas }} un.</strong></article><article><span>Saídas</span><strong>{{ resultadoMovimentacoes.quantidadeSaidas }} un.</strong></article><article><span>Devoluções</span><strong>{{ resultadoMovimentacoes.quantidadeDevolucoes }} un.</strong></article><article><span>Descartes</span><strong>{{ resultadoMovimentacoes.quantidadeDescartes }} un.</strong></article><article><span>Ajustes</span><strong>{{ resultadoMovimentacoes.quantidadeAjustes }} un.</strong></article></div>
-            <div class="table-wrap"><table class="movimentacoes-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Lote</th><th>Laboratório</th><th>Origem</th><th>Responsável</th><th>Saldo</th></tr></thead><tbody><tr v-for="item in resultadoMovimentacoes.itens" :key="item.id"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong><small v-if="item.pedidoSolicitanteNome">Solicitante: {{ item.pedidoSolicitanteNome }}</small></td><td><span
+            <div class="resumo-cards resumo-cards--movimentacoes"><article><span>Movimentações</span><strong>{{ resultadoMovimentacoes.totalMovimentacoes }}</strong></article><article><span>Entradas</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'ENTRADA').length }}</strong></article><article><span>Saídas</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'SAIDA').length }}</strong></article><article><span>Devoluções</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'DEVOLUCAO').length }}</strong></article><article><span>Descartes</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'DESCARTE_VENCIMENTO').length }}</strong></article><article><span>Ajustes</span><strong>{{ resultadoMovimentacoes.itens.filter(item => item.tipoMovimentacao === 'AJUSTE_ENTRADA' || item.tipoMovimentacao === 'AJUSTE_SAIDA').length }}</strong></article></div>
+            <div v-if="movimentoMostrarQuantidades && resultadoMovimentacoes.itens.length" class="totais-produto">
+              <strong>Quantidades por produto e unidade</strong>
+              <div v-for="grupo in quantidadesAgrupadas" :key="grupo.id">{{ grupo.nome }} · {{ formatarRotulo(grupo.tipo) }}: {{ formatarQuantidadeComUnidade(grupo.quantidade, grupo.unidade) }}</div>
+            </div>
+            <p v-if="movimentoEmbalagem && resultadoMovimentacoes.itens.length" class="embalagem-nota">Embalagem filtrada: {{ formatarRotulo(movimentoEmbalagem) }}. Uma saída pode retirar apenas parte do conteúdo de um recipiente; quantidade física e número de recipientes não são equivalentes.</p>
+            <div class="table-wrap"><table class="movimentacoes-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Forma de consumo</th><th v-if="movimentoEmbalagem">Recipientes utilizados</th><th v-if="movimentoMostrarQuantidades">Quantidade retirada</th><th>Lote</th><th>Laboratório</th><th>Origem</th><th>Responsável</th><th v-if="movimentoMostrarQuantidades">Saldo</th></tr></thead><tbody><tr v-for="item in resultadoMovimentacoes.itens" :key="item.id"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong><small v-if="item.pedidoSolicitanteNome">Solicitante: {{ item.pedidoSolicitanteNome }}</small></td><td><span
   class="status status--mov"
   :class="{
     'status--mov-entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO',
     'status--mov-saida': item.tipoMovimentacao === 'SAIDA',
-    'status--mov-ajuste': item.tipoMovimentacao === 'AJUSTE',
+    'status--mov-ajuste': (item.tipoMovimentacao === 'AJUSTE_ENTRADA' || item.tipoMovimentacao === 'AJUSTE_SAIDA'),
     'status--mov-descarte': item.tipoMovimentacao === 'DESCARTE_VENCIMENTO'
   }"
 >
   {{ formatarRotulo(item.tipoMovimentacao) }}
-</span></td><td class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ item.quantidadeMovimentada }} un.</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ formatarRotulo(item.origem) }}</td><td>{{ item.usuarioNome }}</td><td>{{ item.quantidadeAnterior }} → {{ item.quantidadeAtual }}</td></tr><tr v-if="resultadoMovimentacoes.itens.length === 0"><td colspan="9" class="table-empty">Nenhuma movimentação encontrada com os filtros informados.</td></tr></tbody></table></div>
+</span></td><td>{{ formatarRotulo(item.formaConsumoIdentificada || 'NAO_DETERMINADA') }}</td><td v-if="movimentoEmbalagem">{{ item.recipientesUtilizados ?? "—" }} {{ formatarRotulo(movimentoEmbalagem).toLowerCase() }}(s)</td><td v-if="movimentoMostrarQuantidades" class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ formatarQuantidadeComUnidade(item.quantidadeMovimentada, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ formatarRotulo(item.origem) }}</td><td>{{ item.usuarioNome }}</td><td v-if="movimentoMostrarQuantidades">{{ formatarQuantidadeComUnidade(item.quantidadeAnterior, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }} → {{ formatarQuantidadeComUnidade(item.quantidadeAtual, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td></tr><tr v-if="resultadoMovimentacoes.itens.length === 0"><td  :colspan="8 + (movimentoMostrarQuantidades ? 2 : 0) + (movimentoEmbalagem ? 1 : 0)" class="table-empty">Nenhuma movimentação encontrada com os filtros informados.</td></tr></tbody></table></div>
           </div>
 
           <div v-else-if="relatorioResumoSelecionado && resultadoResumoOperacional" class="preview-result">
-            <div class="resumo-cards resumo-cards--movimentacoes resumo-cards--operacional"><article><span>Movimentações</span><strong>{{ resultadoResumoOperacional.totalMovimentacoes }}</strong></article><article><span>Entradas</span><strong>{{ resultadoResumoOperacional.quantidadeEntradas }} un.</strong></article><article><span>Saídas</span><strong>{{ resultadoResumoOperacional.quantidadeSaidas }} un.</strong></article><article><span>Descartes</span><strong>{{ resultadoResumoOperacional.quantidadeDescartes }} un.</strong></article><article><span>Produtos</span><strong>{{ resultadoResumoOperacional.produtosMovimentados }}</strong></article><article><span>Lotes</span><strong>{{ resultadoResumoOperacional.lotesMovimentados }}</strong></article></div>
-            <div class="rankings-grid"><section class="ranking-card ranking-card--entrada"><h3>Principais entradas</h3><ol><li v-for="item in resultadoResumoOperacional.principaisEntradas" :key="item.produtoId"><div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div><b>+{{ item.quantidade }} un.</b></li></ol><p v-if="resultadoResumoOperacional.principaisEntradas.length === 0" class="ranking-empty">Sem entradas no período.</p></section><section class="ranking-card ranking-card--saida"><h3>Principais saídas</h3><ol><li v-for="item in resultadoResumoOperacional.principaisSaidas" :key="item.produtoId"><div><strong>{{ item.produtoNome }}</strong><small>{{ item.movimentacoes }} movimentação(ões)</small></div><b>−{{ item.quantidade }} un.</b></li></ol><p v-if="resultadoResumoOperacional.principaisSaidas.length === 0" class="ranking-empty">Sem saídas no período.</p></section></div>
-            <div class="section-heading"><h3>Lotes mais movimentados</h3><span>Ranking por quantidade total movimentada</span></div>
-            <div class="table-wrap"><table><thead><tr><th>#</th><th>Lote</th><th>Produto</th><th>Movimentado</th><th>Entradas</th><th>Saídas</th><th>Saldo atual</th><th>Validade</th></tr></thead><tbody><tr v-for="(item, index) in resultadoResumoOperacional.lotesMaisMovimentados" :key="item.loteId"><td><strong>{{ index + 1 }}º</strong></td><td><strong>{{ item.codigoInterno || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.produtoNome || '—' }}</td><td>{{ item.quantidadeMovimentada }} un.<small>{{ item.movimentacoes }} operação(ões)</small></td><td class="quantidade quantidade--entrada">+{{ item.quantidadeEntradas }} un.</td><td class="quantidade quantidade--saida">−{{ item.quantidadeSaidas }} un.</td><td>{{ item.saldoAtual }} un.</td><td>{{ formatarData(item.dataValidade) }}</td></tr><tr v-if="resultadoResumoOperacional.lotesMaisMovimentados.length === 0"><td colspan="8" class="table-empty">Nenhum lote movimentado com os filtros informados.</td></tr></tbody></table></div>
+            <div class="resumo-cards resumo-cards--movimentacoes resumo-cards--operacional">
+              <article><span>Movimentações</span><strong>{{ resultadoResumoOperacional.totalMovimentacoes }}</strong></article>
+              <article><span>Entradas</span><strong>{{ resultadoResumoOperacional.totalEntradas ?? '—' }}</strong></article>
+              <article><span>Saídas</span><strong>{{ resultadoResumoOperacional.totalSaidas ?? '—' }}</strong></article>
+              <article><span>Devoluções</span><strong>{{ resultadoResumoOperacional.totalDevolucoes ?? '—' }}</strong></article>
+              <article><span>Ajustes</span><strong>{{ resultadoResumoOperacional.totalAjustes ?? '—' }}</strong></article>
+              <article><span>Descartes</span><strong>{{ resultadoResumoOperacional.totalDescartes ?? '—' }}</strong></article>
+            </div>
+            <p class="resumo-explicacao">Os indicadores representam o número de movimentações registradas, independentemente da unidade de medida. Para consultar os registros, acesse Detalhamento.</p>
           </div>
 
           <div v-else-if="relatorioEstoqueSelecionado && resultadoEstoqueLotes" class="preview-result">
-            <div class="resumo-cards resumo-cards--estoque"><article><span>Estoques</span><strong>{{ resultadoEstoqueLotes.totalEstoques }}</strong></article><article><span>Abaixo do mínimo</span><strong>{{ resultadoEstoqueLotes.estoquesAbaixoMinimo }}</strong></article><article><span>Saldo total</span><strong>{{ resultadoEstoqueLotes.quantidadeTotalEstoque }} un.</strong></article><article><span>Lotes ativos</span><strong>{{ resultadoEstoqueLotes.lotesAtivos }}</strong></article><article><span>Vencidos</span><strong>{{ resultadoEstoqueLotes.lotesVencidos }}</strong></article><article><span>Próx. vencimento</span><strong>{{ resultadoEstoqueLotes.lotesProximosVencimento }}</strong></article></div>
+            <div class="resumo-cards resumo-cards--estoque"><article><span>Estoques</span><strong>{{ resultadoEstoqueLotes.totalEstoques }}</strong></article><article><span>Abaixo do mínimo</span><strong>{{ resultadoEstoqueLotes.estoquesAbaixoMinimo }}</strong></article><article><span>Saldo total</span><strong>Por produto</strong></article><article><span>Lotes ativos</span><strong>{{ resultadoEstoqueLotes.lotesAtivos }}</strong></article><article><span>Vencidos</span><strong>{{ resultadoEstoqueLotes.lotesVencidos }}</strong></article><article><span>Próx. vencimento</span><strong>{{ resultadoEstoqueLotes.lotesProximosVencimento }}</strong></article></div>
             <div class="section-heading"><h3>Posição de estoque</h3><span>Saldo atual comparado ao mínimo configurado</span></div>
-            <div class="table-wrap"><table class="estoques-table"><thead><tr><th>Produto</th><th>Unidade</th><th>Saldo atual</th><th>Mínimo</th><th>Nível</th><th>Lotes ativos</th><th>Vencidos</th><th>Próx. vencimento</th></tr></thead><tbody><tr v-for="item in resultadoEstoqueLotes.estoques" :key="item.estoqueId"><td><strong>{{ item.produtoNome }}</strong><small>{{ item.codigoReferencia || formatarRotulo(item.unidadeMedida) }}</small></td><td>{{ item.unidadeSigla || item.unidadeNome }}</td><td class="quantidade">{{ item.quantidadeAtual }} un.</td><td>{{ item.quantidadeMinima }} un.</td><td><span class="status" :class="item.abaixoMinimo ? 'status--critico' : 'status--ativo'">{{ item.abaixoMinimo ? 'Abaixo do mínimo' : 'Normal' }}</span></td><td>{{ item.lotesAtivos }}</td><td>{{ item.lotesVencidos }}</td><td>{{ item.lotesProximosVencimento }}</td></tr><tr v-if="resultadoEstoqueLotes.estoques.length === 0"><td colspan="8" class="table-empty">Nenhum estoque encontrado com os filtros informados.</td></tr></tbody></table></div>
+            <div class="table-wrap"><table class="estoques-table"><thead><tr><th>Produto</th><th>Unidade</th><th>Saldo atual</th><th>Mínimo</th><th>Nível</th><th>Lotes ativos</th><th>Vencidos</th><th>Próx. vencimento</th></tr></thead><tbody><tr v-for="item in resultadoEstoqueLotes.estoques" :key="item.estoqueId"><td><strong>{{ item.produtoNome }}</strong><small>{{ item.codigoReferencia || formatarRotulo(item.unidadeMedida) }}</small></td><td>{{ item.unidadeSigla || item.unidadeNome }}</td><td class="quantidade">{{ formatarQuantidadeComUnidade(item.quantidadeAtual, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td>{{ formatarQuantidadeComUnidade(item.quantidadeMinima, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td><span class="status" :class="item.abaixoMinimo ? 'status--critico' : 'status--ativo'">{{ item.abaixoMinimo ? 'Abaixo do mínimo' : 'Normal' }}</span></td><td>{{ item.lotesAtivos }}</td><td>{{ item.lotesVencidos }}</td><td>{{ item.lotesProximosVencimento }}</td></tr><tr v-if="resultadoEstoqueLotes.estoques.length === 0"><td colspan="8" class="table-empty">Nenhum estoque encontrado com os filtros informados.</td></tr></tbody></table></div>
             <div class="section-heading section-heading--lotes"><h3>Lotes</h3><span>{{ resultadoEstoqueLotes.totalLotes }} lote(s) na consulta</span></div>
-            <div class="table-wrap"><table class="lotes-table"><thead><tr><th>Lote</th><th>Produto</th><th>Unidade</th><th>Entrada</th><th>Inicial</th><th>Disponível</th><th>Validade</th><th>Situação</th></tr></thead><tbody><tr v-for="item in resultadoEstoqueLotes.lotes" :key="item.loteId"><td><strong>{{ item.codigoInterno }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.produtoNome }}</td><td>{{ item.unidadeNome }}</td><td>{{ formatarData(item.dataEntrada) }}</td><td>{{ item.quantidadeInicial }} un.</td><td class="quantidade">{{ item.quantidadeDisponivel }} un.</td><td>{{ formatarData(item.dataValidade) }}</td><td><span class="status" :class="classeSituacaoLote(item.situacao)">{{ formatarRotulo(item.situacao) }}</span></td></tr><tr v-if="resultadoEstoqueLotes.lotes.length === 0"><td colspan="8" class="table-empty">Nenhum lote encontrado com os filtros informados.</td></tr></tbody></table></div>
+            <div class="table-wrap"><table class="lotes-table"><thead><tr><th>Lote</th><th>Produto</th><th>Unidade</th><th>Entrada</th><th>Inicial</th><th>Disponível</th><th>Validade</th><th>Situação</th><th>Apresentação</th><th>Recipientes</th></tr></thead><tbody><tr v-for="item in resultadoEstoqueLotes.lotes" :key="item.loteId"><td><strong>{{ item.codigoInterno }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.produtoNome }}</td><td>{{ item.unidadeNome }}</td><td>{{ formatarData(item.dataEntrada) }}</td><td>{{ formatarQuantidadeComUnidade(item.quantidadeInicial, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td class="quantidade">{{ formatarQuantidadeComUnidade(item.quantidadeDisponivel, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td>{{ formatarData(item.dataValidade) }}</td><td><span class="status" :class="classeSituacaoLote(item.situacao)">{{ formatarRotulo(item.situacao) }}</span></td><td><strong>{{ item.apresentacao || formatarRotulo(item.tipoEmbalagem) }}</strong><small v-if="item.conteudoPorApresentacao">{{ formatarQuantidadeComUnidade(item.conteudoPorApresentacao, item.unidadeMedida) }} por apresentação</small></td><td><strong>{{ item.recipientesFechados ?? 0 }} fechados</strong><small>{{ item.recipientesAbertos ?? 0 }} abertos · {{ item.recipientesEsgotados ?? 0 }} esgotados</small></td></tr><tr v-if="resultadoEstoqueLotes.lotes.length === 0"><td colspan="10" class="table-empty">Nenhum lote encontrado com os filtros informados.</td></tr></tbody></table></div>
           </div>
 
           <div v-else-if="relatorioFiscalizacaoSelecionado && resultadoFiscalizacao" class="preview-result">
             <div class="resumo-cards resumo-cards--fiscalizacao">
               <article><span>Produtos fiscalizados</span><strong>{{ resultadoFiscalizacao.totalProdutosFiscalizados }}</strong></article>
-              <article><span>Saldo atual</span><strong>{{ resultadoFiscalizacao.saldoAtualTotal }} un.</strong></article>
+              <article><span>Saldo atual</span><strong>Por produto</strong></article>
               <article><span>Lotes ativos</span><strong>{{ resultadoFiscalizacao.lotesAtivos }}</strong></article>
               <article><span>Lotes vencidos</span><strong>{{ resultadoFiscalizacao.lotesVencidos }}</strong></article>
               <article><span>Próx. vencimento</span><strong>{{ resultadoFiscalizacao.lotesProximosVencimento }}</strong></article>
-              <article><span>Entradas no período</span><strong class="quantidade--entrada">+{{ resultadoFiscalizacao.quantidadeEntradas }} un.</strong></article>
-              <article><span>Saídas no período</span><strong class="quantidade--saida">−{{ resultadoFiscalizacao.quantidadeSaidas }} un.</strong></article>
+              <article><span>Entradas no período</span><strong>Por produto</strong></article>
+              <article><span>Saídas no período</span><strong>Por produto</strong></article>
             </div>
 
             <div class="section-heading"><h3>Produtos controlados</h3><span>Classificação, saldo e vencimentos</span></div>
-            <div class="table-wrap"><table class="fiscal-produtos-table"><thead><tr><th>Produto</th><th>Órgão(s)</th><th>Saldo</th><th>Lotes ativos</th><th>Vencidos</th><th>Próx. venc.</th><th>Entradas</th><th>Saídas</th></tr></thead><tbody><tr v-for="item in resultadoFiscalizacao.produtos" :key="item.produtoId"><td><strong>{{ item.produtoNome }}</strong><small>{{ item.codigoReferencia || item.observacaoFiscalizacao || '—' }}</small></td><td><span class="status status--fiscalizado">{{ formatarOrgaos(item.orgaosFiscalizadores) }}</span></td><td class="quantidade">{{ item.saldoAtual }} un.</td><td>{{ item.lotesAtivos }}</td><td><span :class="item.lotesVencidos ? 'quantidade quantidade--saida' : ''">{{ item.lotesVencidos }}</span></td><td><strong>{{ formatarData(item.proximoVencimento) }}</strong><small>{{ item.lotesProximosVencimento }} na janela</small></td><td class="quantidade quantidade--entrada">+{{ item.quantidadeEntradas }} un.</td><td class="quantidade quantidade--saida">−{{ item.quantidadeSaidas }} un.</td></tr><tr v-if="resultadoFiscalizacao.produtos.length === 0"><td colspan="8" class="table-empty">Nenhum produto fiscalizado encontrado com os filtros informados.</td></tr></tbody></table></div>
+            <div class="table-wrap"><table class="fiscal-produtos-table"><thead><tr><th>Produto</th><th>Órgão(s)</th><th>Saldo</th><th>Lotes ativos</th><th>Vencidos</th><th>Próx. venc.</th><th>Entradas</th><th>Saídas</th></tr></thead><tbody><tr v-for="item in resultadoFiscalizacao.produtos" :key="item.produtoId"><td><strong>{{ item.produtoNome }}</strong><small>{{ item.codigoReferencia || item.observacaoFiscalizacao || '—' }}</small></td><td><span class="status status--fiscalizado">{{ formatarOrgaos(item.orgaosFiscalizadores) }}</span></td><td class="quantidade">{{ formatarQuantidadeComUnidade(item.saldoAtual, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td>{{ item.lotesAtivos }}</td><td><span :class="item.lotesVencidos ? 'quantidade quantidade--saida' : ''">{{ item.lotesVencidos }}</span></td><td><strong>{{ formatarData(item.proximoVencimento) }}</strong><small>{{ item.lotesProximosVencimento }} na janela</small></td><td class="quantidade quantidade--entrada">+{{ formatarQuantidadeComUnidade(item.quantidadeEntradas, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td class="quantidade quantidade--saida">−{{ formatarQuantidadeComUnidade(item.quantidadeSaidas, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td></tr><tr v-if="resultadoFiscalizacao.produtos.length === 0"><td colspan="8" class="table-empty">Nenhum produto fiscalizado encontrado com os filtros informados.</td></tr></tbody></table></div>
 
             <div class="section-heading section-heading--lotes"><h3>Rastreabilidade de movimentações</h3><span>Destino e responsáveis das movimentações dos produtos controlados</span></div>
-            <div class="table-wrap"><table class="fiscalizacao-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Lote / validade</th><th>Laboratório</th><th>Projeto</th><th>Solicitante / pedido</th><th>Responsável</th><th>Saldo</th></tr></thead><tbody><tr v-for="item in resultadoFiscalizacao.movimentacoes" :key="item.movimentacaoId"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong></td><td><span
+            <div class="table-wrap"><table class="fiscalizacao-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Quantidade</th><th>Lote / validade</th><th>Laboratório</th><th>Projeto</th><th>Solicitante / pedido</th><th>Responsável</th><th>Recipientes / embalagens</th><th>Saldo</th></tr></thead><tbody><tr v-for="item in resultadoFiscalizacao.movimentacoes" :key="item.movimentacaoId"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong></td><td><span
   class="status status--mov"
   :class="{
     'status--mov-entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO',
     'status--mov-saida': item.tipoMovimentacao === 'SAIDA',
-    'status--mov-ajuste': item.tipoMovimentacao === 'AJUSTE',
+    'status--mov-ajuste': (item.tipoMovimentacao === 'AJUSTE_ENTRADA' || item.tipoMovimentacao === 'AJUSTE_SAIDA'),
     'status--mov-descarte': item.tipoMovimentacao === 'DESCARTE_VENCIMENTO'
   }"
 >
   {{ formatarRotulo(item.tipoMovimentacao) }}
-</span></td><td class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ item.quantidadeMovimentada }} un.</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small>{{ item.numeroLote || 'Sem lote fornecedor' }} · {{ formatarData(item.dataValidadeLote) }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ item.projetoNome || '—' }}</td><td><strong>{{ item.solicitanteNome || '—' }}</strong><small v-if="item.pedidoId">Pedido: {{ item.pedidoId }}</small></td><td>{{ item.responsavelNome }}</td><td>{{ item.saldoAposMovimentacao }} un.</td></tr><tr v-if="resultadoFiscalizacao.movimentacoes.length === 0"><td colspan="10" class="table-empty">Nenhuma movimentação de produto fiscalizado encontrada no período.</td></tr></tbody></table></div>
+</span></td><td class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ formatarQuantidadeComUnidade(item.quantidadeMovimentada, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small>{{ item.numeroLote || 'Sem lote fornecedor' }} · {{ formatarData(item.dataValidadeLote) }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ item.projetoNome || '—' }}</td><td><strong>{{ item.solicitanteNome || '—' }}</strong><small v-if="item.pedidoId">Pedido: {{ item.pedidoId }}</small></td><td>{{ item.responsavelNome }}</td><td><strong>{{ item.recipientesEnvolvidos ?? 0 }} recipiente(s)</strong><small>{{ item.embalagensEnvolvidas || "Sem detalhe de recipiente" }}</small></td><td>{{ formatarQuantidadeComUnidade(item.saldoAposMovimentacao, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td></tr><tr v-if="resultadoFiscalizacao.movimentacoes.length === 0"><td colspan="11" class="table-empty">Nenhuma movimentação de produto fiscalizado encontrada no período.</td></tr></tbody></table></div>
           </div>
         </section>
       </div>
@@ -568,6 +787,23 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.campo--quantidades { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 5px; align-items: flex-start; min-width: 0; }
+.campo--quantidades .movimento-checkbox { display: inline-flex !important; gap: 8px; align-items: center; width: auto !important; margin: 0; font-weight: 600; cursor: pointer; }
+.campo--quantidades .movimento-checkbox input { width: 16px !important; height: 16px !important; flex: 0 0 16px; padding: 0; margin: 0; accent-color: #4b82e7; }
+.campo--quantidades small { display: block; font-size: 11px; line-height: 1.4; }
+.embalagem-nota { padding: 0 20px 10px; margin: 0; color: var(--sgl-text-secondary, #94a3b8); font-size: 12px; }
+
+.totais-produto { padding: 12px 20px; display: grid; gap: 6px; font-size: 13px; }
+.movimento-checkbox { display: flex !important; align-items: center; gap: 9px; }
+.movimento-checkbox input { width: auto; height: auto; }
+
+.resumo-explicacao { padding: 0 20px 20px; color: var(--sgl-text-secondary, #64748b); font-size: 13px; }
+
+.modo-movimentacoes { display: flex; gap: 8px; padding: 16px 20px 0; }
+.modo-movimentacoes button { min-height: 40px; padding: 0 16px; border-radius: var(--sgl-radius-control, 6px); border: 1px solid var(--sgl-border, #cfd8e5); background: var(--sgl-surface, #fff); color: inherit; cursor: pointer; }
+.modo-movimentacoes .modo-ativo { border-color: var(--sgl-primary, #1a4da1); color: var(--sgl-primary, #1a4da1); font-weight: 700; }
+.filtros-body--projetos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
 .relatorios-page { width: 100%; max-width: 1500px; margin: 0 auto; padding: 30px 30px 38px; color: #1a2742; }
 .relatorios-header { margin-bottom: 20px; }
 .relatorios-header h1 { margin: 0; font-size: 30px; line-height: 1.15; color: #162541; letter-spacing: -.03em; }

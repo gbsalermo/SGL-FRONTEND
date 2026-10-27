@@ -14,6 +14,7 @@ const erroExportacao = ref('')
 const nomes: Record<TipoRelatorioExportavel, string> = {
   estagiarios: 'Estagiários',
   produtos: 'Produtos',
+  projetos: 'Projetos',
   movimentacoes: 'Movimentações',
   'resumo-operacional': 'Resumo operacional',
   'estoque-lotes': 'Estoque e lotes',
