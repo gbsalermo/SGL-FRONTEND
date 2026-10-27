@@ -30,7 +30,8 @@ export interface RelatorioEstagiariosFiltros {
 export type TipoMovimentacaoRelatorio =
   | 'ENTRADA'
   | 'SAIDA'
-  | 'AJUSTE'
+  | 'AJUSTE_ENTRADA'
+  | 'AJUSTE_SAIDA'
   | 'DEVOLUCAO'
   | 'DESCARTE_VENCIMENTO'
 
