@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import type { RelatorioProjetosFiltros, RelatorioProjetosResponse } from '@/modules/relatorios/types/projetosRelatorio'
 
 import { http } from '@/services/http'
 import type {
@@ -28,6 +29,7 @@ export type FormatoExportacaoRelatorio = 'PDF' | 'XLSX'
 export type TipoRelatorioExportavel =
   | 'estagiarios'
   | 'produtos'
+  | 'projetos'
   | 'movimentacoes'
   | 'resumo-operacional'
   | 'estoque-lotes'
@@ -61,6 +63,12 @@ export const relatorioService = {
   async listarEstagiarios(filtros: RelatorioEstagiariosFiltros = {}) {
     const { data } = await http.get<RelatorioEstagiariosResponse>('/v1/relatorios/estagiarios', { params: filtros })
     registrarConsulta('estagiarios', filtros)
+    return data
+  },
+
+  async listarProjetos(filtros: RelatorioProjetosFiltros = {}) {
+    const { data } = await http.get<RelatorioProjetosResponse>('/v1/relatorios/projetos', { params: filtros })
+    registrarConsulta('projetos', filtros)
     return data
   },
 
