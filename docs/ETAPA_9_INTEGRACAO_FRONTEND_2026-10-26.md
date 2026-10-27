@@ -39,3 +39,12 @@
 - O modo Resumo preserva o contrato antigo, sem filtro por embalagem nesta implementação. O filtro está disponível no modo Detalhamento.
 - A seleção exige movimentação rastreada por recipiente; registros legados sem vínculo não são classificados artificialmente em embalagens.
 - Testes automatizados adicionados; execução da suíte e validação visual permanecem pendentes do mantenedor.
+
+## Simplificação do Resumo (27/10/2026)
+
+- Removido da interface o filtro **Posições do ranking (Top 5/10/20)**.
+- Removidas as seções visuais de ranking de entradas, saídas e lotes.
+- Resumo exibe somente **contagem de ocorrências**: movimentações, entradas, saídas, devoluções, ajustes e descartes. Não soma unidades físicas incompatíveis.
+- Backend passou a preencher `totalEntradas`, `totalSaidas`, `totalDevolucoes`, `totalAjustes` e `totalDescartes` no DTO; exportação PDF/XLSX usa contagens e tabela simples `Ocorrências por tipo`.
+- O endpoint, os campos legados e as consultas de ranking no service foram preservados temporariamente para compatibilidade com consumidores e testes existentes; **o frontend e as exportações novas não exibem rankings**. Remoção técnica definitiva desses contratos somente após auditoria dos demais consumidores.
+- Testes de contagens e XLSX adicionados ao backend. Compilação, suíte e homologação visual ainda dependem de validação local.
