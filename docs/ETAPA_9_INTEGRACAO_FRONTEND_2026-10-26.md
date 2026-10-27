@@ -48,3 +48,16 @@
 - Backend passou a preencher `totalEntradas`, `totalSaidas`, `totalDevolucoes`, `totalAjustes` e `totalDescartes` no DTO; exportação PDF/XLSX usa contagens e tabela simples `Ocorrências por tipo`.
 - O endpoint, os campos legados e as consultas de ranking no service foram preservados temporariamente para compatibilidade com consumidores e testes existentes; **o frontend e as exportações novas não exibem rankings**. Remoção técnica definitiva desses contratos somente após auditoria dos demais consumidores.
 - Testes de contagens e XLSX adicionados ao backend. Compilação, suíte e homologação visual ainda dependem de validação local.
+
+## Modalidade de consumo por parcela histórica (27/10/2026)
+
+O Detalhamento agora separa explicitamente:
+- `tipoEmbalagem`: categoria do **recipiente físico**, filtrada entre tipos que efetivamente constam de movimentações do produto;
+- `formaConsumo`: modalidade **inferida de forma conservadora a partir do snapshot histórico de cada parcela**. `COMPLETA` apenas se `quantidadeAnterior == capacidadeInicial` e `quantidadeMovimentada == capacidadeInicial`; `POR_MEDIDA` se a retirada não corresponde a uma apresentação inteira; `MISTA` se há ambos os casos na mesma movimentação; `NAO_DETERMINADA` se faltam dados suficientes;
+- `quantidadeMovimentada` + `unidadeMedida`: quantidade física efetivamente consumida, independente de quantos recipientes foram tocados.
+
+Um frasco de 500 mL de que saem 30 mL é **por medida** mesmo que o recipiente identificado seja FRASCO. Um kit de reações pode ter retiradas unitárias identificadas do mesmo modo. Não converter mL em frascos, nem assumir apresentação completa baseada apenas em um rótulo de embalagem.
+
+A classificação atual é um **indicador derivado dos snapshots históricos**, não um novo campo de intenção do pedido persistido no momento da operação. Um registro de uma retirada integral de um recipiente cheio não prova por si só a intenção do usuário de solicitar uma apresentação inteira. Para auditoria normativa futura que dependa dessa intenção, a captura explícita da modalidade no fluxo de pedido/entrega precisa de contrato e migration próprios, sem reinterpretar retroativamente registros históricos.
+
+Todos os filtros na prévia são encaminhados também à exportação; o PDF/XLSX exibe a forma de consumo identificada. Testes de serviço e controller foram atualizados; suíte e build ainda requerem execução local.
