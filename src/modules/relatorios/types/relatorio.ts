@@ -113,6 +113,11 @@ export interface RelatorioResumoLoteRanking {
 }
 
 export interface RelatorioResumoOperacionalResponse {
+  totalEntradas?: number | null
+  totalSaidas?: number | null
+  totalDevolucoes?: number | null
+  totalAjustes?: number | null
+  totalDescartes?: number | null
   geradoEm: string
   totalMovimentacoes: number
   quantidadeEntradas: number
