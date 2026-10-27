@@ -700,7 +700,7 @@ onMounted(async () => {
   :class="{
     'status--mov-entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO',
     'status--mov-saida': item.tipoMovimentacao === 'SAIDA',
-    'status--mov-ajuste': item.tipoMovimentacao === 'AJUSTE',
+    'status--mov-ajuste': (item.tipoMovimentacao === 'AJUSTE_ENTRADA' || item.tipoMovimentacao === 'AJUSTE_SAIDA'),
     'status--mov-descarte': item.tipoMovimentacao === 'DESCARTE_VENCIMENTO'
   }"
 >
@@ -748,7 +748,7 @@ onMounted(async () => {
   :class="{
     'status--mov-entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO',
     'status--mov-saida': item.tipoMovimentacao === 'SAIDA',
-    'status--mov-ajuste': item.tipoMovimentacao === 'AJUSTE',
+    'status--mov-ajuste': (item.tipoMovimentacao === 'AJUSTE_ENTRADA' || item.tipoMovimentacao === 'AJUSTE_SAIDA'),
     'status--mov-descarte': item.tipoMovimentacao === 'DESCARTE_VENCIMENTO'
   }"
 >
