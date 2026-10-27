@@ -75,3 +75,13 @@ O tipo de embalagem (`FRASCO`, `KIT` etc.) continua sendo exclusivamente a **cat
 **Limite de confiabilidade:** são categorias **inferidas do consumo efetivo**, não prova da intenção do solicitante. O sistema ainda não persiste a modalidade originalmente pedida como dado imutável. Para auditoria da modalidade intencional futura, prever captura explícita e migração própria, sem alterar o histórico.
 
 `mostrarQuantidades` é opcional na exportação de movimentações: por padrão os arquivos mostram contagem/ocorrências e colunas operacionais sem saldo/quantidade; quando verdadeiro incluem quantidade física e saldo. O método legado de exportação permanece compatível. Reexecutar testes backend e build frontend antes de homologar.
+
+## Extensão de modelagem — Estoque/Lotes e Fiscalização (27/10/2026)
+
+**Estoque/Lotes**: consulta de leitura passou a expor por lote a apresentação cadastrada, o conteúdo por apresentação e contagens de recipientes por estado físico FECHADO/ABERTO/ESGOTADO, preservando saldo e unidade canônica. A prévia e PDF/XLSX incluem os dados, sem modificar FEFO/FIFO ou operações de estoque.
+
+**Fiscalização**: rastreabilidade das movimentações passou a apresentar número de registros de recipientes envolvidos e os respectivos tipos físicos de embalagem. Não se converte volume em número de frascos entregues, nem se afirma que uma retirada parcial equivale a uma apresentação completa. Prévia e PDF/XLSX foram alinhados.
+
+Os dados vêm de registros existentes e são consultados no contexto de Unidade. Nenhuma alteração de entidades ou migrations foi necessária. Os demais relatórios não foram ampliados.
+
+**Validação pendente**: executar `./mvnw clean verify` no backend e `npm run build` no frontend; comparar prévia, PDF e Excel, em especial lotes com recipientes abertos, kits, lotes sem recipientes rastreados e movimentos fiscalizados.
