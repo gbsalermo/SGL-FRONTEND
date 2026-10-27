@@ -176,6 +176,12 @@ export const router = createRouter({
           component: () => import('@/modules/relatorios/views/RelatorioPessoasLaboratorioView.vue'),
         },
         {
+          path: 'administracao/unidades',
+          name: 'admin-unidades',
+          component: () => import('@/modules/admin/views/UnidadesHabilitacaoView.vue'),
+          meta: { requiresSession: true, perfis: ['ADMINISTRADOR_GERAL'] },
+        },
+        {
           path: 'administracao/cadastros/vinculos/importar',
           name: 'gestao-vinculos-importar',
           component: () => import('@/modules/admin/views/ImportarPessoasView.vue'),

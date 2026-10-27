@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { type RouteLocationRaw, useRoute, useRouter } from 'vue-router'
 import GestaoUserProfile from '@/components/GestaoUserProfile.vue'
+import UnidadeSelector from '@/components/UnidadeSelector.vue'
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { gestaoShellService, type BaseBuscaGestao } from '@/services/gestaoShellService'
 import { ehPerfilAdmin } from '@/modules/auth/perfis'
@@ -711,6 +712,10 @@ onBeforeUnmount(() => {
             <span v-show="!recolhida">Cadastros</span>
           </router-link>
         </template>
+        <router-link v-if="session.administradorGeral" to="/administracao/unidades" title="Habilitar Unidades da Embrapa">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6"/></svg>
+          <span v-show="!recolhida">Unidades</span>
+        </router-link>
       </nav>
 
       <GestaoUserProfile :compact="false" />
@@ -728,6 +733,8 @@ onBeforeUnmount(() => {
         <button v-if="podeVoltar" class="gestao-topbar__back" type="button" aria-label="Voltar" @click="voltar">←</button>
 
         <div class="gestao-topbar__spacer" />
+
+        <UnidadeSelector />
 
         <div ref="buscaRef" class="gestao-search-wrap">
           <button
