@@ -29,3 +29,13 @@
 6. Verificar console/rede e primeiro carregamento.
 
 **Observação:** não foram alterados os endpoints existentes nem realizadas medições de carga. A carga inicial de catálogos da Central permanece pendente de revisão de desempenho local, conforme auditoria 9.1.
+
+## 9.3 — Filtro avançado por embalagem (27/10/2026)
+
+- O Detalhamento de Movimentações expõe `tipoEmbalagem` opcional, combinado aos filtros já existentes por produto, tipo, origem, laboratório, usuário, lote e período.
+- Valores compatíveis com `TipoEmbalagem`: `UNITARIO`, `FRASCO`, `AMPOLA`, `GARRAFA`, `GALAO`, `CAIXA`, `KIT`, `PACOTE`, `SACO`, `TUBO`, `POTE`, `PAR`, `OUTRO`.
+- A API usa os vínculos reais `MovimentacaoRecipiente` e `RecipienteEstoque` para selecionar IDs distintos de movimentações por Unidade. Não deduz embalagem do Produto.
+- Mesmos parâmetros na prévia e no download PDF/XLSX.
+- O modo Resumo preserva o contrato antigo, sem filtro por embalagem nesta implementação. O filtro está disponível no modo Detalhamento.
+- A seleção exige movimentação rastreada por recipiente; registros legados sem vínculo não são classificados artificialmente em embalagens.
+- Testes automatizados adicionados; execução da suíte e validação visual permanecem pendentes do mantenedor.
