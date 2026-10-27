@@ -78,6 +78,7 @@ export interface RelatorioMovimentacoesResponse {
 }
 
 export interface RelatorioMovimentacoesFiltros {
+  tipoEmbalagem?: string
   tipo?: TipoMovimentacaoRelatorio
   origem?: OrigemMovimentacaoRelatorio
   produtoId?: string
