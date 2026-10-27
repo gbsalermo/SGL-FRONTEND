@@ -160,41 +160,23 @@ TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO
 
 ---
 
-## Sessão DEV e contexto de Unidade
+## Sessão e contexto de Unidade
 
-A sessão atual continua sendo um mecanismo de desenvolvimento, não autenticação de produção.
-
-Fluxo:
+O login usa a conta da Embrapa (login de rede, ou CPF para colaboradores) e a senha da Embrapa. O backend valida as credenciais e devolve um JWT próprio do SGL.
 
 ```text
-usuário informa identificador + senha
-→ frontend consulta usuários existentes
-→ resolve usuário ativo
-→ senha ainda não é validada por autenticação backend definitiva
-→ sessão é persistida em localStorage
-→ sessão expira após 5 horas
+login + senha → POST /v1/auth/login → { token, expiraEm, usuario }
+→ sessão persistida em localStorage, chave sgl.session (a antiga sgl.dev-session é apagada)
+→ expira em 5 horas
+→ interceptor envia Authorization: Bearer <token>
 ```
 
-A sessão mantém informações como:
+- Usuário `PENDENTE_VINCULACAO` só vê `/aguardando-aprovacao` ("Verificar novamente" consulta `/v1/auth/me`).
+- 401 em rota protegida encerra a sessão e volta ao login; 403 com `USUARIO_PENDENTE` leva à tela de espera.
+- A Unidade vem da sessão no backend. O header `X-SGL-Unidade-Id` só é enviado pelo **Administrador geral**, quando ele escolhe outra Unidade no seletor da barra superior.
+- O botão "Entrar como desenvolvedor" aparece só quando o backend roda em `dev`/`demo` (`/v1/auth/config`).
 
-```text
-perfil
-unidadeId
-unidadeNome
-unidadeSigla
-laboratorioId
-laboratorioNome
-```
-
-O interceptor HTTP usa `unidadeId` para enviar:
-
-```text
-X-SGL-Unidade-Id: <unidadeId>
-```
-
-O backend usa esse contexto para restringir dados por Unidade.
-
-**Importante:** isso é isolamento funcional de desenvolvimento. Como o header ainda é controlado pelo cliente, ele não substitui a futura autorização baseada em identidade autenticada.
+Telas novas da gestão: aba **Pendentes** e **Importar da Embrapa** em Vínculos de usuários; **Unidades** (habilitação), só para o Administrador geral.
 
 ---
 
@@ -446,16 +428,14 @@ A tela de login não deve ser alterada pelo tema das interfaces autenticadas sem
 ## Segurança — interpretação correta
 
 ```text
-guardas de rota por perfil                    ✅ UX
-sessão DEV                                     ✅ temporária
-contexto de Unidade via header                 ✅ desenvolvimento
-autenticação definitiva                        ⏳
-autorização real no servidor                   ⏳
-auditoria por identidade autenticada           ⏳
-integração corporativa                          ⏳
+login corporativo + sessão JWT                 ✅
+autorização das operações novas no servidor    ✅
+Unidade derivada da sessão                     ✅
+guardas de rota por perfil                     ✅ UX
+matriz completa de permissões por módulo       ⏳
 ```
 
-Não tratar visibilidade de menu/rota como segurança de produção.
+Visibilidade de menu/rota continua sendo só UX; quem decide é o backend.
 
 ---
 
@@ -511,10 +491,11 @@ npm install
 npm run dev
 ```
 
-Build:
+Build e testes (Vitest + jsdom):
 
 ```bash
 npm run build
+npm test
 ```
 
 ---
