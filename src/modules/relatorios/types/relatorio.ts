@@ -78,6 +78,9 @@ export interface RelatorioMovimentacoesResponse {
 }
 
 export interface RelatorioMovimentacoesFiltros {
+  projetoId?: string
+  sciId?: string
+  atividadeId?: string
   tipoEmbalagem?: string
   tipo?: TipoMovimentacaoRelatorio
   origem?: OrigemMovimentacaoRelatorio
