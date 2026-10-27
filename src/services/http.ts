@@ -5,7 +5,8 @@ const baseURL = configuredBaseURL || (import.meta.env.DEV ? 'http://localhost:80
 
 export const SESSION_STORAGE_KEY = 'sgl.session'
 const TENANT_HEADER = 'X-SGL-Unidade-Id'
-const AUTH_PATH_PREFIX = '/v1/auth/'
+// A 401 from these is a login answer (e.g. wrong password); from /v1/auth/me it is a dead session.
+const ROTAS_DE_LOGIN = ['/v1/auth/login', '/v1/auth/dev-login']
 
 if (!configuredBaseURL && import.meta.env.DEV) {
   console.warn(
@@ -72,10 +73,9 @@ http.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ codigo?: string }>) => {
     const status = error.response?.status
-    // A 401 from the auth routes is a login answer (e.g. wrong password), not an expired session.
-    const rotaDeAutenticacao = error.config?.url?.startsWith(AUTH_PATH_PREFIX) ?? false
+    const rotaDeLogin = ROTAS_DE_LOGIN.includes(error.config?.url ?? '')
 
-    if (status === 401 && !rotaDeAutenticacao) {
+    if (status === 401 && !rotaDeLogin) {
       localStorage.removeItem(SESSION_STORAGE_KEY)
       respostasDeSessao?.aoExpirar()
     } else if (status === 403 && error.response?.data?.codigo === 'USUARIO_PENDENTE') {

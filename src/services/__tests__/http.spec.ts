@@ -72,6 +72,19 @@ describe('http', () => {
     expect(aoExpirar).not.toHaveBeenCalled()
   })
 
+  it('401 de /v1/auth/me encerra a sessao (pendente recusado ou desativado)', async () => {
+    salvarSessao('TECNICO')
+    const { http, configurarRespostasDeSessao } = await carregar()
+    const aoExpirar = vi.fn()
+    configurarRespostasDeSessao({ aoExpirar, aoPendente: vi.fn() })
+    http.defaults.adapter = fakeAdapter(() => ({ status: 401, data: { codigo: 'NAO_AUTENTICADO' } })).adapter
+
+    await expect(http.get('/v1/auth/me')).rejects.toBeTruthy()
+
+    expect(localStorage.getItem('sgl.session')).toBeNull()
+    expect(aoExpirar).toHaveBeenCalledOnce()
+  })
+
   it('403 USUARIO_PENDENTE aciona a tela de espera', async () => {
     salvarSessao('TECNICO')
     const { http, configurarRespostasDeSessao } = await carregar()
