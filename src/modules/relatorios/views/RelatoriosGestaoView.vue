@@ -370,6 +370,7 @@ async function visualizarRelatorio() {
         loteId: movimentoLoteId.value || undefined,
         tipoEmbalagem: movimentoEmbalagem.value || undefined,
         formaConsumo: movimentoForma.value || undefined,
+        mostrarQuantidades: movimentoMostrarQuantidades.value,
         projetoId: movimentoProjetoId.value || undefined,
         sciId: movimentoSciId.value || undefined,
         atividadeId: movimentoAtividadeId.value || undefined,
