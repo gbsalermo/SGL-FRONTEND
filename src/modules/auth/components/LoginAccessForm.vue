@@ -18,7 +18,7 @@ async function entrar() {
   carregando.value = true
 
   try {
-    const usuarioAutenticado = await session.entrarDesenvolvimento(usuario.value, senha.value)
+    const usuarioAutenticado = await session.entrar(usuario.value, senha.value)
     const perfil = usuarioAutenticado.perfil
 
     await router.replace(

@@ -62,7 +62,7 @@ function statusRotulo(u: UsuarioPermissao) {
 }
 function perfilRotulo(p: string) {
   return ({ TECNICO: 'Técnico', ANALISTA: 'Analista', PESQUISADOR: 'Pesquisador',
-    GESTOR: 'Gestor', ADMINISTRADOR: 'Administrador' } as Record<string,string>)[p] || p
+    GESTOR: 'Gestor', ADMINISTRADOR: 'Administrador', ADMINISTRADOR_GERAL: 'Administrador geral' } as Record<string,string>)[p] || p
 }
 function labNome(id: string | null | undefined) {
   return props.laboratorios.find(l => l.id === id)?.nome || 'Não atribuído'

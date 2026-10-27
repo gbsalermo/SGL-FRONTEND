@@ -5,6 +5,7 @@ import App from './App.vue'
 import { router } from './router'
 import { instalarCompatibilidadeDashboard } from './router/dashboardCompatibility'
 import { vuetify } from './app/vuetify'
+import { configurarRespostasDeSessao } from './services/http'
 import { aplicarTemaDaRota } from './services/themeService'
 import { useSessionStore } from './stores/session'
 
@@ -100,5 +101,14 @@ function agendarExpiracao() {
 }
 
 watch(() => session.expiraEm, agendarExpiracao, { immediate: true })
+
+configurarRespostasDeSessao({
+  aoExpirar: encerrarSessaoExpirada,
+  aoPendente: () => {
+    if (router.currentRoute.value.path !== '/aguardando-aprovacao') {
+      void router.replace('/aguardando-aprovacao')
+    }
+  },
+})
 
 app.mount('#app')
