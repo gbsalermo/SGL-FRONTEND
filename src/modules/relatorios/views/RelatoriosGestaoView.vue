@@ -101,6 +101,7 @@ const movimentoOrigem = ref<'' | OrigemMovimentacaoRelatorio>('')
 const movimentoProdutoId = ref('')
 const movimentoUsuarioId = ref('')
 const movimentoLoteId = ref('')
+const movimentoEmbalagem = ref('')
 
 const resumoProdutoId = ref('')
 const resumoLimite = ref(5)
@@ -238,6 +239,7 @@ function limparFiltros() {
   movimentoProdutoId.value = ''
   movimentoUsuarioId.value = ''
   movimentoLoteId.value = ''
+  movimentoEmbalagem.value = ''
   resumoProdutoId.value = ''
   resumoLimite.value = 5
   estoqueUnidadeId.value = ''
@@ -338,6 +340,7 @@ async function visualizarRelatorio() {
         laboratorioId: laboratorioId.value || undefined,
         usuarioId: movimentoUsuarioId.value || undefined,
         loteId: movimentoLoteId.value || undefined,
+        tipoEmbalagem: movimentoEmbalagem.value || undefined,
         dataInicio: dataInicio.value || undefined,
         dataFim: dataFim.value || undefined,
       })
@@ -443,7 +446,7 @@ function classeSituacaoLote(situacaoLote: SituacaoLoteRelatorio) {
 watch([
   situacao, laboratorioId, dataInicio, dataFim, tipoBolsa, busca,
   produtoSituacao, produtoFiscalizado, produtoPerecivel, produtoRisco, produtoOrgao,
-  movimentoTipo, movimentoOrigem, movimentoProdutoId, movimentoUsuarioId, movimentoLoteId,
+  movimentoTipo, movimentoOrigem, movimentoProdutoId, movimentoUsuarioId, movimentoLoteId, movimentoEmbalagem,
   resumoProdutoId, resumoLimite, estoqueUnidadeId, estoqueProdutoId,
   estoqueSituacao, estoqueNivel, estoqueSituacaoLote, estoqueDiasVencimento,
   fiscalProdutoId, fiscalOrgao, fiscalUnidadeId, fiscalDiasVencimento,
@@ -533,6 +536,7 @@ onMounted(async () => {
           </div>
 
           <div v-else-if="relatorioMovimentacoesSelecionado" class="filtros-body filtros-body--movimentacoes">
+            <div class="campo"><label for="mov-embalagem">Tipo de embalagem</label><select id="mov-embalagem" v-model="movimentoEmbalagem"><option value="">Todas as embalagens</option><option v-for="emb in ['UNITARIO', 'FRASCO', 'AMPOLA', 'GARRAFA', 'GALAO', 'CAIXA', 'KIT', 'PACOTE', 'SACO', 'TUBO', 'POTE', 'PAR', 'OUTRO']" :key="emb" :value="emb">{{ formatarRotulo(emb) }}</option></select></div>
             <div class="campo"><label for="mov-tipo">Tipo</label><select id="mov-tipo" v-model="movimentoTipo"><option value="">Todos</option><option value="ENTRADA">Entrada</option><option value="SAIDA">Saída</option><option value="AJUSTE">Ajuste</option><option value="DEVOLUCAO">Devolução</option><option value="DESCARTE_VENCIMENTO">Descarte por vencimento</option></select></div>
             <div class="campo"><label for="mov-origem">Origem</label><select id="mov-origem" v-model="movimentoOrigem"><option value="">Todas</option><option value="PEDIDO">Pedido</option><option value="COMPRA">Compra</option><option value="AJUSTE">Ajuste</option><option value="DEVOLUCAO">Devolução</option><option value="INVENTARIO">Inventário</option><option value="DESCARTE">Descarte</option></select></div>
             <div class="campo campo--periodo"><label>Período da movimentação</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
