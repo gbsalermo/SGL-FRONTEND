@@ -105,6 +105,7 @@ const movimentoUsuarioId = ref('')
 const movimentoLoteId = ref('')
 const movimentoEmbalagem = ref('')
 const movimentoForma = ref('')
+const movimentoApresentacao = ref('')
 const movimentoProjetoId = ref('')
 const movimentoSciId = ref('')
 const movimentoAtividadeId = ref('')
@@ -264,6 +265,7 @@ function limparFiltros() {
   movimentoLoteId.value = ''
   movimentoEmbalagem.value = ''
   movimentoForma.value = ''
+  movimentoApresentacao.value = ''
   movimentoProjetoId.value = ''
   movimentoSciId.value = ''
   movimentoAtividadeId.value = ''
@@ -479,7 +481,7 @@ watch([
   situacao, laboratorioId, dataInicio, dataFim, tipoBolsa, busca,
   produtoSituacao, produtoFiscalizado, produtoPerecivel, produtoRisco, produtoOrgao,
   movimentoTipo, movimentoOrigem, movimentoProdutoId, movimentoUsuarioId, movimentoLoteId, movimentoEmbalagem,
-  movimentoProjetoId, movimentoSciId, movimentoAtividadeId, movimentoMostrarQuantidades, movimentoForma,
+  movimentoProjetoId, movimentoSciId, movimentoAtividadeId, movimentoMostrarQuantidades, movimentoApresentacao,
   resumoProdutoId, estoqueUnidadeId, estoqueProdutoId,
   estoqueSituacao, estoqueNivel, estoqueSituacaoLote, estoqueDiasVencimento,
   fiscalProdutoId, fiscalOrgao, fiscalUnidadeId, fiscalDiasVencimento,
@@ -515,7 +517,22 @@ watch(movimentoSciId, async (id) => {
       .filter((a) => a.sciId === id)
   } catch (e) { console.error('Falha ao carregar atividades', e) }
 })
+watch(movimentoApresentacao, (valor) => {
+  if (valor === 'MEDIDA') {
+    movimentoForma.value = 'POR_MEDIDA'
+    movimentoEmbalagem.value = ''
+  } else if (valor.startsWith('EMBALAGEM:')) {
+    movimentoForma.value = 'COMPLETA'
+    movimentoEmbalagem.value = valor.slice('EMBALAGEM:'.length)
+  } else {
+    movimentoForma.value = ''
+    movimentoEmbalagem.value = ''
+  }
+})
+
 watch(movimentoProdutoId, async (id) => {
+  movimentoApresentacao.value = ''
+  movimentoForma.value = ''
   movimentoEmbalagem.value = ''
   embalagensDisponiveis.value = []
   if (!id) return
@@ -613,8 +630,7 @@ onMounted(async () => {
             <div class="campo"><label for="mov-sci">SCI</label><select id="mov-sci" v-model="movimentoSciId" :disabled="!movimentoProjetoId"><option value="">Todos</option><option v-for="sci in scisContexto" :key="sci.id" :value="sci.id">{{ sci.nome }}</option></select></div>
             <div class="campo"><label for="mov-atividade">Atividade</label><select id="mov-atividade" v-model="movimentoAtividadeId" :disabled="!movimentoSciId"><option value="">Todas</option><option v-for="atividade in atividadesContexto" :key="atividade.id" :value="atividade.id">{{ atividade.nome }}</option></select></div>
             <div class="campo"><label for="mov-produto">Produto</label><select id="mov-produto" v-model="movimentoProdutoId"><option value="">Todos os produtos</option><option v-for="produto in produtos" :key="produto.id" :value="produto.id">{{ produto.nome }}</option></select></div>
-            <div class="campo"><label for="mov-forma">Forma de consumo identificada</label><select id="mov-forma" v-model="movimentoForma"><option value="">Todas</option><option value="COMPLETA">Apresentação completa</option><option value="POR_MEDIDA">Por medida / consumo parcial</option><option value="MISTA">Mista</option><option value="NAO_DETERMINADA">Não determinada</option></select></div>
-            <div class="campo"><label for="mov-embalagem">Embalagem do recipiente</label><select id="mov-embalagem" v-model="movimentoEmbalagem" :disabled="!movimentoProdutoId"><option value="">Todas as embalagens</option><option v-for="emb in embalagensDisponiveis" :key="emb" :value="emb">{{ formatarRotulo(emb) }}</option></select></div>
+            <div class="campo"><label for="mov-apresentacao">Apresentação / Unidade</label><select id="mov-apresentacao" v-model="movimentoApresentacao" :disabled="!movimentoProdutoId"><option value="">Todas as apresentações</option><option value="MEDIDA">{{ unidadeProduto(movimentoProdutoId) === 'REACAO' ? 'Reação individual' : unidadeProduto(movimentoProdutoId) === 'UNIDADE' ? 'Unidade individual' : `Por medida (${formatarRotulo(unidadeProduto(movimentoProdutoId))})` }}</option><option v-for="emb in embalagensDisponiveis.filter(item => item !== 'UNITARIO')" :key="emb" :value="`EMBALAGEM:${emb}`">{{ formatarRotulo(emb) }} completo</option></select></div>
             <div class="campo campo--periodo"><label>Período da movimentação</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
             <div class="campo campo--quantidades"><label class="movimento-checkbox"><input v-model="movimentoMostrarQuantidades" type="checkbox" /><span>Mostrar quantidades físicas</span></label><small>Desmarcado: contar movimentações. Marcado: incluir quantidades do produto.</small></div>
             <div class="campo campo--busca"><button type="button" class="btn btn--ghost" @click="movimentoMaisFiltros = !movimentoMaisFiltros">{{ movimentoMaisFiltros ? 'Ocultar filtros adicionais' : 'Mais filtros' }}</button></div>
