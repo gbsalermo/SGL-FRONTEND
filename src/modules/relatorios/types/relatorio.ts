@@ -236,6 +236,12 @@ export interface RelatorioLoteItem {
   dataValidade: string | null
   ativo: boolean
   situacao: SituacaoLoteRelatorio
+  tipoEmbalagem?: string | null
+  apresentacao?: string | null
+  conteudoPorApresentacao?: number | null
+  recipientesFechados?: number | null
+  recipientesAbertos?: number | null
+  recipientesEsgotados?: number | null
   unidadeMedida?: string | null
 }
 
