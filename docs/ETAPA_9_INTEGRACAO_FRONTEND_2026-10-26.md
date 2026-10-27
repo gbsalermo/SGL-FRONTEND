@@ -1,7 +1,7 @@
 # Etapa 9 — Integração da Central de Relatórios (26/10/2026)
 
 **Branch:** `collab/etapa-9-relatorios-consolidados`  
-**Situação:** implementado na branch para validação local; build, testes de integração e homologação visual ainda não confirmados. **Sem merge.**
+**Situação em 27/10/2026:** implementado e validado funcionalmente pelo mantenedor na branch, com confirmações locais de suíte/build e verificação de prévias e exportações ao longo da etapa. **Sem merge ou homologação formal de produção.** Os checklists anteriores permanecem como histórico de validação à época dos commits.
 
 ## Entregas
 
@@ -19,7 +19,7 @@
 - `src/modules/relatorios/views/RelatoriosGestaoView.vue`
 - `src/modules/relatorios/components/RelatorioExportacaoBar.vue`
 
-## Validação pendente pelo mantenedor
+## Roteiro de regressão (histórico; validações funcionais confirmadas posteriormente pelo mantenedor)
 
 1. `npm run build` na branch.
 2. Prévia de Projetos vazia e com dados, incluindo filtros isolados e combinados.
@@ -85,3 +85,10 @@ O tipo de embalagem (`FRASCO`, `KIT` etc.) continua sendo exclusivamente a **cat
 Os dados vêm de registros existentes e são consultados no contexto de Unidade. Nenhuma alteração de entidades ou migrations foi necessária. Os demais relatórios não foram ampliados.
 
 **Validação pendente**: executar `./mvnw clean verify` no backend e `npm run build` no frontend; comparar prévia, PDF e Excel, em especial lotes com recipientes abertos, kits, lotes sem recipientes rastreados e movimentos fiscalizados.
+
+
+## Checkpoint de fechamento — 27/10/2026
+
+A validação funcional da Etapa 9 foi confirmada pelo mantenedor. Entregas: Projetos, Movimentações Resumo/Detalhamento sem ranking, apresentação/unidade reutilizando a terminologia do Novo Pedido, quantidades opcionais (seleção automática ao escolher por medida), filtros de contexto, Estoque/Lotes com apresentações/recipientes e Fiscalização com rastreabilidade. Os endpoints e relatórios pré-existentes permanecem acessíveis. A classificação da forma de consumo em movimentações antigas é inferida dos snapshots e não substitui persistência explícita da modalidade solicitada.
+
+Ainda fora deste aceite: carga/concorrência, E2E de toda a aplicação, autenticação institucional real, validação de segurança de produção e merge. Não realizar mudanças funcionais adicionais sem nova demanda; próximo passo é merge pelo responsável após revisão documental.
