@@ -17,6 +17,8 @@ import type {
   TipoMovimentacaoRelatorio,
 } from '@/modules/relatorios/types/relatorio'
 import { http } from '@/services/http'
+import { projetosService } from '@/modules/projetos/services/projetosService'
+import type { ProjetoOperacional, SciOperacional, AtividadeOperacional } from '@/modules/projetos/types/projetos'
 
 type TipoRelatorio =
   | 'estagiarios'
@@ -102,6 +104,15 @@ const movimentoProdutoId = ref('')
 const movimentoUsuarioId = ref('')
 const movimentoLoteId = ref('')
 const movimentoEmbalagem = ref('')
+const movimentoProjetoId = ref('')
+const movimentoSciId = ref('')
+const movimentoAtividadeId = ref('')
+const movimentoMostrarQuantidades = ref(false)
+const movimentoMaisFiltros = ref(false)
+const projetosContexto = ref<ProjetoOperacional[]>([])
+const scisContexto = ref<SciOperacional[]>([])
+const atividadesContexto = ref<AtividadeOperacional[]>([])
+const embalagensDisponiveis = ref<string[]>([])
 
 const resumoProdutoId = ref('')
 
@@ -239,6 +250,11 @@ function limparFiltros() {
   movimentoUsuarioId.value = ''
   movimentoLoteId.value = ''
   movimentoEmbalagem.value = ''
+  movimentoProjetoId.value = ''
+  movimentoSciId.value = ''
+  movimentoAtividadeId.value = ''
+  movimentoMostrarQuantidades.value = false
+  movimentoMaisFiltros.value = false
   resumoProdutoId.value = ''
   estoqueUnidadeId.value = ''
   estoqueProdutoId.value = ''
@@ -339,6 +355,9 @@ async function visualizarRelatorio() {
         usuarioId: movimentoUsuarioId.value || undefined,
         loteId: movimentoLoteId.value || undefined,
         tipoEmbalagem: movimentoEmbalagem.value || undefined,
+        projetoId: movimentoProjetoId.value || undefined,
+        sciId: movimentoSciId.value || undefined,
+        atividadeId: movimentoAtividadeId.value || undefined,
         dataInicio: dataInicio.value || undefined,
         dataFim: dataFim.value || undefined,
       })
@@ -444,6 +463,7 @@ watch([
   situacao, laboratorioId, dataInicio, dataFim, tipoBolsa, busca,
   produtoSituacao, produtoFiscalizado, produtoPerecivel, produtoRisco, produtoOrgao,
   movimentoTipo, movimentoOrigem, movimentoProdutoId, movimentoUsuarioId, movimentoLoteId, movimentoEmbalagem,
+  movimentoProjetoId, movimentoSciId, movimentoAtividadeId, movimentoMostrarQuantidades,
   resumoProdutoId, estoqueUnidadeId, estoqueProdutoId,
   estoqueSituacao, estoqueNivel, estoqueSituacaoLote, estoqueDiasVencimento,
   fiscalProdutoId, fiscalOrgao, fiscalUnidadeId, fiscalDiasVencimento,
@@ -451,6 +471,42 @@ watch([
 ], () => {
   ultimaConsultaRelatorio.value = null
   limparResultados()
+})
+
+const projetosDoLaboratorio = computed(() =>
+  projetosContexto.value.filter((p) => !laboratorioId.value || p.laboratorioId === laboratorioId.value))
+watch(laboratorioId, () => {
+  movimentoProjetoId.value = ''
+  movimentoSciId.value = ''
+  movimentoAtividadeId.value = ''
+})
+watch(movimentoProjetoId, async (id) => {
+  movimentoSciId.value = ''
+  movimentoAtividadeId.value = ''
+  scisContexto.value = []
+  atividadesContexto.value = []
+  if (!id) return
+  try {
+    scisContexto.value = await projetosService.listarScisPorProjeto(id)
+  } catch (e) { console.error('Falha ao carregar SCIs', e) }
+})
+watch(movimentoSciId, async (id) => {
+  movimentoAtividadeId.value = ''
+  atividadesContexto.value = []
+  if (!id || !movimentoProjetoId.value) return
+  try {
+    atividadesContexto.value = (await projetosService.listarAtividadesPorProjeto(movimentoProjetoId.value))
+      .filter((a) => a.sciId === id)
+  } catch (e) { console.error('Falha ao carregar atividades', e) }
+})
+watch(movimentoProdutoId, async (id) => {
+  movimentoEmbalagem.value = ''
+  embalagensDisponiveis.value = []
+  if (!id) return
+  try {
+    const { data } = await http.get<string[]>('/v1/relatorios/movimentacoes/embalagens', { params: { produtoId: id } })
+    if (movimentoProdutoId.value === id) embalagensDisponiveis.value = data
+  } catch (e) { console.error('Falha ao consultar embalagens do produto', e) }
 })
 
 onMounted(async () => {
@@ -463,6 +519,7 @@ onMounted(async () => {
   ])
 
   const [labs, units, prods, users, lots] = resultados
+  try { projetosContexto.value = await projetosService.listarProjetos() } catch (e) { console.error('Falha ao carregar Projetos', e) }
   if (labs.status === 'fulfilled') laboratorios.value = [...labs.value.data].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
   if (units.status === 'fulfilled') unidades.value = [...units.value.data].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
   if (prods.status === 'fulfilled') produtos.value = [...prods.value.data].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
@@ -533,14 +590,21 @@ onMounted(async () => {
           </div>
 
           <div v-else-if="relatorioMovimentacoesSelecionado" class="filtros-body filtros-body--movimentacoes">
-            <div class="campo"><label for="mov-embalagem">Tipo de embalagem</label><select id="mov-embalagem" v-model="movimentoEmbalagem"><option value="">Todas as embalagens</option><option v-for="emb in ['UNITARIO', 'FRASCO', 'AMPOLA', 'GARRAFA', 'GALAO', 'CAIXA', 'KIT', 'PACOTE', 'SACO', 'TUBO', 'POTE', 'PAR', 'OUTRO']" :key="emb" :value="emb">{{ formatarRotulo(emb) }}</option></select></div>
-            <div class="campo"><label for="mov-tipo">Tipo</label><select id="mov-tipo" v-model="movimentoTipo"><option value="">Todos</option><option value="ENTRADA">Entrada</option><option value="SAIDA">Saída</option><option value="AJUSTE">Ajuste</option><option value="DEVOLUCAO">Devolução</option><option value="DESCARTE_VENCIMENTO">Descarte por vencimento</option></select></div>
+            <div class="campo"><label for="mov-tipo">Movimentação</label><select id="mov-tipo" v-model="movimentoTipo"><option value="">Todas</option><option value="ENTRADA">Entrada</option><option value="SAIDA">Saída</option><option value="AJUSTE_ENTRADA">Ajuste de entrada</option><option value="AJUSTE_SAIDA">Ajuste de saída</option><option value="DEVOLUCAO">Devolução</option><option value="DESCARTE_VENCIMENTO">Descarte</option></select></div>
             <div class="campo"><label for="mov-origem">Origem</label><select id="mov-origem" v-model="movimentoOrigem"><option value="">Todas</option><option value="PEDIDO">Pedido</option><option value="COMPRA">Compra</option><option value="AJUSTE">Ajuste</option><option value="DEVOLUCAO">Devolução</option><option value="INVENTARIO">Inventário</option><option value="DESCARTE">Descarte</option></select></div>
-            <div class="campo campo--periodo"><label>Período da movimentação</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
+            <div class="campo"><label for="mov-lab">Laboratório</label><select id="mov-lab" v-model="laboratorioId"><option value="">Todos</option><option v-for="lab in laboratorios" :key="lab.id" :value="lab.id">{{ lab.nome }}</option></select></div>
+            <div class="campo"><label for="mov-projeto">Projeto</label><select id="mov-projeto" v-model="movimentoProjetoId"><option value="">Todos / Sem filtro</option><option v-for="projeto in projetosDoLaboratorio" :key="projeto.id" :value="projeto.id">{{ projeto.nome }}</option></select></div>
+            <div class="campo"><label for="mov-sci">SCI</label><select id="mov-sci" v-model="movimentoSciId" :disabled="!movimentoProjetoId"><option value="">Todos</option><option v-for="sci in scisContexto" :key="sci.id" :value="sci.id">{{ sci.nome }}</option></select></div>
+            <div class="campo"><label for="mov-atividade">Atividade</label><select id="mov-atividade" v-model="movimentoAtividadeId" :disabled="!movimentoSciId"><option value="">Todas</option><option v-for="atividade in atividadesContexto" :key="atividade.id" :value="atividade.id">{{ atividade.nome }}</option></select></div>
             <div class="campo"><label for="mov-produto">Produto</label><select id="mov-produto" v-model="movimentoProdutoId"><option value="">Todos os produtos</option><option v-for="produto in produtos" :key="produto.id" :value="produto.id">{{ produto.nome }}</option></select></div>
-            <div class="campo"><label for="mov-lab">Laboratório</label><select id="mov-lab" v-model="laboratorioId"><option value="">Todos os laboratórios</option><option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option></select></div>
-            <div class="campo"><label for="mov-usuario">Responsável pela operação</label><select id="mov-usuario" v-model="movimentoUsuarioId"><option value="">Todos os responsáveis</option><option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">{{ usuario.nome }}</option></select></div>
-            <div class="campo campo--busca"><label for="mov-lote">Lote</label><select id="mov-lote" v-model="movimentoLoteId"><option value="">Todos os lotes</option><option v-for="lote in lotes" :key="lote.id" :value="lote.id">{{ lote.codigoInterno || lote.numeroLote || lote.id }}</option></select></div>
+            <div class="campo"><label for="mov-embalagem">Tipo de embalagem</label><select id="mov-embalagem" v-model="movimentoEmbalagem" :disabled="!movimentoProdutoId"><option value="">Todas as embalagens</option><option v-for="emb in embalagensDisponiveis" :key="emb" :value="emb">{{ formatarRotulo(emb) }}</option></select></div>
+            <div class="campo campo--periodo"><label>Período da movimentação</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
+            <div class="campo campo--busca"><label class="movimento-checkbox"><input v-model="movimentoMostrarQuantidades" type="checkbox" />Mostrar também as quantidades físicas</label><small>Por padrão, o relatório conta ocorrências. A unidade física é informada por produto.</small></div>
+            <div class="campo campo--busca"><button type="button" class="btn btn--ghost" @click="movimentoMaisFiltros = !movimentoMaisFiltros">{{ movimentoMaisFiltros ? 'Ocultar filtros adicionais' : 'Mais filtros' }}</button></div>
+            <template v-if="movimentoMaisFiltros">
+              <div class="campo"><label for="mov-usuario">Responsável pela operação</label><select id="mov-usuario" v-model="movimentoUsuarioId"><option value="">Todos</option><option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">{{ usuario.nome }}</option></select></div>
+              <div class="campo"><label for="mov-lote">Lote</label><select id="mov-lote" v-model="movimentoLoteId"><option value="">Todos</option><option v-for="lote in lotes" :key="lote.id" :value="lote.id">{{ lote.codigoInterno || lote.numeroLote || lote.id }}</option></select></div>
+            </template>
           </div>
 
           <div v-else-if="relatorioResumoSelecionado" class="filtros-body filtros-body--resumo">
