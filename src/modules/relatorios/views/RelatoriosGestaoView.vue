@@ -611,7 +611,7 @@ onMounted(async () => {
             <div class="campo"><label for="mov-produto">Produto</label><select id="mov-produto" v-model="movimentoProdutoId"><option value="">Todos os produtos</option><option v-for="produto in produtos" :key="produto.id" :value="produto.id">{{ produto.nome }}</option></select></div>
             <div class="campo"><label for="mov-embalagem">Tipo de embalagem</label><select id="mov-embalagem" v-model="movimentoEmbalagem" :disabled="!movimentoProdutoId"><option value="">Todas as embalagens</option><option v-for="emb in embalagensDisponiveis" :key="emb" :value="emb">{{ formatarRotulo(emb) }}</option></select></div>
             <div class="campo campo--periodo"><label>Período da movimentação</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
-            <div class="campo campo--busca"><label class="movimento-checkbox"><input v-model="movimentoMostrarQuantidades" type="checkbox" />Mostrar também as quantidades físicas</label><small>Por padrão, o relatório conta ocorrências. A unidade física é informada por produto.</small></div>
+            <div class="campo campo--quantidades"><label class="movimento-checkbox"><input v-model="movimentoMostrarQuantidades" type="checkbox" /><span>Mostrar quantidades físicas</span></label><small>Desmarcado: contar movimentações. Marcado: incluir quantidades do produto.</small></div>
             <div class="campo campo--busca"><button type="button" class="btn btn--ghost" @click="movimentoMaisFiltros = !movimentoMaisFiltros">{{ movimentoMaisFiltros ? 'Ocultar filtros adicionais' : 'Mais filtros' }}</button></div>
             <template v-if="movimentoMaisFiltros">
               <div class="campo"><label for="mov-usuario">Responsável pela operação</label><select id="mov-usuario" v-model="movimentoUsuarioId"><option value="">Todos</option><option v-for="usuario in usuarios" :key="usuario.id" :value="usuario.id">{{ usuario.nome }}</option></select></div>
@@ -695,7 +695,8 @@ onMounted(async () => {
               <strong>Quantidades por produto e unidade</strong>
               <div v-for="grupo in quantidadesAgrupadas" :key="grupo.id">{{ grupo.nome }} · {{ formatarRotulo(grupo.tipo) }}: {{ formatarQuantidadeComUnidade(grupo.quantidade, grupo.unidade) }}</div>
             </div>
-            <div class="table-wrap"><table class="movimentacoes-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th v-if="movimentoMostrarQuantidades">Quantidade</th><th>Lote</th><th>Laboratório</th><th>Origem</th><th>Responsável</th><th v-if="movimentoMostrarQuantidades">Saldo</th></tr></thead><tbody><tr v-for="item in resultadoMovimentacoes.itens" :key="item.id"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong><small v-if="item.pedidoSolicitanteNome">Solicitante: {{ item.pedidoSolicitanteNome }}</small></td><td><span
+            <p v-if="movimentoEmbalagem && resultadoMovimentacoes.itens.length" class="embalagem-nota">Embalagem filtrada: {{ formatarRotulo(movimentoEmbalagem) }}. Uma saída pode retirar apenas parte do conteúdo de um recipiente; quantidade física e número de recipientes não são equivalentes.</p>
+            <div class="table-wrap"><table class="movimentacoes-table"><thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th v-if="movimentoEmbalagem">Recipientes utilizados</th><th v-if="movimentoMostrarQuantidades">Quantidade retirada</th><th>Lote</th><th>Laboratório</th><th>Origem</th><th>Responsável</th><th v-if="movimentoMostrarQuantidades">Saldo</th></tr></thead><tbody><tr v-for="item in resultadoMovimentacoes.itens" :key="item.id"><td>{{ formatarDataHora(item.dataMovimentacao) }}</td><td><strong>{{ item.produtoNome }}</strong><small v-if="item.pedidoSolicitanteNome">Solicitante: {{ item.pedidoSolicitanteNome }}</small></td><td><span
   class="status status--mov"
   :class="{
     'status--mov-entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO',
@@ -705,7 +706,7 @@ onMounted(async () => {
   }"
 >
   {{ formatarRotulo(item.tipoMovimentacao) }}
-</span></td><td v-if="movimentoMostrarQuantidades" class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ formatarQuantidadeComUnidade(item.quantidadeMovimentada, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ formatarRotulo(item.origem) }}</td><td>{{ item.usuarioNome }}</td><td v-if="movimentoMostrarQuantidades">{{ formatarQuantidadeComUnidade(item.quantidadeAnterior, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }} → {{ formatarQuantidadeComUnidade(item.quantidadeAtual, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td></tr><tr v-if="resultadoMovimentacoes.itens.length === 0"><td  :colspan="movimentoMostrarQuantidades ? 9 : 7" class="table-empty">Nenhuma movimentação encontrada com os filtros informados.</td></tr></tbody></table></div>
+</span></td><td v-if="movimentoEmbalagem">{{ item.recipientesUtilizados ?? "—" }} {{ formatarRotulo(movimentoEmbalagem).toLowerCase() }}(s)</td><td v-if="movimentoMostrarQuantidades" class="quantidade" :class="{ 'quantidade--entrada': item.tipoMovimentacao === 'ENTRADA' || item.tipoMovimentacao === 'DEVOLUCAO', 'quantidade--saida': item.tipoMovimentacao === 'SAIDA' || item.tipoMovimentacao === 'DESCARTE_VENCIMENTO' }">{{ sinalQuantidade(item.tipoMovimentacao) }}{{ formatarQuantidadeComUnidade(item.quantidadeMovimentada, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td><td><strong>{{ item.codigoInternoLote || '—' }}</strong><small v-if="item.numeroLote">Fornecedor: {{ item.numeroLote }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ formatarRotulo(item.origem) }}</td><td>{{ item.usuarioNome }}</td><td v-if="movimentoMostrarQuantidades">{{ formatarQuantidadeComUnidade(item.quantidadeAnterior, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }} → {{ formatarQuantidadeComUnidade(item.quantidadeAtual, item.unidadeMedida ?? unidadeProduto(item.produtoId)) }}</td></tr><tr v-if="resultadoMovimentacoes.itens.length === 0"><td  :colspan="7 + (movimentoMostrarQuantidades ? 2 : 0) + (movimentoEmbalagem ? 1 : 0)" class="table-empty">Nenhuma movimentação encontrada com os filtros informados.</td></tr></tbody></table></div>
           </div>
 
           <div v-else-if="relatorioResumoSelecionado && resultadoResumoOperacional" class="preview-result">
@@ -764,6 +765,12 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.campo--quantidades { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 5px; align-items: flex-start; min-width: 0; }
+.campo--quantidades .movimento-checkbox { display: inline-flex !important; gap: 8px; align-items: center; width: auto !important; margin: 0; font-weight: 600; cursor: pointer; }
+.campo--quantidades .movimento-checkbox input { width: 16px !important; height: 16px !important; flex: 0 0 16px; padding: 0; margin: 0; accent-color: #4b82e7; }
+.campo--quantidades small { display: block; font-size: 11px; line-height: 1.4; }
+.embalagem-nota { padding: 0 20px 10px; margin: 0; color: var(--sgl-text-secondary, #94a3b8); font-size: 12px; }
+
 .totais-produto { padding: 12px 20px; display: grid; gap: 6px; font-size: 13px; }
 .movimento-checkbox { display: flex !important; align-items: center; gap: 9px; }
 .movimento-checkbox input { width: auto; height: auto; }
