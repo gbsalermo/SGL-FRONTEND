@@ -25,7 +25,7 @@ O SGL considera a estrutura **Unidade → Laboratório → Projeto → SCI → A
 
 A aplicação utiliza Vue e TypeScript, comunica-se com a API do SGL e busca oferecer uma navegação consistente, responsiva e com suporte a temas claro e escuro. O projeto está em **evolução de pré-produção**; autenticação definitiva e integração institucional pertencem a fases posteriores.
 
-> **Acompanhamento da evolução:** entregas, decisões e próximos passos estão em [`CONTINUIDADE.md`](CONTINUIDADE.md) e no roadmap do backend [`docs/PLANO_PRE_PRODUCAO.md`](https://github.com/gbsalermo/Sistema-SGL/blob/main/docs/PLANO_PRE_PRODUCAO.md). O contrato de início da Etapa 9 está em [`docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`](docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md).
+> **Acompanhamento da evolução:** entregas, decisões e próximos passos estão em [`CONTINUIDADE.md`](CONTINUIDADE.md) e no roadmap do backend [`docs/PLANO_PRE_PRODUCAO.md`](https://github.com/gbsalermo/Sistema-SGL/blob/main/docs/PLANO_PRE_PRODUCAO.md). O histórico e o contrato da Etapa 9 estão em [`docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`](docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md).
 
 ---
 
@@ -351,18 +351,22 @@ Central:
 /relatorios
 ```
 
-Cobertura:
+Cobertura funcional validada na Etapa 9:
 
 ```text
 Estagiários
 Produtos
-Movimentações
-Resumo operacional
+Projetos — relatório consolidado
+Movimentações — Resumo / Detalhamento
 Estoque e lotes
 Fiscalização
 Resíduos
 Pessoas por laboratório
 ```
+
+A opção **Movimentações** reúne contagens por tipo no modo Resumo e consulta de registros no Detalhamento. Os filtros do Detalhamento contemplam contexto Laboratório/Projeto/SCI/Atividade, produto, apresentação/unidade, origem e período. A quantidade física pode ser exibida opcionalmente e é identificada pela unidade real de medida. Estoque e lotes exibem apresentações e estados dos recipientes; Fiscalização inclui rastreabilidade por recipiente. As exportações PDF/XLSX usam a consulta filtrada da prévia.
+
+A apresentação física e a quantidade consumida são conceitos distintos. A identificação histórica de consumo completo ou por medida é inferida dos detalhes registrados e não comprova a apresentação originalmente solicitada.
 
 Pedidos entregues são recorte de Movimentações, não relatório separado.
 
@@ -428,7 +432,7 @@ No ambiente DEV, a sessão e os controles de navegação organizam a experiênci
 
 ## Evolução do projeto
 
-O desenvolvimento de pré-produção evolui de forma incremental, preservando os fluxos homologados:
+O desenvolvimento de pré-produção evolui de forma incremental, preservando os fluxos homologados. A Etapa 9 está validada funcionalmente na branch colaborativa, mas ainda não integrada à `main`:
 
 | Etapa | Escopo | Situação |
 |---|---|---|
@@ -437,7 +441,7 @@ O desenvolvimento de pré-produção evolui de forma incremental, preservando os
 | 6 | Estagiários, vínculos, participações e formação | Concluída |
 | 7 | Estoque físico, apresentações, fracionamento, FEFO/FIFO e Soluções | Concluída |
 | 8 | Contextos operacionais, Pedidos, Soluções, Resíduos e vínculos adicionais | Concluída e integrada |
-| 9 | Relatórios consolidados: Projetos e Movimentações (Resumo/Detalhamento) | Em preparação |
+| 9 | Relatórios consolidados: Projetos, Movimentações (Resumo/Detalhamento), Estoque/Lotes e Fiscalização | Implementada e validada funcionalmente; aguardando merge |
 | 10 | Rótulos e impressão operacional | Planejada |
 | 11 | Manual do usuário e revisão de inativação/delete lógico | Planejada |
 | 12 | Testes transversais de arquitetura, carga, E2E e regressão | Planejada |
