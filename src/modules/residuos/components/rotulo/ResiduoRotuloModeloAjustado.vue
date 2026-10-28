@@ -158,11 +158,15 @@ function registrarErroPictograma(risco: TipoRiscoResiduo) {
             <li v-for="medida in medidasVisiveis" :key="medida">{{ segurancaRotulos[medida] }}</li>
           </ul>
           <p v-else>Nenhuma medida {{ dados.classificacaoConfirmada ? 'confirmada' : 'informada' }}.</p>
-          <p v-if="dados.observacaoSeguranca" class="safety-additional">{{ dados.observacaoSeguranca }}</p>
         </div>
         <div class="observations">
           <h3>OBSERVAÇÕES</h3>
-          <p>{{ dados.observacoesRotulo || 'Sem observações adicionais registradas.' }}</p>
+          <p v-if="dados.observacoesRotulo">{{ dados.observacoesRotulo }}</p>
+          <div v-if="dados.observacaoSeguranca" class="observation-safety">
+            <strong>Observação de segurança</strong>
+            <p>{{ dados.observacaoSeguranca }}</p>
+          </div>
+          <p v-if="!dados.observacoesRotulo && !dados.observacaoSeguranca">Sem observações adicionais registradas.</p>
         </div>
       </section>
 
@@ -256,7 +260,7 @@ function registrarErroPictograma(risco: TipoRiscoResiduo) {
 .safety-notes ul{margin:0;padding-left:5mm;display:grid;gap:.5mm}
 .supplemental li,.supplemental p{font-size:8.9pt;line-height:1.22;overflow-wrap:anywhere}
 .supplemental p{margin:0}
-.safety-additional{margin-top:1.5mm!important;font-style:italic}
+.observation-safety{margin-top:1.8mm}.observation-safety strong{display:block;font-size:8pt;margin-bottom:.8mm}
 /* Rodapé alinhado numa faixa horizontal, sem uma segunda marca no topo. */
 .label-footer{
   display:grid;grid-template-columns:38mm minmax(0,1fr) 38mm;gap:5mm;
