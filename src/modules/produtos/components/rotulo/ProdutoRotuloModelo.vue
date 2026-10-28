@@ -11,6 +11,7 @@ const props = defineProps<{
 }>()
 
 const logoComErro = ref(false)
+const logoSglComErro = ref(false)
 const pictogramaComErro = ref(false)
 const BASE_LARGURA = 180
 const BASE_ALTURA = 125
@@ -46,145 +47,37 @@ function textoEnum(valor: string | null) {
 <template>
   <div class="label-frame" :style="frameStyle">
     <article class="produto-label" :style="labelStyle" aria-label="Rótulo do produto">
-      <header class="label-header">
-        <div>
-          <p>PRODUTO LABORATORIAL</p>
-          <h2>{{ dados.nome }}</h2>
-          <strong>{{ dados.codigoReferencia || 'SEM CÓDIGO DE REFERÊNCIA' }}</strong>
-        </div>
-        <div class="header-meta">
-          <strong>SGL — Sistema de Gestão de Laboratórios</strong>
-          <span>{{ dados.unidadeArmazenamento || 'Apresentação não informada' }}</span>
-          <span>{{ dados.ativo ? 'Produto ativo no catálogo' : 'Produto inativo no catálogo' }}</span>
-        </div>
+      <header class="nova-cabecalho">
+        <img v-if="!logoSglComErro" src="/assets/residuos/marcas/sgl-logo.png.png" alt="SGL" @error="logoSglComErro = true" /><b v-else>SGL</b>
+        <div class="titulo"><strong>PRODUTO LABORATORIAL</strong><h2>{{ dados.nome }}</h2></div>
+        <div class="marca"><img v-if="!logoComErro" src="/assets/residuos/marcas/embrapa.png" alt="Embrapa" @error="logoComErro = true" /><b v-else>EMBRAPA</b><small>{{ dados.codigoReferencia || 'SEM REFERÊNCIA' }}</small></div>
       </header>
-
-      <div class="label-body">
-        <aside class="hazard-area">
-          <p>Periculosidade</p>
-          <template v-if="riscoVisivel">
-            <img
-              v-if="!pictogramaComErro"
-              :src="caminhoPictogramaResiduo(riscoVisivel) ?? undefined"
-              :alt="rotuloRiscoResiduo(riscoVisivel)"
-              @error="pictogramaComErro = true"
-            />
-            <div v-else class="hazard-fallback">!</div>
-            <strong>{{ rotuloRiscoResiduo(riscoVisivel) }}</strong>
-          </template>
-          <div v-else class="no-hazard">Sem pictograma aplicável</div>
-        </aside>
-
-        <section class="information-area">
-          <div class="risk-heading">
-            <span>NÍVEL DE RISCO</span>
-            <h3>{{ textoEnum(dados.risco) }}</h3>
-            <p>{{ dados.descricaoRisco || 'Sem advertência complementar cadastrada.' }}</p>
-          </div>
-
-          <div class="info-grid">
-            <div>
-              <h4>Armazenamento recomendado</h4>
-              <p>{{ dados.condicoesArmazenamento || 'Não informado' }}</p>
-            </div>
-            <div>
-              <h4>Localização física</h4>
-              <p>{{ dados.localizacaoFisica || 'Não informada' }}</p>
-            </div>
-            <div>
-              <h4>Unidade de medida</h4>
-              <p>{{ textoEnum(dados.unidadeMedida) }}</p>
-            </div>
-            <div>
-              <h4>Perecibilidade</h4>
-              <p>{{ dados.perecivel ? `Perecível · ${textoEnum(dados.tipoPerecivel)}` : 'Não perecível' }}</p>
-            </div>
-          </div>
-
-          <section class="inspection" :class="{ 'inspection--active': dados.fiscalizado }">
-            <div>
-              <span>CONTROLE / FISCALIZAÇÃO EXTERNA</span>
-              <strong>{{ dados.fiscalizado ? 'Produto sujeito a controle' : 'Sem controle externo cadastrado' }}</strong>
-            </div>
-            <p v-if="dados.fiscalizado && dados.orgaosFiscalizadores.length">
-              {{ dados.orgaosFiscalizadores.map(orgaoRotulo).join(' · ') }}
-            </p>
-            <p v-else-if="dados.fiscalizado">Órgão fiscalizador não informado.</p>
-            <small v-if="dados.observacaoFiscalizacao">{{ dados.observacaoFiscalizacao }}</small>
-          </section>
-        </section>
-      </div>
-
-      <footer class="label-footer">
-        <div class="embrapa-brand">
-          <img v-if="!logoComErro" src="/assets/residuos/marcas/embrapa.png" alt="Embrapa" @error="logoComErro = true" />
-          <strong v-else>EMBRAPA</strong>
-        </div>
-        <div class="description">
-          <span>DESCRIÇÃO</span>
-          <strong>{{ dados.descricao || dados.nome }}</strong>
-        </div>
-        <div v-if="dados.fiscalizado" class="control-badge active">
-          <span>CONTROLADO</span>
-          <strong>{{ dados.orgaosFiscalizadores.map(orgaoRotulo).join(' / ') || 'Fiscalizado' }}</strong>
-        </div>
-        <div v-else class="sgl-brand" aria-label="Catálogo SGL">
-          <img src="/assets/residuos/marcas/sgl-logo.png.png" alt="SGL — Sistema de Gestão de Laboratórios" />
-        </div>
-      </footer>
+      <section class="identificacao">
+        <div><b>Identificação</b><span>{{ dados.codigoReferencia || 'Não informada' }}</span></div>
+        <div><b>Apresentação</b><span>{{ dados.unidadeArmazenamento || 'Não informada' }}</span></div>
+        <div><b>Unidade de medida</b><span>{{ textoEnum(dados.unidadeMedida) }}</span></div>
+        <div><b>Cadastro</b><span>{{ dados.ativo ? 'Ativo' : 'Inativo' }}</span></div>
+      </section>
+      <section class="composicao"><b>DESCRIÇÃO DO PRODUTO</b><span>{{ dados.descricao || dados.nome }}</span></section>
+      <section class="seguranca">
+        <div v-if="riscoVisivel" class="pictogramas"><h3>PICTOGRAMA / RISCO IDENTIFICADO</h3><img v-if="!pictogramaComErro && caminhoPictogramaResiduo(riscoVisivel)" :src="caminhoPictogramaResiduo(riscoVisivel) ?? undefined" :alt="rotuloRiscoResiduo(riscoVisivel)" @error="pictogramaComErro = true" /><span v-else>!</span><p>{{ rotuloRiscoResiduo(riscoVisivel) }}</p></div>
+        <div class="classificacao"><h3>INFORMAÇÕES DE SEGURANÇA</h3><strong>{{ textoEnum(dados.risco) }}</strong><p>{{ dados.descricaoRisco || 'Sem advertência complementar cadastrada.' }}</p></div>
+      </section>
+      <section class="detalhes"><div><h3>ARMAZENAMENTO</h3><p><b>Condições:</b> {{ dados.condicoesArmazenamento || 'Não informadas' }}</p><p><b>Localização:</b> {{ dados.localizacaoFisica || 'Não informada' }}</p><p><b>Perecibilidade:</b> {{ dados.perecivel ? textoEnum(dados.tipoPerecivel) : 'Não perecível' }}</p></div><div><h3>CONTROLE E FISCALIZAÇÃO</h3><p>{{ dados.fiscalizado ? 'Produto sujeito a controle' : 'Sem controle externo cadastrado' }}</p><p v-if="dados.fiscalizado">{{ dados.orgaosFiscalizadores.map(orgaoRotulo).join(' · ') || 'Órgão não informado' }}</p><p v-if="dados.observacaoFiscalizacao">{{ dados.observacaoFiscalizacao }}</p></div></section>
+      <footer class="rodape"><span>{{ dados.nome }}</span><strong>{{ dados.codigoReferencia || 'CATÁLOGO SGL' }}</strong></footer>
     </article>
   </div>
 </template>
 
 <style scoped>
-.label-frame { position: relative; flex: 0 0 auto; overflow: hidden; }
-.produto-label {
-  width: 180mm;
-  height: 125mm;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  padding: 7mm;
-  border: 1.2px solid #111827;
-  background: #fff;
-  color: #111827;
-  font-family: Arial, Helvetica, sans-serif;
-  box-sizing: border-box;
-  transform-origin: top left;
-}
-.label-header { display: grid; grid-template-columns: 1.5fr .9fr; gap: 8mm; padding-bottom: 4mm; border-bottom: 1px solid #cbd5e1; }
-.label-header p { margin: 0 0 1.5mm; font-size: 8pt; font-weight: 800; letter-spacing: .08em; }
-.label-header h2 { margin: 0; font-size: 19pt; line-height: 1.05; }
-.label-header > div > strong { display: block; margin-top: 2mm; font-size: 10pt; }
-.header-meta { display: flex; flex-direction: column; gap: 1mm; font-size: 8pt; line-height: 1.3; }
-.header-meta > strong { margin: 0 !important; font-size: 9pt !important; }
-.label-body { min-height: 0; display: grid; grid-template-columns: 42mm minmax(0, 1fr); gap: 6mm; padding: 5mm 0; }
-.hazard-area { min-height: 0; padding-right: 5mm; border-right: 1px solid #cbd5e1; text-align: center; }
-.hazard-area > p { margin: 0 0 3mm; font-size: 8pt; font-weight: 800; text-transform: uppercase; text-align: left; }
-.hazard-area img, .hazard-fallback { width: 25mm; height: 25mm; margin: 0 auto 2mm; object-fit: contain; }
-.hazard-area > strong { display: block; font-size: 8pt; }
-.hazard-fallback { display: grid; place-items: center; border: 3px solid #dc2626; color: #111827; font-size: 24pt; font-weight: 900; }
-.no-hazard { padding: 6mm 2mm; border: 1px dashed #94a3b8; font-size: 8pt; }
-.information-area { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 3mm; }
-.risk-heading span, .info-grid h4, .inspection span, .description span, .control-badge span { font-size: 7pt; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-.risk-heading h3 { margin: .5mm 0 1mm; font-size: 16pt; line-height: 1; }
-.risk-heading p, .info-grid p, .inspection p, .inspection small { margin: 0; font-size: 8pt; line-height: 1.3; overflow-wrap: anywhere; }
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm 5mm; }
-.info-grid h4 { margin: 0 0 1mm; }
-.inspection { align-self: stretch; padding: 3mm; border: 1px solid #cbd5e1; background: #f8fafc; }
-.inspection--active { border: 1.4px solid #b45309; background: #fff8eb; }
-.inspection > div { display: flex; align-items: baseline; justify-content: space-between; gap: 4mm; margin-bottom: 1.5mm; }
-.inspection > div strong { font-size: 9pt; }
-.inspection small { display: block; margin-top: 1mm; color: #475569; }
-.label-footer { display: grid; grid-template-columns: 38mm minmax(0, 1fr) 45mm; align-items: center; gap: 5mm; padding-top: 4mm; border-top: 1px solid #cbd5e1; }
-.embrapa-brand { min-height: 13mm; display: flex; align-items: center; }
-.embrapa-brand img { display: block; max-width: 34mm; max-height: 12mm; object-fit: contain; object-position: left center; }
-.embrapa-brand > strong { font-size: 12pt; }
-.description { min-width: 0; display: flex; flex-direction: column; gap: 1mm; }
-.description strong { font-size: 8pt; line-height: 1.2; overflow-wrap: anywhere; }
-.control-badge { padding: 2mm 2.5mm; border: 1px solid #cbd5e1; text-align: center; }
-.control-badge.active { border-color: #b45309; background: #fff8eb; }
-.control-badge strong { display: block; margin-top: .8mm; font-size: 7pt; line-height: 1.2; }
-.sgl-brand { min-width: 38mm; min-height: 13mm; display: flex; align-items: center; justify-content: flex-end; }
-.sgl-brand img { display: block; max-width: 38mm; max-height: 14mm; object-fit: contain; object-position: right center; }
-@media print { .produto-label { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
+.label-frame{position:relative;flex:0 0 auto;overflow:hidden}
+.produto-label{width:180mm;height:125mm;box-sizing:border-box;padding:5mm;display:flex;flex-direction:column;gap:2mm;background:#fff;color:#1e293b;border:1px solid #234764;font-family:Arial,Helvetica,sans-serif;transform-origin:top left;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.nova-cabecalho{display:grid;grid-template-columns:23mm 1fr 29mm;gap:3mm;align-items:center;border-bottom:1px solid #cbd5e1;padding-bottom:2mm}
+.nova-cabecalho>img{width:22mm;max-height:13mm;object-fit:contain}.titulo{text-align:center}.titulo>strong{display:block;background:#1667b3;color:#fff;padding:2mm;font-size:10pt}.titulo h2{font-size:13pt;margin:1mm 0;overflow-wrap:anywhere}.marca{display:flex;flex-direction:column;align-items:flex-end;gap:1mm}.marca img{width:25mm;max-height:10mm;object-fit:contain}.marca small{font-size:7pt;font-weight:bold}
+.identificacao{display:grid;grid-template-columns:1fr 1fr 1fr .6fr;gap:2mm;font-size:8pt}.identificacao div{display:flex;flex-direction:column;gap:.6mm;min-width:0}.identificacao span{overflow-wrap:anywhere}
+.composicao{display:flex;gap:3mm;align-items:center;padding:2mm;background:#eff5f8;font-size:8pt;overflow-wrap:anywhere}.composicao span{font-weight:bold}
+.identificacao b,.composicao b{font-size:7pt;text-transform:uppercase;color:#174969}
+.seguranca{display:flex;gap:5mm;min-height:27mm;border-bottom:1px solid #cbd5e1}.seguranca h3,.detalhes h3{font-size:8pt;margin:1mm 0 2mm}.pictogramas{width:38mm;flex-shrink:0}.pictogramas img,.pictogramas>span{display:block;width:19mm;height:19mm;object-fit:contain}.pictogramas p{font-size:8pt;margin:1mm 0}.classificacao{flex:1;min-width:0}.classificacao strong{display:block;font-size:16pt;color:#1b5680}.classificacao p{font-size:8pt;line-height:1.3;overflow-wrap:anywhere}
+.detalhes{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:5mm}.detalhes p{font-size:8pt;line-height:1.25;margin:1mm 0;overflow-wrap:anywhere}
+.rodape{display:flex;justify-content:space-between;align-items:center;gap:3mm;border-top:1px solid #cbd5e1;padding-top:2mm;font-size:8pt}.rodape span{overflow-wrap:anywhere}.rodape strong{white-space:nowrap}
 </style>
