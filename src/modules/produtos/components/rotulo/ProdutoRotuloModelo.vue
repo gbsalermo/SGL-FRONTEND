@@ -11,6 +11,7 @@ const props = defineProps<{
 }>()
 
 const logoComErro = ref(false)
+const logoSglComErro = ref(false)
 const pictogramaComErro = ref(false)
 const BASE_LARGURA = 180
 const BASE_ALTURA = 125
@@ -124,12 +125,9 @@ function textoEnum(valor: string | null) {
           <span>DESCRIÇÃO</span>
           <strong>{{ dados.descricao || dados.nome }}</strong>
         </div>
-        <div v-if="dados.fiscalizado" class="control-badge active">
-          <span>CONTROLADO</span>
-          <strong>{{ dados.orgaosFiscalizadores.map(orgaoRotulo).join(' / ') || 'Fiscalizado' }}</strong>
-        </div>
-        <div v-else class="sgl-brand" aria-label="Catálogo SGL">
-          <img src="/assets/residuos/marcas/sgl-logo.png.png" alt="SGL — Sistema de Gestão de Laboratórios" />
+        <div class="sgl-brand" aria-label="Marca SGL">
+          <img v-if="!logoSglComErro" src="/assets/residuos/marcas/sgl-logo.png.png" alt="SGL — Sistema de Gestão de Laboratórios" @error="logoSglComErro = true" />
+          <strong v-else>SGL</strong>
         </div>
       </footer>
     </article>
@@ -165,7 +163,7 @@ function textoEnum(valor: string | null) {
 .hazard-fallback { display: grid; place-items: center; border: 3px solid #dc2626; color: #111827; font-size: 24pt; font-weight: 900; }
 .no-hazard { padding: 6mm 2mm; border: 1px dashed #94a3b8; font-size: 8pt; }
 .information-area { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 3mm; }
-.risk-heading span, .info-grid h4, .inspection span, .description span, .control-badge span { font-size: 7pt; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.risk-heading span, .info-grid h4, .inspection span, .description span { font-size: 7pt; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 .risk-heading h3 { margin: .5mm 0 1mm; font-size: 16pt; line-height: 1; }
 .risk-heading p, .info-grid p, .inspection p, .inspection small { margin: 0; font-size: 8pt; line-height: 1.3; overflow-wrap: anywhere; }
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm 5mm; }
@@ -175,16 +173,14 @@ function textoEnum(valor: string | null) {
 .inspection > div { display: flex; align-items: baseline; justify-content: space-between; gap: 4mm; margin-bottom: 1.5mm; }
 .inspection > div strong { font-size: 9pt; }
 .inspection small { display: block; margin-top: 1mm; color: #475569; }
-.label-footer { display: grid; grid-template-columns: 38mm minmax(0, 1fr) 45mm; align-items: center; gap: 5mm; padding-top: 4mm; border-top: 1px solid #cbd5e1; }
+.label-footer { display: grid; grid-template-columns: 38mm minmax(0, 1fr) 38mm; align-items: center; gap: 5mm; padding-top: 4mm; border-top: 1px solid #cbd5e1; }
 .embrapa-brand { min-height: 13mm; display: flex; align-items: center; }
 .embrapa-brand img { display: block; max-width: 34mm; max-height: 12mm; object-fit: contain; object-position: left center; }
 .embrapa-brand > strong { font-size: 12pt; }
 .description { min-width: 0; display: flex; flex-direction: column; gap: 1mm; }
 .description strong { font-size: 8pt; line-height: 1.2; overflow-wrap: anywhere; }
-.control-badge { padding: 2mm 2.5mm; border: 1px solid #cbd5e1; text-align: center; }
-.control-badge.active { border-color: #b45309; background: #fff8eb; }
-.control-badge strong { display: block; margin-top: .8mm; font-size: 7pt; line-height: 1.2; }
-.sgl-brand { min-width: 38mm; min-height: 13mm; display: flex; align-items: center; justify-content: flex-end; }
-.sgl-brand img { display: block; max-width: 38mm; max-height: 14mm; object-fit: contain; object-position: right center; }
+.sgl-brand { width: 38mm; height: 16mm; display: flex; align-items: center; justify-content: center; }
+.sgl-brand img { display: block; width: 38mm; height: 16mm; object-fit: contain; object-position: center; }
+.sgl-brand strong { font-size: 14pt; }
 @media print { .produto-label { print-color-adjust: exact; -webkit-print-color-adjust: exact; } }
 </style>
