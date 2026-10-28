@@ -98,14 +98,9 @@ function registrarErroPictograma(risco: TipoRiscoResiduo) {
           <strong class="system-name">SGL — Sistema de Gestão de Laboratórios</strong>
           <p><b>Unidade:</b> {{ dados.unidadeSigla }} — {{ dados.unidadeNome }}</p>
           <p><b>Laboratório:</b> {{ dados.laboratorioNome }}</p>
-          <p><b>Gerador registrado:</b> {{ dados.geradorNome }}</p>
-          <p><b>Informado em:</b> {{ formatarData(dados.dataInformacao) }}</p>
-          <p><b>Situação:</b> {{ statusRotulos[dados.status] }}</p>
-          <p v-if="!dados.impressaoPermitida" class="preview-status">Prévia — impressão não liberada</p>
-          <template v-else-if="dados.dataRotulagem">
-            <p><b>Liberado em:</b> {{ formatarData(dados.dataRotulagem) }}</p>
-            <p><b>Responsável pela liberação:</b> {{ dados.responsavelLiberacaoNome || 'Não identificado no histórico' }}</p>
-          </template>
+          <p v-if="dados.projetoOrigemNome"><b>Projeto:</b> {{ dados.projetoOrigemNome }}</p>
+          <p v-if="dados.sciOrigemNome"><b>SCI:</b> {{ dados.sciOrigemNome }}</p>
+          <p v-if="dados.atividadeOrigemNome"><b>Atividade:</b> {{ dados.atividadeOrigemNome }}</p>
         </div>
       </header>
 
@@ -128,12 +123,24 @@ function registrarErroPictograma(risco: TipoRiscoResiduo) {
         </aside>
 
         <section class="information">
-          <div class="risk-heading">
-            <span class="field-label">{{ dados.classificacaoConfirmada ? 'NÍVEL DE RISCO CONFIRMADO' : 'NÍVEL DE RISCO INFORMADO — PRÉVIA' }}</span>
-            <h3>{{ rotuloNivelRisco(dados.nivelRisco) }}</h3>
-            <p>{{ riscosVisiveis.length
-              ? riscosVisiveis.map(rotuloRiscoResiduo).join(' · ')
-              : (dados.classificacaoConfirmada ? 'Sem riscos específicos confirmados' : 'Sem riscos específicos informados') }}</p>
+          <div class="risk-and-traceability">
+            <div class="risk-heading">
+              <span class="field-label">{{ dados.classificacaoConfirmada ? 'NÍVEL DE RISCO CONFIRMADO' : 'NÍVEL DE RISCO INFORMADO — PRÉVIA' }}</span>
+              <h3>{{ rotuloNivelRisco(dados.nivelRisco) }}</h3>
+              <p>{{ riscosVisiveis.length
+                ? riscosVisiveis.map(rotuloRiscoResiduo).join(' · ')
+                : (dados.classificacaoConfirmada ? 'Sem riscos específicos confirmados' : 'Sem riscos específicos informados') }}</p>
+            </div>
+            <div class="traceability">
+              <p><b>Gerador:</b> {{ dados.geradorNome }}</p>
+              <p><b>Informado em:</b> {{ formatarData(dados.dataInformacao) }}</p>
+              <p><b>Situação:</b> {{ statusRotulos[dados.status] }}</p>
+              <p v-if="!dados.impressaoPermitida" class="preview-status">Prévia — impressão não liberada</p>
+              <template v-else-if="dados.dataRotulagem">
+                <p><b>Liberado em:</b> {{ formatarData(dados.dataRotulagem) }}</p>
+                <p><b>Responsável pela liberação:</b> {{ dados.responsavelLiberacaoNome || 'Não identificado no histórico' }}</p>
+              </template>
+            </div>
           </div>
 
           <div class="composition">
@@ -241,6 +248,11 @@ function registrarErroPictograma(risco: TipoRiscoResiduo) {
 .hazard-item small{display:block;font-size:7pt;line-height:1.12;overflow-wrap:anywhere}
 .no-hazard{font-size:8.5pt;line-height:1.2}
 .information{display:flex;flex-direction:column;gap:2mm}
+.risk-and-traceability{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);column-gap:4mm;align-items:start;padding-bottom:2.2mm;border-bottom:1px solid #e2e8f0}
+.risk-heading,.traceability{min-width:0}
+.traceability{padding-left:3mm;border-left:1px solid #cbd5e1;font-size:8.3pt;line-height:1.18}
+.traceability p{margin:0 0 .9mm;overflow-wrap:anywhere}
+.traceability b{font-weight:700}
 .risk-heading .field-label{font-size:8.5pt}
 .risk-heading h3{font-size:18pt;line-height:1;margin:.7mm 0}
 .risk-heading p,.composition p,.info-grid p,.dispatch-date{
