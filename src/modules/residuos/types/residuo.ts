@@ -220,8 +220,6 @@ export interface RotuloResiduoResponse {
   unidadeSigla: string
   laboratorioNome: string
   geradorNome: string
-  estadoFisico?: string | null
-  observacoesRotulo?: string | null
   processoOrigem: string
   recipiente: string
   quantidade: number
@@ -233,7 +231,6 @@ export interface RotuloResiduoResponse {
   destinoFinalPrevisto: string | null
   dataPrevistaDespacho: string | null
   dataRotulagem: string | null
-  dataInformacao?: string | null
 }
 
 export interface ProjetoResiduoResponse { id: string; nome: string; ativo: boolean }
