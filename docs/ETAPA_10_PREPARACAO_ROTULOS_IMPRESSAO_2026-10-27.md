@@ -51,3 +51,13 @@
 **Não exibir “Capacidade da embalagem” nos rótulos de Produtos, Resíduos ou Soluções.** O elemento constava apenas dos esboços de referência, não dos componentes de rótulo atualmente implementados. A inspeção dos componentes `ProdutoRotuloModelo.vue` e `ResiduoRotuloModeloAjustado.vue` confirmou que eles já não apresentam esse campo; portanto, não adicionar campo novo nem modificar o estoque por causa desta decisão.
 
 Preservar, quando aplicável, **quantidade real e unidade**, **estado físico**, **apresentação**, identificação e rastreabilidade, utilizando exclusivamente dados existentes e corretos para cada domínio. `Lote.conteudoPorApresentacao` e `RecipienteEstoque.capacidadeInicial` continuam necessários às regras internas do estoque e não foram alterados. A implementação visual futura dos modelos da Etapa 10 seguirá essa decisão.
+
+## Primeira implementação do novo modelo visual (28/10/2026)
+
+Os componentes ativos `ResiduoRotuloModeloAjustado.vue` e `ProdutoRotuloModelo.vue` foram atualizados na branch `collab/etapa-10-rotulos-impressao`, preservando a escala física de 180 × 125 mm e o bloqueio da impressão de Resíduos na view existente.
+
+O novo padrão usa o logotipo SGL e a marca Embrapa no cabeçalho, faixa de categoria (vermelho para Resíduos, azul para Produtos), identificação operacional, composição/descrição, pictogramas somente quando cadastrados, informações de risco, armazenamento e rodapé de identificação. A capacidade da embalagem não aparece. A quantidade real é mostrada no Resíduo; no Produto, o rótulo do catálogo não inventa saldo de um recipiente ou lote.
+
+**Limites do contrato atual:** não produzir códigos H/P, palavra de advertência GHS, estado físico ou telefone por inferência; esses campos não constam do DTO atual de rótulo de Resíduo de forma confiável. O layout apresenta apenas os riscos já registrados. Não foram adicionados QR, Zebra/ZPL ou rótulo de Solução nesta implementação. Não houve alteração do backend.
+
+**Verificações ainda necessárias:** `npm run build`, conferência visual e impressão nos quatro presets de largura, resíduos com e sem pictogramas, bloqueio de impressão, nomes e composições longos, campos opcionais vazios e produtos sem classificação de risco. A aprovação final depende da validação do mantenedor.
