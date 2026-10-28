@@ -1,6 +1,7 @@
 import { http } from '@/services/http'
 import type {
   AlterarPerfilRequest,
+  CargoSubstituicao,
   ClasseResiduoCadastro,
   ClasseResiduoRequest,
   LaboratorioCadastro,
@@ -124,6 +125,10 @@ export const cadastrosAdminService = {
 
   async alterarPerfil(id: string, payload: AlterarPerfilRequest) {
     const { data } = await http.put<UsuarioPermissao>(`/v1/usuarios/${id}/perfil`, payload)
+    return data
+  },
+  async listarCargosASubstituir() {
+    const { data } = await http.get<CargoSubstituicao[]>('/v1/cargos-a-substituir')
     return data
   },
 }
