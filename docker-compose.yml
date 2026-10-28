@@ -1,0 +1,30 @@
+# =============================================================================
+# sgl-web — compose de produção (deploy por tag na branch release)
+#
+# Usado pelo sgl-releaser no servidor (ver infra/producao/ no repositório tip, kit
+# sistemas/sgl). O releaser exporta IO_PROJECT/IO_APP/IO_STAGE/IO_VERSION e passa o
+# arquivo de variáveis com --env-file. A rede "shared" é externa (criada pelo
+# bootstrap) e liga o Nginx ao sgl-api (alias "sgl-api").
+#
+# Não é usado no desenvolvimento (lá é "npm run dev").
+# Na morere a porta 80 já é do tip-web: no servidor, PORT=8081 e o proxy HTTPS do
+# NTI encaminha o nome público do SGL para essa porta.
+# =============================================================================
+
+services:
+  app:
+    build: .
+    image: ${IO_PROJECT:-sgl}_${IO_APP:-web}:${IO_VERSION:-local}
+    restart: unless-stopped
+    ports:
+      - "${PORT:-80}:80"
+    networks:
+      - shared
+    environment:
+      TZ: America/Bahia
+      API_UPSTREAM: http://sgl-api:8080
+
+networks:
+  shared:
+    external: true
+    name: ${IO_PROJECT:-sgl}_${IO_STAGE:-release}

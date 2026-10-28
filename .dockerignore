@@ -1,0 +1,11 @@
+# Arquivos que não entram no contexto do build da imagem. O node_modules local fica
+# de fora porque o "npm ci" do Dockerfile instala as dependências do zero.
+node_modules
+dist
+.git
+.github
+.worktrees
+docs
+*.md
+.env
+.env.*

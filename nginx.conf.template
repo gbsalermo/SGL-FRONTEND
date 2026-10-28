@@ -1,0 +1,45 @@
+# =============================================================================
+# Nginx do sgl-web (produção). ${API_UPSTREAM} vem do docker-compose.yml
+# (http://sgl-api:8080). Só as variáveis definidas no ambiente são trocadas na
+# subida do container; as do próprio Nginx ($uri, $host...) ficam como estão.
+# =============================================================================
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # SPA: qualquer rota do front (ex.: /pedidos/123) cai no index.html e o
+    # vue-router decide o que mostrar.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Resolve o nome da API a cada requisição (variável + resolver do Docker):
+    # assim o Nginx sobe mesmo com a API fora do ar, já que no deploy por tag
+    # cada módulo é implantado separadamente.
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $api_upstream ${API_UPSTREAM};
+
+    location /api {
+        proxy_pass $api_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 12m;
+        # Relatórios (PDF/XLSX) podem demorar mais que os 60 s padrão para gerar.
+        proxy_read_timeout 120s;
+    }
+
+    # Arquivos com hash no nome (gerados pelo Vite) podem ficar em cache por 1 ano.
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # O index.html nunca fica em cache: é ele que aponta para os arquivos novos
+    # depois de cada deploy.
+    location = /index.html {
+        add_header Cache-Control "no-store";
+    }
+}
