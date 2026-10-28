@@ -503,11 +503,14 @@ function movimentoMeta(tipo: TipoMovimentacao) {
   const mapa: Record<TipoMovimentacao, { rotulo: string; classe: string }> = {
     ENTRADA: { rotulo: 'Entrada', classe: 'entrada' },
     SAIDA: { rotulo: 'Saída', classe: 'saida' },
+    AJUSTE_ENTRADA: { rotulo: 'Ajuste de entrada', classe: 'ajuste' },
+    AJUSTE_SAIDA: { rotulo: 'Ajuste de saída', classe: 'ajuste' },
     AJUSTE: { rotulo: 'Ajuste', classe: 'ajuste' },
     DEVOLUCAO: { rotulo: 'Devolução', classe: 'devolucao' },
     DESCARTE_VENCIMENTO: { rotulo: 'Descarte', classe: 'descarte' },
   }
-  return mapa[tipo]
+  // Caso a API acrescente outra modalidade, o painel continua renderizando.
+  return mapa[tipo] ?? { rotulo: 'Movimentação', classe: 'ajuste' }
 }
 
 function historicoResiduoMeta(acao: string): { rotulo: string; classe: ClasseMovimentacaoPainel } {
