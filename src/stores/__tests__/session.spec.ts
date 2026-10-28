@@ -77,6 +77,19 @@ describe('session store', () => {
     expect(session.autenticado).toBe(false)
   })
 
+  it('unidadeEmOperacaoId usa a escolha do administrador geral e, sem ela, a do usuario', async () => {
+    const { session } = await carregar()
+    session.usuario = { ...usuario, perfil: 'ADMINISTRADOR_GERAL' }
+    expect(session.unidadeEmOperacaoId).toBe('unidade-1')
+
+    session.selecionarUnidade('unidade-2', 'CNPTIA')
+    expect(session.unidadeEmOperacaoId).toBe('unidade-2')
+
+    // Para os demais perfis, uma escolha antiga guardada na sessao nao vale.
+    session.usuario = usuario
+    expect(session.unidadeEmOperacaoId).toBe('unidade-1')
+  })
+
   it('getters pendente e administradorGeral seguem o usuario', async () => {
     const { session } = await carregar()
     session.$patch({ token: 't', expiraEm: Date.now() + 60_000, usuario: { ...usuario, situacao: 'PENDENTE_VINCULACAO' } })

@@ -250,7 +250,7 @@ async function carregarAlertas() {
 
   const [pedidos, estoque] = await Promise.allSettled([
     gestaoShellService.listarPedidosPendentes(),
-    gestaoShellService.obterResumoEstoque(session.usuario?.unidadeId),
+    gestaoShellService.obterResumoEstoque(session.unidadeEmOperacaoId),
   ])
 
   const falhas: string[] = []
