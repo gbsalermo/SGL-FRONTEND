@@ -185,51 +185,94 @@ function registrarErroPictograma(risco: TipoRiscoResiduo) {
 </template>
 
 <style scoped>
+/* A etiqueta base é horizontal: 180 x 125 mm.
+   Conteúdo longo expande a altura, sem esconder seções ou invadir o rodapé. */
 .label-frame{position:relative;flex:0 0 auto;overflow:visible}
-.residuo-label{box-sizing:border-box;width:180mm;min-height:125mm;height:auto;border:1.2px solid #14273c;background:#fff;color:#111827;padding:6.5mm;display:flex;flex-direction:column;font-family:Arial,Helvetica,sans-serif;gap:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.label-header{display:grid;grid-template-columns:1.23fr 1fr;gap:10mm;padding:1mm 0 5mm;border-bottom:1px solid #9eb4c8}
+.residuo-label{
+  box-sizing:border-box;width:180mm;min-height:125mm;height:auto;
+  padding:5mm 6mm;border:1.2px solid #14273c;background:#fff;color:#111827;
+  font-family:Arial,Helvetica,sans-serif;display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto auto;gap:0;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact;
+}
+/* Mais espaço útil em largura e menos altura acumulada no cabeçalho. */
+.label-header{
+  display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);
+  gap:8mm;align-items:start;padding:0 0 3mm;
+  border-bottom:1px solid #9eb4c8;
+}
 .identification,.origin,.information,.description{min-width:0}
-.eyebrow{margin:0 0 3mm;font-size:9pt;font-weight:800;letter-spacing:.035em}
-.identification h2{font-size:21pt;line-height:1.12;margin:0 0 3mm;overflow-wrap:anywhere}
-.tracking-code{display:block;font-size:12pt;overflow-wrap:anywhere}
+.eyebrow{margin:0 0 1.8mm;font-size:9pt;font-weight:800;letter-spacing:.035em}
+.identification h2{font-size:20pt;line-height:1.1;margin:0 0 2mm;overflow-wrap:anywhere}
+.tracking-code{display:block;font-size:11.5pt;overflow-wrap:anywhere}
 .field-label{font-weight:800;font-size:8pt;letter-spacing:.035em}
-.header-quantity{margin-top:5mm;display:flex;flex-direction:column;gap:.7mm}
-.header-quantity strong{font-size:15pt;line-height:1.2}
-.origin{font-size:9pt;line-height:1.28}
-.origin .system-name{font-size:11pt;line-height:1.25;display:block;margin:0 0 2mm}
-.origin p{margin:1mm 0;overflow-wrap:anywhere}
+.header-quantity{margin-top:3.5mm;display:flex;flex-direction:column;gap:.5mm}
+.header-quantity strong{font-size:14pt;line-height:1.1}
+.origin{font-size:9pt;line-height:1.18}
+.origin .system-name{font-size:10.5pt;line-height:1.2;display:block;margin:0 0 1.5mm}
+.origin p{margin:.6mm 0;overflow-wrap:anywhere}
 .preview-status{font-weight:700;color:#9b2626}
-.label-body{display:grid;grid-template-columns:43mm minmax(0,1fr);gap:6mm;padding:5mm 0;border-bottom:1px solid #9eb4c8;align-items:stretch}
-.hazards{min-width:0;border-right:1px solid #9eb4c8;padding-right:5mm}
-.hazards h3,.supplemental h3{font-size:9pt;font-weight:800;margin:0 0 3mm;letter-spacing:.025em}
-.hazard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4mm 2mm}
+/* Pictogramas em uma coluna; campos operacionais em duas colunas reais. */
+.label-body{
+  display:grid;grid-template-columns:43mm minmax(0,1fr);gap:6mm;
+  padding:3.5mm 0 3.5mm;border-bottom:1px solid #9eb4c8;align-items:stretch;
+}
+.hazards{min-width:0;border-right:1px solid #9eb4c8;padding-right:4mm}
+.hazards h3,.supplemental h3{
+  font-size:8.7pt;font-weight:800;margin:0 0 2mm;letter-spacing:.025em;
+}
+.hazard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2mm}
 .hazard-item{text-align:center;min-width:0}
-.hazard-item img,.hazard-fallback{display:block;width:17mm;height:17mm;max-width:100%;object-fit:contain;margin:0 auto 1.5mm}
-.hazard-fallback{border:2px solid #c32727;font-size:16pt;font-weight:800;display:grid;place-items:center;box-sizing:border-box}
-.hazard-item small{display:block;font-size:7pt;line-height:1.15;overflow-wrap:anywhere}
-.no-hazard{font-size:8.5pt;line-height:1.3}
-.information{display:flex;flex-direction:column;gap:3mm}
+.hazard-item img,.hazard-fallback{
+  display:block;width:18mm;height:18mm;max-width:100%;
+  object-fit:contain;margin:0 auto 1mm;
+}
+.hazard-fallback{
+  border:2px solid #c32727;font-size:16pt;font-weight:800;
+  display:grid;place-items:center;box-sizing:border-box;
+}
+.hazard-item small{display:block;font-size:7pt;line-height:1.12;overflow-wrap:anywhere}
+.no-hazard{font-size:8.5pt;line-height:1.2}
+.information{display:flex;flex-direction:column;gap:2mm}
 .risk-heading .field-label{font-size:8.5pt}
-.risk-heading h3{font-size:19pt;line-height:1;margin:1mm 0}
-.risk-heading p,.composition p,.info-grid p,.dispatch-date{margin:0;font-size:9pt;line-height:1.3;overflow-wrap:anywhere}
-.composition h4,.info-grid h4{font-size:8.5pt;letter-spacing:.025em;font-weight:800;margin:0 0 1mm}
+.risk-heading h3{font-size:18pt;line-height:1;margin:.7mm 0}
+.risk-heading p,.composition p,.info-grid p,.dispatch-date{
+  margin:0;font-size:9.2pt;line-height:1.22;overflow-wrap:anywhere;
+}
+.composition h4,.info-grid h4{
+  font-size:8.3pt;letter-spacing:.025em;font-weight:800;margin:0 0 .7mm;
+}
 .composition p{font-weight:500}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:3.5mm 5mm}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.6mm 6mm}
 .full-row{grid-column:1/-1}
 .dispatch-date{margin-top:0}
-.supplemental{display:grid;grid-template-columns:1.05fr 1fr;gap:6mm;padding:4mm 0;border-bottom:1px solid #9eb4c8}
-.safety-notes{border-right:1px solid #9eb4c8;padding-right:5mm}
-.safety-notes ul{margin:0;padding-left:5mm;display:grid;gap:.9mm}
-.supplemental li,.supplemental p{font-size:9pt;line-height:1.3;overflow-wrap:anywhere}
+/* As duas informações secundárias dividem uma faixa curta, como no esboço. */
+.supplemental{
+  display:grid;grid-template-columns:1fr 1fr;gap:6mm;
+  padding:2.8mm 0 3mm;border-bottom:1px solid #9eb4c8;align-items:start;
+}
+.safety-notes{border-right:1px solid #9eb4c8;padding-right:5mm;min-width:0}
+.observations{min-width:0}
+.safety-notes ul{margin:0;padding-left:5mm;display:grid;gap:.5mm}
+.supplemental li,.supplemental p{font-size:8.9pt;line-height:1.22;overflow-wrap:anywhere}
 .supplemental p{margin:0}
-.safety-additional{margin-top:2mm!important;font-style:italic}
-.label-footer{display:grid;grid-template-columns:38mm minmax(0,1fr) 38mm;gap:5mm;align-items:center;min-height:20mm;padding-top:4mm}
-.embrapa-brand,.sgl-footer-brand{height:16mm;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.embrapa-brand img{display:block;width:34mm;height:16mm;object-fit:contain;object-position:center}
-.sgl-footer-brand img{display:block;width:38mm;height:16mm;object-fit:contain;object-position:center}
+.safety-additional{margin-top:1.5mm!important;font-style:italic}
+/* Rodapé alinhado numa faixa horizontal, sem uma segunda marca no topo. */
+.label-footer{
+  display:grid;grid-template-columns:38mm minmax(0,1fr) 38mm;gap:5mm;
+  align-items:center;min-height:17mm;padding-top:2.5mm;
+}
+.embrapa-brand,.sgl-footer-brand{
+  height:15mm;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.embrapa-brand img{display:block;width:34mm;height:15mm;object-fit:contain;object-position:center}
+.sgl-footer-brand img{display:block;width:38mm;height:15mm;object-fit:contain;object-position:center}
 .embrapa-brand strong,.sgl-footer-brand strong{font-size:14pt}
-.description{display:flex;flex-direction:column;gap:2mm;align-items:flex-start;justify-content:center}
-.description strong{font-size:9pt;line-height:1.3;overflow-wrap:anywhere}
+.description{
+  display:flex;flex-direction:column;gap:1mm;align-items:flex-start;
+  justify-content:center;min-width:0;
+}
+.description strong{font-size:9pt;line-height:1.22;overflow-wrap:anywhere}
 @media print{
   .residuo-label{break-inside:avoid;page-break-inside:avoid}
 }
