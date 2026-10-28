@@ -165,3 +165,5 @@ composição/quantidade corretas
 print preview sem elementos da interface
 legibilidade física do rótulo impresso
 ```
+
+> **Responsável pela liberação (28/10/2026, Etapa 10):** quando o resíduo tem data de liberação, o rótulo passa a mostrar **Responsável pela liberação** logo após a data. O backend consulta o usuário do evento auditado `RISCO_CONFERIDO_E_RESIDUO_LIBERADO`, restrito ao resíduo previamente recuperado com isolamento de Unidade; não usa o gerador ou o gestor que apenas recebeu como substituto. Em registros antigos sem esse evento, exibe **Não identificado no histórico** em vez de inventar um nome. Antes da liberação, não apresenta esse campo. Nenhuma migration é necessária. Build, testes e conferência visual permanecem pendentes da validação local.
