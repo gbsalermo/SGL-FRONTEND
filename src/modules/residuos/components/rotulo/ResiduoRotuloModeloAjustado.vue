@@ -36,17 +36,17 @@ function unidadeLegivel(valor: string) { return ({ ML:'mL',L:'L',MG:'mg',G:'g',K
       <section class="identificacao">
         <div><b>Unidade</b><span>{{ dados.unidadeSigla }} — {{ dados.unidadeNome }}</span></div>
         <div><b>Laboratório</b><span>{{ dados.laboratorioNome }}</span></div>
-        <div><b>Gerador</b><span>{{ dados.geradorNome }}</span></div>
+        <div><b>Gerador registrado</b><span>{{ dados.geradorNome }}</span></div>
         <div><b>Data</b><span>{{ dados.impressaoPermitida ? formatarData(dados.dataRotulagem) : 'Prévia — impressão bloqueada' }}</span></div>
       </section>
-      <section class="composicao"><b>COMPOSIÇÃO</b><span>{{ composicao || dados.descricao }}</span></section>
-      <section class="medidas"><div><b>Recipiente</b><span>{{ dados.recipiente || 'Não informado' }}</span></div><div><b>Quantidade real</b><strong>{{ dados.quantidade }} {{ unidadeLegivel(dados.unidadeMedida) }}</strong></div><div><b>Origem</b><span>{{ dados.processoOrigem || 'Não informado' }}</span></div></section>
+      <section class="composicao"><b>COMPOSIÇÃO DO RESÍDUO</b><strong>{{ composicao || dados.descricao }}</strong></section>
+      <section class="medidas"><div v-if="dados.estadoFisico"><b>Estado físico</b><span>{{ dados.estadoFisico.toLowerCase().replaceAll("_", " ") }}</span></div><div><b>Recipiente</b><span>{{ dados.recipiente || 'Não informado' }}</span></div><div><b>Quantidade real</b><strong>{{ dados.quantidade }} {{ unidadeLegivel(dados.unidadeMedida) }}</strong></div><div><b>Origem</b><span>{{ dados.processoOrigem || 'Não informado' }}</span></div></section>
       <section class="seguranca">
         <div><h3>PICTOGRAMAS E RISCOS IDENTIFICADOS</h3><div class="simbolos"><div v-for="risco in riscosVisiveis" :key="risco" class="simbolo"><img v-if="caminhoPictogramaResiduo(risco) && !pictogramaFalhou(risco)" :src="caminhoPictogramaResiduo(risco) ?? undefined" :alt="rotuloRiscoResiduo(risco)" @error="registrarErroPictograma(risco)" /><span v-else>!</span><small>{{ rotuloRiscoResiduo(risco) }}</small></div><p v-if="!riscosVisiveis.length">Sem pictograma registrado</p></div></div>
-        <div class="classificacao"><h3>{{ dados.classificacaoConfirmada ? 'CLASSIFICAÇÃO CONFIRMADA' : 'CLASSIFICAÇÃO PRELIMINAR' }}</h3><strong>{{ rotuloNivelRisco(dados.nivelRisco) }}</strong><p>Frases H/P e palavra de advertência dependem de classificação química específica validada.</p></div>
+        <div class="classificacao"><h3>{{ dados.classificacaoConfirmada ? 'CLASSIFICAÇÃO CONFIRMADA' : 'CLASSIFICAÇÃO PRELIMINAR' }}</h3><strong>{{ rotuloNivelRisco(dados.nivelRisco) }}</strong><p>{{ dados.classificacaoConfirmada ? "Classificação revisada pela Gestão." : "Informações preliminares, sujeitas à análise da Gestão." }}</p></div>
       </section>
       <section class="detalhes"><div><h3>INFORMAÇÕES DE SEGURANÇA</h3><p>{{ riscosVisiveis.length ? riscosVisiveis.map(rotuloRiscoResiduo).join(' · ') : 'Sem riscos específicos registrados' }}</p></div><div><h3>ARMAZENAMENTO E DESTINO</h3><p><b>Armazenamento:</b> {{ dados.localArmazenamentoTemporario || 'Não informado' }}</p><p><b>Destino:</b> {{ dados.destinoFinalPrevisto || 'Não informado' }}</p><p v-if="dados.dataPrevistaDespacho"><b>Despacho previsto:</b> {{ formatarData(dados.dataPrevistaDespacho) }}</p></div></section>
-      <footer class="rodape"><span>{{ dados.descricao }}</span><strong>{{ dados.codigoRastreio }}</strong></footer>
+      <footer class="rodape"><div><b>OBSERVAÇÕES</b><span>{{ dados.observacoesRotulo || "Sem observações adicionais registradas." }}</span></div><div class="data-rodape"><b>DATA DA ROTULAGEM</b><span>{{ dados.dataRotulagem ? formatarData(dados.dataRotulagem) : "Aguardando liberação" }}</span></div></footer>
     </article>
   </div>
 </template>
@@ -54,12 +54,12 @@ function unidadeLegivel(valor: string) { return ({ ML:'mL',L:'L',MG:'mg',G:'g',K
 <style scoped>
 .label-frame{position:relative;flex:0 0 auto;overflow:hidden}
 .residuo-label{width:180mm;height:125mm;box-sizing:border-box;padding:5mm;display:flex;flex-direction:column;gap:2mm;background:#fff;color:#1e293b;border:1px solid #234764;font-family:Arial,Helvetica,sans-serif;transform-origin:top left;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.nova-cabecalho{display:grid;grid-template-columns:23mm 1fr 29mm;gap:3mm;align-items:center;border-bottom:1px solid #cbd5e1;padding-bottom:2mm}
-.nova-cabecalho>img{width:22mm;max-height:13mm;object-fit:contain}.titulo{text-align:center}.titulo>strong{display:block;background:#bd2026;color:#fff;padding:2mm;font-size:10pt}.titulo h2{font-size:12pt;margin:1mm 0;overflow-wrap:anywhere}.marca{display:flex;flex-direction:column;align-items:flex-end;gap:1mm}.marca img{width:25mm;max-height:10mm;object-fit:contain}.marca small{font-size:7pt;font-weight:bold}
+.nova-cabecalho{display:grid;grid-template-columns:38mm 1fr 29mm;gap:3mm;align-items:center;border-bottom:1px solid #cbd5e1;padding-bottom:2mm}
+.nova-cabecalho>img{width:37mm;max-height:18mm;object-fit:contain}.titulo{text-align:center}.titulo>strong{display:block;background:#bd2026;color:#fff;padding:2mm;font-size:10pt}.titulo h2{font-size:12pt;margin:1mm 0;overflow-wrap:anywhere}.marca{display:flex;flex-direction:column;align-items:flex-end;gap:1mm}.marca img{width:25mm;max-height:10mm;object-fit:contain}.marca small{font-size:8.5pt;font-weight:bold}
 .identificacao{display:grid;grid-template-columns:1.2fr 1fr 1fr .9fr;gap:2mm;font-size:7pt}.identificacao div,.medidas div{display:flex;flex-direction:column;gap:.6mm;min-width:0}.identificacao span,.medidas span{overflow-wrap:anywhere}
-.composicao{display:flex;gap:3mm;align-items:center;padding:2mm;background:#eff5f8;font-size:8pt;overflow-wrap:anywhere}.composicao span{font-weight:bold}
-.medidas{display:grid;grid-template-columns:1fr .8fr 1fr;gap:4mm;font-size:8pt;border-bottom:1px solid #cbd5e1;padding:1mm 0 2mm}.medidas strong{font-size:12pt}
+.composicao{display:flex;flex-direction:column;gap:1mm;padding:2.5mm 3mm;background:#e7eff7;border-left:3px solid #174da3;overflow-wrap:anywhere}.composicao strong{font-size:13pt;line-height:1.15;color:#102e50}
+.medidas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4mm;font-size:8pt;border-bottom:1px solid #cbd5e1;padding:1mm 0 2mm}.medidas strong{font-size:12pt}
 .identificacao b,.medidas b,.composicao b{font-size:7pt;text-transform:uppercase;color:#174969}
-.seguranca{display:grid;grid-template-columns:1.45fr 1fr;gap:4mm;min-height:0}.seguranca h3,.detalhes h3{font-size:8pt;margin:1mm 0 2mm}.simbolos{display:flex;flex-wrap:wrap;gap:2mm}.simbolo{width:19mm;text-align:center}.simbolo img,.simbolo>span{display:block;width:15mm;height:15mm;margin:0 auto;object-fit:contain}.simbolo small{display:block;font-size:6pt;line-height:1.1}.classificacao{border-left:1px solid #cbd5e1;padding-left:4mm}.classificacao strong{display:block;font-size:17pt;color:#b91c1c}.classificacao p{font-size:7pt;line-height:1.25}.detalhes{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:4mm;border-top:1px solid #cbd5e1}.detalhes p{font-size:8pt;line-height:1.2;margin:1mm 0;overflow-wrap:anywhere}
+.seguranca{display:grid;grid-template-columns:1.45fr 1fr;gap:4mm;min-height:0}.seguranca h3,.detalhes h3{font-size:8pt;margin:1mm 0 2mm}.simbolos{display:flex;flex-wrap:wrap;gap:2mm}.simbolo{width:19mm;text-align:center}.simbolo img,.simbolo>span{display:block;width:15mm;height:15mm;margin:0 auto;object-fit:contain}.simbolo small{display:block;font-size:7.5pt;line-height:1.1}.classificacao{border-left:1px solid #cbd5e1;padding-left:4mm}.classificacao strong{display:block;font-size:17pt;color:#b91c1c}.classificacao p{font-size:7pt;line-height:1.25}.detalhes{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:4mm;border-top:1px solid #cbd5e1}.detalhes p{font-size:8pt;line-height:1.2;margin:1mm 0;overflow-wrap:anywhere}
 .rodape{display:flex;justify-content:space-between;align-items:center;gap:3mm;border-top:1px solid #cbd5e1;padding-top:2mm;font-size:8pt}.rodape span{overflow-wrap:anywhere}.rodape strong{white-space:nowrap}
 </style>
