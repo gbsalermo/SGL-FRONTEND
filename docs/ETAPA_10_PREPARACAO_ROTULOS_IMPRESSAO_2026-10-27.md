@@ -61,3 +61,11 @@ O novo padrão usa o logotipo SGL e a marca Embrapa no cabeçalho, faixa de cate
 **Limites do contrato atual:** não produzir códigos H/P, palavra de advertência GHS, estado físico ou telefone por inferência; esses campos não constam do DTO atual de rótulo de Resíduo de forma confiável. O layout apresenta apenas os riscos já registrados. Não foram adicionados QR, Zebra/ZPL ou rótulo de Solução nesta implementação. Não houve alteração do backend.
 
 **Verificações ainda necessárias:** `npm run build`, conferência visual e impressão nos quatro presets de largura, resíduos com e sem pictogramas, bloqueio de impressão, nomes e composições longos, campos opcionais vazios e produtos sem classificação de risco. A aprovação final depende da validação do mantenedor.
+
+## Revisão incremental do rótulo de Resíduo — 28/10/2026
+
+Após validação visual inicial, o layout foi ajustado **sobre o componente atual do SGL**, preservando proporção 180 × 125 mm e controles de escala, em vez de substituir a identidade por um template genérico. Alterações: logotipo SGL ampliado; tipografia e hierarquia reforçadas; composição destacada; estado físico proveniente de `Residuo.estadoFisico`; “Gerador registrado” para não atribuir incorretamente a identidade de quem informou; observações vindas do registro (prioridade à observação da Gestão, com fallback à do gerador) e data de rotulagem no rodapé. Removida da etiqueta a instrução técnica sobre frases H/P.
+
+**Responsável pela liberação:** o fluxo de liberação recebe um `Usuario gestor`, mas o DTO de rótulo atual não oferece um histórico imutável de quem liberou. Não apresentar nomes inferidos. A eventual captura/exibição exige verificar a trilha de auditoria antes de modificar contratos. **Frases H/P e palavra de advertência GHS:** ainda não são campos confirmados no contrato e não podem ser inventados a partir de risco alto/baixo ou somente pictogramas. **Orientação vertical:** discutida, mas não implantada; esta revisão mantém a proporção física atual para comparar antes de alterar impressão e escala.
+
+**Validação necessária:** `./mvnw clean verify` após alteração do DTO, `npm run build`, impressão em tamanhos pequeno/médio/grande/A4, casos com descrições/observações extensas e ausência de estado físico, liberação de impressão em Resíduos, visual claro/escuro. Nenhum merge realizado.
