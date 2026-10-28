@@ -211,7 +211,7 @@ async function carregarDados() {
   if (!estagiario.value) {
     try {
       autorizacaoAtualizada.value = false
-      const usuarioAtualizado = await session.atualizarUsuarioAtual()
+      const usuarioAtualizado = await session.atualizarUsuario()
       if (usuarioAtualizado.unidadeId !== usuario.value.unidadeId) throw new Error('A unidade foi alterada. Atualize a página.')
       laboratorios.value = await listarLaboratoriosOperacionais(usuarioAtualizado.unidadeId!)
       if (!gestao.value) {

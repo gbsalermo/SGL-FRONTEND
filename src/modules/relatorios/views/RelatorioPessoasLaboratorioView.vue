@@ -96,6 +96,7 @@ async function exportar(formato: 'PDF' | 'XLSX') {
 
 function rotuloPerfil(valor: PerfilUsuario) {
   const mapa: Record<PerfilUsuario, string> = {
+    ADMINISTRADOR_GERAL: 'Administrador geral',
     ADMINISTRADOR: 'Administrador',
     GESTOR: 'Gestor',
     TECNICO: 'Técnico',

@@ -95,7 +95,7 @@ async function carregar() {
     if (!unidade) throw new Error('Unidade operacional obrigatória.')
     if (!estagiario.value) {
       autorizacaoAtualizada.value = false
-      const usuarioAtualizado = await session.atualizarUsuarioAtual()
+      const usuarioAtualizado = await session.atualizarUsuario()
       if (usuarioAtualizado.unidadeId !== unidade) {
         throw new Error('A unidade de vínculo foi alterada. Atualize a página para continuar.')
       }

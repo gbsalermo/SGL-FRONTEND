@@ -1,4 +1,5 @@
 import { http } from '@/services/http'
+import { ehPerfilGestao } from '@/modules/auth/perfis'
 import type { PerfilUsuario } from '@/modules/auth/types/session'
 
 export interface LaboratorioOperacional {
@@ -8,7 +9,7 @@ export interface LaboratorioOperacional {
   ativo: boolean
 }
 export function podeEscolherLaboratorio(perfil: PerfilUsuario | null | undefined) {
-  return perfil === 'GESTOR' || perfil === 'ADMINISTRADOR'
+  return ehPerfilGestao(perfil)
 }
 export async function listarLaboratoriosOperacionais(unidadeId: string) {
   const { data } = await http.get<LaboratorioOperacional[]>('/v1/laboratorios')

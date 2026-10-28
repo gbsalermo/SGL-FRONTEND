@@ -228,3 +228,14 @@ export interface ModeloResiduoRequest {
   componentes: ComponenteModeloResiduoRequest[]
   ativo: boolean
 }
+
+export type TipoCargoSubstituicao = 'RESPONSAVEL_LABORATORIO' | 'ORIENTADOR_ESTAGIO' | 'GESTOR_RECEBEDOR_RESIDUO'
+
+// Cadastro da unidade cujo ocupante não pode mais exercer o cargo (GET /v1/cargos-a-substituir).
+export interface CargoSubstituicao {
+  tipo: TipoCargoSubstituicao
+  registroId: string
+  descricao: string
+  ocupanteId: string
+  ocupanteNome: string
+}

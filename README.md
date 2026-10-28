@@ -141,41 +141,23 @@ TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO
 
 ---
 
-## Sessão DEV e contexto de Unidade
+## Sessão e contexto de Unidade
 
-O ambiente DEV utiliza uma sessão local para reproduzir a navegação e o contexto operacional dos usuários enquanto a identidade institucional é integrada.
-
-Fluxo:
+O login usa a conta da Embrapa (login de rede, ou CPF para colaboradores) e a senha da Embrapa. O backend valida as credenciais e devolve um JWT próprio do SGL.
 
 ```text
-usuário informa identificador + senha
-→ frontend consulta usuários existentes
-→ resolve usuário ativo
-→ senha ainda não é validada por autenticação backend definitiva
-→ sessão é persistida em localStorage
-→ sessão expira após 5 horas
+login + senha → POST /v1/auth/login → { token, expiraEm, usuario }
+→ sessão persistida em localStorage, chave sgl.session (a antiga sgl.dev-session é apagada)
+→ expira em 5 horas
+→ interceptor envia Authorization: Bearer <token>
 ```
 
-A sessão mantém informações como:
+- Usuário `PENDENTE_VINCULACAO` só vê `/aguardando-aprovacao` ("Verificar novamente" consulta `/v1/auth/me`).
+- 401 em rota protegida encerra a sessão e volta ao login; 403 com `USUARIO_PENDENTE` leva à tela de espera.
+- A Unidade vem da sessão no backend. O header `X-SGL-Unidade-Id` só é enviado pelo **Administrador geral**, quando ele escolhe outra Unidade no seletor da barra superior.
+- O botão "Entrar como desenvolvedor" aparece só quando o backend roda em `dev`/`demo` (`/v1/auth/config`).
 
-```text
-perfil
-unidadeId
-unidadeNome
-unidadeSigla
-laboratorioId
-laboratorioNome
-```
-
-O interceptor HTTP usa `unidadeId` para enviar:
-
-```text
-X-SGL-Unidade-Id: <unidadeId>
-```
-
-O backend usa esse contexto para restringir dados por Unidade.
-
-A API usa o cabeçalho para identificar a Unidade no ambiente DEV. Na integração corporativa, a Unidade será associada à identidade autenticada e à autorização no servidor.
+Telas novas da gestão: aba **Pendentes** e **Importar da Embrapa** em Vínculos de usuários; **Unidades** (habilitação), só para o Administrador geral.
 
 ---
 
@@ -417,16 +399,14 @@ O tema claro/escuro é aplicado às áreas autenticadas, mantendo a identidade v
 ## Identidade e controle de acesso
 
 ```text
-guardas de rota por perfil                    ✅ UX
-sessão DEV                                     ✅ temporária
-contexto de Unidade via header                 ✅ desenvolvimento
-autenticação definitiva                        ⏳
-autorização real no servidor                   ⏳
-auditoria por identidade autenticada           ⏳
-integração corporativa                          ⏳
+login corporativo + sessão JWT                 ✅
+autorização das operações novas no servidor    ✅
+Unidade derivada da sessão                     ✅
+guardas de rota por perfil                     ✅ UX
+matriz completa de permissões por módulo       ⏳
 ```
 
-No ambiente DEV, a sessão e os controles de navegação organizam a experiência dos perfis. A integração institucional vinculará a sessão a uma identidade autenticada e à autorização aplicada no backend.
+Visibilidade de menu/rota continua sendo só UX; quem decide é o backend.
 
 ---
 
@@ -474,10 +454,11 @@ npm install
 npm run dev
 ```
 
-Build:
+Build e testes (Vitest + jsdom):
 
 ```bash
 npm run build
+npm test
 ```
 
 ---

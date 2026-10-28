@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { ehPerfilAdmin } from '@/modules/auth/perfis'
 import { useSessionStore } from '@/stores/session'
 import { solucaoService } from '@/modules/solucoes/services/solucaoService'
 import {
@@ -52,7 +53,7 @@ async function carregar() {
   carregando.value = true
   try {
     const unidadeId = session.usuario?.unidadeId
-    if (!unidadeId || session.usuario?.perfil !== 'ADMINISTRADOR')
+    if (!unidadeId || !ehPerfilAdmin(session.usuario?.perfil))
       throw new Error('A área de modelos é destinada ao Administrador vinculado à Unidade.')
     const [catalogo,prods,solicitacoes] = await Promise.all([
       solucaoService.listarModelos(), solucaoService.listarProdutos(unidadeId),
