@@ -54,7 +54,7 @@ onMounted(carregar)
       <button type="button" @click="voltar">← Voltar</button>
       <div>
         <strong>{{ dados?.impressaoPermitida ? 'Rótulo de resíduo' : 'Prévia do rótulo' }}</strong>
-        <span v-if="dados?.impressaoPermitida">A folha permanece A4; somente o rótulo muda de tamanho.</span>
+        <span v-if="dados?.impressaoPermitida">A folha permanece A4; o rótulo pode aumentar em altura para preservar todo o conteúdo.</span>
         <span v-else>Confira os dados disponíveis. A impressão será liberada após a análise técnica.</span>
       </div>
       <button class="primary" type="button" :disabled="!dados?.impressaoPermitida" @click="imprimir">Imprimir rótulo</button>
@@ -75,7 +75,7 @@ onMounted(carregar)
       <div class="custom">
         <label><span>Largura personalizada</span><input v-model.number="larguraRotuloMm" type="range" :min="MIN" :max="MAX" step="5" /></label>
         <label class="number"><span>Largura</span><div><input v-model.number="larguraRotuloMm" type="number" :min="MIN" :max="MAX" @change="normalizar" /><b>mm</b></div></label>
-        <div class="result"><span>Tamanho final</span><strong>{{ larguraRotuloMm }} × {{ alturaRotuloMm }} mm</strong></div>
+        <div class="result"><span>Dimensões mínimas</span><strong>{{ larguraRotuloMm }} × {{ alturaRotuloMm }} mm</strong></div>
       </div>
     </section>
 
