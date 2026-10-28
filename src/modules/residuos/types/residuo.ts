@@ -220,6 +220,7 @@ export interface RotuloResiduoResponse {
   unidadeSigla: string
   laboratorioNome: string
   geradorNome: string
+  responsavelLiberacaoNome: string | null
   dataInformacao: string | null
   estadoFisico: EstadoFisicoResiduo | null
   medidasSeguranca: MedidaSegurancaResiduo[]
