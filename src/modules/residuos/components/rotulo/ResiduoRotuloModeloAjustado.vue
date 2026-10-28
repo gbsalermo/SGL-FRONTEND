@@ -102,7 +102,10 @@ function registrarErroPictograma(risco: TipoRiscoResiduo) {
           <p><b>Informado em:</b> {{ formatarData(dados.dataInformacao) }}</p>
           <p><b>Situação:</b> {{ statusRotulos[dados.status] }}</p>
           <p v-if="!dados.impressaoPermitida" class="preview-status">Prévia — impressão não liberada</p>
-          <p v-else-if="dados.dataRotulagem"><b>Liberado em:</b> {{ formatarData(dados.dataRotulagem) }}</p>
+          <template v-else-if="dados.dataRotulagem">
+            <p><b>Liberado em:</b> {{ formatarData(dados.dataRotulagem) }}</p>
+            <p><b>Responsável pela liberação:</b> {{ dados.responsavelLiberacaoNome || 'Não identificado no histórico' }}</p>
+          </template>
         </div>
       </header>
 
