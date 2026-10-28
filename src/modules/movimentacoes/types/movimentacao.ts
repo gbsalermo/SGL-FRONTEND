@@ -1,4 +1,4 @@
-export type TipoMovimentacao = 'ENTRADA' | 'SAIDA' | 'AJUSTE' | 'DEVOLUCAO' | 'DESCARTE_VENCIMENTO'
+export type TipoMovimentacao = 'ENTRADA' | 'SAIDA' | 'AJUSTE_ENTRADA' | 'AJUSTE_SAIDA' | 'AJUSTE' | 'DEVOLUCAO' | 'DESCARTE_VENCIMENTO'
 
 export type OrigemMovimentacao = 'PEDIDO' | 'COMPRA' | 'AJUSTE' | 'DEVOLUCAO' | 'INVENTARIO' | 'DESCARTE'
 
