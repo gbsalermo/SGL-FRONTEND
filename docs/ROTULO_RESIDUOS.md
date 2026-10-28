@@ -1,5 +1,7 @@
 # Rótulo físico de Resíduos
 
+> **Atualização vigente — 28/10/2026 (Etapa 10, pré-merge):** a rota ativa de impressão usa `RotuloResiduoAjustadoView.vue` e `ResiduoRotuloModeloAjustado.vue`. O visual foi atualizado para o esboço aprovado: nome/código/quantidade e contexto no cabeçalho, composição/risco/pictogramas e dados operacionais no centro, medidas de segurança e observações no terço inferior e marcas Embrapa/SGL apenas no rodapé. Os dados extras vêm do backend, não são frases químicas presumidas. O rótulo tem altura dinâmica e dimensões mínimas de referência; a impressão continua bloqueada conforme `impressaoPermitida`. Mudança ainda sujeita aos testes e à validação do mantenedor, sem merge. As descrições abaixo documentam também o histórico de versões anteriores.
+
 **Status:** implementação concluída na branch `feat/residuos-interface`; aguardando validação visual e de impressão.
 
 ## Decisão de escopo
