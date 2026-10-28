@@ -790,6 +790,7 @@ async function carregar() {
 onMounted(() => {
   const secao = route.query.secao
   if (secao === 'residuos-solucoes') aba.value = 'residuos-solucoes'
+  if (typeof route.query.busca === 'string') busca.value = route.query.busca
   void carregar()
 })
 </script>

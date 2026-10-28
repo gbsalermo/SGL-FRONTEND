@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import axios from 'axios'
+import CargosSubstituirTable from '@/modules/admin/components/CargosSubstituirTable.vue'
 import ImportarPessoaDrawer from '@/modules/admin/components/ImportarPessoaDrawer.vue'
 import VinculosUsuariosCadastro from '@/modules/admin/components/VinculosUsuariosCadastro.vue'
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
@@ -13,7 +14,7 @@ const usuarios = ref<UsuarioPermissao[]>([])
 const laboratorios = ref<LaboratorioCadastro[]>([])
 const projetos = ref<ProjetoCadastro[]>([])
 const pendentes = ref<UsuarioSessao[]>([])
-const aba = ref<'USUARIOS' | 'PENDENTES'>('USUARIOS')
+const aba = ref<'USUARIOS' | 'PENDENTES' | 'CARGOS'>('USUARIOS')
 const erro = ref('')
 const sucesso = ref('')
 const carregando = ref(false)
@@ -93,10 +94,12 @@ function recusar() {
         <button type="button" role="tab" :aria-selected="aba === 'PENDENTES'" :class="{ active: aba === 'PENDENTES' }" @click="aba = 'PENDENTES'">
           Pendentes <span v-if="pendentes.length" class="people-pill people-pill--pendente"><span class="people-dot" />{{ pendentes.length }} aguardando</span>
         </button>
+        <button type="button" role="tab" :aria-selected="aba === 'CARGOS'" :class="{ active: aba === 'CARGOS' }" @click="aba = 'CARGOS'">Cargos a substituir</button>
       </div>
     </div>
     <p v-if="carregando">Carregando...</p>
     <VinculosUsuariosCadastro v-else-if="aba === 'USUARIOS'" :usuarios="usuarios" :laboratorios="laboratorios" :projetos="projetos" />
+    <CargosSubstituirTable v-else-if="aba === 'CARGOS'" />
     <section v-else class="people-management people-workspace">
       <div v-if="pendentes.length === 0" class="people-empty">Nenhum acesso aguardando aprovação.</div>
       <div v-else class="people-table-wrap">
