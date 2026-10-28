@@ -46,6 +46,8 @@ const movimentacaoAlvo = computed(() => {
 const tipos: Array<{ valor: TipoMovimentacao; rotulo: string }> = [
   { valor: 'ENTRADA', rotulo: 'Entrada' },
   { valor: 'SAIDA', rotulo: 'Saída' },
+  { valor: 'AJUSTE_ENTRADA', rotulo: 'Ajuste de entrada' },
+  { valor: 'AJUSTE_SAIDA', rotulo: 'Ajuste de saída' },
   { valor: 'AJUSTE', rotulo: 'Ajuste' },
   { valor: 'DEVOLUCAO', rotulo: 'Devolução' },
   { valor: 'DESCARTE_VENCIMENTO', rotulo: 'Descarte por vencimento' },
@@ -126,13 +128,13 @@ function codigoSolicitacao(id: string | null) {
 function classeTipo(valor: TipoMovimentacao) {
   if (valor === 'ENTRADA' || valor === 'DEVOLUCAO') return 'chip chip--positive'
   if (valor === 'DESCARTE_VENCIMENTO') return 'chip chip--danger'
-  if (valor === 'AJUSTE') return 'chip chip--warning'
+  if (valor === 'AJUSTE' || valor === 'AJUSTE_ENTRADA' || valor === 'AJUSTE_SAIDA') return 'chip chip--warning'
   return 'chip chip--neutral'
 }
 
 function sinalQuantidade(valor: TipoMovimentacao) {
-  if (valor === 'ENTRADA' || valor === 'DEVOLUCAO') return '+'
-  if (valor === 'SAIDA' || valor === 'DESCARTE_VENCIMENTO') return '−'
+  if (valor === 'ENTRADA' || valor === 'DEVOLUCAO' || valor === 'AJUSTE_ENTRADA') return '+'
+  if (valor === 'SAIDA' || valor === 'DESCARTE_VENCIMENTO' || valor === 'AJUSTE_SAIDA') return '−'
   return ''
 }
 
