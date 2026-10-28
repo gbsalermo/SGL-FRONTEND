@@ -90,3 +90,12 @@ Após validação do rótulo DEMO de Meio BDA, o cabeçalho foi simplificado par
 **Gerador registrado, informado em, situação, indicador de prévia, data e responsável pela liberação** foram movidos do cabeçalho para um painel de rastreabilidade **ao lado do nível de risco e acima da composição/estado físico**, sem eliminar informações. A distinção entre o responsável pela liberação (evento auditado) e o gerador permanece. Foram preservados pictogramas, notas de segurança, descrição, logotipos e bloqueio de impressão.
 
 **Pendência de validação:** executar `./mvnw clean verify` e `npm run build`; comparar rótulos com e sem Projeto/SCI/Atividade, nomes longos e prévias de 90/135/180/190 mm. A altura pode se expandir quando necessária, devendo ser conferida na impressão física. Nenhum merge executado.
+
+
+## Correção de compatibilidade do dashboard com a massa DEMO (28/10/2026)
+
+Durante a validação integrada da Etapa 10, o `DashboardGestaoView.vue` falhava ao montar **Últimas movimentações**: `Cannot read properties of undefined (reading 'rotulo')` na função `movimentoMeta()`. A causa foi a divergência entre o enum do backend (`AJUSTE_ENTRADA`, `AJUSTE_SAIDA`) e o mapa do frontend, que reconhecia somente `AJUSTE`. A massa DEMO expõe o caso com ajuste positivo de inventário.
+
+Correções restritas ao frontend: o tipo `TipoMovimentacao` passou a aceitar os dois valores reais, o dashboard passou a rotulá-los separadamente e possui fallback para uma eventual modalidade nova que o backend introduza sem derrubar a renderização. A tela geral `MovimentacoesGestaoView.vue` também lista, filtra e sinaliza (+/-) ambos os ajustes. `AJUSTE` foi mantido apenas por compatibilidade com referências legadas.
+
+**Validar:** `npm run build`; iniciar `demo`, acessar como Gestor, conferir Dashboard/Últimas movimentações e a busca/filtro de ajustes na página Movimentações. Mudança não afeta banco, cálculos FEFO/FIFO, rótulos ou APIs; sem merge.
