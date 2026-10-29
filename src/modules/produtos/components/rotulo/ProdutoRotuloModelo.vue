@@ -48,15 +48,15 @@ function textoEnum(valor: string | null) {
   <div class="label-frame" :style="frameStyle">
     <article class="produto-label" :style="labelStyle" aria-label="Rótulo do produto">
       <header class="label-header">
-        <div>
+        <div class="product-identification">
           <p>PRODUTO LABORATORIAL</p>
           <h2>{{ dados.nome }}</h2>
           <strong>{{ dados.codigoReferencia || 'SEM CÓDIGO DE REFERÊNCIA' }}</strong>
+          <span class="product-presentation">{{ dados.unidadeArmazenamento || 'Apresentação não informada' }}</span>
         </div>
         <div class="header-meta">
           <strong>SGL — Sistema de Gestão de Laboratórios</strong>
-          <span>{{ dados.unidadeArmazenamento || 'Apresentação não informada' }}</span>
-          <span>{{ dados.ativo ? 'Produto ativo no catálogo' : 'Produto inativo no catálogo' }}</span>
+          <span class="catalog-status">{{ dados.ativo ? 'Produto ativo no catálogo' : 'Produto inativo no catálogo' }}</span>
         </div>
       </header>
 
@@ -103,15 +103,17 @@ function textoEnum(valor: string | null) {
           </div>
 
           <section class="inspection" :class="{ 'inspection--active': dados.fiscalizado }">
-            <div>
-              <span>CONTROLE / FISCALIZAÇÃO EXTERNA</span>
-              <strong>{{ dados.fiscalizado ? 'Produto sujeito a controle' : 'Sem controle externo cadastrado' }}</strong>
+            <div class="inspection-box">
+              <div class="inspection-details">
+                <span>CONTROLE / FISCALIZAÇÃO EXTERNA</span>
+                <p v-if="dados.fiscalizado && dados.orgaosFiscalizadores.length">
+                  {{ dados.orgaosFiscalizadores.map(orgaoRotulo).join(' · ') }}
+                </p>
+                <p v-else-if="dados.fiscalizado">Órgão fiscalizador não informado.</p>
+              </div>
+              <strong class="inspection-status">{{ dados.fiscalizado ? 'Produto sujeito a controle' : 'Sem controle externo cadastrado' }}</strong>
             </div>
-            <p v-if="dados.fiscalizado && dados.orgaosFiscalizadores.length">
-              {{ dados.orgaosFiscalizadores.map(orgaoRotulo).join(' · ') }}
-            </p>
-            <p v-else-if="dados.fiscalizado">Órgão fiscalizador não informado.</p>
-            <small v-if="dados.observacaoFiscalizacao">{{ dados.observacaoFiscalizacao }}</small>
+            <small v-if="dados.observacaoFiscalizacao" class="inspection-note">{{ dados.observacaoFiscalizacao }}</small>
           </section>
         </section>
       </div>
@@ -149,12 +151,15 @@ function textoEnum(valor: string | null) {
   box-sizing: border-box;
   transform-origin: top left;
 }
-.label-header { display: grid; grid-template-columns: 1.5fr .9fr; gap: 8mm; padding-bottom: 4mm; border-bottom: 1px solid #cbd5e1; }
+.label-header { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 9mm; align-items: start; padding-bottom: 4mm; border-bottom: 1px solid #cbd5e1; }
+.product-identification, .header-meta { min-width: 0; }
 .label-header p { margin: 0 0 1.5mm; font-size: 8pt; font-weight: 800; letter-spacing: .08em; }
-.label-header h2 { margin: 0; font-size: 19pt; line-height: 1.05; }
-.label-header > div > strong { display: block; margin-top: 2mm; font-size: 10pt; }
-.header-meta { display: flex; flex-direction: column; gap: 1mm; font-size: 8pt; line-height: 1.3; }
-.header-meta > strong { margin: 0 !important; font-size: 9pt !important; }
+.label-header h2 { margin: 0; font-size: 19pt; line-height: 1.1; overflow-wrap: anywhere; }
+.product-identification > strong { display: block; margin-top: 2mm; font-size: 10.5pt; overflow-wrap: anywhere; }
+.product-presentation { display: block; margin-top: 1.5mm; font-size: 10pt; line-height: 1.25; overflow-wrap: anywhere; }
+.header-meta { display: flex; flex-direction: column; align-items: flex-start; gap: 2mm; line-height: 1.25; }
+.header-meta > strong { display: block; font-size: 11pt; line-height: 1.23; overflow-wrap: anywhere; }
+.catalog-status { display: block; font-size: 10pt; line-height: 1.25; overflow-wrap: anywhere; }
 .label-body { min-height: 0; display: grid; grid-template-columns: 42mm minmax(0, 1fr); gap: 6mm; padding: 5mm 0; }
 .hazard-area { min-height: 0; padding-right: 5mm; border-right: 1px solid #cbd5e1; text-align: center; }
 .hazard-area > p { margin: 0 0 3mm; font-size: 8pt; font-weight: 800; text-transform: uppercase; text-align: left; }
@@ -162,17 +167,20 @@ function textoEnum(valor: string | null) {
 .hazard-area > strong { display: block; font-size: 8pt; }
 .hazard-fallback { display: grid; place-items: center; border: 3px solid #dc2626; color: #111827; font-size: 24pt; font-weight: 900; }
 .no-hazard { padding: 6mm 2mm; border: 1px dashed #94a3b8; font-size: 8pt; }
-.information-area { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 3mm; }
+.information-area { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 2.5mm; }
 .risk-heading span, .info-grid h4, .inspection span, .description span { font-size: 7pt; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 .risk-heading h3 { margin: .5mm 0 1mm; font-size: 16pt; line-height: 1; }
 .risk-heading p, .info-grid p, .inspection p, .inspection small { margin: 0; font-size: 8pt; line-height: 1.3; overflow-wrap: anywhere; }
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm 5mm; }
 .info-grid h4 { margin: 0 0 1mm; }
-.inspection { align-self: stretch; padding: 3mm; border: 1px solid #cbd5e1; background: #f8fafc; }
-.inspection--active { border: 1.4px solid #b45309; background: #fff8eb; }
-.inspection > div { display: flex; align-items: baseline; justify-content: space-between; gap: 4mm; margin-bottom: 1.5mm; }
-.inspection > div strong { font-size: 9pt; }
-.inspection small { display: block; margin-top: 1mm; color: #475569; }
+.inspection { align-self: start; min-width: 0; }
+.inspection-box { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); align-items: center; border: 1px solid #cbd5e1; background: #f8fafc; }
+.inspection--active .inspection-box { border: 1.4px solid #b45309; background: #fff8eb; }
+.inspection-details { padding: 2mm 3mm; min-width: 0; }
+.inspection-details span { display: block; margin-bottom: 1mm; line-height: 1.2; }
+.inspection-details p { line-height: 1.25; }
+.inspection-status { display: flex; align-items: center; justify-content: center; align-self: stretch; min-width: 0; border-left: 1px solid #dfd1b8; padding: 2mm 3mm; font-size: 9pt; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
+.inspection-note { display: block; margin: 1.2mm 1mm 0 !important; color: #475569; font-size: 7.5pt !important; line-height: 1.15 !important; overflow-wrap: anywhere; }
 .label-footer { display: grid; grid-template-columns: 38mm minmax(0, 1fr) 38mm; align-items: center; gap: 5mm; padding-top: 4mm; border-top: 1px solid #cbd5e1; }
 .embrapa-brand { min-height: 13mm; display: flex; align-items: center; }
 .embrapa-brand img { display: block; max-width: 34mm; max-height: 12mm; object-fit: contain; object-position: left center; }
