@@ -247,7 +247,7 @@ function definirPrincipal(index: number) {
 }
 
 function validar() {
-  if (!session.usuario?.unidadeId) throw new Error('Usuário sem Unidade vinculada.')
+  if (!session.unidadeEmOperacaoId) throw new Error('Usuário sem Unidade vinculada.')
   if (!form.value.nome.trim()) throw new Error('Informe o nome do modelo.')
   if (!form.value.descricao.trim()) throw new Error('Informe a descrição.')
   if (!form.value.processoOrigem.trim()) throw new Error('Informe o processo de origem.')
@@ -282,7 +282,7 @@ function payload(): ModeloResiduoRequest {
   }))
 
   return {
-    unidadeId: session.usuario!.unidadeId!,
+    unidadeId: session.unidadeEmOperacaoId!,
     nome: form.value.nome.trim(),
     descricao: form.value.descricao.trim(),
     processoOrigem: form.value.processoOrigem.trim(),

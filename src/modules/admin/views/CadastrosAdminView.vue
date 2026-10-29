@@ -256,11 +256,11 @@ function novoProduto(): ProdutoForm {
 }
 
 function novaClasseResiduo(): ClasseResiduoForm {
-  return { unidadeId: session.usuario?.unidadeId ?? '', codigo: '', descricao: '', ativo: true }
+  return { unidadeId: session.unidadeEmOperacaoId ?? '', codigo: '', descricao: '', ativo: true }
 }
 
 function novoLocalArmazenamento(): LocalArmazenamentoForm {
-  return { unidadeId: session.usuario?.unidadeId ?? '', nome: '', ativo: true }
+  return { unidadeId: session.unidadeEmOperacaoId ?? '', nome: '', ativo: true }
 }
 
 const rotuloNovoCadastro = computed(() => {
