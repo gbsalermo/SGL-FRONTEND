@@ -1,0 +1,54 @@
+/* Impressão de Soluções e Entradas: identidade aprovada dos rótulos SGL/Embrapa. */
+.op-print-page{min-height:100vh;padding:22px;background:#edf1f6;color:#14243b}
+.op-print-toolbar,.op-print-controls{box-sizing:border-box;width:min(100%,1060px);margin:0 auto 14px;padding:14px 18px;background:#fff;border:1px solid #d9e1eb;border-radius:10px;box-shadow:0 9px 24px rgb(13 43 94 / 6%)}
+.op-print-toolbar{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:18px;align-items:center}
+.op-print-toolbar>div{display:flex;flex-direction:column;gap:3px}
+.op-print-toolbar strong{font-size:14px}
+.op-print-toolbar span{font-size:11px;color:#63758b}
+.op-print-toolbar button,.op-print-controls button{font:inherit;font-size:11px;font-weight:800;padding:10px 13px;border:1px solid #b9c9dc;border-radius:7px;background:#fff;color:#173d7a;cursor:pointer}
+.op-print-toolbar .op-print-primary{color:#fff;background:#174da3;border-color:#174da3}
+.op-print-toolbar button:disabled{opacity:.5;cursor:default}
+.op-print-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.op-print-controls .chosen{background:#e8f0fc;border-color:#174da3}
+.op-print-controls label{display:flex;align-items:center;gap:8px;font-size:11px;color:#465670}
+.op-print-controls input{width:72px;min-height:34px;padding:0 6px;border:1px solid #bac7d7;border-radius:6px}
+.op-print-notice,.op-print-error{box-sizing:border-box;width:min(100%,1060px);margin:0 auto 14px;padding:13px 16px;border-radius:8px;background:#fff8e7;border:1px solid #edd38a;color:#74530e;font-size:12px}
+.op-print-error{background:#fff1f2;border-color:#fecaca;color:#a31f2c}
+.op-print-canvas{width:max-content;max-width:100%;margin:18px auto;padding:15px;background:#fff;box-shadow:0 16px 45px rgb(13 43 94 / 14%);overflow-x:auto}
+.op-print-frame{position:relative;overflow:visible}
+.op-label{box-sizing:border-box;width:180mm;min-height:125mm;padding:5.5mm 6mm;border:1.2px solid #14273c;background:#fff;color:#111827;font-family:Arial,Helvetica,sans-serif;display:flex;flex-direction:column;gap:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.op-label-header{display:grid;grid-template-columns:34mm minmax(0,1fr) 32mm;gap:5mm;align-items:center;padding-bottom:3mm;border-bottom:1px solid #a9bacb}
+.op-label-header img{width:100%;height:17mm;object-fit:contain}
+.op-label-header h1{margin:0;font-size:15pt;line-height:1.15;overflow-wrap:anywhere}
+.op-label-header p{margin:1mm 0 0;font-size:9pt}
+.op-label-marker{display:block;font-size:9pt;font-weight:800;letter-spacing:.04em;color:#0d4c85}
+.op-label-marker--green{color:#078341}
+.op-label-header .op-label-code{font-size:9pt;line-height:1.25;text-align:right;overflow-wrap:anywhere}
+.op-label-title{font-size:11pt;font-weight:800;margin:0 0 2.5mm;color:#173d7a}
+.op-label-body{padding:4mm 0 3mm;flex:1;display:flex;flex-direction:column;gap:3mm}
+.op-label-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3mm 6mm}
+.op-label-field{min-width:0}
+.op-label-field b{display:block;font-size:8pt;letter-spacing:.03em;text-transform:uppercase;margin-bottom:.7mm}
+.op-label-field span,.op-label-field p{font-size:9.2pt;line-height:1.25;overflow-wrap:anywhere;margin:0}
+.op-label-field--full{grid-column:1/-1}
+.op-label-highlight{padding:2.8mm 3mm;background:#edf5fb;border-left:2.2mm solid #1b5697}
+.op-label-highlight--green{background:#edf9f2;border-left-color:#128c50}
+.op-label-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2mm 5mm;padding:0;margin:0;list-style:none}
+.op-label-items li{border-bottom:1px solid #e2e8f0;padding-bottom:1.5mm;font-size:9pt;line-height:1.25;overflow-wrap:anywhere}
+.op-label-items b{display:block;font-size:8.5pt}
+.op-label-separator{border:0;border-top:1px solid #cbd5e1;margin:1mm 0}
+.op-label-warn{border:1px solid #d6a24e;background:#fff8ea;padding:2mm 3mm;font-size:9pt;line-height:1.3}
+.op-label-footer{display:grid;grid-template-columns:38mm minmax(0,1fr) 38mm;gap:5mm;align-items:center;padding-top:3mm;margin-top:auto;border-top:1px solid #b4c4d3;min-height:17mm}
+.op-label-footer img{display:block;width:100%;height:15mm;object-fit:contain}
+.op-label-footer div{font-size:9pt;line-height:1.3;overflow-wrap:anywhere}
+.op-label-footer div b{display:block;font-size:8pt;text-transform:uppercase;margin-bottom:1mm}
+.op-label-caption{font-size:8.5pt;color:#334155}
+.op-label-strong{font-size:11pt;font-weight:800}
+@media(max-width:750px){.op-print-toolbar{grid-template-columns:1fr}.op-print-canvas{width:100%}.op-print-page{padding:10px}.op-print-controls{justify-content:center}}
+@media print{
+ @page{size:A4 portrait;margin:10mm}
+ .op-print-page{padding:0;min-height:0;background:#fff}
+ .op-print-toolbar,.op-print-controls,.op-print-notice,.op-print-error{display:none!important}
+ .op-print-canvas{margin:0;padding:0;max-width:none;width:auto;overflow:visible;box-shadow:none}
+ .op-label{break-inside:avoid;page-break-inside:avoid}
+}
