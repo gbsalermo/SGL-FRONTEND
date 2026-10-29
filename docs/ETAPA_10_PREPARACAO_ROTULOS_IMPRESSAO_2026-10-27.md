@@ -99,3 +99,9 @@ Durante a validação integrada da Etapa 10, o `DashboardGestaoView.vue` falhava
 Correções restritas ao frontend: o tipo `TipoMovimentacao` passou a aceitar os dois valores reais, o dashboard passou a rotulá-los separadamente e possui fallback para uma eventual modalidade nova que o backend introduza sem derrubar a renderização. A tela geral `MovimentacoesGestaoView.vue` também lista, filtra e sinaliza (+/-) ambos os ajustes. `AJUSTE` foi mantido apenas por compatibilidade com referências legadas.
 
 **Validar:** `npm run build`; iniciar `demo`, acessar como Gestor, conferir Dashboard/Últimas movimentações e a busca/filtro de ajustes na página Movimentações. Mudança não afeta banco, cálculos FEFO/FIFO, rótulos ou APIs; sem merge.
+
+## Acabamento do rótulo de Produto — organização visual (29/10/2026)
+
+Ajustado `ProdutoRotuloModelo.vue` na branch da Etapa 10, conforme prévia aprovada: apresentação/embalagem `unidadeArmazenamento` aparece abaixo de `codigoReferencia` no lado esquerdo; o cabeçalho direito contém apenas o texto institucional SGL e a situação real `ativo` do catálogo, com tipografia mais legível. O quadro de Controle/Fiscalização usa duas colunas alinhadas: órgão fiscalizador à esquerda, situação de controle à direita e observação fiscalizatória abaixo do quadro, sem replicar o selo CONTROLADO. As marcas Embrapa e SGL permanecem no rodapé. Os valores seguem o contrato real de Produto, sem inventar campos de capacidade de lote ou de entrada.
+
+**Validação pendente:** `npm run build`, prévia e impressão nos formatos 90/135/180/190 mm, produtos fiscalizados/não fiscalizados, nomes longos, apresentações ausentes e observações extensas. Backend inalterado, sem merge.
