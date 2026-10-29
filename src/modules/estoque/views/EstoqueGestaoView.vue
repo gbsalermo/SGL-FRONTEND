@@ -23,7 +23,8 @@ const situacao = ref<'TODOS' | 'BAIXO' | 'NORMAL' | 'ZERADO' | 'VENCIDO' | 'PROX
 const ordenarPor = ref<'PRODUTO' | 'QUANTIDADE' | 'MINIMO' | 'LOCALIZACAO'>('PRODUTO')
 const direcao = ref<'ASC' | 'DESC'>('ASC')
 
-const unidadeId = computed(() => session.usuario?.unidadeId)
+// Unidade em operação: a do usuário ou, para o administrador geral, a escolhida no seletor.
+const unidadeId = computed(() => session.unidadeEmOperacaoId)
 const ordemQuantitativa = computed(() => ordenarPor.value === 'QUANTIDADE' || ordenarPor.value === 'MINIMO')
 const rotuloOrdem = computed(() => ordemQuantitativa.value ? 'Ordem por quantidade' : 'Ordem alfabética')
 const filtroAtivo = computed(() => buscaEmFoco.value || filtrosAbertos.value)
