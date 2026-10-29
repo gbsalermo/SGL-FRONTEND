@@ -8,10 +8,21 @@
 .op-print-toolbar button,.op-print-controls button{font:inherit;font-size:11px;font-weight:800;padding:10px 13px;border:1px solid #b9c9dc;border-radius:7px;background:#fff;color:#173d7a;cursor:pointer}
 .op-print-toolbar .op-print-primary{color:#fff;background:#174da3;border-color:#174da3}
 .op-print-toolbar button:disabled{opacity:.5;cursor:default}
-.op-print-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
-.op-print-controls .chosen{background:#e8f0fc;border-color:#174da3}
-.op-print-controls label{display:flex;align-items:center;gap:8px;font-size:11px;color:#465670}
-.op-print-controls input{width:72px;min-height:34px;padding:0 6px;border:1px solid #bac7d7;border-radius:6px}
+/* Mesma hierarquia visual do seletor de Produtos e Resíduos. */
+.op-print-controls{display:grid;gap:14px;margin-bottom:22px;padding:16px 18px}
+.op-print-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.op-print-presets button{min-width:0;min-height:54px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;border-color:#cbd5e1;color:#34445c;background:#fff}
+.op-print-presets button.chosen{border-color:#2456c4;background:#eef4ff;color:#173f91}
+.op-print-presets button strong{font-size:11px;line-height:1.2}
+.op-print-presets button span{color:#78869a;font-size:9px;font-weight:500}
+.op-print-custom{display:grid;grid-template-columns:minmax(0,1fr) 150px 190px;gap:14px;align-items:end;padding-top:13px;border-top:1px solid #e5eaf1}
+.op-print-custom label,.op-print-result{min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:6px}
+.op-print-custom label>span,.op-print-result>span{color:#64748b;font-size:9px;font-weight:800;text-transform:uppercase}
+.op-print-custom input[type='range']{width:100%;min-height:26px;accent-color:#2456c4}
+.op-print-number div{display:flex;align-items:center;overflow:hidden;border:1px solid #cbd5e1;border-radius:7px}
+.op-print-number input{width:100%;min-width:0;min-height:38px;padding:0 9px;border:0;outline:0;background:#fff;color:#15243b}
+.op-print-number b{padding-right:10px;font-size:11px}
+.op-print-result strong{min-height:40px;display:flex;align-items:center;font-size:13px}
 .op-print-notice,.op-print-error{box-sizing:border-box;width:min(100%,1060px);margin:0 auto 14px;padding:13px 16px;border-radius:8px;background:#fff8e7;border:1px solid #edd38a;color:#74530e;font-size:12px}
 .op-print-error{background:#fff1f2;border-color:#fecaca;color:#a31f2c}
 .op-print-canvas{width:max-content;max-width:100%;margin:18px auto;padding:15px;background:#fff;box-shadow:0 16px 45px rgb(13 43 94 / 14%);overflow-x:auto}
@@ -44,7 +55,7 @@
 .op-label-footer div b{display:block;font-size:8pt;text-transform:uppercase;margin-bottom:1mm}
 .op-label-caption{font-size:8.5pt;color:#334155}
 .op-label-strong{font-size:11pt;font-weight:800}
-@media(max-width:750px){.op-print-toolbar{grid-template-columns:1fr}.op-print-canvas{width:100%}.op-print-page{padding:10px}.op-print-controls{justify-content:center}}
+@media(max-width:750px){.op-print-toolbar,.op-print-custom{grid-template-columns:1fr}.op-print-presets{grid-template-columns:repeat(2,minmax(0,1fr))}.op-print-canvas{width:100%}.op-print-page{padding:10px}}
 @media print{
  @page{size:A4 portrait;margin:10mm}
  .op-print-page{padding:0;min-height:0;background:#fff}
