@@ -435,7 +435,7 @@ function formatarDataHora(valor: string) {
   return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(data)
 }
 
-function formatarRotulo(valor: string | null) {
+function formatarRotulo(valor: string | null | undefined) {
   if (!valor) return '—'
   return valor
     .toLocaleLowerCase('pt-BR')
