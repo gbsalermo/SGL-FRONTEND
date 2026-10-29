@@ -153,6 +153,42 @@ onMounted(carregar)
 
 <style scoped>
 /* Layout exclusivo do Documento de Entrada: o rótulo de Soluções fica inalterado. */
+/* Centralização simétrica entre marcas e texto, exclusiva deste documento. */
+.entrada-label .op-label-header{
+  grid-template-columns:38mm minmax(0,1fr) 38mm;
+  gap:5mm;
+  align-items:center;
+}
+.entrada-label .op-label-header>div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.entrada-label .op-label-header>img,
+.entrada-label .op-label-footer>img{
+  justify-self:center;
+  margin-inline:auto;
+  object-position:center;
+}
+.entrada-label .op-label-header .op-label-marker,
+.entrada-label .op-label-header h1,
+.entrada-label .op-label-header p{
+  text-align:center;
+}
+.entrada-label .op-label-footer{
+  grid-template-columns:38mm minmax(0,1fr) 38mm;
+  gap:5mm;
+  align-items:center;
+}
+.entrada-label .op-label-footer>div{
+  min-width:0;
+  align-self:center;
+  text-align:center;
+}
+
 .entrada-label .op-label-header h1{font-size:16pt;line-height:1.18}
 .entrada-label .op-label-marker{font-size:9.5pt}
 .entrada-label .op-label-header p{font-size:9.5pt;line-height:1.3}
