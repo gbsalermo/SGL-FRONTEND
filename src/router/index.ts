@@ -45,6 +45,18 @@ export const router = createRouter({
       meta: { requiresSession: true, perfis: PERFIS_GESTAO },
     },
     {
+      path: '/solucoes/:id/rotulo',
+      name: 'gestao-solucao-rotulo',
+      component: () => import('@/modules/solucoes/views/RotuloSolucaoView.vue'),
+      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+    },
+    {
+      path: '/lotes/:id/documento-entrada',
+      name: 'gestao-documento-entrada-lote',
+      component: () => import('@/modules/estoque/views/DocumentoEntradaLoteView.vue'),
+      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+    },
+    {
       path: '/',
       component: () => import('@/layouts/SolicitanteLayout.vue'),
       meta: { requiresSession: true, perfis: PERFIS_SOLICITANTE },
