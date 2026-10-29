@@ -49,6 +49,11 @@ export const estoqueService = {
     return data
   },
 
+  async buscarLotePorId(loteId: string) {
+    const { data } = await http.get<LoteResponse>('/v1/lotes/' + encodeURIComponent(loteId))
+    return validarContratoLote(data)
+  },
+
   async listarLotesPorEstoque(estoqueId: string) {
     const { data } = await http.get<LoteResponse[]>('/v1/lotes/por-estoque', { params: { estoqueId } })
     const lotes = validarContratoLotes(data)
