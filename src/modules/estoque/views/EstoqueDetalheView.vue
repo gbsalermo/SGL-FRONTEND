@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { estoqueService } from '@/modules/estoque/services/estoqueService'
 import type {
@@ -17,6 +17,7 @@ type SituacaoLoteFiltro = 'TODOS' | 'VALIDO' | 'PROXIMO' | 'VENCIDO' | 'ESGOTADO
 type SituacaoLoteVisual = Exclude<SituacaoLoteFiltro, 'TODOS'>
 
 const route = useRoute()
+const router = useRouter()
 const session = useSessionStore()
 
 const estoque = ref<EstoqueCentralResponse | null>(null)
@@ -31,6 +32,7 @@ const modalEntradaAberto = ref(false)
 const salvandoEntrada = ref(false)
 const erroEntrada = ref('')
 const sucessoEntrada = ref('')
+const ultimoLoteCriadoId = ref<string | null>(null)
 
 const modalLoteAberto = ref(false)
 const loteSelecionado = ref<LoteResponse | null>(null)
@@ -353,6 +355,7 @@ async function salvarMinimo() {
 function abrirEntrada() {
   erroEntrada.value = ''
   sucessoEntrada.value = ''
+  ultimoLoteCriadoId.value = null
   sucessoDescarte.value = ''
   formularioEntrada.value = {
     numeroLote: '', tipoEmbalagem: 'UNITARIO', apresentacao: '', quantidade: 1,
@@ -392,6 +395,7 @@ async function registrarEntrada() {
     })
     modalEntradaAberto.value = false
     sucessoEntrada.value = `Entrada ${criado.codigoInterno} registrada com sucesso.`
+    ultimoLoteCriadoId.value = criado.id
     await carregar()
   } catch (error) {
     erroEntrada.value = mensagemErro(error, 'Não foi possível registrar a entrada do lote.')
@@ -554,7 +558,7 @@ onMounted(carregar)
         <article :class="{ danger: vencidos > 0 }"><span>Lotes vencidos</span><strong>{{ vencidos }}</strong><small>{{ vencidos > 0 ? `${quantidadeComMedida(quantidadeVencida)} aguardando descarte` : 'Nenhum vencido com saldo' }}</small></article>
       </div>
 
-      <div v-if="sucessoEntrada" class="success-box">{{ sucessoEntrada }}</div>
+      <div v-if="sucessoEntrada" class="success-box">{{ sucessoEntrada }} <button v-if="ultimoLoteCriadoId" class="secondary-action" type="button" @click="router.push('/lotes/' + encodeURIComponent(ultimoLoteCriadoId) + '/documento-entrada')">Imprimir documento de entrada</button></div>
       <div v-if="sucessoDescarte" class="success-box">{{ sucessoDescarte }}</div>
 
       <section class="lot-card">
@@ -616,7 +620,7 @@ onMounted(carregar)
             </div>
           </section>
 
-          <footer class="modal-actions"><button type="button" class="secondary-action" @click="fecharLote">Fechar</button><button type="button" class="primary-action" @click="iniciarEdicaoLote">Editar dados do lote</button></footer>
+          <footer class="modal-actions"><button type="button" class="secondary-action" @click="fecharLote">Fechar</button><button type="button" class="secondary-action" @click="router.push('/lotes/' + encodeURIComponent(loteSelecionado.id) + '/documento-entrada')">Documento de entrada</button><button type="button" class="primary-action" @click="iniciarEdicaoLote">Editar dados do lote</button></footer>
         </div>
 
         <form v-else class="entry-form" @submit.prevent="salvarLote">
@@ -659,6 +663,7 @@ onMounted(carregar)
 .summary-grid small { display: block; margin-top: 6px; color: #94a3b8; font-size: 11px; line-height: 1.4; }
 .view-card select { width: 100%; min-height: 40px; margin-top: 9px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1e293b; font: inherit; }
 .summary-grid .warning { border-color: #fde68a; background: #fffdf5; }.summary-grid .warning strong { color: #946200; }.summary-grid .danger { border-color: #fecaca; background: #fffafa; }.summary-grid .danger strong { color: #b42318; }
+.success-box button { margin-left: 12px; }
 .success-box { margin-bottom: 14px; padding: 11px 13px; border: 1px solid #bbefcb; border-radius: 8px; background: #f2fbf5; color: #087443; font-size: 12px; font-weight: 700; }
 .lot-card { padding: 16px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; }.lot-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }.lot-card__heading h2 { margin: 0; color: #0d2b5e; font-size: 16px; }.lot-card__heading p { margin: 5px 0 14px; color: #64748b; font-size: 12px; }.lot-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .lot-filter-bar { display: grid; grid-template-columns: minmax(260px, 1.5fr) minmax(190px, .7fr) auto; align-items: end; gap: 10px; margin: 2px 0 14px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 9px; background: #f8fafc; }.lot-filter-bar label { display: flex; min-width: 0; flex-direction: column; gap: 5px; }.lot-filter-bar label > span { color: #475569; font-size: 10px; font-weight: 800; }.lot-filter-bar input, .lot-filter-bar select { width: 100%; min-height: 38px; padding: 0 10px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #1e293b; box-sizing: border-box; }.lot-filter-result { display: flex; min-height: 38px; align-items: center; gap: 5px; white-space: nowrap; color: #64748b; font-size: 10px; }.lot-filter-result strong { color: #0d2b5e; font-size: 15px; }.lot-filter-result button { margin-left: 5px; border: 0; background: transparent; color: #1a4da1; font-size: 10px; font-weight: 800; cursor: pointer; }
