@@ -140,3 +140,9 @@ As regras adicionais estão em `<style scoped>` e sob `.entrada-label`, para **n
 ## Centralização final do Documento de Entrada (29/10/2026)
 
 Centralizados o bloco textual do cabeçalho e o texto do rodapé entre as marcas SGL/Embrapa, com colunas laterais simétricas de 38 mm e espaçamento uniforme. A alteração usa CSS scoped em `DocumentoEntradaLoteView.vue`, sem mudar os campos, a prévia de impressão, a lógica de entrada ou os rótulos de outros módulos. Validar visualmente em 90/135/180/190 mm e executar `npm run build` antes do merge.
+
+## Validação do rótulo de Soluções e acabamento de ações (29/10/2026)
+
+O mantenedor **validou visualmente o rótulo de Soluções** durante a revisão da Etapa 10. Preservar o modelo, os dados e a regra de impressão a partir do status `EM_PREPARACAO`; não redesenhar sem nova solicitação. Essa validação de layout não substitui o `npm run build`, testes de fluxo nem conferência da impressão física.
+
+No frontend, corrigido o botão **Cancelar preparação** em **Central de Soluções → Detalhes → Ações da solução**: o seletor `.admin-cancel-action` estava formatado apenas no rodapé do modal, e na área expandida aparecia com altura/padding incoerentes. A nova regra no CSS de Soluções aplica altura, espaçamento, raio, tipografia, borda, contraste vermelho e foco aos botões do conjunto operacional; o rodapé do modal e a lógica de cancelamento permanecem inalterados. Validar em tema claro/escuro e telas estreitas; sem merge.
