@@ -97,7 +97,7 @@ onMounted(carregar)
     <p v-else-if="erro" class="op-print-error">{{ erro }}</p>
     <div v-else-if="lote && estoque" class="op-print-canvas">
       <div class="op-print-frame" :style="frameStyle">
-        <article class="op-label" :style="labelStyle" aria-label="Documento de entrada de lote">
+        <article class="op-label entrada-label" :style="labelStyle" aria-label="Documento de entrada de lote">
           <header class="op-label-header">
             <img src="/assets/residuos/marcas/sgl-logo.png.png" alt="SGL" />
             <div>
@@ -108,29 +108,34 @@ onMounted(carregar)
             <img src="/assets/residuos/marcas/embrapa.png" alt="Embrapa" />
           </header>
           <div class="op-label-body">
-            <section class="op-label-highlight">
-              <div class="op-label-grid">
-                <div class="op-label-field"><b>Código SGL do lote</b><span class="op-label-strong">{{ lote.codigoInterno }}</span></div>
+            <section class="op-label-highlight entrada-identificacao">
+              <div class="op-label-grid entrada-grid">
+                <div class="op-label-field entrada-chave"><b>Código SGL do lote</b><span class="op-label-strong">{{ lote.codigoInterno }}</span></div>
                 <div class="op-label-field"><b>Lote/referência informada</b><span>{{ lote.numeroLote }}</span></div>
                 <div class="op-label-field"><b>Código do produto</b><span>{{ estoque.produtoCodigoReferencia || 'Não informado' }}</span></div>
                 <div class="op-label-field"><b>Unidade</b><span>{{ estoque.unidadeSigla }} — {{ lote.unidadeNome }}</span></div>
               </div>
             </section>
-            <section>
+            <section class="entrada-recebimento">
               <h2 class="op-label-title">RECEBIMENTO REGISTRADO</h2>
-              <div class="op-label-grid">
+              <div class="op-label-grid entrada-grid">
                 <div class="op-label-field"><b>Apresentação / embalagem</b><span>{{ lote.apresentacao || rotulo(lote.tipoEmbalagem) }}</span></div>
                 <div class="op-label-field"><b>Tipo de embalagem</b><span>{{ rotulo(lote.tipoEmbalagem) }}</span></div>
-                <div class="op-label-field"><b>Quantidade original de embalagens</b><span>{{ numero(lote.quantidadeApresentacoes) }}</span></div>
+                <div class="op-label-field entrada-chave"><b>Quantidade original de embalagens</b><span>{{ numero(lote.quantidadeApresentacoes) }}</span></div>
                 <div class="op-label-field"><b>Conteúdo por embalagem</b><span>{{ numero(lote.conteudoPorApresentacao) }} {{ unidade(lote.unidadeBase) }}</span></div>
-                <div class="op-label-field"><b>Total original recebido</b><span class="op-label-strong">{{ numero(lote.quantidadeInicial) }} {{ unidade(lote.unidadeBase) }}</span></div>
+                <div class="op-label-field entrada-chave"><b>Total original recebido</b><span class="op-label-strong">{{ numero(lote.quantidadeInicial) }} {{ unidade(lote.unidadeBase) }}</span></div>
                 <div class="op-label-field"><b>Permite fracionamento</b><span>{{ lote.fracionavel === false ? 'Não' : lote.fracionavel === true ? 'Sim' : 'Não informado' }}</span></div>
-                <div class="op-label-field"><b>Data de entrada</b><span>{{ data(lote.dataEntrada) }}</span></div>
+                <div class="op-label-field entrada-chave"><b>Data de entrada</b><span>{{ data(lote.dataEntrada) }}</span></div>
                 <div class="op-label-field"><b>Validade</b><span>{{ data(lote.dataValidade) }}</span></div>
                 <div class="op-label-field"><b>Origem registrada</b><span>{{ rotulo(primeiraEntrada?.origem) }}</span></div>
-                <div class="op-label-field"><b>Registro realizado por</b><span>{{ primeiraEntrada?.usuarioNome || 'Não identificado no histórico' }}</span></div>
-                <div v-if="lote.observacao" class="op-label-field op-label-field--full"><b>Observações do lote</b><p>{{ lote.observacao }}</p></div>
-                <div v-if="primeiraEntrada?.observacao && primeiraEntrada.observacao !== lote.observacao" class="op-label-field op-label-field--full"><b>Observações da entrada</b><p>{{ primeiraEntrada.observacao }}</p></div>
+                <div class="op-label-field entrada-chave"><b>Registro realizado por</b><span>{{ primeiraEntrada?.usuarioNome || 'Não identificado no histórico' }}</span></div>
+              </div>
+            </section>
+            <section v-if="lote.observacao || (primeiraEntrada?.observacao && primeiraEntrada.observacao !== lote.observacao)" class="entrada-observacoes">
+              <h2 class="op-label-title">OBSERVAÇÕES REGISTRADAS</h2>
+              <div class="entrada-observacoes-grid">
+                <div v-if="lote.observacao" class="op-label-field"><b>Observações do lote</b><p>{{ lote.observacao }}</p></div>
+                <div v-if="primeiraEntrada?.observacao && primeiraEntrada.observacao !== lote.observacao" class="op-label-field"><b>Observações da entrada</b><p>{{ primeiraEntrada.observacao }}</p></div>
               </div>
             </section>
             <div class="op-label-warn">Documento informativo para rastreabilidade interna do SGL. Não representa nota fiscal nem substitui documentos fiscais ou de segurança aplicáveis.</div>
@@ -145,3 +150,29 @@ onMounted(carregar)
     </div>
   </main>
 </template>
+
+<style scoped>
+/* Layout exclusivo do Documento de Entrada: o rótulo de Soluções fica inalterado. */
+.entrada-label .op-label-header h1{font-size:16pt;line-height:1.18}
+.entrada-label .op-label-marker{font-size:9.5pt}
+.entrada-label .op-label-header p{font-size:9.5pt;line-height:1.3}
+.entrada-label .op-label-body{gap:3.5mm;padding:3.5mm 0 3mm}
+.entrada-label .op-label-title{font-size:12pt;font-weight:800;margin:0 0 2.5mm;color:#113b74}
+.entrada-label .entrada-grid{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:6mm;row-gap:0;align-items:stretch}
+.entrada-label .entrada-grid>.op-label-field{min-width:0;padding:2.3mm 0;border-bottom:1px solid #e0e8f2}
+.entrada-label .entrada-grid>.op-label-field:nth-last-child(-n+2){border-bottom:0}
+.entrada-label .op-label-field b{display:block;margin-bottom:1.1mm;color:#143759;font-size:8.8pt;line-height:1.22;letter-spacing:.02em;font-weight:800}
+.entrada-label .op-label-field span,.entrada-label .op-label-field p{display:block;color:#111827;font-size:10pt;line-height:1.3;overflow-wrap:anywhere;margin:0;font-weight:500}
+.entrada-label .entrada-chave>span{font-weight:800;color:#0e2d55}
+.entrada-label .entrada-chave .op-label-strong{font-size:11.5pt}
+.entrada-label .entrada-identificacao{padding:3mm 3.5mm;background:#edf4fb;border-left:2.4mm solid #24569b}
+.entrada-label .entrada-identificacao .entrada-grid>.op-label-field{border-bottom-color:#d5e1ef}
+.entrada-label .entrada-recebimento{min-width:0}
+.entrada-label .entrada-observacoes{min-width:0;padding:2.7mm 3.2mm;border:1px solid #d9e4f1;background:#f7faff}
+.entrada-label .entrada-observacoes .op-label-title{font-size:9.5pt;margin-bottom:2mm}
+.entrada-label .entrada-observacoes-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4mm 6mm}
+.entrada-label .entrada-observacoes-grid>:only-child{grid-column:1/-1}
+.entrada-label .op-label-warn{border:1px solid #cf9d41;background:#fff8e9;color:#5c420e;padding:2.6mm 3.2mm;font-size:9.3pt;line-height:1.35}
+.entrada-label .op-label-footer div{font-size:9.5pt;line-height:1.3}
+.entrada-label .op-label-footer div b{font-size:8.5pt;color:#143759}
+</style>
