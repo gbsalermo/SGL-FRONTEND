@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { estoqueService } from '@/modules/estoque/services/estoqueService'
 import type { EstoqueCentralResponse, LoteResponse, MovimentacaoLoteResponse } from '@/modules/estoque/types/estoque'
 import '@/modules/rotulos/styles/rotulosOperacionais.css'
+import ZebraExportPanel from '@/modules/rotulos/zebra/ZebraExportPanel.vue'
+import type { DocumentoZpl } from '@/modules/rotulos/zebra/zpl'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,6 +29,40 @@ const labelStyle = computed(() => ({ zoom: larguraMm.value / 180 }))
 const primeiraEntrada = computed(() => movimentos.value
   .filter(m => m.tipoMovimentacao === 'ENTRADA')
   .sort((a,b) => a.dataMovimentacao.localeCompare(b.dataMovimentacao))[0] ?? null)
+const documentoZebra = computed<DocumentoZpl | null>(() => {
+  const l = lote.value
+  const e = estoque.value
+  if (!l || !e) return null
+  return {
+    titulo: 'ENTRADA DE LOTE - USO INTERNO / SEM VALOR FISCAL',
+    identificador: l.codigoInterno,
+    subtitulo: l.produtoNome,
+    secoes: [
+      { titulo: 'Identificacao', campos: [
+        { rotulo: 'Codigo produto', valor: e.produtoCodigoReferencia },
+        { rotulo: 'Lote fornecedor', valor: l.numeroLote },
+        { rotulo: 'Unidade', valor: e.unidadeSigla + ' - ' + l.unidadeNome },
+      ] },
+      { titulo: 'Recebimento', campos: [
+        { rotulo: 'Apresentacao', valor: l.apresentacao || rotulo(l.tipoEmbalagem) },
+        { rotulo: 'Tipo embalagem', valor: rotulo(l.tipoEmbalagem) },
+        { rotulo: 'Embalagens originais', valor: numero(l.quantidadeApresentacoes) },
+        { rotulo: 'Conteudo por embalagem', valor: numero(l.conteudoPorApresentacao) + ' ' + unidade(l.unidadeBase) },
+        { rotulo: 'Total original', valor: numero(l.quantidadeInicial) + ' ' + unidade(l.unidadeBase) },
+        { rotulo: 'Entrada', valor: data(l.dataEntrada) },
+        { rotulo: 'Validade', valor: data(l.dataValidade) },
+        { rotulo: 'Origem', valor: rotulo(primeiraEntrada.value?.origem) },
+        { rotulo: 'Registrado por', valor: primeiraEntrada.value?.usuarioNome },
+      ] },
+      { titulo: 'Observacoes', campos: [
+        { rotulo: 'Lote', valor: l.observacao },
+        { rotulo: 'Entrada', valor: primeiraEntrada.value?.observacao !== l.observacao
+          ? primeiraEntrada.value?.observacao : null },
+      ] },
+    ],
+    avisoFinal: 'DOCUMENTO INFORMATIVO. NAO SUBSTITUI DOCUMENTO FISCAL.',
+  }
+})
 function numero(n: number | null | undefined) {
   return typeof n === 'number' && Number.isFinite(n) ? n.toLocaleString('pt-BR', { maximumFractionDigits: 6 }) : 'Não informado'
 }
@@ -93,6 +129,7 @@ onMounted(carregar)
         <div class="op-print-result"><span>Dimensões mínimas</span><strong>{{ larguraMm }} × {{ alturaRotuloMm }} mm</strong></div>
       </div>
     </section>
+    <ZebraExportPanel :documento="documentoZebra" :bloqueado="carregando || !!erro" />
     <p v-if="carregando" class="op-print-notice">Carregando registro da entrada...</p>
     <p v-else-if="erro" class="op-print-error">{{ erro }}</p>
     <div v-else-if="lote && estoque" class="op-print-canvas">
