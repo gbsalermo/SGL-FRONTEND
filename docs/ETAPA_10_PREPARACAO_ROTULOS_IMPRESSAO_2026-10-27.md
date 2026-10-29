@@ -126,3 +126,7 @@ Ajustado `ProdutoRotuloModelo.vue` na branch da Etapa 10, conforme prévia aprov
 - **Testes pendentes de execução local:** `npm run build`; impressões com diferentes larguras; Solução pendente, aprovada e entregue; Documento após entrada e pela consulta posterior; lotes fracionáveis e não fracionáveis; campos nulos/textos longos; responsividade e isolamento de Unidade.
 - A altura aumenta conforme o conteúdo; antes de imprimir em mídia adesiva pequena, verificar se o conteúdo inteiro cabe na altura física disponível.
 - Não há QR Code operacional nestas versões: a referência visual do cliente não justifica gerar conteúdo de QR sem endereço/código de leitura implementado e validado. Sem merge.
+
+## Padronização da seleção de tamanho (29/10/2026)
+
+A prévia do **Documento de Entrada de Lote** e a do **Rótulo de Solução** passaram a usar o mesmo padrão de controle de dimensões aprovado em Produtos/Resíduos: quatro cartões Pequeno (90 mm), Médio (135 mm), Grande (180 mm) e Máx. A4 (190 mm), cada um com largura e altura de referência, seletor deslizante de largura (70–190 mm), entrada numérica em milímetros e indicação de **dimensões mínimas**. A etiqueta continua com altura dinâmica para preservar o conteúdo, mantendo o botão de impressão e o bloqueio funcional de Soluções. Estilos centralizados em `src/modules/rotulos/styles/rotulosOperacionais.css`; sem alteração das informações impressas ou das APIs. Validar build e responsividade (desktop e mobile) localmente, antes do merge.
