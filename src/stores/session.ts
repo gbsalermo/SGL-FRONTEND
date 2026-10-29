@@ -57,6 +57,12 @@ export const useSessionStore = defineStore('session', {
     autenticado: (state) => Boolean(state.token && state.usuario && state.expiraEm),
     pendente: (state) => state.usuario?.situacao === 'PENDENTE_VINCULACAO',
     administradorGeral: (state) => state.usuario?.perfil === 'ADMINISTRADOR_GERAL',
+    // Unidade em que a tela trabalha: a escolhida no seletor pelo ADMINISTRADOR_GERAL ou, sem
+    // escolha (e para os demais perfis), a do próprio usuário. Use este getter sempre que a tela
+    // precisar saber "de qual unidade" mostrar os dados — é a mesma que a API usa como tenant.
+    unidadeEmOperacaoId: (state): string | null =>
+      (state.usuario?.perfil === 'ADMINISTRADOR_GERAL' ? state.unidadeOperacaoId : null)
+        ?? state.usuario?.unidadeId ?? null,
   },
 
   actions: {

@@ -15,7 +15,8 @@ const erro = ref('')
 const aviso = ref('')
 const busca = ref('')
 
-const unidadeId = computed(() => session.usuario?.unidadeId ?? null)
+// Unidade em operação: a do usuário ou, para o administrador geral, a escolhida no seletor.
+const unidadeId = computed(() => session.unidadeEmOperacaoId)
 const hoje = computed(() => inicioDoDia(new Date()))
 
 function inicioDoDia(data: Date) {
