@@ -47,6 +47,8 @@ export interface PedidoSolucao {
   usuarioId: string
   usuarioNome: string
   unidadeId: string
+  unidadeNome: string
+  unidadeSigla: string
   laboratorioId: string
   laboratorioNome: string
   projetoId: string | null
@@ -90,6 +92,7 @@ export interface MovimentacaoSolucao {
   numeroLote: string | null
   codigoInternoLote: string | null
   quantidadeMovimentada: number
+  usuarioNome: string
   tipoMovimentacao: string
   dataMovimentacao: string
 }
