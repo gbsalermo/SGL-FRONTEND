@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { solucaoService } from '@/modules/solucoes/services/solucaoService'
 import { exibirQuantidade, type MovimentacaoSolucao, type PedidoSolucao } from '@/modules/solucoes/types/solucao'
 import '@/modules/rotulos/styles/rotulosOperacionais.css'
+import ZebraExportPanel from '@/modules/rotulos/zebra/ZebraExportPanel.vue'
+import type { DocumentoZpl } from '@/modules/rotulos/zebra/zpl'
 
 const route = useRoute()
 const router = useRouter()
@@ -35,6 +37,41 @@ const responsavelAprovacao = computed(() => {
   return 'Não identificado nas movimentações'
 })
 const primeiraMovimentacao = computed(() => saidasAprovacao.value[0]?.dataMovimentacao ?? null)
+
+const documentoZebra = computed<DocumentoZpl | null>(() => {
+  const p = pedido.value
+  if (!p || !habilitado.value) return null
+  return {
+    titulo: 'SOLUCAO - ' + (p.status === 'EM_PREPARACAO' ? 'EM PREPARACAO' : 'ENTREGUE'),
+    identificador: p.id,
+    subtitulo: p.nomeSolucao || 'Solucao sem nome',
+    secoes: [
+      { titulo: 'Origem', campos: [
+        { rotulo: 'Unidade', valor: (p.unidadeSigla || '') + ' - ' + (p.unidadeNome || '') },
+        { rotulo: 'Laboratorio', valor: p.laboratorioOrigemNome || p.laboratorioNome },
+        { rotulo: 'Projeto', valor: p.projetoOrigemNome || p.projetoNome },
+        { rotulo: 'SCI', valor: p.sciOrigemNome },
+        { rotulo: 'Atividade', valor: p.atividadeOrigemNome },
+      ] },
+      { titulo: 'Aprovacao', campos: [
+        { rotulo: 'Solicitante', valor: p.usuarioNome },
+        { rotulo: 'Preparacao aprovada por', valor: responsavelAprovacao.value },
+        { rotulo: 'Registro de aprovacao', valor: formatarDataHora(primeiraMovimentacao.value) },
+        { rotulo: 'Situacao', valor: p.status },
+      ] },
+      { titulo: 'Componentes informados', campos: p.itens.map(item => ({
+        rotulo: item.produtoNome,
+        valor: exibirQuantidade(item.quantidadeAprovada ?? item.quantidadeSolicitada) + ' ' + unidadeLegivel(item.unidadeMedidaSolicitada),
+      })) },
+      { titulo: 'Instrucoes e observacoes', campos: [
+        { rotulo: 'Instrucoes', valor: p.instrucoesPreparoSolucao },
+        { rotulo: 'Observacoes', valor: p.observacao },
+      ] },
+    ],
+    avisoFinal: 'IDENTIFICA O PEDIDO; NAO COMPROVA O PREPARO FISICO, VOLUME FINAL, CONCENTRACAO OU VALIDADE.',
+  }
+})
+
 
 function formatarData(data: string | null | undefined) {
   if (!data) return 'Não informada'
@@ -100,6 +137,7 @@ onMounted(carregar)
         <div class="op-print-result"><span>Dimensões mínimas</span><strong>{{ larguraMm }} × {{ alturaRotuloMm }} mm</strong></div>
       </div>
     </section>
+    <ZebraExportPanel :documento="documentoZebra" :bloqueado="!habilitado || carregando || !!erro" />
     <p v-if="carregando" class="op-print-notice">Carregando o pedido e a rastreabilidade...</p>
     <p v-else-if="erro" class="op-print-error">{{ erro }}</p>
     <div v-else-if="pedido" class="op-print-canvas" :class="{ 'op-print-blocked': !habilitado }">
