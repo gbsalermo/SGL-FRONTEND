@@ -13,7 +13,15 @@ const movimentos = ref<MovimentacaoLoteResponse[]>([])
 const carregando = ref(true)
 const erro = ref('')
 const larguraMm = ref(180)
+const BASE_LARGURA = 180
+const BASE_ALTURA = 125
+const MIN = 70
+const MAX = 190
 const tamanhos = [90, 135, 180, 190]
+const alturaRotuloMm = computed(() => Math.round(larguraMm.value / BASE_LARGURA * BASE_ALTURA * 10) / 10)
+function normalizar() {
+  larguraMm.value = Math.min(MAX, Math.max(MIN, Math.round(Number(larguraMm.value) || BASE_LARGURA)))
+}
 const frameStyle = computed(() => ({ width: String(larguraMm.value) + 'mm' }))
 const labelStyle = computed(() => ({ zoom: larguraMm.value / 180 }))
 const primeiraEntrada = computed(() => movimentos.value
@@ -56,7 +64,7 @@ async function carregar() {
 }
 function imprimir() {
   if (!lote.value || !estoque.value || !!erro.value) return
-  larguraMm.value = Math.max(70,Math.min(190,Math.round(larguraMm.value || 180)))
+  normalizar()
   window.print()
 }
 function voltar() {
@@ -73,9 +81,17 @@ onMounted(carregar)
       <button type="button" class="op-print-primary" :disabled="!lote || !estoque || carregando || !!erro" @click="imprimir">Imprimir documento</button>
     </header>
     <section class="op-print-controls">
-      <button v-for="opcao in tamanhos" :key="opcao" type="button" :class="{ chosen: larguraMm === opcao }" @click="larguraMm = opcao">{{ opcao }} mm</button>
-      <label>Largura personalizada <input v-model.number="larguraMm" type="number" min="70" max="190" step="5" @change="larguraMm = Math.max(70,Math.min(190,Math.round(larguraMm || 180)))" /></label>
-      <span style="font-size:11px;color:#64748b">A altura acompanha os dados registrados.</span>
+      <div class="op-print-presets">
+        <button v-for="largura in tamanhos" :key="largura" type="button" :class="{ chosen: larguraMm === largura }" @click="larguraMm = largura">
+          <strong>{{ largura === 90 ? 'Pequeno' : largura === 135 ? 'Médio' : largura === 180 ? 'Grande' : 'Máx. A4' }}</strong>
+          <span>{{ largura }} × {{ Math.round(largura / BASE_LARGURA * BASE_ALTURA) }} mm</span>
+        </button>
+      </div>
+      <div class="op-print-custom">
+        <label><span>Largura personalizada</span><input v-model.number="larguraMm" type="range" :min="MIN" :max="MAX" step="5" /></label>
+        <label class="op-print-number"><span>Largura</span><div><input v-model.number="larguraMm" type="number" :min="MIN" :max="MAX" @change="normalizar" /><b>mm</b></div></label>
+        <div class="op-print-result"><span>Dimensões mínimas</span><strong>{{ larguraMm }} × {{ alturaRotuloMm }} mm</strong></div>
+      </div>
     </section>
     <p v-if="carregando" class="op-print-notice">Carregando registro da entrada...</p>
     <p v-else-if="erro" class="op-print-error">{{ erro }}</p>
