@@ -16,6 +16,38 @@
 .residuos-gestao-page.sol-gestao .sol-detail-actions { border-block:1px solid var(--sgl-border); padding:14px 0; margin:16px 0; }
 .residuos-gestao-page.sol-gestao .sol-detail-actions h3 { margin:0 0 6px; }
 .residuos-gestao-page.sol-gestao .sol-detail-buttons { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:12px; }
+
+/* Ações operacionais têm a mesma altura e acabamento; o botão de cancelamento
+   precisa de estilo também na área expandida, e não somente no rodapé do modal. */
+.residuos-gestao-page.sol-gestao .sol-detail-buttons > button {
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 16px;
+  border-radius:var(--sgl-radius-control);
+  font:inherit;
+  font-size:var(--sgl-font-body);
+  font-weight:700;
+  line-height:1.2;
+  cursor:pointer;
+}
+.residuos-gestao-page.sol-gestao .sol-detail-buttons > .admin-cancel-action {
+  background:#b42318;
+  border:1px solid #b42318;
+  color:#fff;
+}
+.residuos-gestao-page.sol-gestao .sol-detail-buttons > .admin-cancel-action:hover:not(:disabled) {
+  filter:brightness(.94);
+}
+.residuos-gestao-page.sol-gestao .sol-detail-buttons > button:focus-visible {
+  outline:2px solid var(--sgl-primary);
+  outline-offset:2px;
+}
+.residuos-gestao-page.sol-gestao .sol-detail-buttons > button:disabled {
+  opacity:.55;
+  cursor:not-allowed;
+}
 .residuos-gestao-page.sol-gestao .sol-table-wrap { overflow-x:auto; }
 .residuos-gestao-page.sol-gestao .sol-table { border-collapse:collapse; width:100%; font-size:var(--sgl-font-label); }
 .residuos-gestao-page.sol-gestao .sol-table th,
