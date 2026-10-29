@@ -1,6 +1,6 @@
 # Etapa 10 — Piloto Zebra / ZPL — 29/10/2026
 
-**Estado:** primeira implementação publicada na branch `collab/etapa-10-rotulos-impressao`, aguardando build, testes, identificação do modelo real de impressora e validação física. **Não homologado**.
+**Estado:** piloto publicado na branch `collab/etapa-10-rotulos-impressao`. O mantenedor informou em 29/10/2026 que o teste local passou; não foram compartilhados logs para distinguir individualmente build e suíte de testes. Modelo real da impressora, conferência do arquivo gerado e validação física ainda pendentes. **Não homologado para impressão física**.
 
 ## Objetivo e limites
 
@@ -52,3 +52,7 @@ Cobrir ainda:
 - Zebra, ZPL II Programming Guide: https://cpws.zebra.com/cpws/docs/zpl/zpl_manual.pdf
 
 **Regra de aceite:** exportação ZPL e testes automatizados não são equivalentes à impressão física Zebra homologada. Sem merge automático.
+
+## Checkpoint — retorno de teste local (29/10/2026)
+
+O mantenedor confirmou **“o teste passou”** após a publicação do piloto Zebra e dos comandos de validação. Registrar como **teste local reportado aprovado**, sem interpretar esse retorno como teste na impressora ou confirmação isolada de todos os cenários automatizados. Antes de fechar a Etapa 10: gerar e inspecionar um arquivo `.zpl` pela interface, identificar o modelo Zebra/DPI/largura útil/mídia e realizar impressão física supervisionada. Não fazer merge automático.
