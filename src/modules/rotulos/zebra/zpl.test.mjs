@@ -1,7 +1,7 @@
 // Execute com: node --experimental-strip-types --test src/modules/rotulos/zebra/zpl.test.mjs
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { escaparCampoZpl, gerarDocumentoZpl, milimetrosParaPontos } from './zpl.ts'
+import { escaparCampoZpl, gerarDocumentoZpl, milimetrosParaPontos, recomendarConfiguracaoZpl, validarEspacoZpl, alturaInicialZpl, ladoPictogramaZpl } from './zpl.ts'
 import { encontrarLimitesConteudo } from './recorteMarca.ts'
 
 const base = {
@@ -178,4 +178,50 @@ test('mantém todos os símbolos e seus nomes na versão Zebra', () => {
   assert.ok(zpl.includes('^GFA,1,1,1,FF'))
   assert.ok(zpl.includes(escaparCampoZpl('Corrosivo')))
   assert.ok(zpl.endsWith('^PQ1\n^XZ'))
+})
+
+test('modo automático aplica padrão por tipo sem alterar a largura selecionada', () => {
+  assert.equal(alturaInicialZpl({ ...base, categoria: 'SOLUCAO' }), 125)
+  assert.equal(alturaInicialZpl({ ...base, categoria: 'ENTRADA_LOTE' }), 125)
+  assert.equal(alturaInicialZpl({ ...base, categoria: 'PRODUTO' }), 200)
+  assert.equal(alturaInicialZpl({ ...base, categoria: 'RESIDUO' }), 200)
+  assert.deepEqual(recomendarConfiguracaoZpl({ ...base, categoria: 'PRODUTO' }, 90, 203), {
+    larguraMm: 90, alturaMm: 200, dpi: 203,
+  })
+  const recomendada = recomendarConfiguracaoZpl(base, 80, 203)
+  assert.equal(recomendada.larguraMm, 80)
+  assert.ok(recomendada.alturaMm >= 125)
+  validarEspacoZpl(base, recomendada)
+})
+
+test('aumenta a altura automaticamente quando o texto não cabe em 125 mm', () => {
+  const longo = { ...base, categoria: 'SOLUCAO',
+    secoes: [{ titulo: 'Observações', campos: [
+      { rotulo: 'Instruções registradas', valor: 'Observação extensa com dados reais. '.repeat(75) },
+    ] }],
+  }
+  assert.throws(() => validarEspacoZpl(longo, { larguraMm: 90, alturaMm: 125, dpi: 203 }), /não cabe|Não há espaço/)
+  const recomendado = recomendarConfiguracaoZpl(longo, 90, 203)
+  assert.ok(recomendado.alturaMm > 125)
+  assert.ok(recomendado.alturaMm <= 300)
+  validarEspacoZpl(longo, recomendado)
+})
+
+test('não inventa um tamanho se o documento ultrapassar 300 mm', () => {
+  const enorme = { ...base, secoes: [
+    { titulo: 'Observações', campos: [{ rotulo: 'Texto', valor: 'Muito longo '.repeat(5000) }] },
+  ] }
+  assert.throws(() => recomendarConfiguracaoZpl(enorme, 90, 203), /não cabe nos formatos sugeridos/)
+})
+
+test('sugestão considera pictogramas e o tamanho efetivo de cada símbolo', () => {
+  const produto = { ...base, categoria: 'PRODUTO', pictogramas: [
+    { caminho: '/assets/residuos/pictogramas/corrosivo.png', rotulo: 'Corrosivo' },
+    { caminho: '/assets/residuos/pictogramas/toxico.png', rotulo: 'Tóxico' },
+  ] }
+  const config = recomendarConfiguracaoZpl(produto, 90, 300)
+  assert.equal(config.dpi, 300)
+  assert.ok(config.alturaMm >= 200)
+  assert.ok(ladoPictogramaZpl(90, 300) > ladoPictogramaZpl(90, 203))
+  validarEspacoZpl(produto, config)
 })
