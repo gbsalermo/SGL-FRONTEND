@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { gerarDocumentoZpl, type DocumentoZpl, type ResolucaoZebra } from './zpl'
+import { prepararMarcasZpl } from './marcasZpl'
 
 const props = defineProps<{
   documento: DocumentoZpl | null
@@ -10,16 +11,22 @@ const larguraMm = ref(90)
 const alturaMm = ref(125)
 const dpi = ref<ResolucaoZebra>(203)
 const erroZpl = ref('')
+const gerando = ref(false)
 
-function baixar() {
+async function baixar() {
   erroZpl.value = ''
-  if (props.bloqueado || !props.documento) return
+  if (props.bloqueado || !props.documento || gerando.value) return
+  gerando.value = true
   try {
-    const zpl = gerarDocumentoZpl(props.documento, {
+    const configuracao = {
       larguraMm: Number(larguraMm.value),
       alturaMm: Number(alturaMm.value),
       dpi: dpi.value,
-    })
+    }
+    // Validar conteúdo/tamanho antes de carregar os logotipos.
+    gerarDocumentoZpl(props.documento, configuracao)
+    const marcas = await prepararMarcasZpl(configuracao)
+    const zpl = gerarDocumentoZpl(props.documento, configuracao, marcas)
     const nomeSeguro = props.documento.identificador
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 65) || 'rotulo-sgl'
@@ -33,6 +40,8 @@ function baixar() {
     window.setTimeout(() => URL.revokeObjectURL(url), 1000)
   } catch (error) {
     erroZpl.value = error instanceof Error ? error.message : 'Não foi possível gerar o ZPL.'
+  } finally {
+    gerando.value = false
   }
 }
 </script>
@@ -42,7 +51,7 @@ function baixar() {
     <header>
       <div>
         <strong>Impressão Zebra — piloto ZPL</strong>
-        <p>Exporta um arquivo de etiqueta textual. Não envia comandos diretamente à impressora.</p>
+        <p>Rótulo térmico com identidade SGL/Embrapa em preto e branco. Não envia comandos diretamente à impressora.</p>
       </div>
       <span class="zebra-stage">Validação física pendente</span>
     </header>
@@ -60,9 +69,9 @@ function baixar() {
           <option :value="300">300 dpi</option>
         </select>
       </label>
-      <button type="button" :disabled="bloqueado || !documento" @click="baixar">Baixar ZPL</button>
+      <button type="button" :disabled="bloqueado || !documento || gerando" @click="baixar">{{ gerando ? 'Preparando ZPL...' : 'Baixar ZPL' }}</button>
     </div>
-    <p class="zebra-hint">Confirme tamanho real, dpi e compatibilidade ZPL no equipamento antes de usar. Esta versão não reproduz logotipos ou pictogramas; os rótulos completos continuam disponíveis pela impressão normal.</p>
+    <p class="zebra-hint">Confirme tamanho real, dpi e compatibilidade ZPL no equipamento antes de usar. Esta versão incorpora as marcas institucionais em monocromia, mas não inclui pictogramas GHS. Confira o arquivo no visualizador antes de imprimir; os rótulos completos continuam disponíveis pela impressão normal.</p>
     <p v-if="bloqueado" class="zebra-feedback">A exportação respeita o bloqueio de impressão deste registro.</p>
     <p v-if="erroZpl" class="zebra-feedback zebra-error" role="alert">{{ erroZpl }}</p>
   </section>
