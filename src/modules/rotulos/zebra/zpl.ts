@@ -50,7 +50,7 @@ const POL_MILIMETROS = 25.4
 export const ALTURAS_PADRAO_ZEBRA_MM = [125, 140, 150, 160, 175, 180, 200, 225, 250, 275, 300] as const
 
 export function alturaInicialZpl(documento: DocumentoZpl): number {
-  return documento.categoria === 'PRODUTO' ? 200 : 125
+  return 125
 }
 
 /** Mesma geometria usada pelo rasterizador para que a pré-verificação seja fiel. */
@@ -64,8 +64,9 @@ export function ladoPictogramaZpl(
   const colunas = larguraMm >= 75 ? 3 : 2
   const distancia = Math.round(8 * fator)
   const coluna = Math.floor((larguraUtil - distancia * (colunas - 1)) / colunas)
-  // Na etiqueta de Resíduo o risco fica na coluna lateral, ao lado do nome.
-  return Math.min(Math.round((categoria === 'RESIDUO' ? 72 : 92) * fator), coluna - Math.round(8 * fator))
+  // Produto e Resíduo usam o mesmo pictograma lateral, junto do nome.
+  const riscoLateral = categoria === 'PRODUTO' || categoria === 'RESIDUO'
+  return Math.min(Math.round((riscoLateral ? 72 : 92) * fator), coluna - Math.round(8 * fator))
 }
 
 /** Confere o encaixe usando o tamanho real dos pictogramas, sem carregar imagens. */
@@ -185,7 +186,7 @@ export function gerarDocumentoZpl(
   const h = milimetrosParaPontos(config.alturaMm, config.dpi)
   const k = config.dpi / 203
   const p = (base: number) => Math.max(1, Math.round(base * k))
-  const compacto = documento.categoria === 'RESIDUO'
+  const compacto = documento.categoria === 'RESIDUO' || documento.categoria === 'PRODUTO'
   const m = p(22)
   const util = w - m * 2
   const pequeno = p(compacto ? 13 : 14)
@@ -316,7 +317,7 @@ export function gerarDocumentoZpl(
   }
 
   /**
-   * Resíduos: risco ao lado do nome, com legenda RISCO, sem criar uma seção
+   * Produtos e Resíduos: risco ao lado do nome, com legenda RISCO, sem criar uma seção
    * vertical inteira. Se houver vários símbolos, a coluna lateral acomoda
    * todos em linhas; o nome/código nunca é apagado nem truncado.
    */
