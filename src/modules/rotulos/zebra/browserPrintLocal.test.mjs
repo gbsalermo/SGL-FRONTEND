@@ -41,7 +41,7 @@ test('envia exatamente um ZPL para a impressora escolhida', async () => {
     chamada = true
     assert.equal(url, 'http://localhost:9100/write')
     assert.equal(opts.method, 'POST')
-    assert.deepEqual(JSON.parse(opts.body), { device: impressora, data: zpl })
+    assert.deepEqual(JSON.parse(opts.body), { device: { ...impressora, version: 2 }, data: zpl })
     return new Response('', { status: 200 })
   }
   await enviarZplParaZebra('http:', impressora, zpl, mock)
