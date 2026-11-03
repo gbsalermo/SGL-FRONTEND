@@ -479,10 +479,11 @@ function validarBitmap(marca: MarcaZpl): { dados: Uint8Array; porLinha: number }
       marca.altura * bytes !== total) {
     throw new Error('Gráfico ZPL inválido para orientação horizontal.')
   }
-  return {
-    dados: Uint8Array.from({ length: total }, (_, i) => parseInt(hex.slice(i * 2, i * 2 + 2), 16)),
-    porLinha: bytes,
+  const dados = new Uint8Array(total)
+  for (let i = 0; i < total; i++) {
+    dados[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16)
   }
+  return { dados, porLinha: bytes }
 }
 
 /** Roda o bitmap ^GFA em 90° no sentido horário, sem espelhar o conteúdo. */
