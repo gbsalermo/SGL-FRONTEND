@@ -56,3 +56,17 @@ Cobrir ainda:
 ## Checkpoint — retorno de teste local (29/10/2026)
 
 O mantenedor confirmou **“o teste passou”** após a publicação do piloto Zebra e dos comandos de validação. Registrar como **teste local reportado aprovado**, sem interpretar esse retorno como teste na impressora ou confirmação isolada de todos os cenários automatizados. Antes de fechar a Etapa 10: gerar e inspecionar um arquivo `.zpl` pela interface, identificar o modelo Zebra/DPI/largura útil/mídia e realizar impressão física supervisionada. Não fazer merge automático.
+
+## Refinamento visual do ZPL — 03/11/2026
+
+**Motivação:** a prévia de Solução aprovada funcionalmente foi considerada excessivamente textual e pouco institucional (sem marcas, informações numa única coluna, grandes áreas vazias e sem hierarquia).
+
+**Alterações realizadas na branch colaborativa:**
+- `zpl.ts`: substituído o fluxo de texto simples por layout térmico monocromático com **cabeçalho institucional**, faixa de identificação em negativo, título principal da Solução/Produto, estado separado, código SGL, títulos de seção, campos agrupados em grade de duas colunas (quando a mídia tem largura suficiente), tabela de componentes com quantidade destacada, observações separadas, aviso e rodapé em moldura.
+- `marcasZpl.ts`: rasterização **local no navegador**, a partir dos arquivos oficiais de SGL e Embrapa já servidos pelo frontend, para gráficos ZPL `^GFA` em preto e branco, dimensionados conforme a resolução do equipamento. Nenhum recurso é enviado a serviço externo ou armazenado na impressora.
+- `ZebraExportPanel.vue`: geração assíncrona de ambas as marcas antes do download, bloqueio temporário do botão e erro explícito caso não seja possível converter as imagens. O rótulo HTML original permanece independente.
+- Os dois documentos (Solução e Entrada de Lote) informam **tipo e situação separadamente**, evitando uma longa linha de texto sem destaque.
+- Mecanismo de verificação **continua impedindo corte** quando largura/altura não comportam os campos; não encurtar dados cadastrais nem omitir componentes para caber. A altura escolhida ainda é física e precisa corresponder à mídia real. Resultado calculado para o exemplo de Solução (90 × 125 mm, 203 dpi), mas a renderização visual **deve ser conferida novamente** pelo mantenedor.
+- `zpl.test.mjs`: testes de faixa inversa, cabeçalho com logos, tabela, injeção de comandos e cenário com campos da prévia de Solução. Os testes já informados como aprovados em 29/10 são de uma versão **anterior**, logo **não validam automaticamente este redesenho**.
+
+**Pendências:** novo `npm run build` e `node --experimental-strip-types --test src/modules/rotulos/zebra/zpl.test.mjs`, prévia no visualizador ZPL com dados reais, legibilidade em mídias estreitas/300 dpi, verificação física e identificação de modelo/driver quando disponível. Gráficos GHS, quando obrigatórios, **não são incluídos**; Produto e Resíduo permanecem sem exportação ZPL de segurança. Sem merge.
