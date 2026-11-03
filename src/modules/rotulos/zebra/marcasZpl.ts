@@ -1,4 +1,4 @@
-import type { ConfiguracaoZpl, MarcaZpl, MarcasZpl } from './zpl'
+import type { ConfiguracaoZpl, DocumentoZpl, MarcaZpl, MarcasZpl, PictogramaZpl } from './zpl'
 import { milimetrosParaPontos } from './zpl'
 import { encontrarLimitesConteudo } from './recorteMarca'
 
@@ -103,4 +103,35 @@ export async function prepararMarcasZpl(config: ConfiguracaoZpl): Promise<Marcas
     converterMarca('/assets/residuos/marcas/embrapa.png', larguraLogo, alturaLogo, 0.82, Math.round(4 * fator)),
   ])
   return { sgl, embrapa }
+}
+
+/**
+ * Rasteriza todos os pictogramas existentes no catálogo do SGL.
+ * Se uma imagem falhar, rejeita toda a exportação: não emitir etiqueta de risco
+ * com símbolos ausentes ou substitutos inventados.
+ */
+export async function prepararPictogramasZpl(
+  config: ConfiguracaoZpl,
+  pictogramas: NonNullable<DocumentoZpl['pictogramas']>,
+): Promise<PictogramaZpl[]> {
+  if (!pictogramas.length) return []
+  const fator = config.dpi / 203
+  const largura = milimetrosParaPontos(config.larguraMm, config.dpi)
+  const margem = Math.round(22 * fator)
+  const larguraUtil = largura - 2 * margem
+  const colunas = config.larguraMm >= 75 ? 3 : 2
+  const distancia = Math.round(8 * fator)
+  const coluna = Math.floor((larguraUtil - distancia * (colunas - 1)) / colunas)
+  const lado = Math.min(Math.round(92 * fator), coluna - Math.round(8 * fator))
+  if (lado < 32 * fator) throw new Error('Etiqueta estreita demais para pictogramas legíveis.')
+  return Promise.all(pictogramas.map(async pictograma => {
+    if (!pictograma.caminho.startsWith('/assets/residuos/pictogramas/')) {
+      throw new Error('Caminho de pictograma não reconhecido no catálogo do SGL.')
+    }
+    return {
+      caminho: pictograma.caminho,
+      rotulo: pictograma.rotulo,
+      imagem: await converterMarca(pictograma.caminho, lado, lado, 0.94, 0),
+    }
+  }))
 }
