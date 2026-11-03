@@ -406,9 +406,8 @@ test('modo horizontal rejeita etiqueta baixa sem mudar a mídia automaticamente'
   assert.throws(() => validarEspacoZpl(longo, {
     larguraMm: 90, alturaMm: 125, dpi: 203, orientacao: 'HORIZONTAL',
   }), /não cabe|excede|ultrapassa|pequena|espaço|largo/i)
-  assert.equal(recomendarConfiguracaoZpl(base, 90, 203).alturaMm, 125)
-  assert.deepEqual(
-    { larguraMm: 90, alturaMm: 125 },
-    { larguraMm: 90, alturaMm: 125 },
-  )
+  const recomendado = recomendarConfiguracaoZpl(base, 90, 203)
+  assert.equal(recomendado.larguraMm, 90)
+  assert.equal(recomendado.alturaMm, 125)
+  assert.equal(recomendado.orientacao, undefined)
 })
