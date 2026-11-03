@@ -12,6 +12,7 @@ async function converterMarca(
   larguraDestino: number,
   alturaDestino: number,
   escalaAjuste: number,
+  deslocamentoY: number,
 ): Promise<MarcaZpl> {
   const imagem = new Image()
   imagem.src = caminho
@@ -40,7 +41,7 @@ async function converterMarca(
   const limites = encontrarLimitesConteudo(pixelsOriginais.data, original.width, original.height)
   if (!limites) throw new Error('A marca institucional está vazia ou ilegível: ' + caminho)
 
-  // Caixas de mesmo tamanho: centralização óptica pelo conteúdo da logo.
+  // Caixas de mesmo tamanho; deslocamento vertical independente sem alterar escala.
   const final = document.createElement('canvas')
   final.width = larguraDestino
   final.height = alturaDestino
@@ -56,7 +57,8 @@ async function converterMarca(
   const larguraArte = limites.largura * fator
   const alturaArte = limites.altura * fator
   const xArte = (larguraDestino - larguraArte) / 2
-  const yArte = (alturaDestino - alturaArte) / 2
+  const centroY = (alturaDestino - alturaArte) / 2
+  const yArte = Math.max(0, Math.min(alturaDestino - alturaArte, centroY + deslocamentoY))
   ctxFinal.drawImage(
     original,
     limites.x, limites.y, limites.largura, limites.altura,
@@ -96,8 +98,9 @@ export async function prepararMarcasZpl(config: ConfiguracaoZpl): Promise<Marcas
   const alturaLogo = Math.round(42 * fator)
 
   const [sgl, embrapa] = await Promise.all([
-    converterMarca('/assets/residuos/marcas/sgl-logo.png.png', larguraLogo, alturaLogo, 0.88),
-    converterMarca('/assets/residuos/marcas/embrapa.png', larguraLogo, alturaLogo, 0.82),
+    // Correção óptica: SGL sobe e Embrapa desce; tamanhos originais preservados.
+    converterMarca('/assets/residuos/marcas/sgl-logo.png.png', larguraLogo, alturaLogo, 0.88, Math.round(-4 * fator)),
+    converterMarca('/assets/residuos/marcas/embrapa.png', larguraLogo, alturaLogo, 0.82, Math.round(4 * fator)),
   ])
   return { sgl, embrapa }
 }
