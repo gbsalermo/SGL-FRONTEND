@@ -272,7 +272,7 @@ test('Resíduo: pictograma ao lado do nome sob RISCO sem remover campos', () => 
   assert.ok(!zpl.includes(escaparCampoZpl('PICTOGRAMAS DE RISCO')))
   assert.ok(zpl.includes(escaparCampoZpl('Master Mix vencido')))
   assert.ok(zpl.includes(escaparCampoZpl('Ricardo Almeida')))
-  assert.ok(zpl.includes(escaparCampoZpl('Confirmadas')))
+  assert.ok(zpl.includes(escaparCampoZpl('CONFIRMADAS')))
   assert.ok(zpl.includes('^GFA,1,1,1,FF'))
 })
 
