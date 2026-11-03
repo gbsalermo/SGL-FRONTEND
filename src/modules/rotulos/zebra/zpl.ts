@@ -18,7 +18,9 @@ export interface DocumentoZpl {
   identificador: string
   subtitulo?: string
   situacao?: string
-  categoria?: 'SOLUCAO' | 'ENTRADA_LOTE'
+  categoria?: 'SOLUCAO' | 'ENTRADA_LOTE' | 'PRODUTO' | 'RESIDUO'
+  /** Pictogramas do cadastro real. Obrigatórios na exportação quando presentes. */
+  pictogramas?: Array<{ caminho: string; rotulo: string }>
   secoes: SecaoZpl[]
   avisoFinal?: string
 }
@@ -35,6 +37,11 @@ export interface MarcaZpl {
 export interface MarcasZpl {
   sgl: MarcaZpl
   embrapa: MarcaZpl
+}
+export interface PictogramaZpl {
+  caminho: string
+  rotulo: string
+  imagem: MarcaZpl
 }
 
 const POL_MILIMETROS = 25.4
@@ -101,7 +108,21 @@ function camposValidos(campos: CampoZpl[]): Array<{ rotulo: string; valor: strin
  * em tabela e notas. A geração lança erro se houver risco de corte.
  * Marcas são opcionais para testes puros; o painel prepara os logos reais em ^GFA.
  */
-export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZpl, marcas?: MarcasZpl): string {
+export function gerarDocumentoZpl(
+  documento: DocumentoZpl,
+  config: ConfiguracaoZpl,
+  marcas?: MarcasZpl,
+  pictogramas: PictogramaZpl[] = [],
+): string {
+  const esperados = documento.pictogramas ?? []
+  if (esperados.length !== pictogramas.length ||
+    esperados.some((item, i) =>
+      item.caminho !== pictogramas[i]?.caminho ||
+      item.rotulo !== pictogramas[i]?.rotulo
+    )
+  ) {
+    throw new Error('Nem todos os pictogramas de risco foram carregados. O ZPL não pode omitir símbolos.')
+  }
   validar(config)
   const w = milimetrosParaPontos(config.larguraMm, config.dpi)
   const h = milimetrosParaPontos(config.alturaMm, config.dpi)
@@ -114,7 +135,6 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
   const valor = p(19)
   const titulo = p(30)
   const secaoFont = p(21)
-  const espaco = p(5)
   const limite = h - p(7) // limite físico; o espaço do rodapé é validado antes do retorno
   const comandos: string[] = ['^XA', '^CI28', '^LH0,0', '^PW' + w, '^LL' + h]
   let y = m
@@ -204,6 +224,38 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
     }
   }
 
+  function desenharPictogramas(): void {
+    if (!pictogramas.length) return
+    tituloSecao('Pictogramas de risco')
+    const colunas = config.larguraMm >= 75 ? 3 : 2
+    const distancia = p(8)
+    const coluna = Math.floor((util - distancia * (colunas - 1)) / colunas)
+    const lado = Math.min(p(92), coluna - p(8))
+    const margemInterna = p(4)
+    for (let i = 0; i < pictogramas.length; i += colunas) {
+      const inicio = y
+      let maiorLegenda = 0
+      for (let j = 0; j < colunas && i + j < pictogramas.length; j++) {
+        const item = pictogramas[i + j]
+        if (item.imagem.largura > lado || item.imagem.altura > lado) {
+          throw new Error('Pictograma maior que a área disponível da etiqueta Zebra.')
+        }
+        const x = m + j * (coluna + distancia)
+        const centroX = x + Math.round((coluna - item.imagem.largura) / 2)
+        const posY = inicio + margemInterna + Math.round((lado - item.imagem.altura) / 2)
+        verificar(posY + item.imagem.altura)
+        comandos.push('^FO' + centroX + ',' + posY + item.imagem.comando + '^FS')
+        const fim = escrever(x, inicio + lado + p(8), item.rotulo, pequeno, coluna, p(1))
+        maiorLegenda = Math.max(maiorLegenda, fim)
+      }
+      y = maiorLegenda + p(8)
+      if (i + colunas < pictogramas.length) {
+        linha(y)
+        y += p(4)
+      }
+    }
+  }
+
   // Moldura e marcas em preto e branco, preparadas no navegador a partir dos logos.
   const logoH = p(42)
   const metade = Math.floor((util - p(18)) / 2)
@@ -219,7 +271,8 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
     escrever(m + metade + p(18), y, 'EMBRAPA', p(20), metade)
   }
   y += logoH + p(3)
-  y = escrever(m, y, 'SISTEMA DE GESTÃO DE LABORATÓRIOS', pequeno, util) + p(7)
+  // Alinhamento da legenda do SGL aprovado visualmente para a versão térmica.
+  y = escrever(m + p(48), y, 'SISTEMA DE GESTÃO DE LABORATÓRIOS', pequeno, util - p(48)) + p(7)
   linha(y, m, util, p(2))
   y += p(13)
 
@@ -237,6 +290,8 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
   }
   y = escrever(m, y, 'CÓDIGO SGL / IDENTIFICADOR', pequeno, util, p(1))
   y = escrever(m, y + p(2), documento.identificador, p(18), util, p(1)) + p(7)
+
+  desenharPictogramas()
 
   for (const secao of documento.secoes) {
     const itens = camposValidos(secao.campos)
