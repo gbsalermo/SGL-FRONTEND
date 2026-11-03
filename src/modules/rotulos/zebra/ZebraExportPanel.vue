@@ -7,6 +7,7 @@ import {
   type ConfiguracaoZpl,
   type DocumentoZpl,
   type ResolucaoZebra,
+  type OrientacaoConteudoZpl,
 } from './zpl'
 import { prepararMarcasZpl, prepararPictogramasZpl } from './marcasZpl'
 
@@ -19,11 +20,12 @@ const larguraMm = ref(90)
 const alturaManualMm = ref(125)
 const dpi = ref<ResolucaoZebra>(203)
 const automatico = ref(true)
+const orientacao = ref<OrientacaoConteudoZpl>('VERTICAL')
 const erroZpl = ref('')
 const gerando = ref(false)
 
 // Mensagens antigas não devem persistir quando o usuário muda a mídia ou o registro.
-watch([larguraMm, alturaManualMm, dpi, automatico, () => props.documento], () => {
+watch([larguraMm, alturaManualMm, dpi, automatico, orientacao, () => props.documento], () => {
   erroZpl.value = ''
 })
 
@@ -44,13 +46,30 @@ const recomendacao = computed(() => {
 
 const configuracaoEfetiva = computed<ConfiguracaoZpl | null>(() => {
   if (!props.documento) return null
-  if (automatico.value) return recomendacao.value.config
-  return {
-    larguraMm: Number(larguraMm.value),
-    alturaMm: Number(alturaManualMm.value),
-    dpi: dpi.value,
+  // A orientação troca apenas a leitura do conteúdo, nunca a mídia física.
+  const fisico = automatico.value
+    ? recomendacao.value.config
+    : { larguraMm: Number(larguraMm.value), alturaMm: Number(alturaManualMm.value), dpi: dpi.value }
+  return fisico ? { ...fisico, orientacao: orientacao.value } : null
+})
+
+const encaixeOrientacao = computed(() => {
+  if (!props.documento || !configuracaoEfetiva.value) return { valido: false, mensagem: '' }
+  try {
+    validarEspacoZpl(props.documento, configuracaoEfetiva.value)
+    return { valido: true, mensagem: '' }
+  } catch (error) {
+    return {
+      valido: false,
+      mensagem: error instanceof Error ? error.message : 'A orientação selecionada não cabe na etiqueta atual.',
+    }
   }
 })
+
+function selecionarOrientacao(valor: OrientacaoConteudoZpl) {
+  orientacao.value = valor
+  erroZpl.value = ''
+}
 
 function selecionarModo(auto: boolean) {
   if (!auto && automatico.value && recomendacao.value.config) {
@@ -112,6 +131,18 @@ async function baixar() {
       </button>
     </div>
 
+    <div class="zebra-orientation" role="group" aria-label="Orientação do conteúdo impresso">
+      <span>Orientação do conteúdo</span>
+      <div class="zebra-mode">
+        <button type="button" :class="{ chosen: orientacao === 'VERTICAL' }" :aria-pressed="orientacao === 'VERTICAL'" @click="selecionarOrientacao('VERTICAL')">
+          <span aria-hidden="true">▯</span> Vertical
+        </button>
+        <button type="button" :class="{ chosen: orientacao === 'HORIZONTAL' }" :aria-pressed="orientacao === 'HORIZONTAL'" @click="selecionarOrientacao('HORIZONTAL')">
+          <span aria-hidden="true">▭</span> Horizontal
+        </button>
+      </div>
+    </div>
+
     <div class="zebra-options">
       <label>Largura da etiqueta (mm)
         <input v-model.number="larguraMm" type="number" min="40" max="110" step="1" />
@@ -127,7 +158,7 @@ async function baixar() {
         </select>
       </label>
       <button class="zebra-download" type="button"
-        :disabled="bloqueado || !documento || gerando || !configuracaoEfetiva"
+        :disabled="bloqueado || !documento || gerando || !configuracaoEfetiva || !encaixeOrientacao.valido"
         @click="baixar">{{ gerando ? 'Preparando ZPL...' : 'Baixar ZPL' }}</button>
     </div>
 
@@ -143,8 +174,9 @@ async function baixar() {
       O SGL verificará se o conteúdo cabe antes de baixar.
     </p>
 
+    <p v-if="configuracaoEfetiva && encaixeOrientacao.mensagem" class="zebra-feedback zebra-error" role="alert">{{ encaixeOrientacao.mensagem }}</p>
     <p class="zebra-hint">
-      A sugestão não altera a mídia instalada na impressora. Confira a largura, a altura e o dpi do papel real antes de imprimir.
+      Vertical e Horizontal mantêm exatamente a mesma largura e altura física da etiqueta; apenas o conteúdo é reorganizado e girado em 90°. A sugestão não altera a mídia instalada na impressora. Confira a largura, a altura e o dpi do papel real antes de imprimir.
       Pictogramas cadastrados são preservados; esta etiqueta não substitui a FDS nem as exigências de segurança aplicáveis.
     </p>
     <p v-if="bloqueado" class="zebra-feedback">A exportação respeita o bloqueio de impressão deste registro.</p>
@@ -162,6 +194,11 @@ async function baixar() {
 .zebra-mode button { border: 1px solid transparent; border-radius: 6px; min-height: 34px; padding: 0 13px; background: transparent; color: #415470; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
 .zebra-mode button.chosen { border-color: #b8cce7; background: #fff; color: #174da3; box-shadow: 0 1px 5px rgb(13 43 94 / 9%); }
 .zebra-mode button span { font-size: 9px; margin-left: 4px; color: #52779f; }
+.zebra-orientation { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.zebra-orientation > span { font-size: 11px; color: #34445c; font-weight: 700; }
+.zebra-orientation .zebra-mode { margin-bottom: 0; }
+.zebra-orientation .zebra-mode button { min-width: 112px; }
+.zebra-orientation .zebra-mode button span { font-size: 15px; margin-right: 5px; }
 .zebra-options { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) auto; gap: 10px; align-items: end; }
 .zebra-options label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 10px; font-weight: 700; color: #34445c; }
 .zebra-options input, .zebra-options select { min-height: 38px; width: 100%; box-sizing: border-box; border: 1px solid #aebed2; border-radius: 6px; padding: 0 9px; font: inherit; color: #15243b; background: #fff; }
