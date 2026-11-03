@@ -143,11 +143,11 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
     return yy
   }
   function tituloSecao(nome: string): void {
-    y += p(9)
-    verificar(y + p(27))
+    y += p(5)
+    verificar(y + p(24))
     retangulo(m, y + p(1), p(5), p(21), p(5))
     escrever(m + p(14), y, nome.toUpperCase(), secaoFont, util - p(18), p(1))
-    y += p(29)
+    y += p(25)
   }
   function camposEmGrade(campos: CampoZpl[]): void {
     const dados = camposValidos(campos)
@@ -161,11 +161,11 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
       for (let j = 0; j < colunas && i + j < dados.length; j++) {
         const item = dados[i + j]
         const x = m + j * (colW + gap)
-        let v = escrever(x, ini + p(6), item.rotulo.toUpperCase(), label, colW, p(1))
+        let v = escrever(x, ini + p(4), item.rotulo.toUpperCase(), label, colW, p(1))
         v = escrever(x, v + p(2), item.valor, valor, colW, p(2))
         fim = Math.max(fim, v)
       }
-      y = fim + p(7)
+      y = fim + p(5)
       if (i + colunas < dados.length) {
         linha(y)
         y += p(2)
@@ -195,10 +195,10 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
   }
   function notas(campos: CampoZpl[]): void {
     for (const item of camposValidos(campos)) {
-      const inicio = y + p(5)
+      const inicio = y + p(3)
       retangulo(m, inicio, p(3), p(20), p(3))
       const fimLabel = escrever(m + p(12), inicio, item.rotulo.toUpperCase(), label, util - p(20))
-      y = escrever(m + p(12), fimLabel + p(3), item.valor, valor, util - p(24)) + p(7)
+      y = escrever(m + p(12), fimLabel + p(3), item.valor, valor, util - p(24)) + p(5)
       linha(y)
       y += p(3)
     }
@@ -219,7 +219,7 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
     escrever(m + metade + p(18), y, 'EMBRAPA', p(20), metade)
   }
   y += logoH + p(3)
-  y = escrever(m, y, 'SISTEMA DE GESTÃO DE LABORATÓRIOS', pequeno, util) + p(9)
+  y = escrever(m, y, 'SISTEMA DE GESTÃO DE LABORATÓRIOS', pequeno, util) + p(7)
   linha(y, m, util, p(2))
   y += p(13)
 
@@ -248,11 +248,11 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
   }
 
   if (documento.avisoFinal) {
-    y += p(5)
+    y += p(3)
     const avisoY = y
-    const textoY = escrever(m + p(9), y + p(7), documento.avisoFinal, pequeno, util - p(18), p(2))
-    retangulo(m, avisoY, util, textoY - avisoY + p(5), 1)
-    y = textoY + p(9)
+    const textoY = escrever(m + p(9), y + p(5), documento.avisoFinal, pequeno, util - p(18), p(2))
+    retangulo(m, avisoY, util, textoY - avisoY + p(4), 1)
+    y = textoY + p(6)
   }
   verificar(y)
 
