@@ -34,6 +34,8 @@ const erroImpressora = ref('')
 // Mensagens antigas não devem persistir quando o usuário muda a mídia ou o registro.
 watch([larguraMm, alturaManualMm, dpi, automatico, orientacao, () => props.documento], () => {
   erroZpl.value = ''
+  mensagemImpressao.value = ''
+  erroImpressora.value = ''
 })
 
 const recomendacao = computed(() => {
@@ -211,7 +213,7 @@ async function baixar() {
         </select>
       </label>
       <button class="zebra-download" type="button"
-        :disabled="bloqueado || !documento || gerando || !configuracaoEfetiva || !encaixeOrientacao.valido"
+        :disabled="bloqueado || !documento || gerando || imprimindoZebra || !configuracaoEfetiva || !encaixeOrientacao.valido"
         @click="baixar">{{ gerando ? 'Preparando ZPL...' : 'Baixar ZPL' }}</button>
     </div>
 
