@@ -146,3 +146,36 @@ test('não tenta rasterizar marca sem conteúdo visível', () => {
   assert.equal(encontrarLimitesConteudo(branca, 4, 4), null)
   assert.equal(encontrarLimitesConteudo(branca, 0, 4), null)
 })
+
+test('impede etiqueta de Produto/Resíduo com pictogramas ausentes ou diferentes', () => {
+  const documento = {
+    ...base,
+    pictogramas: [
+      { caminho: '/assets/residuos/pictogramas/corrosivo.png', rotulo: 'Corrosivo' },
+      { caminho: '/assets/residuos/pictogramas/toxico.png', rotulo: 'Tóxico' },
+    ],
+  }
+  const config = { larguraMm: 90, alturaMm: 200, dpi: 203 }
+  assert.throws(() => gerarDocumentoZpl(documento, config), /Nem todos os pictogramas/)
+  const imagem = { comando: '^GFA,1,1,1,FF', largura: 80, altura: 80 }
+  const incompleto = [{ ...documento.pictogramas[0], imagem }]
+  assert.throws(() => gerarDocumentoZpl(documento, config, undefined, incompleto), /Nem todos os pictogramas/)
+  const incorreto = documento.pictogramas.map((p, i) => ({
+    ...p,
+    rotulo: i === 0 ? 'Inflamável' : p.rotulo,
+    imagem,
+  }))
+  assert.throws(() => gerarDocumentoZpl(documento, config, undefined, incorreto), /Nem todos os pictogramas/)
+})
+
+test('mantém todos os símbolos e seus nomes na versão Zebra', () => {
+  const pictograma = { caminho: '/assets/residuos/pictogramas/corrosivo.png', rotulo: 'Corrosivo' }
+  const imagem = { comando: '^GFA,1,1,1,FF', largura: 80, altura: 80 }
+  const zpl = gerarDocumentoZpl({
+    ...base, pictogramas: [pictograma],
+  }, { larguraMm: 90, alturaMm: 200, dpi: 203 }, undefined, [{ ...pictograma, imagem }])
+  assert.ok(zpl.includes(escaparCampoZpl('PICTOGRAMAS DE RISCO')))
+  assert.ok(zpl.includes('^GFA,1,1,1,FF'))
+  assert.ok(zpl.includes(escaparCampoZpl('Corrosivo')))
+  assert.ok(zpl.endsWith('^PQ1\n^XZ'))
+})
