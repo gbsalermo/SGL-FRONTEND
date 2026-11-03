@@ -183,10 +183,10 @@ test('mantém todos os símbolos e seus nomes na versão Zebra', () => {
 test('modo automático aplica padrão por tipo sem alterar a largura selecionada', () => {
   assert.equal(alturaInicialZpl({ ...base, categoria: 'SOLUCAO' }), 125)
   assert.equal(alturaInicialZpl({ ...base, categoria: 'ENTRADA_LOTE' }), 125)
-  assert.equal(alturaInicialZpl({ ...base, categoria: 'PRODUTO' }), 200)
+  assert.equal(alturaInicialZpl({ ...base, categoria: 'PRODUTO' }), 125)
   assert.equal(alturaInicialZpl({ ...base, categoria: 'RESIDUO' }), 125)
   assert.deepEqual(recomendarConfiguracaoZpl({ ...base, categoria: 'PRODUTO' }, 90, 203), {
-    larguraMm: 90, alturaMm: 200, dpi: 203,
+    larguraMm: 90, alturaMm: 125, dpi: 203,
   })
   const recomendada = recomendarConfiguracaoZpl(base, 80, 203)
   assert.equal(recomendada.larguraMm, 80)
@@ -221,7 +221,7 @@ test('sugestão considera pictogramas e o tamanho efetivo de cada símbolo', () 
   ] }
   const config = recomendarConfiguracaoZpl(produto, 90, 300)
   assert.equal(config.dpi, 300)
-  assert.ok(config.alturaMm >= 200)
+  assert.ok(config.alturaMm >= 125)
   assert.ok(ladoPictogramaZpl(90, 300) > ladoPictogramaZpl(90, 203))
   validarEspacoZpl(produto, config)
 })
@@ -291,4 +291,54 @@ test('Resíduo: todos os pictogramas ainda são obrigatórios com layout lateral
   const zpl = gerarDocumentoZpl(documento, config, undefined, preenchidos)
   assert.equal((zpl.match(/\^GFA/g) || []).length, 3)
   for (const nome of nomes) assert.ok(zpl.includes(escaparCampoZpl(nome)))
+})
+
+test('Produto: RISCO ao lado do nome, sem seção vertical de pictogramas', () => {
+  const pictograma = { caminho: '/assets/residuos/pictogramas/corrosivo.png', rotulo: 'Corrosivo' }
+  const documento = {
+    titulo: 'RÓTULO DE PRODUTO',
+    identificador: 'CNPMF-HCL-37',
+    subtitulo: 'Ácido Clorídrico 37%',
+    situacao: 'Produto ativo no catálogo',
+    categoria: 'PRODUTO',
+    pictogramas: [pictograma],
+    secoes: [
+      { titulo: 'Identificação', campos: [
+        { rotulo: 'Apresentação', valor: 'garrafa de 1 L' },
+        { rotulo: 'Unidade de medida', valor: 'mL' },
+      ] },
+      { titulo: 'Risco e segurança', campos: [
+        { rotulo: 'Nível de risco', valor: 'Alto' },
+        { rotulo: 'Tipo de risco', valor: 'Corrosivo' },
+      ] },
+      { titulo: 'Armazenamento', campos: [
+        { rotulo: 'Condições recomendadas', valor: 'Manter em local ventilado' },
+      ] },
+      { titulo: 'Controle e fiscalização', campos: [
+        { rotulo: 'Situação', valor: 'Produto sujeito a controle' },
+        { rotulo: 'Órgãos fiscalizadores', valor: 'Polícia Federal' },
+      ] },
+    ],
+    avisoFinal: 'CONSULTAR FDS E REQUISITOS DE SEGURANÇA APLICÁVEIS.',
+  }
+  const config = recomendarConfiguracaoZpl(documento, 90, 203)
+  assert.equal(config.larguraMm, 90)
+  assert.ok(config.alturaMm >= 125 && config.alturaMm <= 300)
+  assert.equal(ladoPictogramaZpl(90, 203, 'PRODUTO'), ladoPictogramaZpl(90, 203, 'RESIDUO'))
+  const imagem = { comando: '^GFA,1,1,1,FF', largura: 72, altura: 72 }
+  const zpl = gerarDocumentoZpl(documento, config, undefined, [{ ...pictograma, imagem }])
+  assert.ok(zpl.includes(escaparCampoZpl('RISCO')))
+  assert.ok(!zpl.includes(escaparCampoZpl('PICTOGRAMAS DE RISCO')))
+  assert.ok(zpl.includes(escaparCampoZpl('Ácido Clorídrico 37%')))
+  assert.ok(zpl.includes(escaparCampoZpl('Polícia Federal')))
+  assert.ok(zpl.includes('^GFA,1,1,1,FF'))
+})
+
+test('Produto sem pictograma mantém informações e não mostra bloco de risco lateral', () => {
+  const documento = { ...base, categoria: 'PRODUTO', pictogramas: [] }
+  const config = recomendarConfiguracaoZpl(documento, 90, 203)
+  assert.equal(config.alturaMm, 125)
+  const zpl = gerarDocumentoZpl(documento, config)
+  assert.ok(zpl.includes(escaparCampoZpl('Acido Cloridrico 37%')))
+  assert.ok(!zpl.includes(escaparCampoZpl('PICTOGRAMAS DE RISCO')))
 })
