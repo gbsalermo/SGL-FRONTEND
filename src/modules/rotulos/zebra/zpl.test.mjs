@@ -76,14 +76,14 @@ test('usa composição institucional com faixa inversa, grade, tabela e moldura'
   assert.ok(zpl.includes(escaparCampoZpl('COMPONENTE')))
   assert.ok(zpl.includes(escaparCampoZpl('QUANTIDADE')))
   assert.ok(zpl.includes(escaparCampoZpl('Tampão PBS 10X')))
-  assert.ok(zpl.endsWith('^PQ1\\n^XZ'))
+  assert.ok(zpl.endsWith('^PQ1\n^XZ'))
 })
 
 test('posiciona as duas marcas em GFA sem duplicar a identificação textual do cabeçalho', () => {
   const logo = { comando: '^GFA,1,1,1,FF', largura: 80, altura: 24 }
   const zpl = gerarDocumentoZpl(base, { larguraMm: 90, alturaMm: 125, dpi: 203 },
     { sgl: logo, embrapa: logo })
-  assert.equal(zpl.match(/\\^GFA/g)?.length, 2)
+  assert.equal(zpl.match(/\^GFA/g)?.length, 2)
   assert.ok(zpl.includes('^FO22,22^GFA,1,1,1,FF^FS'))
 })
 
