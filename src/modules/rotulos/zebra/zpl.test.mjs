@@ -1,7 +1,7 @@
 // Execute com: node --experimental-strip-types --test src/modules/rotulos/zebra/zpl.test.mjs
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { escaparCampoZpl, gerarDocumentoZpl, milimetrosParaPontos, recomendarConfiguracaoZpl, validarEspacoZpl, alturaInicialZpl, ladoPictogramaZpl } from './zpl.ts'
+import { escaparCampoZpl, gerarDocumentoZpl, milimetrosParaPontos, recomendarConfiguracaoZpl, validarEspacoZpl, alturaInicialZpl, ladoPictogramaZpl, rotacionarGraficoZpl } from './zpl.ts'
 import { encontrarLimitesConteudo } from './recorteMarca.ts'
 
 const base = {
@@ -341,4 +341,74 @@ test('Produto sem pictograma mantém informações e não mostra bloco de risco 
   const zpl = gerarDocumentoZpl(documento, config)
   assert.ok(zpl.includes(escaparCampoZpl('Acido Cloridrico 37%')))
   assert.ok(!zpl.includes(escaparCampoZpl('PICTOGRAMAS DE RISCO')))
+})
+
+test('Zebra horizontal mantém ^PW e ^LL físicos e gira somente o conteúdo', () => {
+  const vertical = gerarDocumentoZpl(base, { larguraMm: 90, alturaMm: 125, dpi: 203 })
+  const horizontal = gerarDocumentoZpl(base, {
+    larguraMm: 90, alturaMm: 125, dpi: 203, orientacao: 'HORIZONTAL',
+  })
+  for (const codigo of ['^PW719', '^LL999']) {
+    assert.ok(vertical.includes(codigo))
+    assert.ok(horizontal.includes(codigo))
+  }
+  assert.ok(vertical.includes('^A0N'))
+  assert.ok(horizontal.includes('^A0R'))
+  assert.ok(horizontal.includes('^PON'))
+  assert.ok(horizontal.includes(escaparCampoZpl('Acido Cloridrico 37%')))
+  assert.ok(horizontal.includes(escaparCampoZpl('8000 mL')))
+  assert.ok(horizontal.endsWith('^PQ1\n^XZ'))
+})
+
+test('rotação de ^GFA mantém os pixels sem espelhar imagem', () => {
+  const bitmap = { comando: '^GFA,2,2,1,8020', largura: 3, altura: 2 }
+  const girado = rotacionarGraficoZpl(bitmap)
+  assert.deepEqual(girado, {
+    comando: '^GFA,3,3,1,400080', largura: 2, altura: 3,
+  })
+  assert.throws(() => rotacionarGraficoZpl({
+    comando: '^GFA,1,1,1,FF', largura: 30, altura: 30,
+  }), /inválido/)
+})
+
+test('horizontal preserva pictogramas e bloqueia qualquer símbolo ausente', () => {
+  const pic = {
+    caminho: '/assets/residuos/pictogramas/corrosivo.png',
+    rotulo: 'Corrosivo',
+  }
+  const doc = { ...base, categoria: 'PRODUTO', subtitulo: 'Ácido clorídrico',
+    pictogramas: [pic],
+  }
+  const config = { larguraMm: 90, alturaMm: 200, dpi: 203, orientacao: 'HORIZONTAL' }
+  assert.throws(() => gerarDocumentoZpl(doc, config), /Nem todos os pictogramas/)
+  validarEspacoZpl(doc, config)
+  const tamanho = ladoPictogramaZpl(90, 203, 'PRODUTO')
+  const porLinha = Math.ceil(tamanho / 8)
+  const total = porLinha * tamanho
+  const imagem = {
+    comando: '^GFA,' + total + ',' + total + ',' + porLinha + ',' + 'FF'.repeat(total),
+    largura: tamanho, altura: tamanho,
+  }
+  const zpl = gerarDocumentoZpl(doc, config, undefined, [{ ...pic, imagem }])
+  assert.ok(zpl.includes(escaparCampoZpl('RISCO')))
+  assert.ok(zpl.includes(escaparCampoZpl('Corrosivo')))
+  assert.ok(zpl.includes('^GFA,'))
+  assert.ok(zpl.includes('^PW719'))
+  assert.ok(zpl.includes('^LL1598'))
+})
+
+test('modo horizontal rejeita etiqueta baixa sem mudar a mídia automaticamente', () => {
+  const longo = { ...base,
+    secoes: Array.from({ length: 12 }, (_, i) => ({
+      titulo: 'Seção ' + i, campos: [{ rotulo: 'Anotação', valor: 'Texto registrado para conferência'.repeat(5) }],
+    })),
+  }
+  assert.throws(() => validarEspacoZpl(longo, {
+    larguraMm: 90, alturaMm: 125, dpi: 203, orientacao: 'HORIZONTAL',
+  }), /não cabe|excede|ultrapassa|pequena|espaço|largo/i)
+  assert.equal(recomendarConfiguracaoZpl(base, 90, 203).alturaMm, 125)
+  assert.deepEqual(
+    { larguraMm: 90, alturaMm: 125 },
+    { larguraMm: 90, alturaMm: 125 },
+  )
 })
