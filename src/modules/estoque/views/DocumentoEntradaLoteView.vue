@@ -34,7 +34,9 @@ const documentoZebra = computed<DocumentoZpl | null>(() => {
   const e = estoque.value
   if (!l || !e) return null
   return {
-    titulo: 'ENTRADA DE LOTE - USO INTERNO / SEM VALOR FISCAL',
+    titulo: 'DOCUMENTO DE ENTRADA DE LOTE',
+    situacao: 'USO INTERNO — SEM VALOR FISCAL',
+    categoria: 'ENTRADA_LOTE',
     identificador: l.codigoInterno,
     subtitulo: l.produtoNome,
     secoes: [
