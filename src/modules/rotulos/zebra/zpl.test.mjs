@@ -184,7 +184,7 @@ test('modo automático aplica padrão por tipo sem alterar a largura selecionada
   assert.equal(alturaInicialZpl({ ...base, categoria: 'SOLUCAO' }), 125)
   assert.equal(alturaInicialZpl({ ...base, categoria: 'ENTRADA_LOTE' }), 125)
   assert.equal(alturaInicialZpl({ ...base, categoria: 'PRODUTO' }), 200)
-  assert.equal(alturaInicialZpl({ ...base, categoria: 'RESIDUO' }), 200)
+  assert.equal(alturaInicialZpl({ ...base, categoria: 'RESIDUO' }), 125)
   assert.deepEqual(recomendarConfiguracaoZpl({ ...base, categoria: 'PRODUTO' }, 90, 203), {
     larguraMm: 90, alturaMm: 200, dpi: 203,
   })
@@ -224,4 +224,71 @@ test('sugestão considera pictogramas e o tamanho efetivo de cada símbolo', () 
   assert.ok(config.alturaMm >= 200)
   assert.ok(ladoPictogramaZpl(90, 300) > ladoPictogramaZpl(90, 203))
   validarEspacoZpl(produto, config)
+})
+
+test('Resíduo: pictograma ao lado do nome sob RISCO sem remover campos', () => {
+  const pictograma = {
+    caminho: '/assets/residuos/pictogramas/irritante.png', rotulo: 'Irritante',
+  }
+  const imagem = { comando: '^GFA,1,1,1,FF', largura: 72, altura: 72 }
+  const documento = {
+    titulo: 'RÓTULO DE RESÍDUO', identificador: 'SGL-RES-2026-000007',
+    subtitulo: 'Master Mix vencido', situacao: 'DESPACHADO',
+    categoria: 'RESIDUO', pictogramas: [pictograma],
+    secoes: [
+      { titulo: 'Origem', campos: [
+        { rotulo: 'Unidade', valor: 'CNPMF — Embrapa Mandioca e Fruticultura' },
+        { rotulo: 'Laboratório', valor: 'Laboratório de Biologia Molecular' },
+      ] },
+      { titulo: 'Risco e quantidade', campos: [
+        { rotulo: 'Nível de risco confirmado', valor: 'Baixo' },
+        { rotulo: 'Riscos específicos', valor: 'Irritante' },
+        { rotulo: 'Quantidade', valor: '2 L' },
+      ] },
+      { titulo: 'Rastreabilidade', campos: [
+        { rotulo: 'Gerador registrado', valor: 'Camila Menezes' },
+        { rotulo: 'Responsável pela liberação', valor: 'Ricardo Almeida' },
+      ] },
+      { titulo: 'Componentes e composição', campos: [
+        { rotulo: 'Master Mix vencido', valor: 'resíduo líquido' },
+      ] },
+      { titulo: 'Armazenamento e destino', campos: [
+        { rotulo: 'Destino previsto', valor: 'Tratamento externo especializado' },
+      ] },
+      { titulo: 'Medidas de segurança', campos: [
+        { rotulo: 'Confirmadas', valor: 'Usar luvas de proteção; Usar óculos de proteção' },
+      ] },
+      { titulo: 'Observações', campos: [
+        { rotulo: 'Descrição', valor: 'Material vencido encaminhado para descarte' },
+      ] },
+    ],
+    avisoFinal: 'IDENTIFICAÇÃO INTERNA. CONSULTAR AS MEDIDAS DE SEGURANÇA.',
+  }
+  const config = recomendarConfiguracaoZpl(documento, 90, 203)
+  assert.equal(config.larguraMm, 90)
+  assert.ok(config.alturaMm >= 125 && config.alturaMm <= 300)
+  const zpl = gerarDocumentoZpl(documento, config, undefined, [{ ...pictograma, imagem }])
+  assert.ok(zpl.includes(escaparCampoZpl('RISCO')))
+  assert.ok(!zpl.includes(escaparCampoZpl('PICTOGRAMAS DE RISCO')))
+  assert.ok(zpl.includes(escaparCampoZpl('Master Mix vencido')))
+  assert.ok(zpl.includes(escaparCampoZpl('Ricardo Almeida')))
+  assert.ok(zpl.includes(escaparCampoZpl('Confirmadas')))
+  assert.ok(zpl.includes('^GFA,1,1,1,FF'))
+})
+
+test('Resíduo: todos os pictogramas ainda são obrigatórios com layout lateral', () => {
+  const nomes = ['Irritante', 'Corrosivo', 'Inflamável']
+  const pictogramas = nomes.map((rotulo, i) => ({
+    caminho: '/assets/residuos/pictogramas/' + i + '.png',
+    rotulo,
+  }))
+  const documento = { ...base, categoria: 'RESIDUO', pictogramas }
+  const config = recomendarConfiguracaoZpl(documento, 90, 203)
+  assert.throws(() => gerarDocumentoZpl(documento, config), /Nem todos/)
+  const preenchidos = pictogramas.map(p => ({
+    ...p, imagem: { comando: '^GFA,1,1,1,FF', largura: 72, altura: 72 },
+  }))
+  const zpl = gerarDocumentoZpl(documento, config, undefined, preenchidos)
+  assert.equal((zpl.match(/\^GFA/g) || []).length, 3)
+  for (const nome of nomes) assert.ok(zpl.includes(escaparCampoZpl(nome)))
 })
