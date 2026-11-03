@@ -47,7 +47,7 @@ export interface PictogramaZpl {
 const POL_MILIMETROS = 25.4
 
 /** Tamanhos iniciais sugeridos para mídia térmica; não são padrões físicos universais. */
-export const ALTURAS_PADRAO_ZEBRA_MM = [125, 160, 200, 250, 300] as const
+export const ALTURAS_PADRAO_ZEBRA_MM = [125, 140, 150, 160, 175, 180, 200, 225, 250, 275, 300] as const
 
 export function alturaInicialZpl(documento: DocumentoZpl): number {
   return documento.categoria === 'PRODUTO' ? 200 : 125
