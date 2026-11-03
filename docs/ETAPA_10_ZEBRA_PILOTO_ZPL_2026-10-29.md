@@ -70,3 +70,9 @@ O mantenedor confirmou **“o teste passou”** após a publicação do piloto Z
 - `zpl.test.mjs`: testes de faixa inversa, cabeçalho com logos, tabela, injeção de comandos e cenário com campos da prévia de Solução. Os testes já informados como aprovados em 29/10 são de uma versão **anterior**, logo **não validam automaticamente este redesenho**.
 
 **Pendências:** novo `npm run build` e `node --experimental-strip-types --test src/modules/rotulos/zebra/zpl.test.mjs`, prévia no visualizador ZPL com dados reais, legibilidade em mídias estreitas/300 dpi, verificação física e identificação de modelo/driver quando disponível. Gráficos GHS, quando obrigatórios, **não são incluídos**; Produto e Resíduo permanecem sem exportação ZPL de segurança. Sem merge.
+
+## Centralização óptica das marcas — 03/11/2026
+
+Na validação visual do novo layout térmico, foi identificada diferença de alinhamento entre SGL (arte com áreas vazias internas) e Embrapa (proporção diferente). O rasterizador `marcasZpl.ts` agora determina o retângulo de **pixels realmente visíveis** do arquivo original (limiar de luminância e transparência), recorta suas margens e **centraliza a arte recortada nas duas caixas simétricas** usadas pelo cabeçalho ZPL, preservando proporção e margem interna. Escalas ópticas específicas: SGL 88% e Embrapa 82%, sujeitas à conferência na prévia. Função pura de detecção em `recorteMarca.ts` e testes de bordas vazias/transparentes adicionados a `zpl.test.mjs`. Não foram alterados os componentes de impressão normal ou os contratos de dados.
+
+**Conferência pendente para este ajuste:** rodar `npm run build` e `node --experimental-strip-types --test src/modules/rotulos/zebra/zpl.test.mjs` e gerar novamente a Solução 90×125 mm em 203 dpi, observando posição e escala das duas marcas. A validação do ZPL anterior não comprova o novo posicionamento; impressão física ainda pendente e nenhum merge autorizado.
