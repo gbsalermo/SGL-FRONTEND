@@ -1,21 +1,21 @@
 # Etapa 10 — Piloto Zebra / ZPL — 29/10/2026
 
-**Estado:** piloto publicado na branch `collab/etapa-10-rotulos-impressao`. O mantenedor informou em 29/10/2026 que o teste local passou; não foram compartilhados logs para distinguir individualmente build e suíte de testes. Modelo real da impressora, conferência do arquivo gerado e validação física ainda pendentes. **Não homologado para impressão física**.
+**Estado vigente em 03/11/2026:** o suporte Zebra/ZPL foi estendido a **Soluções, Entradas de Lote, Produtos e Resíduos** na branch `collab/etapa-10-rotulos-impressao`. O visual de Soluções foi aprovado pelo mantenedor; os novos modelos de Produto/Resíduo ainda aguardam build, testes locais e validação visual. A impressão física ainda não foi homologada. O teste local aprovado em 29/10/2026 corresponde ao piloto anterior e não substitui a validação desta ampliação.
 
 ## Objetivo e limites
 
 Adicionar uma opção controlada de exportação `.zpl` sem alterar os rótulos aprovados para impressão normal em A4. Um navegador não envia ZPL bruto diretamente a USB, spooler ou porta TCP por padrão. Esta etapa gera o arquivo localmente, que será enviado pela infraestrutura Zebra aprovada (driver ZDesigner, Zebra Setup Utilities ou outro método supervisionado). A integração direta com a impressora, incluindo Browser Print, não foi ativada nem simulada.
 
-**Primeira cobertura:**
+**Cobertura inicial (histórico de 29/10, substituída pelas evoluções de 03/11):**
 - **Estoque → detalhes do lote → Documento de Entrada:** painel `Impressão Zebra — piloto ZPL` com exportação das informações registradas da entrada.
 - **Central de Soluções → detalhes → Rótulo de Solução:** exportação textual apenas para pedidos `EM_PREPARACAO` ou `ENTREGUE`; pedidos ainda não aprovados não podem exportar nem imprimir.
-- **Produto e Resíduo:** continuam com os rótulos HTML aprovados. **Não permitir exportação ZPL incompleta** até haver conversão validada dos pictogramas, identificação de riscos e elementos visuais obrigatórios. Esta etapa não imprime etiquetas químicas de segurança em ZPL.
+- **Produto e Resíduo:** ainda não tinham exportação ZPL nesta primeira versão. A expansão posterior está registrada em **10.5 — Zebra aplicada a Produto e Resíduo**, abaixo.
 
 ## Contratos e código
 
 - `src/modules/rotulos/zebra/zpl.ts`: gerador puro de ZPL (`^XA`, `^CI28`, `^PW`, `^LL`, `^FO`, `^A0`, `^FH`, `^FD`, `^GB`, `^PQ1`, `^XZ`). Converte mm em pontos por DPI, quebra texto em linhas e rejeita a geração se exceder a área física configurada, **sem truncar valores**.
 - `src/modules/rotulos/zebra/ZebraExportPanel.vue`: largura 40–110 mm, altura 40–300 mm, densidade 203 ou 300 dpi, botão de download de arquivo ZPL e feedback de erro. Padrão piloto: 90×125 mm, 203 dpi (configuração de interface, **não afirma** compatibilidade com o equipamento físico). Nenhuma configuração é enviada à impressora sem ação do operador.
-- Dados gerados no navegador a partir de contratos existentes: nenhum endpoint, migration ou campo persistido foi criado. O arquivo ZPL usa texto monocromático e assinatura institucional **SGL/Embrapa em texto**, ainda **sem imagens rasterizadas, logomarcas ou pictogramas**. A versão HTML com as imagens aprovadas permanece intacta.
+- Dados gerados no navegador a partir de contratos existentes: nenhum endpoint, migration ou campo persistido foi criado. **Na versão atual**, o ZPL inclui logomarcas oficiais e pictogramas cadastrados, quando presentes, como gráficos monocromáticos `^GFA`; não omite pictogramas exigidos. A versão HTML com as imagens aprovadas permanece intacta.
 - Escapar todos os bytes dos campos de dados via UTF-8 `^FH_` (incluindo `^`, `~` e `_`). A exibição de caracteres acentuados depende de compatibilidade do firmware/fonte ZPL e precisa ser testada.
 
 ## Testes
@@ -36,11 +36,11 @@ Cobrir ainda:
 6. Confirmar que as páginas existentes imprimem normalmente pelo navegador e que os botões Zebra não aparecem no papel.
 7. Testar isolamento de Unidade e rotas de acesso existentes.
 
-## Próximos blocos (não implementados)
+## Pendências ainda não implementadas (revistas em 03/11/2026)
 
 1. Levantar fabricante/modelo exato, capacidade em largura útil, resolução, versão de ZPL, mídia adesiva, etiqueta contínua/intervalo, orientação, driver e sistema operacional do laboratório.
 2. Decidir dimensões-alvo e conteúdo obrigatório do layout térmico (não tentar encolher 180×125 mm cegamente para 50×30 mm).
-3. Criar saída monocromática validada de **logomarcas/pictogramas GHS** com `^GFA` ou gráficos ZPL suportados. Para produtos/resíduos, preservar segurança e texto legível; não produzir etiquetas parciais com informação de risco omitida.
+3. **Validar fisicamente** a rasterização monocromática `^GFA` das logomarcas e de todos os pictogramas de risco cadastrados. A conversão já está implementada no frontend, mas ainda não há homologação de fidelidade visual ou aderência a requisitos regulatórios de cada classe de risco.
 4. Testar fisicamente margens, qualidade e acentuação e evitar imprimir uma etiqueta que esconda informação por falta de espaço.
 5. Se for autorizado e necessário: integração com **Zebra Browser Print** com consentimento, descoberta e seleção explícita de impressora, tratamento de indisponibilidade e estratégia de segurança. Não enviar ZPL automaticamente ao dispositivo.
 6. Registrar resultados e parecer de compatibilidade por equipamento antes de fechar a Etapa 10.
