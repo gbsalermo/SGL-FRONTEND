@@ -65,6 +65,16 @@ export function ladoPictogramaZpl(larguraMm: number, dpi: ResolucaoZebra): numbe
   return Math.min(Math.round(92 * fator), coluna - Math.round(8 * fator))
 }
 
+/** Confere o encaixe usando o tamanho real dos pictogramas, sem carregar imagens. */
+export function validarEspacoZpl(documento: DocumentoZpl, config: ConfiguracaoZpl): void {
+  const lado = ladoPictogramaZpl(config.larguraMm, config.dpi)
+  const simulados: PictogramaZpl[] = (documento.pictogramas ?? []).map(p => ({
+    ...p,
+    imagem: { comando: '^GFA,1,1,1,FF', largura: lado, altura: lado },
+  }))
+  gerarDocumentoZpl(documento, config, undefined, simulados)
+}
+
 /**
  * Calcula o menor padrão de altura adequado ao documento, conservando a largura
  * escolhida pelo usuário. A simulação usa a geometria real dos pictogramas,
@@ -75,17 +85,12 @@ export function recomendarConfiguracaoZpl(
   larguraMm: number,
   dpi: ResolucaoZebra,
 ): ConfiguracaoZpl {
-  const lado = ladoPictogramaZpl(larguraMm, dpi)
-  const simulados: PictogramaZpl[] = (documento.pictogramas ?? []).map(p => ({
-    ...p,
-    imagem: { comando: '^GFA,1,1,1,FF', largura: lado, altura: lado },
-  }))
   const minimo = alturaInicialZpl(documento)
   for (const alturaMm of ALTURAS_PADRAO_ZEBRA_MM) {
     if (alturaMm < minimo) continue
     const configuracao: ConfiguracaoZpl = { larguraMm, alturaMm, dpi }
     try {
-      gerarDocumentoZpl(documento, configuracao, undefined, simulados)
+      validarEspacoZpl(documento, configuracao)
       return configuracao
     } catch (e) {
       if (!(e instanceof Error) ||
