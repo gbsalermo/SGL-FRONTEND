@@ -1,5 +1,5 @@
 import type { ConfiguracaoZpl, DocumentoZpl, MarcaZpl, MarcasZpl, PictogramaZpl } from './zpl'
-import { milimetrosParaPontos } from './zpl'
+import { ladoPictogramaZpl, milimetrosParaPontos } from './zpl'
 import { encontrarLimitesConteudo } from './recorteMarca'
 
 /**
@@ -116,13 +116,7 @@ export async function prepararPictogramasZpl(
 ): Promise<PictogramaZpl[]> {
   if (!pictogramas.length) return []
   const fator = config.dpi / 203
-  const largura = milimetrosParaPontos(config.larguraMm, config.dpi)
-  const margem = Math.round(22 * fator)
-  const larguraUtil = largura - 2 * margem
-  const colunas = config.larguraMm >= 75 ? 3 : 2
-  const distancia = Math.round(8 * fator)
-  const coluna = Math.floor((larguraUtil - distancia * (colunas - 1)) / colunas)
-  const lado = Math.min(Math.round(92 * fator), coluna - Math.round(8 * fator))
+  const lado = ladoPictogramaZpl(config.larguraMm, config.dpi)
   if (lado < 32 * fator) throw new Error('Etiqueta estreita demais para pictogramas legíveis.')
   return Promise.all(pictogramas.map(async pictograma => {
     if (!pictograma.caminho.startsWith('/assets/residuos/pictogramas/')) {
