@@ -42,7 +42,9 @@ const documentoZebra = computed<DocumentoZpl | null>(() => {
   const p = pedido.value
   if (!p || !habilitado.value) return null
   return {
-    titulo: 'SOLUCAO - ' + (p.status === 'EM_PREPARACAO' ? 'EM PREPARACAO' : 'ENTREGUE'),
+    titulo: 'RÓTULO DE SOLUÇÃO',
+    situacao: p.status === 'EM_PREPARACAO' ? 'EM PREPARAÇÃO' : 'ENTREGUE',
+    categoria: 'SOLUCAO',
     identificador: p.id,
     subtitulo: p.nomeSolucao || 'Solucao sem nome',
     secoes: [
