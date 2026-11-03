@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { gerarDocumentoZpl, type DocumentoZpl, type ResolucaoZebra } from './zpl'
-import { prepararMarcasZpl } from './marcasZpl'
+import { prepararMarcasZpl, prepararPictogramasZpl } from './marcasZpl'
 
 const props = defineProps<{
   documento: DocumentoZpl | null
@@ -23,10 +23,12 @@ async function baixar() {
       alturaMm: Number(alturaMm.value),
       dpi: dpi.value,
     }
-    // Validar conteúdo/tamanho antes de carregar os logotipos.
-    gerarDocumentoZpl(props.documento, configuracao)
-    const marcas = await prepararMarcasZpl(configuracao)
-    const zpl = gerarDocumentoZpl(props.documento, configuracao, marcas)
+    // A exportação é atômica: falha caso não consiga converter qualquer pictograma.
+    const [marcas, pictogramas] = await Promise.all([
+      prepararMarcasZpl(configuracao),
+      prepararPictogramasZpl(configuracao, props.documento.pictogramas ?? []),
+    ])
+    const zpl = gerarDocumentoZpl(props.documento, configuracao, marcas, pictogramas)
     const nomeSeguro = props.documento.identificador
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 65) || 'rotulo-sgl'
@@ -71,7 +73,7 @@ async function baixar() {
       </label>
       <button type="button" :disabled="bloqueado || !documento || gerando" @click="baixar">{{ gerando ? 'Preparando ZPL...' : 'Baixar ZPL' }}</button>
     </div>
-    <p class="zebra-hint">Confirme tamanho real, dpi e compatibilidade ZPL no equipamento antes de usar. Esta versão incorpora as marcas institucionais em monocromia, mas não inclui pictogramas GHS. Confira o arquivo no visualizador antes de imprimir; os rótulos completos continuam disponíveis pela impressão normal.</p>
+    <p class="zebra-hint">Confirme tamanho real, dpi e compatibilidade ZPL no equipamento antes de usar. O ZPL utiliza as marcas institucionais e, quando cadastrados, pictogramas de risco em preto e branco. A etiqueta é informativa e não substitui a FISPQ/FDS ou os requisitos legais aplicáveis. Confira no visualizador antes de imprimir.</p>
     <p v-if="bloqueado" class="zebra-feedback">A exportação respeita o bloqueio de impressão deste registro.</p>
     <p v-if="erroZpl" class="zebra-feedback zebra-error" role="alert">{{ erroZpl }}</p>
   </section>
