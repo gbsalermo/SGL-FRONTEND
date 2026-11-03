@@ -75,9 +75,12 @@ export function ladoPictogramaZpl(
 /** Confere o encaixe usando o tamanho real dos pictogramas, sem carregar imagens. */
 export function validarEspacoZpl(documento: DocumentoZpl, config: ConfiguracaoZpl): void {
   const lado = ladoPictogramaZpl(config.larguraMm, config.dpi, documento.categoria)
+  // Simulação com bitmap de dimensões reais: também suporta giro de gráficos.
+  const bytesLinha = Math.ceil(lado / 8)
+  const total = bytesLinha * lado
+  const imagem = { comando: '^GFA,' + total + ',' + total + ',' + bytesLinha + ',' + '00'.repeat(total), largura: lado, altura: lado }
   const simulados: PictogramaZpl[] = (documento.pictogramas ?? []).map(p => ({
-    ...p,
-    imagem: { comando: '^GFA,1,1,1,FF', largura: lado, altura: lado },
+    ...p, imagem,
   }))
   gerarDocumentoZpl(documento, config, undefined, simulados)
 }
@@ -619,7 +622,7 @@ export function gerarDocumentoZplHorizontal(
   const blocos = documento.secoes.map(secao => {
     const campos = validos(secao.campos)
     if (!campos.length) return null
-    let medida = px(32)
+    let medida = px(14) + quebrar(secao.titulo.toUpperCase(), colW - px(21), px(16)).length * (px(16) + px(2))
     for (const campo of campos) {
       const validoW = colW - px(16)
       medida += px(2)
@@ -643,6 +646,9 @@ export function gerarDocumentoZplHorizontal(
     for (const campo of bloco.campos) {
       campoY = escrever(x + px(8), campoY, campo.rotulo.toUpperCase(), rotulo, colW - px(16))
       campoY = escrever(x + px(8), campoY + px(1), campo.valor, fonte, colW - px(16)) + px(4)
+    }
+    if (campoY > yy + bloco.medida - px(3)) {
+      throw new Error('Os campos não cabem no quadro horizontal; aumente a altura física.')
     }
     alturas[indice] = yy + bloco.medida + gap
   }
