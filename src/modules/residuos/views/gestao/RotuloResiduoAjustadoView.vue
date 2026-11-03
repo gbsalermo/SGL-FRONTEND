@@ -73,7 +73,7 @@ const documentoZebra = computed<DocumentoZpl | null>(() => {
       ] },
       { titulo: 'Risco e quantidade', campos: [
         { rotulo: 'Nível de risco ' + (d.classificacaoConfirmada ? 'confirmado' : 'informado'),
-          valor: textoEnum(d.nivelRisco) },
+          valor: d.nivelRisco === 'MEDIO' ? 'Médio' : textoEnum(d.nivelRisco) },
         { rotulo: 'Riscos específicos', valor: riscos.length
           ? riscos.map(rotuloRiscoResiduo).join(', ')
           : (d.classificacaoConfirmada ? 'Sem riscos específicos confirmados' : 'Sem riscos específicos informados') },
