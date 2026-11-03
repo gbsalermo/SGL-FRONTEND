@@ -2,6 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { escaparCampoZpl, gerarDocumentoZpl, milimetrosParaPontos } from './zpl.ts'
+import { encontrarLimitesConteudo } from './recorteMarca.ts'
 
 const base = {
   titulo: 'DOCUMENTO DE ENTRADA',
@@ -125,4 +126,23 @@ test('cabe o exemplo realista de solução em 90 x 125 mm, sem omitir observaç�
   assert.ok(zpl.includes(escaparCampoZpl('OBSERVAÇÕES')))
   assert.ok(zpl.includes(escaparCampoZpl('4 mL')))
   assert.ok(zpl.includes('^PQ1'))
+})
+
+test('recorta margens brancas e transparentes sem deslocar o desenho real', () => {
+  const largura = 8, altura = 6
+  const rgba = new Uint8ClampedArray(largura * altura * 4)
+  for (let i = 0; i < largura * altura; i++) rgba.set([255, 255, 255, 255], i * 4)
+  for (let y = 2; y <= 4; y++) {
+    for (let x = 3; x <= 5; x++) rgba.set([12, 30, 70, 255], (y * largura + x) * 4)
+  }
+  rgba.set([0, 0, 0, 0], 0) // margem transparente não deve contar
+  assert.deepEqual(encontrarLimitesConteudo(rgba, largura, altura), {
+    x: 3, y: 2, largura: 3, altura: 3,
+  })
+})
+
+test('não tenta rasterizar marca sem conteúdo visível', () => {
+  const branca = new Uint8ClampedArray(4 * 4 * 4).fill(255)
+  assert.equal(encontrarLimitesConteudo(branca, 4, 4), null)
+  assert.equal(encontrarLimitesConteudo(branca, 0, 4), null)
 })
