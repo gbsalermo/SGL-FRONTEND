@@ -115,8 +115,7 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
   const titulo = p(30)
   const secaoFont = p(21)
   const espaco = p(5)
-  const rodapeH = p(42)
-  const limite = h - m - rodapeH
+  const limite = h - p(7) // limite físico; o espaço do rodapé é validado antes do retorno
   const comandos: string[] = ['^XA', '^CI28', '^LH0,0', '^PW' + w, '^LL' + h]
   let y = m
 
@@ -220,8 +219,7 @@ export function gerarDocumentoZpl(documento: DocumentoZpl, config: ConfiguracaoZ
     escrever(m + metade + p(18), y, 'EMBRAPA', p(20), metade)
   }
   y += logoH + p(3)
-  escrever(m, y, 'SISTEMA DE GESTÃO DE LABORATÓRIOS', pequeno, util)
-  y += pequeno + p(9)
+  y = escrever(m, y, 'SISTEMA DE GESTÃO DE LABORATÓRIOS', pequeno, util) + p(9)
   linha(y, m, util, p(2))
   y += p(13)
 
