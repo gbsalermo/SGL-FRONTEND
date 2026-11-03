@@ -50,11 +50,13 @@ const POL_MILIMETROS = 25.4
 export const ALTURAS_PADRAO_ZEBRA_MM = [125, 160, 200, 250, 300] as const
 
 export function alturaInicialZpl(documento: DocumentoZpl): number {
-  return documento.categoria === 'PRODUTO' || documento.categoria === 'RESIDUO' ? 200 : 125
+  return documento.categoria === 'PRODUTO' ? 200 : 125
 }
 
 /** Mesma geometria usada pelo rasterizador para que a pré-verificação seja fiel. */
-export function ladoPictogramaZpl(larguraMm: number, dpi: ResolucaoZebra): number {
+export function ladoPictogramaZpl(
+  larguraMm: number, dpi: ResolucaoZebra, categoria?: DocumentoZpl['categoria'],
+): number {
   const fator = dpi / 203
   const largura = milimetrosParaPontos(larguraMm, dpi)
   const margem = Math.round(22 * fator)
@@ -62,12 +64,13 @@ export function ladoPictogramaZpl(larguraMm: number, dpi: ResolucaoZebra): numbe
   const colunas = larguraMm >= 75 ? 3 : 2
   const distancia = Math.round(8 * fator)
   const coluna = Math.floor((larguraUtil - distancia * (colunas - 1)) / colunas)
-  return Math.min(Math.round(92 * fator), coluna - Math.round(8 * fator))
+  // Na etiqueta de Resíduo o risco fica na coluna lateral, ao lado do nome.
+  return Math.min(Math.round((categoria === 'RESIDUO' ? 72 : 92) * fator), coluna - Math.round(8 * fator))
 }
 
 /** Confere o encaixe usando o tamanho real dos pictogramas, sem carregar imagens. */
 export function validarEspacoZpl(documento: DocumentoZpl, config: ConfiguracaoZpl): void {
-  const lado = ladoPictogramaZpl(config.larguraMm, config.dpi)
+  const lado = ladoPictogramaZpl(config.larguraMm, config.dpi, documento.categoria)
   const simulados: PictogramaZpl[] = (documento.pictogramas ?? []).map(p => ({
     ...p,
     imagem: { comando: '^GFA,1,1,1,FF', largura: lado, altura: lado },
@@ -182,13 +185,15 @@ export function gerarDocumentoZpl(
   const h = milimetrosParaPontos(config.alturaMm, config.dpi)
   const k = config.dpi / 203
   const p = (base: number) => Math.max(1, Math.round(base * k))
+  const compacto = documento.categoria === 'RESIDUO'
   const m = p(22)
   const util = w - m * 2
-  const pequeno = p(14)
-  const label = p(15)
-  const valor = p(19)
-  const titulo = p(30)
-  const secaoFont = p(21)
+  const pequeno = p(compacto ? 13 : 14)
+  const label = p(compacto ? 14 : 15)
+  const valor = p(compacto ? 18 : 19)
+  const titulo = p(compacto ? 28 : 30)
+  const secaoFont = p(compacto ? 19 : 21)
+  const passo = (normal: number, reduzido: number) => p(compacto ? reduzido : normal)
   const limite = h - p(7) // limite físico; o espaço do rodapé é validado antes do retorno
   const comandos: string[] = ['^XA', '^CI28', '^LH0,0', '^PW' + w, '^LL' + h]
   let y = m
@@ -217,11 +222,11 @@ export function gerarDocumentoZpl(
     return yy
   }
   function tituloSecao(nome: string): void {
-    y += p(5)
-    verificar(y + p(24))
-    retangulo(m, y + p(1), p(5), p(21), p(5))
+    y += passo(5, 3)
+    verificar(y + passo(24, 22))
+    retangulo(m, y + p(1), p(5), passo(21, 19), p(5))
     escrever(m + p(14), y, nome.toUpperCase(), secaoFont, util - p(18), p(1))
-    y += p(25)
+    y += passo(25, 22)
   }
   function camposEmGrade(campos: CampoZpl[]): void {
     const dados = camposValidos(campos)
@@ -235,14 +240,14 @@ export function gerarDocumentoZpl(
       for (let j = 0; j < colunas && i + j < dados.length; j++) {
         const item = dados[i + j]
         const x = m + j * (colW + gap)
-        let v = escrever(x, ini + p(4), item.rotulo.toUpperCase(), label, colW, p(1))
-        v = escrever(x, v + p(2), item.valor, valor, colW, p(2))
+        let v = escrever(x, ini + passo(4, 2), item.rotulo.toUpperCase(), label, colW, p(1))
+        v = escrever(x, v + passo(2, 1), item.valor, valor, colW, passo(2, 1))
         fim = Math.max(fim, v)
       }
-      y = fim + p(5)
+      y = fim + passo(5, 3)
       if (i + colunas < dados.length) {
         linha(y)
-        y += p(2)
+        y += passo(2, 1)
       }
     }
     y += p(1)
@@ -253,34 +258,34 @@ export function gerarDocumentoZpl(
     const quantidadeW = Math.round(util * (config.larguraMm >= 75 ? 0.26 : 0.36))
     const nomeW = util - quantidadeW - p(12)
     const xQtd = m + util - quantidadeW
-    let cab = escrever(m, y + p(5), 'COMPONENTE', pequeno, nomeW)
-    cab = Math.max(cab, escrever(xQtd, y + p(5), 'QUANTIDADE', pequeno, quantidadeW))
-    y = cab + p(6)
+    let cab = escrever(m, y + passo(5, 3), 'COMPONENTE', pequeno, nomeW)
+    cab = Math.max(cab, escrever(xQtd, y + passo(5, 3), 'QUANTIDADE', pequeno, quantidadeW))
+    y = cab + passo(6, 4)
     linha(y, m, util, p(2))
-    y += p(5)
+    y += passo(5, 3)
     for (const item of dados) {
-      const fimNome = escrever(m, y + p(5), item.rotulo, valor, nomeW)
-      const fimQtd = escrever(xQtd, y + p(5), item.valor, valor, quantidadeW)
-      y = Math.max(fimNome, fimQtd) + p(5)
+      const fimNome = escrever(m, y + passo(5, 3), item.rotulo, valor, nomeW)
+      const fimQtd = escrever(xQtd, y + passo(5, 3), item.valor, valor, quantidadeW)
+      y = Math.max(fimNome, fimQtd) + passo(5, 3)
       linha(y)
-      y += p(2)
+      y += passo(2, 1)
     }
     y += p(1)
   }
   function notas(campos: CampoZpl[]): void {
     for (const item of camposValidos(campos)) {
-      const inicio = y + p(3)
+      const inicio = y + passo(3, 2)
       retangulo(m, inicio, p(3), p(20), p(3))
       const fimLabel = escrever(m + p(12), inicio, item.rotulo.toUpperCase(), label, util - p(20))
-      y = escrever(m + p(12), fimLabel + p(3), item.valor, valor, util - p(24)) + p(5)
+      y = escrever(m + p(12), fimLabel + passo(3, 2), item.valor, valor, util - p(24)) + passo(5, 3)
       linha(y)
-      y += p(3)
+      y += passo(3, 2)
     }
   }
 
   function desenharPictogramas(): void {
     if (!pictogramas.length) return
-    tituloSecao('Pictogramas de risco')
+    tituloSecao(compacto ? 'Risco' : 'Pictogramas de risco')
     const colunas = config.larguraMm >= 75 ? 3 : 2
     const distancia = p(8)
     const coluna = Math.floor((util - distancia * (colunas - 1)) / colunas)
@@ -310,6 +315,38 @@ export function gerarDocumentoZpl(
     }
   }
 
+  /**
+   * Resíduos: risco ao lado do nome, com legenda RISCO, sem criar uma seção
+   * vertical inteira. Se houver vários símbolos, a coluna lateral acomoda
+   * todos em linhas; o nome/código nunca é apagado nem truncado.
+   */
+  function riscoAoLado(x: number, inicio: number, largura: number): number {
+    let top = escrever(x, inicio, 'RISCO', secaoFont, largura, p(1)) + p(4)
+    const colunas = pictogramas.length > 1 ? 2 : 1
+    const gap = p(5)
+    const coluna = Math.floor((largura - gap * (colunas - 1)) / colunas)
+    const lado = ladoPictogramaZpl(config.larguraMm, config.dpi, documento.categoria)
+    if (lado > coluna) throw new Error('Etiqueta estreita demais para pictogramas legíveis.')
+    for (let i = 0; i < pictogramas.length; i += colunas) {
+      let fim = top
+      for (let j = 0; j < colunas && i + j < pictogramas.length; j++) {
+        const item = pictogramas[i + j]
+        if (item.imagem.largura > lado || item.imagem.altura > lado) {
+          throw new Error('Pictograma maior que a área disponível da etiqueta Zebra.')
+        }
+        const xColuna = x + j * (coluna + gap)
+        const imagemX = xColuna + Math.floor((coluna - item.imagem.largura) / 2)
+        const imagemY = top
+        verificar(imagemY + item.imagem.altura)
+        comandos.push('^FO' + imagemX + ',' + imagemY + item.imagem.comando + '^FS')
+        const legendaY = escrever(xColuna, top + lado + p(3), item.rotulo, pequeno, coluna, p(1))
+        fim = Math.max(fim, legendaY)
+      }
+      top = fim + p(4)
+    }
+    return top
+  }
+
   // Moldura e marcas em preto e branco, preparadas no navegador a partir dos logos.
   const logoH = p(42)
   const metade = Math.floor((util - p(18)) / 2)
@@ -337,15 +374,23 @@ export function gerarDocumentoZpl(
   y += faixaH + p(11)
 
   const assunto = documento.subtitulo || documento.identificador
-  y = escrever(m, y, assunto, titulo, util, p(2)) + p(6)
+  const riscoLateral = compacto && pictogramas.length > 0 && config.larguraMm >= 75
+  const larguraRisco = riscoLateral ? Math.round(util * 0.35) : 0
+  const textoUtil = riscoLateral ? util - larguraRisco - p(12) : util
+  const inicioAssunto = y
+  y = escrever(m, y, assunto, titulo, textoUtil, p(2)) + passo(6, 3)
   if (documento.situacao) {
-    const v = escrever(m, y, documento.situacao.toUpperCase(), p(18), util)
-    y = v + p(7)
+    const v = escrever(m, y, documento.situacao.toUpperCase(), p(18), textoUtil)
+    y = v + passo(7, 4)
   }
-  y = escrever(m, y, 'CÓDIGO SGL / IDENTIFICADOR', pequeno, util, p(1))
-  y = escrever(m, y + p(2), documento.identificador, p(18), util, p(1)) + p(7)
-
-  desenharPictogramas()
+  y = escrever(m, y, 'CÓDIGO SGL / IDENTIFICADOR', pequeno, textoUtil, p(1))
+  y = escrever(m, y + passo(2, 1), documento.identificador, p(18), textoUtil, p(1)) + passo(7, 4)
+  if (riscoLateral) {
+    const yRisco = riscoAoLado(m + util - larguraRisco, inicioAssunto, larguraRisco)
+    y = Math.max(y, yRisco) + p(3)
+  } else {
+    desenharPictogramas()
+  }
 
   for (const secao of documento.secoes) {
     const itens = camposValidos(secao.campos)
