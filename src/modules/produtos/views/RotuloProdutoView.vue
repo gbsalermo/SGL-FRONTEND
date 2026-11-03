@@ -56,7 +56,7 @@ const documentoZebra = computed<DocumentoZpl | null>(() => {
           ? 'Perecível — ' + legivel(p.tipoPerecivel) : 'Não perecível' },
       ] },
       { titulo: 'Risco e segurança', campos: [
-        { rotulo: 'Nível de risco', valor: legivel(p.risco) },
+        { rotulo: 'Nível de risco', valor: p.risco === 'MEDIO' ? 'Médio' : legivel(p.risco) },
         { rotulo: 'Tipo de risco', valor: p.tipoRisco && p.tipoRisco !== 'NENHUM'
           ? rotuloRiscoResiduo(p.tipoRisco) : 'Sem pictograma aplicável' },
         { rotulo: 'Advertência cadastrada', valor: p.descricaoRisco || 'Não informada' },
