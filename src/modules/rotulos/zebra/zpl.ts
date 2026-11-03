@@ -1,9 +1,12 @@
+import { gerarDocumentoZplHorizontal } from './zplHorizontal'
+
 /**
  * Layout térmico institucional do SGL: comandos ZPL II, sem dependência do modelo.
  * As medidas físicas dependem da mídia e da largura real do cabeçote Zebra.
  * Nenhum gráfico de segurança GHS é gerado por esta versão informativa.
  */
 export type ResolucaoZebra = 203 | 300
+export type OrientacaoConteudoZpl = 'VERTICAL' | 'HORIZONTAL'
 
 export interface CampoZpl {
   rotulo: string
@@ -28,6 +31,8 @@ export interface ConfiguracaoZpl {
   larguraMm: number
   alturaMm: number
   dpi: ResolucaoZebra
+  /** Gira apenas a composição e seus gráficos, nunca a dimensão da mídia. */
+  orientacao?: OrientacaoConteudoZpl
 }
 export interface MarcaZpl {
   comando: string
@@ -88,11 +93,12 @@ export function recomendarConfiguracaoZpl(
   documento: DocumentoZpl,
   larguraMm: number,
   dpi: ResolucaoZebra,
+  orientacao: OrientacaoConteudoZpl = 'VERTICAL',
 ): ConfiguracaoZpl {
   const minimo = alturaInicialZpl(documento)
   for (const alturaMm of ALTURAS_PADRAO_ZEBRA_MM) {
     if (alturaMm < minimo) continue
-    const configuracao: ConfiguracaoZpl = { larguraMm, alturaMm, dpi }
+    const configuracao: ConfiguracaoZpl = { larguraMm, alturaMm, dpi, ...(orientacao === 'HORIZONTAL' ? { orientacao } : {}) }
     try {
       validarEspacoZpl(documento, configuracao)
       return configuracao
@@ -182,6 +188,12 @@ export function gerarDocumentoZpl(
     throw new Error('Nem todos os pictogramas de risco foram carregados. O ZPL não pode omitir símbolos.')
   }
   validar(config)
+  if (config.orientacao && config.orientacao !== 'VERTICAL' && config.orientacao !== 'HORIZONTAL') {
+    throw new Error('Orientação do conteúdo Zebra inválida.')
+  }
+  if (config.orientacao === 'HORIZONTAL') {
+    return gerarDocumentoZplHorizontal(documento, config, marcas, pictogramas)
+  }
   const w = milimetrosParaPontos(config.larguraMm, config.dpi)
   const h = milimetrosParaPontos(config.alturaMm, config.dpi)
   const k = config.dpi / 203
