@@ -10,6 +10,7 @@ import {
   type OrientacaoConteudoZpl,
 } from './zpl'
 import { prepararMarcasZpl, prepararPictogramasZpl } from './marcasZpl'
+import { listarImpressorasZebra, enviarZplParaZebra, type ImpressoraZebraLocal } from './browserPrintLocal'
 
 const props = defineProps<{
   documento: DocumentoZpl | null
@@ -23,6 +24,12 @@ const automatico = ref(true)
 const orientacao = ref<OrientacaoConteudoZpl>('VERTICAL')
 const erroZpl = ref('')
 const gerando = ref(false)
+const buscandoImpressoras = ref(false)
+const imprimindoZebra = ref(false)
+const impressoras = ref<ImpressoraZebraLocal[]>([])
+const impressoraSelecionada = ref('')
+const mensagemImpressao = ref('')
+const erroImpressora = ref('')
 
 // Mensagens antigas não devem persistir quando o usuário muda a mídia ou o registro.
 watch([larguraMm, alturaManualMm, dpi, automatico, orientacao, () => props.documento], () => {
@@ -71,6 +78,58 @@ function selecionarOrientacao(valor: OrientacaoConteudoZpl) {
   erroZpl.value = ''
 }
 
+async function buscarImpressoras() {
+  if (buscandoImpressoras.value || imprimindoZebra.value) return
+  buscandoImpressoras.value = true
+  erroImpressora.value = ''
+  mensagemImpressao.value = ''
+  impressoras.value = []
+  impressoraSelecionada.value = ''
+  try {
+    const encontradas = await listarImpressorasZebra(window.location.protocol)
+    impressoras.value = encontradas
+    if (encontradas.length === 1) impressoraSelecionada.value = encontradas[0].uid
+    if (!encontradas.length) {
+      erroImpressora.value = 'Nenhuma Zebra encontrada. Verifique se o Browser Print está aberto e se a impressora está conectada.'
+    }
+  } catch (error) {
+    erroImpressora.value = error instanceof Error ? error.message : 'Não foi possível localizar o serviço Zebra.'
+  } finally {
+    buscandoImpressoras.value = false
+  }
+}
+
+async function prepararZpl(documento: DocumentoZpl, configuracao: ConfiguracaoZpl): Promise<string> {
+  validarEspacoZpl(documento, configuracao)
+  const [marcas, pictogramas] = await Promise.all([
+    prepararMarcasZpl(configuracao),
+    prepararPictogramasZpl(configuracao, documento.pictogramas ?? [], documento.categoria),
+  ])
+  return gerarDocumentoZpl(documento, configuracao, marcas, pictogramas)
+}
+
+async function imprimirDiretamente() {
+  const documento = props.documento
+  const configuracao = configuracaoEfetiva.value
+  const impressora = impressoras.value.find(item => item.uid === impressoraSelecionada.value)
+  if (props.bloqueado || !documento || !configuracao || !encaixeOrientacao.value.valido ||
+      !impressora || imprimindoZebra.value || gerando.value) return
+  // Ação explícita do operador: nunca enviar trabalho no carregamento da tela.
+  if (!window.confirm(`Enviar 1 etiqueta de "${documento.subtitulo || documento.titulo}" para "${impressora.name}"? Confirme que a mídia física corresponde às dimensões selecionadas.`)) return
+  imprimindoZebra.value = true
+  erroImpressora.value = ''
+  mensagemImpressao.value = ''
+  try {
+    const zpl = await prepararZpl(documento, configuracao)
+    await enviarZplParaZebra(window.location.protocol, impressora, zpl)
+    mensagemImpressao.value = 'ZPL enviado ao serviço Zebra para ' + impressora.name + '. Confira na impressora se a etiqueta foi realmente impressa.'
+  } catch (error) {
+    erroImpressora.value = error instanceof Error ? error.message : 'Não foi possível enviar a etiqueta à Zebra.'
+  } finally {
+    imprimindoZebra.value = false
+  }
+}
+
 function selecionarModo(auto: boolean) {
   if (!auto && automatico.value && recomendacao.value.config) {
     alturaManualMm.value = recomendacao.value.config.alturaMm
@@ -83,16 +142,10 @@ async function baixar() {
   erroZpl.value = ''
   const documento = props.documento
   const configuracao = configuracaoEfetiva.value
-  if (props.bloqueado || !documento || !configuracao || gerando.value) return
+  if (props.bloqueado || !documento || !configuracao || gerando.value || imprimindoZebra.value) return
   gerando.value = true
   try {
-    // Mesmas medidas usadas pela saída real, inclusive os pictogramas.
-    validarEspacoZpl(documento, configuracao)
-    const [marcas, pictogramas] = await Promise.all([
-      prepararMarcasZpl(configuracao),
-      prepararPictogramasZpl(configuracao, documento.pictogramas ?? [], documento.categoria),
-    ])
-    const zpl = gerarDocumentoZpl(documento, configuracao, marcas, pictogramas)
+    const zpl = await prepararZpl(documento, configuracao)
     const nomeSeguro = documento.identificador
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 65) || 'rotulo-sgl'
@@ -162,6 +215,33 @@ async function baixar() {
         @click="baixar">{{ gerando ? 'Preparando ZPL...' : 'Baixar ZPL' }}</button>
     </div>
 
+    <section class="zebra-direct" aria-label="Impressão direta na Zebra">
+      <div class="zebra-direct-heading">
+        <div>
+          <strong>Imprimir diretamente na Zebra</strong>
+          <p>Conecte a impressora com o aplicativo oficial Zebra Browser Print. Não é necessário baixar o ZPL.</p>
+        </div>
+        <a href="https://www.zebra.com/us/en/support-downloads/software/printer-software/browser-print.html" target="_blank" rel="noopener noreferrer">Instalar Browser Print</a>
+      </div>
+      <div class="zebra-direct-controls">
+        <button type="button" class="zebra-find" :disabled="buscandoImpressoras || imprimindoZebra" @click="buscarImpressoras">
+          {{ buscandoImpressoras ? 'Procurando...' : impressoras.length ? 'Atualizar impressoras' : 'Buscar impressoras' }}
+        </button>
+        <label v-if="impressoras.length" class="zebra-device-label">Impressora disponível
+          <select v-model="impressoraSelecionada" :disabled="imprimindoZebra">
+            <option value="">Selecione uma impressora</option>
+            <option v-for="item in impressoras" :key="item.uid" :value="item.uid">{{ item.name }} ({{ item.connection || item.uid }})</option>
+          </select>
+        </label>
+        <button type="button" class="zebra-print" :disabled="bloqueado || !documento || gerando || imprimindoZebra || !encaixeOrientacao.valido || !impressoraSelecionada" @click="imprimirDiretamente">
+          {{ imprimindoZebra ? 'Enviando à Zebra...' : 'Imprimir na Zebra' }}
+        </button>
+      </div>
+      <p v-if="erroImpressora" class="zebra-feedback zebra-error" role="alert">{{ erroImpressora }}</p>
+      <p v-if="mensagemImpressao" class="zebra-feedback zebra-sent" role="status">{{ mensagemImpressao }}</p>
+      <p class="zebra-direct-note">O Browser Print precisa estar instalado e em execução neste computador, com o endereço do SGL autorizado. O envio não confirma que a etiqueta saiu fisicamente.</p>
+    </section>
+
     <p v-if="automatico && recomendacao.config" class="zebra-suggestion">
       <strong>Tamanho sugerido: {{ recomendacao.config.larguraMm }} × {{ recomendacao.config.alturaMm }} mm.</strong>
       Calculado a partir do conteúdo deste documento, sem cortar informações.
@@ -206,6 +286,20 @@ async function baixar() {
 .zebra-download { min-height: 38px; border: 1px solid #16479a; border-radius: 7px; background: #16479a; color: #fff; font-size: 11px; font-weight: 800; padding: 0 14px; cursor: pointer; }
 .zebra-download:disabled { opacity: .5; cursor: not-allowed; }
 .zebra-options input:focus-visible, .zebra-options select:focus-visible, .zebra-panel button:focus-visible { outline: 2px solid #2456c4; outline-offset: 2px; }
+.zebra-direct { margin-top: 14px; padding: 13px; border: 1px solid #d1ddeb; border-radius: 9px; background: #f6f9fd; }
+.zebra-direct-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.zebra-direct-heading strong { font-size: 12px; color: #1e3b69; }
+.zebra-direct-heading p, .zebra-direct-note { margin: 4px 0 0; font-size: 11px; line-height: 1.4; color: #53647a; }
+.zebra-direct-heading a { font-size: 11px; color: #174da3; text-decoration: underline; }
+.zebra-direct-controls { margin-top: 12px; display: flex; align-items: end; flex-wrap: wrap; gap: 10px; }
+.zebra-find, .zebra-print { min-height: 38px; border-radius: 7px; font-weight: 700; font-size: 11px; padding: 0 14px; cursor: pointer; }
+.zebra-find { border: 1px solid #aebed2; background: #fff; color: #1d416f; }
+.zebra-print { border: 1px solid #1b7549; background: #1b7549; color: #fff; }
+.zebra-find:disabled, .zebra-print:disabled { opacity: .5; cursor: not-allowed; }
+.zebra-device-label { display: flex; flex: 1; min-width: 200px; flex-direction: column; gap: 5px; font-weight: 700; font-size: 10px; color: #34445c; }
+.zebra-device-label select { width: 100%; height: 38px; background: #fff; color: #15243b; border: 1px solid #aebed2; border-radius: 6px; padding: 0 9px; }
+.zebra-direct-note { margin-top: 10px; }
+.zebra-sent { color: #1b7549; font-weight: 650; }
 .zebra-suggestion { margin: 12px 0 0; padding: 9px 11px; border: 1px solid #cfdeef; border-radius: 7px; background: #f2f6fb; color: #344c6d; font-size: 11px; line-height: 1.4; }
 .zebra-suggestion strong { color: #173f83; }
 .zebra-hint { margin-top: 10px; }
