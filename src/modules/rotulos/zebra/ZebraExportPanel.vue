@@ -71,7 +71,7 @@ async function baixar() {
     validarEspacoZpl(documento, configuracao)
     const [marcas, pictogramas] = await Promise.all([
       prepararMarcasZpl(configuracao),
-      prepararPictogramasZpl(configuracao, documento.pictogramas ?? []),
+      prepararPictogramasZpl(configuracao, documento.pictogramas ?? [], documento.categoria),
     ])
     const zpl = gerarDocumentoZpl(documento, configuracao, marcas, pictogramas)
     const nomeSeguro = documento.identificador
