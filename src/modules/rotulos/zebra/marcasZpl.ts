@@ -113,10 +113,11 @@ export async function prepararMarcasZpl(config: ConfiguracaoZpl): Promise<Marcas
 export async function prepararPictogramasZpl(
   config: ConfiguracaoZpl,
   pictogramas: NonNullable<DocumentoZpl['pictogramas']>,
+  categoria?: DocumentoZpl['categoria'],
 ): Promise<PictogramaZpl[]> {
   if (!pictogramas.length) return []
   const fator = config.dpi / 203
-  const lado = ladoPictogramaZpl(config.larguraMm, config.dpi)
+  const lado = ladoPictogramaZpl(config.larguraMm, config.dpi, categoria)
   if (lado < 32 * fator) throw new Error('Etiqueta estreita demais para pictogramas legíveis.')
   return Promise.all(pictogramas.map(async pictograma => {
     if (!pictograma.caminho.startsWith('/assets/residuos/pictogramas/')) {
