@@ -84,7 +84,18 @@ export async function enviarZplParaZebra(
   await consultar(
     enderecoBrowserPrint(protocolo) + '/write',
     'POST',
-    JSON.stringify({ device: impressora, data: zpl }),
+    JSON.stringify({
+      device: {
+        name: impressora.name,
+        uid: impressora.uid,
+        connection: impressora.connection,
+        deviceType: 'printer',
+        version: 2,
+        provider: impressora.provider,
+        manufacturer: impressora.manufacturer,
+      },
+      data: zpl,
+    }),
     solicitar,
   )
   // Sucesso no transporte não garante a conclusão física da impressão.
