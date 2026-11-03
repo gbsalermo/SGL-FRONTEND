@@ -1,11 +1,18 @@
 import type { ConfiguracaoZpl, MarcaZpl, MarcasZpl } from './zpl'
 import { milimetrosParaPontos } from './zpl'
+import { encontrarLimitesConteudo } from './recorteMarca'
 
 /**
- * Rasteriza as marcas oficiais que já existem no frontend em bitmap monocromático.
- * A imagem não sai do navegador. ZPL ^GFA com hexadecimal ASCII, sem upload.
+ * Usa as marcas oficiais já servidas no frontend. Recorta margens visuais vazias,
+ * centraliza a arte dentro de caixas simétricas e rasteriza em ZPL monocromático.
+ * Nenhum bitmap sai do navegador ou é enviado a um servidor externo.
  */
-async function converterMarca(caminho: string, largura: number, altura: number): Promise<MarcaZpl> {
+async function converterMarca(
+  caminho: string,
+  larguraDestino: number,
+  alturaDestino: number,
+  escalaAjuste: number,
+): Promise<MarcaZpl> {
   const imagem = new Image()
   imagem.src = caminho
   try {
@@ -13,25 +20,57 @@ async function converterMarca(caminho: string, largura: number, altura: number):
   } catch {
     throw new Error('Não foi possível carregar a marca institucional para a etiqueta Zebra: ' + caminho)
   }
-  const canvas = document.createElement('canvas')
-  canvas.width = largura
-  canvas.height = altura
-  const contexto = canvas.getContext('2d', { willReadFrequently: true })
-  if (!contexto) throw new Error('O navegador não oferece suporte à rasterização de logotipos.')
-  contexto.fillStyle = '#FFFFFF'
-  contexto.fillRect(0, 0, largura, altura)
-  const fator = Math.min(largura / imagem.naturalWidth, altura / imagem.naturalHeight)
-  const w = imagem.naturalWidth * fator
-  const h = imagem.naturalHeight * fator
-  contexto.drawImage(imagem, (largura - w) / 2, (altura - h) / 2, w, h)
 
-  const pixels = contexto.getImageData(0, 0, largura, altura).data
-  const bytesPorLinha = Math.ceil(largura / 8)
-  const bytes = new Uint8Array(bytesPorLinha * altura)
+  if (!imagem.naturalWidth || !imagem.naturalHeight) {
+    throw new Error('A marca institucional não possui dimensões válidas: ' + caminho)
+  }
+
+  // Desenha a fonte sobre branco: transparência e espaços claros não influem
+  // na identificação dos contornos. Não redimensionar antes de recortar.
+  const original = document.createElement('canvas')
+  original.width = imagem.naturalWidth
+  original.height = imagem.naturalHeight
+  const ctxOriginal = original.getContext('2d', { willReadFrequently: true })
+  if (!ctxOriginal) throw new Error('O navegador não oferece suporte à rasterização de logotipos.')
+  ctxOriginal.fillStyle = '#FFFFFF'
+  ctxOriginal.fillRect(0, 0, original.width, original.height)
+  ctxOriginal.drawImage(imagem, 0, 0)
+
+  const pixelsOriginais = ctxOriginal.getImageData(0, 0, original.width, original.height)
+  const limites = encontrarLimitesConteudo(pixelsOriginais.data, original.width, original.height)
+  if (!limites) throw new Error('A marca institucional está vazia ou ilegível: ' + caminho)
+
+  // Caixas de mesmo tamanho: centralização óptica pelo conteúdo da logo.
+  const final = document.createElement('canvas')
+  final.width = larguraDestino
+  final.height = alturaDestino
+  const ctxFinal = final.getContext('2d', { willReadFrequently: true })
+  if (!ctxFinal) throw new Error('O navegador não oferece suporte à rasterização final de logotipos.')
+  ctxFinal.fillStyle = '#FFFFFF'
+  ctxFinal.fillRect(0, 0, final.width, final.height)
+
+  const fator = Math.min(
+    larguraDestino / limites.largura,
+    alturaDestino / limites.altura,
+  ) * escalaAjuste
+  const larguraArte = limites.largura * fator
+  const alturaArte = limites.altura * fator
+  const xArte = (larguraDestino - larguraArte) / 2
+  const yArte = (alturaDestino - alturaArte) / 2
+  ctxFinal.drawImage(
+    original,
+    limites.x, limites.y, limites.largura, limites.altura,
+    xArte, yArte, larguraArte, alturaArte,
+  )
+
+  const pixels = ctxFinal.getImageData(0, 0, larguraDestino, alturaDestino).data
+  const bytesPorLinha = Math.ceil(larguraDestino / 8)
+  const bytes = new Uint8Array(bytesPorLinha * alturaDestino)
   let pixelsPretos = 0
-  for (let y = 0; y < altura; y++) {
-    for (let x = 0; x < largura; x++) {
-      const i = (y * largura + x) * 4
+
+  for (let y = 0; y < alturaDestino; y++) {
+    for (let x = 0; x < larguraDestino; x++) {
+      const i = (y * larguraDestino + x) * 4
       const luminancia = pixels[i] * 0.2126 + pixels[i + 1] * 0.7152 + pixels[i + 2] * 0.0722
       if (luminancia < 200) {
         bytes[y * bytesPorLinha + (x >> 3)] |= 0x80 >> (x & 7)
@@ -43,21 +82,22 @@ async function converterMarca(caminho: string, largura: number, altura: number):
   const hex = Array.from(bytes, valor => valor.toString(16).toUpperCase().padStart(2, '0')).join('')
   return {
     comando: '^GFA,' + bytes.length + ',' + bytes.length + ',' + bytesPorLinha + ',' + hex,
-    largura,
-    altura,
+    largura: larguraDestino,
+    altura: alturaDestino,
   }
 }
 
 export async function prepararMarcasZpl(config: ConfiguracaoZpl): Promise<MarcasZpl> {
-  const width = milimetrosParaPontos(config.larguraMm, config.dpi)
-  const k = config.dpi / 203
-  const margem = Math.round(22 * k)
-  const total = width - margem * 2
-  const larguraLogo = Math.max(40, Math.floor((total - Math.round(18 * k)) / 2))
-  const alturaLogo = Math.round(42 * k)
+  const larguraMidia = milimetrosParaPontos(config.larguraMm, config.dpi)
+  const fator = config.dpi / 203
+  const margem = Math.round(22 * fator)
+  const larguraUtil = larguraMidia - 2 * margem
+  const larguraLogo = Math.max(40, Math.floor((larguraUtil - Math.round(18 * fator)) / 2))
+  const alturaLogo = Math.round(42 * fator)
+
   const [sgl, embrapa] = await Promise.all([
-    converterMarca('/assets/residuos/marcas/sgl-logo.png.png', larguraLogo, alturaLogo),
-    converterMarca('/assets/residuos/marcas/embrapa.png', larguraLogo, alturaLogo),
+    converterMarca('/assets/residuos/marcas/sgl-logo.png.png', larguraLogo, alturaLogo, 0.88),
+    converterMarca('/assets/residuos/marcas/embrapa.png', larguraLogo, alturaLogo, 0.82),
   ])
   return { sgl, embrapa }
 }
