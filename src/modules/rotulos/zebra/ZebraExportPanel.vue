@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
   recomendarConfiguracaoZpl,
   validarEspacoZpl,
@@ -21,6 +21,11 @@ const dpi = ref<ResolucaoZebra>(203)
 const automatico = ref(true)
 const erroZpl = ref('')
 const gerando = ref(false)
+
+// Mensagens antigas não devem persistir quando o usuário muda a mídia ou o registro.
+watch([larguraMm, alturaManualMm, dpi, automatico, () => props.documento], () => {
+  erroZpl.value = ''
+})
 
 const recomendacao = computed(() => {
   if (!props.documento) return { config: null as ConfiguracaoZpl | null, erro: '' }
