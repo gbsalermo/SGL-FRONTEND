@@ -271,18 +271,8 @@ export function gerarDocumentoZpl(
     escrever(m + metade + p(18), y, 'EMBRAPA', p(20), metade)
   }
   y += logoH + p(3)
-<<<<<<< HEAD
   // Alinhamento da legenda do SGL aprovado visualmente para a versão térmica.
   y = escrever(m + p(48), y, 'SISTEMA DE GESTÃO DE LABORATÓRIOS', pequeno, util - p(48)) + p(7)
-=======
-  y = escrever(
-  m + p(48),
-  y,
-  'SISTEMA DE GESTÃO DE LABORATÓRIOS',
-  pequeno,
-  util - p(48),
-) + p(7)
->>>>>>> 8600a75 (fix: alinhamento do titulo no rotulo zebra)
   linha(y, m, util, p(2))
   y += p(13)
 
