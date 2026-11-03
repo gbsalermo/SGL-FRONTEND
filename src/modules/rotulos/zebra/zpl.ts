@@ -46,6 +46,55 @@ export interface PictogramaZpl {
 
 const POL_MILIMETROS = 25.4
 
+/** Tamanhos iniciais sugeridos para mídia térmica; não são padrões físicos universais. */
+export const ALTURAS_PADRAO_ZEBRA_MM = [125, 160, 200, 250, 300] as const
+
+export function alturaInicialZpl(documento: DocumentoZpl): number {
+  return documento.categoria === 'PRODUTO' || documento.categoria === 'RESIDUO' ? 200 : 125
+}
+
+/** Mesma geometria usada pelo rasterizador para que a pré-verificação seja fiel. */
+export function ladoPictogramaZpl(larguraMm: number, dpi: ResolucaoZebra): number {
+  const fator = dpi / 203
+  const largura = milimetrosParaPontos(larguraMm, dpi)
+  const margem = Math.round(22 * fator)
+  const larguraUtil = largura - 2 * margem
+  const colunas = larguraMm >= 75 ? 3 : 2
+  const distancia = Math.round(8 * fator)
+  const coluna = Math.floor((larguraUtil - distancia * (colunas - 1)) / colunas)
+  return Math.min(Math.round(92 * fator), coluna - Math.round(8 * fator))
+}
+
+/**
+ * Calcula o menor padrão de altura adequado ao documento, conservando a largura
+ * escolhida pelo usuário. A simulação usa a geometria real dos pictogramas,
+ * sem carregar imagens; o download valida novamente as imagens oficiais.
+ */
+export function recomendarConfiguracaoZpl(
+  documento: DocumentoZpl,
+  larguraMm: number,
+  dpi: ResolucaoZebra,
+): ConfiguracaoZpl {
+  const lado = ladoPictogramaZpl(larguraMm, dpi)
+  const simulados: PictogramaZpl[] = (documento.pictogramas ?? []).map(p => ({
+    ...p,
+    imagem: { comando: '^GFA,1,1,1,FF', largura: lado, altura: lado },
+  }))
+  const minimo = alturaInicialZpl(documento)
+  for (const alturaMm of ALTURAS_PADRAO_ZEBRA_MM) {
+    if (alturaMm < minimo) continue
+    const configuracao: ConfiguracaoZpl = { larguraMm, alturaMm, dpi }
+    try {
+      gerarDocumentoZpl(documento, configuracao, undefined, simulados)
+      return configuracao
+    } catch (e) {
+      if (!(e instanceof Error) ||
+          !/não cabe|não há espaço para o rodapé/i.test(e.message)) throw e
+    }
+  }
+  throw new Error('Este conteúdo não cabe nos formatos sugeridos (até 300 mm). Aumente a largura ou use a impressão A4.')
+}
+
 export function milimetrosParaPontos(mm: number, dpi: ResolucaoZebra): number {
   return Math.round(mm * dpi / POL_MILIMETROS)
 }
