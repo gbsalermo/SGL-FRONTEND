@@ -118,3 +118,11 @@ A prévia do Resíduo `Master Mix vencido` ficou longa demais para uma leitura c
 - Foram acrescentados testes de regressão em `zpl.test.mjs` para posição lateral, título RISCO, preservação de todas as informações e múltiplos pictogramas.
 
 **Validação ainda pendente:** `npm run build` e `node --experimental-strip-types --test src/modules/rotulos/zebra/zpl.test.mjs`; em seguida, gerar o mesmo Resíduo em Automático, conferir **toda** a imagem ZPL inclusive rodapé e medidas de segurança, e testar Resíduos com dois ou mais pictogramas. As prévias anteriores não homologam esse layout novo. Uma captura cortada na tela não comprova, isoladamente, perda de conteúdo no arquivo; conferir a altura efetiva no visualizador e no `^LL`. Sem merge.
+
+## Layout compacto Zebra de Produtos (03/11/2026)
+
+O mantenedor solicitou reproduzir em Produtos o acabamento do ZPL de Resíduos: fontes e espaçamentos do corpo mais compactos; pictograma (quando cadastrado) com o título **RISCO**, ao lado do nome do produto para largura de mídia de pelo menos 75 mm, com o nome do risco embaixo da imagem. Mídias estreitas mantêm o bloco vertical para não reduzir o símbolo em excesso.
+
+Implementação feita no **gerador ZPL comum** (`zpl.ts`), incluindo o mesmo dimensionamento de pictograma usado em Resíduos (`ladoPictogramaZpl`, compartilhado com `marcasZpl.ts`). Os dados de fiscalização, condições de armazenamento, apresentação, nível de risco e demais campos de Produto continuam íntegros. O modo automático passa a iniciar os formatos de Produto em **125 mm** e escolhe a menor altura que caiba, sem cortes nem remoção de pictogramas. O rótulo HTML/A4 de Produto permanece inalterado.
+
+Testes adicionados para Produto com pictograma e fiscalização e Produto sem pictograma; ajustadas as expectativas de altura automática. **Aguardando build e suíte Node no ambiente local, prévia visual completa e teste físico. Nenhum merge.**
