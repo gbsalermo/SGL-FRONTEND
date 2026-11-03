@@ -55,3 +55,74 @@ test('dados comuns de recebimento cabem no piloto 90 x 125 mm', () => {
   assert.ok(zpl.includes('^LL999'))
   assert.ok(zpl.includes('^CI28'))
 })
+
+test('usa composição institucional com faixa inversa, grade, tabela e moldura', () => {
+  const zpl = gerarDocumentoZpl({
+    ...base,
+    titulo: 'RÓTULO DE SOLUÇÃO',
+    situacao: 'EM PREPARAÇÃO',
+    subtitulo: 'Tampão analítico demonstrativo',
+    secoes: [
+      { titulo: 'Origem', campos: [{ rotulo: 'Laboratório', valor: 'Biologia Molecular' }] },
+      { titulo: 'Componentes informados', campos: [
+        { rotulo: 'Tampão PBS 10X', valor: '4 mL' },
+        { rotulo: 'Cloreto de Potássio', valor: '2 g' },
+      ] },
+    ],
+    avisoFinal: 'Rótulo de uso interno',
+  }, { larguraMm: 90, alturaMm: 125, dpi: 203 })
+  assert.ok(zpl.includes('^GB'))
+  assert.ok(zpl.includes('^FR'))
+  assert.ok(zpl.includes(escaparCampoZpl('COMPONENTE')))
+  assert.ok(zpl.includes(escaparCampoZpl('QUANTIDADE')))
+  assert.ok(zpl.includes(escaparCampoZpl('Tampão PBS 10X')))
+  assert.ok(zpl.endsWith('^PQ1\\n^XZ'))
+})
+
+test('posiciona as duas marcas em GFA sem duplicar a identificação textual do cabeçalho', () => {
+  const logo = { comando: '^GFA,1,1,1,FF', largura: 80, altura: 24 }
+  const zpl = gerarDocumentoZpl(base, { larguraMm: 90, alturaMm: 125, dpi: 203 },
+    { sgl: logo, embrapa: logo })
+  assert.equal(zpl.match(/\\^GFA/g)?.length, 2)
+  assert.ok(zpl.includes('^FO22,22^GFA,1,1,1,FF^FS'))
+})
+
+test('rejeita marcas grandes demais para a mídia escolhida', () => {
+  const logo = { comando: '^GFA,1,1,1,FF', largura: 500, altura: 24 }
+  assert.throws(() => gerarDocumentoZpl(base, { larguraMm: 90, alturaMm: 125, dpi: 203 },
+    { sgl: logo, embrapa: logo }), /marcas excedem/)
+})
+
+test('cabe o exemplo realista de solução em 90 x 125 mm, sem omitir observações', () => {
+  const zpl = gerarDocumentoZpl({
+    titulo: 'RÓTULO DE SOLUÇÃO',
+    situacao: 'EM PREPARAÇÃO',
+    subtitulo: 'Tampão analítico demonstrativo',
+    identificador: '34a61146-ccba-4f33-8995-18f634bfc1e9',
+    secoes: [
+      { titulo: 'Origem', campos: [
+        { rotulo: 'Unidade', valor: 'CNPMF — Embrapa Mandioca e Fruticultura' },
+        { rotulo: 'Laboratório', valor: 'Laboratório de Biologia Molecular' },
+        { rotulo: 'Projeto', valor: 'Genotipagem de variedades de mandioca' },
+      ] },
+      { titulo: 'Aprovação', campos: [
+        { rotulo: 'Solicitante', valor: 'Camila Menezes' },
+        { rotulo: 'Preparação aprovada por', valor: 'Não identificado nas movimentações' },
+        { rotulo: 'Registro de aprovação', valor: 'Não registrada' },
+        { rotulo: 'Situação', valor: 'EM_PREPARACAO' },
+      ] },
+      { titulo: 'Componentes informados', campos: [
+        { rotulo: 'Tampão PBS 10X', valor: '4 mL' },
+        { rotulo: 'Cloreto de Potássio P.A.', valor: '2 g' },
+      ] },
+      { titulo: 'Instruções e observações', campos: [
+        { rotulo: 'Instruções', valor: 'Seguir procedimento interno autorizado pela Gestão.' },
+        { rotulo: 'Observações', valor: 'Pedido aprovado e em preparação; nenhuma retirada final foi simulada.' },
+      ] },
+    ],
+    avisoFinal: 'IDENTIFICA O PEDIDO; NAO COMPROVA O PREPARO FISICO, VOLUME FINAL, CONCENTRACAO OU VALIDADE.',
+  }, { larguraMm: 90, alturaMm: 125, dpi: 203 })
+  assert.ok(zpl.includes(escaparCampoZpl('OBSERVAÇÕES')))
+  assert.ok(zpl.includes(escaparCampoZpl('4 mL')))
+  assert.ok(zpl.includes('^PQ1'))
+})
