@@ -411,3 +411,78 @@ test('modo horizontal rejeita etiqueta baixa sem mudar a mídia automaticamente'
   assert.equal(recomendado.alturaMm, 125)
   assert.equal(recomendado.orientacao, undefined)
 })
+
+test('Automático horizontal calcula a altura pela orientação escolhida e preserva o conteúdo', () => {
+  const documento = {
+    titulo: 'RÓTULO DE RESÍDUO',
+    identificador: 'SGL-RES-2026-000007',
+    categoria: 'RESIDUO',
+    subtitulo: 'Master Mix vencido',
+    situacao: 'DESPACHADO',
+    secoes: [
+      { titulo: 'Origem', campos: [
+        { rotulo: 'Unidade', valor: 'CNPMF — Embrapa Mandioca e Fruticultura' },
+        { rotulo: 'Laboratório', valor: 'Laboratório de Biologia Molecular' },
+        { rotulo: 'Projeto', valor: 'Genotipagem de variedades de mandioca' },
+      ] },
+      { titulo: 'Risco e quantidade', campos: [
+        { rotulo: 'Nível de risco confirmado', valor: 'Baixo' },
+        { rotulo: 'Riscos específicos', valor: 'Irritante' },
+        { rotulo: 'Quantidade', valor: '2 L' },
+        { rotulo: 'Recipiente', valor: 'Bombona 5 L' },
+      ] },
+      { titulo: 'Rastreabilidade', campos: [
+        { rotulo: 'Gerador registrado', valor: 'Camila Menezes' },
+        { rotulo: 'Responsável pela liberação', valor: 'Ricardo Almeida' },
+      ] },
+      { titulo: 'Componentes e composição', campos: [
+        { rotulo: 'Master Mix vencido', valor: 'resíduo líquido' },
+      ] },
+      { titulo: 'Armazenamento e destino', campos: [
+        { rotulo: 'Armazenamento temporário', valor: 'Abrigo químico — posição Q1' },
+        { rotulo: 'Destino previsto', valor: 'Tratamento externo especializado' },
+      ] },
+      { titulo: 'Medidas de segurança', campos: [
+        { rotulo: 'Confirmadas', valor: 'Usar luvas de proteção; Usar óculos de proteção' },
+      ] },
+    ],
+    avisoFinal: 'IDENTIFICAÇÃO INTERNA. CONSULTAR AS MEDIDAS DE SEGURANÇA.',
+  }
+  const config = recomendarConfiguracaoZpl(documento, 90, 203, 'HORIZONTAL')
+  assert.equal(config.larguraMm, 90)
+  assert.equal(config.orientacao, 'HORIZONTAL')
+  assert.ok(config.alturaMm >= 90 && config.alturaMm <= 300)
+  validarEspacoZpl(documento, config)
+  const zpl = gerarDocumentoZpl(documento, config)
+  assert.ok(zpl.includes('^PW719'))
+  assert.ok(zpl.includes('^LL' + milimetrosParaPontos(config.alturaMm, 203)))
+  assert.ok(zpl.includes(escaparCampoZpl('Ricardo Almeida')))
+  assert.ok(zpl.includes(escaparCampoZpl('Bombona 5 L')))
+  assert.ok(zpl.includes(escaparCampoZpl('CONFIRMADAS')))
+})
+
+test('Orientação horizontal aumenta tamanho automático sem aplicar a altura vertical', () => {
+  const documento = {
+    ...base,
+    secoes: [
+      { titulo: 'Cadastro', campos: [{ rotulo: 'Local', valor: 'Laboratório de Biologia Molecular' }] },
+      { titulo: 'Observações', campos: [
+        { rotulo: 'Nota', valor: 'Registro de uso interno para conferência documental' },
+      ] },
+    ],
+  }
+  const config = recomendarConfiguracaoZpl(documento, 90, 203, 'HORIZONTAL')
+  assert.equal(config.orientacao, 'HORIZONTAL')
+  assert.ok(config.alturaMm >= 90 && config.alturaMm <= 300)
+  validarEspacoZpl(documento, config)
+})
+
+test('Orientação horizontal não gera documento cortado quando não há formato compatível', () => {
+  const documento = { ...base, secoes: [
+    { titulo: 'Segurança', campos: [{ rotulo: 'Observações', valor: 'Texto registrado '.repeat(2400) }] },
+  ] }
+  assert.throws(
+    () => recomendarConfiguracaoZpl(documento, 90, 203, 'HORIZONTAL'),
+    /horizontal não cabe nos formatos compatíveis/i,
+  )
+})
