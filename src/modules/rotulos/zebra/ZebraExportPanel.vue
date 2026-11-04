@@ -42,7 +42,7 @@ const recomendacao = computed(() => {
   if (!props.documento) return { config: null as ConfiguracaoZpl | null, erro: '' }
   try {
     return {
-      config: recomendarConfiguracaoZpl(props.documento, Number(larguraMm.value), dpi.value),
+      config: recomendarConfiguracaoZpl(props.documento, Number(larguraMm.value), dpi.value, orientacao.value),
       erro: '',
     }
   } catch (error) {
@@ -168,146 +168,153 @@ async function baixar() {
 </script>
 
 <template>
-  <section class="zebra-panel no-print" aria-label="Exportação para impressora Zebra">
-    <header>
-      <div>
-        <strong>Impressão Zebra — piloto ZPL</strong>
-        <p>Escolha o tamanho automaticamente ou informe as medidas da sua etiqueta.</p>
+  <section class="zebra-panel no-print" aria-label="Impressão Zebra">
+    <header class="zebra-header">
+      <div class="zebra-header-copy">
+        <strong>Impressão Zebra</strong>
+        <p>ZPL · {{ orientacao === 'VERTICAL' ? 'Vertical' : 'Horizontal' }} · {{ automatico ? 'Automático' : 'Personalizado' }}
+          · {{ configuracaoEfetiva?.larguraMm ?? larguraMm }} × {{ configuracaoEfetiva?.alturaMm ?? '—' }} mm · {{ dpi }} dpi</p>
       </div>
       <span class="zebra-stage">Validação física pendente</span>
     </header>
 
-    <div class="zebra-mode" role="group" aria-label="Modo de dimensionamento da etiqueta">
-      <button type="button" :class="{ chosen: automatico }" :aria-pressed="automatico" @click="selecionarModo(true)">
-        Automático <span>Recomendado</span>
-      </button>
-      <button type="button" :class="{ chosen: !automatico }" :aria-pressed="!automatico" @click="selecionarModo(false)">
-        Personalizado
-      </button>
-    </div>
+    <details class="zebra-settings">
+      <summary>
+        <span><span class="zebra-chevron" aria-hidden="true">›</span> Configurações da etiqueta</span>
+        <span class="zebra-expand-hint">Expandir para alterar orientação e medidas</span>
+      </summary>
+      <div class="zebra-settings-body">
+        <div class="zebra-controls-row">
+          <div class="zebra-control-group">
+            <span>Dimensionamento</span>
+            <div class="zebra-mode" role="group" aria-label="Modo de dimensionamento">
+              <button type="button" :class="{ chosen: automatico }" :aria-pressed="automatico" @click="selecionarModo(true)">
+                Automático <span>Recomendado</span>
+              </button>
+              <button type="button" :class="{ chosen: !automatico }" :aria-pressed="!automatico" @click="selecionarModo(false)">
+                Personalizado
+              </button>
+            </div>
+          </div>
+          <div class="zebra-control-group">
+            <span>Orientação do conteúdo</span>
+            <div class="zebra-mode" role="group" aria-label="Orientação do conteúdo impresso">
+              <button type="button" :class="{ chosen: orientacao === 'VERTICAL' }" :aria-pressed="orientacao === 'VERTICAL'" @click="selecionarOrientacao('VERTICAL')">
+                Vertical
+              </button>
+              <button type="button" :class="{ chosen: orientacao === 'HORIZONTAL' }" :aria-pressed="orientacao === 'HORIZONTAL'" @click="selecionarOrientacao('HORIZONTAL')">
+                Horizontal
+              </button>
+            </div>
+          </div>
+        </div>
 
-    <div class="zebra-orientation" role="group" aria-label="Orientação do conteúdo impresso">
-      <span>Orientação do conteúdo</span>
-      <div class="zebra-mode">
-        <button type="button" :class="{ chosen: orientacao === 'VERTICAL' }" :aria-pressed="orientacao === 'VERTICAL'" @click="selecionarOrientacao('VERTICAL')">
-          <span aria-hidden="true">▯</span> Vertical
-        </button>
-        <button type="button" :class="{ chosen: orientacao === 'HORIZONTAL' }" :aria-pressed="orientacao === 'HORIZONTAL'" @click="selecionarOrientacao('HORIZONTAL')">
-          <span aria-hidden="true">▭</span> Horizontal
-        </button>
+        <div class="zebra-options">
+          <label>Largura da etiqueta (mm)
+            <input v-model.number="larguraMm" type="number" min="40" max="110" step="1" />
+          </label>
+          <label>Altura da etiqueta (mm)
+            <input v-if="automatico" :value="recomendacao.config?.alturaMm ?? '—'" type="text" disabled aria-label="Altura recomendada automaticamente" />
+            <input v-else v-model.number="alturaManualMm" type="number" min="40" max="300" step="1" />
+          </label>
+          <label>Resolução Zebra
+            <select v-model.number="dpi">
+              <option :value="203">203 dpi</option>
+              <option :value="300">300 dpi</option>
+            </select>
+          </label>
+        </div>
+        <p v-if="automatico && recomendacao.config" class="zebra-suggestion">
+          Altura sugerida para <strong>{{ orientacao === 'HORIZONTAL' ? 'horizontal' : 'vertical' }}:
+          {{ recomendacao.config.alturaMm }} mm</strong>. O cálculo considera todo o conteúdo, incluindo os pictogramas.
+        </p>
+        <p v-else-if="automatico && recomendacao.erro" class="zebra-feedback zebra-error" role="alert">
+          {{ recomendacao.erro }}
+        </p>
+        <p class="zebra-hint">
+          A orientação gira o conteúdo e os gráficos, mantendo a largura física escolhida. No automático, o SGL recomenda
+          a menor altura que comporte a orientação selecionada; confirme as dimensões da etiqueta real antes de imprimir.
+          O rótulo não substitui a FDS nem requisitos de segurança aplicáveis.
+        </p>
+        <p class="zebra-browser-link">Impressão direta requer o
+          <a href="https://www.zebra.com/us/en/support-downloads/software/printer-software/browser-print.html"
+            target="_blank" rel="noopener noreferrer">Zebra Browser Print</a> instalado e o SGL autorizado neste computador.
+        </p>
       </div>
-    </div>
+    </details>
 
-    <div class="zebra-options">
-      <label>Largura da etiqueta (mm)
-        <input v-model.number="larguraMm" type="number" min="40" max="110" step="1" />
-      </label>
-      <label>Altura da etiqueta (mm)
-        <input v-if="automatico" :value="recomendacao.config?.alturaMm ?? '—'" type="text" disabled aria-label="Altura recomendada automaticamente" />
-        <input v-else v-model.number="alturaManualMm" type="number" min="40" max="300" step="1" />
-      </label>
-      <label>Resolução Zebra
-        <select v-model.number="dpi">
-          <option :value="203">203 dpi</option>
-          <option :value="300">300 dpi</option>
+    <div class="zebra-actions">
+      <button class="zebra-download" type="button"
+        :disabled="bloqueado || !documento || gerando || imprimindoZebra || !encaixeOrientacao.valido"
+        @click="baixar">{{ gerando ? 'Gerando ZPL...' : 'Baixar ZPL' }}</button>
+      <button type="button" class="zebra-find" :disabled="buscandoImpressoras || imprimindoZebra" @click="buscarImpressoras">
+        {{ buscandoImpressoras ? 'Procurando...' : impressoras.length ? 'Atualizar impressoras' : 'Buscar impressoras' }}
+      </button>
+      <label v-if="impressoras.length" class="zebra-device-label">Impressora
+        <select v-model="impressoraSelecionada" :disabled="imprimindoZebra">
+          <option value="">Selecione uma impressora</option>
+          <option v-for="item in impressoras" :key="item.uid" :value="item.uid">
+            {{ item.name }} ({{ item.connection || item.uid }})
+          </option>
         </select>
       </label>
-      <button class="zebra-download" type="button"
-        :disabled="bloqueado || !documento || gerando || imprimindoZebra || !configuracaoEfetiva || !encaixeOrientacao.valido"
-        @click="baixar">{{ gerando ? 'Preparando ZPL...' : 'Baixar ZPL' }}</button>
+      <button type="button" class="zebra-print"
+        :disabled="bloqueado || !documento || gerando || imprimindoZebra || !encaixeOrientacao.valido || !impressoraSelecionada"
+        @click="imprimirDiretamente">{{ imprimindoZebra ? 'Enviando...' : 'Imprimir na Zebra' }}</button>
     </div>
 
-    <section class="zebra-direct" aria-label="Impressão direta na Zebra">
-      <div class="zebra-direct-heading">
-        <div>
-          <strong>Imprimir diretamente na Zebra</strong>
-          <p>Conecte a impressora com o aplicativo oficial Zebra Browser Print. Não é necessário baixar o ZPL.</p>
-        </div>
-        <a href="https://www.zebra.com/us/en/support-downloads/software/printer-software/browser-print.html" target="_blank" rel="noopener noreferrer">Instalar Browser Print</a>
-      </div>
-      <div class="zebra-direct-controls">
-        <button type="button" class="zebra-find" :disabled="buscandoImpressoras || imprimindoZebra" @click="buscarImpressoras">
-          {{ buscandoImpressoras ? 'Procurando...' : impressoras.length ? 'Atualizar impressoras' : 'Buscar impressoras' }}
-        </button>
-        <label v-if="impressoras.length" class="zebra-device-label">Impressora disponível
-          <select v-model="impressoraSelecionada" :disabled="imprimindoZebra">
-            <option value="">Selecione uma impressora</option>
-            <option v-for="item in impressoras" :key="item.uid" :value="item.uid">{{ item.name }} ({{ item.connection || item.uid }})</option>
-          </select>
-        </label>
-        <button type="button" class="zebra-print" :disabled="bloqueado || !documento || gerando || imprimindoZebra || !encaixeOrientacao.valido || !impressoraSelecionada" @click="imprimirDiretamente">
-          {{ imprimindoZebra ? 'Enviando à Zebra...' : 'Imprimir na Zebra' }}
-        </button>
-      </div>
-      <p v-if="erroImpressora" class="zebra-feedback zebra-error" role="alert">{{ erroImpressora }}</p>
-      <p v-if="mensagemImpressao" class="zebra-feedback zebra-sent" role="status">{{ mensagemImpressao }}</p>
-      <p class="zebra-direct-note">O Browser Print precisa estar instalado e em execução neste computador, com o endereço do SGL autorizado. O envio não confirma que a etiqueta saiu fisicamente.</p>
-    </section>
-
-    <p v-if="automatico && recomendacao.config" class="zebra-suggestion">
-      <strong>Tamanho sugerido: {{ recomendacao.config.larguraMm }} × {{ recomendacao.config.alturaMm }} mm.</strong>
-      Calculado a partir do conteúdo deste documento, sem cortar informações.
+    <p v-if="encaixeOrientacao.mensagem && documento" class="zebra-feedback zebra-error" role="alert">
+      {{ encaixeOrientacao.mensagem }}
     </p>
-    <p v-else-if="automatico && recomendacao.erro && documento" class="zebra-feedback zebra-error" role="alert">
-      {{ recomendacao.erro }}
-    </p>
-    <p v-else-if="!automatico && configuracaoEfetiva" class="zebra-suggestion">
-      <strong>Formato personalizado: {{ configuracaoEfetiva.larguraMm }} × {{ configuracaoEfetiva.alturaMm }} mm.</strong>
-      O SGL verificará se o conteúdo cabe antes de baixar.
-    </p>
-
-    <p v-if="configuracaoEfetiva && encaixeOrientacao.mensagem" class="zebra-feedback zebra-error" role="alert">{{ encaixeOrientacao.mensagem }}</p>
-    <p class="zebra-hint">
-      Vertical e Horizontal mantêm exatamente a mesma largura e altura física da etiqueta; apenas o conteúdo é reorganizado e girado em 90°. A sugestão não altera a mídia instalada na impressora. Confira a largura, a altura e o dpi do papel real antes de imprimir.
-      Pictogramas cadastrados são preservados; esta etiqueta não substitui a FDS nem as exigências de segurança aplicáveis.
-    </p>
+    <p v-if="erroImpressora" class="zebra-feedback zebra-error" role="alert">{{ erroImpressora }}</p>
+    <p v-if="mensagemImpressao" class="zebra-feedback zebra-sent" role="status">{{ mensagemImpressao }}</p>
     <p v-if="bloqueado" class="zebra-feedback">A exportação respeita o bloqueio de impressão deste registro.</p>
     <p v-if="erroZpl" class="zebra-feedback zebra-error" role="alert">{{ erroZpl }}</p>
   </section>
 </template>
 
 <style scoped>
-.zebra-panel { box-sizing: border-box; width: min(100%, 1060px); margin: 0 auto 14px; padding: 16px 18px; border: 1px solid #cad7e5; border-radius: 10px; background: #fff; color: #15243b; box-shadow: 0 7px 22px rgb(13 43 94 / 5%); }
-.zebra-panel header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 13px; }
-.zebra-panel header strong { font-size: 13px; }
-.zebra-panel header p, .zebra-hint { margin: 4px 0 0; font-size: 11px; line-height: 1.45; color: #53647a; }
+.zebra-panel { box-sizing: border-box; width: min(100%, 1060px); margin: 0 auto 12px; padding: 12px 16px; border: 1px solid #cad7e5; border-radius: 10px; background: #fff; color: #15243b; box-shadow: 0 5px 16px rgb(13 43 94 / 5%); }
+.zebra-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.zebra-header-copy { min-width: 0; }
+.zebra-header-copy strong { font-size: 13px; }
+.zebra-header-copy p { margin: 3px 0 0; font-size: 11px; color: #53647a; line-height: 1.45; }
 .zebra-stage { font-size: 10px; font-weight: 700; color: #805d12; background: #fff4d5; padding: 5px 9px; border-radius: 16px; }
-.zebra-mode { display: inline-flex; gap: 4px; padding: 4px; border-radius: 8px; background: #edf2f8; margin-bottom: 12px; }
-.zebra-mode button { border: 1px solid transparent; border-radius: 6px; min-height: 34px; padding: 0 13px; background: transparent; color: #415470; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.zebra-settings { margin-top: 9px; border: 1px solid #d7e1ee; border-radius: 7px; }
+.zebra-settings > summary { padding: 9px 11px; cursor: pointer; display: flex; justify-content: space-between; gap: 9px; align-items: center; color: #214a83; font-size: 11px; font-weight: 700; list-style: none; }
+.zebra-settings > summary::-webkit-details-marker { display: none; }
+.zebra-settings > summary:focus-visible { outline: 2px solid #2456c4; outline-offset: 2px; }
+.zebra-settings[open] > summary { border-bottom: 1px solid #d7e1ee; background: #f3f7fc; }
+.zebra-chevron { display: inline-block; margin-right: 5px; font-size: 18px; line-height: 10px; transform: rotate(0deg); transition: transform .15s ease; }
+.zebra-settings[open] .zebra-chevron { transform: rotate(90deg); }
+.zebra-expand-hint { font-size: 10px; color: #63768f; font-weight: 400; text-align: right; }
+.zebra-settings-body { padding: 12px; }
+.zebra-controls-row { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 11px; }
+.zebra-control-group { display: flex; flex-direction: column; gap: 5px; }
+.zebra-control-group > span { font-size: 10px; font-weight: 700; color: #34445c; }
+.zebra-mode { display: inline-flex; gap: 4px; padding: 3px; border-radius: 7px; background: #edf2f8; }
+.zebra-mode button { border: 1px solid transparent; border-radius: 5px; min-height: 32px; padding: 0 12px; background: transparent; color: #415470; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
 .zebra-mode button.chosen { border-color: #b8cce7; background: #fff; color: #174da3; box-shadow: 0 1px 5px rgb(13 43 94 / 9%); }
-.zebra-mode button span { font-size: 9px; margin-left: 4px; color: #52779f; }
-.zebra-orientation { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-.zebra-orientation > span { font-size: 11px; color: #34445c; font-weight: 700; }
-.zebra-orientation .zebra-mode { margin-bottom: 0; }
-.zebra-orientation .zebra-mode button { min-width: 112px; }
-.zebra-orientation .zebra-mode button span { font-size: 15px; margin-right: 5px; }
-.zebra-options { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) auto; gap: 10px; align-items: end; }
+.zebra-mode button span { font-size: 9px; margin-left: 3px; color: #52779f; }
+.zebra-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .zebra-options label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 10px; font-weight: 700; color: #34445c; }
-.zebra-options input, .zebra-options select { min-height: 38px; width: 100%; box-sizing: border-box; border: 1px solid #aebed2; border-radius: 6px; padding: 0 9px; font: inherit; color: #15243b; background: #fff; }
-.zebra-options input:disabled { background: #f0f5fa; color: #334b66; opacity: 1; cursor: default; }
-.zebra-download { min-height: 38px; border: 1px solid #16479a; border-radius: 7px; background: #16479a; color: #fff; font-size: 11px; font-weight: 800; padding: 0 14px; cursor: pointer; }
-.zebra-download:disabled { opacity: .5; cursor: not-allowed; }
-.zebra-options input:focus-visible, .zebra-options select:focus-visible, .zebra-panel button:focus-visible { outline: 2px solid #2456c4; outline-offset: 2px; }
-.zebra-direct { margin-top: 14px; padding: 13px; border: 1px solid #d1ddeb; border-radius: 9px; background: #f6f9fd; }
-.zebra-direct-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.zebra-direct-heading strong { font-size: 12px; color: #1e3b69; }
-.zebra-direct-heading p, .zebra-direct-note { margin: 4px 0 0; font-size: 11px; line-height: 1.4; color: #53647a; }
-.zebra-direct-heading a { font-size: 11px; color: #174da3; text-decoration: underline; }
-.zebra-direct-controls { margin-top: 12px; display: flex; align-items: end; flex-wrap: wrap; gap: 10px; }
-.zebra-find, .zebra-print { min-height: 38px; border-radius: 7px; font-weight: 700; font-size: 11px; padding: 0 14px; cursor: pointer; }
-.zebra-find { border: 1px solid #aebed2; background: #fff; color: #1d416f; }
+.zebra-options input, .zebra-options select, .zebra-device-label select { min-height: 36px; width: 100%; box-sizing: border-box; border: 1px solid #aebed2; border-radius: 6px; padding: 0 9px; font: inherit; color: #15243b; background: #fff; }
+.zebra-options input:disabled { background: #f0f5fa; opacity: 1; color: #334b66; }
+.zebra-suggestion { margin: 10px 0 0; font-size: 11px; color: #344c6d; }
+.zebra-hint, .zebra-browser-link { margin: 9px 0 0; font-size: 11px; line-height: 1.4; color: #53647a; }
+.zebra-browser-link a { color: #174da3; text-decoration: underline; }
+.zebra-actions { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.zebra-actions button { min-height: 38px; border-radius: 7px; font-weight: 700; font-size: 11px; padding: 0 14px; cursor: pointer; }
+.zebra-download { border: 1px solid #16479a; background: #16479a; color: #fff; }
 .zebra-print { border: 1px solid #1b7549; background: #1b7549; color: #fff; }
-.zebra-find:disabled, .zebra-print:disabled { opacity: .5; cursor: not-allowed; }
-.zebra-device-label { display: flex; flex: 1; min-width: 200px; flex-direction: column; gap: 5px; font-weight: 700; font-size: 10px; color: #34445c; }
-.zebra-device-label select { width: 100%; height: 38px; background: #fff; color: #15243b; border: 1px solid #aebed2; border-radius: 6px; padding: 0 9px; }
-.zebra-direct-note { margin-top: 10px; }
-.zebra-sent { color: #1b7549; font-weight: 650; }
-.zebra-suggestion { margin: 12px 0 0; padding: 9px 11px; border: 1px solid #cfdeef; border-radius: 7px; background: #f2f6fb; color: #344c6d; font-size: 11px; line-height: 1.4; }
-.zebra-suggestion strong { color: #173f83; }
-.zebra-hint { margin-top: 10px; }
-.zebra-feedback { font-size: 11px; color: #805d12; margin: 10px 0 0; }
+.zebra-find { border: 1px solid #aebed2; background: #fff; color: #1d416f; }
+.zebra-actions button:disabled { opacity: .5; cursor: not-allowed; }
+.zebra-device-label { display: flex; min-width: 190px; max-width: 340px; flex: 1; flex-direction: column; gap: 4px; font-weight: 700; font-size: 10px; color: #34445c; }
+.zebra-panel button:focus-visible, .zebra-panel input:focus-visible, .zebra-panel select:focus-visible { outline: 2px solid #2456c4; outline-offset: 2px; }
+.zebra-feedback { font-size: 11px; color: #805d12; margin: 9px 0 0; }
 .zebra-error { color: #b42318; }
-@media(max-width:730px) { .zebra-options { grid-template-columns: repeat(2,minmax(0,1fr)); } .zebra-download { grid-column: 1/-1; } .zebra-mode { width: 100%; box-sizing: border-box; } .zebra-mode button { flex: 1; } }
-@media(max-width:440px) { .zebra-options { grid-template-columns: 1fr; } }
+.zebra-sent { color: #1b7549; font-weight: 650; }
+@media (max-width: 680px) { .zebra-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } .zebra-settings > summary { align-items: flex-start; } }
+@media (max-width: 440px) { .zebra-options { grid-template-columns: 1fr; } .zebra-actions button { flex: 1; } .zebra-device-label { min-width: 100%; max-width: 100%; } .zebra-expand-hint { display: none; } }
 @media print { .zebra-panel { display: none !important; } }
 </style>
