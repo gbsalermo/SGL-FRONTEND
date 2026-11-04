@@ -51,6 +51,8 @@ const POL_MILIMETROS = 25.4
 
 /** Tamanhos iniciais sugeridos para mídia térmica; não são padrões físicos universais. */
 export const ALTURAS_PADRAO_ZEBRA_MM = [125, 140, 150, 160, 175, 180, 200, 225, 250, 275, 300] as const
+/** Na horizontal, comprimentos menores também podem acomodar o mesmo conteúdo. */
+export const ALTURAS_HORIZONTAIS_ZEBRA_MM = [90, 100, 110, 120, ...ALTURAS_PADRAO_ZEBRA_MM] as const
 
 export function alturaInicialZpl(documento: DocumentoZpl): number {
   return 125
@@ -96,8 +98,10 @@ export function recomendarConfiguracaoZpl(
   dpi: ResolucaoZebra,
   orientacao: OrientacaoConteudoZpl = 'VERTICAL',
 ): ConfiguracaoZpl {
-  const minimo = alturaInicialZpl(documento)
-  for (const alturaMm of ALTURAS_PADRAO_ZEBRA_MM) {
+  const minimo = orientacao === 'HORIZONTAL' ? 90 : alturaInicialZpl(documento)
+  const opcoes = orientacao === 'HORIZONTAL'
+    ? ALTURAS_HORIZONTAIS_ZEBRA_MM : ALTURAS_PADRAO_ZEBRA_MM
+  for (const alturaMm of opcoes) {
     if (alturaMm < minimo) continue
     const configuracao: ConfiguracaoZpl = { larguraMm, alturaMm, dpi, ...(orientacao === 'HORIZONTAL' ? { orientacao } : {}) }
     try {
@@ -105,10 +109,12 @@ export function recomendarConfiguracaoZpl(
       return configuracao
     } catch (e) {
       if (!(e instanceof Error) ||
-          !/não cabe|não há espaço para o rodapé/i.test(e.message)) throw e
+          !/não cabe|não há espaço|excede|ultrapassa|pequena demais|muito grande|estreita demais|não há largura|quadro horizontal/i.test(e.message)) throw e
     }
   }
-  throw new Error('Este conteúdo não cabe nos formatos sugeridos (até 300 mm). Aumente a largura ou use a impressão A4.')
+  throw new Error(orientacao === 'HORIZONTAL'
+    ? 'O conteúdo horizontal não cabe nos formatos compatíveis até 300 mm. Experimente outra largura física ou a orientação vertical.'
+    : 'Este conteúdo não cabe nos formatos sugeridos (até 300 mm). Aumente a largura ou use a impressão A4.')
 }
 
 export function milimetrosParaPontos(mm: number, dpi: ResolucaoZebra): number {
@@ -615,46 +621,73 @@ export function gerarDocumentoZplHorizontal(
     throw new Error('O cabeçalho horizontal excede o espaço útil da etiqueta.')
   }
 
-  // Blocos independentes: colunas distribuídas na largura útil, sem cortar
-  // observações ou perder campos de risco e fiscalização.
-  const cols = Math.min(7, Math.max(1, Math.floor((util + gap) / (px(280) + gap))))
-  const colW = Math.floor((util - (cols - 1) * gap) / cols)
-  const alturas = Array.from({ length: cols }, () => bodyY)
-  const blocos = documento.secoes.map(secao => {
-    const campos = validos(secao.campos)
-    if (!campos.length) return null
-    let medida = px(14) + quebrar(secao.titulo.toUpperCase(), colW - px(21), px(16)).length * (px(16) + px(2))
-    for (const campo of campos) {
-      const validoW = colW - px(16)
-      medida += px(2)
-        + quebrar(campo.rotulo.toUpperCase(), validoW, rotulo).length * (rotulo + px(2))
-        + quebrar(campo.valor, validoW, fonte).length * (fonte + px(2)) + px(4)
-    }
-    return { secao, campos, medida: medida + px(8) }
-  }).filter((s): s is NonNullable<typeof s> => s !== null)
+  // Experimente distribuições de 1 a N colunas: a escolha leva em conta
+  // o espaço real utilizado e evita grandes áreas vazias entre os quadros.
+  // Seções nunca são truncadas; todas devem caber integralmente.
+  const maxColunas = Math.max(1, Math.min(6, Math.floor((util + gap) / (px(225) + gap))))
+  const secoes = documento.secoes.map(secao => ({
+    secao, campos: validos(secao.campos),
+  })).filter(item => item.campos.length > 0)
 
-  for (const bloco of blocos) {
-    const indice = alturas.indexOf(Math.min(...alturas))
-    const x = m + indice * (colW + gap)
-    const yy = alturas[indice]
-    if (yy + bloco.medida > finalCorpo) {
-      throw new Error('O conteúdo horizontal não cabe nesta etiqueta. Aumente a altura física ou use o modo vertical.')
+  type BlocoHorizontal = {
+    secao: SecaoZpl
+    campos: DadosValidos[]
+    medida: number
+    coluna: number
+    topo: number
+  }
+  let melhor: { blocos: BlocoHorizontal[]; colunas: number; largura: number; ocupacao: number } | null = null
+
+  for (let numero = 1; numero <= maxColunas; numero++) {
+    const largura = Math.floor((util - (numero - 1) * gap) / numero)
+    const alturas = Array.from({ length: numero }, () => bodyY)
+    const blocos: BlocoHorizontal[] = []
+    let cabe = true
+
+    for (const item of secoes) {
+      const larguraTexto = largura - px(16)
+      const tituloLinhas = quebrar(item.secao.titulo.toUpperCase(), largura - px(21), px(16)).length
+      let medida = px(7) + tituloLinhas * (px(16) + px(2)) + px(5)
+      for (const campo of item.campos) {
+        medida += quebrar(campo.rotulo.toUpperCase(), larguraTexto, rotulo).length * (rotulo + px(2))
+        medida += px(1) + quebrar(campo.valor, larguraTexto, fonte).length * (fonte + px(2)) + px(4)
+      }
+      medida += px(7)
+      const indice = alturas.indexOf(Math.min(...alturas))
+      const topo = alturas[indice]
+      if (topo + medida > finalCorpo) { cabe = false; break }
+      blocos.push({ ...item, medida, coluna: indice, topo })
+      alturas[indice] += medida + gap
     }
-    retangulo(x, yy, colW, bloco.medida, px(1))
+    if (!cabe) continue
+    // Priorizar menos colunas e maior ocupação da altura útil, diminuindo as
+    // lacunas entre quadros; usar mais colunas somente se o conteúdo exigir.
+    const ocupacao = (Math.max(...alturas) - bodyY) / Math.max(px(1), finalCorpo - bodyY)
+    const pontuacao = numero * 100 - ocupacao
+    if (!melhor || pontuacao < melhor.colunas * 100 - melhor.ocupacao) {
+      melhor = { blocos, colunas: numero, largura, ocupacao }
+    }
+  }
+
+  if (!melhor) {
+    throw new Error('O conteúdo horizontal não cabe nesta etiqueta. Aumente a altura física ou use o modo vertical.')
+  }
+
+  for (const bloco of melhor.blocos) {
+    const x = m + bloco.coluna * (melhor.largura + gap)
+    const yy = bloco.topo
+    retangulo(x, yy, melhor.largura, bloco.medida, px(1))
     let campoY = yy + px(7)
     retangulo(x + px(4), campoY + px(2), px(4), px(17), px(4))
-    campoY = escrever(x + px(13), campoY, bloco.secao.titulo.toUpperCase(), px(16), colW - px(21)) + px(5)
+    campoY = escrever(x + px(13), campoY, bloco.secao.titulo.toUpperCase(), px(16), melhor.largura - px(21)) + px(5)
     for (const campo of bloco.campos) {
-      campoY = escrever(x + px(8), campoY, campo.rotulo.toUpperCase(), rotulo, colW - px(16))
-      campoY = escrever(x + px(8), campoY + px(1), campo.valor, fonte, colW - px(16)) + px(4)
+      campoY = escrever(x + px(8), campoY, campo.rotulo.toUpperCase(), rotulo, melhor.largura - px(16))
+      campoY = escrever(x + px(8), campoY + px(1), campo.valor, fonte, melhor.largura - px(16)) + px(4)
     }
-    if (campoY > yy + bloco.medida - px(3)) {
-      throw new Error('Os campos não cabem no quadro horizontal; aumente a altura física.')
+    if (campoY > yy + bloco.medida - px(2)) {
+      throw new Error('Os campos ultrapassaram o quadro horizontal; a impressão foi bloqueada.')
     }
-    alturas[indice] = yy + bloco.medida + gap
   }
-  const fimDados = Math.max(bodyY, ...alturas)
-  if (fimDados > finalCorpo + gap) throw new Error('O conteúdo horizontal ultrapassa a área útil.')
 
   // Aviso e identificação no rodapé, sem cortar informações.
   const footerY = h - m - px(30)
