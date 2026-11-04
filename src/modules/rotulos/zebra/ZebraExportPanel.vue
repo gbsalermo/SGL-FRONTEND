@@ -228,9 +228,7 @@ async function baixar() {
           Altura sugerida para <strong>{{ orientacao === 'HORIZONTAL' ? 'horizontal' : 'vertical' }}:
           {{ recomendacao.config.alturaMm }} mm</strong>. O cálculo considera todo o conteúdo, incluindo os pictogramas.
         </p>
-        <p v-else-if="automatico && recomendacao.erro" class="zebra-feedback zebra-error" role="alert">
-          {{ recomendacao.erro }}
-        </p>
+
         <p class="zebra-hint">
           A orientação gira o conteúdo e os gráficos, mantendo a largura física escolhida. No automático, o SGL recomenda
           a menor altura que comporte a orientação selecionada; confirme as dimensões da etiqueta real antes de imprimir.
@@ -263,6 +261,9 @@ async function baixar() {
         @click="imprimirDiretamente">{{ imprimindoZebra ? 'Enviando...' : 'Imprimir na Zebra' }}</button>
     </div>
 
+    <p v-if="automatico && recomendacao.erro && documento" class="zebra-feedback zebra-error" role="alert">
+      {{ recomendacao.erro }}
+    </p>
     <p v-if="encaixeOrientacao.mensagem && documento" class="zebra-feedback zebra-error" role="alert">
       {{ encaixeOrientacao.mensagem }}
     </p>
