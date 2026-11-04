@@ -633,6 +633,7 @@ export function gerarDocumentoZplHorizontal(
     secao: SecaoZpl
     campos: DadosValidos[]
     medida: number
+    indice: number
     coluna: number
     topo: number
   }
@@ -644,7 +645,7 @@ export function gerarDocumentoZplHorizontal(
     const blocos: BlocoHorizontal[] = []
     let cabe = true
 
-    for (const item of secoes) {
+    const medidas = secoes.map((item, indice) => {
       const larguraTexto = largura - px(16)
       const tituloLinhas = quebrar(item.secao.titulo.toUpperCase(), largura - px(21), px(16)).length
       let medida = px(7) + tituloLinhas * (px(16) + px(2)) + px(5)
@@ -652,12 +653,15 @@ export function gerarDocumentoZplHorizontal(
         medida += quebrar(campo.rotulo.toUpperCase(), larguraTexto, rotulo).length * (rotulo + px(2))
         medida += px(1) + quebrar(campo.valor, larguraTexto, fonte).length * (fonte + px(2)) + px(4)
       }
-      medida += px(7)
+      return { ...item, indice, medida: medida + px(7) }
+    })
+    // Distribuir maiores quadros primeiro evita colunas cheias e outras vazias.
+    for (const item of medidas.sort((a, b) => b.medida - a.medida)) {
       const indice = alturas.indexOf(Math.min(...alturas))
       const topo = alturas[indice]
-      if (topo + medida > finalCorpo) { cabe = false; break }
-      blocos.push({ ...item, medida, coluna: indice, topo })
-      alturas[indice] += medida + gap
+      if (topo + item.medida > finalCorpo) { cabe = false; break }
+      blocos.push({ ...item, coluna: indice, topo })
+      alturas[indice] += item.medida + gap
     }
     if (!cabe) continue
     // Priorizar menos colunas e maior ocupação da altura útil, diminuindo as
@@ -673,7 +677,8 @@ export function gerarDocumentoZplHorizontal(
     throw new Error('O conteúdo horizontal não cabe nesta etiqueta. Aumente a altura física ou use o modo vertical.')
   }
 
-  for (const bloco of melhor.blocos) {
+  // Manter a ordem lógica do documento na sequência de comandos ZPL.
+  for (const bloco of melhor.blocos.sort((a, b) => a.indice - b.indice)) {
     const x = m + bloco.coluna * (melhor.largura + gap)
     const yy = bloco.topo
     retangulo(x, yy, melhor.largura, bloco.medida, px(1))
