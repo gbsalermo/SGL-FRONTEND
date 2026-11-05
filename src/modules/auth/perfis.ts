@@ -1,4 +1,4 @@
-import type { PerfilUsuario } from './types/session'
+import type { PerfilUsuario, SituacaoUsuario } from './types/session'
 
 // Mirrors the backend PerfilPolicy: the general administrator counts as both gestão and admin.
 export const PERFIS_GESTAO: PerfilUsuario[] = ['GESTOR', 'ADMINISTRADOR', 'ADMINISTRADOR_GERAL']
@@ -38,3 +38,14 @@ export const ROTULOS_PERFIL: Record<PerfilUsuario, string> = {
   PESQUISADOR: 'Pesquisador',
   ESTAGIARIO: 'Estagiário',
 }
+
+/**
+ * Usuário que entrou pelo AD como colaborador e ainda não foi aprovado. Trocar perfil ou laboratório
+ * dele não libera o acesso (a API recusa com USUARIO_PENDENTE): só "Aprovar", na aba Pendentes, faz isso.
+ */
+export function aguardaAprovacao(usuario?: { situacao?: SituacaoUsuario | null } | null) {
+  return usuario?.situacao === 'PENDENTE_VINCULACAO'
+}
+
+/** Onde a gestão aprova pendentes: tela de Vínculos já aberta na aba Pendentes. */
+export const ROTA_APROVAR_PENDENTES = { path: '/administracao/cadastros/vinculos', query: { aba: 'PENDENTES' } }

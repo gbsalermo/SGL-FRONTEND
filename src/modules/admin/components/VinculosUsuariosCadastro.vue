@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
+import { aguardaAprovacao, ROTA_APROVAR_PENDENTES } from '@/modules/auth/perfis'
 import { computed, onMounted, ref, watch } from 'vue'
 import { projetosService } from '@/modules/projetos/services/projetosService'
 import type { LaboratorioCadastro, ProjetoCadastro, UsuarioPermissao } from '@/modules/admin/types/cadastros'
@@ -363,7 +364,13 @@ onMounted(() => { void carregarResumo() })
         <div class="people-drawer-content">
           <div v-if="erro" class="people-feedback people-feedback--error" role="alert">{{ erro }}</div>
           <div v-if="sucesso" class="people-feedback people-feedback--success" role="status">{{ sucesso }}</div>
-          <div v-if="status(usuario) === 'PENDENTE'" class="people-pending-message">
+          <!-- Situação PENDENTE_VINCULACAO (aguarda aprovação) é diferente de "pendente de vinculação" abaixo:
+               salvar base ou trocar perfil não a libera; só Aprovar, na aba Pendentes. -->
+          <div v-if="aguardaAprovacao(usuario)" class="people-pending-message">
+            <strong>Este usuário aguarda aprovação.</strong>
+            <p>O acesso só é liberado em Aprovar, que define o perfil e o laboratório-base. <router-link :to="ROTA_APROVAR_PENDENTES">Ir para Pendentes →</router-link></p>
+          </div>
+          <div v-else-if="status(usuario) === 'PENDENTE'" class="people-pending-message">
             <strong>Este usuário precisa de vinculação.</strong>
             <p>Atribua um laboratório-base ou um vínculo operacional para disponibilizar contextos de trabalho. Este status não confirma a data de primeiro acesso.</p>
           </div>
@@ -372,12 +379,12 @@ onMounted(() => { void carregarResumo() })
             <p>Referência principal do usuário. Vínculos adicionais não a substituem.</p>
             <div class="people-inline-form">
               <label class="people-field"><span>Laboratório-base atual</span>
-                <select v-model="laboratorioBaseId" :disabled="!usuario.ativo || salvando">
+                <select v-model="laboratorioBaseId" :disabled="!usuario.ativo || salvando || aguardaAprovacao(usuario)">
                   <option value="">Sem laboratório-base</option>
                   <option v-for="l in laboratoriosValidos" :key="l.id" :value="l.id">{{ l.nome }}</option>
                 </select>
               </label>
-              <button type="button" class="people-primary" :disabled="!usuario.ativo || salvando || laboratorioBaseId === (baseAtual(usuario) || '')" @click="salvarBase">{{ salvando ? 'Salvando...' : 'Salvar base' }}</button>
+              <button type="button" class="people-primary" :disabled="!usuario.ativo || salvando || aguardaAprovacao(usuario) || laboratorioBaseId === (baseAtual(usuario) || '')" @click="salvarBase">{{ salvando ? 'Salvando...' : 'Salvar base' }}</button>
             </div>
           </section>
           <section class="people-section">
