@@ -4,8 +4,9 @@ export type TipoRiscoResiduo =
   | 'NENHUM' | 'INFLAMAVEL' | 'RADIOATIVO' | 'TOXICO' | 'CORROSIVO' | 'BIOLOGICO'
   | 'IRRITANTE' | 'PERIGO_SAUDE' | 'OXIDANTE' | 'EXPLOSIVO' | 'GAS_PRESSURIZADO' | 'PERIGO_AMBIENTAL'
 
+// As grandezas seguem o enum backend. Tipos de embalagem são campos distintos.
 export type UnidadeMedidaResiduo =
-  | 'ML' | 'L' | 'MG' | 'G' | 'KG' | 'UNIDADE' | 'REACAO' | 'CAIXA' | 'FRASCO' | 'AMPOLA' | 'PAR' | 'METRO' | 'OUTRO'
+  | 'ML' | 'L' | 'MG' | 'G' | 'KG' | 'METRO' | 'UNIDADE' | 'REACAO'
 
 export type EstadoFisicoResiduo = 'LIQUIDO' | 'SOLIDO' | 'SEMISSOLIDO' | 'GASOSO' | 'OUTRO'
 
