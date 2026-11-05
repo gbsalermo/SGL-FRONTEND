@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { perfisConcedidosPor } from '@/modules/auth/perfis'
+import { aguardaAprovacao, perfisConcedidosPor, ROTA_APROVAR_PENDENTES } from '@/modules/auth/perfis'
 
 describe('perfisConcedidosPor (regra 3b)', () => {
   it('gestor concede so perfis solicitantes', () => {
@@ -21,5 +21,19 @@ describe('perfisConcedidosPor (regra 3b)', () => {
   it('solicitante nao concede nada', () => {
     expect(perfisConcedidosPor('TECNICO')).toEqual([])
     expect(perfisConcedidosPor(null)).toEqual([])
+  })
+})
+
+describe('aguardaAprovacao', () => {
+  it('so a situacao PENDENTE_VINCULACAO conta como aguardando aprovacao', () => {
+    expect(aguardaAprovacao({ situacao: 'PENDENTE_VINCULACAO' })).toBe(true)
+    expect(aguardaAprovacao({ situacao: 'ATIVO' })).toBe(false)
+    // API antiga, sem o campo: nada bloqueado, a propria API recusa a troca se preciso.
+    expect(aguardaAprovacao({})).toBe(false)
+    expect(aguardaAprovacao(null)).toBe(false)
+  })
+
+  it('a rota de aprovacao abre a aba Pendentes de Vinculos', () => {
+    expect(ROTA_APROVAR_PENDENTES).toEqual({ path: '/administracao/cadastros/vinculos', query: { aba: 'PENDENTES' } })
   })
 })
