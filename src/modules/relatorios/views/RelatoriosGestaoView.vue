@@ -492,7 +492,7 @@ watch([
 })
 
 const projetosDoLaboratorio = computed(() =>
-  projetosContexto.value.filter((p) => !laboratorioId.value || p.laboratorioId === laboratorioId.value))
+  projetosContexto.value.filter((p) => !laboratorioId.value || p.laboratorios.some((l) => l.id === laboratorioId.value)))
 watch(laboratorioId, () => {
   movimentoProjetoId.value = ''
   movimentoSciId.value = ''

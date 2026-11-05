@@ -3,6 +3,8 @@ import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { aguardaAprovacao, ROTA_APROVAR_PENDENTES } from '@/modules/auth/perfis'
+import LaboratoriosProjetoSelect from '@/modules/projetos/components/LaboratoriosProjetoSelect.vue'
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 import CatalogosResiduosSolucoesView from '@/modules/admin/views/CatalogosResiduosSolucoesView.vue'
 
 import type { PerfilUsuario } from '@/modules/auth/types/session'
@@ -44,7 +46,8 @@ interface LaboratorioForm {
 }
 
 interface ProjetoForm {
-  laboratorioId: string
+  unidadeId: string
+  laboratorioIds: string[]
   nome: string
   descricao: string
   dataInicio: string
@@ -179,8 +182,18 @@ const laboratoriosFiltrados = computed(() => laboratorios.value.filter((item) =>
   return bateBusca && (mostrarInativos.value || item.ativo)
 }))
 
+const laboratoriosAtivosDaUnidade = computed<LaboratorioResumo[]>(() => laboratorios.value
+  .filter((lab) => lab.ativo && lab.unidadeId === projetoForm.value.unidadeId)
+  .map((lab) => ({ id: lab.id, nome: lab.nome })))
+
+// Laboratórios já ligados ao projeto em edição: os inativos continuam selecionáveis para manter o vínculo.
+const vinculadosEmEdicao = computed<LaboratorioResumo[]>(() => {
+  const atual = projetos.value.find((item) => item.id === idEdicao.value)
+  return atual?.laboratorios ?? []
+})
+
 const projetosFiltrados = computed(() => projetos.value.filter((item) => {
-  const bateBusca = !termoBusca.value || [item.nome, item.descricao ?? '', item.laboratorioNome, item.responsavel ?? '']
+  const bateBusca = !termoBusca.value || [item.nome, item.descricao ?? '', item.laboratorios.map((lab) => lab.nome).join(', '), item.responsavel ?? '']
     .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termoBusca.value))
   return bateBusca && (mostrarInativos.value || item.ativo)
 }))
@@ -231,7 +244,8 @@ function novoLaboratorio(): LaboratorioForm {
 
 function novoProjeto(): ProjetoForm {
   return {
-    laboratorioId: '',
+    unidadeId: session.unidadeEmOperacaoId ?? '',
+    laboratorioIds: [],
     nome: '',
     descricao: '',
     dataInicio: '',
@@ -354,7 +368,8 @@ function editarLaboratorio(item: LaboratorioCadastro) {
 function editarProjeto(item: ProjetoCadastro) {
   idEdicao.value = item.id
   projetoForm.value = {
-    laboratorioId: item.laboratorioId,
+    unidadeId: item.unidadeId,
+    laboratorioIds: item.laboratorios.map((lab) => lab.id),
     nome: item.nome,
     descricao: item.descricao ?? '',
     dataInicio: item.dataInicio ?? '',
@@ -481,8 +496,8 @@ async function salvarLaboratorio() {
 }
 
 async function salvarProjeto() {
-  if (!projetoForm.value.laboratorioId || !projetoForm.value.nome.trim()) {
-    erroModal.value = 'Informe o laboratório e o nome do projeto.'
+  if (projetoForm.value.laboratorioIds.length < 1 || !projetoForm.value.nome.trim()) {
+    erroModal.value = 'Informe ao menos um laboratório e o nome do projeto.'
     return
   }
   if (projetoForm.value.dataInicio && projetoForm.value.dataFim && projetoForm.value.dataFim < projetoForm.value.dataInicio) {
@@ -494,7 +509,7 @@ async function salvarProjeto() {
     return
   }
   const payload: ProjetoRequest = {
-    laboratorioId: projetoForm.value.laboratorioId,
+    laboratorioIds: projetoForm.value.laboratorioIds,
     nome: projetoForm.value.nome.trim(),
     descricao: projetoForm.value.descricao.trim() || null,
     dataInicio: projetoForm.value.dataInicio || null,
@@ -653,7 +668,7 @@ async function alternarProjeto(item: ProjetoCadastro) {
   erro.value = ''
   try {
     await cadastrosAdminService.atualizarProjeto(item.id, {
-      laboratorioId: item.laboratorioId,
+      laboratorioIds: item.laboratorios.map((lab) => lab.id),
       nome: item.nome,
       descricao: item.descricao,
       dataInicio: item.dataInicio,
@@ -895,12 +910,12 @@ onMounted(() => {
 
         <div v-else-if="aba === 'projetos'" class="table-wrap">
           <table>
-            <thead><tr><th>Situação</th><th>Projeto / SEG</th><th>Laboratório</th><th>Responsável</th><th>Período</th><th></th></tr></thead>
+            <thead><tr><th>Situação</th><th>Projeto / SEG</th><th>Laboratórios</th><th>Responsável</th><th>Período</th><th></th></tr></thead>
             <tbody>
               <tr v-for="item in projetosFiltrados" :key="item.id">
                 <td><span class="status" :class="item.ativo ? 'status--active' : 'status--inactive'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td>
                 <td><strong>{{ item.nome }}</strong><small>{{ item.codigoSeg || 'SEG não definido' }} · {{ rotuloEnum(item.status) }}</small><small>{{ item.descricao || 'Sem descrição' }}</small></td>
-                <td>{{ item.laboratorioNome }}</td>
+                <td>{{ item.laboratorios.map((lab) => lab.nome).join(', ') }}</td>
                 <td>{{ item.responsavel || 'Não informado' }}</td>
                 <td>{{ formatarData(item.dataInicio) }} → {{ formatarData(item.dataFim) }}</td>
                 <td class="actions">
@@ -1038,7 +1053,7 @@ onMounted(() => {
 
         <form v-else-if="modal === 'projeto'" class="modal-body" @submit.prevent="salvarProjeto">
           <div class="form-grid">
-            <label class="field"><span>Laboratório *</span><select v-model="projetoForm.laboratorioId" required><option value="">Selecione...</option><option v-for="lab in laboratorios.filter((item) => item.ativo || item.id === projetoForm.laboratorioId)" :key="lab.id" :value="lab.id">{{ lab.nome }}</option></select></label>
+            <LaboratoriosProjetoSelect v-model="projetoForm.laboratorioIds" :opcoes="laboratoriosAtivosDaUnidade" :vinculados="vinculadosEmEdicao" />
             <label class="field"><span>Nome *</span><input v-model="projetoForm.nome" required /></label>
             <label class="field"><span>Data de início</span><input v-model="projetoForm.dataInicio" type="date" /></label>
             <label class="field"><span>Data final</span><input v-model="projetoForm.dataFim" type="date" /></label>
