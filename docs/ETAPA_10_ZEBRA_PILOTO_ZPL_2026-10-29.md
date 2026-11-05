@@ -1,5 +1,18 @@
 # Etapa 10 — Piloto Zebra / ZPL — 29/10/2026
 
+
+## Checkpoint vigente — 05/11/2026: Etapa 10 validada, pré-merge; SGL em produção real
+
+**Estado operacional informado pelo responsável:** o SGL já está **em produção e em uso real**. Esta informação substitui a caracterização genérica de que o projeto inteiro estaria apenas em DEV/pré-produção. Registros históricos sobre ambientes DEV/DEMO e limitações de autenticação continuam válidos para seus respectivos checkpoints; a declaração de produção não comprova, por si, homologação de segurança, carga, E2E ou integração institucional definitiva.
+
+**Etapa 10 — Rótulos e impressão:** o responsável confirmou **“validado”** em 05/11/2026 após a revisão do checklist de fechamento (Produto, Resíduo, Solução, Documento de Entrada, orientações, impressão, cadastro e regressão). Registrar como **aceite funcional reportado pelo responsável**, não como execução independente de testes pelo assistente. Permanecem distintos o aceite funcional da etapa e a certificação física de cada modelo de impressora Zebra, de mídia, firmware, acentuação e pictogramas, que requer evidência específica por equipamento.
+
+**Cadastro de Produtos:** as opções oferecidas para novos produtos são ML, L, MG, G, KG, METRO e UNIDADE. A opção REACAO foi retirada da criação por ser contagem unitária para o usuário; produtos históricos em REACAO continuam editáveis sem conversão silenciosa ou migração de dados. Backend mantém o enum REACAO por compatibilidade. Kits podem continuar tendo apresentação e conteúdo por embalagem próprios, com consumo de unidades inteiras conforme as regras de estoque já aprovadas.
+
+**Integração e merge:** branch frontend `collab/etapa-10-rotulos-impressao` preparada documentalmente para revisão/merge pelo responsável. GitLab institucional permanece canônico e GitHub é espelho colaborativo; não declarar merge ou sincronização GitLab concluídos sem evidência. Não foram realizadas alterações de código backend neste fechamento. O aceite informado não substitui conferência de CI/build do HEAD final nem testes de implantação no ambiente real.
+
+---
+
 **Estado vigente em 03/11/2026:** o suporte Zebra/ZPL foi estendido a **Soluções, Entradas de Lote, Produtos e Resíduos** na branch `collab/etapa-10-rotulos-impressao`. O visual de Soluções foi aprovado pelo mantenedor; os novos modelos de Produto/Resíduo ainda aguardam build, testes locais e validação visual. A impressão física ainda não foi homologada. O teste local aprovado em 29/10/2026 corresponde ao piloto anterior e não substitui a validação desta ampliação.
 
 ## Objetivo e limites
