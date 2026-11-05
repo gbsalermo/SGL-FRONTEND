@@ -81,12 +81,7 @@ const unidadesMedida: Array<{ value: UnidadeMedidaResiduo; label: string }> = [
   { value: 'KG', label: 'kg' },
   { value: 'UNIDADE', label: 'Unidade' },
   { value: 'REACAO', label: 'Reação' },
-  { value: 'CAIXA', label: 'Caixa' },
-  { value: 'FRASCO', label: 'Frasco' },
-  { value: 'AMPOLA', label: 'Ampola' },
-  { value: 'PAR', label: 'Par' },
   { value: 'METRO', label: 'Metro' },
-  { value: 'OUTRO', label: 'Outro' },
 ]
 
 const session = useSessionStore()
