@@ -345,6 +345,11 @@ body.sgl-dark-active .gestao-main .admin-page .status--inactive {
   color: var(--sgl-neutral-strong);
 }
 
+body.sgl-dark-active .gestao-main .admin-page .status--pending {
+  background: #3a2c12;
+  color: #F2C46D;
+}
+
 body.sgl-dark-active .gestao-main .admin-page .controlled {
   color: var(--sgl-primary);
   font-weight: var(--sgl-font-weight-semibold);
