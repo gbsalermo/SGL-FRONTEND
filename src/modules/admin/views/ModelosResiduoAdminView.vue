@@ -69,7 +69,7 @@ const form = ref<ModeloForm>(novoForm())
 
 const estadosFisicos: EstadoFisicoModeloResiduo[] = ['LIQUIDO', 'SOLIDO', 'SEMISSOLIDO', 'GASOSO', 'OUTRO']
 const unidadesMedida: UnidadeMedidaCadastro[] = [
-  'ML', 'L', 'MG', 'G', 'KG', 'UNIDADE', 'REACAO', 'CAIXA', 'FRASCO', 'AMPOLA', 'PAR', 'METRO', 'OUTRO',
+  'ML', 'L', 'MG', 'G', 'KG', 'METRO', 'UNIDADE', 'REACAO',
 ]
 const niveisRisco: NivelRiscoCadastro[] = ['NENHUM', 'BAIXO', 'MEDIO', 'ALTO']
 const tiposRisco: TipoRiscoCadastro[] = [
@@ -421,7 +421,7 @@ onMounted(carregar)
 
           <div class="grid three">
             <label><span>Recipiente</span><input v-model="form.recipiente" maxlength="255" required /></label>
-            <label><span>Unidade padrão</span><select v-model="form.unidadeMedida"><option v-for="item in unidadesMedida" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select></label>
+            <label><span>Unidade padrão</span><select v-model="form.unidadeMedida"><option v-for="item in unidadesMedida" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select><small>Informe frasco, bombona ou outro recipiente no campo Recipiente, não como unidade de medida.</small></label>
             <label><span>Nível de risco</span><select v-model="form.nivelRisco"><option v-for="item in niveisRisco" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select></label>
           </div>
 
