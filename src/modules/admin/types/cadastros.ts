@@ -67,9 +67,10 @@ export interface ProjetoRequest {
   ativo: boolean
 }
 
+// Coincide com com.sgl.model.enums.UnidadeMedida do backend.
+// Frasco, caixa, ampola e similares são tipos de embalagem, não unidades de medida.
 export type UnidadeMedidaCadastro =
-  | 'ML' | 'L' | 'MG' | 'G' | 'KG' | 'UNIDADE' | 'REACAO'
-  | 'CAIXA' | 'FRASCO' | 'AMPOLA' | 'PAR' | 'METRO' | 'OUTRO'
+  | 'ML' | 'L' | 'MG' | 'G' | 'KG' | 'UNIDADE' | 'REACAO' | 'METRO'
 
 export type NivelRiscoCadastro = 'NENHUM' | 'BAIXO' | 'MEDIO' | 'ALTO'
 
