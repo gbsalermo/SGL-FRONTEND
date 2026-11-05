@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 import CargosSubstituirTable from '@/modules/admin/components/CargosSubstituirTable.vue'
 import ImportarPessoaDrawer from '@/modules/admin/components/ImportarPessoaDrawer.vue'
@@ -14,7 +15,10 @@ const usuarios = ref<UsuarioPermissao[]>([])
 const laboratorios = ref<LaboratorioCadastro[]>([])
 const projetos = ref<ProjetoCadastro[]>([])
 const pendentes = ref<UsuarioSessao[]>([])
-const aba = ref<'USUARIOS' | 'PENDENTES' | 'CARGOS'>('USUARIOS')
+type Aba = 'USUARIOS' | 'PENDENTES' | 'CARGOS'
+// ?aba=PENDENTES (link "Aprovar" de Cadastros) abre direto na aba pedida; sem query, Usuários.
+const abaInicial = String(useRoute().query.aba ?? '').toUpperCase()
+const aba = ref<Aba>((['USUARIOS', 'PENDENTES', 'CARGOS'] as const).find((a) => a === abaInicial) ?? 'USUARIOS')
 const erro = ref('')
 const sucesso = ref('')
 const carregando = ref(false)
