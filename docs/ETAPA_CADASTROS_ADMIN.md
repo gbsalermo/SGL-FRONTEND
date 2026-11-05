@@ -226,3 +226,19 @@ A autorização definitiva no backend continua vinculada à futura etapa de aute
 Removido o cartão lateral duplicado **“Resíduos”**, anteriormente injetado em `.tabs-card` por `ResiduoPredeterminadoEmBreve.vue` a partir de `App.vue`. O componente, que não realizava operações próprias, foi excluído juntamente com seus seletores CSS órfãos. A opção **“Resíduos e Soluções”** permanece como único acesso da navegação de Cadastros para os dois tipos de modelo, conservando os editores existentes, suas chamadas de API e os redirecionamentos de URLs antigas.
 
 Ajustado o espaçamento interno do cabeçalho **“Modelos de resíduo”** quando exibido na aba integrada, com recuo superior e lateral, sem alterar os formulários. Mudança exclusivamente de frontend. Validação local de build e conferência visual ainda pendentes; nenhum merge.
+
+## Correção de unidades de medida inválidas no cadastro — 05/11/2026
+
+Em uma validação real, o cadastro do Produto `BDS` com `unidadeMedida: FRASCO` retornou HTTP 400 **“O JSON enviado está malformado ou contém valores inválidos.”**. Inspeção do backend confirmou a origem: o `ProdutoRequestDTO` recebe o enum `com.sgl.model.enums.UnidadeMedida`, cujos valores válidos são **ML, L, MG, G, KG, METRO, UNIDADE e REACAO**. A interface oferecia indevidamente também `CAIXA`, `FRASCO`, `AMPOLA`, `PAR` e `OUTRO`, pertencentes ao conceito de embalagem/recipiente, e o Jackson rejeitava esses valores antes do serviço.
+
+**Correção no frontend colaborativo:**
+- `src/modules/admin/types/cadastros.ts` e `src/modules/residuos/types/residuo.ts`: tipos de unidade alinhados ao enum real do backend.
+- `src/modules/admin/views/CadastrosAdminView.vue`: apenas opções válidas; explicação explícita de unidade de medida versus apresentação, exemplo “frasco de 1 L”, validação preventiva em `salvarProduto` caso ainda exista um valor antigo durante hot reload.
+- `src/modules/admin/views/ModelosResiduoAdminView.vue` e `src/modules/residuos/views/solicitante/InformarResiduoView.vue`: remoção das mesmas opções inválidas, conservando o texto livre de recipiente.
+- Nenhuma conversão silenciosa de embalagens em volume, nenhuma mudança no modelo de Estoque, em FEFO/FIFO, nas entidades Java ou nas migrations.
+
+**Verificar:** reiniciar o Vite após a exclusão intencional de `ResiduoPredeterminadoEmBreve.vue` (uma tentativa de hot reload do caminho antigo pode gerar 404); executar `npm run build`; criar Produto com unidade `UNIDADE` e apresentação “Frasco”, depois testar produto em `ML`/`L` e um Modelo de Resíduo.
+
+**Investigação independente:** erros HTTP 400 em `GET /api/v1/projetos` e `GET /api/v1/atividades` não podem ser atribuídos a `FRASCO`. Esses endpoints exigem `X-SGL-Unidade-Id`; verificar na aba Network o método, mensagem da resposta e o valor UUID do header no contexto da sessão. A API `/api/v1/produtos` em GET pode também ter erros de header; não deduzir sua causa somente pelo console. A sessão DEV é persistida em `sgl.dev-session`; não remover filtros de tenant nem contornar isolamento.
+
+**Estado:** código frontend corrigido no GitHub; validações locais e confirmação da causa dos outros 400 ainda pendentes. Sem merge.
