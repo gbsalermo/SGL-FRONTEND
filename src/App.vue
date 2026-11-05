@@ -2,7 +2,6 @@
 import '@/modules/admin/styles/cadastros-scale.css'
 import AdminCadastrosNavLink from '@/modules/admin/components/AdminCadastrosNavLink.vue'
 import EstoqueFiltroEmbalagem from '@/modules/estoque/components/EstoqueFiltroEmbalagem.vue'
-import ResiduoPredeterminadoEmBreve from '@/modules/residuos/components/ResiduoPredeterminadoEmBreve.vue'
 import ProdutoRotuloAtalho from '@/modules/produtos/components/ProdutoRotuloAtalho.vue'
 import SolicitanteThemeToggle from '@/components/SolicitanteThemeToggle.vue'
 </script>
@@ -13,7 +12,6 @@ import SolicitanteThemeToggle from '@/components/SolicitanteThemeToggle.vue'
     <SolicitanteThemeToggle />
     <ProdutoRotuloAtalho />
     <AdminCadastrosNavLink />
-    <ResiduoPredeterminadoEmBreve />
     <EstoqueFiltroEmbalagem />
   </v-app>
 </template>
