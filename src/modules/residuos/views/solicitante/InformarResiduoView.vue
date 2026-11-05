@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { contextoOperacionalService } from '@/modules/operacao/services/contextoOperacionalService'
 import { prepararSelecaoContextoEstagiario, type ContextoParticipacaoOperacional } from '@/modules/operacao/types/contextoOperacional'
 
@@ -23,6 +23,7 @@ import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
+import { laboratorioDoProjetoValido, laboratorioInicial, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
 
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
 type ModoPreenchimento = 'MANUAL' | 'MODELO'
@@ -104,9 +105,15 @@ const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
 const participacoes = ref<ContextoParticipacaoOperacional[]>([])
 const participacaoSelecionadaId = ref('')
 const participacaoSelecionada = computed(() => participacoes.value.find(p => p.participacaoId === participacaoSelecionadaId.value))
+// The participation fixes the project, but the project may span several laboratories:
+// the estagiário picks one of them (the API rejects a choice outside the project).
+const laboratorioProjetoId = ref('')
+const laboratoriosDoProjeto = computed(() => participacaoSelecionada.value?.laboratorios ?? [])
+watch(participacaoSelecionadaId, () => { laboratorioProjetoId.value = laboratorioInicial(laboratoriosDoProjeto.value) })
 const laboratorioOperacionalId = computed(() => estagiario.value
-  ? participacaoSelecionada.value?.laboratorioId || ''
+  ? laboratorioDoProjetoValido(laboratoriosDoProjeto.value, laboratorioProjetoId.value)
   : laboratorioSelecionadoId.value)
+const laboratorioDoProjeto = computed(() => laboratoriosDoProjeto.value.find(l => l.id === laboratorioOperacionalId.value))
 const laboratorioOperacional = computed(() => laboratorios.value.find(l => l.id === laboratorioOperacionalId.value))
 const produtos = ref<ProdutoResiduoResponse[]>([])
 const classesResiduo = ref<ClasseResiduoResponse[]>([])
@@ -410,13 +417,14 @@ async function selecionarLaboratorio() {
 }
 
 function selecionarParticipacao() {
-  // Projeto e laboratório nunca vêm de seleção livre para estagiários.
+  // The project comes from the participation; the laboratory may only be one of that project's.
   projetoId.value = participacaoSelecionada.value?.projetoId || ''
   errosFormulario.value = {}
 }
 
 function validarFormulario() {
-  if (!usuario.value?.id || !laboratorioOperacionalId.value) {
+  // For an estagiário the laboratory comes from the project and a missing choice is a form error below.
+  if (!usuario.value?.id || (!estagiario.value && !laboratorioOperacionalId.value)) {
     throw new Error('Nenhum laboratório autorizado para informar resíduos. Solicite a vinculação à Gestão.')
   }
 
@@ -427,6 +435,8 @@ function validarFormulario() {
   const erros: Record<string, string> = {}
   if (estagiario.value && !participacaoSelecionada.value?.elegivel) {
     erros.participacao = 'Selecione uma participação ativa e elegível.'
+  } else if (estagiario.value && !laboratorioOperacionalId.value) {
+    erros.laboratorioProjeto = 'Selecione o laboratório do projeto em que o resíduo foi gerado.'
   }
 
   if (nivelRiscoInformado.value !== 'NENHUM' && riscosInformados.value.length === 0) {
@@ -558,7 +568,7 @@ onMounted(carregarDados)
       </article>
       <article>
         <span>Laboratório de origem</span>
-        <strong>{{ estagiario ? (participacaoSelecionada?.laboratorioNome || 'Selecione uma participação') : laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : 'Não vinculado') }}</strong>
+        <strong>{{ estagiario ? (laboratorioDoProjeto?.nome || (participacaoSelecionada ? 'Selecione abaixo' : 'Selecione uma participação')) : laboratorioOperacional?.nome || (gestao ? 'Selecione abaixo' : 'Não vinculado') }}</strong>
         <small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small>
       </article>
     </div>
@@ -653,12 +663,22 @@ onMounted(carregarDados)
           <select v-model="participacaoSelecionadaId" required :disabled="carregandoDados || enviando" :data-form-error="Boolean(errosFormulario.participacao)" @change="selecionarParticipacao">
             <option value="">Selecione uma participação elegível</option>
             <option v-for="participacao in participacoes" :key="participacao.participacaoId" :value="participacao.participacaoId">
-              {{ participacao.atividadeNome || participacao.atividadeCodigoSeg }} — {{ participacao.projetoNome }} / {{ participacao.laboratorioNome }}
+              {{ participacao.atividadeNome || participacao.atividadeCodigoSeg }} — {{ participacao.projetoNome }} / {{ participacao.laboratorios.map(l => l.nome).join(', ') }}
             </option>
           </select>
           <small v-if="errosFormulario.participacao">{{ errosFormulario.participacao }}</small>
-          <small v-if="participacaoSelecionada">SCI: {{ participacaoSelecionada.sciNome || 'Não informado' }} · Projeto: {{ participacaoSelecionada.projetoNome }} · Laboratório: {{ participacaoSelecionada.laboratorioNome }}</small>
+          <small v-if="participacaoSelecionada">SCI: {{ participacaoSelecionada.sciNome || 'Não informado' }} · Projeto: {{ participacaoSelecionada.projetoNome }} · {{ participacaoSelecionada.laboratorios.length > 1 ? 'Laboratórios' : 'Laboratório' }}: {{ participacaoSelecionada.laboratorios.map(l => l.nome).join(', ') }}</small>
           <small v-if="!carregandoDados && !participacoes.length">Não existem participações elegíveis para informar resíduos.</small>
+        </label>
+
+        <label v-if="estagiario && precisaEscolherLaboratorio(laboratoriosDoProjeto)" class="field">
+          <span>Laboratório do projeto <small>(obrigatório)</small></span>
+          <select id="laboratorio-projeto" v-model="laboratorioProjetoId" required :data-form-error="Boolean(errosFormulario.laboratorioProjeto)" :disabled="carregandoDados || enviando">
+            <option value="">Selecione o laboratório</option>
+            <option v-for="laboratorio in laboratoriosDoProjeto" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+          </select>
+          <small v-if="errosFormulario.laboratorioProjeto">{{ errosFormulario.laboratorioProjeto }}</small>
+          <small>O projeto está em mais de um laboratório. Escolha o indicado pelo responsável do projeto.</small>
         </label>
 
         <div class="form-grid form-grid--two">

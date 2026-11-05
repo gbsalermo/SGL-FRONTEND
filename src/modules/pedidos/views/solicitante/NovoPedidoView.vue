@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { pedidoService } from '@/modules/pedidos/services/pedidoService'
@@ -24,6 +24,7 @@ import {
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
+import { laboratorioDoProjetoValido, laboratorioInicial, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
 
 interface ItemForm {
   produtoId: string
@@ -66,9 +67,15 @@ const contextoResolvido = computed(() => resolverContextoEstagiario(
 ))
 const participacaoSelecionada = computed(() => opcoesContexto.value.contextosElegiveis
   .find(x => x.participacaoId === participacaoSelecionadaId.value))
+// The participation fixes the project, but the project may span several laboratories:
+// the estagiário picks one of them (the API rejects a choice outside the project).
+const laboratorioProjetoId = ref('')
+const laboratoriosDoProjeto = computed(() => contextoResolvido.value?.laboratorios ?? [])
+watch(participacaoSelecionadaId, () => { laboratorioProjetoId.value = laboratorioInicial(laboratoriosDoProjeto.value) })
 const laboratorioOperacionalId = computed(() => estagiario.value
-  ? contextoResolvido.value?.laboratorioId || ''
+  ? laboratorioDoProjetoValido(laboratoriosDoProjeto.value, laboratorioProjetoId.value)
   : laboratorioSelecionadoId.value)
+const laboratorioDoProjeto = computed(() => laboratoriosDoProjeto.value.find(l => l.id === laboratorioOperacionalId.value))
 const laboratorioOperacional = computed(() => laboratorios.value.find(x => x.id === laboratorioOperacionalId.value))
 const estoques = ref<EstoqueCentralResponse[]>([])
 const lotesPorEstoque = ref<Record<string, LotePedidoResponse[]>>({})
@@ -367,6 +374,8 @@ function validarFormulario() {
   if (!usuario.value?.id) throw new Error('Não foi possível identificar o solicitante.')
   if (estagiario.value && !contextoResolvido.value)
     throw new Error('Selecione uma participação elegível para encaminhar o pedido.')
+  if (estagiario.value && !laboratorioOperacionalId.value)
+    throw new Error('Selecione o laboratório do projeto em que o pedido será utilizado.')
   if (!laboratorioOperacionalId.value)
     throw new Error('Nenhum laboratório autorizado para este usuário. Solicite a vinculação à Gestão.')
   if (!estagiario.value && (!autorizacaoAtualizada.value || !laboratorioPermitido.value.some(l => l.id === laboratorioOperacionalId.value)))
@@ -410,7 +419,7 @@ async function enviarPedido() {
     const payload: PedidoRequest = {
       usuarioId: usuario.value!.id,
       ...(estagiario.value
-        ? { participacaoId: contextoResolvido.value!.participacaoId }
+        ? { participacaoId: contextoResolvido.value!.participacaoId, laboratorioId: laboratorioOperacionalId.value }
         : { laboratorioId: laboratorioOperacionalId.value, projetoId: projetoId.value || null }),
       urgente: urgente.value,
       motivoUrgencia: null,
@@ -461,7 +470,7 @@ onMounted(carregarDados)
 
     <div class="context-grid">
       <article><span>Solicitante</span><strong>{{ usuario?.nome }}</strong><small>{{ usuario?.email }}</small></article>
-      <article><span>Laboratório de destino</span><strong>{{ estagiario ? (participacaoSelecionada?.laboratorioNome || 'Selecione uma participação abaixo') : (laboratorioOperacional?.nome || (gestao ? 'Escolha o laboratório abaixo' : 'Não vinculado')) }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
+      <article><span>Laboratório de destino</span><strong>{{ estagiario ? (laboratorioDoProjeto?.nome || (participacaoSelecionada ? 'Escolha o laboratório abaixo' : 'Selecione uma participação abaixo')) : (laboratorioOperacional?.nome || (gestao ? 'Escolha o laboratório abaixo' : 'Não vinculado')) }}</strong><small>{{ usuario?.unidadeNome ?? 'Unidade não vinculada' }}</small></article>
     </div>
 
     <form class="request-surface" @submit.prevent="enviarPedido">
@@ -482,6 +491,14 @@ onMounted(carregarDados)
           :opcoes="opcoesContexto"
           :carregando="carregandoDados"
         />
+        <label v-if="estagiario && precisaEscolherLaboratorio(laboratoriosDoProjeto)" class="field">
+          <span>Laboratório do projeto <small>(obrigatório)</small></span>
+          <select id="laboratorio-projeto" v-model="laboratorioProjetoId" required :disabled="carregandoDados">
+            <option value="">Selecione o laboratório</option>
+            <option v-for="laboratorio in laboratoriosDoProjeto" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option>
+          </select>
+          <small>O projeto está em mais de um laboratório. Escolha o indicado pelo responsável do projeto.</small>
+        </label>
         <label v-if="!estagiario" class="field">
           <span>Projeto <small>(opcional)</small></span>
           <select v-model="projetoId" :disabled="carregandoDados">

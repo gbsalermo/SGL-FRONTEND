@@ -1,0 +1,81 @@
+import { flushPromises, mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import {
+  DOIS_LABORATORIOS, UM_LABORATORIO, entrarComoEstagiario, participacaoEstagio,
+} from '@/modules/operacao/__tests__/estagiarioFixtures'
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+
+const mocks = vi.hoisted(() => ({
+  criar: vi.fn(),
+  listarParticipacoesEstagiario: vi.fn(),
+}))
+
+vi.mock('vue-router', () => ({ useRouter: () => ({ push: vi.fn() }) }))
+vi.mock('@/modules/pedidos/services/pedidoService', () => ({
+  pedidoService: {
+    listarProjetosPorLaboratorio: vi.fn().mockResolvedValue([]),
+    listarEstoquePorUnidade: vi.fn().mockResolvedValue([
+      { id: 'e-1', produtoId: 'p-1', produtoNome: 'Etanol', produtoUnidadeMedida: 'ML', quantidadeAtual: 500, ativo: true },
+    ]),
+    listarLotesPorEstoque: vi.fn().mockResolvedValue([]),
+    criar: mocks.criar,
+  },
+}))
+vi.mock('@/modules/operacao/services/contextoOperacionalService', () => ({
+  contextoOperacionalService: { listarParticipacoesEstagiario: mocks.listarParticipacoesEstagiario },
+}))
+
+import NovoPedidoView from '@/modules/pedidos/views/solicitante/NovoPedidoView.vue'
+
+async function montarComoEstagiario(laboratorios: LaboratorioResumo[]) {
+  entrarComoEstagiario()
+  mocks.listarParticipacoesEstagiario.mockResolvedValue([participacaoEstagio(laboratorios)])
+  const wrapper = mount(NovoPedidoView)
+  await flushPromises()
+  return wrapper
+}
+
+// Fills the single item through the component state: the item widgets depend on stock lots
+// that are irrelevant to the laboratory rule under test.
+async function preencherItemEEnviar(wrapper: Awaited<ReturnType<typeof montarComoEstagiario>>) {
+  const vm = wrapper.vm as unknown as { itens: Array<Record<string, unknown>> }
+  Object.assign(vm.itens[0]!, { produtoId: 'p-1', modo: 'FISICA', unidadeFisica: 'ML', quantidadeFisica: 1 })
+  await wrapper.find('form').trigger('submit')
+  await flushPromises()
+}
+
+describe('NovoPedidoView — laboratório do projeto do estagiário', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    setActivePinia(createPinia())
+    mocks.criar.mockReset().mockResolvedValue({})
+  })
+
+  it('estagiário com projeto de 2 laboratórios vê seletor e envia laboratorioId', async () => {
+    const wrapper = await montarComoEstagiario(DOIS_LABORATORIOS)
+
+    const seletor = wrapper.find('select#laboratorio-projeto')
+    expect(seletor.exists()).toBe(true)
+    expect(seletor.findAll('option').map(o => o.text())).toEqual(['Selecione o laboratório', 'Lab A', 'Lab B'])
+
+    await preencherItemEEnviar(wrapper)
+    expect(mocks.criar).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('Selecione o laboratório do projeto')
+
+    await seletor.setValue('B')
+    expect(wrapper.find('.context-grid').text()).toContain('Lab B')
+    await preencherItemEEnviar(wrapper)
+    expect(mocks.criar).toHaveBeenCalledWith(expect.objectContaining({ participacaoId: 'part-1', laboratorioId: 'B' }))
+  })
+
+  it('estagiário com projeto de 1 laboratório não vê seletor', async () => {
+    const wrapper = await montarComoEstagiario(UM_LABORATORIO)
+
+    expect(wrapper.find('select#laboratorio-projeto').exists()).toBe(false)
+    expect(wrapper.find('.context-grid').text()).toContain('Lab A')
+    await preencherItemEEnviar(wrapper)
+    expect(mocks.criar).toHaveBeenCalledWith(expect.objectContaining({ participacaoId: 'part-1', laboratorioId: 'A' }))
+  })
+})

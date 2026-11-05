@@ -1,3 +1,5 @@
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+
 export type UnidadeSolucao = 'ML' | 'L' | 'MG' | 'G' | 'KG' | 'METRO' | 'UNIDADE' | 'REACAO'
 export type StatusSolucao = 'PENDENTE' | 'EM_PREPARACAO' | 'ENTREGUE' | 'REJEITADO' | 'CANCELADO'
 export type UnidadeProduto = { id: string; nome: string; unidadeMedida: UnidadeSolucao; quantidadeAtual: number; ativo: boolean }
@@ -93,7 +95,7 @@ export interface MovimentacaoSolucao {
   tipoMovimentacao: string
   dataMovimentacao: string
 }
-export interface ProjetoSolucao { id: string; nome: string; laboratorioId: string; ativo: boolean }
+export interface ProjetoSolucao { id: string; nome: string; laboratorios: LaboratorioResumo[]; ativo: boolean }
 export const UNIDADES_SOLUCAO: UnidadeSolucao[] = ['ML','L','MG','G','KG','METRO','UNIDADE','REACAO']
 export const statusSolucaoLabel: Record<StatusSolucao, string> = {
   PENDENTE: 'Pendente', EM_PREPARACAO: 'Em preparação', ENTREGUE: 'Entregue',
