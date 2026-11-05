@@ -131,7 +131,7 @@ const perfis: Array<{ valor: PerfilUsuario; rotulo: string }> = [
 ]
 
 const unidadesMedida: UnidadeMedidaCadastro[] = [
-  'ML', 'L', 'MG', 'G', 'KG', 'UNIDADE', 'REACAO', 'CAIXA', 'FRASCO', 'AMPOLA', 'PAR', 'METRO', 'OUTRO',
+  'ML', 'L', 'MG', 'G', 'KG', 'METRO', 'UNIDADE', 'REACAO',
 ]
 const niveisRisco: NivelRiscoCadastro[] = ['NENHUM', 'BAIXO', 'MEDIO', 'ALTO']
 const tiposRisco: TipoRiscoCadastro[] = [
@@ -526,6 +526,10 @@ async function salvarProduto() {
   sincronizarProduto()
   if (!produtoForm.value.nome.trim() || !produtoForm.value.codigoReferencia.trim()) {
     erroModal.value = 'Informe nome e código de referência do produto.'
+    return
+  }
+  if (!unidadesMedida.includes(produtoForm.value.unidadeMedida)) {
+    erroModal.value = 'Unidade de medida inválida. Escolha mL, L, g, kg, metro, unidade ou reação. Descreva frascos e outras embalagens em Apresentação.'
     return
   }
   if (produtoForm.value.fiscalizado && produtoForm.value.orgaosFiscalizadores.length === 0) {
@@ -1059,11 +1063,11 @@ onMounted(() => {
             <div class="form-grid">
               <label class="field"><span>Nome *</span><input v-model="produtoForm.nome" required /></label>
               <label class="field"><span>Código de referência *</span><input v-model="produtoForm.codigoReferencia" required /></label>
-              <label class="field"><span>Unidade de medida *</span><select v-model="produtoForm.unidadeMedida"><option v-for="item in unidadesMedida" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select></label>
+              <label class="field"><span>Unidade de medida *</span><select v-model="produtoForm.unidadeMedida" required><option v-for="item in unidadesMedida" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select><small>Frasco, caixa e ampola são embalagens; use UNIDADE para contagem ou uma medida física (mL, L, g etc.).</small></label>
               <label class="field"><span>Localização física</span><input v-model="produtoForm.localizacaoFisica" placeholder="Armário, prateleira..." /></label>
             </div>
             <label class="field"><span>Descrição</span><textarea v-model="produtoForm.descricao" rows="3" /></label>
-            <label class="field"><span>Apresentação / unidade de armazenamento</span><input v-model="produtoForm.unidadeArmazenamento" placeholder="Ex.: kit com 50 reações" /></label>
+            <label class="field"><span>Apresentação / unidade de armazenamento</span><input v-model="produtoForm.unidadeArmazenamento" placeholder="Ex.: frasco de 1 L; kit com 50 reações" /></label>
           </section>
 
           <section class="form-section">
