@@ -220,3 +220,9 @@ A autorização definitiva no backend continua vinculada à futura etapa de aute
 18. Informar resíduo permite Manual ou Modelo
 19. modelo pré-preenche sem criar vínculo vivo com o Resíduo
 ```
+
+## Ajuste de navegação em Cadastros — 05/11/2026
+
+Removido o cartão lateral duplicado **“Resíduos”**, anteriormente injetado em `.tabs-card` por `ResiduoPredeterminadoEmBreve.vue` a partir de `App.vue`. O componente, que não realizava operações próprias, foi excluído juntamente com seus seletores CSS órfãos. A opção **“Resíduos e Soluções”** permanece como único acesso da navegação de Cadastros para os dois tipos de modelo, conservando os editores existentes, suas chamadas de API e os redirecionamentos de URLs antigas.
+
+Ajustado o espaçamento interno do cabeçalho **“Modelos de resíduo”** quando exibido na aba integrada, com recuo superior e lateral, sem alterar os formulários. Mudança exclusivamente de frontend. Validação local de build e conferência visual ainda pendentes; nenhum merge.
