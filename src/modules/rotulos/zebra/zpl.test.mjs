@@ -451,7 +451,7 @@ test('Automático horizontal calcula a altura pela orientação escolhida e pres
   const config = recomendarConfiguracaoZpl(documento, 90, 203, 'HORIZONTAL')
   assert.equal(config.larguraMm, 90)
   assert.equal(config.orientacao, 'HORIZONTAL')
-  assert.ok(config.alturaMm >= 90 && config.alturaMm <= 300)
+  assert.ok(config.alturaMm >= 40 && config.alturaMm <= 300)
   validarEspacoZpl(documento, config)
   const zpl = gerarDocumentoZpl(documento, config)
   assert.ok(zpl.includes('^PW719'))
@@ -473,7 +473,7 @@ test('Orientação horizontal aumenta tamanho automático sem aplicar a altura v
   }
   const config = recomendarConfiguracaoZpl(documento, 90, 203, 'HORIZONTAL')
   assert.equal(config.orientacao, 'HORIZONTAL')
-  assert.ok(config.alturaMm >= 90 && config.alturaMm <= 300)
+  assert.ok(config.alturaMm >= 40 && config.alturaMm <= 300)
   validarEspacoZpl(documento, config)
 })
 
@@ -485,4 +485,55 @@ test('Orientação horizontal não gera documento cortado quando não há format
     () => recomendarConfiguracaoZpl(documento, 90, 203, 'HORIZONTAL'),
     /horizontal não cabe nos formatos compatíveis/i,
   )
+})
+
+test('largura de 150 mm calcula a menor altura viável para documento horizontal', () => {
+  const documento = {
+    ...base,
+    categoria: 'RESIDUO',
+    titulo: 'RÓTULO DE RESÍDUO',
+    subtitulo: 'Master Mix vencido',
+    secoes: [
+      { titulo: 'Origem', campos: [
+        { rotulo: 'Unidade', valor: 'CNPMF — Embrapa Mandioca e Fruticultura' },
+        { rotulo: 'Laboratório', valor: 'Laboratório de Biologia Molecular' },
+        { rotulo: 'Projeto', valor: 'Genotipagem de variedades de mandioca' },
+      ] },
+      { titulo: 'Risco e quantidade', campos: [
+        { rotulo: 'Nível', valor: 'Baixo' }, { rotulo: 'Quantidade', valor: '2 L' },
+        { rotulo: 'Recipiente', valor: 'Bombona 5 L' },
+      ] },
+      { titulo: 'Rastreabilidade', campos: [
+        { rotulo: 'Responsável pela liberação', valor: 'Ricardo Almeida' },
+        { rotulo: 'Informado em', valor: '19/10/2026' },
+      ] },
+      { titulo: 'Armazenamento e destino', campos: [
+        { rotulo: 'Destino previsto', valor: 'Tratamento externo especializado' },
+      ] },
+    ],
+    avisoFinal: 'IDENTIFICAÇÃO INTERNA. CONSULTAR AS MEDIDAS DE SEGURANÇA.',
+  }
+  const config = recomendarConfiguracaoZpl(documento, 150, 203, 'HORIZONTAL')
+  assert.equal(config.larguraMm, 150)
+  assert.equal(config.dpi, 203)
+  assert.equal(config.orientacao, 'HORIZONTAL')
+  assert.ok(config.alturaMm >= 40 && config.alturaMm <= 300)
+  assert.equal(config.alturaMm % 5, 0)
+  validarEspacoZpl(documento, config)
+  const zpl = gerarDocumentoZpl(documento, config)
+  assert.ok(zpl.includes('^PW' + milimetrosParaPontos(150, 203)))
+  assert.ok(zpl.includes('^LL' + milimetrosParaPontos(config.alturaMm, 203)))
+  if (config.alturaMm > 40) {
+    assert.throws(() => validarEspacoZpl(documento,
+      { ...config, alturaMm: config.alturaMm - 5 }), /não cabe|não há espaço|excede|ultrapassa|pequena|largo|quadro/i)
+  }
+})
+
+test('ZPL valida os limites de largura sem assumir que toda Zebra suporta 150 mm', () => {
+  const config = { larguraMm: 150, alturaMm: 300, dpi: 203 }
+  assert.doesNotThrow(() => validarEspacoZpl(base, config))
+  assert.throws(() => validarEspacoZpl(base, { ...config, larguraMm: 169 }),
+    /entre 40 e 168 mm/)
+  assert.throws(() => validarEspacoZpl(base, { ...config, larguraMm: 39 }),
+    /entre 40 e 168 mm/)
 })
