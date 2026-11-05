@@ -131,7 +131,7 @@ const perfis: Array<{ valor: PerfilUsuario; rotulo: string }> = [
 ]
 
 const unidadesMedida: UnidadeMedidaCadastro[] = [
-  'ML', 'L', 'MG', 'G', 'KG', 'METRO', 'UNIDADE', 'REACAO',
+  'ML', 'L', 'MG', 'G', 'KG', 'METRO', 'UNIDADE',
 ]
 const niveisRisco: NivelRiscoCadastro[] = ['NENHUM', 'BAIXO', 'MEDIO', 'ALTO']
 const tiposRisco: TipoRiscoCadastro[] = [
@@ -1063,7 +1063,7 @@ onMounted(() => {
             <div class="form-grid">
               <label class="field"><span>Nome *</span><input v-model="produtoForm.nome" required /></label>
               <label class="field"><span>Código de referência *</span><input v-model="produtoForm.codigoReferencia" required /></label>
-              <label class="field"><span>Unidade de medida *</span><select v-model="produtoForm.unidadeMedida" required><option v-for="item in unidadesMedida" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select><small>Frasco, caixa e ampola são embalagens; use UNIDADE para contagem ou uma medida física (mL, L, g etc.).</small></label>
+              <label class="field"><span>Unidade de medida *</span><select v-model="produtoForm.unidadeMedida" required><option v-for="item in unidadesMedida" :key="item" :value="item">{{ rotuloEnum(item) }}</option><option v-if="produtoForm.unidadeMedida === 'REACAO'" value="REACAO">Reação (cadastro existente)</option></select><small>Frasco, caixa e ampola são embalagens; use UNIDADE para contagem ou uma medida física (mL, L, g etc.).</small></label>
               <label class="field"><span>Localização física</span><input v-model="produtoForm.localizacaoFisica" placeholder="Armário, prateleira..." /></label>
             </div>
             <label class="field"><span>Descrição</span><textarea v-model="produtoForm.descricao" rows="3" /></label>
