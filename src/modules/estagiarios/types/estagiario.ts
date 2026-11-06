@@ -1,3 +1,5 @@
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+
 export type TipoBolsaEstagiario =
   | 'BOLSA_CNPQ'
   | 'BOLSA_CAPES'
@@ -41,8 +43,9 @@ export interface VinculoEstagioAtividadeResponse {
   projetoId: string | null
   projetoNome: string | null
   projetoDataFim: string | null
-  laboratorioId: string | null
-  laboratorioNome: string | null
+  unidadeId: string | null
+  /** Laboratórios do projeto da participação; um projeto pode estar em vários. */
+  laboratorios: LaboratorioResumo[]
   dataInicioParticipacao: string
   dataFimParticipacao: string | null
   observacao: string | null

@@ -254,7 +254,7 @@ function textoContextoSemAtividade(estagiario: EstagiarioResponse) {
 function contagemContexto(vinculo: VinculoEstagioResponse | null) {
   const participacoes = participacoesAtivas(vinculo)
   const projetos = new Set(participacoes.map((item) => item.projetoId).filter(Boolean))
-  const laboratorios = new Set(participacoes.map((item) => item.laboratorioId).filter(Boolean))
+  const laboratorios = new Set(participacoes.flatMap((item) => (item.laboratorios ?? []).map((l) => l.id)))
 
   return {
     atividades: participacoes.length,
@@ -320,9 +320,9 @@ const contextos = computed(() => {
         if (participacao.projetoId && participacao.projetoNome) {
           opcoes.set(`PROJETO:${participacao.projetoId}`, `Projeto · ${participacao.projetoNome}`)
         }
-        if (participacao.laboratorioId && participacao.laboratorioNome) {
-          opcoes.set(`LAB:${participacao.laboratorioId}`, `Laboratório · ${participacao.laboratorioNome}`)
-        }
+        participacao.laboratorios?.forEach((laboratorio) => {
+          opcoes.set(`LAB:${laboratorio.id}`, `Laboratório · ${laboratorio.nome}`)
+        })
       })
     })
   })
@@ -340,7 +340,8 @@ function correspondeContexto(estagiario: EstagiarioResponse) {
 
   return participacoesAtivas(vinculo).some((participacao) => {
     if (tipo === 'PROJETO') return participacao.projetoId === id
-    if (tipo === 'LAB') return participacao.laboratorioId === id
+    // A participation belongs to every laboratory of its project, so any of them matches.
+    if (tipo === 'LAB') return (participacao.laboratorios ?? []).some((laboratorio) => laboratorio.id === id)
     return false
   })
 }
@@ -362,7 +363,7 @@ function termosPesquisa(estagiario: EstagiarioResponse) {
       item.atividadeCodigoSeg ?? '',
       item.sciNome ?? '',
       item.projetoNome ?? '',
-      item.laboratorioNome ?? '',
+      ...(item.laboratorios ?? []).map((laboratorio) => laboratorio.nome),
       ...(item.culturas ?? []).map((cultura) => cultura.nome),
     ]),
   ]
@@ -1531,8 +1532,8 @@ onMounted(carregar)
                       <dd>{{ participacao.projetoNome || 'Não informado' }}</dd>
                     </div>
                     <div>
-                      <dt>Laboratório</dt>
-                      <dd>{{ participacao.laboratorioNome || 'Não informado' }}</dd>
+                      <dt>{{ (participacao.laboratorios?.length ?? 0) > 1 ? 'Laboratórios' : 'Laboratório' }}</dt>
+                      <dd>{{ (participacao.laboratorios ?? []).map((l) => l.nome).join(', ') || 'Não informado' }}</dd>
                     </div>
                     <div>
                       <dt>Culturas</dt>

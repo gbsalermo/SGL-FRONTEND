@@ -1,3 +1,5 @@
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+
 export type StatusPedido =
   | 'PENDENTE'
   | 'APROVADO'
@@ -90,8 +92,8 @@ export interface AprovarPedidoRequest {
 
 export interface ProjetoResponse {
   id: string
-  laboratorioId: string
-  laboratorioNome: string
+  unidadeId: string
+  laboratorios: LaboratorioResumo[]
   nome: string
   descricao: string | null
   dataInicio: string

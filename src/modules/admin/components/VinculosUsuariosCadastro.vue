@@ -100,7 +100,7 @@ const pendentes = computed(() => usuariosGerenciaveis.value.filter(u => status(u
 const vinculados = computed(() => usuariosGerenciaveis.value.filter(u => status(u) === 'VINCULADO').length)
 const inativos = computed(() => usuariosGerenciaveis.value.filter(u => status(u) === 'INATIVO').length)
 const laboratoriosValidos = computed(() => props.laboratorios.filter(l => l.ativo && l.unidadeId === usuario.value?.unidadeId))
-const projetosValidos = computed(() => props.projetos.filter(p => p.ativo && p.laboratorioId === laboratorioId.value))
+const projetosValidos = computed(() => props.projetos.filter(p => p.ativo && p.laboratorios.some(l => l.id === laboratorioId.value)))
 const atividadesValidas = computed(() => atividades.value.filter(a => !sciId.value || a.sciId === sciId.value))
 const ativos = computed(() => vinculos.value.filter(vigente))
 const historico = computed(() => vinculos.value.filter(v => !vigente(v)))

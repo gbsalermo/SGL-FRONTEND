@@ -1,3 +1,5 @@
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+
 export interface RelatorioProjetosFiltros {
   laboratorioId?: string
   status?: string
@@ -12,8 +14,7 @@ export interface RelatorioProjetoItem {
   id: string
   codigoSeg: string | null
   nome: string
-  laboratorioId: string
-  laboratorioNome: string
+  laboratorios: LaboratorioResumo[]
   responsavel: string | null
   dataInicio: string | null
   dataFim: string | null

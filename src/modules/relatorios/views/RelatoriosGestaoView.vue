@@ -492,7 +492,7 @@ watch([
 })
 
 const projetosDoLaboratorio = computed(() =>
-  projetosContexto.value.filter((p) => !laboratorioId.value || p.laboratorioId === laboratorioId.value))
+  projetosContexto.value.filter((p) => !laboratorioId.value || p.laboratorios.some((l) => l.id === laboratorioId.value)))
 watch(laboratorioId, () => {
   movimentoProjetoId.value = ''
   movimentoSciId.value = ''
@@ -695,11 +695,11 @@ onMounted(async () => {
               <article><span>Estagiários distintos</span><strong>{{ resultadoProjetos.totalEstagiariosDistintos }}</strong></article>
             </div>
             <div class="table-wrap"><table>
-              <thead><tr><th>Código SEG / Projeto</th><th>Laboratório</th><th>Responsável</th><th>Período</th><th>Status</th><th>Execução</th><th>Recurso externo</th><th>SCI</th><th>Atividades</th><th>Participações</th><th>Estagiários</th></tr></thead>
+              <thead><tr><th>Código SEG / Projeto</th><th>Laboratórios</th><th>Responsável</th><th>Período</th><th>Status</th><th>Execução</th><th>Recurso externo</th><th>SCI</th><th>Atividades</th><th>Participações</th><th>Estagiários</th></tr></thead>
               <tbody>
                 <tr v-for="item in resultadoProjetos.projetos" :key="item.id">
                   <td><strong>{{ item.nome }}</strong><small>{{ item.codigoSeg || 'Sem código SEG' }}</small></td>
-                  <td>{{ item.laboratorioNome }}</td><td>{{ item.responsavel || '—' }}</td>
+                  <td>{{ item.laboratorios.map((l) => l.nome).join('; ') || '—' }}</td><td>{{ item.responsavel || '—' }}</td>
                   <td>{{ formatarData(item.dataInicio) }} – {{ formatarData(item.dataFim) }}</td>
                   <td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ formatarRotulo(item.status) }}</span></td>
                   <td>{{ formatarRotulo(item.situacaoExecucao) }}</td>
