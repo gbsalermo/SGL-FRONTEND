@@ -2,6 +2,9 @@
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 
+import CriarVinculoEstagioDialog from '@/modules/estagiarios/components/CriarVinculoEstagioDialog.vue'
+import EstagiariosVinculoPendente from '@/modules/estagiarios/components/EstagiariosVinculoPendente.vue'
+import { opcoesBolsa, opcoesFormacao, rotulosFormacao } from '@/modules/estagiarios/opcoesEstagio'
 import { estagiarioService } from '@/modules/estagiarios/services/estagiarioService'
 import { useSessionStore } from '@/stores/session'
 import type {
@@ -10,6 +13,7 @@ import type {
   CulturaEstagioResponse,
   CursoEstagioResponse,
   EstagiarioResponse,
+  EstagiarioSemVinculoResponse,
   FormacaoEstagiario,
   ObservacaoVinculoEstagioResponse,
   SituacaoEstagio,
@@ -26,6 +30,8 @@ type FiltroStatus = 'TODOS' | StatusTabela
 const session = useSessionStore()
 
 const estagiarios = ref<EstagiarioResponse[]>([])
+const pendentesVinculo = ref<EstagiarioSemVinculoResponse[]>([])
+const pendenteParaVinculo = ref<EstagiarioSemVinculoResponse | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 const busca = ref('')
@@ -94,31 +100,7 @@ const edicaoCursoId = ref('')
 const edicaoNovoCursoNome = ref('')
 const edicaoObservacao = ref('')
 
-const formacoes: Record<FormacaoEstagiario, string> = {
-  ENSINO_MEDIO: 'Ensino médio',
-  GRADUACAO: 'Graduação',
-  MESTRADO: 'Mestrado',
-  DOUTORADO: 'Doutorado',
-  POS_DOUTORADO: 'Pós-doutorado',
-  APOIO_ADMINISTRATIVO: 'Apoio administrativo',
-  APOIO_TECNICO: 'Apoio técnico',
-  OUTRO: 'Outro',
-}
-
-const opcoesFormacao = Object.entries(formacoes)
-  .map(([valor, rotulo]) => ({
-    valor: valor as FormacaoEstagiario,
-    rotulo,
-  }))
-
-
-const opcoesBolsa: Array<{ valor: TipoBolsaEstagiario; rotulo: string }> = [
-  { valor: 'BOLSA_CNPQ', rotulo: 'Bolsa CNPq' },
-  { valor: 'BOLSA_CAPES', rotulo: 'Bolsa CAPES' },
-  { valor: 'BOLSA_INSTITUCIONAL', rotulo: 'Bolsa institucional' },
-  { valor: 'VOLUNTARIO', rotulo: 'Voluntário' },
-  { valor: 'CONTRATUAL', rotulo: 'Contrato' },
-]
+const formacoes = rotulosFormacao
 
 const situacoes: Record<SituacaoEstagio, string> = {
   EM_ANDAMENTO: 'Em andamento',
@@ -466,7 +448,12 @@ async function carregar() {
   erro.value = ''
 
   try {
-    estagiarios.value = await estagiarioService.listarTodos()
+    const [todos, semVinculo] = await Promise.all([
+      estagiarioService.listarTodos(),
+      estagiarioService.listarSemVinculo(),
+    ])
+    estagiarios.value = todos
+    pendentesVinculo.value = semVinculo
 
     if (selecionado.value) {
       selecionado.value = estagiarios.value.find((item) => item.id === selecionado.value?.id) ?? null
@@ -1086,6 +1073,11 @@ async function salvarCulturas() {
   }
 }
 
+async function aoCriarVinculo() {
+  pendenteParaVinculo.value = null
+  await carregar()
+}
+
 onMounted(carregar)
 </script>
 
@@ -1132,6 +1124,19 @@ onMounted(carregar)
     </section>
 
     <div v-if="erro" class="feedback feedback--error">{{ erro }}</div>
+
+    <!-- Outside the filters so no default filter can hide interns awaiting a bond. -->
+    <EstagiariosVinculoPendente
+      :pendentes="pendentesVinculo"
+      @criar-vinculo="pendenteParaVinculo = $event"
+    />
+    <CriarVinculoEstagioDialog
+      v-if="pendenteParaVinculo"
+      :pendente="pendenteParaVinculo"
+      :aberto="true"
+      @fechar="pendenteParaVinculo = null"
+      @criado="aoCriarVinculo"
+    />
 
     <section class="workspace-card">
       <div class="filters-grid">

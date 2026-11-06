@@ -97,10 +97,30 @@ export interface EstagiarioRequest {
   usuarioId: string
   laboratorioId: string
   dataInicioEstagio: string
-  dataFimEstagio: string | null
+  dataFimEstagio: string
   tipoBolsa: TipoBolsaEstagiario
   observacao: string | null
   ativo: boolean | null
+  orientadorId: string
+  atividadeId: string
+  formacao: FormacaoEstagiario
+  formacaoOutro: string | null
+  cursoId: string | null
+  culturaIds: string[]
+}
+
+export interface EstagiarioSemVinculoResponse {
+  usuarioId: string
+  nome: string
+  laboratorioId: string | null
+  laboratorioNome: string | null
+}
+
+export interface OrientadorElegivelResponse {
+  usuarioId: string
+  nome: string
+  perfil: string
+  cargo: string | null
 }
 
 
