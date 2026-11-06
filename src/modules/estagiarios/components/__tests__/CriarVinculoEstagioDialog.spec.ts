@@ -11,8 +11,7 @@ import { fakeAdapter } from '@/test/fakeAdapter'
 const pendente: EstagiarioSemVinculoResponse = {
   usuarioId: 'u-9',
   nome: 'MARIA DA SILVA',
-  laboratorioId: 'lab-1',
-  laboratorioNome: 'Laboratório 1',
+  laboratorios: [{ id: 'lab-1', nome: 'Laboratório 1', ativo: true }],
 }
 
 const orientadores = [
@@ -136,7 +135,7 @@ describe('CriarVinculoEstagioDialog', () => {
   })
 
   it('exigeLaboratorioQuandoNaoHaBase', async () => {
-    const wrapper = await montar({ ...pendente, laboratorioId: null, laboratorioNome: null })
+    const wrapper = await montar({ ...pendente, laboratorios: [] })
     await preencher(wrapper)
 
     expect(salvar(wrapper).attributes('disabled')).toBeDefined()
@@ -147,7 +146,7 @@ describe('CriarVinculoEstagioDialog', () => {
   })
 
   it('limpaLaboratorioForaDaLista', async () => {
-    const wrapper = await montar({ ...pendente, laboratorioId: 'lab-inativo' })
+    const wrapper = await montar({ ...pendente, laboratorios: [{ id: 'lab-inativo', nome: 'Lab inativo', ativo: false }] })
     await preencher(wrapper)
 
     expect(salvar(wrapper).attributes('disabled')).toBeDefined()

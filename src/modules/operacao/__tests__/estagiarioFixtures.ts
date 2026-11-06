@@ -17,7 +17,7 @@ export function entrarComoEstagiario() {
   const usuario: UsuarioSessao = {
     id: 'u-1', nome: 'Estagiária', email: 'e@embrapa.br', perfil: 'ESTAGIARIO', situacao: 'ATIVO',
     unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF',
-    laboratorioId: null, laboratorioNome: null, ativo: true,
+    laboratorios: [], ativo: true,
   }
   useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
 }

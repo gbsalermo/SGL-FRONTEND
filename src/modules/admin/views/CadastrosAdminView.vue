@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
@@ -218,7 +219,7 @@ const locaisArmazenamentoFiltrados = computed(() => locaisArmazenamento.value.fi
 
 const usuariosFiltrados = computed(() => usuarios.value.filter((item) => {
   if (!termoBusca.value) return true
-  return [item.nome, item.email, item.unidadeNome ?? '', item.laboratorioNome ?? '', rotuloPerfil(item.perfil)]
+  return [item.nome, item.email, item.unidadeNome ?? '', nomesDosLaboratoriosDaPessoa(item.laboratorios), rotuloPerfil(item.perfil)]
     .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termoBusca.value))
 }))
 
@@ -988,11 +989,11 @@ onMounted(() => {
           <router-link class="btn btn--primary" to="/administracao/cadastros/vinculos">Gerenciar vínculos de usuários →</router-link>
           <div class="table-wrap">
           <table class="permissions-table">
-            <thead><tr><th>Usuário</th><th>Unidade / laboratório</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
+            <thead><tr><th>Usuário</th><th>Unidade / laboratórios</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
             <tbody>
               <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
                 <td><strong>{{ usuario.nome }}</strong><small>{{ usuario.email }}</small></td>
-                <td><strong>{{ usuario.unidadeNome || 'Sem unidade' }}</strong><small>{{ usuario.laboratorioNome || 'Sem laboratório' }}</small></td>
+                <td><strong>{{ usuario.unidadeNome || 'Sem unidade' }}</strong><small>{{ nomesDosLaboratoriosDaPessoa(usuario.laboratorios) || 'Sem laboratórios' }}</small></td>
                 <td>
                   <!-- Pendente vem antes de Ativo/Inativo: ele está "ativo" no cadastro, mas ainda sem acesso. -->
                   <span v-if="aguardaAprovacao(usuario)" class="status status--pending">Aguardando aprovação</span>

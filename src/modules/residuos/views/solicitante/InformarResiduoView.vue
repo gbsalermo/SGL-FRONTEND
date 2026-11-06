@@ -23,6 +23,7 @@ import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
+import { atuaNoLaboratorio } from '@/modules/operacao/laboratoriosDaPessoa'
 import { laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
 
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
@@ -97,7 +98,7 @@ const laboratorioSelecionadoId = ref('')
 const vinculosAdicionais = ref<VinculoOperacional[]>([])
 const autorizacaoAtualizada = ref(false)
 const laboratoriosPermitidos = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
-  l.id === session.usuario?.laboratorioId || vinculosAdicionais.value.some(v =>
+  atuaNoLaboratorio(session.usuario?.laboratorios ?? [], l.id) || vinculosAdicionais.value.some(v =>
     v.laboratorioId === l.id && !v.encerrado && v.dataInicio <= new Date().toLocaleDateString('en-CA')
     && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA')))))
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
@@ -225,9 +226,9 @@ async function carregarDados() {
         vinculosAdicionais.value = await vinculosOperacionaisService.listar(usuarioAtualizado.id)
       }
       autorizacaoAtualizada.value = true
-      const laboratorioBase = usuarioAtualizado.laboratorioId || ''
-      laboratorioSelecionadoId.value = laboratoriosPermitidos.value.some(l => l.id === laboratorioBase)
-        ? laboratorioBase : laboratoriosPermitidos.value[0]?.id || ''
+      // Prefer one of the person's own laboratories over an additional link when both are allowed.
+      laboratorioSelecionadoId.value = (laboratoriosPermitidos.value.find(l => atuaNoLaboratorio(usuarioAtualizado.laboratorios, l.id))
+        ?? laboratoriosPermitidos.value[0])?.id || ''
     } catch(e) { erro.value = mensagemErro(e); carregandoDados.value = false; return }
   }
   const laboratorioId = laboratorioOperacionalId.value
@@ -652,11 +653,11 @@ onMounted(carregarDados)
           <span>Laboratório de origem <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
             <option v-if="!laboratoriosPermitidos.length" value="" disabled>Nenhum laboratório autorizado disponível</option>
-            <option v-for="laboratorio in laboratoriosPermitidos" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && laboratorio.id === usuario?.laboratorioId ? ' (laboratório-base)' : !gestao ? ' (vínculo adicional)' : '' }}</option>
+            <option v-for="laboratorio in laboratoriosPermitidos" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && !atuaNoLaboratorio(usuario?.laboratorios ?? [], laboratorio.id) ? ' (vínculo adicional)' : '' }}</option>
           </select>
         </label>
 
-        <p v-if="!estagiario && !carregandoDados && autorizacaoAtualizada && !laboratoriosPermitidos.length" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório-base ou vínculo operacional vigente antes de informar resíduos.</p>
+        <p v-if="!estagiario && !carregandoDados && autorizacaoAtualizada && !laboratoriosPermitidos.length" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório ou vínculo operacional vigente antes de informar resíduos.</p>
 
         <label v-if="estagiario" class="field">
           <span>Participação / Atividade <small>(obrigatório)</small></span>

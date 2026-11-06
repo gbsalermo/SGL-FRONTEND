@@ -12,6 +12,7 @@ import {
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
+import { atuaNoLaboratorio } from '@/modules/operacao/laboratoriosDaPessoa'
 import { laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
 
 import { solucaoService } from '../services/solucaoService'
@@ -41,7 +42,7 @@ const laboratorioSelecionadoId = ref('')
 const vinculosAdicionais = ref<VinculoOperacional[]>([])
 const autorizacaoAtualizada = ref(false)
 const laboratorioPermitido = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
-  l.id === session.usuario?.laboratorioId || vinculosAdicionais.value.some(v =>
+  atuaNoLaboratorio(session.usuario?.laboratorios ?? [], l.id) || vinculosAdicionais.value.some(v =>
     v.laboratorioId === l.id && !v.encerrado && v.dataInicio <= new Date().toLocaleDateString('en-CA')
     && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA')))))
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
@@ -224,10 +225,10 @@ onMounted(() => { void carregar() })
           <span>Laboratório de destino <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregando" @change="selecionarLaboratorio">
             <option v-if="!laboratorioPermitido.length" value="" disabled>Nenhum laboratório autorizado disponível</option>
-            <option v-for="laboratorio in laboratorioPermitido" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && laboratorio.id === usuario?.laboratorioId ? ' (laboratório-base)' : !gestao ? ' (vínculo adicional)' : '' }}</option>
+            <option v-for="laboratorio in laboratorioPermitido" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && !atuaNoLaboratorio(usuario?.laboratorios ?? [], laboratorio.id) ? ' (vínculo adicional)' : '' }}</option>
           </select>
         </label>
-        <p v-if="!estagiario && !carregando && autorizacaoAtualizada && laboratorioPermitido.length === 0" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório-base ou vínculo operacional vigente antes de solicitar soluções.</p>
+        <p v-if="!estagiario && !carregando && autorizacaoAtualizada && laboratorioPermitido.length === 0" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório ou vínculo operacional vigente antes de solicitar soluções.</p>
         <SeletorParticipacaoOperacional
           v-if="estagiario"
           v-model="participacaoSelecionadaId"

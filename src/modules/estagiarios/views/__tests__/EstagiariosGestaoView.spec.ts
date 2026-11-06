@@ -11,8 +11,7 @@ import { fakeAdapter } from '@/test/fakeAdapter'
 const pendente = {
   usuarioId: 'u-9',
   nome: 'MARIA DA SILVA',
-  laboratorioId: 'lab-1',
-  laboratorioNome: 'Laboratório 1',
+  laboratorios: [{ id: 'lab-1', nome: 'Laboratório 1', ativo: true }],
 }
 
 describe('EstagiariosGestaoView - vínculo pendente', () => {

@@ -72,7 +72,7 @@ const podeSalvar = computed(() =>
 )
 
 function reiniciarFormulario() {
-  laboratorioId.value = props.pendente.laboratorioId ?? ''
+  laboratorioId.value = props.pendente.laboratorios[0]?.id ?? ''
   orientadorId.value = ''
   dataInicio.value = ''
   dataFim.value = ''

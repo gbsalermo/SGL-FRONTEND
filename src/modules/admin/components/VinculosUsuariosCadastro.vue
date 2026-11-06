@@ -50,7 +50,7 @@ const tab = ref<'ATIVOS' | 'HISTORICO'>('ATIVOS')
 const usuariosGerenciaveis = computed(() => props.usuarios.filter(u => u.perfil !== 'ESTAGIARIO'))
 function baseAtual(u: UsuarioPermissao) {
   return Object.prototype.hasOwnProperty.call(basesAtualizadas.value, u.id)
-    ? basesAtualizadas.value[u.id] : u.laboratorioId
+    ? basesAtualizadas.value[u.id] : u.laboratorios[0]?.id ?? null
 }
 function resumoDoUsuario(id: string) { return resumo.value.find(x => x.usuarioId === id) }
 function status(u: UsuarioPermissao): 'PENDENTE' | 'VINCULADO' | 'INATIVO' {
@@ -299,7 +299,7 @@ async function confirmarEncerramento() {
 }
 watch(() => props.usuarios, () => {
   if (usuario.value && !Object.prototype.hasOwnProperty.call(basesAtualizadas.value, usuario.value.id)) {
-    laboratorioBaseId.value = usuario.value.laboratorioId || ''
+    laboratorioBaseId.value = usuario.value.laboratorios[0]?.id || ''
   }
 })
 onMounted(() => { void carregarResumo() })

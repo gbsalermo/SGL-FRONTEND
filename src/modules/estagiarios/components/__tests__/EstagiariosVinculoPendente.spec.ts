@@ -5,8 +5,8 @@ import EstagiariosVinculoPendente from '@/modules/estagiarios/components/Estagia
 import type { EstagiarioSemVinculoResponse } from '@/modules/estagiarios/types/estagiario'
 
 const pendentes: EstagiarioSemVinculoResponse[] = [
-  { usuarioId: 'u-1', nome: 'Amanda Souza', laboratorioId: 'lab-1', laboratorioNome: 'Laboratório de Solos' },
-  { usuarioId: 'u-2', nome: 'Bruno Lima', laboratorioId: null, laboratorioNome: null },
+  { usuarioId: 'u-1', nome: 'Amanda Souza', laboratorios: [{ id: 'lab-1', nome: 'Laboratório de Solos', ativo: true }, { id: 'lab-2', nome: 'Laboratório de Águas', ativo: true }] },
+  { usuarioId: 'u-2', nome: 'Bruno Lima', laboratorios: [] },
 ]
 
 function contar(texto: string, alvo: string) {
@@ -20,15 +20,20 @@ describe('EstagiariosVinculoPendente', () => {
     expect(contar(wrapper.text(), 'Vínculo pendente')).toBe(2)
     expect(wrapper.findAll('button').filter((b) => b.text() === 'Criar vínculo')).toHaveLength(2)
     expect(wrapper.text()).toContain('Amanda Souza')
-    expect(wrapper.text()).toContain('Laboratório de Solos')
   })
 
-  it('mostraSemLaboratorioBase', () => {
+  it('mostraOsLaboratoriosDaPessoa', () => {
+    const wrapper = mount(EstagiariosVinculoPendente, { props: { pendentes: [pendentes[0]] } })
+
+    expect(wrapper.text()).toContain('Laboratório de Solos, Laboratório de Águas')
+  })
+
+  it('mostraSemLaboratorios', () => {
     const wrapper = mount(EstagiariosVinculoPendente, {
       props: { pendentes: [pendentes[1]] },
     })
 
-    expect(wrapper.text()).toContain('Sem laboratório-base')
+    expect(wrapper.text()).toContain('Sem laboratórios')
   })
 
   it('emiteCriarVinculoComOPendente', async () => {
