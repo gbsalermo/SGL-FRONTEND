@@ -1897,7 +1897,7 @@ onMounted(carregar)
         <header>
           <div>
             <span>AÇÃO OPERACIONAL</span>
-            <h2>Associar atividade</h2>
+            <h2>Associar atividade a um laboratório</h2>
           </div>
           <button type="button" aria-label="Fechar" @click="fecharModalAtividade">×</button>
         </header>
@@ -1906,7 +1906,8 @@ onMounted(carregar)
           <div v-if="acaoErro" class="feedback feedback--error">{{ acaoErro }}</div>
 
           <label class="action-field">
-            <span>Atividade</span>
+            <span>Projeto → SCI → Atividade</span>
+            <small>O laboratório é determinado pelo Projeto da Atividade. É possível manter participações em laboratórios diferentes da mesma unidade.</small>
             <select v-model="atividadeSelecionadaId">
               <option value="">Selecione</option>
               <option
@@ -1914,7 +1915,7 @@ onMounted(carregar)
                 :key="atividade.id"
                 :value="atividade.id"
               >
-                {{ atividade.nome }} · Projeto: {{ atividade.projetoNome || 'não informado' }}
+                {{ atividade.projetoNome || 'Projeto não informado' }} → {{ atividade.sciNome || 'SCI não informado' }} → {{ atividade.nome }}
               </option>
             </select>
           </label>
