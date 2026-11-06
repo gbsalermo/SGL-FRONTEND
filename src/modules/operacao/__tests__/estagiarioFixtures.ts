@@ -22,5 +22,6 @@ export function entrarComoEstagiario() {
   useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
 }
 
-export const DOIS_LABORATORIOS: LaboratorioResumo[] = [{ id: 'A', nome: 'Lab A' }, { id: 'B', nome: 'Lab B' }]
-export const UM_LABORATORIO: LaboratorioResumo[] = [{ id: 'A', nome: 'Lab A' }]
+export const DOIS_LABORATORIOS: LaboratorioResumo[] = [{ id: 'A', nome: 'Lab A', ativo: true }, { id: 'B', nome: 'Lab B', ativo: true }]
+export const UM_LABORATORIO: LaboratorioResumo[] = [{ id: 'A', nome: 'Lab A', ativo: true }]
+export const UM_ATIVO_UM_INATIVO: LaboratorioResumo[] = [{ id: 'A', nome: 'Lab A', ativo: true }, { id: 'I', nome: 'Lab Inativo', ativo: false }]

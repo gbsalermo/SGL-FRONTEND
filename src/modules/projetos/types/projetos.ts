@@ -12,6 +12,7 @@ export type SituacaoExecucaoProjeto =
 export interface LaboratorioResumo {
   id: string
   nome: string
+  ativo: boolean
 }
 
 export interface ProjetoOperacional {

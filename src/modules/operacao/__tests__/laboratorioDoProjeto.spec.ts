@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  laboratorioDoProjetoValido, laboratorioInicial, precisaEscolherLaboratorio,
+  laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, precisaEscolherLaboratorio,
 } from '@/modules/operacao/laboratorioDoProjeto'
 
-const A = { id: 'A', nome: 'Lab A' }
-const B = { id: 'B', nome: 'Lab B' }
+const A = { id: 'A', nome: 'Lab A', ativo: true }
+const B = { id: 'B', nome: 'Lab B', ativo: true }
 
 describe('laboratorioDoProjeto', () => {
   it('um laboratório: pré-seleciona e não pede escolha', () => {
@@ -21,6 +21,20 @@ describe('laboratorioDoProjeto', () => {
   it('sem laboratórios: nada a pré-selecionar nem escolher', () => {
     expect(laboratorioInicial([])).toBe('')
     expect(precisaEscolherLaboratorio([])).toBe(false)
+  })
+})
+
+describe('laboratoriosAtivos', () => {
+  const INATIVO = { id: 'C', nome: 'Lab C', ativo: false }
+
+  it('descarta laboratórios inativos', () => {
+    expect(laboratoriosAtivos([A, INATIVO])).toEqual([A])
+  })
+
+  it('1 ativo + 1 inativo: o ativo é pré-selecionado e não pede escolha', () => {
+    const ativos = laboratoriosAtivos([INATIVO, A])
+    expect(laboratorioInicial(ativos)).toBe('A')
+    expect(precisaEscolherLaboratorio(ativos)).toBe(false)
   })
 })
 

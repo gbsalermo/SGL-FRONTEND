@@ -23,7 +23,7 @@ import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
-import { laboratorioDoProjetoValido, laboratorioInicial, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
+import { laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
 
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
 type ModoPreenchimento = 'MANUAL' | 'MODELO'
@@ -108,7 +108,7 @@ const participacaoSelecionada = computed(() => participacoes.value.find(p => p.p
 // The participation fixes the project, but the project may span several laboratories:
 // the estagiário picks one of them (the API rejects a choice outside the project).
 const laboratorioProjetoId = ref('')
-const laboratoriosDoProjeto = computed(() => participacaoSelecionada.value?.laboratorios ?? [])
+const laboratoriosDoProjeto = computed(() => laboratoriosAtivos(participacaoSelecionada.value?.laboratorios ?? []))
 watch(participacaoSelecionadaId, () => { laboratorioProjetoId.value = laboratorioInicial(laboratoriosDoProjeto.value) })
 const laboratorioOperacionalId = computed(() => estagiario.value
   ? laboratorioDoProjetoValido(laboratoriosDoProjeto.value, laboratorioProjetoId.value)

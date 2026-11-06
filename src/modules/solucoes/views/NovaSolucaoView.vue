@@ -12,7 +12,7 @@ import {
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
-import { laboratorioDoProjetoValido, laboratorioInicial, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
+import { laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
 
 import { solucaoService } from '../services/solucaoService'
 import {
@@ -57,7 +57,7 @@ const participacaoSelecionada = computed(() => opcoesContexto.value.contextosEle
 // The participation fixes the project, but the project may span several laboratories:
 // the estagiário picks one of them (the API rejects a choice outside the project).
 const laboratorioProjetoId = ref('')
-const laboratoriosDoProjeto = computed(() => contextoResolvido.value?.laboratorios ?? [])
+const laboratoriosDoProjeto = computed(() => laboratoriosAtivos(contextoResolvido.value?.laboratorios ?? []))
 watch(participacaoSelecionadaId, () => { laboratorioProjetoId.value = laboratorioInicial(laboratoriosDoProjeto.value) })
 const laboratorioOperacionalId = computed(() => estagiario.value
   ? laboratorioDoProjetoValido(laboratoriosDoProjeto.value, laboratorioProjetoId.value)

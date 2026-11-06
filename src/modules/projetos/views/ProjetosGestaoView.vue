@@ -966,7 +966,7 @@ onMounted(carregar)
 
         <section class="metadata-grid">
           <div>
-            <span>Laboratório responsável</span>
+            <span>Laboratórios</span>
             <strong>{{ nomesLaboratorios(projetoSelecionado) }}</strong>
           </div>
           <div>

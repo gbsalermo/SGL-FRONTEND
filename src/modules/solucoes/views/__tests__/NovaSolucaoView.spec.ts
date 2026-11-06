@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  DOIS_LABORATORIOS, UM_LABORATORIO, entrarComoEstagiario, participacaoEstagio,
+  DOIS_LABORATORIOS, UM_ATIVO_UM_INATIVO, UM_LABORATORIO, entrarComoEstagiario, participacaoEstagio,
 } from '@/modules/operacao/__tests__/estagiarioFixtures'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 
@@ -71,6 +71,14 @@ describe('NovaSolucaoView — laboratório do projeto do estagiário', () => {
     const wrapper = await montarComoEstagiario(UM_LABORATORIO)
 
     expect(wrapper.find('select#laboratorio-projeto').exists()).toBe(false)
+    await escolherModeloEEnviar(wrapper)
+    expect(mocks.solicitar).toHaveBeenCalledWith(expect.objectContaining({ participacaoId: 'part-1', laboratorioId: 'A' }))
+  })
+  it('projeto com 1 laboratório ativo e 1 inativo: não oferece o inativo e pré-seleciona o ativo', async () => {
+    const wrapper = await montarComoEstagiario(UM_ATIVO_UM_INATIVO)
+
+    expect(wrapper.find('select#laboratorio-projeto').exists()).toBe(false)
+    expect(wrapper.findAll('option').map(o => o.text())).not.toContain('Lab Inativo')
     await escolherModeloEEnviar(wrapper)
     expect(mocks.solicitar).toHaveBeenCalledWith(expect.objectContaining({ participacaoId: 'part-1', laboratorioId: 'A' }))
   })

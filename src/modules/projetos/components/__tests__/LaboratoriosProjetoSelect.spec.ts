@@ -4,14 +4,14 @@ import { describe, expect, it } from 'vitest'
 import LaboratoriosProjetoSelect from '@/modules/projetos/components/LaboratoriosProjetoSelect.vue'
 
 const opcoes = [
-  { id: 'A', nome: 'Lab A' },
-  { id: 'B', nome: 'Lab B' },
+  { id: 'A', nome: 'Lab A', ativo: true },
+  { id: 'B', nome: 'Lab B', ativo: true },
 ]
 
 describe('LaboratoriosProjetoSelect', () => {
   it('lista ativos e vinculados inativos marcados', () => {
     const wrapper = mount(LaboratoriosProjetoSelect, {
-      props: { modelValue: [], opcoes, vinculados: [{ id: 'X', nome: 'Lab X' }] },
+      props: { modelValue: [], opcoes, vinculados: [{ id: 'X', nome: 'Lab X', ativo: false }] },
     })
 
     const texto = wrapper.text()

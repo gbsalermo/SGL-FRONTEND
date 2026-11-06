@@ -184,7 +184,7 @@ const laboratoriosFiltrados = computed(() => laboratorios.value.filter((item) =>
 
 const laboratoriosAtivosDaUnidade = computed<LaboratorioResumo[]>(() => laboratorios.value
   .filter((lab) => lab.ativo && lab.unidadeId === projetoForm.value.unidadeId)
-  .map((lab) => ({ id: lab.id, nome: lab.nome })))
+  .map((lab) => ({ id: lab.id, nome: lab.nome, ativo: lab.ativo })))
 
 // Laboratórios já ligados ao projeto em edição: os inativos continuam selecionáveis para manter o vínculo.
 const vinculadosEmEdicao = computed<LaboratorioResumo[]>(() => {

@@ -12,7 +12,7 @@ function contexto(sobrescrever: Partial<ContextoParticipacaoOperacional> = {}): 
     participacaoId: 'part-1', vinculoEstagioId: 'v-1', usuarioId: 'u-1', usuarioNome: 'Estagiária',
     atividadeId: 'at-1', atividadeNome: 'Atividade', atividadeCodigoSeg: null,
     sciId: 'sci-1', sciNome: 'SCI', projetoId: 'proj-1', projetoNome: 'Projeto',
-    laboratorios: [{ id: 'A', nome: 'Lab A' }, { id: 'B', nome: 'Lab B' }],
+    laboratorios: [{ id: 'A', nome: 'Lab A', ativo: true }, { id: 'B', nome: 'Lab B', ativo: true }],
     unidadeId: 'unidade-1', dataInicioParticipacao: '2026-01-01', dataFimParticipacao: null,
     aberta: true, elegivel: true, motivoInelegibilidade: null,
     ...sobrescrever,
@@ -25,7 +25,7 @@ describe('contextoOperacional', () => {
 
     expect(opcoes.situacao).toBe('PRE_SELECIONAVEL')
     expect(resolverContextoEstagiario(opcoes, 'part-1', 'unidade-1')?.laboratorios)
-      .toEqual([{ id: 'A', nome: 'Lab A' }, { id: 'B', nome: 'Lab B' }])
+      .toEqual([{ id: 'A', nome: 'Lab A', ativo: true }, { id: 'B', nome: 'Lab B', ativo: true }])
   })
 
   it('descarta contexto cujo projeto não tem laboratório', () => {

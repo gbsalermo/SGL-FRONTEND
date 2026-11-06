@@ -1,6 +1,14 @@
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 
 /**
+ * Only active laboratories are offered: the API ignores inactive ones when it resolves the
+ * operational laboratory and rejects an explicitly chosen inactive one with 400.
+ */
+export function laboratoriosAtivos(laboratorios: LaboratorioResumo[]): LaboratorioResumo[] {
+  return laboratorios.filter(l => l.ativo)
+}
+
+/**
  * A project may run in several laboratories. With a single one there is nothing to ask,
  * so it is preselected; with several, the requester must pick explicitly — guessing would
  * route the request to a laboratory the responsible person did not choose.
