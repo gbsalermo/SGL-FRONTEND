@@ -22,6 +22,10 @@ describe('nomesDosLaboratoriosDaPessoa', () => {
     expect(nomesDosLaboratoriosDaPessoa([solos, antigo])).toBe('Solos, Antigo (inativo)')
   })
 
+  it('aceita outro separador (relatório de estagiários usa "; ")', () => {
+    expect(nomesDosLaboratoriosDaPessoa([solos, antigo], '; ')).toBe('Solos; Antigo (inativo)')
+  })
+
   it('devolve vazio para lista vazia', () => {
     expect(nomesDosLaboratoriosDaPessoa([])).toBe('')
   })

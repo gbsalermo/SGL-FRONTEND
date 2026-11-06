@@ -9,6 +9,6 @@ export function atuaNoLaboratorio(laboratorios: LaboratorioResumo[], id: string)
  * Inactive laboratories stay in the list (the API keeps them), so they are flagged instead of hidden.
  * An empty string lets each screen choose its own placeholder.
  */
-export function nomesDosLaboratoriosDaPessoa(laboratorios: LaboratorioResumo[]): string {
-  return laboratorios.map(l => (l.ativo ? l.nome : `${l.nome} (inativo)`)).join(', ')
+export function nomesDosLaboratoriosDaPessoa(laboratorios: LaboratorioResumo[], separador = ', '): string {
+  return laboratorios.map(l => (l.ativo ? l.nome : `${l.nome} (inativo)`)).join(separador)
 }

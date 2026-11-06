@@ -13,7 +13,7 @@ import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type Laborator
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
 import { atuaNoLaboratorio } from '@/modules/operacao/laboratoriosDaPessoa'
-import { laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
+import { AVISO_SEM_LABORATORIO_DO_ESTAGIARIO, laboratorioDoProjetoValido, laboratorioInicial, laboratoriosOferecidosAoEstagiario, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
 
 import { solucaoService } from '../services/solucaoService'
 import {
@@ -58,7 +58,10 @@ const participacaoSelecionada = computed(() => opcoesContexto.value.contextosEle
 // The participation fixes the project, but the project may span several laboratories:
 // the estagiário picks one of them (the API rejects a choice outside the project).
 const laboratorioProjetoId = ref('')
-const laboratoriosDoProjeto = computed(() => laboratoriosAtivos(contextoResolvido.value?.laboratorios ?? []))
+const laboratoriosDoProjeto = computed(() => laboratoriosOferecidosAoEstagiario(
+  contextoResolvido.value?.laboratorios ?? [], session.usuario?.laboratorios ?? []))
+// An intern with a participation selected but no laboratory left must be told why, not just blocked.
+const semLaboratorioDoEstagiario = computed(() => estagiario.value && !!contextoResolvido.value && laboratoriosDoProjeto.value.length === 0)
 watch(participacaoSelecionadaId, () => { laboratorioProjetoId.value = laboratorioInicial(laboratoriosDoProjeto.value) })
 const laboratorioOperacionalId = computed(() => estagiario.value
   ? laboratorioDoProjetoValido(laboratoriosDoProjeto.value, laboratorioProjetoId.value)
@@ -235,6 +238,7 @@ onMounted(() => { void carregar() })
           :opcoes="opcoesContexto"
           :carregando="carregando"
         />
+        <p v-if="semLaboratorioDoEstagiario" role="alert" class="no-laboratory-notice" data-test="sem-laboratorio-do-estagiario">{{ AVISO_SEM_LABORATORIO_DO_ESTAGIARIO }}</p>
         <label v-if="estagiario && precisaEscolherLaboratorio(laboratoriosDoProjeto)" class="field">
           <span>Laboratório do projeto <small>(obrigatório)</small></span>
           <select id="laboratorio-projeto" v-model="laboratorioProjetoId" required :disabled="carregando">
@@ -326,7 +330,7 @@ onMounted(() => { void carregar() })
       <div v-if="erro" class="error-banner" role="alert">{{ erro }}</div>
       <footer class="form-footer">
         <p>O pedido ficará pendente até a análise da gestão.<span class="urgent-footer-note">A preparação deverá seguir a cartilha registrada no pedido.</span></p>
-        <button class="primary-action" type="submit" :disabled="enviando || carregando || (!estagiario && (!autorizacaoAtualizada || !laboratorioPermitido.length)) || (estagiario && !contextoResolvido)">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
+        <button class="primary-action" type="submit" :disabled="enviando || carregando || (!estagiario && (!autorizacaoAtualizada || !laboratorioPermitido.length)) || (estagiario && !contextoResolvido) || semLaboratorioDoEstagiario">{{ enviando ? 'Enviando...' : 'Enviar solicitação' }}</button>
       </footer>
     </form>
   </section>

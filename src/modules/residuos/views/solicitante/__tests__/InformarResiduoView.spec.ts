@@ -27,8 +27,8 @@ vi.mock('@/modules/operacao/services/contextoOperacionalService', () => ({
 
 import InformarResiduoView from '@/modules/residuos/views/solicitante/InformarResiduoView.vue'
 
-async function montarComoEstagiario(laboratorios: LaboratorioResumo[]) {
-  entrarComoEstagiario()
+async function montarComoEstagiario(laboratorios: LaboratorioResumo[], laboratoriosDaPessoa?: LaboratorioResumo[]) {
+  entrarComoEstagiario(laboratoriosDaPessoa)
   mocks.listarParticipacoesEstagiario.mockResolvedValue([participacaoEstagio(laboratorios)])
   const wrapper = mount(InformarResiduoView)
   await flushPromises()
@@ -85,5 +85,21 @@ describe('InformarResiduoView — laboratório do projeto do estagiário', () =>
     expect(wrapper.findAll('option').map(o => o.text())).not.toContain('Lab Inativo')
     await preencherEEnviar(wrapper)
     expect(mocks.criar).toHaveBeenCalledWith(expect.objectContaining({ participacaoId: 'part-1', laboratorioId: 'A' }))
+  })
+  it('não oferece laboratório do projeto que está fora da lista do estagiário', async () => {
+    const wrapper = await montarComoEstagiario(DOIS_LABORATORIOS, [{ id: 'B', nome: 'Lab B', ativo: true }])
+
+    expect(wrapper.find('select#laboratorio-projeto').exists()).toBe(false)
+    expect(wrapper.find('.context-grid').text()).toContain('Lab B')
+    expect(wrapper.find('.context-grid').text()).not.toContain('Lab A')
+    await preencherEEnviar(wrapper)
+    expect(mocks.criar).toHaveBeenCalledWith(expect.objectContaining({ participacaoId: 'part-1', laboratorioId: 'B' }))
+  })
+
+  it('sem laboratório do projeto na lista do estagiário: avisa e bloqueia o envio', async () => {
+    const wrapper = await montarComoEstagiario(UM_LABORATORIO, [])
+
+    expect(wrapper.text()).toContain('Nenhum laboratório deste projeto está entre os seus laboratórios. Peça à Gestão para incluí-lo.')
+    expect(wrapper.find('form button[type="submit"]').attributes('disabled')).toBeDefined()
   })
 })

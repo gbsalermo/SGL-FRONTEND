@@ -17,7 +17,7 @@ const props = defineProps<{
 const emit = defineEmits<{ (e: 'atualizar'): void }>()
 type Nivel = 'LABORATORIO' | 'PROJETO' | 'SCI' | 'ATIVIDADE'
 type FiltroStatus = 'TODOS' | 'PENDENTE' | 'VINCULADO' | 'INATIVO'
-type FiltroPerfil = 'TODOS' | 'TECNICO' | 'ANALISTA' | 'PESQUISADOR' | 'ADMINISTRADOR' | 'GESTOR'
+type FiltroPerfil = 'TODOS' | 'ESTAGIARIO' | 'TECNICO' | 'ANALISTA' | 'PESQUISADOR' | 'ADMINISTRADOR' | 'GESTOR'
 
 const resumo = ref<ResumoVinculosUsuario[]>([])
 // Keeps the saved list visible until the parent reloads `usuarios`.
@@ -52,7 +52,10 @@ const dataFim = ref('')
 const observacao = ref('')
 const tab = ref<'ATIVOS' | 'HISTORICO'>('ATIVOS')
 
-const usuariosGerenciaveis = computed(() => props.usuarios.filter(u => u.perfil !== 'ESTAGIARIO'))
+// Estagiários are included: Gestão edits their laboratory list here. Only the additional-link form
+// is withheld from them, because the API refuses operational links for interns.
+const usuariosGerenciaveis = computed(() => props.usuarios)
+const ehEstagiario = computed(() => usuario.value?.perfil === 'ESTAGIARIO')
 function listaAtual(u: UsuarioPermissao): LaboratorioResumo[] {
   return listasAtualizadas.value[u.id] ?? u.laboratorios
 }
@@ -66,7 +69,7 @@ function statusRotulo(u: UsuarioPermissao) {
     : status(u) === 'INATIVO' ? 'Inativo' : 'Vinculado'
 }
 function perfilRotulo(p: string) {
-  return ({ TECNICO: 'Técnico', ANALISTA: 'Analista', PESQUISADOR: 'Pesquisador',
+  return ({ ESTAGIARIO: 'Estagiário', TECNICO: 'Técnico', ANALISTA: 'Analista', PESQUISADOR: 'Pesquisador',
     GESTOR: 'Gestor', ADMINISTRADOR: 'Administrador', ADMINISTRADOR_GERAL: 'Administrador geral' } as Record<string,string>)[p] || p
 }
 function vigente(v: VinculoOperacional) {
@@ -126,6 +129,10 @@ const laboratoriosAssociados = computed(() => {
 // Mirrors the API: a link without end date and without project/SCI/activity is just the person's list again.
 const MENSAGEM_VINCULO_GENERICO = 'Use a lista de laboratórios da pessoa para acesso sem prazo; o vínculo adicional é para acesso temporário ou restrito a projeto, SCI ou atividade.'
 const vinculoGenerico = computed(() => nivel.value === 'LABORATORIO' && !dataFim.value)
+// Editing must not clear the deadline of a laboratory-wide link: that would recreate the generic link.
+const edicaoExigeDataFim = computed(() => !!modalEditarVinculo.value
+  && !modalEditarVinculo.value.projetoId && !modalEditarVinculo.value.sciId && !modalEditarVinculo.value.atividadeId)
+const edicaoGenerica = computed(() => edicaoExigeDataFim.value && !edicaoDataFim.value)
 const podeSalvar = computed(() => !vinculoGenerico.value && !!usuario.value?.ativo && !!laboratorioId.value
   && (nivel.value === 'LABORATORIO' || !!projetoId.value)
   && (nivel.value !== 'SCI' && nivel.value !== 'ATIVIDADE' || !!sciId.value)
@@ -259,7 +266,7 @@ function abrirEdicaoVinculo(v: VinculoOperacional) {
   erro.value = ''
 }
 async function salvarEdicaoVinculo() {
-  if (!modalEditarVinculo.value || salvando.value) return
+  if (!modalEditarVinculo.value || salvando.value || edicaoGenerica.value) return
   erro.value = ''
   sucesso.value = ''
   salvando.value = true
@@ -305,7 +312,7 @@ onMounted(() => { void carregarResumo() })
     <section class="people-metrics" aria-label="Resumo operacional">
       <article class="people-metric people-metric--ok"><span>Vinculados</span><strong>{{ vinculados }}</strong><small>com contexto operacional</small></article>
       <article class="people-metric people-metric--pending"><span>Pendentes de vinculação</span><strong>{{ pendentes }}</strong><small>sem laboratório nem vínculo vigente</small></article>
-      <article class="people-metric"><span>Usuários efetivos</span><strong>{{ usuariosGerenciaveis.length }}</strong><small>técnicos, analistas, pesquisadores e gestores</small></article>
+      <article class="people-metric"><span>Usuários</span><strong>{{ usuariosGerenciaveis.length }}</strong><small>todos os perfis, inclusive estagiários</small></article>
       <article class="people-metric"><span>Inativos</span><strong>{{ inativos }}</strong><small>sem operação no sistema</small></article>
     </section>
 
@@ -321,7 +328,7 @@ onMounted(() => { void carregarResumo() })
         </label>
         <label class="people-field"><span>Perfil</span>
           <select v-model="filtroPerfil">
-            <option value="TODOS">Todos os perfis</option><option value="TECNICO">Técnico</option>
+            <option value="TODOS">Todos os perfis</option><option value="ESTAGIARIO">Estagiário</option><option value="TECNICO">Técnico</option>
             <option value="ANALISTA">Analista</option><option value="PESQUISADOR">Pesquisador</option>
             <option value="GESTOR">Gestor</option><option value="ADMINISTRADOR">Administrador</option>
           </select>
@@ -387,8 +394,9 @@ onMounted(() => { void carregarResumo() })
           </section>
           <section class="people-section">
             <div class="people-section-head"><div><span class="people-section-number">03</span><h3>Participações e vínculos</h3></div>
-              <button class="people-primary" type="button" data-test="novo-vinculo" :disabled="!usuario.ativo || salvando" @click="abrirNovoVinculo">+ Adicionar vínculo</button>
+              <button v-if="!ehEstagiario" class="people-primary" type="button" data-test="novo-vinculo" :disabled="!usuario.ativo || salvando" @click="abrirNovoVinculo">+ Adicionar vínculo</button>
             </div>
+            <p v-if="ehEstagiario" class="people-footnote" data-test="aviso-estagiario">Estagiários usam vínculos de estágio e participações existentes.</p>
             <div class="people-tabs"><button type="button" :class="{active:tab==='ATIVOS'}" @click="tab='ATIVOS'">Vigentes ({{ ativos.length }})</button><button type="button" :class="{active:tab==='HISTORICO'}" @click="tab='HISTORICO'">Histórico ({{ historico.length }})</button></div>
             <div v-if="carregandoDetalhe" class="people-empty-inline">Carregando vínculos...</div>
             <div v-else-if="(tab==='ATIVOS'?ativos:historico).length === 0" class="people-empty-inline">{{ tab==='ATIVOS' ? 'Nenhum vínculo adicional vigente.' : 'Ainda não há registros encerrados.' }}</div>
@@ -429,11 +437,12 @@ onMounted(() => { void carregarResumo() })
         <header><div><span class="people-eyebrow">ATUALIZAÇÃO DO VÍNCULO</span><h2>Editar informações</h2><p>{{ contextoTitulo(modalEditarVinculo) }} · {{ modalEditarVinculo.laboratorioNome }}</p></div><button type="button" class="people-close" @click="modalEditarVinculo=null">×</button></header>
         <div class="people-modal-body">
           <p>O vínculo foi iniciado em {{ dataFormatada(modalEditarVinculo.dataInicio) }}. Para trocar o Laboratório, Projeto, SCI ou Atividade, encerre este vínculo e cadastre outro.</p>
-          <label class="people-field"><span>Fim previsto (opcional)</span><input v-model="edicaoDataFim" type="date" :min="modalEditarVinculo.dataInicio" /></label>
+          <label class="people-field"><span>Fim previsto{{ edicaoExigeDataFim ? ' *' : ' (opcional)' }}</span><input v-model="edicaoDataFim" type="date" data-test="edicao-data-fim" :min="modalEditarVinculo.dataInicio" /></label>
+          <p v-if="edicaoGenerica" class="people-footnote" data-test="dica-edicao-generica">{{ MENSAGEM_VINCULO_GENERICO }}</p>
           <label class="people-field"><span>Observação</span><textarea v-model="edicaoObservacao" rows="3" /></label>
           <div v-if="erro" role="alert" class="people-feedback people-feedback--error">{{ erro }}</div>
         </div>
-        <footer><button type="button" class="people-outline" :disabled="salvando" @click="modalEditarVinculo=null">Cancelar</button><button type="button" class="people-primary" :disabled="salvando" @click="salvarEdicaoVinculo">{{ salvando?'Salvando...':'Salvar alterações' }}</button></footer>
+        <footer><button type="button" class="people-outline" :disabled="salvando" @click="modalEditarVinculo=null">Cancelar</button><button type="button" class="people-primary" :disabled="salvando || edicaoGenerica" @click="salvarEdicaoVinculo">{{ salvando?'Salvando...':'Salvar alterações' }}</button></footer>
       </section>
     </div>
     <div v-if="modalEncerramento" class="people-modal-backdrop" @click.self="modalEncerramento=null">

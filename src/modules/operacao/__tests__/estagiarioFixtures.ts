@@ -13,11 +13,16 @@ export function participacaoEstagio(laboratorios: LaboratorioResumo[]): Contexto
   }
 }
 
-export function entrarComoEstagiario() {
+/** Defaults to every fixture laboratory, so only tests about the person's list need to narrow it. */
+export function entrarComoEstagiario(
+  laboratoriosDaPessoa: LaboratorioResumo[] = [
+    { id: 'A', nome: 'Lab A', ativo: true }, { id: 'B', nome: 'Lab B', ativo: true }, { id: 'I', nome: 'Lab Inativo', ativo: false },
+  ],
+) {
   const usuario: UsuarioSessao = {
     id: 'u-1', nome: 'Estagiária', email: 'e@embrapa.br', perfil: 'ESTAGIARIO', situacao: 'ATIVO',
     unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF',
-    laboratorios: [], ativo: true,
+    laboratorios: laboratoriosDaPessoa, ativo: true,
   }
   useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
 }
