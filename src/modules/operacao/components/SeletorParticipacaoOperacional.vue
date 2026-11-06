@@ -42,17 +42,17 @@ function selecionar(evento: Event) {
           :key="contexto.participacaoId"
           :value="contexto.participacaoId"
         >
-          {{ contexto.atividadeNome || 'Atividade' }} — {{ contexto.projetoNome || 'Projeto' }} · {{ contexto.laboratorioNome || 'Laboratório' }}
+          {{ contexto.laboratorioNome || 'Laboratório' }} → {{ contexto.projetoNome || 'Projeto' }} → {{ contexto.sciNome || 'SCI' }} → {{ contexto.atividadeNome || 'Atividade' }}
         </option>
       </select>
     </label>
     <p v-if="carregando" class="seletor-participacao__ajuda">Consultando participações e sua elegibilidade...</p>
     <p v-else-if="erro" role="alert" class="seletor-participacao__erro">{{ erro }}</p>
     <p v-else-if="opcoes.situacao === 'SEM_CONTEXTO_ELEGIVEL'" role="status" class="seletor-participacao__ajuda">
-      Nenhuma participação está elegível para novas solicitações. Verifique com a gestão o vínculo de estágio, as datas e a situação da Atividade.
+      Você precisa de pelo menos uma participação elegível para utilizar os fluxos de solicitação. Peça ao gestor um vínculo com uma Atividade; o Laboratório, Projeto e SCI são derivados da hierarquia. Confira também as datas e o estado do vínculo.
     </p>
     <p v-else-if="opcoes.situacao === 'ESCOLHA_OBRIGATORIA' && !modelValue" class="seletor-participacao__ajuda">
-      Você participa de mais de uma Atividade. Selecione a participação correspondente a esta solicitação, mesmo que as atividades pertençam ao mesmo Projeto.
+      Você possui mais de uma participação. Escolha a Atividade e confira o Laboratório, SCI e Projeto: cada solicitação pertence a um único laboratório.
     </p>
 
     <div v-if="selecionado" class="seletor-participacao__resumo" aria-label="Contexto derivado da participação">
