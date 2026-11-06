@@ -44,6 +44,12 @@ const atividadeSelecionadaId = ref('')
 const atividadeInicio = ref('')
 const atividadeObservacao = ref('')
 
+// Uma participação aberta não deve ser oferecida novamente ao mesmo vínculo.
+const atividadesAssociaveis = computed(() => {
+  const vinculadas = new Set(participacoesAtivas(vinculoSelecionado.value).map(item => item.atividadeId))
+  return atividadesDisponiveis.value.filter(atividade => !vinculadas.has(atividade.id))
+})
+
 const modalEditarParticipacaoAberto = ref(false)
 const participacaoEdicao = ref<VinculoEstagioAtividadeResponse | null>(null)
 const participacaoEdicaoAtividadeId = ref('')
@@ -1911,7 +1917,7 @@ onMounted(carregar)
             <select v-model="atividadeSelecionadaId">
               <option value="">Selecione</option>
               <option
-                v-for="atividade in atividadesDisponiveis"
+                v-for="atividade in atividadesAssociaveis"
                 :key="atividade.id"
                 :value="atividade.id"
               >
