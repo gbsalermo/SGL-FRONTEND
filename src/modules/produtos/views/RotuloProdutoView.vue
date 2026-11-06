@@ -4,7 +4,10 @@ import { useRoute, useRouter } from 'vue-router'
 
 import ProdutoRotuloModelo from '@/modules/produtos/components/rotulo/ProdutoRotuloModelo.vue'
 import { produtoService } from '@/modules/produtos/services/produtoService'
-import type { ProdutoRotuloResponse } from '@/modules/produtos/types/produtoRotulo'
+import type { ProdutoRotuloResponse, OrgaoFiscalizadorProduto } from '@/modules/produtos/types/produtoRotulo'
+import { caminhoPictogramaResiduo, rotuloRiscoResiduo } from '@/modules/residuos/config/pictogramas'
+import ZebraExportPanel from '@/modules/rotulos/zebra/ZebraExportPanel.vue'
+import type { DocumentoZpl } from '@/modules/rotulos/zebra/zpl'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,6 +21,64 @@ const MIN = 70
 const MAX = 190
 const tamanhos = [90, 135, 180, 190]
 const alturaRotuloMm = computed(() => Math.round(larguraRotuloMm.value / BASE_LARGURA * BASE_ALTURA * 10) / 10)
+
+const nomesFiscalizadores: Record<OrgaoFiscalizadorProduto, string> = {
+  POLICIA_FEDERAL: 'Polícia Federal',
+  VIGILANCIA_SANITARIA: 'Vigilância Sanitária',
+  ANVISA: 'Anvisa',
+  EXERCITO: 'Exército',
+  OUTRO: 'Outro órgão',
+}
+function legivel(valor: string | null | undefined) {
+  return valor ? valor.toLowerCase().replaceAll('_', ' ').replace(/^./, c => c.toUpperCase()) : 'Não informado'
+}
+
+const documentoZebra = computed<DocumentoZpl | null>(() => {
+  const p = dados.value
+  if (!p) return null
+  const pictograma = p.tipoRisco && p.tipoRisco !== 'NENHUM'
+    ? caminhoPictogramaResiduo(p.tipoRisco) : null
+  return {
+    titulo: 'RÓTULO DE PRODUTO',
+    identificador: p.codigoReferencia || p.id,
+    subtitulo: p.nome,
+    situacao: p.ativo ? 'Produto ativo no catálogo' : 'Produto inativo no catálogo',
+    categoria: 'PRODUTO',
+    pictogramas: pictograma && p.tipoRisco
+      ? [{ caminho: pictograma, rotulo: rotuloRiscoResiduo(p.tipoRisco) }]
+      : [],
+    secoes: [
+      { titulo: 'Identificação', campos: [
+        { rotulo: 'Código de referência', valor: p.codigoReferencia || 'Não informado' },
+        { rotulo: 'Apresentação', valor: p.unidadeArmazenamento || 'Não informada' },
+        { rotulo: 'Unidade de medida', valor: legivel(p.unidadeMedida) },
+        { rotulo: 'Perecibilidade', valor: p.perecivel
+          ? 'Perecível — ' + legivel(p.tipoPerecivel) : 'Não perecível' },
+      ] },
+      { titulo: 'Risco e segurança', campos: [
+        { rotulo: 'Nível de risco', valor: p.risco === 'MEDIO' ? 'Médio' : legivel(p.risco) },
+        { rotulo: 'Tipo de risco', valor: p.tipoRisco && p.tipoRisco !== 'NENHUM'
+          ? rotuloRiscoResiduo(p.tipoRisco) : 'Sem pictograma aplicável' },
+        { rotulo: 'Advertência cadastrada', valor: p.descricaoRisco || 'Não informada' },
+      ] },
+      { titulo: 'Armazenamento', campos: [
+        { rotulo: 'Condições recomendadas', valor: p.condicoesArmazenamento || 'Não informadas' },
+        { rotulo: 'Localização física', valor: p.localizacaoFisica || 'Não informada' },
+      ] },
+      { titulo: 'Controle e fiscalização', campos: [
+        { rotulo: 'Situação', valor: p.fiscalizado ? 'Produto sujeito a controle' : 'Sem controle externo cadastrado' },
+        { rotulo: 'Órgãos fiscalizadores', valor: p.fiscalizado
+          ? p.orgaosFiscalizadores.map(orgao => nomesFiscalizadores[orgao]).join(', ') || 'Não informados'
+          : 'Não aplicável' },
+        { rotulo: 'Observação de fiscalização', valor: p.observacaoFiscalizacao },
+      ] },
+      { titulo: 'Descrição e observações', campos: [
+        { rotulo: 'Descrição', valor: p.descricao || p.nome },
+      ] },
+    ],
+    avisoFinal: 'IDENTIFICAÇÃO INTERNA SGL. CONSULTAR FDS E REQUISITOS DE SEGURANÇA APLICÁVEIS.',
+  }
+})
 
 async function carregar() {
   const id = String(route.params.id ?? '')
@@ -60,6 +121,8 @@ onMounted(carregar)
         <div class="result"><span>Tamanho final</span><strong>{{ larguraRotuloMm }} × {{ alturaRotuloMm }} mm</strong></div>
       </div>
     </section>
+
+    <ZebraExportPanel :documento="documentoZebra" :bloqueado="carregando || !!erro" />
 
     <section v-if="carregando" class="state">Carregando produto...</section>
     <section v-else-if="erro" class="state error">{{ erro }}</section>

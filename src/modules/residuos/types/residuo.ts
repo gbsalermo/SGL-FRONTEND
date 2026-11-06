@@ -219,7 +219,16 @@ export interface RotuloResiduoResponse {
   unidadeNome: string
   unidadeSigla: string
   laboratorioNome: string
+  projetoOrigemNome: string | null
+  sciOrigemNome: string | null
+  atividadeOrigemNome: string | null
   geradorNome: string
+  responsavelLiberacaoNome: string | null
+  dataInformacao: string | null
+  estadoFisico: EstadoFisicoResiduo | null
+  medidasSeguranca: MedidaSegurancaResiduo[]
+  observacaoSeguranca: string | null
+  observacoesRotulo: string | null
   processoOrigem: string
   recipiente: string
   quantidade: number

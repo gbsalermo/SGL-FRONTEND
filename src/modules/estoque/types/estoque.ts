@@ -59,6 +59,7 @@ export interface MovimentacaoLoteResponse {
   loteId: string | null
   codigoInternoLote: string | null
   tipoMovimentacao: string
+  origem?: string | null
   quantidadeMovimentada: number
   dataMovimentacao: string
   observacao: string | null
