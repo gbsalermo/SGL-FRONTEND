@@ -146,6 +146,39 @@ describe('CriarVinculoEstagioDialog', () => {
     expect(salvar(wrapper).attributes('disabled')).toBeUndefined()
   })
 
+  it('limpaLaboratorioForaDaLista', async () => {
+    const wrapper = await montar({ ...pendente, laboratorioId: 'lab-inativo' })
+    await preencher(wrapper)
+
+    expect(salvar(wrapper).attributes('disabled')).toBeDefined()
+
+    await wrapper.get('[data-test="laboratorio"]').setValue('lab-2')
+
+    expect(salvar(wrapper).attributes('disabled')).toBeUndefined()
+  })
+
+  it('ignoraFecharDuranteEnvio', async () => {
+    let liberar: () => void = () => {}
+    const original = http.defaults.adapter as (c: never) => Promise<unknown>
+    http.defaults.adapter = (config) => (config.method === 'post'
+      ? new Promise((resolve) => { liberar = () => resolve(original(config as never)) })
+      : original(config as never)) as never
+    const wrapper = await montar()
+    await preencher(wrapper)
+    await salvar(wrapper).trigger('click')
+
+    await wrapper.get('.vinculo-backdrop').trigger('click')
+    await wrapper.get('[aria-label="Fechar"]').trigger('click')
+    await wrapper.get('[data-test="cancelar"]').trigger('click')
+
+    expect(wrapper.emitted('fechar')).toBeUndefined()
+    expect(wrapper.get('[data-test="cancelar"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('[aria-label="Fechar"]').attributes('disabled')).toBeDefined()
+    liberar()
+    await flushPromises()
+    expect(wrapper.emitted('criado')).toHaveLength(1)
+  })
+
   it('fimAntesDoInicioDesabilita', async () => {
     const wrapper = await montar()
     await preencher(wrapper, '2026-10-01')

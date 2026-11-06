@@ -98,6 +98,8 @@ async function carregarOpcoes() {
         estagiarioService.listarCulturasAtivas(),
       ])
     laboratorios.value = labs
+    // The base lab may be inactive or outside the unit; keeping it would save into a lab the select doesn't show.
+    if (!labs.some((lab) => lab.id === laboratorioId.value)) laboratorioId.value = ''
     orientadores.value = orientadoresElegiveis
     atividades.value = atividadesAtivas
     cursos.value = cursosAtivos
@@ -117,6 +119,12 @@ watch(
   },
   { immediate: true },
 )
+
+// Closing mid-request would unmount the dialog and drop `criado`, leaving the list stale.
+function fechar() {
+  if (enviando.value) return
+  emit('fechar')
+}
 
 function mensagemDeErro(error: unknown, padrao: string) {
   if (axios.isAxiosError<ApiErrorResponse>(error)) return error.response?.data?.message ?? padrao
@@ -153,7 +161,7 @@ async function salvar() {
 </script>
 
 <template>
-  <div v-if="aberto" class="vinculo-backdrop" @click.self="emit('fechar')">
+  <div v-if="aberto" class="vinculo-backdrop" @click.self="fechar">
     <section
       class="vinculo-card"
       role="dialog"
@@ -163,7 +171,7 @@ async function salvar() {
       <header>
         <h2>Criar vínculo</h2>
         <p>{{ pendente.nome }}</p>
-        <button type="button" aria-label="Fechar" @click="emit('fechar')">×</button>
+        <button type="button" aria-label="Fechar" :disabled="enviando" @click="fechar">×</button>
       </header>
 
       <form class="vinculo-form" @submit.prevent>
@@ -258,7 +266,7 @@ async function salvar() {
         </label>
 
         <footer>
-          <button type="button" data-test="cancelar" @click="emit('fechar')">Cancelar</button>
+          <button type="button" data-test="cancelar" :disabled="enviando" @click="fechar">Cancelar</button>
           <button type="button" data-test="salvar" :disabled="!podeSalvar" @click="salvar">
             {{ enviando ? 'Salvando...' : 'Salvar' }}
           </button>
