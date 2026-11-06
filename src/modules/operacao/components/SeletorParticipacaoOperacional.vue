@@ -20,6 +20,28 @@ const selecionado = computed<ContextoParticipacaoOperacional | undefined>(() =>
   props.opcoes.contextosElegiveis.find(x => x.participacaoId === props.modelValue),
 )
 
+const gruposLaboratorio = computed(() => {
+  const grupos = new Map<string, {
+    nome: string
+    participacoes: ContextoParticipacaoOperacional[]
+  }>()
+
+  for (const contexto of props.opcoes.contextosElegiveis) {
+    const chave = contexto.laboratorioId || ''
+    const existente = grupos.get(chave)
+    if (existente) {
+      existente.participacoes.push(contexto)
+    } else {
+      grupos.set(chave, {
+        nome: contexto.laboratorioNome || 'Laboratório não informado',
+        participacoes: [contexto],
+      })
+    }
+  }
+
+  return [...grupos.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+})
+
 function selecionar(evento: Event) {
   emit('update:modelValue', (evento.target as HTMLSelectElement).value)
 }
@@ -37,15 +59,22 @@ function selecionar(evento: Event) {
         @change="selecionar"
       >
         <option value="">Selecione uma participação elegível</option>
-        <option
-          v-for="contexto in opcoes.contextosElegiveis"
-          :key="contexto.participacaoId"
-          :value="contexto.participacaoId"
+        <optgroup
+          v-for="grupo in gruposLaboratorio"
+          :key="grupo.participacoes[0]?.laboratorioId || grupo.nome"
+          :label="grupo.nome"
         >
-          {{ contexto.laboratorioNome || 'Laboratório' }} → {{ contexto.projetoNome || 'Projeto' }} → {{ contexto.sciNome || 'SCI' }} → {{ contexto.atividadeNome || 'Atividade' }}
-        </option>
+          <option
+            v-for="contexto in grupo.participacoes"
+            :key="contexto.participacaoId"
+            :value="contexto.participacaoId"
+          >
+            {{ contexto.projetoNome || 'Projeto' }} → {{ contexto.sciNome || 'SCI' }} → {{ contexto.atividadeNome || 'Atividade' }}
+          </option>
+        </optgroup>
       </select>
     </label>
+    <p v-if="!carregando && gruposLaboratorio.length > 1" class="seletor-participacao__ajuda" role="status">Você tem participações elegíveis em {{ gruposLaboratorio.length }} laboratórios. Cada pedido utiliza apenas o laboratório da participação escolhida.</p>
     <p v-if="carregando" class="seletor-participacao__ajuda">Consultando participações e sua elegibilidade...</p>
     <p v-else-if="erro" role="alert" class="seletor-participacao__erro">{{ erro }}</p>
     <p v-else-if="opcoes.situacao === 'SEM_CONTEXTO_ELEGIVEL'" role="status" class="seletor-participacao__ajuda">
