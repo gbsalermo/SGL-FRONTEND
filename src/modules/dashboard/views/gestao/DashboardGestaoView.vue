@@ -74,7 +74,8 @@ const painelResumo = ref<PainelResumo>('laboratorios')
 const indiceLaboratorio = ref(0)
 
 const hoje = computed(() => inicioDoDia(new Date()))
-const unidadeId = computed(() => session.usuario?.unidadeId ?? null)
+// Unidade em operação: a do usuário ou, para o administrador geral, a escolhida no seletor.
+const unidadeId = computed(() => session.unidadeEmOperacaoId)
 
 const pedidosUrgentes = computed(() =>
   pedidos.value.filter((pedido) => pedido.status === 'PENDENTE' && pedido.urgente),

@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { aguardaAprovacao, ROTA_APROVAR_PENDENTES } from '@/modules/auth/perfis'
 import CatalogosResiduosSolucoesView from '@/modules/admin/views/CatalogosResiduosSolucoesView.vue'
 
 import type { PerfilUsuario } from '@/modules/auth/types/session'
@@ -256,11 +257,11 @@ function novoProduto(): ProdutoForm {
 }
 
 function novaClasseResiduo(): ClasseResiduoForm {
-  return { unidadeId: session.usuario?.unidadeId ?? '', codigo: '', descricao: '', ativo: true }
+  return { unidadeId: session.unidadeEmOperacaoId ?? '', codigo: '', descricao: '', ativo: true }
 }
 
 function novoLocalArmazenamento(): LocalArmazenamentoForm {
-  return { unidadeId: session.usuario?.unidadeId ?? '', nome: '', ativo: true }
+  return { unidadeId: session.unidadeEmOperacaoId ?? '', nome: '', ativo: true }
 }
 
 const rotuloNovoCadastro = computed(() => {
@@ -743,7 +744,7 @@ async function alternarLocalArmazenamento(item: LocalArmazenamentoResiduoCadastr
 
 async function salvarPermissao(usuario: UsuarioPermissao) {
   const novoPerfil = perfisEdicao.value[usuario.id]
-  if (!novoPerfil || novoPerfil === usuario.perfil || usuario.id === session.usuario?.id) return
+  if (!novoPerfil || novoPerfil === usuario.perfil || usuario.id === session.usuario?.id || aguardaAprovacao(usuario)) return
 
   salvandoPerfil.value = usuario.id
   erro.value = ''
@@ -790,6 +791,7 @@ async function carregar() {
 onMounted(() => {
   const secao = route.query.secao
   if (secao === 'residuos-solucoes') aba.value = 'residuos-solucoes'
+  if (typeof route.query.busca === 'string') busca.value = route.query.busca
   void carregar()
 })
 </script>
@@ -976,9 +978,18 @@ onMounted(() => {
               <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
                 <td><strong>{{ usuario.nome }}</strong><small>{{ usuario.email }}</small></td>
                 <td><strong>{{ usuario.unidadeNome || 'Sem unidade' }}</strong><small>{{ usuario.laboratorioNome || 'Sem laboratório' }}</small></td>
-                <td><span class="status" :class="usuario.ativo ? 'status--active' : 'status--inactive'">{{ usuario.ativo ? 'Ativo' : 'Inativo' }}</span></td>
-                <td>{{ rotuloPerfil(usuario.perfil) }}</td>
                 <td>
+                  <!-- Pendente vem antes de Ativo/Inativo: ele está "ativo" no cadastro, mas ainda sem acesso. -->
+                  <span v-if="aguardaAprovacao(usuario)" class="status status--pending">Aguardando aprovação</span>
+                  <span v-else class="status" :class="usuario.ativo ? 'status--active' : 'status--inactive'">{{ usuario.ativo ? 'Ativo' : 'Inativo' }}</span>
+                </td>
+                <td>{{ rotuloPerfil(usuario.perfil) }}</td>
+                <td v-if="aguardaAprovacao(usuario)">
+                  <!-- Trocar o perfil de um pendente não libera o acesso; a aprovação define perfil e laboratório-base. -->
+                  <router-link class="pending-link" :to="ROTA_APROVAR_PENDENTES">Aprovar em Vínculos → Pendentes</router-link>
+                  <small class="self-note">O perfil é escolhido na aprovação</small>
+                </td>
+                <td v-else>
                   <select v-model="perfisEdicao[usuario.id]" :disabled="usuario.id === session.usuario?.id">
                     <option v-for="perfilItem in perfis" :key="perfilItem.valor" :value="perfilItem.valor">{{ perfilItem.rotulo }}</option>
                   </select>
@@ -987,7 +998,7 @@ onMounted(() => {
                 <td class="actions">
                   <button
                     type="button"
-                    :disabled="usuario.id === session.usuario?.id || perfisEdicao[usuario.id] === usuario.perfil || salvandoPerfil === usuario.id"
+                    :disabled="aguardaAprovacao(usuario) || usuario.id === session.usuario?.id || perfisEdicao[usuario.id] === usuario.perfil || salvandoPerfil === usuario.id"
                     @click="salvarPermissao(usuario)"
                   >
                     {{ salvandoPerfil === usuario.id ? 'Salvando...' : 'Salvar perfil' }}
@@ -1178,6 +1189,8 @@ td small { margin-top: 3px; color: #8491a3; font-size: 8.5px; }
 .status { display: inline-flex; min-width: 58px; justify-content: center; padding: 4px 7px; border-radius: 999px; font-size: 8px; font-weight: 900; text-transform: uppercase; }
 .status--active { background: #e8f7ee; color: #1b7140; }
 .status--inactive { background: #eef1f5; color: #697587; }
+.status--pending { background: #fdf3e1; color: #8a5a12; }
+.pending-link { font-weight: 700; color: var(--sgl-primary); white-space: nowrap; }
 .controlled { color: #244f98; font-weight: 700; }
 .actions { white-space: nowrap; text-align: right; }
 .actions button { margin-left: 6px; padding: 6px 8px; border: 1px solid #ced8e5; border-radius: 5px; background: #fff; color: #34506f; font: inherit; font-size: 9px; font-weight: 800; cursor: pointer; }

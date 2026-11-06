@@ -15,6 +15,7 @@ import type {
   SituacaoExecucaoProjeto,
   StatusProjeto,
 } from '@/modules/projetos/types/projetos'
+import { ehPerfilAdmin } from '@/modules/auth/perfis'
 import { useSessionStore } from '@/stores/session'
 
 type FiltroStatus = 'TODOS' | StatusProjeto
@@ -126,7 +127,7 @@ const atividadeForm = ref<AtividadeForm>({
   ativo: true,
 })
 
-const ehAdministrador = computed(() => session.usuario?.perfil === 'ADMINISTRADOR')
+const ehAdministrador = computed(() => ehPerfilAdmin(session.usuario?.perfil))
 
 const termoBusca = computed(() => busca.value.trim().toLocaleLowerCase('pt-BR'))
 

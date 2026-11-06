@@ -37,7 +37,8 @@ const dataFim = ref('')
 const ordem = ref<'RECENTES' | 'ANTIGAS'>('RECENTES')
 const expandida = ref<string | null>(null)
 
-const unidadeId = computed(() => session.usuario?.unidadeId)
+// Unidade em operação: a do usuário ou, para o administrador geral, a escolhida no seletor.
+const unidadeId = computed(() => session.unidadeEmOperacaoId)
 const movimentacaoAlvo = computed(() => {
   const valor = route.query.highlight ?? route.query.movimentacao
   return typeof valor === 'string' ? valor : ''

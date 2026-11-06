@@ -1,34 +1,42 @@
 import { defineStore } from 'pinia'
 
-import { http } from '@/services/http'
-import type { UsuarioSessao } from '@/modules/auth/types/session'
+import { http, SESSION_STORAGE_KEY } from '@/services/http'
+import type { LoginResponse, UsuarioSessao } from '@/modules/auth/types/session'
 
-const STORAGE_KEY = 'sgl.dev-session'
-export const DURACAO_SESSAO_MS = 5 * 60 * 60 * 1000
+// Left behind by the browser-side DEV login that the JWT session replaced.
+const LEGACY_STORAGE_KEY = 'sgl.dev-session'
 
 interface SessaoPersistida {
+  token: string
   usuario: UsuarioSessao
   expiraEm: number
+  unidadeOperacaoId: string | null
+  unidadeOperacaoRotulo: string | null
 }
 
 function carregarSessao(): SessaoPersistida | null {
+  localStorage.removeItem(LEGACY_STORAGE_KEY)
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY)
     if (!raw) return null
 
     const sessao = JSON.parse(raw) as Partial<SessaoPersistida>
 
-    if (!sessao.usuario || typeof sessao.expiraEm !== 'number' || sessao.expiraEm <= Date.now()) {
-      localStorage.removeItem(STORAGE_KEY)
+    if (!sessao.token || !sessao.usuario || typeof sessao.expiraEm !== 'number' || sessao.expiraEm <= Date.now()) {
+      localStorage.removeItem(SESSION_STORAGE_KEY)
       return null
     }
 
     return {
+      token: sessao.token,
       usuario: sessao.usuario,
       expiraEm: sessao.expiraEm,
+      unidadeOperacaoId: sessao.unidadeOperacaoId ?? null,
+      unidadeOperacaoRotulo: sessao.unidadeOperacaoRotulo ?? null,
     }
   } catch {
-    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(SESSION_STORAGE_KEY)
     return null
   }
 }
@@ -37,73 +45,49 @@ const sessaoInicial = carregarSessao()
 
 export const useSessionStore = defineStore('session', {
   state: () => ({
+    token: sessaoInicial?.token ?? null as string | null,
     usuario: sessaoInicial?.usuario ?? null as UsuarioSessao | null,
     expiraEm: sessaoInicial?.expiraEm ?? null as number | null,
+    unidadeOperacaoId: sessaoInicial?.unidadeOperacaoId ?? null as string | null,
+    // Display label of the selected Unidade, so screens can show it without another request.
+    unidadeOperacaoRotulo: sessaoInicial?.unidadeOperacaoRotulo ?? null as string | null,
   }),
 
   getters: {
-    autenticado: (state) => Boolean(state.usuario && state.expiraEm),
+    autenticado: (state) => Boolean(state.token && state.usuario && state.expiraEm),
+    pendente: (state) => state.usuario?.situacao === 'PENDENTE_VINCULACAO',
+    administradorGeral: (state) => state.usuario?.perfil === 'ADMINISTRADOR_GERAL',
+    // Unidade em que a tela trabalha: a escolhida no seletor pelo ADMINISTRADOR_GERAL ou, sem
+    // escolha (e para os demais perfis), a do próprio usuário. Use este getter sempre que a tela
+    // precisar saber "de qual unidade" mostrar os dados — é a mesma que a API usa como tenant.
+    unidadeEmOperacaoId: (state): string | null =>
+      (state.usuario?.perfil === 'ADMINISTRADOR_GERAL' ? state.unidadeOperacaoId : null)
+        ?? state.usuario?.unidadeId ?? null,
   },
 
   actions: {
-    async entrarDesenvolvimento(identificador: string, senha: string) {
-      if (!import.meta.env.DEV) {
-        throw new Error('A autenticação local definitiva ainda não está disponível.')
-      }
-
-      const login = identificador.trim().toLowerCase()
-
-      if (!login || !senha.trim()) {
-        throw new Error('Informe usuário e senha para continuar.')
-      }
-
-      const { data } = await http.get<UsuarioSessao[]>('/v1/usuarios')
-
-      if (!Array.isArray(data)) {
-        throw new Error(
-          'O backend não retornou uma lista de usuários. Verifique se a API está rodando em http://localhost:8080 e se VITE_API_BASE_URL aponta para http://localhost:8080/api.',
-        )
-      }
-
-      const usuario = data.find((item) => {
-        if (!item.ativo) return false
-
-        const email = item.email.toLowerCase()
-        const nome = item.nome.toLowerCase()
-        const usuarioEmail = email.split('@')[0]
-
-        return email === login || usuarioEmail === login || nome === login
-      })
-
-      if (!usuario) {
-        throw new Error('Usuário ativo não encontrado no backend.')
-      }
-
-      // Modo temporário de desenvolvimento: o backend ainda não possui endpoint de login.
-      // A senha é exigida pela interface, mas não é validada até a etapa oficial de autenticação.
-      this.usuario = usuario
-      this.expiraEm = Date.now() + DURACAO_SESSAO_MS
-
-      const sessao: SessaoPersistida = {
-        usuario,
-        expiraEm: this.expiraEm,
-      }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessao))
-
-      return usuario
+    async entrar(login: string, senha: string) {
+      const { data } = await http.post<LoginResponse>('/v1/auth/login', { login: login.trim(), senha })
+      return this.aplicarLogin(data)
     },
 
-    async atualizarUsuarioAtual() {
-      if (!this.usuario) throw new Error('Sessão de usuário não encontrada.')
-      const { data } = await http.get<UsuarioSessao[]>('/v1/usuarios')
-      if (!Array.isArray(data)) throw new Error('Não foi possível consultar os dados atuais do usuário.')
-      const atualizado = data.find(item => item.id === this.usuario?.id && item.ativo)
-      if (!atualizado) throw new Error('O usuário não está mais ativo ou disponível.')
-      this.usuario = atualizado
-      if (this.expiraEm) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ usuario: atualizado, expiraEm: this.expiraEm }))
-      }
-      return atualizado
+    async entrarDesenvolvimento(login: string) {
+      const { data } = await http.post<LoginResponse>('/v1/auth/dev-login', { login: login.trim() })
+      return this.aplicarLogin(data)
+    },
+
+    async atualizarUsuario() {
+      if (!this.token) throw new Error('Sessão de usuário não encontrada.')
+      const { data } = await http.get<UsuarioSessao>('/v1/auth/me')
+      this.usuario = data
+      this.persistir()
+      return data
+    },
+
+    selecionarUnidade(unidadeId: string | null, rotulo: string | null = null) {
+      this.unidadeOperacaoId = unidadeId
+      this.unidadeOperacaoRotulo = unidadeId ? rotulo : null
+      this.persistir()
     },
 
     expirarSeNecessario() {
@@ -118,9 +102,34 @@ export const useSessionStore = defineStore('session', {
     },
 
     sair() {
+      this.token = null
       this.usuario = null
       this.expiraEm = null
-      localStorage.removeItem(STORAGE_KEY)
+      this.unidadeOperacaoId = null
+      this.unidadeOperacaoRotulo = null
+      localStorage.removeItem(SESSION_STORAGE_KEY)
+    },
+
+    aplicarLogin(resposta: LoginResponse) {
+      this.token = resposta.token
+      this.usuario = resposta.usuario
+      this.expiraEm = Date.parse(resposta.expiraEm)
+      this.unidadeOperacaoId = null
+      this.unidadeOperacaoRotulo = null
+      this.persistir()
+      return resposta.usuario
+    },
+
+    persistir() {
+      if (!this.token || !this.usuario || !this.expiraEm) return
+      const sessao: SessaoPersistida = {
+        token: this.token,
+        usuario: this.usuario,
+        expiraEm: this.expiraEm,
+        unidadeOperacaoId: this.unidadeOperacaoId,
+        unidadeOperacaoRotulo: this.unidadeOperacaoRotulo,
+      }
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessao))
     },
   },
 })

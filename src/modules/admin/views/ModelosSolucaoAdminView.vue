@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { ehPerfilAdmin } from '@/modules/auth/perfis'
 import { useSessionStore } from '@/stores/session'
 import { solucaoService } from '@/modules/solucoes/services/solucaoService'
 import {
@@ -29,7 +30,7 @@ const nomePromover = ref('')
 
 function novoForm(): ModeloSolucaoInput {
   return {
-    unidadeId: session.usuario?.unidadeId ?? '',
+    unidadeId: session.unidadeEmOperacaoId ?? '',
     nome: '', descricao: null, instrucoesPreparo: null, ativo: true,
     componentes: [{produtoId:'',quantidade:1,unidadeMedida:'ML'}],
   }
@@ -51,8 +52,8 @@ async function carregar() {
   erro.value = ''
   carregando.value = true
   try {
-    const unidadeId = session.usuario?.unidadeId
-    if (!unidadeId || session.usuario?.perfil !== 'ADMINISTRADOR')
+    const unidadeId = session.unidadeEmOperacaoId
+    if (!unidadeId || !ehPerfilAdmin(session.usuario?.perfil))
       throw new Error('A área de modelos é destinada ao Administrador vinculado à Unidade.')
     const [catalogo,prods,solicitacoes] = await Promise.all([
       solucaoService.listarModelos(), solucaoService.listarProdutos(unidadeId),
@@ -73,7 +74,7 @@ function abrirNovo() {
 function editar(modelo: ModeloSolucao) {
   idEdicao.value = modelo.id
   form.value = {
-    unidadeId: session.usuario?.unidadeId || '',
+    unidadeId: session.unidadeEmOperacaoId || '',
     nome: modelo.nome, descricao:modelo.descricao,
     instrucoesPreparo:modelo.instrucoesPreparo,ativo:modelo.ativo,
     componentes:modelo.componentes.map(c => ({

@@ -1,18 +1,14 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
 
+import { ehPerfilGestao, PERFIS_ADMIN, PERFIS_GESTAO, PERFIS_SOLICITANTE } from '@/modules/auth/perfis'
 import type { PerfilUsuario } from '@/modules/auth/types/session'
 import { useSessionStore } from '@/stores/session'
 
-const PERFIS_GESTAO: PerfilUsuario[] = ['GESTOR', 'ADMINISTRADOR']
-const PERFIS_ADMIN: PerfilUsuario[] = ['ADMINISTRADOR']
-const PERFIS_SOLICITANTE: PerfilUsuario[] = ['TECNICO', 'ANALISTA', 'PESQUISADOR', 'ESTAGIARIO']
-
-function ehPerfilGestao(perfil?: PerfilUsuario) {
-  return Boolean(perfil && PERFIS_GESTAO.includes(perfil))
-}
+const ROTA_AGUARDANDO = '/aguardando-aprovacao'
 
 function rotaInicial() {
   const session = useSessionStore()
+  if (session.pendente) return ROTA_AGUARDANDO
   return ehPerfilGestao(session.usuario?.perfil) ? '/dashboard' : '/inicio'
 }
 
@@ -31,6 +27,12 @@ export const router = createRouter({
       name: 'login',
       component: () => import('@/modules/auth/views/LoginView.vue'),
       meta: { public: true },
+    },
+    {
+      path: ROTA_AGUARDANDO,
+      name: 'aguardando-aprovacao',
+      component: () => import('@/modules/auth/views/AguardandoAprovacaoView.vue'),
+      meta: { requiresSession: true },
     },
     {
       path: '/residuos/:id/rotulo',
@@ -186,6 +188,18 @@ export const router = createRouter({
           component: () => import('@/modules/relatorios/views/RelatorioPessoasLaboratorioView.vue'),
         },
         {
+          path: 'administracao/unidades',
+          name: 'admin-unidades',
+          component: () => import('@/modules/admin/views/UnidadesHabilitacaoView.vue'),
+          meta: { requiresSession: true, perfis: ['ADMINISTRADOR_GERAL'] },
+        },
+        {
+          path: 'administracao/cadastros/vinculos/importar',
+          name: 'gestao-vinculos-importar',
+          component: () => import('@/modules/admin/views/ImportarPessoasView.vue'),
+          meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+        },
+        {
           path: 'administracao/cadastros/vinculos',
           name: 'gestao-vinculos-cadastros',
           component: () => import('@/modules/admin/views/VinculosOperacionaisGestaoView.vue'),
@@ -236,7 +250,8 @@ export const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+// Only the fields the guard reads, so tests can pass router.resolve() results directly.
+export function guardaDeRota(to: Pick<RouteLocationNormalized, 'path' | 'fullPath' | 'meta' | 'matched'>) {
   const session = useSessionStore()
 
   if (session.expirarSeNecessario()) {
@@ -246,6 +261,15 @@ router.beforeEach((to) => {
       path: '/login',
       query: { motivo: 'sessao-expirada' },
     }
+  }
+
+  // A pending user sees only the waiting screen (the backend refuses everything else with 403 anyway).
+  if (session.autenticado && session.pendente) {
+    return to.path === ROTA_AGUARDANDO ? true : ROTA_AGUARDANDO
+  }
+
+  if (to.path === ROTA_AGUARDANDO && session.autenticado) {
+    return rotaInicial()
   }
 
   if (to.meta.public) {
@@ -272,4 +296,6 @@ router.beforeEach((to) => {
   }
 
   return true
-})
+}
+
+router.beforeEach(guardaDeRota)

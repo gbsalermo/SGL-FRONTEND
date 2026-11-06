@@ -2,6 +2,7 @@
 import { nextTick, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { ehPerfilAdmin } from '@/modules/auth/perfis'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -22,7 +23,7 @@ function tecla(event: KeyboardEvent) {
 }
 
 function aplicar() {
-  if (session.usuario?.perfil !== 'ADMINISTRADOR') return
+  if (!ehPerfilAdmin(session.usuario?.perfil)) return
   const candidato = [...document.querySelectorAll<HTMLElement>('.gestao-nav__future')]
     .find((elemento) => elemento.textContent?.includes('Cadastros'))
   if (!candidato) return
@@ -56,7 +57,7 @@ function limpar() {
 }
 
 async function aplicarContextoBuscaGlobal() {
-  if (route.path !== '/administracao/cadastros' || session.usuario?.perfil !== 'ADMINISTRADOR') return
+  if (route.path !== '/administracao/cadastros' || !ehPerfilAdmin(session.usuario?.perfil)) return
 
   const secao = typeof route.query.secao === 'string' ? route.query.secao : ''
   const rotuloAba: Record<string, string> = {
@@ -100,7 +101,7 @@ watch(() => route.fullPath, async () => {
 
 watch(() => session.usuario?.perfil, async () => {
   await nextTick()
-  if (session.usuario?.perfil === 'ADMINISTRADOR') {
+  if (ehPerfilAdmin(session.usuario?.perfil)) {
     aplicar()
     await aplicarContextoBuscaGlobal()
   } else limpar()
