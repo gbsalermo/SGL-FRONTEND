@@ -6,9 +6,11 @@ import type {
   CursoEstagioResponse,
   EstagiarioRequest,
   EstagiarioResponse,
+  EstagiarioSemVinculoResponse,
   NovaBolsaVinculoEstagioRequest,
   ProrrogarBolsaVinculoEstagioRequest,
   ObservacaoVinculoEstagioResponse,
+  OrientadorElegivelResponse,
   VinculoEstagioAtividadeRequest,
   VinculoEstagioAtividadeResponse,
   UsuarioOpcaoEstagioResponse,
@@ -23,6 +25,18 @@ export const estagiarioService = {
 
   async listarAtivos() {
     const { data } = await http.get<EstagiarioResponse[]>('/v1/estagiarios/ativos')
+    return data
+  },
+
+  async listarSemVinculo() {
+    const { data } = await http.get<EstagiarioSemVinculoResponse[]>('/v1/estagiarios/sem-vinculo')
+    return data
+  },
+
+  async listarOrientadoresElegiveis() {
+    const { data } = await http.get<OrientadorElegivelResponse[]>(
+      '/v1/estagiarios/orientadores-elegiveis',
+    )
     return data
   },
 
