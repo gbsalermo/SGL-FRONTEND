@@ -131,12 +131,16 @@ const ehAdministrador = computed(() => ehPerfilAdmin(session.usuario?.perfil))
 
 const termoBusca = computed(() => busca.value.trim().toLocaleLowerCase('pt-BR'))
 
+function nomesLaboratorios(projeto: { laboratorios: { nome: string }[] }) {
+  return projeto.laboratorios.map((laboratorio) => laboratorio.nome).join(', ')
+}
+
 const laboratoriosDisponiveis = computed(() => {
   const unicos = new Map<string, string>()
 
   for (const projeto of projetos.value) {
-    if (projeto.laboratorioId && projeto.laboratorioNome) {
-      unicos.set(projeto.laboratorioId, projeto.laboratorioNome)
+    for (const laboratorio of projeto.laboratorios) {
+      unicos.set(laboratorio.id, laboratorio.nome)
     }
   }
 
@@ -149,12 +153,12 @@ const projetosFiltrados = computed(() => {
   return projetos.value.filter((projeto) => {
     const bateStatus = filtroStatus.value === 'TODOS' || projeto.status === filtroStatus.value
     const bateLaboratorio = filtroLaboratorio.value === 'TODOS'
-      || projeto.laboratorioId === filtroLaboratorio.value
+      || projeto.laboratorios.some((laboratorio) => laboratorio.id === filtroLaboratorio.value)
 
     const campos = [
       projeto.nome,
       projeto.codigoSeg ?? '',
-      projeto.laboratorioNome,
+      nomesLaboratorios(projeto),
       projeto.responsavel ?? '',
       projeto.descricao ?? '',
     ]
@@ -882,7 +886,7 @@ onMounted(carregar)
             <span class="seg-code">{{ projeto.codigoSeg || 'SEG não definido' }}</span>
           </div>
           <strong>{{ projeto.nome }}</strong>
-          <small>{{ projeto.laboratorioNome }}</small>
+          <small>{{ nomesLaboratorios(projeto) }}</small>
           <footer>
             <span>{{ projeto.responsavel || 'Responsável não informado' }}</span>
             <span>{{ formatarData(projeto.dataInicio) }}</span>
@@ -962,8 +966,8 @@ onMounted(carregar)
 
         <section class="metadata-grid">
           <div>
-            <span>Laboratório responsável</span>
-            <strong>{{ projetoSelecionado.laboratorioNome }}</strong>
+            <span>Laboratórios</span>
+            <strong>{{ nomesLaboratorios(projetoSelecionado) }}</strong>
           </div>
           <div>
             <span>Líder / responsável</span>

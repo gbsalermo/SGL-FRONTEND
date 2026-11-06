@@ -1,4 +1,5 @@
 import type { PerfilUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 
 export interface UnidadeCadastro {
   id: string
@@ -37,8 +38,8 @@ export type SituacaoExecucaoProjetoCadastro =
 
 export interface ProjetoCadastro {
   id: string
-  laboratorioId: string
-  laboratorioNome: string
+  unidadeId: string
+  laboratorios: LaboratorioResumo[]
   nome: string
   descricao: string | null
   dataInicio: string | null
@@ -53,7 +54,7 @@ export interface ProjetoCadastro {
 }
 
 export interface ProjetoRequest {
-  laboratorioId: string
+  laboratorioIds: string[]
   nome: string
   descricao: string | null
   dataInicio: string | null

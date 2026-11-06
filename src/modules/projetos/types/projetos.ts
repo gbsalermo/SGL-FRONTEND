@@ -9,10 +9,16 @@ export type SituacaoExecucaoProjeto =
   | 'EM_ANDAMENTO_ATRASADO'
   | 'EXECUCAO_CANCELADA'
 
+export interface LaboratorioResumo {
+  id: string
+  nome: string
+  ativo: boolean
+}
+
 export interface ProjetoOperacional {
   id: string
-  laboratorioId: string
-  laboratorioNome: string
+  unidadeId: string
+  laboratorios: LaboratorioResumo[]
   nome: string
   descricao: string | null
   dataInicio: string | null
@@ -30,7 +36,7 @@ export interface ProjetoOperacional {
 export type { ContextoParticipacaoOperacional } from '@/modules/operacao/types/contextoOperacional'
 
 export interface ProjetoRequest {
-  laboratorioId: string
+  laboratorioIds: string[]
   nome: string
   descricao: string | null
   dataInicio: string | null

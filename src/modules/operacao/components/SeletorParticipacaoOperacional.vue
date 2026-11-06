@@ -20,6 +20,10 @@ const selecionado = computed<ContextoParticipacaoOperacional | undefined>(() =>
   props.opcoes.contextosElegiveis.find(x => x.participacaoId === props.modelValue),
 )
 
+function nomesLaboratorios(contexto: ContextoParticipacaoOperacional) {
+  return contexto.laboratorios.map(l => l.nome).join(', ')
+}
+
 function selecionar(evento: Event) {
   emit('update:modelValue', (evento.target as HTMLSelectElement).value)
 }
@@ -42,7 +46,7 @@ function selecionar(evento: Event) {
           :key="contexto.participacaoId"
           :value="contexto.participacaoId"
         >
-          {{ contexto.atividadeNome || 'Atividade' }} — {{ contexto.projetoNome || 'Projeto' }} · {{ contexto.laboratorioNome || 'Laboratório' }}
+          {{ contexto.atividadeNome || 'Atividade' }} — {{ contexto.projetoNome || 'Projeto' }} · {{ nomesLaboratorios(contexto) || 'Laboratório' }}
         </option>
       </select>
     </label>
@@ -59,7 +63,7 @@ function selecionar(evento: Event) {
       <div><span>Atividade</span><strong>{{ selecionado.atividadeNome || 'Não informada' }}</strong></div>
       <div><span>SCI</span><strong>{{ selecionado.sciNome || 'Não informado' }}</strong></div>
       <div><span>Projeto</span><strong>{{ selecionado.projetoNome || 'Não informado' }}</strong></div>
-      <div><span>Laboratório</span><strong>{{ selecionado.laboratorioNome || 'Não informado' }}</strong></div>
+      <div><span>{{ selecionado.laboratorios.length > 1 ? 'Laboratórios do projeto' : 'Laboratório' }}</span><strong>{{ nomesLaboratorios(selecionado) || 'Não informado' }}</strong></div>
       <p>Esses dados são derivados da participação. O servidor os validará novamente ao registrar a solicitação.</p>
     </div>
   </div>

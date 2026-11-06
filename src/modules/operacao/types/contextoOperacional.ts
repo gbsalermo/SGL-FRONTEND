@@ -1,3 +1,5 @@
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+
 /**
  * Contrato de leitura da Etapa 7.5.2.
  * A origem PARTICIPACAO_ESTAGIO e a unica atualmente retornada pela API.
@@ -16,8 +18,8 @@ export interface ContextoParticipacaoOperacional {
   sciNome: string | null
   projetoId: string | null
   projetoNome: string | null
-  laboratorioId: string | null
-  laboratorioNome: string | null
+  /** Laboratorios do projeto (ativos e inativos), ordenados por nome. */
+  laboratorios: LaboratorioResumo[]
   unidadeId: string | null
   dataInicioParticipacao: string | null
   dataFimParticipacao: string | null
@@ -36,7 +38,8 @@ export interface ContextoEstagioResolvido {
   atividadeId: string
   sciId: string
   projetoId: string
-  laboratorioId: string
+  /** O laboratorio e escolhido depois, entre estes, quando o projeto esta em mais de um. */
+  laboratorios: LaboratorioResumo[]
   unidadeId: string
 }
 
@@ -74,7 +77,7 @@ export function prepararSelecaoContextoEstagiario(
       || !contexto.atividadeId
       || !contexto.sciId
       || !contexto.projetoId
-      || !contexto.laboratorioId
+      || !contexto.laboratorios?.length
       || !unidadeId
       || contexto.unidadeId !== unidadeId
       || ids.has(contexto.participacaoId)
@@ -106,7 +109,7 @@ export function resolverContextoEstagiario(
   const contexto = opcoes.contextosElegiveis.find((item) =>
     item.elegivel && item.participacaoId === participacaoId && item.unidadeId === unidadeId,
   )
-  if (!contexto?.atividadeId || !contexto.sciId || !contexto.projetoId || !contexto.laboratorioId) {
+  if (!contexto?.atividadeId || !contexto.sciId || !contexto.projetoId || !contexto.laboratorios?.length) {
     return null
   }
 
@@ -115,7 +118,7 @@ export function resolverContextoEstagiario(
     atividadeId: contexto.atividadeId,
     sciId: contexto.sciId,
     projetoId: contexto.projetoId,
-    laboratorioId: contexto.laboratorioId,
+    laboratorios: contexto.laboratorios,
     unidadeId,
   }
 }
