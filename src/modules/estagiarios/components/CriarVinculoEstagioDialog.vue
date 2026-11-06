@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { computed, ref, watch } from 'vue'
 
+import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 import { listarLaboratoriosOperacionais } from '@/modules/operacao/services/laboratoriosOperacionais'
 import type { LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { opcoesBolsa, opcoesFormacao } from '@/modules/estagiarios/opcoesEstagio'
@@ -37,7 +38,7 @@ const atividades = ref<AtividadeDisponivelEstagioResponse[]>([])
 const cursos = ref<CursoEstagioResponse[]>([])
 const culturas = ref<CulturaEstagioResponse[]>([])
 
-const laboratorioId = ref('')
+const laboratorioIds = ref<string[]>([])
 const orientadorId = ref('')
 const dataInicio = ref('')
 const dataFim = ref('')
@@ -52,13 +53,16 @@ const observacao = ref('')
 const enviando = ref(false)
 const erro = ref('')
 
+const opcoesLaboratorios = computed(() =>
+  laboratorios.value.map((lab) => ({ id: lab.id, nome: lab.nome, ativo: lab.ativo })))
+
 const fimAntesDoInicio = computed(
   () => Boolean(dataInicio.value && dataFim.value) && dataFim.value < dataInicio.value,
 )
 
 const podeSalvar = computed(() =>
   Boolean(
-    laboratorioId.value
+    laboratorioIds.value.length > 0
     && orientadorId.value
     && dataInicio.value
     && dataFim.value
@@ -72,7 +76,7 @@ const podeSalvar = computed(() =>
 )
 
 function reiniciarFormulario() {
-  laboratorioId.value = props.pendente.laboratorios[0]?.id ?? ''
+  laboratorioIds.value = props.pendente.laboratorios.map((lab) => lab.id)
   orientadorId.value = ''
   dataInicio.value = ''
   dataFim.value = ''
@@ -98,8 +102,8 @@ async function carregarOpcoes() {
         estagiarioService.listarCulturasAtivas(),
       ])
     laboratorios.value = labs
-    // The base lab may be inactive or outside the unit; keeping it would save into a lab the select doesn't show.
-    if (!labs.some((lab) => lab.id === laboratorioId.value)) laboratorioId.value = ''
+    // A lab of the person may be inactive or outside the unit; keeping it would save into a lab the select doesn't show.
+    laboratorioIds.value = laboratorioIds.value.filter((id) => labs.some((lab) => lab.id === id))
     orientadores.value = orientadoresElegiveis
     atividades.value = atividadesAtivas
     cursos.value = cursosAtivos
@@ -138,7 +142,7 @@ async function salvar() {
   try {
     const criado = await estagiarioService.criar({
       usuarioId: props.pendente.usuarioId,
-      laboratorioId: laboratorioId.value,
+      laboratorioIds: laboratorioIds.value,
       orientadorId: orientadorId.value,
       dataInicioEstagio: dataInicio.value,
       dataFimEstagio: dataFim.value,
@@ -177,13 +181,13 @@ async function salvar() {
       <form class="vinculo-form" @submit.prevent>
         <p v-if="erro" class="vinculo-erro" role="alert">{{ erro }}</p>
 
-        <label>
-          <span>Laboratório</span>
-          <select v-model="laboratorioId" data-test="laboratorio">
-            <option value="" disabled>Selecione</option>
-            <option v-for="lab in laboratorios" :key="lab.id" :value="lab.id">{{ lab.nome }}</option>
-          </select>
-        </label>
+        <LaboratoriosSelect
+          v-model="laboratorioIds"
+          data-test="laboratorios"
+          rotulo="Laboratórios do estagiário"
+          :opcoes="opcoesLaboratorios"
+          :vinculados="[]"
+        />
 
         <label>
           <span>Orientador</span>

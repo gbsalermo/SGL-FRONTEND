@@ -35,7 +35,7 @@ export interface ResumoVinculosUsuario {
 }
 export interface AprovarUsuarioRequest {
   perfil: PerfilUsuario
-  laboratorioBaseId: string
+  laboratorioIds: string[]
 }
 export const vinculosOperacionaisService = {
   async listarPendentes() {
@@ -69,7 +69,7 @@ export const vinculosOperacionaisService = {
     const { data } = await http.put<VinculoOperacional>(`/v1/vinculos-operacionais/${id}/encerrar`)
     return data
   },
-  async atualizarBase(usuarioId: string, laboratorioId: string | null) {
-    await http.put(`/v1/vinculos-operacionais/usuarios/${usuarioId}/laboratorio-base`, { laboratorioId })
+  async definirLaboratorios(usuarioId: string, laboratorioIds: string[]) {
+    await http.put(`/v1/vinculos-operacionais/usuarios/${usuarioId}/laboratorios`, { laboratorioIds })
   },
 }

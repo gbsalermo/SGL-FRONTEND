@@ -4,7 +4,7 @@ import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { aguardaAprovacao, ROTA_APROVAR_PENDENTES } from '@/modules/auth/perfis'
-import LaboratoriosProjetoSelect from '@/modules/projetos/components/LaboratoriosProjetoSelect.vue'
+import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 import CatalogosResiduosSolucoesView from '@/modules/admin/views/CatalogosResiduosSolucoesView.vue'
 
@@ -1001,7 +1001,7 @@ onMounted(() => {
                 </td>
                 <td>{{ rotuloPerfil(usuario.perfil) }}</td>
                 <td v-if="aguardaAprovacao(usuario)">
-                  <!-- Trocar o perfil de um pendente não libera o acesso; a aprovação define perfil e laboratório-base. -->
+                  <!-- Trocar o perfil de um pendente não libera o acesso; a aprovação define perfil e laboratórios. -->
                   <router-link class="pending-link" :to="ROTA_APROVAR_PENDENTES">Aprovar em Vínculos → Pendentes</router-link>
                   <small class="self-note">O perfil é escolhido na aprovação</small>
                 </td>
@@ -1054,7 +1054,7 @@ onMounted(() => {
 
         <form v-else-if="modal === 'projeto'" class="modal-body" @submit.prevent="salvarProjeto">
           <div class="form-grid">
-            <LaboratoriosProjetoSelect v-model="projetoForm.laboratorioIds" :opcoes="laboratoriosAtivosDaUnidade" :vinculados="vinculadosEmEdicao" />
+            <LaboratoriosSelect v-model="projetoForm.laboratorioIds" :opcoes="laboratoriosAtivosDaUnidade" :vinculados="vinculadosEmEdicao" />
             <label class="field"><span>Nome *</span><input v-model="projetoForm.nome" required /></label>
             <label class="field"><span>Data de início</span><input v-model="projetoForm.dataInicio" type="date" /></label>
             <label class="field"><span>Data final</span><input v-model="projetoForm.dataFim" type="date" /></label>

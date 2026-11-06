@@ -24,7 +24,7 @@ export interface ImportarPessoaRequest {
   tipo: TipoPessoaCorporativa
   referencia: string
   perfil: PerfilUsuario
-  laboratorioBaseId: string
+  laboratorioIds: string[]
 }
 
 /** One read-only line of Embrapa data shown in the import/approval drawer. */

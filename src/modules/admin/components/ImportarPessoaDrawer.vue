@@ -3,8 +3,10 @@ import { computed, ref, watch } from 'vue'
 
 import type { DadoEmbrapa } from '@/modules/admin/services/pessoasCorporativasService'
 import type { LaboratorioCadastro } from '@/modules/admin/types/cadastros'
-import { perfisConcedidosPor, ROTULOS_PERFIL } from '@/modules/auth/perfis'
+import { ehPerfilGestao, perfisConcedidosPor, ROTULOS_PERFIL } from '@/modules/auth/perfis'
 import type { PerfilUsuario } from '@/modules/auth/types/session'
+import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 import { useSessionStore } from '@/stores/session'
 
 const props = defineProps<{
@@ -19,17 +21,17 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   fechar: []
-  confirmar: [payload: { perfil: PerfilUsuario; laboratorioBaseId: string }]
+  confirmar: [payload: { perfil: PerfilUsuario; laboratorioIds: string[] }]
   recusar: []
 }>()
 
 const session = useSessionStore()
 
 const perfisDisponiveis = computed(() => perfisConcedidosPor(session.usuario?.perfil))
-const laboratoriosAtivos = computed(() =>
-  props.laboratorios.filter((lab) => lab.ativo).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')))
+const laboratoriosAtivos = computed<LaboratorioResumo[]>(() =>
+  props.laboratorios.filter((lab) => lab.ativo).map(({ id, nome, ativo }) => ({ id, nome, ativo })))
 
-const laboratorioBaseId = ref('')
+const laboratorioIds = ref<string[]>([])
 const perfil = ref<PerfilUsuario | ''>('')
 const confirmandoRecusa = ref(false)
 
@@ -38,11 +40,14 @@ watch(() => [props.perfilSugerido, perfisDisponiveis.value] as const, ([sugerido
   perfil.value = sugerido && disponiveis.includes(sugerido) ? sugerido : ''
 }, { immediate: true })
 
-const podeConfirmar = computed(() => Boolean(laboratorioBaseId.value && perfil.value) && !props.salvando)
+// Management profiles act on the whole Unidade, so only operational ones need a laboratory.
+const exigeLaboratorio = computed(() => !ehPerfilGestao(perfil.value || null))
+const podeConfirmar = computed(() =>
+  Boolean(perfil.value) && (!exigeLaboratorio.value || laboratorioIds.value.length > 0) && !props.salvando)
 
 function confirmar() {
-  if (!perfil.value || !laboratorioBaseId.value) return
-  emit('confirmar', { perfil: perfil.value, laboratorioBaseId: laboratorioBaseId.value })
+  if (!perfil.value || !podeConfirmar.value) return
+  emit('confirmar', { perfil: perfil.value, laboratorioIds: laboratorioIds.value })
 }
 </script>
 
@@ -73,19 +78,14 @@ function confirmar() {
         <section class="people-section">
           <div class="people-section-head"><div><span class="people-section-number">02</span><h3>No SGL</h3></div></div>
           <div class="people-filter-grid">
-            <label class="people-field"><span>Laboratório-base *</span>
-              <select v-model="laboratorioBaseId" required>
-                <option value="" disabled>Selecione</option>
-                <option v-for="lab in laboratoriosAtivos" :key="lab.id" :value="lab.id">{{ lab.nome }}</option>
-              </select>
-            </label>
             <label class="people-field"><span>Perfil *</span>
-              <select v-model="perfil" required>
+              <select v-model="perfil" required data-test="perfil">
                 <option value="" disabled>Selecione</option>
                 <option v-for="p in perfisDisponiveis" :key="p" :value="p">{{ ROTULOS_PERFIL[p] }}</option>
               </select>
             </label>
           </div>
+          <LaboratoriosSelect v-model="laboratorioIds" :opcoes="laboratoriosAtivos" :vinculados="[]" :obrigatorio="exigeLaboratorio" />
           <p class="people-footnote">Vínculos adicionais (projetos, SCIs, atividades) são cadastrados depois, em Vínculos operacionais.</p>
         </section>
 
@@ -98,7 +98,7 @@ function confirmar() {
               <button class="people-danger" type="button" :disabled="salvando" @click="emit('recusar')">Confirmar recusa</button>
             </template>
           </template>
-          <button class="people-primary" type="button" :disabled="!podeConfirmar" @click="confirmar">
+          <button class="people-primary" type="button" data-test="confirmar" :disabled="!podeConfirmar" @click="confirmar">
             {{ salvando ? 'Salvando...' : modo === 'importar' ? 'Cadastrar e vincular' : 'Aprovar' }}
           </button>
         </div>

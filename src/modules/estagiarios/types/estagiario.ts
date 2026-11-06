@@ -92,7 +92,7 @@ export interface EstagiarioResponse {
 
 export interface EstagiarioRequest {
   usuarioId: string
-  laboratorioId: string
+  laboratorioIds: string[]
   dataInicioEstagio: string
   dataFimEstagio: string
   tipoBolsa: TipoBolsaEstagiario
