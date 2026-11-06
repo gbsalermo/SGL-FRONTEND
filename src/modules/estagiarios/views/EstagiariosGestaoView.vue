@@ -2,6 +2,7 @@
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 
+import { opcoesBolsa, opcoesFormacao, rotulosFormacao } from '@/modules/estagiarios/opcoesEstagio'
 import { estagiarioService } from '@/modules/estagiarios/services/estagiarioService'
 import { useSessionStore } from '@/stores/session'
 import type {
@@ -94,31 +95,7 @@ const edicaoCursoId = ref('')
 const edicaoNovoCursoNome = ref('')
 const edicaoObservacao = ref('')
 
-const formacoes: Record<FormacaoEstagiario, string> = {
-  ENSINO_MEDIO: 'Ensino médio',
-  GRADUACAO: 'Graduação',
-  MESTRADO: 'Mestrado',
-  DOUTORADO: 'Doutorado',
-  POS_DOUTORADO: 'Pós-doutorado',
-  APOIO_ADMINISTRATIVO: 'Apoio administrativo',
-  APOIO_TECNICO: 'Apoio técnico',
-  OUTRO: 'Outro',
-}
-
-const opcoesFormacao = Object.entries(formacoes)
-  .map(([valor, rotulo]) => ({
-    valor: valor as FormacaoEstagiario,
-    rotulo,
-  }))
-
-
-const opcoesBolsa: Array<{ valor: TipoBolsaEstagiario; rotulo: string }> = [
-  { valor: 'BOLSA_CNPQ', rotulo: 'Bolsa CNPq' },
-  { valor: 'BOLSA_CAPES', rotulo: 'Bolsa CAPES' },
-  { valor: 'BOLSA_INSTITUCIONAL', rotulo: 'Bolsa institucional' },
-  { valor: 'VOLUNTARIO', rotulo: 'Voluntário' },
-  { valor: 'CONTRATUAL', rotulo: 'Contrato' },
-]
+const formacoes = rotulosFormacao
 
 const situacoes: Record<SituacaoEstagio, string> = {
   EM_ANDAMENTO: 'Em andamento',
