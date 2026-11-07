@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { nomesDosLaboratorios } from '@/modules/operacao/laboratorioDoProjeto'
 import type {
   ContextoParticipacaoOperacional,
   OpcoesSelecaoContexto,
@@ -21,7 +22,7 @@ const selecionado = computed<ContextoParticipacaoOperacional | undefined>(() =>
 )
 
 function nomesLaboratorios(contexto: ContextoParticipacaoOperacional) {
-  return contexto.laboratorios.map(l => l.nome).join(', ')
+  return nomesDosLaboratorios(contexto.laboratorios)
 }
 
 function selecionar(evento: Event) {

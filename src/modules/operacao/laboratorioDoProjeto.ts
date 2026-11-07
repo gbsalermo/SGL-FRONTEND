@@ -25,3 +25,11 @@ export function precisaEscolherLaboratorio(laboratorios: LaboratorioResumo[]): b
 export function laboratorioDoProjetoValido(laboratorios: LaboratorioResumo[], laboratorioId: string): string {
   return laboratorios.some(l => l.id === laboratorioId) ? laboratorioId : ''
 }
+
+/**
+ * Informational list of every laboratory of the project. Inactive ones stay visible (the
+ * project still lists them) but are flagged, so nobody assumes they can receive requests.
+ */
+export function nomesDosLaboratorios(laboratorios: LaboratorioResumo[]): string {
+  return laboratorios.map(l => (l.ativo ? l.nome : `${l.nome} (inativo)`)).join(', ')
+}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, precisaEscolherLaboratorio,
+  laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, nomesDosLaboratorios, precisaEscolherLaboratorio,
 } from '@/modules/operacao/laboratorioDoProjeto'
 
 const A = { id: 'A', nome: 'Lab A', ativo: true }
@@ -42,5 +42,18 @@ describe('laboratorioDoProjetoValido', () => {
   it('mantém a escolha que pertence ao projeto e descarta a que não pertence', () => {
     expect(laboratorioDoProjetoValido([A, B], 'B')).toBe('B')
     expect(laboratorioDoProjetoValido([A], 'B')).toBe('')
+  })
+})
+
+describe('nomesDosLaboratorios', () => {
+  it('marca os inativos para o usuário não achar que ainda atendem o projeto', () => {
+    expect(nomesDosLaboratorios([
+      { id: 'A', nome: 'Lab A', ativo: true },
+      { id: 'C', nome: 'Lab C', ativo: false },
+    ])).toBe('Lab A, Lab C (inativo)')
+  })
+
+  it('sem laboratórios devolve texto vazio', () => {
+    expect(nomesDosLaboratorios([])).toBe('')
   })
 })
