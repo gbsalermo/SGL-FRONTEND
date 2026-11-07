@@ -9,7 +9,7 @@ function entrarComo(perfil: PerfilUsuario, situacao: SituacaoUsuario = 'ATIVO') 
   const usuario: UsuarioSessao = {
     id: 'u-1', nome: 'Fulano', email: 'f@embrapa.br', perfil, situacao,
     unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF',
-    laboratorioId: null, laboratorioNome: null, ativo: true,
+    laboratorios: [], ativo: true,
   }
   useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
 }

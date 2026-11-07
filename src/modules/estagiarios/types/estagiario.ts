@@ -79,13 +79,7 @@ export interface EstagiarioResponse {
   usuarioNome: string
   unidadeId: string | null
   unidadeNome: string | null
-
-  /**
-   * Campos legados de compatibilidade. Não representam o contexto operacional
-   * definitivo do Estagiário no 6.5.
-   */
-  laboratorioId: string | null
-  laboratorioNome: string | null
+  laboratorios: LaboratorioResumo[]
   dataInicioEstagio: string | null
   dataFimEstagio: string
   tipoBolsa: TipoBolsaEstagiario | null
@@ -98,7 +92,7 @@ export interface EstagiarioResponse {
 
 export interface EstagiarioRequest {
   usuarioId: string
-  laboratorioId: string
+  laboratorioIds: string[]
   dataInicioEstagio: string
   dataFimEstagio: string
   tipoBolsa: TipoBolsaEstagiario
@@ -115,8 +109,7 @@ export interface EstagiarioRequest {
 export interface EstagiarioSemVinculoResponse {
   usuarioId: string
   nome: string
-  laboratorioId: string | null
-  laboratorioNome: string | null
+  laboratorios: LaboratorioResumo[]
 }
 
 export interface OrientadorElegivelResponse {

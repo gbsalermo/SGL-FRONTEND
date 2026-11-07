@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import { computed, onMounted, ref, watch } from 'vue'
 
 import { relatorioService, ultimaConsultaRelatorio } from '@/modules/relatorios/services/relatorioService'
@@ -678,7 +679,7 @@ onMounted(async () => {
 
           <div v-else-if="relatorioEstagiariosSelecionado && resultadoEstagiarios" class="preview-result">
             <div class="resumo-cards"><article><span>Total</span><strong>{{ resumoEstagiarios.total }}</strong></article><article><span>Ativos</span><strong>{{ resumoEstagiarios.ativos }}</strong></article><article><span>Inativos</span><strong>{{ resumoEstagiarios.inativos }}</strong></article></div>
-            <div class="table-wrap"><table><thead><tr><th>Estagiário</th><th>Laboratório</th><th>Unidade</th><th>Bolsa</th><th>Início</th><th>Fim</th><th>Situação</th></tr></thead><tbody><tr v-for="item in itensEstagiariosFiltrados" :key="item.id"><td><strong>{{ item.nome }}</strong><small>{{ item.email }}</small></td><td>{{ item.laboratorioNome || '—' }}</td><td>{{ item.unidadeNome || '—' }}</td><td>{{ formatarRotulo(item.tipoBolsa) }}</td><td>{{ formatarData(item.dataInicioEstagio) }}</td><td>{{ formatarData(item.dataFimEstagio) }}</td><td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td></tr><tr v-if="itensEstagiariosFiltrados.length === 0"><td colspan="7" class="table-empty">Nenhum estagiário encontrado com os filtros informados.</td></tr></tbody></table></div>
+            <div class="table-wrap"><table><thead><tr><th>Estagiário</th><th>Laboratórios</th><th>Unidade</th><th>Bolsa</th><th>Início</th><th>Fim</th><th>Situação</th></tr></thead><tbody><tr v-for="item in itensEstagiariosFiltrados" :key="item.id"><td><strong>{{ item.nome }}</strong><small>{{ item.email }}</small></td><td>{{ nomesDosLaboratoriosDaPessoa(item.laboratorios, '; ') || '—' }}</td><td>{{ item.unidadeNome || '—' }}</td><td>{{ formatarRotulo(item.tipoBolsa) }}</td><td>{{ formatarData(item.dataInicioEstagio) }}</td><td>{{ formatarData(item.dataFimEstagio) }}</td><td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td></tr><tr v-if="itensEstagiariosFiltrados.length === 0"><td colspan="7" class="table-empty">Nenhum estagiário encontrado com os filtros informados.</td></tr></tbody></table></div>
           </div>
 
           <div v-else-if="relatorioProdutosSelecionado && resultadoProdutos" class="preview-result">

@@ -1,9 +1,10 @@
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+
 export interface RelatorioEstagiarioItem {
   id: string
   nome: string
   email: string
-  laboratorioId: string | null
-  laboratorioNome: string | null
+  laboratorios: LaboratorioResumo[]
   unidadeNome: string | null
   dataInicioEstagio: string
   dataFimEstagio: string | null

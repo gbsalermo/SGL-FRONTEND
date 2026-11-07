@@ -11,8 +11,10 @@ import { fakeAdapter } from '@/test/fakeAdapter'
 const pendente: EstagiarioSemVinculoResponse = {
   usuarioId: 'u-9',
   nome: 'MARIA DA SILVA',
-  laboratorioId: 'lab-1',
-  laboratorioNome: 'Laboratório 1',
+  laboratorios: [
+    { id: 'lab-1', nome: 'Laboratório 1', ativo: true },
+    { id: 'lab-2', nome: 'Laboratório 2', ativo: true },
+  ],
 }
 
 const orientadores = [
@@ -85,7 +87,7 @@ describe('CriarVinculoEstagioDialog', () => {
     expect(posts()[0].url).toBe('/v1/estagiarios')
     expect(JSON.parse(posts()[0].data)).toEqual({
       usuarioId: 'u-9',
-      laboratorioId: 'lab-1',
+      laboratorioIds: ['lab-1', 'lab-2'],
       orientadorId: 'o-1',
       dataInicioEstagio: '2026-11-01',
       dataFimEstagio: '2027-02-01',
@@ -135,24 +137,34 @@ describe('CriarVinculoEstagioDialog', () => {
     expect(posts()).toHaveLength(1)
   })
 
-  it('exigeLaboratorioQuandoNaoHaBase', async () => {
-    const wrapper = await montar({ ...pendente, laboratorioId: null, laboratorioNome: null })
+  const caixas = (wrapper: Awaited<ReturnType<typeof montar>>) =>
+    wrapper.findAll('[data-test="laboratorios"] input[type="checkbox"]')
+
+  it('prePreencheComOsLaboratoriosDaPessoa', async () => {
+    const wrapper = await montar()
+
+    expect(caixas(wrapper).map((c) => (c.element as HTMLInputElement).checked)).toEqual([true, true])
+    expect(wrapper.get('[data-test="laboratorios"] legend').text()).toContain('Laboratórios do estagiário')
+  })
+
+  it('exigeAoMenosUmLaboratorio', async () => {
+    const wrapper = await montar({ ...pendente, laboratorios: [] })
     await preencher(wrapper)
 
     expect(salvar(wrapper).attributes('disabled')).toBeDefined()
 
-    await wrapper.get('[data-test="laboratorio"]').setValue('lab-2')
+    await caixas(wrapper)[1].setValue(true)
 
     expect(salvar(wrapper).attributes('disabled')).toBeUndefined()
   })
 
-  it('limpaLaboratorioForaDaLista', async () => {
-    const wrapper = await montar({ ...pendente, laboratorioId: 'lab-inativo' })
+  it('desmarcaLaboratorioForaDosAtivosCarregados', async () => {
+    const wrapper = await montar({ ...pendente, laboratorios: [{ id: 'lab-inativo', nome: 'Lab inativo', ativo: false }] })
     await preencher(wrapper)
 
     expect(salvar(wrapper).attributes('disabled')).toBeDefined()
 
-    await wrapper.get('[data-test="laboratorio"]').setValue('lab-2')
+    await caixas(wrapper)[1].setValue(true)
 
     expect(salvar(wrapper).attributes('disabled')).toBeUndefined()
   })

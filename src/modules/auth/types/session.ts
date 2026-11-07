@@ -1,3 +1,5 @@
+import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+
 export type PerfilUsuario =
   | 'ADMINISTRADOR_GERAL'
   | 'ADMINISTRADOR'
@@ -18,8 +20,7 @@ export interface UsuarioSessao {
   unidadeId: string | null
   unidadeNome: string | null
   unidadeSigla: string | null
-  laboratorioId: string | null
-  laboratorioNome: string | null
+  laboratorios: LaboratorioResumo[]
   ativo: boolean
 }
 

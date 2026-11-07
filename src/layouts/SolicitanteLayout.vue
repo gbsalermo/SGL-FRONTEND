@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -188,7 +189,7 @@ function sair() {
     <div class="solicitante-workspace">
       <header class="solicitante-topbar">
         <div class="solicitante-topbar__context">
-          <strong>{{ session.usuario?.laboratorioNome ?? 'Laboratório não vinculado' }}</strong>
+          <strong>{{ nomesDosLaboratoriosDaPessoa(session.usuario?.laboratorios ?? []) || 'Laboratório não vinculado' }}</strong>
           <span>{{ session.usuario?.unidadeNome ?? 'Unidade não vinculada' }}</span>
         </div>
 

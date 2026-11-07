@@ -1,16 +1,16 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 
-import LaboratoriosProjetoSelect from '@/modules/projetos/components/LaboratoriosProjetoSelect.vue'
+import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 
 const opcoes = [
   { id: 'A', nome: 'Lab A', ativo: true },
   { id: 'B', nome: 'Lab B', ativo: true },
 ]
 
-describe('LaboratoriosProjetoSelect', () => {
+describe('LaboratoriosSelect', () => {
   it('lista ativos e vinculados inativos marcados', () => {
-    const wrapper = mount(LaboratoriosProjetoSelect, {
+    const wrapper = mount(LaboratoriosSelect, {
       props: { modelValue: [], opcoes, vinculados: [{ id: 'X', nome: 'Lab X', ativo: false }] },
     })
 
@@ -22,7 +22,7 @@ describe('LaboratoriosProjetoSelect', () => {
   })
 
   it('emite os ids selecionados', async () => {
-    const wrapper = mount(LaboratoriosProjetoSelect, {
+    const wrapper = mount(LaboratoriosSelect, {
       props: { modelValue: [], opcoes, vinculados: [] },
     })
     const caixas = wrapper.findAll('input[type="checkbox"]')
@@ -35,7 +35,7 @@ describe('LaboratoriosProjetoSelect', () => {
   })
 
   it('mostra erro quando nenhum selecionado', () => {
-    const wrapper = mount(LaboratoriosProjetoSelect, {
+    const wrapper = mount(LaboratoriosSelect, {
       props: { modelValue: [], opcoes, vinculados: [] },
     })
 
@@ -43,10 +43,19 @@ describe('LaboratoriosProjetoSelect', () => {
   })
 
   it('não mostra erro quando há seleção', () => {
-    const wrapper = mount(LaboratoriosProjetoSelect, {
+    const wrapper = mount(LaboratoriosSelect, {
       props: { modelValue: ['A'], opcoes, vinculados: [] },
     })
 
+    expect(wrapper.text()).not.toContain('Selecione ao menos um laboratório.')
+  })
+
+  it('aceita rotulo próprio e lista vazia quando não é obrigatório', () => {
+    const wrapper = mount(LaboratoriosSelect, {
+      props: { modelValue: [], opcoes, vinculados: [], rotulo: 'Laboratórios do estagiário', obrigatorio: false },
+    })
+
+    expect(wrapper.get('legend').text()).toBe('Laboratórios do estagiário')
     expect(wrapper.text()).not.toContain('Selecione ao menos um laboratório.')
   })
 })

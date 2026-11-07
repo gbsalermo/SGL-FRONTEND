@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import { computed, onActivated, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -419,7 +420,7 @@ onActivated(() => {
         <div class="user-context">
           <span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v5l-5 9a2 2 0 0 0 1.7 3h10.6A2 2 0 0 0 19 17l-5-9V3M8 14h8" /></svg>
-            {{ session.usuario?.laboratorioNome ?? 'Laboratório não vinculado' }}
+            {{ nomesDosLaboratoriosDaPessoa(session.usuario?.laboratorios ?? []) || 'Laboratório não vinculado' }}
           </span>
           <i />
           <span>

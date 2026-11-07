@@ -2,13 +2,17 @@
 import { computed } from 'vue'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: string[]
   /** Laboratórios ativos da Unidade. */
   opcoes: LaboratorioResumo[]
   /** Laboratórios já vinculados ao projeto; os fora de `opcoes` estão inativos e podem permanecer. */
   vinculados: LaboratorioResumo[]
-}>()
+  /** Legend shown above the options; screens that name the list differently override it. */
+  rotulo?: string
+  /** Management profiles may keep an empty list, so the mandatory marker and the error are opt-out. */
+  obrigatorio?: boolean
+}>(), { rotulo: 'Laboratórios', obrigatorio: true })
 
 const emit = defineEmits<{ 'update:modelValue': [ids: string[]] }>()
 
@@ -32,7 +36,7 @@ function alternar(id: string, marcado: boolean) {
 
 <template>
   <fieldset class="labs-select">
-    <legend>Laboratórios *</legend>
+    <legend>{{ rotulo }}{{ obrigatorio ? ' *' : '' }}</legend>
     <label v-for="lab in itens" :key="lab.id" class="labs-select__item">
       <input
         type="checkbox"
@@ -41,7 +45,7 @@ function alternar(id: string, marcado: boolean) {
       />
       <span>{{ lab.nome }}{{ lab.inativo ? ' (inativo)' : '' }}</span>
     </label>
-    <small v-if="modelValue.length === 0" class="labs-select__erro" role="alert">Selecione ao menos um laboratório.</small>
+    <small v-if="obrigatorio && modelValue.length === 0" class="labs-select__erro" role="alert">Selecione ao menos um laboratório.</small>
   </fieldset>
 </template>
 

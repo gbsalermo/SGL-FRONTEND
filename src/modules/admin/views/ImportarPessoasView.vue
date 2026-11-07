@@ -97,7 +97,7 @@ function abrir(pessoa: PessoaCorporativa) {
   selecionada.value = pessoa
 }
 
-async function cadastrar(payload: { perfil: PerfilUsuario; laboratorioBaseId: string }) {
+async function cadastrar(payload: { perfil: PerfilUsuario; laboratorioIds: string[] }) {
   const pessoa = selecionada.value
   if (!pessoa) return
   salvando.value = true
