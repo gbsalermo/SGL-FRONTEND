@@ -46,6 +46,7 @@ export interface PedidoResponse {
   projetoNome: string | null
   participacaoId?: string | null
   projetoSemVinculoDireto?: boolean
+  laboratorioForaDoSolicitante: boolean
   atividadeOrigemId?: string | null
   atividadeOrigemNome?: string | null
   sciOrigemId?: string | null

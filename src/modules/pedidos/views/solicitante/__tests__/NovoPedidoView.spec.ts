@@ -118,17 +118,21 @@ describe('NovoPedidoView - laboratórios da pessoa', () => {
   })
   afterEach(() => { http.defaults.adapter = adapterOriginal })
 
-  it('pessoaComDoisLaboratoriosPodeEscolherQualquerUm', async () => {
+  it('empregadoVeTodosOsLaboratoriosAtivosComOsDaListaPrimeiro', async () => {
     const usuario: UsuarioSessao = {
       id: 'u-2', nome: 'Pesquisadora', email: 'p@embrapa.br', perfil: 'PESQUISADOR', situacao: 'ATIVO',
       unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF', ativo: true,
-      laboratorios: DOIS_LABORATORIOS,
+      laboratorios: [{ id: 'B', nome: 'Lab B', ativo: true }],
     }
     useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
     const { adapter } = fakeAdapter((config) => {
       if (config.url === '/v1/auth/me') return { status: 200, data: usuario }
       if (config.url === '/v1/laboratorios') {
-        return { status: 200, data: [...DOIS_LABORATORIOS, { id: 'Z', nome: 'Lab Z', ativo: true }].map(l => ({ ...l, unidadeId: 'unidade-1' })) }
+        return {
+          status: 200,
+          data: [...DOIS_LABORATORIOS, { id: 'Z', nome: 'Lab Z', ativo: true }, { id: 'I', nome: 'Lab Inativo', ativo: false }]
+            .map(l => ({ ...l, unidadeId: 'unidade-1' })),
+        }
       }
       return { status: 200, data: [] }
     })
@@ -137,11 +141,9 @@ describe('NovoPedidoView - laboratórios da pessoa', () => {
     const wrapper = mount(NovoPedidoView)
     await flushPromises()
 
-    const opcoes = wrapper.find('select:not(#laboratorio-projeto)').findAll('option').map(o => o.text())
-    expect(opcoes).toHaveLength(2)
-    expect(opcoes[0]).toContain('Lab A')
-    expect(opcoes[1]).toContain('Lab B')
-    expect(opcoes.join(' ')).not.toContain('Lab Z')
-    expect(opcoes.join(' ')).not.toContain('base')
+    const seletor = wrapper.find('select:not(#laboratorio-projeto)')
+    // The person's own laboratory leads; the other active ones follow, without any link suffix.
+    expect(seletor.findAll('option').map(o => o.text())).toEqual(['Lab B', 'Lab A', 'Lab Z'])
+    expect((seletor.element as HTMLSelectElement).value).toBe('B')
   })
 })

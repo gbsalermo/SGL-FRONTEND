@@ -758,6 +758,7 @@ onMounted(carregar)
             <article v-if="selecionado.participacaoId || selecionado.sciOrigemNome"><span>SCI</span><strong>{{ selecionado.sciOrigemNome || 'Origem registrada' }}</strong></article>
             <article><span>Recipiente</span><strong>{{ selecionado.recipiente }}</strong></article>
           </section>
+          <p v-if="selecionado.laboratorioForaDoSolicitante" role="alert" class="guidance" data-test="aviso-laboratorio-fora">Solicitante não está vinculado a este laboratório. Verifique antes de receber.</p>
 
           <section>
             <h3>Processo de origem</h3>
@@ -876,6 +877,7 @@ onMounted(carregar)
         <header><div><span>RECEBIMENTO</span><h2>Confirmar chegada à Gestão</h2></div><button type="button" @click="fecharRecebimento">×</button></header>
         <div class="modal-content">
           <div class="selected-summary"><strong>{{ selecionado.descricao }}</strong><span>{{ selecionado.laboratorioNome }} · {{ selecionado.usuarioGeradorNome }}</span></div>
+          <p v-if="selecionado.laboratorioForaDoSolicitante" role="alert" class="guidance" data-test="aviso-laboratorio-fora">Solicitante não está vinculado a este laboratório. Verifique antes de receber.</p>
           <label class="field"><span>Observação do recebimento <small>(opcional)</small></span><textarea v-model="observacaoRecebimento" rows="4" /></label>
           <p class="guidance">Esta ação altera o status para <b>Em análise</b>. A classificação de risco permanece como originalmente informada até a análise técnica.</p>
         </div>

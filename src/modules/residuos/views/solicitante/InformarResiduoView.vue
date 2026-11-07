@@ -23,7 +23,7 @@ import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
-import { atuaNoLaboratorio } from '@/modules/operacao/laboratoriosDaPessoa'
+import { atuaNoLaboratorio, laboratoriosDaUnidadeComOsDaPessoaPrimeiro, sufixoDeVinculoAdicional } from '@/modules/operacao/laboratoriosDaPessoa'
 import { AVISO_SEM_LABORATORIO_DO_ESTAGIARIO, laboratorioDoProjetoValido, laboratorioInicial, laboratoriosOferecidosAoEstagiario, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
 
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
@@ -97,10 +97,8 @@ const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
 const vinculosAdicionais = ref<VinculoOperacional[]>([])
 const autorizacaoAtualizada = ref(false)
-const laboratoriosPermitidos = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
-  atuaNoLaboratorio(session.usuario?.laboratorios ?? [], l.id) || vinculosAdicionais.value.some(v =>
-    v.laboratorioId === l.id && !v.encerrado && v.dataInicio <= new Date().toLocaleDateString('en-CA')
-    && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA')))))
+const laboratoriosPermitidos = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratoriosDaUnidadeComOsDaPessoaPrimeiro(
+  laboratorios.value, session.usuario?.laboratorios ?? []))
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
 const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
 const participacoes = ref<ContextoParticipacaoOperacional[]>([])
@@ -656,7 +654,7 @@ onMounted(carregarDados)
           <span>Laboratório de origem <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
             <option v-if="!laboratoriosPermitidos.length" value="" disabled>Nenhum laboratório autorizado disponível</option>
-            <option v-for="laboratorio in laboratoriosPermitidos" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && !atuaNoLaboratorio(usuario?.laboratorios ?? [], laboratorio.id) ? ' (vínculo adicional)' : '' }}</option>
+            <option v-for="laboratorio in laboratoriosPermitidos" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ gestao ? '' : sufixoDeVinculoAdicional(usuario?.laboratorios ?? [], vinculosAdicionais, laboratorio.id) }}</option>
           </select>
         </label>
 
