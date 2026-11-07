@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import type { EstagiarioSemVinculoResponse } from '@/modules/estagiarios/types/estagiario'
 
 defineProps<{
@@ -17,7 +18,7 @@ defineEmits<{
         <div class="student-cell">
           <strong>{{ pendente.nome }}</strong>
           <small class="student-responsible">
-            {{ pendente.laboratorioNome || 'Sem laboratório-base' }}
+            {{ nomesDosLaboratoriosDaPessoa(pendente.laboratorios) || 'Sem laboratórios' }}
           </small>
         </div>
         <span class="status-pill status-pill--pending">

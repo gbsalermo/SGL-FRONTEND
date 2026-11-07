@@ -35,7 +35,7 @@ function entrarComo(perfil: PerfilUsuario) {
   const usuario: UsuarioSessao = {
     id: 'u-1', nome: 'Gestor', email: 'g@embrapa.br', perfil, situacao: 'ATIVO',
     unidadeId: 'unidade-1', unidadeNome: 'Mandioca e Fruticultura', unidadeSigla: 'CNPMF',
-    laboratorioId: null, laboratorioNome: null, ativo: true,
+    laboratorios: [], ativo: true,
   }
   useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
 }

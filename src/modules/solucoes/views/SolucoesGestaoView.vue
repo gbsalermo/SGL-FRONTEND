@@ -209,6 +209,7 @@ onMounted(async () => { await carregar(); await abrirPedidoDaRota() })
                     <p>Projeto: {{ p.projetoNome || 'Sem projeto' }} · Laboratório: {{ p.laboratorioNome }}</p>
                      <p v-if="p.projetoSemVinculoDireto" role="alert" class="warning-note">Atenção: solicitante sem vínculo direto com o projeto. Confira o contexto antes de aprovar.</p>
                   </div>
+                  <p v-if="p.laboratorioForaDoSolicitante" role="alert" class="warning-note" data-test="aviso-laboratorio-fora">Solicitante não está vinculado a este laboratório. Verifique antes de aprovar.</p>
                   <div class="sol-request-context"><strong>Finalidade e exigências do solicitante</strong><p>{{ p.observacao || 'Não foram informadas exigências adicionais.' }}</p></div>
                   <div class="sol-table-wrap"><table class="sol-table">
                     <thead><tr><th>Componente</th><th>Quantidade necessária</th></tr></thead>

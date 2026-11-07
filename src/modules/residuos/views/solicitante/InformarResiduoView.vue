@@ -23,7 +23,8 @@ import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
 import { possuiVinculoVigenteComProjeto } from '@/modules/operacao/services/vinculoProjetoOperacional'
-import { laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
+import { atuaNoLaboratorio, laboratoriosDaUnidadeComOsDaPessoaPrimeiro, sufixoDeVinculoAdicional } from '@/modules/operacao/laboratoriosDaPessoa'
+import { AVISO_SEM_LABORATORIO_DO_ESTAGIARIO, laboratorioDoProjetoValido, laboratorioInicial, laboratoriosOferecidosAoEstagiario, precisaEscolherLaboratorio } from '@/modules/operacao/laboratorioDoProjeto'
 
 type OrigemComponente = 'CATALOGO' | 'LIVRE'
 type ModoPreenchimento = 'MANUAL' | 'MODELO'
@@ -96,10 +97,8 @@ const laboratorios = ref<LaboratorioOperacional[]>([])
 const laboratorioSelecionadoId = ref('')
 const vinculosAdicionais = ref<VinculoOperacional[]>([])
 const autorizacaoAtualizada = ref(false)
-const laboratoriosPermitidos = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratorios.value.filter(l =>
-  l.id === session.usuario?.laboratorioId || vinculosAdicionais.value.some(v =>
-    v.laboratorioId === l.id && !v.encerrado && v.dataInicio <= new Date().toLocaleDateString('en-CA')
-    && (!v.dataFim || v.dataFim >= new Date().toLocaleDateString('en-CA')))))
+const laboratoriosPermitidos = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratoriosDaUnidadeComOsDaPessoaPrimeiro(
+  laboratorios.value, session.usuario?.laboratorios ?? []))
 const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
 const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
 const participacoes = ref<ContextoParticipacaoOperacional[]>([])
@@ -108,7 +107,10 @@ const participacaoSelecionada = computed(() => participacoes.value.find(p => p.p
 // The participation fixes the project, but the project may span several laboratories:
 // the estagiário picks one of them (the API rejects a choice outside the project).
 const laboratorioProjetoId = ref('')
-const laboratoriosDoProjeto = computed(() => laboratoriosAtivos(participacaoSelecionada.value?.laboratorios ?? []))
+const laboratoriosDoProjeto = computed(() => laboratoriosOferecidosAoEstagiario(
+  participacaoSelecionada.value?.laboratorios ?? [], session.usuario?.laboratorios ?? []))
+// An intern with a participation selected but no laboratory left must be told why, not just blocked.
+const semLaboratorioDoEstagiario = computed(() => estagiario.value && !!participacaoSelecionada.value && laboratoriosDoProjeto.value.length === 0)
 watch(participacaoSelecionadaId, () => { laboratorioProjetoId.value = laboratorioInicial(laboratoriosDoProjeto.value) })
 const laboratorioOperacionalId = computed(() => estagiario.value
   ? laboratorioDoProjetoValido(laboratoriosDoProjeto.value, laboratorioProjetoId.value)
@@ -225,9 +227,9 @@ async function carregarDados() {
         vinculosAdicionais.value = await vinculosOperacionaisService.listar(usuarioAtualizado.id)
       }
       autorizacaoAtualizada.value = true
-      const laboratorioBase = usuarioAtualizado.laboratorioId || ''
-      laboratorioSelecionadoId.value = laboratoriosPermitidos.value.some(l => l.id === laboratorioBase)
-        ? laboratorioBase : laboratoriosPermitidos.value[0]?.id || ''
+      // Prefer one of the person's own laboratories over an additional link when both are allowed.
+      laboratorioSelecionadoId.value = (laboratoriosPermitidos.value.find(l => atuaNoLaboratorio(usuarioAtualizado.laboratorios, l.id))
+        ?? laboratoriosPermitidos.value[0])?.id || ''
     } catch(e) { erro.value = mensagemErro(e); carregandoDados.value = false; return }
   }
   const laboratorioId = laboratorioOperacionalId.value
@@ -652,11 +654,11 @@ onMounted(carregarDados)
           <span>Laboratório de origem <small>(obrigatório)</small></span>
           <select v-model="laboratorioSelecionadoId" required :disabled="carregandoDados" @change="selecionarLaboratorio">
             <option v-if="!laboratoriosPermitidos.length" value="" disabled>Nenhum laboratório autorizado disponível</option>
-            <option v-for="laboratorio in laboratoriosPermitidos" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ !gestao && laboratorio.id === usuario?.laboratorioId ? ' (laboratório-base)' : !gestao ? ' (vínculo adicional)' : '' }}</option>
+            <option v-for="laboratorio in laboratoriosPermitidos" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ gestao ? '' : sufixoDeVinculoAdicional(usuario?.laboratorios ?? [], vinculosAdicionais, laboratorio.id) }}</option>
           </select>
         </label>
 
-        <p v-if="!estagiario && !carregandoDados && autorizacaoAtualizada && !laboratoriosPermitidos.length" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório-base ou vínculo operacional vigente antes de informar resíduos.</p>
+        <p v-if="!estagiario && !carregandoDados && autorizacaoAtualizada && !laboratoriosPermitidos.length" role="alert" class="no-laboratory-notice">Nenhum laboratório ativo nesta Unidade. Fale com a Gestão.</p>
 
         <label v-if="estagiario" class="field">
           <span>Participação / Atividade <small>(obrigatório)</small></span>
@@ -671,6 +673,7 @@ onMounted(carregarDados)
           <small v-if="!carregandoDados && !participacoes.length">Não existem participações elegíveis para informar resíduos.</small>
         </label>
 
+        <p v-if="semLaboratorioDoEstagiario" role="alert" class="no-laboratory-notice" data-test="sem-laboratorio-do-estagiario">{{ AVISO_SEM_LABORATORIO_DO_ESTAGIARIO }}</p>
         <label v-if="estagiario && precisaEscolherLaboratorio(laboratoriosDoProjeto)" class="field">
           <span>Laboratório do projeto <small>(obrigatório)</small></span>
           <select id="laboratorio-projeto" v-model="laboratorioProjetoId" required :data-form-error="Boolean(errosFormulario.laboratorioProjeto)" :disabled="carregandoDados || enviando">
@@ -937,7 +940,7 @@ onMounted(carregarDados)
           <strong>Ao enviar</strong>
           <span>o resíduo entra como INFORMADO e aguarda o recebimento físico pela Gestão.</span>
         </div>
-        <button class="submit-action" type="submit" :disabled="enviando || carregandoDados || (!estagiario && (!autorizacaoAtualizada || !laboratoriosPermitidos.length)) || (estagiario && !participacaoSelecionada?.elegivel)">
+        <button class="submit-action" type="submit" :disabled="enviando || carregandoDados || (!estagiario && (!autorizacaoAtualizada || !laboratoriosPermitidos.length)) || (estagiario && !participacaoSelecionada?.elegivel) || semLaboratorioDoEstagiario">
           {{ enviando ? 'Enviando...' : 'Informar resíduo' }}
         </button>
       </footer>

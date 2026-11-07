@@ -1,11 +1,15 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   DOIS_LABORATORIOS, UM_ATIVO_UM_INATIVO, UM_LABORATORIO, entrarComoEstagiario, participacaoEstagio,
 } from '@/modules/operacao/__tests__/estagiarioFixtures'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+import type { UsuarioSessao } from '@/modules/auth/types/session'
+import { http } from '@/services/http'
+import { useSessionStore } from '@/stores/session'
+import { fakeAdapter } from '@/test/fakeAdapter'
 
 const mocks = vi.hoisted(() => ({
   criar: vi.fn(),
@@ -27,8 +31,8 @@ vi.mock('@/modules/operacao/services/contextoOperacionalService', () => ({
 
 import InformarResiduoView from '@/modules/residuos/views/solicitante/InformarResiduoView.vue'
 
-async function montarComoEstagiario(laboratorios: LaboratorioResumo[]) {
-  entrarComoEstagiario()
+async function montarComoEstagiario(laboratorios: LaboratorioResumo[], laboratoriosDaPessoa?: LaboratorioResumo[]) {
+  entrarComoEstagiario(laboratoriosDaPessoa)
   mocks.listarParticipacoesEstagiario.mockResolvedValue([participacaoEstagio(laboratorios)])
   const wrapper = mount(InformarResiduoView)
   await flushPromises()
@@ -85,5 +89,54 @@ describe('InformarResiduoView — laboratório do projeto do estagiário', () =>
     expect(wrapper.findAll('option').map(o => o.text())).not.toContain('Lab Inativo')
     await preencherEEnviar(wrapper)
     expect(mocks.criar).toHaveBeenCalledWith(expect.objectContaining({ participacaoId: 'part-1', laboratorioId: 'A' }))
+  })
+  it('não oferece laboratório do projeto que está fora da lista do estagiário', async () => {
+    const wrapper = await montarComoEstagiario(DOIS_LABORATORIOS, [{ id: 'B', nome: 'Lab B', ativo: true }])
+
+    expect(wrapper.find('select#laboratorio-projeto').exists()).toBe(false)
+    expect(wrapper.find('.context-grid').text()).toContain('Lab B')
+    expect(wrapper.find('.context-grid').text()).not.toContain('Lab A')
+    await preencherEEnviar(wrapper)
+    expect(mocks.criar).toHaveBeenCalledWith(expect.objectContaining({ participacaoId: 'part-1', laboratorioId: 'B' }))
+  })
+
+  it('sem laboratório do projeto na lista do estagiário: avisa e bloqueia o envio', async () => {
+    const wrapper = await montarComoEstagiario(UM_LABORATORIO, [])
+
+    expect(wrapper.text()).toContain('Nenhum laboratório deste projeto está entre os seus laboratórios. Peça à Gestão para incluí-lo.')
+    expect(wrapper.find('form button[type="submit"]').attributes('disabled')).toBeDefined()
+  })
+})
+
+describe('InformarResiduoView - laboratórios do empregado', () => {
+  const adapterOriginal = http.defaults.adapter
+  beforeEach(() => { localStorage.clear(); setActivePinia(createPinia()); window.scrollTo = vi.fn() })
+  afterEach(() => { http.defaults.adapter = adapterOriginal })
+
+  it('empregadoVeTodosOsLaboratoriosAtivosComOsDaListaPrimeiro', async () => {
+    const usuario: UsuarioSessao = {
+      id: 'u-2', nome: 'Técnico', email: 't@embrapa.br', perfil: 'TECNICO', situacao: 'ATIVO',
+      unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF', ativo: true,
+      laboratorios: [{ id: 'B', nome: 'Lab B', ativo: true }],
+    }
+    useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
+    const { adapter } = fakeAdapter((config) => {
+      if (config.url === '/v1/auth/me') return { status: 200, data: usuario }
+      if (config.url === '/v1/laboratorios') {
+        return {
+          status: 200,
+          data: [...DOIS_LABORATORIOS, { id: 'Z', nome: 'Lab Z', ativo: true }, { id: 'I', nome: 'Lab Inativo', ativo: false }]
+            .map(l => ({ ...l, unidadeId: 'unidade-1' })),
+        }
+      }
+      return { status: 200, data: [] }
+    })
+    http.defaults.adapter = adapter
+
+    const wrapper = mount(InformarResiduoView)
+    await flushPromises()
+
+    const seletor = wrapper.find('select:not(#laboratorio-projeto)')
+    expect(seletor.findAll('option').map(o => o.text())).toEqual(['Lab B', 'Lab A', 'Lab Z'])
   })
 })

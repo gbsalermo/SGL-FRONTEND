@@ -68,7 +68,7 @@ async function concluir(acao: () => Promise<unknown>, texto: string) {
     erroDrawer.value = mensagem(e, 'Não foi possível concluir a operação.')
   } finally { salvando.value = false }
 }
-function aprovar(payload: { perfil: PerfilUsuario; laboratorioBaseId: string }) {
+function aprovar(payload: { perfil: PerfilUsuario; laboratorioIds: string[] }) {
   const alvo = analisando.value
   if (alvo) void concluir(() => vinculosOperacionaisService.aprovar(alvo.id, payload), `${alvo.nome} foi aprovado(a).`)
 }

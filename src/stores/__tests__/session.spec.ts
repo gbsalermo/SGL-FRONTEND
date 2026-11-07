@@ -13,8 +13,7 @@ const usuario: UsuarioSessao = {
   unidadeId: 'unidade-1',
   unidadeNome: 'Mandioca',
   unidadeSigla: 'CNPMF',
-  laboratorioId: null,
-  laboratorioNome: null,
+  laboratorios: [],
   ativo: true,
 }
 

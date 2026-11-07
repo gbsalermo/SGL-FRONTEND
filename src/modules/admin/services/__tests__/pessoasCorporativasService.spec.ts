@@ -23,7 +23,7 @@ describe('pessoasCorporativasService', () => {
     http.defaults.adapter = fakeAdapter(() => ({ status: 409, data: { codigo: 'JA_CADASTRADO' } })).adapter
 
     await expect(importarPessoa({
-      tipo: 'EMPREGADO', referencia: '344136', perfil: 'TECNICO', laboratorioBaseId: 'lab-1',
+      tipo: 'EMPREGADO', referencia: '344136', perfil: 'TECNICO', laboratorioIds: ['lab-1'],
     })).rejects.toThrow('Pessoa já cadastrada no SGL.')
   })
 
@@ -31,11 +31,11 @@ describe('pessoasCorporativasService', () => {
     const fake = fakeAdapter(() => ({ status: 201, data: { id: 'u-1' } }))
     http.defaults.adapter = fake.adapter
 
-    await importarPessoa({ tipo: 'EMPREGADO', referencia: '344136', perfil: 'TECNICO', laboratorioBaseId: 'lab-1' })
+    await importarPessoa({ tipo: 'EMPREGADO', referencia: '344136', perfil: 'TECNICO', laboratorioIds: ['lab-1'] })
 
     expect(fake.requests[0].url).toBe('/v1/pessoas-corporativas/importar')
     expect(JSON.parse(fake.requests[0].data)).toEqual({
-      tipo: 'EMPREGADO', referencia: '344136', perfil: 'TECNICO', laboratorioBaseId: 'lab-1',
+      tipo: 'EMPREGADO', referencia: '344136', perfil: 'TECNICO', laboratorioIds: ['lab-1'],
     })
   })
 })

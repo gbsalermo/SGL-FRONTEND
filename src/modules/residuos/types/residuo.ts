@@ -152,6 +152,7 @@ export interface ResiduoResponse {
   projetoId: string | null
   projetoNome: string | null
   projetoSemVinculoDireto?: boolean
+  laboratorioForaDoSolicitante: boolean
   participacaoId?: string | null
   atividadeOrigemNome?: string | null
   sciOrigemNome?: string | null

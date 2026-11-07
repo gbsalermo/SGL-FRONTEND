@@ -1,4 +1,18 @@
+import { atuaNoLaboratorio } from '@/modules/operacao/laboratoriosDaPessoa'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+
+export const AVISO_SEM_LABORATORIO_DO_ESTAGIARIO =
+  'Nenhum laboratório deste projeto está entre os seus laboratórios. Peça à Gestão para incluí-lo.'
+
+/**
+ * An intern may only act in project laboratories that are also in their own list; offering any other
+ * would preselect a laboratory the API refuses with 400.
+ */
+export function laboratoriosOferecidosAoEstagiario(
+  laboratoriosDoProjeto: LaboratorioResumo[], laboratoriosDaPessoa: LaboratorioResumo[],
+): LaboratorioResumo[] {
+  return laboratoriosAtivos(laboratoriosDoProjeto).filter(l => atuaNoLaboratorio(laboratoriosDaPessoa, l.id))
+}
 
 /**
  * Only active laboratories are offered: the API ignores inactive ones when it resolves the

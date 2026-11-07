@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { type RouteLocationRaw, useRoute, useRouter } from 'vue-router'
 import GestaoUserProfile from '@/components/GestaoUserProfile.vue'
@@ -172,7 +173,7 @@ const resultadosBusca = computed<ResultadoBuscaGlobal[]>(() => {
       usuario.email,
       usuario.perfil,
       usuario.unidadeNome,
-      usuario.laboratorioNome,
+      nomesDosLaboratoriosDaPessoa(usuario.laboratorios),
     ].filter(Boolean).join(' '))
 
     if (!corresponde(termos)) continue
@@ -182,7 +183,7 @@ const resultadosBusca = computed<ResultadoBuscaGlobal[]>(() => {
       tipo: 'usuario',
       titulo: usuario.nome,
       descricao: `${usuario.email} · ${rotuloPerfil(usuario.perfil)}`,
-      detalhe: usuario.laboratorioNome ?? usuario.unidadeNome ?? 'Sem vínculo operacional',
+      detalhe: nomesDosLaboratoriosDaPessoa(usuario.laboratorios) || usuario.unidadeNome || 'Sem vínculo operacional',
       termos,
       destino: ehAdministrador.value
         ? { path: '/administracao/cadastros', query: { secao: 'usuarios', busca: usuario.nome } }

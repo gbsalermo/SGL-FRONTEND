@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, nomesDosLaboratorios, precisaEscolherLaboratorio,
+  laboratorioDoProjetoValido, laboratorioInicial, laboratoriosAtivos, laboratoriosOferecidosAoEstagiario,
+  nomesDosLaboratorios, precisaEscolherLaboratorio,
 } from '@/modules/operacao/laboratorioDoProjeto'
 
 const A = { id: 'A', nome: 'Lab A', ativo: true }
@@ -55,5 +56,17 @@ describe('nomesDosLaboratorios', () => {
 
   it('sem laboratórios devolve texto vazio', () => {
     expect(nomesDosLaboratorios([])).toBe('')
+  })
+})
+
+describe('laboratoriosOferecidosAoEstagiario', () => {
+  const INATIVO = { id: 'C', nome: 'Lab C', ativo: false }
+
+  it('oferece só laboratórios ativos do projeto que estão na lista da pessoa', () => {
+    expect(laboratoriosOferecidosAoEstagiario([A, B, INATIVO], [B, INATIVO])).toEqual([B])
+  })
+
+  it('devolve vazio quando nenhum laboratório do projeto está na lista', () => {
+    expect(laboratoriosOferecidosAoEstagiario([A, B], [])).toEqual([])
   })
 })

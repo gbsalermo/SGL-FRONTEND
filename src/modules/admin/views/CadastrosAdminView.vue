@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { aguardaAprovacao, ROTA_APROVAR_PENDENTES } from '@/modules/auth/perfis'
-import LaboratoriosProjetoSelect from '@/modules/projetos/components/LaboratoriosProjetoSelect.vue'
+import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 import CatalogosResiduosSolucoesView from '@/modules/admin/views/CatalogosResiduosSolucoesView.vue'
 
@@ -218,7 +219,7 @@ const locaisArmazenamentoFiltrados = computed(() => locaisArmazenamento.value.fi
 
 const usuariosFiltrados = computed(() => usuarios.value.filter((item) => {
   if (!termoBusca.value) return true
-  return [item.nome, item.email, item.unidadeNome ?? '', item.laboratorioNome ?? '', rotuloPerfil(item.perfil)]
+  return [item.nome, item.email, item.unidadeNome ?? '', nomesDosLaboratoriosDaPessoa(item.laboratorios), rotuloPerfil(item.perfil)]
     .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termoBusca.value))
 }))
 
@@ -988,11 +989,11 @@ onMounted(() => {
           <router-link class="btn btn--primary" to="/administracao/cadastros/vinculos">Gerenciar vínculos de usuários →</router-link>
           <div class="table-wrap">
           <table class="permissions-table">
-            <thead><tr><th>Usuário</th><th>Unidade / laboratório</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
+            <thead><tr><th>Usuário</th><th>Unidade / laboratórios</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
             <tbody>
               <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
                 <td><strong>{{ usuario.nome }}</strong><small>{{ usuario.email }}</small></td>
-                <td><strong>{{ usuario.unidadeNome || 'Sem unidade' }}</strong><small>{{ usuario.laboratorioNome || 'Sem laboratório' }}</small></td>
+                <td><strong>{{ usuario.unidadeNome || 'Sem unidade' }}</strong><small>{{ nomesDosLaboratoriosDaPessoa(usuario.laboratorios) || 'Sem laboratórios' }}</small></td>
                 <td>
                   <!-- Pendente vem antes de Ativo/Inativo: ele está "ativo" no cadastro, mas ainda sem acesso. -->
                   <span v-if="aguardaAprovacao(usuario)" class="status status--pending">Aguardando aprovação</span>
@@ -1000,7 +1001,7 @@ onMounted(() => {
                 </td>
                 <td>{{ rotuloPerfil(usuario.perfil) }}</td>
                 <td v-if="aguardaAprovacao(usuario)">
-                  <!-- Trocar o perfil de um pendente não libera o acesso; a aprovação define perfil e laboratório-base. -->
+                  <!-- Trocar o perfil de um pendente não libera o acesso; a aprovação define perfil e laboratórios. -->
                   <router-link class="pending-link" :to="ROTA_APROVAR_PENDENTES">Aprovar em Vínculos → Pendentes</router-link>
                   <small class="self-note">O perfil é escolhido na aprovação</small>
                 </td>
@@ -1053,7 +1054,7 @@ onMounted(() => {
 
         <form v-else-if="modal === 'projeto'" class="modal-body" @submit.prevent="salvarProjeto">
           <div class="form-grid">
-            <LaboratoriosProjetoSelect v-model="projetoForm.laboratorioIds" :opcoes="laboratoriosAtivosDaUnidade" :vinculados="vinculadosEmEdicao" />
+            <LaboratoriosSelect v-model="projetoForm.laboratorioIds" :opcoes="laboratoriosAtivosDaUnidade" :vinculados="vinculadosEmEdicao" />
             <label class="field"><span>Nome *</span><input v-model="projetoForm.nome" required /></label>
             <label class="field"><span>Data de início</span><input v-model="projetoForm.dataInicio" type="date" /></label>
             <label class="field"><span>Data final</span><input v-model="projetoForm.dataFim" type="date" /></label>
