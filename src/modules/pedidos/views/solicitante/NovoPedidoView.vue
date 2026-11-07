@@ -486,7 +486,7 @@ onMounted(carregarDados)
             <option v-for="laboratorio in laboratorioPermitido" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}{{ gestao ? '' : sufixoDeVinculoAdicional(usuario?.laboratorios ?? [], vinculosAdicionais, laboratorio.id) }}</option>
           </select>
         </label>
-        <p v-if="!estagiario && !carregandoDados && autorizacaoAtualizada && laboratorioPermitido.length === 0" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório ou vínculo operacional vigente antes de criar pedidos.</p>
+        <p v-if="!estagiario && !carregandoDados && autorizacaoAtualizada && laboratorioPermitido.length === 0" role="alert" class="no-laboratory-notice">Nenhum laboratório ativo nesta Unidade. Fale com a Gestão.</p>
         <SeletorParticipacaoOperacional
           v-if="estagiario"
           v-model="participacaoSelecionadaId"

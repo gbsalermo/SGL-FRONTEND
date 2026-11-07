@@ -658,7 +658,7 @@ onMounted(carregarDados)
           </select>
         </label>
 
-        <p v-if="!estagiario && !carregandoDados && autorizacaoAtualizada && !laboratoriosPermitidos.length" role="alert" class="no-laboratory-notice">Nenhum laboratório autorizado. Solicite à Gestão a atribuição de um laboratório ou vínculo operacional vigente antes de informar resíduos.</p>
+        <p v-if="!estagiario && !carregandoDados && autorizacaoAtualizada && !laboratoriosPermitidos.length" role="alert" class="no-laboratory-notice">Nenhum laboratório ativo nesta Unidade. Fale com a Gestão.</p>
 
         <label v-if="estagiario" class="field">
           <span>Participação / Atividade <small>(obrigatório)</small></span>

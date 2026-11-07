@@ -146,4 +146,22 @@ describe('NovoPedidoView - laboratórios da pessoa', () => {
     expect(seletor.findAll('option').map(o => o.text())).toEqual(['Lab B', 'Lab A', 'Lab Z'])
     expect((seletor.element as HTMLSelectElement).value).toBe('B')
   })
+
+  it('empregadoSemLaboratorioAtivoNaUnidadeVeAvisoDaUnidade', async () => {
+    const usuario: UsuarioSessao = {
+      id: 'u-3', nome: 'Técnico', email: 't@embrapa.br', perfil: 'TECNICO', situacao: 'ATIVO',
+      unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF', ativo: true, laboratorios: [],
+    }
+    useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
+    const { adapter } = fakeAdapter((config) => {
+      if (config.url === '/v1/auth/me') return { status: 200, data: usuario }
+      return { status: 200, data: [] }
+    })
+    http.defaults.adapter = adapter
+
+    const wrapper = mount(NovoPedidoView)
+    await flushPromises()
+
+    expect(wrapper.find('.no-laboratory-notice').text()).toBe('Nenhum laboratório ativo nesta Unidade. Fale com a Gestão.')
+  })
 })
