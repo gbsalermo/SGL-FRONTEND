@@ -447,6 +447,30 @@ O detalhamento das decisões, entregas e critérios de validação fica em [`CON
 
 ---
 
+## Vídeos da Central de Ajuda
+
+Os MP4 da Central de Ajuda (`/ajuda`) **não** vão para o git nem para a imagem: são servidos pelo Nginx a partir do volume externo `sgl_web_ajuda_videos`, montado somente leitura em `/usr/share/nginx/ajuda-videos/`. Os pôsteres (`public/ajuda/posters/`) ficam versionados.
+
+1. Criar o volume, uma única vez por servidor. **Faça isto antes da primeira tag**: sem o volume, o `docker compose up` falha.
+
+   ```bash
+   docker volume create sgl_web_ajuda_videos
+   ```
+
+2. Copiar ou atualizar os vídeos (baixe os MP4 da pasta do Drive para um diretório no servidor, aqui `saida/`). Não precisa de novo deploy.
+
+   ```bash
+   docker run --rm -v sgl_web_ajuda_videos:/dest -v "$PWD/saida":/src:ro alpine sh -c 'cp /src/*.mp4 /dest/'
+   ```
+
+3. Em desenvolvimento, apontar para a pasta de saída dos manuais:
+
+   ```bash
+   ln -s ~/repos/sgl-manuais/saida public/ajuda/videos
+   ```
+
+---
+
 ## Execução
 
 ```bash
