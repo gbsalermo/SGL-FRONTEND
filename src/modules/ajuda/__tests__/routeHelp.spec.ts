@@ -6,6 +6,9 @@ import { helpTaskForCadastroTab, helpTaskForRoute } from '../routeHelp'
 const ROUTE_TABLE: Array<[string, string]> = [
   ['/pedidos/novo', 'fazer-um-pedido-e-acompanhar'],
   ['/meus-pedidos', 'fazer-um-pedido-e-acompanhar'],
+  ['/solicitacoes/novo', 'fazer-um-pedido-e-acompanhar'],
+  ['/solicitacoes/meus-pedidos', 'fazer-um-pedido-e-acompanhar'],
+  ['/administracao/cadastros/vinculos', 'importar-pessoa-da-embrapa'],
   ['/solucoes/solicitar', 'solicitar-uma-solucao'],
   ['/minhas-solucoes', 'solicitar-uma-solucao'],
   ['/residuos/novo', 'informar-um-residuo'],
@@ -41,6 +44,7 @@ describe('helpTaskForRoute', () => {
   it('maps the orientandos view before the generic my-orders screen', () => {
     expect(helpTaskForRoute('/meus-pedidos', { visao: 'orientandos' })).toBe('pedidos-dos-orientandos')
     expect(helpTaskForRoute('/meus-pedidos')).toBe('fazer-um-pedido-e-acompanhar')
+    expect(helpTaskForRoute('/solicitacoes/meus-pedidos', { visao: 'orientandos' })).toBe('pedidos-dos-orientandos')
   })
 
   it('leaves cadastros to the tabs', () => {

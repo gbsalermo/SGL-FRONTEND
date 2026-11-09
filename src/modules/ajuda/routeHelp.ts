@@ -12,8 +12,12 @@ const prefix = (base: string) => (path: string) => path === base || path.startsW
 
 // Order matters: the first match wins, so specific cases go before generic ones.
 const ROUTE_HELP_RULES: RouteHelpRule[] = [
-  { match: (path, query) => path === '/meus-pedidos' && query.visao === 'orientandos', taskId: 'pedidos-dos-orientandos' },
-  { match: exact('/pedidos/novo', '/meus-pedidos'), taskId: 'fazer-um-pedido-e-acompanhar' },
+  {
+    match: (path, query) => (path === '/meus-pedidos' || path === '/solicitacoes/meus-pedidos') && query.visao === 'orientandos',
+    taskId: 'pedidos-dos-orientandos',
+  },
+  {
+    match: exact('/pedidos/novo', '/meus-pedidos', '/solicitacoes/novo', '/solicitacoes/meus-pedidos'), taskId: 'fazer-um-pedido-e-acompanhar' },
   { match: exact('/solucoes/solicitar', '/minhas-solucoes'), taskId: 'solicitar-uma-solucao' },
   { match: exact('/residuos/novo', '/meus-residuos'), taskId: 'informar-um-residuo' },
   { match: exact('/dashboard'), taskId: 'painel-e-alertas-da-gestao' },
@@ -23,7 +27,8 @@ const ROUTE_HELP_RULES: RouteHelpRule[] = [
   { match: exact('/solucoes', '/solucoes/nova'), taskId: 'central-de-solucoes' },
   { match: exact('/residuos', '/residuos/informar'), taskId: 'gestao-de-residuos' },
   { match: prefix('/relatorios'), taskId: 'relatorios' },
-  { match: exact('/administracao/cadastros/vinculos/importar'), taskId: 'importar-pessoa-da-embrapa' },
+  // The list is where the import starts (step 1 of the text opens "Vínculos de usuários").
+  { match: exact('/administracao/cadastros/vinculos', '/administracao/cadastros/vinculos/importar'), taskId: 'importar-pessoa-da-embrapa' },
   { match: exact('/estagiarios'), taskId: 'acompanhar-estagiarios' },
   { match: exact('/projetos'), taskId: 'projeto-em-varios-laboratorios' },
   {
