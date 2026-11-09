@@ -62,4 +62,32 @@ describe('guardas de rota', () => {
 
     expect(destino('/administracao/cadastros')).toBe('/dashboard')
   })
+
+  it('ajuda is public for anonymous users', () => {
+    expect(destino('/ajuda')).toBe(true)
+    expect(destino('/ajuda/informar-um-residuo')).toBe(true)
+  })
+
+  it('pending user can open ajuda', () => {
+    entrarComo('TECNICO', 'PENDENTE_VINCULACAO')
+
+    expect(destino('/ajuda')).toBe(true)
+    expect(destino('/ajuda/informar-um-residuo')).toBe(true)
+    expect(destino('/inicio')).toBe('/aguardando-aprovacao')
+  })
+
+  it('logged-in user stays on ajuda', () => {
+    entrarComo('GESTOR')
+    expect(destino('/ajuda/analisar-pedido')).toBe(true)
+  })
+
+  it('unknown task goes back to ajuda', async () => {
+    await router.push('/ajuda/nao-existe')
+    expect(router.currentRoute.value.path).toBe('/ajuda')
+  })
+
+  it('faq route is valid', async () => {
+    await router.push('/ajuda/perguntas-frequentes')
+    expect(router.currentRoute.value.path).toBe('/ajuda/perguntas-frequentes')
+  })
 })

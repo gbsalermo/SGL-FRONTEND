@@ -22,6 +22,12 @@ describe('EstagiariosVinculoPendente', () => {
     expect(wrapper.text()).toContain('Amanda Souza')
   })
 
+  it('oferecePontoDeAjudaDoVinculoDeEstagio', () => {
+    const wrapper = mount(EstagiariosVinculoPendente, { props: { pendentes } })
+
+    expect(wrapper.find('a.help-link').attributes('href')).toBe('/ajuda/vinculo-de-estagio')
+  })
+
   it('mostraOsLaboratoriosDaPessoa', () => {
     const wrapper = mount(EstagiariosVinculoPendente, { props: { pendentes: [pendentes[0]] } })
 
