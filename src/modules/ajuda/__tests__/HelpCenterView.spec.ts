@@ -73,6 +73,14 @@ describe('HelpCenterView', () => {
     expect(wrapper.find('.help-menu').classes()).not.toContain('help-menu--open')
   })
 
+  it('escape closes the mobile menu', async () => {
+    const wrapper = await mountAt('/ajuda')
+    await wrapper.find('[data-testid="menu-toggle"]').trigger('click')
+    expect(wrapper.find('.help-menu').classes()).toContain('help-menu--open')
+    await wrapper.find('.help-center').trigger('keydown', { key: 'Escape' })
+    expect(wrapper.find('.help-menu').classes()).not.toContain('help-menu--open')
+  })
+
   it('menu has FAQ and PDF links', async () => {
     const wrapper = await mountAt('/ajuda')
     expect(wrapper.find('a[href="/ajuda/perguntas-frequentes"]').exists()).toBe(true)

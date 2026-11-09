@@ -28,7 +28,7 @@ watch(
 </script>
 
 <template>
-  <div class="help-center">
+  <div class="help-center" @keydown.esc="menuOpen = false">
     <header class="help-center__header">
       <button
         type="button"
@@ -82,9 +82,11 @@ watch(
   .help-menu {
     position: fixed; top: 0; left: 0; bottom: 0; z-index: 20; width: min(300px, 85vw); max-height: none;
     padding: var(--sgl-space-4); box-sizing: border-box; background: var(--sgl-surface);
-    transform: translateX(-100%); transition: transform var(--sgl-transition-fast);
+    transform: translateX(-100%); visibility: hidden;
+    /* visibility flips after the slide-out ends, so the closed drawer's links leave the Tab order. */
+    transition: transform var(--sgl-transition-fast), visibility 0s linear var(--sgl-transition-fast);
   }
-  .help-menu--open { transform: translateX(0); }
+  .help-menu--open { transform: translateX(0); visibility: visible; transition-delay: 0s; }
   .help-center__overlay { display: block; position: fixed; inset: 0; z-index: 10; background: rgba(0, 0, 0, 0.4); }
 }
 </style>
