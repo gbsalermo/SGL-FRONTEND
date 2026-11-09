@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 import { solucaoService } from '../services/solucaoService'
 import {
@@ -13,6 +13,7 @@ type Operacao = 'APROVAR' | 'ENTREGAR' | 'REJEITAR' | 'CANCELAR'
 type Filtro = StatusSolucao | 'TODOS'
 const session = useSessionStore()
 const route = useRoute()
+const router = useRouter()
 const carregando = ref(true)
 const executando = ref(false)
 const erro = ref('')
@@ -221,6 +222,12 @@ onMounted(async () => { await carregar(); await abrirPedidoDaRota() })
                     {{ p.solucaoPreparadaNoCancelamento ? 'Preparação realizada: os ingredientes permanecem consumidos.' : p.estoqueRevertidoNoCancelamento ? 'Preparação não realizada: componentes retornaram ao estoque.' : 'Cancelamento sem saída de estoque.' }}
                   </div>
                   <h3>Cartilha de preparo</h3><p class="sol-note">{{ p.instrucoesPreparoSolucao || 'Sem instruções de preparo registradas neste pedido.' }}</p>
+                  <!-- O rótulo fica acessível desde o pedido PENDENTE: a página abre como prévia e só libera a
+                       impressão (A4 ou Zebra) em EM_PREPARACAO/ENTREGUE — essa trava fica em RotuloSolucaoView. -->
+                  <div v-if="p.status === 'PENDENTE' || p.status === 'EM_PREPARACAO' || p.status === 'ENTREGUE'" class="sol-detail-actions">
+                    <div><h3>Rótulo da solução</h3><p class="sol-muted">{{ p.status === 'PENDENTE' ? 'Prévia disponível; a impressão é liberada após Aprovar preparação.' : 'Impressão liberada. Identifica o pedido e a composição registrada.' }}</p></div>
+                    <div class="sol-detail-buttons"><button class="secondary-action" type="button" @click="router.push('/solucoes/' + encodeURIComponent(p.id) + '/rotulo')">Visualizar / imprimir rótulo</button></div>
+                  </div>
                   <section v-if="p.status === 'PENDENTE' || p.status === 'EM_PREPARACAO'" class="sol-detail-actions">
                     <div><h3>Ações da solução</h3><p class="sol-muted">Confira a composição e a cartilha antes de realizar a operação.</p></div>
                     <div class="sol-detail-buttons">
