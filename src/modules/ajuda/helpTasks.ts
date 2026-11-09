@@ -30,19 +30,6 @@ export const FEATURED_TASK_IDS: string[] = [
 /** Route id of the FAQ page, which is not a video task. */
 export const FAQ_ID = 'perguntas-frequentes'
 
-// Texts are plain Markdown files so they can be edited without touching code.
-const textFiles = import.meta.glob('./textos/*.md', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-}) as Record<string, string>
-
-export function helpText(id: string): string | undefined {
-  return textFiles[`./textos/${id}.md`]
-}
-
-export const FAQ_TEXT: string = helpText(FAQ_ID) ?? ''
-
 export function findHelpTask(id: string): HelpTask | undefined {
   return HELP_TASKS.find((task) => task.id === id)
 }

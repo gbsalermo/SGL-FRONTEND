@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   FEATURED_TASK_IDS,
+  HELP_GROUPS,
   HELP_TASKS,
   findHelpTask,
   posterUrl,
@@ -17,6 +18,13 @@ describe('helpTasks', () => {
     for (const task of HELP_TASKS) {
       expect(task.video).toMatch(/^\d{2}-/)
       expect(task.video.endsWith(task.id)).toBe(true)
+    }
+  })
+
+  it('puts every task in a known group', () => {
+    const groupIds = HELP_GROUPS.map((g) => g.id) as string[]
+    for (const task of HELP_TASKS) {
+      expect(groupIds, task.id).toContain(task.group)
     }
   })
 

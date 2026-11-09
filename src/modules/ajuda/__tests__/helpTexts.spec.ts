@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { FAQ_TEXT, HELP_TASKS, helpText } from '../helpTasks'
+import { HELP_TASKS } from '../helpTasks'
+import { FAQ_TEXT, helpText } from '../helpTexts'
 
 // Same glob as the loader, used here to detect texts that match no task.
 const files = import.meta.glob('../textos/*.md', { query: '?raw', import: 'default', eager: true })

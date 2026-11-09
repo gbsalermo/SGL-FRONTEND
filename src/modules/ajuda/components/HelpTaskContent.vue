@@ -1,14 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-import {
-  FAQ_ID,
-  FAQ_TEXT,
-  findHelpTask,
-  helpText,
-  posterUrl,
-  videoUrl,
-} from '@/modules/ajuda/helpTasks'
+import { FAQ_ID, findHelpTask, posterUrl, videoUrl } from '@/modules/ajuda/helpTasks'
+import { FAQ_TEXT, helpText } from '@/modules/ajuda/helpTexts'
 import { renderHelpMarkdown } from '@/modules/ajuda/renderHelpMarkdown'
 
 const props = defineProps<{ taskId: string }>()
