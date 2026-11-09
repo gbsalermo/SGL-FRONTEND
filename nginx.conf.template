@@ -9,9 +9,10 @@ server {
     index index.html;
 
     # SPA: qualquer rota do front (ex.: /pedidos/123) cai no index.html e o
-    # vue-router decide o que mostrar.
+    # vue-router decide o que mostrar. Sem "$uri/": /ajuda também é um diretório
+    # em dist/ (pôsteres e PDF) e o try_files redirecionaria para /ajuda/ (403).
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files $uri /index.html;
     }
 
     # Resolve o nome da API a cada requisição (variável + resolver do Docker):
@@ -33,12 +34,18 @@ server {
 
     # Vídeos da Central de Ajuda: ficam fora da imagem (são grandes e mudam
     # sem novo deploy), num volume externo montado somente leitura. O Nginx
-    # atende Range por padrão, o que permite avançar/voltar o vídeo. Vem antes
-    # da regra de estáticos para deixar clara a intenção.
-    location /ajuda/videos/ {
+    # atende Range por padrão, o que permite avançar/voltar o vídeo. O "^~"
+    # faz este prefixo vencer a regex de estáticos (a ordem não decide: regex
+    # só é avaliada se o prefixo mais longo não tiver "^~").
+    location ^~ /ajuda/videos/ {
         alias /usr/share/nginx/ajuda-videos/;
         expires 7d;
         add_header Cache-Control "public";
+    }
+
+    # Pôsteres não têm hash no nome: cache curto, para refletir um pôster novo.
+    location ^~ /ajuda/posters/ {
+        expires 1d;
     }
 
     # Arquivos com hash no nome (gerados pelo Vite) podem ficar em cache por 1 ano.
