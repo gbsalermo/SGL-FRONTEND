@@ -9,6 +9,9 @@ import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 import CatalogosResiduosSolucoesView from '@/modules/admin/views/CatalogosResiduosSolucoesView.vue'
 
 import type { PerfilUsuario } from '@/modules/auth/types/session'
+import HelpLink from '@/modules/ajuda/components/HelpLink.vue'
+import { helpTaskForCadastroTab } from '@/modules/ajuda/routeHelp'
+import type { AbaCadastro } from '@/modules/admin/types/cadastros'
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
 import type {
   ApiErrorAdmin,
@@ -35,7 +38,6 @@ import type {
 } from '@/modules/admin/types/cadastros'
 import { useSessionStore } from '@/stores/session'
 
-type AbaCadastro = 'laboratorios' | 'projetos' | 'produtos' | 'residuos-solucoes' | 'classes-residuo' | 'locais-armazenamento' | 'permissoes'
 type ModalCadastro = 'laboratorio' | 'projeto' | 'produto' | 'classe-residuo' | 'local-armazenamento' | null
 
 interface LaboratorioForm {
@@ -820,9 +822,12 @@ onMounted(() => {
         <h1>Cadastros do SGL</h1>
         <span>Manutenção dos dados-base usados pelos fluxos do sistema.</span>
       </div>
-      <button class="btn btn--ghost" type="button" :disabled="carregando" @click="carregar">
-        {{ carregando ? 'Atualizando...' : 'Atualizar dados' }}
-      </button>
+      <div class="page-header__actions">
+        <HelpLink :task-id="helpTaskForCadastroTab(aba)" />
+        <button class="btn btn--ghost" type="button" :disabled="carregando" @click="carregar">
+          {{ carregando ? 'Atualizando...' : 'Atualizar dados' }}
+        </button>
+      </div>
     </header>
 
     <section class="summary-grid">
@@ -1160,6 +1165,7 @@ onMounted(() => {
 .admin-page { max-width: 1500px; margin: 0 auto; color: #1b2940; }
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
 .eyebrow { margin: 0 0 7px; color: #2459bd; font-size: 10px; font-weight: 900; letter-spacing: .08em; }
+.page-header__actions { display: flex; align-items: center; gap: 10px; }
 .page-header h1 { margin: 0; color: #0e2140; font-size: 31px; line-height: 1.1; }
 .page-header span { display: block; margin-top: 7px; color: #6d7c91; font-size: 12px; }
 .summary-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 11px; margin-bottom: 12px; }

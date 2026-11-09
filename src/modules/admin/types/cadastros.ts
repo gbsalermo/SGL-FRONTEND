@@ -240,3 +240,5 @@ export interface CargoSubstituicao {
   ocupanteId: string
   ocupanteNome: string
 }
+
+export type AbaCadastro = 'laboratorios' | 'projetos' | 'produtos' | 'residuos-solucoes' | 'classes-residuo' | 'locais-armazenamento' | 'permissoes'

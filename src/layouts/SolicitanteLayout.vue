@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import HelpLink from '@/modules/ajuda/components/HelpLink.vue'
+import { helpTaskForRoute } from '@/modules/ajuda/routeHelp'
 
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { useProfilePreferencesStore } from '@/stores/profilePreferences'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
+const route = useRoute()
 const session = useSessionStore()
 const profilePreferences = useProfilePreferencesStore()
 
@@ -192,6 +195,8 @@ function sair() {
           <strong>{{ nomesDosLaboratoriosDaPessoa(session.usuario?.laboratorios ?? []) || 'Laboratório não vinculado' }}</strong>
           <span>{{ session.usuario?.unidadeNome ?? 'Unidade não vinculada' }}</span>
         </div>
+
+        <HelpLink :task-id="helpTaskForRoute(route.path, route.query)" />
 
         <button class="solicitante-logout" type="button" @click="sair">
           <span>Sair</span>
@@ -439,13 +444,14 @@ function sair() {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 0 28px;
   background: #08162f;
   color: #fff;
   box-shadow: 0 4px 14px rgb(6 18 40 / 8%);
 }
 
-.solicitante-topbar__context { display: flex; flex-direction: column; gap: 2px; }
+.solicitante-topbar__context { margin-right: auto; display: flex; flex-direction: column; gap: 2px; }
 .solicitante-topbar__context strong { font-size: 13px; }
 .solicitante-topbar__context span { color: #9fb0ca; font-size: 11px; }
 
