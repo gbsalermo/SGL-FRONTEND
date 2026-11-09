@@ -1,5 +1,10 @@
 # Rótulo físico de Resíduos
 
+
+> **Ajuste de proporção horizontal (28/10/2026):** após comparar a prévia real com o esboço aprovado, foi corrigida a distribuição CSS da versão ativa de Resíduos. O desenho continua com largura-base de 180 mm e altura mínima de 125 mm, mas usa cabeçalho mais compacto, seção central em duas colunas, pictogramas proporcionais, faixa de medidas/observações menos alta e rodapé horizontal equilibrado. Não há segundo logotipo SGL no cabeçalho; a marca permanece à direita do rodapé, e a Embrapa à esquerda. **Quando os dados ultrapassarem a altura mínima, a etiqueta cresce para não cortar informações**, portanto a proporção fixa do esboço não é garantia para registros extensos. Sem alteração de contrato/API nesta revisão visual; executar build e testar prévia/diálogo de impressão em cada largura antes da homologação.
+
+> **Atualização vigente — 28/10/2026 (Etapa 10, pré-merge):** a rota ativa de impressão usa `RotuloResiduoAjustadoView.vue` e `ResiduoRotuloModeloAjustado.vue`. O visual foi atualizado para o esboço aprovado: nome/código/quantidade e contexto no cabeçalho, composição/risco/pictogramas e dados operacionais no centro, medidas de segurança e observações no terço inferior e marcas Embrapa/SGL apenas no rodapé. Os dados extras vêm do backend, não são frases químicas presumidas. O rótulo tem altura dinâmica e dimensões mínimas de referência; a impressão continua bloqueada conforme `impressaoPermitida`. Mudança ainda sujeita aos testes e à validação do mantenedor, sem merge. As descrições abaixo documentam também o histórico de versões anteriores.
+
 **Status:** implementação concluída na branch `feat/residuos-interface`; aguardando validação visual e de impressão.
 
 ## Decisão de escopo
@@ -160,3 +165,5 @@ composição/quantidade corretas
 print preview sem elementos da interface
 legibilidade física do rótulo impresso
 ```
+
+> **Responsável pela liberação (28/10/2026, Etapa 10):** quando o resíduo tem data de liberação, o rótulo passa a mostrar **Responsável pela liberação** logo após a data. O backend consulta o usuário do evento auditado `RISCO_CONFERIDO_E_RESIDUO_LIBERADO`, restrito ao resíduo previamente recuperado com isolamento de Unidade; não usa o gerador ou o gestor que apenas recebeu como substituto. Em registros antigos sem esse evento, exibe **Não identificado no histórico** em vez de inventar um nome. Antes da liberação, não apresenta esse campo. Nenhuma migration é necessária. Build, testes e conferência visual permanecem pendentes da validação local.
