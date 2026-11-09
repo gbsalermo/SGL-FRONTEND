@@ -3,6 +3,8 @@ import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaP
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { type RouteLocationRaw, useRoute, useRouter } from 'vue-router'
 import GestaoUserProfile from '@/components/GestaoUserProfile.vue'
+import HelpLink from '@/modules/ajuda/components/HelpLink.vue'
+import { helpTaskForRoute } from '@/modules/ajuda/routeHelp'
 import UnidadeSelector from '@/components/UnidadeSelector.vue'
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { gestaoShellService, type BaseBuscaGestao } from '@/services/gestaoShellService'
@@ -734,6 +736,9 @@ onBeforeUnmount(() => {
         <button v-if="podeVoltar" class="gestao-topbar__back" type="button" aria-label="Voltar" @click="voltar">←</button>
 
         <div class="gestao-topbar__spacer" />
+
+        <!-- Cadastros renders its own link, which follows the active tab. Matching by route name (not path) keeps a trailing slash from showing two links. -->
+        <HelpLink v-if="route.name !== 'admin-cadastros'" :task-id="helpTaskForRoute(route.path, route.query)" />
 
         <UnidadeSelector />
 

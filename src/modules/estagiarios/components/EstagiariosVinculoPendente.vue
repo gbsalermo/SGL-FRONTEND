@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import HelpLink from '@/modules/ajuda/components/HelpLink.vue'
 import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import type { EstagiarioSemVinculoResponse } from '@/modules/estagiarios/types/estagiario'
 
@@ -13,6 +14,9 @@ defineEmits<{
 
 <template>
   <section v-if="pendentes.length > 0" class="workspace-card pending-card">
+    <header class="pending-header">
+      <HelpLink task-id="vinculo-de-estagio" />
+    </header>
     <ul class="pending-list">
       <li v-for="pendente in pendentes" :key="pendente.usuarioId" class="pending-row">
         <div class="student-cell">
@@ -39,6 +43,13 @@ defineEmits<{
   border: 1px solid #dbe3ee;
   border-radius: 11px;
   background: #fff;
+}
+
+.pending-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px 0;
+  color: #2456c4;
 }
 
 .pending-list {

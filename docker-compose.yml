@@ -23,8 +23,19 @@ services:
     environment:
       TZ: America/Bahia
       API_UPSTREAM: http://sgl-api:8080
+    volumes:
+      - ajuda_videos:/usr/share/nginx/ajuda-videos:ro
 
 networks:
   shared:
     external: true
     name: ${IO_PROJECT:-sgl}_${IO_STAGE:-release}
+
+# Vídeos da Central de Ajuda. O nome é fixo e o volume é externo porque o
+# releaser roda o compose com --project-name sgl_web_homologacao; sem isso o
+# nome ganharia prefixo do projeto e mudaria entre ambientes. Criar uma vez
+# (ver README, "Vídeos da Central de Ajuda").
+volumes:
+  ajuda_videos:
+    external: true
+    name: sgl_web_ajuda_videos
