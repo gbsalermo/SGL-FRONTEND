@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
 
+import { FAQ_ID, findHelpTask } from '@/modules/ajuda/helpTasks'
 import { ehPerfilGestao, PERFIS_ADMIN, PERFIS_GESTAO, PERFIS_SOLICITANTE } from '@/modules/auth/perfis'
 import type { PerfilUsuario } from '@/modules/auth/types/session'
 import { useSessionStore } from '@/stores/session'
@@ -230,6 +231,23 @@ export const router = createRouter({
       ],
     },
     {
+      path: '/ajuda',
+      name: 'ajuda',
+      component: () => import('@/modules/ajuda/views/HelpCenterView.vue'),
+      meta: { public: true },
+    },
+    {
+      path: '/ajuda/:taskId',
+      name: 'ajuda-tarefa',
+      component: () => import('@/modules/ajuda/views/HelpCenterView.vue'),
+      meta: { public: true },
+      // A stale or mistyped link lands on the help index instead of a blank page.
+      beforeEnter: (to) => {
+        const id = String(to.params.taskId)
+        return id === FAQ_ID || findHelpTask(id) ? true : { name: 'ajuda' }
+      },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/modules/system/views/NotFoundView.vue'),
@@ -253,7 +271,9 @@ export function guardaDeRota(to: Pick<RouteLocationNormalized, 'path' | 'fullPat
 
   // A pending user sees only the waiting screen (the backend refuses everything else with 403 anyway).
   if (session.autenticado && session.pendente) {
-    return to.path === ROTA_AGUARDANDO ? true : ROTA_AGUARDANDO
+    // The help center stays reachable so a pending user can learn how to proceed.
+    const ehAjuda = to.path === '/ajuda' || to.path.startsWith('/ajuda/')
+    return to.path === ROTA_AGUARDANDO || ehAjuda ? true : ROTA_AGUARDANDO
   }
 
   if (to.path === ROTA_AGUARDANDO && session.autenticado) {

@@ -27,6 +27,9 @@ export const FEATURED_TASK_IDS: string[] = [
   'analisar-pedido',
 ]
 
+/** Route id of the FAQ page, which is not a video task. */
+export const FAQ_ID = 'perguntas-frequentes'
+
 export function findHelpTask(id: string): HelpTask | undefined {
   return HELP_TASKS.find((task) => task.id === id)
 }

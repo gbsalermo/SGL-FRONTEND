@@ -147,6 +147,8 @@ function entrarComoDesenvolvedor() {
           Entrar como desenvolvedor
         </button>
       </form>
+
+      <router-link to="/ajuda" class="login-help">Precisa de ajuda? Veja os guias com vídeo</router-link>
     </div>
   </section>
 </template>
@@ -348,6 +350,26 @@ function entrarComoDesenvolvedor() {
 }
 
 .login-dev:focus-visible {
+  outline: 3px solid rgb(45 107 196 / 28%);
+  outline-offset: 3px;
+}
+
+.login-help {
+  display: block;
+  margin-top: 20px;
+  color: var(--sgl-text-muted, #64748b);
+  font-size: 14px;
+  font-weight: 650;
+  text-align: center;
+  text-decoration: none;
+}
+
+.login-help:hover {
+  color: var(--sgl-primary, #1a4da1);
+  text-decoration: underline;
+}
+
+.login-help:focus-visible {
   outline: 3px solid rgb(45 107 196 / 28%);
   outline-offset: 3px;
 }
