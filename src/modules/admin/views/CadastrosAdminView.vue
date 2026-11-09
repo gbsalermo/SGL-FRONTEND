@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { newCadastroButtonLabel } from '@/modules/admin/newCadastroButtonLabel'
 import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
@@ -281,16 +282,7 @@ function novoLocalArmazenamento(): LocalArmazenamentoForm {
   return { unidadeId: session.unidadeEmOperacaoId ?? '', nome: '', ativo: true }
 }
 
-const rotuloNovoCadastro = computed(() => {
-  const rotulos: Partial<Record<AbaCadastro, string>> = {
-    laboratorios: 'laboratório',
-    projetos: 'projeto',
-    produtos: 'produto',
-    'classes-residuo': 'classe',
-    'locais-armazenamento': 'local',
-  }
-  return rotulos[aba.value] ?? 'cadastro'
-})
+const rotuloNovoCadastro = computed(() => newCadastroButtonLabel(aba.value))
 
 function mensagemErro(error: unknown, fallback = 'Não foi possível concluir a operação.') {
   if (axios.isAxiosError<ApiErrorAdmin>(error)) return error.response?.data?.message ?? fallback
@@ -876,7 +868,7 @@ onMounted(() => {
             <p v-else>Usuários são criados pelo fluxo institucional. Aqui é alterado somente o perfil de acesso.</p>
           </div>
           <button v-if="aba !== 'permissoes' && aba !== 'residuos-solucoes'" class="btn btn--primary" type="button" @click="abrirNovo">
-            + Novo {{ rotuloNovoCadastro }}
+            {{ rotuloNovoCadastro }}
           </button>
         </header>
 
