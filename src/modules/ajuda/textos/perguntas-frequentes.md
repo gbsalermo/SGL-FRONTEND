@@ -1,5 +1,13 @@
 Respostas rápidas para as dúvidas mais comuns. Se a sua dúvida não estiver aqui, procure a Gestão do seu laboratório.
 
+### Como entro no SGL?
+
+Na tela de entrada, use o **login de rede** da Embrapa (ou o seu CPF) e a **senha da Embrapa**, a mesma do computador e do e-mail. Não há senha separada para o SGL. Se esqueceu a senha ou ela expirou, procure o suporte de informática (NTI) da sua Unidade.
+
+### Entrei, mas apareceu "Aguardando aprovação"
+
+É o seu primeiro acesso e a Gestão ainda não definiu o seu laboratório e o seu perfil. Avise a Gestão do laboratório: ela aprova o seu cadastro em **Vínculos de usuários**. Depois disso, entre de novo.
+
 ### Não vejo o laboratório na lista
 
 Ao fazer um pedido, em **Laboratório de destino** aparecem todos os laboratórios ativos da Unidade, e os seus vêm primeiro. Se ainda assim faltar algum, ele pode estar inativo. Fale com a Gestão ou com a administração.

@@ -14,6 +14,6 @@ Gestores de laboratório.
 4. Confira os componentes, as exigências do solicitante e a cartilha de preparo.
 5. Se estiver tudo certo, clique em **Aprovar preparação**. **Rejeitar** recusa com justificativa.
 6. A janela mostra os produtos que saem do estoque. Deixe uma observação e clique em **Aprovar solução**.
-7. Com a solução em preparação, o rótulo fica liberado. Clique em **Visualizar / imprimir** para identificar o frasco.
+7. Com a solução em preparação, o rótulo fica liberado. Clique em **Visualizar / imprimir rótulo** para identificar o frasco.
 8. Quando o solicitante retirar a solução, clique em **Confirmar entrega** e confirme na janela.
 9. A solicitação fica como entregue, e o solicitante acompanha tudo em **Minhas soluções**.

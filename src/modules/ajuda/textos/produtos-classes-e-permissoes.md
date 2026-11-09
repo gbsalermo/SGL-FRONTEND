@@ -13,7 +13,7 @@ Administradores.
 3. Para incluir um produto, clique em **+ Novo produto**.
 4. Informe nome, código de referência, unidade de medida, apresentação, nível e tipo de risco e as condições de armazenamento.
 5. Marque se o produto é perecível ou controlado por órgão externo.
-6. Em **Classes de resíduo**, mantenha as classes usadas para classificar os resíduos. Use o botão de nova classe para incluir uma.
+6. Em **Classes de resíduo**, mantenha as classes usadas para classificar os resíduos. Clique em **+ Nova classe** para incluir uma.
 7. Informe a unidade, o código e a descrição da classe e salve.
 8. Em **Locais de armazenamento**, cadastre onde os resíduos ficam guardados até o descarte. Os botões são os mesmos.
 9. Em **Permissões** estão as pessoas já cadastradas. Aqui só se troca o perfil de acesso.
