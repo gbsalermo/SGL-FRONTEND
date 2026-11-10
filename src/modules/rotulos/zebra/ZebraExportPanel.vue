@@ -8,6 +8,8 @@ import {
   type DocumentoZpl,
   type ResolucaoZebra,
   type OrientacaoConteudoZpl,
+  LARGURA_PADRAO_ZPL_MM,
+  LARGURA_MAXIMA_ZPL_MM,
 } from './zpl'
 import { prepararMarcasZpl, prepararPictogramasZpl } from './marcasZpl'
 import { listarImpressorasZebra, enviarZplParaZebra, type ImpressoraZebraLocal } from './browserPrintLocal'
@@ -18,6 +20,8 @@ const props = defineProps<{
 }>()
 
 const larguraMm = ref(90)
+const larguraAmpliadaConfirmada = ref(false)
+const larguraAmpliada = computed(() => Number(larguraMm.value) > LARGURA_PADRAO_ZPL_MM)
 const alturaManualMm = ref(125)
 const dpi = ref<ResolucaoZebra>(203)
 const automatico = ref(true)
@@ -32,6 +36,7 @@ const mensagemImpressao = ref('')
 const erroImpressora = ref('')
 
 // Mensagens antigas não devem persistir quando o usuário muda a mídia ou o registro.
+watch([larguraMm, () => props.documento], () => { larguraAmpliadaConfirmada.value = false })
 watch([larguraMm, alturaManualMm, dpi, automatico, orientacao, () => props.documento], () => {
   erroZpl.value = ''
   mensagemImpressao.value = ''
@@ -115,7 +120,8 @@ async function imprimirDiretamente() {
   const configuracao = configuracaoEfetiva.value
   const impressora = impressoras.value.find(item => item.uid === impressoraSelecionada.value)
   if (props.bloqueado || !documento || !configuracao || !encaixeOrientacao.value.valido ||
-      !impressora || imprimindoZebra.value || gerando.value) return
+      !impressora || imprimindoZebra.value || gerando.value ||
+      (larguraAmpliada.value && !larguraAmpliadaConfirmada.value)) return
   // Ação explícita do operador: nunca enviar trabalho no carregamento da tela.
   if (!window.confirm(`Enviar 1 etiqueta de "${documento.subtitulo || documento.titulo}" para "${impressora.name}"? Confirme que a mídia física corresponde às dimensões selecionadas.`)) return
   imprimindoZebra.value = true
@@ -211,7 +217,7 @@ async function baixar() {
 
         <div class="zebra-options">
           <label>Largura da etiqueta (mm)
-            <input v-model.number="larguraMm" type="number" min="40" max="110" step="1" />
+            <input v-model.number="larguraMm" type="number" min="40" :max="LARGURA_MAXIMA_ZPL_MM" step="1" />
           </label>
           <label>Altura da etiqueta (mm)
             <input v-if="automatico" :value="recomendacao.config?.alturaMm ?? '—'" type="text" disabled aria-label="Altura recomendada automaticamente" />
@@ -224,6 +230,10 @@ async function baixar() {
             </select>
           </label>
         </div>
+        <p v-if="larguraAmpliada" class="zebra-wide-warning" role="note">
+          <strong>Largura ampliada ({{ larguraMm }} mm).</strong> Exige impressora Zebra com cabeça de impressão compatível com essa mídia.
+          <label><input v-model="larguraAmpliadaConfirmada" type="checkbox" /> Confirmo que a impressora selecionada suporta esta largura física.</label>
+        </p>
         <p v-if="automatico && recomendacao.config" class="zebra-suggestion">
           Altura sugerida para <strong>{{ orientacao === 'HORIZONTAL' ? 'horizontal' : 'vertical' }}:
           {{ recomendacao.config.alturaMm }} mm</strong>. O cálculo considera todo o conteúdo, incluindo os pictogramas.
@@ -257,10 +267,11 @@ async function baixar() {
         </select>
       </label>
       <button type="button" class="zebra-print"
-        :disabled="bloqueado || !documento || gerando || imprimindoZebra || !encaixeOrientacao.valido || !impressoraSelecionada"
+        :disabled="bloqueado || !documento || gerando || imprimindoZebra || !encaixeOrientacao.valido || !impressoraSelecionada || (larguraAmpliada && !larguraAmpliadaConfirmada)"
         @click="imprimirDiretamente">{{ imprimindoZebra ? 'Enviando...' : 'Imprimir na Zebra' }}</button>
     </div>
 
+    <p v-if="larguraAmpliada" class="zebra-feedback zebra-wide-alert">Largura {{ larguraMm }} mm: confira a capacidade da impressora antes de imprimir fisicamente.</p>
     <p v-if="automatico && recomendacao.erro && documento" class="zebra-feedback zebra-error" role="alert">
       {{ recomendacao.erro }}
     </p>
@@ -275,6 +286,10 @@ async function baixar() {
 </template>
 
 <style scoped>
+.zebra-wide-warning { margin: 10px 0; padding: 10px; border: 1px solid #d8b867; border-radius: 7px; background: #fff8e5; color: #624713; font-size: 12px; }
+.zebra-wide-warning label { display: flex; align-items: center; gap: 7px; margin-top: 8px; }
+.zebra-wide-alert { color: #805d12; }
+
 .zebra-panel { box-sizing: border-box; width: min(100%, 1060px); margin: 0 auto 12px; padding: 12px 16px; border: 1px solid #cad7e5; border-radius: 10px; background: #fff; color: #15243b; box-shadow: 0 5px 16px rgb(13 43 94 / 5%); }
 .zebra-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .zebra-header-copy { min-width: 0; }
