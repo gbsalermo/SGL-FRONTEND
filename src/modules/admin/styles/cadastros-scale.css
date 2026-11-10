@@ -79,13 +79,11 @@
   padding: 14px 15px !important;
 }
 
-.admin-page .tab-button strong,
-.admin-page .residuo-modelo-admin-tab__topline strong {
+.admin-page .tab-button strong {
   font-size: 14px !important;
 }
 
-.admin-page .tab-button small,
-.admin-page .residuo-modelo-admin-tab__description {
+.admin-page .tab-button small {
   font-size: 11px !important;
 }
 
