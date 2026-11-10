@@ -486,3 +486,11 @@ test('Orientação horizontal não gera documento cortado quando não há format
     /horizontal não cabe nos formatos compatíveis/i,
   )
 })
+
+
+test('ZPL aceita mídia larga até 168 mm e rejeita largura acima do limite', () => {
+  const config = { larguraMm: 150, alturaMm: 300, dpi: 203 }
+  assert.doesNotThrow(() => validarEspacoZpl(base, config))
+  assert.throws(() => validarEspacoZpl(base, { ...config, larguraMm: 169 }), /entre 40 e 168 mm/)
+  assert.throws(() => validarEspacoZpl(base, { ...config, larguraMm: 39 }), /entre 40 e 168 mm/)
+})
