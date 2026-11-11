@@ -23,7 +23,7 @@ onMounted(async () => {
     const { data } = await http.get<AuthConfig>('/v1/auth/config')
     devLoginAtivo.value = data.devLoginAtivo
   } catch {
-    // Without the config the developer shortcut simply stays hidden.
+    // Without the config the test-user link simply stays hidden.
     devLoginAtivo.value = false
   }
 })
@@ -121,6 +121,8 @@ function entrar() {
           {{ carregando ? 'Entrando...' : 'Entrar' }}
         </button>
       </form>
+
+      <router-link v-if="devLoginAtivo" to="/login/teste" class="login-dev">Entrar como usuário de teste</router-link>
 
       <router-link to="/ajuda" class="login-help">Precisa de ajuda? Veja os guias com vídeo</router-link>
     </div>
@@ -307,18 +309,19 @@ function entrar() {
 }
 
 .login-dev {
-  min-height: 48px;
-  margin-top: -12px;
+  display: block;
+  margin-top: 24px;
+  padding: 12px;
   border: 1px dashed var(--sgl-border, #e2e8f0);
   border-radius: var(--sgl-radius-control, 6px);
-  background: transparent;
   color: var(--sgl-text-muted, #64748b);
   font-size: 14px;
   font-weight: 650;
-  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
 }
 
-.login-dev:hover:not(:disabled) {
+.login-dev:hover {
   border-color: var(--sgl-primary, #1a4da1);
   color: var(--sgl-primary, #1a4da1);
 }

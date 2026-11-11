@@ -2,10 +2,29 @@ import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vu
 
 import { FAQ_ID, findHelpTask } from '@/modules/ajuda/helpTasks'
 import { ehPerfilGestao, PERFIS_ADMIN, PERFIS_GESTAO, PERFIS_SOLICITANTE } from '@/modules/auth/perfis'
-import type { PerfilUsuario } from '@/modules/auth/types/session'
+import type { AuthConfig, PerfilUsuario } from '@/modules/auth/types/session'
+import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
 
 const ROTA_AGUARDANDO = '/aguardando-aprovacao'
+
+/**
+ * The test-user page only exists while the API exposes the developer login; any failure to confirm
+ * that sends the visitor back to the corporate login instead of showing a page that cannot work.
+ */
+export async function entradaLoginTeste(): Promise<true | string> {
+  try {
+    const { data } = await http.get<AuthConfig>('/v1/auth/config')
+    if (!data.devLoginAtivo) return '/login'
+  } catch {
+    return '/login'
+  }
+
+  // "Trocar usuário" lands here: picking another test user starts from a clean session.
+  const session = useSessionStore()
+  if (session.autenticado) session.sair()
+  return true
+}
 
 function rotaInicial() {
   const session = useSessionStore()
@@ -28,6 +47,13 @@ export const router = createRouter({
       name: 'login',
       component: () => import('@/modules/auth/views/LoginView.vue'),
       meta: { public: true },
+    },
+    {
+      path: '/login/teste',
+      name: 'login-teste',
+      component: () => import('@/modules/auth/views/LoginTesteView.vue'),
+      meta: { public: true },
+      beforeEnter: entradaLoginTeste,
     },
     {
       path: ROTA_AGUARDANDO,

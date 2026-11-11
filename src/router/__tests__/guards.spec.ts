@@ -1,8 +1,9 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { PerfilUsuario, SituacaoUsuario, UsuarioSessao } from '@/modules/auth/types/session'
-import { guardaDeRota, router } from '@/router'
+import { entradaLoginTeste, guardaDeRota, router } from '@/router'
+import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
 
 function entrarComo(perfil: PerfilUsuario, situacao: SituacaoUsuario = 'ATIVO') {
@@ -89,5 +90,38 @@ describe('guardas de rota', () => {
   it('faq route is valid', async () => {
     await router.push('/ajuda/perguntas-frequentes')
     expect(router.currentRoute.value.path).toBe('/ajuda/perguntas-frequentes')
+  })
+
+  describe('entradaLoginTeste', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('entradaLoginTeste_devLoginInativo_redirecionaLogin', async () => {
+      vi.spyOn(http, 'get').mockResolvedValue({ data: { devLoginAtivo: false } })
+
+      await expect(entradaLoginTeste()).resolves.toBe('/login')
+      expect(http.get).toHaveBeenCalledWith('/v1/auth/config')
+    })
+
+    it('entradaLoginTeste_erro_redirecionaLogin', async () => {
+      vi.spyOn(http, 'get').mockRejectedValue(new Error('offline'))
+
+      await expect(entradaLoginTeste()).resolves.toBe('/login')
+    })
+
+    it('entradaLoginTeste_ativoComSessao_encerraSessao', async () => {
+      vi.spyOn(http, 'get').mockResolvedValue({ data: { devLoginAtivo: true } })
+      entrarComo('GESTOR')
+
+      await expect(entradaLoginTeste()).resolves.toBe(true)
+      expect(useSessionStore().autenticado).toBe(false)
+    })
+
+    it('entradaLoginTeste_ativoSemSessao_permite', async () => {
+      vi.spyOn(http, 'get').mockResolvedValue({ data: { devLoginAtivo: true } })
+
+      await expect(entradaLoginTeste()).resolves.toBe(true)
+    })
   })
 })
