@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { ROTULOS_PERFIL } from '@/modules/auth/perfis'
@@ -9,6 +9,17 @@ const session = useSessionStore()
 const router = useRouter()
 
 const visivel = computed(() => session.autenticado && session.sessaoDeTeste && Boolean(session.usuario))
+
+const VARIAVEL_ALTURA = '--sgl-faixa-teste-altura'
+
+// Layouts with fixed sidebars read this variable to start below the banner instead of under it.
+watch(visivel, (mostrando) => {
+  const raiz = document.documentElement.style
+  if (mostrando) raiz.setProperty(VARIAVEL_ALTURA, '48px')
+  else raiz.removeProperty(VARIAVEL_ALTURA)
+}, { immediate: true })
+
+onBeforeUnmount(() => document.documentElement.style.removeProperty(VARIAVEL_ALTURA))
 
 const descricao = computed(() => {
   const usuario = session.usuario

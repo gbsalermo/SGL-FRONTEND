@@ -62,6 +62,16 @@ describe('SessaoTesteBanner', () => {
     expect(texto).not.toMatch(/Gestor\s*·/)
   })
 
+  it('publicaAlturaDaFaixaEnquantoVisivel', async () => {
+    const session = entrar({ sessaoDeTeste: true })
+    const wrapper = montar()
+    const altura = () => document.documentElement.style.getPropertyValue('--sgl-faixa-teste-altura')
+    expect(altura()).toBe('48px')
+    session.sair()
+    await wrapper.vm.$nextTick()
+    expect(altura()).toBe('')
+  })
+
   it('trocar_encerraSessaoENavega', async () => {
     const session = entrar({ sessaoDeTeste: true })
     const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/', component: { template: '<div />' } }] })

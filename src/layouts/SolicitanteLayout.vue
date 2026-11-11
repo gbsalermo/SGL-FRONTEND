@@ -286,17 +286,17 @@ function sair() {
 
 <style scoped>
 .solicitante-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--sgl-faixa-teste-altura, 0px));
   background: var(--sgl-background);
   color: var(--sgl-text);
 }
 
 .solicitante-sidebar {
   position: fixed;
-  inset: 0 auto 0 0;
+  inset: var(--sgl-faixa-teste-altura, 0px) auto 0 0;
   z-index: 20;
   width: 258px;
-  height: 100vh;
+  height: calc(100vh - var(--sgl-faixa-teste-altura, 0px));
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -438,7 +438,7 @@ function sair() {
 
 .solicitante-topbar {
   position: sticky;
-  top: 0;
+  top: var(--sgl-faixa-teste-altura, 0px);
   z-index: 10;
   min-height: 72px;
   display: flex;
@@ -472,7 +472,7 @@ function sair() {
 .solicitante-logout svg { width: 19px; height: 19px; }
 
 .solicitante-main {
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 72px - var(--sgl-faixa-teste-altura, 0px));
   padding: 30px;
   background: radial-gradient(circle at top left, rgb(45 107 196 / 6%), transparent 28%), var(--sgl-background);
 }
@@ -623,7 +623,7 @@ function sair() {
   .solicitante-nav__group,
   .solicitante-sidebar__user { display: none; }
   .solicitante-topbar { position: static; min-height: 62px; padding-inline: 18px; }
-  .solicitante-main { min-height: calc(100vh - 62px); padding: 20px; }
+  .solicitante-main { min-height: calc(100vh - 62px - var(--sgl-faixa-teste-altura, 0px)); padding: 20px; }
 }
 
 @media (max-width: 560px) {
