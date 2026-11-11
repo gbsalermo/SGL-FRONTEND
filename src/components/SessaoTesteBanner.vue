@@ -85,4 +85,9 @@ async function trocarUsuario() {
 
 .sessao-teste__botao:hover { background: #fffaf0; }
 .sessao-teste__botao:focus-visible { outline: 2px solid #7a4b00; outline-offset: 2px; }
+
+/* The label print routes must not carry the banner onto paper. */
+@media print {
+  .sessao-teste { display: none; }
+}
 </style>

@@ -42,6 +42,14 @@ describe('UsuarioTesteCard', () => {
     expect(texto).not.toContain('Lab. Química')
   })
 
+  it('botaoEntrar_temAriaLabelComNomeCompleto', () => {
+    const wrapper = mount(UsuarioTesteCard, { props: { usuario: usuario() } })
+
+    const botao = wrapper.get('[data-test="entrar"]')
+    expect(botao.attributes('aria-label')).toBe('Entrar como Ana Beatriz Moreira')
+    expect(botao.text()).toBe('Entrar como Ana')
+  })
+
   it('semUnidadeNemLaboratorio_naoQuebra', () => {
     const wrapper = mount(UsuarioTesteCard, {
       props: { usuario: usuario({ nome: 'Ana', unidadeId: null, unidadeSigla: null, laboratorios: [] }) },

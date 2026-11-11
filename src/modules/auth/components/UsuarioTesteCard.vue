@@ -53,7 +53,8 @@ const laboratoriosRestantes = computed(() => Math.max(props.usuario.laboratorios
       </li>
     </ul>
 
-    <button class="teste-card__entrar" type="button" data-test="entrar" @click="emit('entrar', usuario.login)">
+    <button class="teste-card__entrar" type="button" data-test="entrar"
+      :aria-label="`Entrar como ${usuario.nome}`" @click="emit('entrar', usuario.login)">
       Entrar como {{ primeiroNome }}
     </button>
   </article>
