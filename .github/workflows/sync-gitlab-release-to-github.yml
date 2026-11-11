@@ -1,0 +1,57 @@
+name: Sync GitLab release to GitHub
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-gitlab-release-to-github
+  cancel-in-progress: false
+
+jobs:
+  sync-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure GitLab remote
+        shell: bash
+        env:
+          GITLAB_PUSH_TOKEN: ${{ secrets.GITLAB_PUSH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${GITLAB_PUSH_TOKEN}" || { echo "GITLAB_PUSH_TOKEN missing"; exit 1; }
+          git remote add gitlab "https://oauth2:${GITLAB_PUSH_TOKEN}@git-cnpmf.nuvem.ti.embrapa.br/nti/sgl-web.git"
+
+      - name: Fetch GitLab release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags gitlab refs/heads/release:refs/remotes/gitlab/release
+
+      - name: Sync release by fast-forward only
+        shell: bash
+        run: |
+          set -euo pipefail
+          GITLAB_SHA="$(git rev-parse refs/remotes/gitlab/release)"
+          GITHUB_SHA="$(git ls-remote --heads origin refs/heads/release | awk '{print $1}')"
+          echo "GitLab release: ${GITLAB_SHA}"
+          if [ -n "${GITHUB_SHA}" ]; then
+            if [ "${GITHUB_SHA}" = "${GITLAB_SHA}" ]; then
+              echo "Already synchronized"
+              exit 0
+            fi
+            git fetch --no-tags origin refs/heads/release:refs/remotes/origin/release
+            if ! git merge-base --is-ancestor refs/remotes/origin/release refs/remotes/gitlab/release; then
+              echo "GitHub/release diverged; refusing overwrite"
+              exit 1
+            fi
+          fi
+          git push origin "${GITLAB_SHA}:refs/heads/release"
