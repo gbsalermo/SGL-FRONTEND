@@ -37,7 +37,16 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags gitlab +refs/heads/release:refs/remotes/gitlab/release
-          git fetch --no-tags origin +refs/heads/release:refs/remotes/origin/release || true
+          if git ls-remote --exit-code --heads origin refs/heads/release >/dev/null; then
+            git fetch --no-tags origin +refs/heads/release:refs/remotes/origin/release
+          else
+            status=$?
+            if [ "${status}" -ne 2 ]; then
+              echo "Unable to check GitHub release (status ${status})"
+              exit "${status}"
+            fi
+            echo "GitHub release does not exist yet."
+          fi
 
       - name: Validate fast-forward or initial creation
         shell: bash
