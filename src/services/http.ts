@@ -6,7 +6,7 @@ const baseURL = configuredBaseURL || (import.meta.env.DEV ? 'http://localhost:80
 export const SESSION_STORAGE_KEY = 'sgl.session'
 const TENANT_HEADER = 'X-SGL-Unidade-Id'
 // A 401 from these is a login answer (e.g. wrong password); from /v1/auth/me it is a dead session.
-const ROTAS_DE_LOGIN = ['/v1/auth/login', '/v1/auth/dev-login']
+const ROTAS_DE_LOGIN = ['/v1/auth/login', '/v1/auth/dev/entrar']
 
 if (!configuredBaseURL && import.meta.env.DEV) {
   console.warn(

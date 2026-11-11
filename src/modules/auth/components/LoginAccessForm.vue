@@ -2,8 +2,8 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { destinoAposLogin } from '@/modules/auth/destinoAposLogin'
 import { mensagemDeErroDeLogin } from '@/modules/auth/loginErrors'
-import { ehPerfilGestao } from '@/modules/auth/perfis'
 import type { AuthConfig, UsuarioSessao } from '@/modules/auth/types/session'
 import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
@@ -23,25 +23,17 @@ onMounted(async () => {
     const { data } = await http.get<AuthConfig>('/v1/auth/config')
     devLoginAtivo.value = data.devLoginAtivo
   } catch {
-    // Without the config the developer shortcut simply stays hidden.
+    // Without the config the test-user link simply stays hidden.
     devLoginAtivo.value = false
   }
 })
-
-async function irParaInicio(usuarioAutenticado: UsuarioSessao) {
-  if (usuarioAutenticado.situacao === 'PENDENTE_VINCULACAO') {
-    await router.replace('/aguardando-aprovacao')
-    return
-  }
-  await router.replace(ehPerfilGestao(usuarioAutenticado.perfil) ? '/dashboard' : '/inicio')
-}
 
 async function executar(acao: () => Promise<UsuarioSessao>) {
   erro.value = ''
   carregando.value = true
 
   try {
-    await irParaInicio(await acao())
+    await router.replace(destinoAposLogin(await acao()))
   } catch (error) {
     erro.value = mensagemDeErroDeLogin(error)
   } finally {
@@ -55,14 +47,6 @@ function entrar() {
     return
   }
   void executar(() => session.entrar(usuario.value, senha.value))
-}
-
-function entrarComoDesenvolvedor() {
-  if (!usuario.value.trim()) {
-    erro.value = 'Informe o login do usuário de desenvolvimento.'
-    return
-  }
-  void executar(() => session.entrarDesenvolvimento(usuario.value))
 }
 </script>
 
@@ -136,17 +120,9 @@ function entrarComoDesenvolvedor() {
         <button class="login-submit" type="submit" :disabled="carregando">
           {{ carregando ? 'Entrando...' : 'Entrar' }}
         </button>
-
-        <button
-          v-if="devLoginAtivo"
-          class="login-dev"
-          type="button"
-          :disabled="carregando"
-          @click="entrarComoDesenvolvedor"
-        >
-          Entrar como desenvolvedor
-        </button>
       </form>
+
+      <router-link v-if="devLoginAtivo" to="/login/teste" class="login-dev">Entrar como usuário de teste</router-link>
 
       <router-link to="/ajuda" class="login-help">Precisa de ajuda? Veja os guias com vídeo</router-link>
     </div>
@@ -333,18 +309,19 @@ function entrarComoDesenvolvedor() {
 }
 
 .login-dev {
-  min-height: 48px;
-  margin-top: -12px;
+  display: block;
+  margin-top: 24px;
+  padding: 12px;
   border: 1px dashed var(--sgl-border, #e2e8f0);
   border-radius: var(--sgl-radius-control, 6px);
-  background: transparent;
   color: var(--sgl-text-muted, #64748b);
   font-size: 14px;
   font-weight: 650;
-  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
 }
 
-.login-dev:hover:not(:disabled) {
+.login-dev:hover {
   border-color: var(--sgl-primary, #1a4da1);
   color: var(--sgl-primary, #1a4da1);
 }
