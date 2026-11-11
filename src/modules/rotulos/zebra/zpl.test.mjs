@@ -451,7 +451,7 @@ test('Automático horizontal calcula a altura pela orientação escolhida e pres
   const config = recomendarConfiguracaoZpl(documento, 90, 203, 'HORIZONTAL')
   assert.equal(config.larguraMm, 90)
   assert.equal(config.orientacao, 'HORIZONTAL')
-  assert.ok(config.alturaMm >= 90 && config.alturaMm <= 300)
+  assert.ok(config.alturaMm >= 40 && config.alturaMm <= 300)
   validarEspacoZpl(documento, config)
   const zpl = gerarDocumentoZpl(documento, config)
   assert.ok(zpl.includes('^PW719'))
@@ -473,7 +473,7 @@ test('Orientação horizontal aumenta tamanho automático sem aplicar a altura v
   }
   const config = recomendarConfiguracaoZpl(documento, 90, 203, 'HORIZONTAL')
   assert.equal(config.orientacao, 'HORIZONTAL')
-  assert.ok(config.alturaMm >= 90 && config.alturaMm <= 300)
+  assert.ok(config.alturaMm >= 40 && config.alturaMm <= 300)
   validarEspacoZpl(documento, config)
 })
 
@@ -485,4 +485,23 @@ test('Orientação horizontal não gera documento cortado quando não há format
     () => recomendarConfiguracaoZpl(documento, 90, 203, 'HORIZONTAL'),
     /horizontal não cabe nos formatos compatíveis/i,
   )
+})
+
+
+test('ZPL aceita mídia larga até 168 mm e rejeita largura acima do limite', () => {
+  const config = { larguraMm: 150, alturaMm: 300, dpi: 203 }
+  assert.doesNotThrow(() => validarEspacoZpl(base, config))
+  assert.throws(() => validarEspacoZpl(base, { ...config, larguraMm: 169 }), /entre 40 e 168 mm/)
+  assert.throws(() => validarEspacoZpl(base, { ...config, larguraMm: 39 }), /entre 40 e 168 mm/)
+})
+
+
+test('horizontal automático procura a menor altura viável em passos de 5 mm', () => {
+  const config = recomendarConfiguracaoZpl(base, 150, 203, 'HORIZONTAL')
+  assert.equal(config.larguraMm, 150)
+  assert.equal(config.alturaMm % 5, 0)
+  assert.ok(config.alturaMm >= 40 && config.alturaMm <= 300)
+  if (config.alturaMm > 40) {
+    assert.throws(() => validarEspacoZpl(base, { ...config, alturaMm: config.alturaMm - 5 }), /não cabe|não há espaço|excede|ultrapassa|pequena|largo|quadro/i)
+  }
 })
