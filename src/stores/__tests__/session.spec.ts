@@ -122,4 +122,52 @@ describe('session store', () => {
     expect(session.autenticado).toBe(false)
     expect(localStorage.getItem('sgl.session')).toBeNull()
   })
+
+  describe('sessao de teste', () => {
+    function respostaDeLogin() {
+      const expiraEm = new Date(Date.now() + 60_000).toISOString()
+      return { data: { token: 'jwt-teste', expiraEm, usuario } }
+    }
+
+    it('entrarComoTeste_marcaSessaoDeTesteEPersiste', async () => {
+      const { http, session } = await carregar()
+      const post = vi.spyOn(http, 'post').mockResolvedValue(respostaDeLogin())
+
+      await session.entrarComoTeste(' teste.gestor.1 ')
+
+      expect(post).toHaveBeenCalledWith('/v1/auth/dev/entrar', { login: 'teste.gestor.1' })
+      expect(session.sessaoDeTeste).toBe(true)
+      expect(JSON.parse(localStorage.getItem('sgl.session') ?? '{}').sessaoDeTeste).toBe(true)
+    })
+
+    it('entrarReal_aposSessaoDeTeste_limpaMarca', async () => {
+      const { http, session } = await carregar()
+      vi.spyOn(http, 'post').mockResolvedValue(respostaDeLogin())
+
+      await session.entrarComoTeste('teste.gestor.1')
+      await session.entrar('m344136', 'senha')
+
+      expect(session.sessaoDeTeste).toBe(false)
+      expect(JSON.parse(localStorage.getItem('sgl.session') ?? '{}').sessaoDeTeste).toBe(false)
+    })
+
+    it('sair_limpaSessaoDeTeste', async () => {
+      const { http, session } = await carregar()
+      vi.spyOn(http, 'post').mockResolvedValue(respostaDeLogin())
+
+      await session.entrarComoTeste('teste.gestor.1')
+      session.sair()
+
+      expect(session.sessaoDeTeste).toBe(false)
+    })
+
+    it('sessaoAntigaSemCampo_carregaComoFalse', async () => {
+      localStorage.setItem('sgl.session', JSON.stringify({ token: 'jwt-1', usuario, expiraEm: Date.now() + 60_000 }))
+
+      const { session } = await carregar()
+
+      expect(session.autenticado).toBe(true)
+      expect(session.sessaoDeTeste).toBe(false)
+    })
+  })
 })

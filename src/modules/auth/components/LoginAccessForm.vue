@@ -2,8 +2,8 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { destinoAposLogin } from '@/modules/auth/destinoAposLogin'
 import { mensagemDeErroDeLogin } from '@/modules/auth/loginErrors'
-import { ehPerfilGestao } from '@/modules/auth/perfis'
 import type { AuthConfig, UsuarioSessao } from '@/modules/auth/types/session'
 import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
@@ -28,20 +28,12 @@ onMounted(async () => {
   }
 })
 
-async function irParaInicio(usuarioAutenticado: UsuarioSessao) {
-  if (usuarioAutenticado.situacao === 'PENDENTE_VINCULACAO') {
-    await router.replace('/aguardando-aprovacao')
-    return
-  }
-  await router.replace(ehPerfilGestao(usuarioAutenticado.perfil) ? '/dashboard' : '/inicio')
-}
-
 async function executar(acao: () => Promise<UsuarioSessao>) {
   erro.value = ''
   carregando.value = true
 
   try {
-    await irParaInicio(await acao())
+    await router.replace(destinoAposLogin(await acao()))
   } catch (error) {
     erro.value = mensagemDeErroDeLogin(error)
   } finally {
@@ -55,14 +47,6 @@ function entrar() {
     return
   }
   void executar(() => session.entrar(usuario.value, senha.value))
-}
-
-function entrarComoDesenvolvedor() {
-  if (!usuario.value.trim()) {
-    erro.value = 'Informe o login do usuário de desenvolvimento.'
-    return
-  }
-  void executar(() => session.entrarDesenvolvimento(usuario.value))
 }
 </script>
 
@@ -135,16 +119,6 @@ function entrarComoDesenvolvedor() {
 
         <button class="login-submit" type="submit" :disabled="carregando">
           {{ carregando ? 'Entrando...' : 'Entrar' }}
-        </button>
-
-        <button
-          v-if="devLoginAtivo"
-          class="login-dev"
-          type="button"
-          :disabled="carregando"
-          @click="entrarComoDesenvolvedor"
-        >
-          Entrar como desenvolvedor
         </button>
       </form>
 

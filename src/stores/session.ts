@@ -12,6 +12,7 @@ interface SessaoPersistida {
   expiraEm: number
   unidadeOperacaoId: string | null
   unidadeOperacaoRotulo: string | null
+  sessaoDeTeste: boolean
 }
 
 function carregarSessao(): SessaoPersistida | null {
@@ -34,6 +35,7 @@ function carregarSessao(): SessaoPersistida | null {
       expiraEm: sessao.expiraEm,
       unidadeOperacaoId: sessao.unidadeOperacaoId ?? null,
       unidadeOperacaoRotulo: sessao.unidadeOperacaoRotulo ?? null,
+      sessaoDeTeste: sessao.sessaoDeTeste ?? false,
     }
   } catch {
     localStorage.removeItem(SESSION_STORAGE_KEY)
@@ -51,6 +53,8 @@ export const useSessionStore = defineStore('session', {
     unidadeOperacaoId: sessaoInicial?.unidadeOperacaoId ?? null as string | null,
     // Display label of the selected Unidade, so screens can show it without another request.
     unidadeOperacaoRotulo: sessaoInicial?.unidadeOperacaoRotulo ?? null as string | null,
+    // Marks a session opened through the developer-only test login, so the UI can warn about it.
+    sessaoDeTeste: sessaoInicial?.sessaoDeTeste ?? false,
   }),
 
   getters: {
@@ -71,9 +75,9 @@ export const useSessionStore = defineStore('session', {
       return this.aplicarLogin(data)
     },
 
-    async entrarDesenvolvimento(login: string) {
-      const { data } = await http.post<LoginResponse>('/v1/auth/dev-login', { login: login.trim() })
-      return this.aplicarLogin(data)
+    async entrarComoTeste(login: string) {
+      const { data } = await http.post<LoginResponse>('/v1/auth/dev/entrar', { login: login.trim() })
+      return this.aplicarLogin(data, { sessaoDeTeste: true })
     },
 
     async atualizarUsuario() {
@@ -107,15 +111,18 @@ export const useSessionStore = defineStore('session', {
       this.expiraEm = null
       this.unidadeOperacaoId = null
       this.unidadeOperacaoRotulo = null
+      this.sessaoDeTeste = false
       localStorage.removeItem(SESSION_STORAGE_KEY)
     },
 
-    aplicarLogin(resposta: LoginResponse) {
+    aplicarLogin(resposta: LoginResponse, opcoes: { sessaoDeTeste?: boolean } = {}) {
       this.token = resposta.token
       this.usuario = resposta.usuario
       this.expiraEm = Date.parse(resposta.expiraEm)
       this.unidadeOperacaoId = null
       this.unidadeOperacaoRotulo = null
+      // Always reset: a regular login after a test session must not inherit the mark.
+      this.sessaoDeTeste = opcoes.sessaoDeTeste ?? false
       this.persistir()
       return resposta.usuario
     },
@@ -128,6 +135,7 @@ export const useSessionStore = defineStore('session', {
         expiraEm: this.expiraEm,
         unidadeOperacaoId: this.unidadeOperacaoId,
         unidadeOperacaoRotulo: this.unidadeOperacaoRotulo,
+        sessaoDeTeste: this.sessaoDeTeste,
       }
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessao))
     },
