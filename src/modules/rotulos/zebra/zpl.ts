@@ -101,9 +101,12 @@ export function recomendarConfiguracaoZpl(
   dpi: ResolucaoZebra,
   orientacao: OrientacaoConteudoZpl = 'VERTICAL',
 ): ConfiguracaoZpl {
-  const minimo = orientacao === 'HORIZONTAL' ? 90 : alturaInicialZpl(documento)
+  const minimo = orientacao === 'HORIZONTAL' ? 40 : alturaInicialZpl(documento)
+  // Horizontal: buscar a menor altura válida em incrementos de 5 mm.
+  // Vertical: preservar os tamanhos institucionais já homologados.
   const opcoes = orientacao === 'HORIZONTAL'
-    ? ALTURAS_HORIZONTAIS_ZEBRA_MM : ALTURAS_PADRAO_ZEBRA_MM
+    ? Array.from({ length: 53 }, (_, i) => 40 + i * 5)
+    : [...ALTURAS_PADRAO_ZEBRA_MM]
   for (const alturaMm of opcoes) {
     if (alturaMm < minimo) continue
     const configuracao: ConfiguracaoZpl = { larguraMm, alturaMm, dpi, ...(orientacao === 'HORIZONTAL' ? { orientacao } : {}) }
