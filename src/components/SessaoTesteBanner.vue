@@ -11,11 +11,13 @@ const router = useRouter()
 const visivel = computed(() => session.autenticado && session.sessaoDeTeste && Boolean(session.usuario))
 
 const VARIAVEL_ALTURA = '--sgl-faixa-teste-altura'
+// Single source of truth: published to the layouts and bound into the CSS below.
+const ALTURA_FAIXA = '48px'
 
 // Layouts with fixed sidebars read this variable to start below the banner instead of under it.
 watch(visivel, (mostrando) => {
   const raiz = document.documentElement.style
-  if (mostrando) raiz.setProperty(VARIAVEL_ALTURA, '48px')
+  if (mostrando) raiz.setProperty(VARIAVEL_ALTURA, ALTURA_FAIXA)
   else raiz.removeProperty(VARIAVEL_ALTURA)
 }, { immediate: true })
 
@@ -48,13 +50,18 @@ async function trocarUsuario() {
 </template>
 
 <style scoped>
-/* In normal flow on purpose: it pushes the app down instead of covering the navigation. */
+/* Takes space in the flow (pushing the app down) but sticks on scroll, so the layouts' 48px offsets
+   stay valid. z-index sits above the Gestao sidebar (30) and the theme toggle (45). */
 .sessao-teste {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-sizing: border-box;
+  height: v-bind(ALTURA_FAIXA);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 48px;
   padding: 0 32px;
   background: #fff7e6;
   border-bottom: 1px solid #f5d38a;
@@ -62,9 +69,10 @@ async function trocarUsuario() {
   font-size: 14px;
 }
 
-.sessao-teste__texto { margin: 0; }
+.sessao-teste__texto { flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
 .sessao-teste__botao {
+  flex: none;
   padding: 6px 20px;
   border: 1px solid #f5d38a;
   border-radius: 8px;

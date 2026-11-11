@@ -48,7 +48,7 @@ const visivel = computed(() => {
 .solicitante-theme-toggle {
   position: fixed;
   z-index: 45;
-  top: 118px;
+  top: calc(118px + var(--sgl-faixa-teste-altura, 0px));
   left: 18px;
   width: 222px;
   min-height: 48px;
@@ -129,7 +129,7 @@ const visivel = computed(() => {
 
 @media (max-width: 720px) {
   .solicitante-theme-toggle {
-    top: 112px;
+    top: calc(112px + var(--sgl-faixa-teste-altura, 0px));
     left: 14px;
     width: 214px;
   }
