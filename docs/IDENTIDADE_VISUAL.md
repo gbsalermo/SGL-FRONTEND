@@ -1,5 +1,7 @@
 # Identidade Visual — SGL Frontend
 
+> **Autoridade visual (12/11/2026):** este documento registra a identidade (cores, tipografia e linguagem); para dimensões, componentes e refinamentos aprovados, prevalece `PADRAO_VISUAL_PRE_PRODUCAO.md`. `PADROES_PAGINA.md` e `SHELL_VISUAL.md` complementam aspectos específicos, sem substituir o padrão principal. Conferir tokens e CSS reais antes de alterar a interface.
+
 **Etapa:** 1.3 — Figma e padrões visuais  
 **Status:** base visual aprovada; implementação futura  
 **Próximo bloco:** componentes reutilizáveis
