@@ -6,6 +6,9 @@
 
 ### Onde mexer — frontend
 
+**Roteamento verificado:** `src/router/index.ts` direciona `/residuos/:id/rotulo` para `RotuloResiduoAjustadoView.vue`, `/solucoes/:id/rotulo` para `RotuloSolucaoView.vue` e `/lotes/:id/documento-entrada` para `DocumentoEntradaLoteView.vue`. A existência da rota não comprova que o ponto de acionamento esteja completo em todos os fluxos. A Central de Ajuda é pública em `/ajuda` e usa textos em `src/modules/ajuda/textos/*.md`; essa documentação voltada ao usuário exige auditoria própria.
+
+
 | Necessidade | Entrada de UI | Integração/apoio | Atenção |
 |---|---|---|---|
 | Login, sessão e contexto | `src/modules/auth/views/LoginView.vue` | `src/stores/session.ts`, `src/services/http.ts` | Autorização real deve ser conferida no backend; não confiar só em controles visuais |
@@ -17,7 +20,7 @@
 | Estoque, lotes e entrada | `src/modules/estoque/views/EstoqueGestaoView.vue`, `EstoqueDetalheView.vue`, `DocumentoEntradaLoteView.vue` | `src/modules/estoque/services/estoqueService.ts` | Preservar FEFO/FIFO, recipientes e unidades |
 | Soluções | `src/modules/solucoes/views/NovaSolucaoView.vue`, `SolucoesGestaoView.vue`, `RotuloSolucaoView.vue` | `src/modules/solucoes/services/solucaoService.ts` | Confirmar etapa de preparação e impressão |
 | Resíduos | `src/modules/residuos/views/solicitante/InformarResiduoView.vue`, `gestao/ResiduosGestaoCompletoView.vue` | `src/modules/residuos/services/residuoService.ts` | Preservar snapshots, liberação e histórico |
-| Produtos e rótulos | `src/modules/produtos/views/RotuloProdutoView.vue`, `src/modules/residuos/views/gestao/RotuloResiduoView.vue` | `src/modules/rotulos/zebra/ZebraExportPanel.vue`, `zpl.ts`, `browserPrintLocal.ts` | Validar dimensões físicas e impressora piloto |
+| Produtos e rótulos | `src/modules/produtos/views/RotuloProdutoView.vue`, `src/modules/residuos/views/gestao/RotuloResiduoAjustadoView.vue` | `src/modules/rotulos/zebra/ZebraExportPanel.vue`, `zpl.ts`, `browserPrintLocal.ts` | Validar dimensões físicas e impressora piloto |
 | Relatórios | `src/modules/relatorios/views/RelatoriosGestaoView.vue`, `RelatoriosExportacaoView.vue` | `src/modules/relatorios/services/relatorioService.ts` | Conferir filtros, unidades e exportação |
 | Dashboard | `src/modules/dashboard/views/gestao/DashboardGestaoView.vue`, `solicitante/DashboardSolicitanteView.vue` | `src/services/gestaoShellService.ts` | Verificar consultas e estados de carregamento |
 | Ajuda ao usuário | `src/modules/ajuda/views/HelpCenterView.vue` | documentação operacional | Conferir textos contra a release |
