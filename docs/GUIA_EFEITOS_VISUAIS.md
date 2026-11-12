@@ -1,5 +1,7 @@
 # Guia de Efeitos Visuais e Microinterações - SGL
 
+> **Nota de autoridade (12/11/2026):** Catálogo de exemplos reutilizáveis, **não** autoridade visual do SGL. Aplicar somente se compatível com `PADRAO_VISUAL_PRE_PRODUCAO.md` e tokens/componentes da `release`.
+
 > Catálogo reutilizável para projetos web. Os exemplos usam CSS puro e podem ser aplicados em Vue, React, Angular ou HTML convencional.
 
 ## 1. Modal com background desfocado (efeito principal)
