@@ -1,5 +1,7 @@
 # Inventário de Telas — SGL Frontend
 
+> **Vigência (12/11/2026):** o inventário abaixo é uma fotografia histórica de telas e rotas. Verifique a `release` e `src/router/index.ts` antes de adicionar ou modificar telas. O mapa de manutenção está no `DOSSIE_PROJETO_SGL.md`. Não considerar a Etapa 9 ainda futura apenas pelo checkpoint antigo.
+
 ## Atualização histórica — início da Etapa 9 (26/10/2026)
 
 **Central de Relatórios atual:** opções Movimentações e Resumo Operacional ainda separadas; relatório de Projetos **não implementado** no HEAD de início da Etapa 9. **Alvo aprovado:** inserir Projetos, e consolidar os dois relatórios de Movimentações numa opção com modos internos Resumo/Detalhamento, mantendo compatibilidade dos contratos já existentes. Hub `/projetos` permanece operacional e independente. Ver `docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`.
