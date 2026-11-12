@@ -1,5 +1,7 @@
 # Sidebar e Alertas Operacionais — SGL Frontend
 
+> **Nota de autoridade (12/11/2026):** Registro conceitual de 1.3. Para o shell efetivo, consultar `SHELL_VISUAL.md`, rotas e componentes da `release`. Não tratar a frase “implementação futura” como status atual.
+
 **Etapa:** 1.3 — Figma e padrões visuais  
 **Status:** decisão conceitual aprovada; implementação futura  
 **Bloco:** fechado
