@@ -1,5 +1,7 @@
 # Decisão de Arquitetura — Unidades e integração corporativa
 
+> **Nota de autoridade (12/11/2026):** Decisão arquitetural histórica de agosto/setembro; afirmações sobre DEV e integração futura devem ser conferidas com autenticação, tenant e unidade da `release` antes de serem tratadas como estado atual.
+
 **Decisão original:** 26/08/2026  
 **Revisado em:** 04/09/2026  
 **Status:** decisão vigente  
