@@ -1,5 +1,7 @@
 # Rótulo físico de Resíduos
 
+> **Nota de autoridade (12/11/2026):** Registro de implementação e refinamentos do rótulo de Resíduo. Verificar a `release` e os documentos posteriores da Etapa 10 antes de alterar dimensões, logos ou impressão; não tomar medidas antigas como contrato físico definitivo.
+
 
 > **Ajuste de proporção horizontal (28/10/2026):** após comparar a prévia real com o esboço aprovado, foi corrigida a distribuição CSS da versão ativa de Resíduos. O desenho continua com largura-base de 180 mm e altura mínima de 125 mm, mas usa cabeçalho mais compacto, seção central em duas colunas, pictogramas proporcionais, faixa de medidas/observações menos alta e rodapé horizontal equilibrado. Não há segundo logotipo SGL no cabeçalho; a marca permanece à direita do rodapé, e a Embrapa à esquerda. **Quando os dados ultrapassarem a altura mínima, a etiqueta cresce para não cortar informações**, portanto a proporção fixa do esboço não é garantia para registros extensos. Sem alteração de contrato/API nesta revisão visual; executar build e testar prévia/diálogo de impressão em cada largura antes da homologação.
 
