@@ -1,0 +1,724 @@
+# Histórico do dossiê técnico do frontend — arquivo preservado em 12/11/2026
+
+Este arquivo preserva integralmente o conteúdo anterior de `docs/DOSSIE_PROJETO_SGL.md` da branch documental, incluindo checkpoints antigos. **Não é a referência vigente.** Para manutenção, consulte `DOSSIE_PROJETO_SGL.md` e `GOVERNANCA_DOCUMENTAL.md`.
+
+---
+
+# Dossiê do Projeto SGL — Frontend
+
+> **Governança e redundâncias (12/11/2026):** consultar [`GOVERNANCA_DOCUMENTAL.md`](GOVERNANCA_DOCUMENTAL.md) para a autoridade de cada documento, escopo das referências especializadas e conflitos ainda pendentes. O dossiê é proprietário do **mapa de manutenção**, não de roadmaps, instruções Git ou tokens visuais.
+
+## Mapa técnico de manutenção — checkpoint 12/11/2026 (base: GitHub/release)
+
+**Propósito:** localizar o ponto de alteração antes de editar. Este mapa foi confrontado com a árvore de arquivos da `release` do frontend em 12/11/2026; identifica arquivos existentes, **não** certifica sozinho contratos ou funcionamento de cada fluxo. Consulte a implementação e o Swagger/OpenAPI da `release` do backend antes de modificar payloads.
+
+### Onde mexer — frontend
+
+**Roteamento verificado:** `src/router/index.ts` direciona `/residuos/:id/rotulo` para `RotuloResiduoAjustadoView.vue`, `/solucoes/:id/rotulo` para `RotuloSolucaoView.vue` e `/lotes/:id/documento-entrada` para `DocumentoEntradaLoteView.vue`. A existência da rota não comprova que o ponto de acionamento esteja completo em todos os fluxos. A Central de Ajuda é pública em `/ajuda` e usa textos em `src/modules/ajuda/textos/*.md`; essa documentação voltada ao usuário exige auditoria própria.
+
+
+| Necessidade | Entrada de UI | Integração/apoio | Atenção |
+|---|---|---|---|
+| Login, sessão e contexto | `src/modules/auth/views/LoginView.vue` | `src/stores/session.ts`, `src/services/http.ts` | Autorização real deve ser conferida no backend; não confiar só em controles visuais |
+| Rotas e acesso | `src/router/index.ts`, `src/App.vue` | `src/stores/session.ts` | Preservar perfis, guards e rotas existentes |
+| Cadastros e pessoas | `src/modules/admin/views/CadastrosAdminView.vue`, `ImportarPessoasView.vue`, `VinculosOperacionaisGestaoView.vue` | `src/modules/admin/services/cadastrosAdminService.ts`, `pessoasCorporativasService.ts`, `vinculosOperacionaisService.ts` | Validar origem institucional e escopo de unidade |
+| Projetos, SCI e atividades | `src/modules/projetos/views/ProjetosGestaoView.vue` | `src/modules/projetos/services/projetosService.ts` | Conferir hierarquia e SEG no contrato |
+| Estagiários | `src/modules/estagiarios/views/EstagiariosGestaoView.vue` | `src/modules/estagiarios/services/estagiarioService.ts` | Verificar vínculos multi-laboratório na release antes de alterar |
+| Pedidos e orientandos | `src/modules/pedidos/views/solicitante/NovoPedidoView.vue`, `MeusPedidosView.vue`, `PedidosOrientandosView.vue`, `gestao/PedidosGestaoView.vue` | `src/modules/pedidos/services/pedidoService.ts`, `src/modules/operacao/services/contextoOperacionalService.ts` | Permissões, laboratório-base e baixa de estoque são regras do backend |
+| Estoque, lotes e entrada | `src/modules/estoque/views/EstoqueGestaoView.vue`, `EstoqueDetalheView.vue`, `DocumentoEntradaLoteView.vue` | `src/modules/estoque/services/estoqueService.ts` | Preservar FEFO/FIFO, recipientes e unidades |
+| Soluções | `src/modules/solucoes/views/NovaSolucaoView.vue`, `SolucoesGestaoView.vue`, `RotuloSolucaoView.vue` | `src/modules/solucoes/services/solucaoService.ts` | Confirmar etapa de preparação e impressão |
+| Resíduos | `src/modules/residuos/views/solicitante/InformarResiduoView.vue`, `gestao/ResiduosGestaoCompletoView.vue` | `src/modules/residuos/services/residuoService.ts` | Preservar snapshots, liberação e histórico |
+| Produtos e rótulos | `src/modules/produtos/views/RotuloProdutoView.vue`, `src/modules/residuos/views/gestao/RotuloResiduoAjustadoView.vue` | `src/modules/rotulos/zebra/ZebraExportPanel.vue`, `zpl.ts`, `browserPrintLocal.ts` | Validar dimensões físicas e impressora piloto |
+| Relatórios | `src/modules/relatorios/views/RelatoriosGestaoView.vue`, `RelatoriosExportacaoView.vue` | `src/modules/relatorios/services/relatorioService.ts` | Conferir filtros, unidades e exportação |
+| Dashboard | `src/modules/dashboard/views/gestao/DashboardGestaoView.vue`, `solicitante/DashboardSolicitanteView.vue` | `src/services/gestaoShellService.ts` | Verificar consultas e estados de carregamento |
+| Ajuda ao usuário | `src/modules/ajuda/views/HelpCenterView.vue` | documentação operacional | Conferir textos contra a release |
+
+### Como localizar alterações com segurança
+
+1. Ler este dossiê e o documento canônico do domínio; verificar `CONTINUIDADE.md` para o checkpoint atual.
+2. Conferir a rota em `src/router/index.ts`, a view, seus componentes, serviços e testes existentes.
+3. Identificar endpoints realmente consumidos e conferir contratos no backend `release`; não inferir regra de autorização da interface.
+4. Criar `collab/*` sobre `gitlab/release`, implementar e validar os fluxos relacionados; abrir MR manual no GitLab.
+5. Atualizar **uma única fonte canônica por regra** e referenciá-la nos demais documentos.
+
+### Política de documentação sem redundância
+
+- `CONTINUIDADE.md`: **checkpoint curto**, aceites, riscos e próximas ações; não duplicar contratos extensos.
+- `docs/DOSSIE_PROJETO_SGL.md`: **mapa de manutenção e dependências**; não reproduzir cronologia integral.
+- `docs/ESTRUTURA_FRONTEND.md`: arquitetura de pastas, convenções e responsabilidades; o inventário pontual fica aqui no dossiê.
+- `docs/SINCRONIZACAO_GITLAB_GITHUB.md`: **única fonte operacional** de branches, remotes, workflows e sincronização.
+- `docs/PADRAO_VISUAL_PRE_PRODUCAO.md`: padrão visual canônico; `IDENTIDADE_VISUAL.md`, `PADROES_PAGINA.md`, `SHELL_VISUAL.md` e documentos de etapas devem remeter às regras vigentes e delimitar suas especialidades.
+- `docs/README.md`: índice de navegação, classificação **vigente / histórico / validação**, sem repetir roadmap inteiro.
+- Documentos `ETAPA_*.md`: evidências e decisões **datadas**; não reescrever retroativamente, nem apresentar planos passados como status atual.
+- Não excluir arquivos apenas por semelhança de título: comparar conteúdo, links internos e decisões antes de arquivar ou consolidar.
+
+**Pendências de auditoria:** confirmar comportamento e contratos reais da `release` (especialmente vínculos de estagiários, autorização, pontos de impressão de Soluções/documento de entrada), revisar todas as referências cruzadas e executar testes após ajustes. Este mapa é ponto de partida, não homologação de produção.
+
+---
+
+
+> **Registro histórico (26/10/2026):** a Etapa 8 está concluída e integrada às duas `main` por MR institucional; a Etapa 9 vigente é **Relatórios consolidados** (Projetos; Movimentações em Resumo/Detalhamento), preparada em `collab/etapa-9-relatorios-consolidados`. **Sem implementação funcional da Etapa 9 ainda.** Contrato e checklist atuais: `docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`. Informações datadas posteriores a este aviso dentro do documento são registros históricos, não o status mais recente.
+
+
+> **Checkpoint histórico — 23/10/2026 (Etapa 8, MVP em DEV):** blocos funcionais Vínculos, Pedidos, Soluções e Resíduos homologados manualmente; Pedido/Solução/Resíduo permitem Projeto opcional para os perfis elegíveis; vínculo específico por Projeto/SCI/Atividade deriva contexto operacional sem criar vínculos formais automaticamente. Backend PostgreSQL/Flyway validou 44 migrations; o frontend compilou e o ArchUnit passou 5/5 regras. Auditorias completas de carga/E2E e eventual identidade institucional permanecem fora deste aceite. **Auditoria de campos e entradas:** `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md` — há dependência de provisionamento externo/seed para Unidade, Usuário e cadastro inicial de Estagiário, embora os cadastros operacionais restantes tenham telas. **Sem merge; não presumir sincronização GitLab confirmada.** Trechos históricos datados abaixo descrevem o estado *àquela época*, não substituem este checkpoint.
+
+
+**Projeto:** SGL — Sistema de Gestão de Laboratórios  
+**Frontend:** `gbsalermo/SGL-FRONTEND`  
+**Backend:** `gbsalermo/Sistema-SGL`  
+**Atualizado em:** 29/09/2026  
+**Estado:** primeiro protótipo funcional aprovado; Etapas 1–5 concluídas e validadas; frontend da Etapa 5 encerrado; próxima etapa: Etapa 6 — Estagiários e vínculos.
+
+Este documento resume o estado real do frontend para retomada humana ou por IA. O objetivo é evitar reconstrução de módulos já aprovados e impedir que roadmaps antigos sejam tratados como tarefa imediata.
+
+## Checkpoint atual — 24/09/2026
+
+```text
+Etapa 1 — padrão visual global              ✅ concluída
+Etapa 2 — Dark Mode definitivo              ✅ concluída
+Etapa 3 — refinamentos do fluxo de Resíduos ✅ concluída e validada
+Etapa 4 — expansão operacional de Resíduos  ✅ concluída e validada
+Etapa 5 — Projetos e Atividades             ✅ concluída e validada
+Etapa 6 — Estagiários e vínculos            ⏳ próxima
+```
+
+Retomada imediata: após o merge de `collab/etapa-5-projetos-atividades`, criar a branch da Etapa 6 sobre a `main` sincronizada. Projeto → SCI → Atividade e os contratos HTTP da Etapa 5 estão estabilizados.
+
+Dark Mode definitivo: fonte única em `src/services/themeService.ts`, tokens consolidados, Vuetify/DOM sincronizados e Login/404/rótulos de impressão preservados em Light.
+
+---
+
+# 0. Infraestrutura Git e sincronização — obrigatório
+
+Documento detalhado:
+
+`docs/SINCRONIZACAO_GITLAB_GITHUB.md`
+
+Arquitetura:
+
+```text
+GitLab/main = fonte canônica
+
+GitLab/main
+    ↓ automático a cada 15 min / manual
+GitHub/main
+
+GitHub/collab/*
+    ↓ automático em cada push
+GitLab/collab/*
+    ↓ Merge Request
+GitLab/main
+```
+
+Regras:
+
+- o supervisor trabalha no GitLab e pode avançar a `main`;
+- `GitHub/main` é espelho;
+- usuário/IA colaboram em `GitHub/collab/*`;
+- integração final ocorre por MR no GitLab;
+- não usar `--force`;
+- divergência faz os workflows falharem;
+- remotes locais esperados: `github` e `gitlab`;
+- a antiga configuração `origin` com múltiplos push URLs foi removida;
+- o secret `GITLAB_PUSH_TOKEN` existe no GitHub Actions, mas seu valor nunca deve ser documentado.
+
+Workflows frontend:
+
+```text
+.github/workflows/sync-collab-to-gitlab.yml
+.github/workflows/sync-gitlab-main-to-github.yml
+```
+
+Os dois sentidos foram testados com sucesso em 22/09/2026.
+
+
+---
+
+# 1. Ordem de precedência
+
+```text
+1. código da main
+2. Swagger/OpenAPI do backend para contratos HTTP
+3. ../CONTINUIDADE.md
+4. SINCRONIZACAO_GITLAB_GITHUB.md para Git/remotes
+5. este DOSSIE_PROJETO_SGL.md
+6. documentos específicos de decisão/módulo
+7. documentos de etapas antigas e snapshots históricos
+```
+
+Fonte de rotas: `src/router/index.ts`.
+
+A Etapa 4 foi concluída na branch `collab/etapa-4-residuos-reconcile`. Após o merge, ela passa a ser referência histórica de fechamento; a antiga `feat/etapa-4-residuos` também permanece apenas como referência histórica.
+
+---
+
+# 2. Fase atual
+
+O primeiro protótipo foi funcionalmente aprovado.
+
+Antes do roadmap formal de produção, o projeto passa por um bloco de pré-produção:
+
+```text
+1. limpeza, revisão e atualização documental
+2. levantamento dos ajustes de pré-produção
+3. implementação/refinamento dos ajustes
+4. validação e estabilização do bloco
+```
+
+Depois:
+
+```text
+matriz de permissões
+→ congelamento funcional
+→ homologação integrada final
+→ autenticação/autorização/auditoria definitiva
+→ integração corporativa
+→ demais etapas formais de produção
+```
+
+A matriz de permissões permanece válida, mas não é a tarefa imediata enquanto a pré-produção atual estiver aberta.
+
+---
+
+# 3. Stack
+
+```text
+Vue 3.5
+Vite 8
+TypeScript 5.9
+Vue Router 5
+Pinia 4
+Axios
+Vuetify 3
+Node >= 20.19
+```
+
+Diretrizes:
+
+- interface em português;
+- UUID público nas fronteiras com a API;
+- Axios concentrado em `services`;
+- Pinia para estado compartilhado;
+- regras de negócio críticas permanecem no backend;
+- eventual refactor técnico para inglês não altera a linguagem da interface.
+
+---
+
+# 4. Estado executivo
+
+```text
+Login visual / sessão DEV                         ✅
+Expiração de sessão DEV                           ✅
+Pedidos Solicitante/Gestão                        ✅
+Estoque / lotes                                   ✅
+Movimentações                                     ✅
+Relatórios / fiscalização                         ✅
+PDF/XLSX                                          ✅
+Resíduos Solicitante/Gestão                       ✅
+Rótulos Produto/Resíduo                           ✅
+Estagiários                                       ✅
+Pessoas por laboratório                           ✅
+Administração/Cadastros                           ✅
+Dashboard Gestão                                  ✅
+Dashboard Solicitante                             ✅
+Alertas operacionais                              ✅
+Busca global                                      ✅
+Tema claro/escuro + persistência                  ✅
+404                                               ✅
+Contexto de Unidade enviado à API                 ✅
+Autenticação/autorização definitiva               ⏳
+Integração corporativa                            ⏳
+```
+
+---
+
+# 5. Perfis e experiências
+
+Perfis atuais:
+
+```text
+ADMINISTRADOR
+GESTOR
+TECNICO
+ANALISTA
+PESQUISADOR
+ESTAGIARIO
+```
+
+Agrupamento de navegação:
+
+```text
+GESTÃO
+→ GESTOR + ADMINISTRADOR
+
+ADMINISTRAÇÃO
+→ ADMINISTRADOR
+
+SOLICITANTE
+→ TECNICO + ANALISTA + PESQUISADOR + ESTAGIARIO
+```
+
+Rota inicial:
+
+```text
+GESTOR / ADMINISTRADOR → /dashboard
+TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO → /inicio
+```
+
+Guardas do router são controle de UX e navegação; não substituem autorização real no backend.
+
+---
+
+# 6. Rotas atuais
+
+```text
+/login
+
+SOLICITANTE
+/inicio
+/meus-pedidos
+/meus-residuos
+/pedidos/novo
+/residuos/novo
+
+GESTÃO / ADMIN
+/dashboard
+/pedidos
+/estoque
+/estoque/lotes-vencendo
+/estoque/:id
+/movimentacoes
+/estagiarios
+/residuos
+/relatorios
+/relatorios/residuos
+/relatorios/pessoas-laboratorio
+/administracao/cadastros
+/solicitacoes/novo
+/solicitacoes/meus-pedidos
+
+RÓTULOS
+/residuos/:id/rotulo
+/produtos/:id/rotulo
+
+SISTEMA
+/:pathMatch(.*)*
+```
+
+---
+
+# 7. Sessão DEV
+
+Fluxo atual:
+
+```text
+identificador + senha preenchida
+→ frontend consulta usuários existentes
+→ resolve usuário ativo
+→ senha ainda não é validada por autenticação definitiva
+→ sessão é persistida em localStorage
+→ expiração automática em 5 horas
+```
+
+A sessão possui dados como:
+
+```text
+id
+nome
+email
+perfil
+unidadeId
+unidadeNome
+unidadeSigla
+laboratorioId
+laboratorioNome
+ativo
+```
+
+Essa sessão existe para desenvolvimento e validação funcional.
+
+---
+
+# 8. Multitenancy por Unidade
+
+`src/services/http.ts` lê `unidadeId` da sessão e envia:
+
+```text
+X-SGL-Unidade-Id: <unidadeId>
+```
+
+O backend usa esse header para montar o `TenantContext` e restringir consultas/serviços à Unidade corrente.
+
+Interpretação correta:
+
+```text
+isolamento funcional por Unidade              ✅
+validação de cenários multitenant              ✅
+fronteira definitiva de segurança              ❌
+```
+
+O cliente ainda controla o header. Na produção, Unidade/tenant deverá ser derivado de identidade autenticada confiável.
+
+A interface exibe a sigla da Unidade no perfil da Gestão/Administração.
+
+---
+
+# 9. Pedidos
+
+Solicitante:
+
+```text
+/pedidos/novo
+/meus-pedidos
+```
+
+Gestão:
+
+```text
+/pedidos
+```
+
+Regras oficiais permanecem no backend:
+
+```text
+criação → não baixa estoque
+aprovação → baixa estoque
+entrega → não baixa novamente
+cancelamento aprovado → restaura lotes utilizados
+perecível → FEFO
+não perecível → FIFO
+urgência → não altera FIFO/FEFO
+```
+
+O frontend deve refletir estados e ações permitidas sem recriar a regra de estoque.
+
+---
+
+# 10. Estoque e Lotes
+
+Rotas:
+
+```text
+/estoque
+/estoque/:id
+/estoque/lotes-vencendo
+```
+
+Cobertura:
+
+- saldo consolidado e estoque mínimo;
+- entrada de lote;
+- validade;
+- Código SGL;
+- embalagem e multiplicador;
+- fracionamento;
+- descarte;
+- rastreabilidade/histórico;
+- filtros;
+- integração com dashboard, busca e alertas.
+
+Lote continua contextual a Estoque e não deve virar item principal separado sem nova decisão de produto.
+
+---
+
+# 11. Movimentações
+
+```text
+/movimentacoes
+```
+
+Funções:
+
+```text
+histórico
+rastreabilidade
+auditoria operacional
+filtros
+```
+
+Pedidos entregues continuam sendo um recorte de Movimentações, não relatório independente.
+
+---
+
+# 12. Resíduos
+
+Decisão:
+
+```text
+Produto != Resíduo
+```
+
+Rotas:
+
+```text
+Solicitante
+/residuos/novo
+/meus-residuos
+
+Gestão
+/residuos
+
+Rótulo
+/residuos/:id/rotulo
+
+Relatório
+/relatorios/residuos
+```
+
+Fluxo:
+
+```text
+INFORMADO
+→ EM_ANALISE
+→ LIBERADO_PARA_ARMAZENAMENTO
+→ ARMAZENADO_TEMPORARIAMENTE
+→ DESPACHADO
+```
+
+Composição pode referenciar Produto para rastreabilidade sem movimentar estoque automaticamente.
+
+O Código SGL existe desde o registro inicial. QR Code não integra o rótulo visual atual.
+
+Modelos de Resíduos pré-cadastrados foram reconciliados, integrados ao fluxo Manual/Modelo e validados na Etapa 4.
+
+---
+
+# 13. Estagiários
+
+```text
+/estagiarios
+```
+
+Cobertura:
+
+```text
+listagem
+cadastro
+edição
+Unidade/Laboratório
+período
+tipo de vínculo
+encerramento com data efetiva
+indicadores de término/vencimento
+```
+
+Relatório complementar:
+
+```text
+/relatorios/pessoas-laboratorio
+```
+
+---
+
+# 14. Administração / Cadastros
+
+```text
+/administracao/cadastros
+```
+
+Exclusivo de `ADMINISTRADOR`.
+
+Áreas:
+
+```text
+Laboratórios
+Projetos
+Produtos
+Classes de resíduo
+Locais de armazenamento
+Permissões
+Resíduos — modelos reutilizáveis
+```
+
+Decisões:
+
+- Unidade não possui CRUD manual normal;
+- usuário não é criado manualmente pela central;
+- Administração altera perfil de usuários existentes;
+- Produto representa catálogo, não estoque;
+- responsável de Laboratório deve pertencer à mesma Unidade;
+- histórico relevante é preservado por ativação/inativação quando aplicável;
+- `ESTAGIARIO` com vínculo ativo não deve perder o perfil antes do encerramento.
+
+---
+
+# 15. Relatórios
+
+```text
+Estagiários
+Produtos
+Movimentações
+Resumo operacional
+Estoque e lotes
+Fiscalização
+Resíduos
+Pessoas por laboratório
+```
+
+Prévia, PDF e XLSX devem usar a mesma consulta e os mesmos filtros.
+
+---
+
+# 16. Dashboard Gestão
+
+```text
+/dashboard
+```
+
+Indicadores operacionais atuais:
+
+```text
+pedidos pendentes
+pedidos urgentes
+estoque baixo
+lotes vencidos
+lotes vencendo em 7/30 dias
+resíduos INFORMADO/EM_ANALISE
+movimentações recentes
+resumo por laboratório
+```
+
+Cards e alertas direcionam para o contexto operacional correspondente quando possível.
+
+---
+
+# 17. Dashboard Solicitante
+
+```text
+/inicio
+```
+
+Apresenta contexto útil ao solicitante sem expor controles de Gestão/Administração.
+
+---
+
+# 18. Shell, busca, alertas e tema
+
+Integrado:
+
+```text
+Alertas operacionais            ✅
+Busca global                    ✅
+Tema claro/escuro               ✅
+Persistência de preferência     ✅
+Responsividade                  ✅
+```
+
+Decisão visual importante: o tema das interfaces autenticadas não deve modificar automaticamente a tela de login. A tela de login permanece independente salvo nova decisão explícita.
+
+---
+
+# 19. Segurança
+
+```text
+guardas de rota por perfil                    ✅ UX
+sessão DEV                                     ✅ temporária
+contexto de Unidade via header                 ✅ desenvolvimento
+autenticação definitiva                        ⏳
+autorização real no servidor                   ⏳
+auditoria por identidade autenticada           ⏳
+integração corporativa                          ⏳
+```
+
+Não tratar menu oculto, rota protegida no client ou Unidade em localStorage como mecanismo de segurança de produção.
+
+---
+
+# 20. Unidade corporativa
+
+A decisão futura é que Unidade seja institucional, não um cadastro livre do usuário.
+
+Fluxo esperado:
+
+```text
+login/integração corporativa
+→ identidade institucional
+→ Unidade resolvida de forma confiável
+→ sessão/token recebe contexto institucional
+→ frontend apenas consome o contexto
+```
+
+Detalhes: `DECISAO_UNIDADES_CORPORATIVAS.md`.
+
+---
+
+# 21. Documentos/upload
+
+Upload/download real ainda depende de contrato backend definitivo.
+
+Contextos potenciais:
+
+```text
+Pedido
+Produto
+Lote
+```
+
+Não inventar persistência documental apenas no frontend.
+
+---
+
+# 22. Roadmap formal posterior
+
+Depois da pré-produção atual:
+
+```text
+1. matriz/diretrizes de permissões
+2. congelamento funcional
+3. homologação integrada final
+4. correção de falhas encontradas
+5. autenticação + autorização + auditoria definitiva
+6. integração corporativa / tenant confiável
+7. documentos/upload quando houver contrato
+8. refactors técnicos planejados
+```
+
+O documento `ROADMAP_INTERFACE_GESTAO.md` registra esse bloco posterior. O primeiro protótipo já foi aprovado e `FECHAMENTO_PRIMEIRO_PROTOTIPO.md` deve ser lido como registro de fechamento, não como gate atual.
+
+---
+
+# 23. Regra de retomada
+
+```text
+1. ler ../CONTINUIDADE.md
+2. conferir a main
+3. conferir src/router/index.ts
+4. validar contratos no Swagger
+5. consultar este dossiê
+6. abrir o documento específico da área
+7. distinguir decisão atual de histórico
+```
+
+**O SGL está funcionalmente aprovado e em pré-produção pós-aprovação. Não tratar afirmações antigas de “matriz de permissões = próximo passo” como estado atual; essa etapa pertence ao roadmap formal posterior.**
+
+
+---
+
+## Fechamento da Etapa 5
+
+Fechamento confirmado em 29/09/2026.
+
+Frontend entregue e validado:
+
+- rota `/projetos` como hub operacional;
+- Projeto como eixo principal;
+- filtro por Laboratório, busca e status;
+- Projeto → SCI → Atividade;
+- cadastro/edição de SCI e Atividade;
+- prorrogações;
+- correção SEG;
+- históricos;
+- cadastro administrativo de Projeto atualizado;
+- sugestão editável de Código SEG para SCI/Atividade;
+- tipografia canônica e dark mode;
+- diferenciação visual: SCI em azul do padrão de status e Atividade em verde;
+- refinamentos finais aprovados em execução.
+
+Próxima etapa: **Etapa 6 — Estagiários e vínculos**.
+
+
+### Drawer Estagiários 6.5 — refinamento final
+
+Ações foram promovidas para o topo; Bolsa e histórico foram consolidados em `BOLSA / VÍNCULO`; Segurança deixou de ser seção própria; treinamento passou a usar confirmação e reversão auditável; Observações consolidam registros de vínculo, participação, treinamento e notas operacionais; Participações ganharam maior legibilidade; Culturas podem ser criadas diretamente no modal de associação.
+
+A rodada está implementada e segue para validação do 6.6.
