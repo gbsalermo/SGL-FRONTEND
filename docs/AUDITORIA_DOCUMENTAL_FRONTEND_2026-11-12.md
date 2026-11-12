@@ -28,9 +28,9 @@ A auditoria de cada arquivo precisa registrar: (1) conteúdo conferido contra `r
 | `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md` | Histórico / evidência | Pendente |
 | `docs/AUDITORIA_VISUAL_INTEGRAL_SOLUCOES_ETAPA_7_4_2026-10-13.md` | Histórico / evidência | Pendente |
 | `docs/CONTINUIDADE_ETAPA_1_4_2026-09-09.md` | Histórico / evidência | Pendente |
-| `docs/DECISAO_UNIDADES_CORPORATIVAS.md` | Especializado / auxiliar | Pendente |
+| `docs/DECISAO_UNIDADES_CORPORATIVAS.md` | Especializado / auxiliar | Lido; autoridade sinalizada; confronto de código pendente |
 | `docs/DOSSIE_PROJETO_SGL.md` | Referência estrutural candidata | Pendente |
-| `docs/ESTRUTURA_FRONTEND.md` | Referência estrutural candidata | Pendente |
+| `docs/ESTRUTURA_FRONTEND.md` | Referência estrutural candidata | Lido; autoridade sinalizada; confronto de código pendente |
 | `docs/ETAPA_10_CENARIO_GESTAO_ROTULOS_2026-10-28.md` | Histórico / evidência | Pendente |
 | `docs/ETAPA_10_PREPARACAO_ROTULOS_IMPRESSAO_2026-10-27.md` | Histórico / evidência | Pendente |
 | `docs/ETAPA_10_ZEBRA_PILOTO_ZPL_2026-10-29.md` | Histórico / evidência | Pendente |
@@ -69,21 +69,21 @@ A auditoria de cada arquivo precisa registrar: (1) conteúdo conferido contra `r
 | `docs/ETAPA_CADASTROS_ADMIN.md` | Histórico / evidência | Pendente |
 | `docs/ETAPA_ESTAGIARIOS.md` | Histórico / evidência | Pendente |
 | `docs/FECHAMENTO_PRIMEIRO_PROTOTIPO.md` | Histórico / evidência | Pendente |
-| `docs/FLUXOS_NAVEGACAO.md` | Referência estrutural candidata | Pendente |
-| `docs/GUIA_EFEITOS_VISUAIS.md` | Especializado / auxiliar | Pendente |
-| `docs/ICONOGRAFIA.md` | Especializado / auxiliar | Pendente |
-| `docs/IDENTIDADE_VISUAL.md` | Referência estrutural candidata | Pendente |
-| `docs/INVENTARIO_TELAS.md` | Referência estrutural candidata | Pendente |
+| `docs/FLUXOS_NAVEGACAO.md` | Referência estrutural candidata | Lido; autoridade sinalizada; confronto de código pendente |
+| `docs/GUIA_EFEITOS_VISUAIS.md` | Especializado / auxiliar | Lido; autoridade sinalizada; confronto de código pendente |
+| `docs/ICONOGRAFIA.md` | Especializado / auxiliar | Lido; autoridade sinalizada; confronto de código pendente |
+| `docs/IDENTIDADE_VISUAL.md` | Referência estrutural candidata | Lido; autoridade sinalizada; confronto de código pendente |
+| `docs/INVENTARIO_TELAS.md` | Referência estrutural candidata | Lido; autoridade sinalizada; confronto de código pendente |
 | `docs/PADRAO_VISUAL_PRE_PRODUCAO.md` | Referência estrutural candidata | Pendente |
-| `docs/PADROES_PAGINA.md` | Referência estrutural candidata | Pendente |
+| `docs/PADROES_PAGINA.md` | Referência estrutural candidata | Lido; autoridade sinalizada; confronto de código pendente |
 | `docs/PLANO_TESTES_PRIMEIRO_PROTOTIPO.md` | Histórico / evidência | Pendente |
 | `docs/README.md` | Referência estrutural candidata | Pendente |
 | `docs/REGRA_PADRONIZACAO_NOVOS_MODULOS.md` | Referência estrutural candidata | Pendente |
-| `docs/ROADMAP_INTERFACE_GESTAO.md` | Histórico / evidência | Pendente |
-| `docs/ROTULO_PRODUTOS.md` | Especializado / auxiliar | Pendente |
-| `docs/ROTULO_RESIDUOS.md` | Especializado / auxiliar | Pendente |
-| `docs/SHELL_VISUAL.md` | Referência estrutural candidata | Pendente |
-| `docs/SIDEBAR_ALERTAS.md` | Especializado / auxiliar | Pendente |
+| `docs/ROADMAP_INTERFACE_GESTAO.md` | Histórico / evidência | Lido; autoridade sinalizada; confronto de código pendente |
+| `docs/ROTULO_PRODUTOS.md` | Especializado / auxiliar | Lido; autoridade sinalizada; confronto de código pendente |
+| `docs/ROTULO_RESIDUOS.md` | Especializado / auxiliar | Lido; autoridade sinalizada; confronto de código pendente |
+| `docs/SHELL_VISUAL.md` | Referência estrutural candidata | Lido; autoridade sinalizada; confronto de código pendente |
+| `docs/SIDEBAR_ALERTAS.md` | Especializado / auxiliar | Lido; autoridade sinalizada; confronto de código pendente |
 | `docs/SINCRONIZACAO_GITLAB_GITHUB.md` | Referência estrutural candidata | Pendente |
 | `docs/screenshots/README.md` | Especializado / auxiliar | Pendente |
 | `public/assets/residuos/marcas/README.md` | Especializado / auxiliar | Pendente |
@@ -139,3 +139,13 @@ A auditoria só será considerada concluída quando cada linha do inventário ti
 | Demais textos | Orientações operacionais identificadas para cadastros, relatórios, resíduos, modelos, estoque, dashboard e movimentações. | Conferir nomes dos botões, rotas e permissões contra release antes de marcar como validados. |
 
 **Resultado:** não alterar silenciosamente textos de ajuda onde existe conflito de regras; registrar a ambiguidade e resolvê-la contra o código e o responsável funcional. Nenhum texto de ajuda foi modificado nesta rodada.
+
+## Revisão documental de referências visuais e operacionais (13 arquivos)
+
+Os arquivos de estrutura, fluxos, inventário, identidade visual, padrões de página, shell, iconografia, sidebar, roadmap de gestão, unidades corporativas, efeitos visuais e rótulos de Produto/Resíduo foram lidos e classificados quanto à vigência. **Ação aplicada:** notas de autoridade em documentos que podiam ser interpretados como regras atuais, sem apagar decisões históricas. **Não foram alterados vídeos, posters, player, textos de ajuda ou código funcional.**
+
+- **Canônico visual:** `PADRAO_VISUAL_PRE_PRODUCAO.md`; `IDENTIDADE_VISUAL.md`, `PADROES_PAGINA.md` e `SHELL_VISUAL.md` especializam conceitos e não devem repetir tokens conflitantes.
+- **Conceitual/histórico:** `ICONOGRAFIA.md`, `SIDEBAR_ALERTAS.md`, `GUIA_EFEITOS_VISUAIS.md` e `ROADMAP_INTERFACE_GESTAO.md`; não usar “implementação futura” de 1.3 como estado de novembro.
+- **Funcional condicionado à release:** `ROTULO_PRODUTOS.md`, `ROTULO_RESIDUOS.md` e `DECISAO_UNIDADES_CORPORATIVAS.md`; conferir código e decisões posteriores antes de modificar o sistema.
+
+**Pendente:** confrontar cada valor visual com CSS/tokens atuais e conferir os contratos e caminhos do código antes de declarar homologação documental.
