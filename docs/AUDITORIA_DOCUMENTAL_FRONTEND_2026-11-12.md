@@ -122,3 +122,20 @@ A auditoria de cada arquivo precisa registrar: (1) conteúdo conferido contra `r
 ## Critério de conclusão
 
 A auditoria só será considerada concluída quando cada linha do inventário tiver resultado individual fundamentado e os documentos canônicos forem confrontados com código/rotas/serviços reais. Revisões em andamento permanecem em `collab/docs-release-estado-2026-11`, sem merge automático.
+
+## Revisão de conteúdo — Central de Ajuda (21/21 arquivos lidos, 12/11/2026)
+
+**Escopo:** todos os 21 textos em `src/modules/ajuda/textos/` foram lidos e confrontados entre si; comparação de conteúdo com as implementações ainda é necessária antes de alterar orientações ao usuário. **Status: leitura documental concluída; homologação funcional pendente.**
+
+| Tema / arquivos | Achado | Encaminhamento |
+|---|---|---|
+| `pedido-em-qualquer-laboratorio.md`, `pedido-do-estagiario.md`, `perguntas-frequentes.md` | A ajuda geral afirma que empregados **e estagiários** podem pedir a qualquer laboratório ativo; a ajuda específica do estagiário diz que o pedido vinculado à atividade é bloqueado sem laboratório autorizado. As regras podem coexistir sob condições diferentes, mas a documentação não explicita essa diferença. | Conferir `NovoPedidoView.vue`, `pedidoService.ts`, `PedidoService.java` e elegibilidade; explicitar exceções por perfil/contexto antes de publicar. |
+| `fazer-um-pedido-e-acompanhar.md`, `solicitar-uma-solucao.md` | Descrevem Projeto como opcional de forma geral, sem separar requisitos de estagiários ou contextos específicos. | Documentar condicionalmente por perfil e vínculo, após conferir backend. |
+| `vinculo-de-estagio.md`, `acompanhar-estagiarios.md` | Há orientação de seleção de múltiplos laboratórios e de participação em atividades; ainda não comprova todos os cenários de autorização multilaboratório. | Conferir `EstagiariosGestaoView.vue`, `VinculoEstagioService.java` e migrations V47/V48. |
+| `analisar-pedido.md` | Cobre aprovar, entregar e rejeitar, mas não detalha o fluxo de **solicitar correção**, mencionado nos requisitos operacionais anteriores. | Verificar se o estado/ação existe no código da release; acrescentar apenas se implementado. |
+| `central-de-solucoes.md`, `estoque-e-lotes.md` | Descrevem impressão do rótulo durante preparo e documento de entrada de lote. | Conferir pontos de acionamento e impressão física, sem assumir homologação por haver rota. |
+| `importar-pessoa-da-embrapa.md`, `perguntas-frequentes.md` | Descrevem integração institucional e login com credenciais corporativas. | Confirmar configuração efetiva e políticas de acesso em ambiente institucional, não deduzir de UI. |
+| `informar-um-residuo.md` | Já explicita componente do catálogo **ou componente livre**, conforme regra operacional registrada. | Preservar essa distinção. |
+| Demais textos | Orientações operacionais identificadas para cadastros, relatórios, resíduos, modelos, estoque, dashboard e movimentações. | Conferir nomes dos botões, rotas e permissões contra release antes de marcar como validados. |
+
+**Resultado:** não alterar silenciosamente textos de ajuda onde existe conflito de regras; registrar a ambiguidade e resolvê-la contra o código e o responsável funcional. Nenhum texto de ajuda foi modificado nesta rodada.
