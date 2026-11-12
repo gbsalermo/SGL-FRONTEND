@@ -1,5 +1,7 @@
 # Estrutura Física — SGL Frontend
 
+> **Vigência (12/11/2026):** este guia registra a organização estrutural; a árvore e o roteador da branch `release` prevalecem sobre inventários e checkpoints antigos. As menções a `main` como versão operacional e às Etapas 8/9 como próximas são históricas. Consulte `DOSSIE_PROJETO_SGL.md` para pontos de manutenção e `AUDITORIA_DOCUMENTAL_FRONTEND_2026-11-12.md` para pendências. Não alterar a Central de Ajuda e seus vídeos nesta auditoria.
+
 > **Registro histórico (26/10/2026):** a Etapa 8 está concluída e integrada às duas `main` por MR institucional; a Etapa 9 vigente é **Relatórios consolidados** (Projetos; Movimentações em Resumo/Detalhamento), preparada em `collab/etapa-9-relatorios-consolidados`. **Sem implementação funcional da Etapa 9 ainda.** Contrato e checklist atuais: `docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`. Informações datadas posteriores a este aviso dentro do documento são registros históricos, não o status mais recente.
 
 
