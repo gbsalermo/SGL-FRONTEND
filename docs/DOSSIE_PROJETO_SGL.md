@@ -1,5 +1,51 @@
 # Dossiê do Projeto SGL — Frontend
 
+## Mapa técnico de manutenção — checkpoint 12/11/2026 (base: GitHub/release)
+
+**Propósito:** localizar o ponto de alteração antes de editar. Este mapa foi confrontado com a árvore de arquivos da `release` do frontend em 12/11/2026; identifica arquivos existentes, **não** certifica sozinho contratos ou funcionamento de cada fluxo. Consulte a implementação e o Swagger/OpenAPI da `release` do backend antes de modificar payloads.
+
+### Onde mexer — frontend
+
+| Necessidade | Entrada de UI | Integração/apoio | Atenção |
+|---|---|---|---|
+| Login, sessão e contexto | `src/modules/auth/views/LoginView.vue` | `src/stores/session.ts`, `src/services/http.ts` | Autorização real deve ser conferida no backend; não confiar só em controles visuais |
+| Rotas e acesso | `src/router/index.ts`, `src/App.vue` | `src/stores/session.ts` | Preservar perfis, guards e rotas existentes |
+| Cadastros e pessoas | `src/modules/admin/views/CadastrosAdminView.vue`, `ImportarPessoasView.vue`, `VinculosOperacionaisGestaoView.vue` | `src/modules/admin/services/cadastrosAdminService.ts`, `pessoasCorporativasService.ts`, `vinculosOperacionaisService.ts` | Validar origem institucional e escopo de unidade |
+| Projetos, SCI e atividades | `src/modules/projetos/views/ProjetosGestaoView.vue` | `src/modules/projetos/services/projetosService.ts` | Conferir hierarquia e SEG no contrato |
+| Estagiários | `src/modules/estagiarios/views/EstagiariosGestaoView.vue` | `src/modules/estagiarios/services/estagiarioService.ts` | Verificar vínculos multi-laboratório na release antes de alterar |
+| Pedidos e orientandos | `src/modules/pedidos/views/solicitante/NovoPedidoView.vue`, `MeusPedidosView.vue`, `PedidosOrientandosView.vue`, `gestao/PedidosGestaoView.vue` | `src/modules/pedidos/services/pedidoService.ts`, `src/modules/operacao/services/contextoOperacionalService.ts` | Permissões, laboratório-base e baixa de estoque são regras do backend |
+| Estoque, lotes e entrada | `src/modules/estoque/views/EstoqueGestaoView.vue`, `EstoqueDetalheView.vue`, `DocumentoEntradaLoteView.vue` | `src/modules/estoque/services/estoqueService.ts` | Preservar FEFO/FIFO, recipientes e unidades |
+| Soluções | `src/modules/solucoes/views/NovaSolucaoView.vue`, `SolucoesGestaoView.vue`, `RotuloSolucaoView.vue` | `src/modules/solucoes/services/solucaoService.ts` | Confirmar etapa de preparação e impressão |
+| Resíduos | `src/modules/residuos/views/solicitante/InformarResiduoView.vue`, `gestao/ResiduosGestaoCompletoView.vue` | `src/modules/residuos/services/residuoService.ts` | Preservar snapshots, liberação e histórico |
+| Produtos e rótulos | `src/modules/produtos/views/RotuloProdutoView.vue`, `src/modules/residuos/views/gestao/RotuloResiduoView.vue` | `src/modules/rotulos/zebra/ZebraExportPanel.vue`, `zpl.ts`, `browserPrintLocal.ts` | Validar dimensões físicas e impressora piloto |
+| Relatórios | `src/modules/relatorios/views/RelatoriosGestaoView.vue`, `RelatoriosExportacaoView.vue` | `src/modules/relatorios/services/relatorioService.ts` | Conferir filtros, unidades e exportação |
+| Dashboard | `src/modules/dashboard/views/gestao/DashboardGestaoView.vue`, `solicitante/DashboardSolicitanteView.vue` | `src/services/gestaoShellService.ts` | Verificar consultas e estados de carregamento |
+| Ajuda ao usuário | `src/modules/ajuda/views/HelpCenterView.vue` | documentação operacional | Conferir textos contra a release |
+
+### Como localizar alterações com segurança
+
+1. Ler este dossiê e o documento canônico do domínio; verificar `CONTINUIDADE.md` para o checkpoint atual.
+2. Conferir a rota em `src/router/index.ts`, a view, seus componentes, serviços e testes existentes.
+3. Identificar endpoints realmente consumidos e conferir contratos no backend `release`; não inferir regra de autorização da interface.
+4. Criar `collab/*` sobre `gitlab/release`, implementar e validar os fluxos relacionados; abrir MR manual no GitLab.
+5. Atualizar **uma única fonte canônica por regra** e referenciá-la nos demais documentos.
+
+### Política de documentação sem redundância
+
+- `CONTINUIDADE.md`: **checkpoint curto**, aceites, riscos e próximas ações; não duplicar contratos extensos.
+- `docs/DOSSIE_PROJETO_SGL.md`: **mapa de manutenção e dependências**; não reproduzir cronologia integral.
+- `docs/ESTRUTURA_FRONTEND.md`: arquitetura de pastas, convenções e responsabilidades; o inventário pontual fica aqui no dossiê.
+- `docs/SINCRONIZACAO_GITLAB_GITHUB.md`: **única fonte operacional** de branches, remotes, workflows e sincronização.
+- `docs/PADRAO_VISUAL_PRE_PRODUCAO.md`: padrão visual canônico; `IDENTIDADE_VISUAL.md`, `PADROES_PAGINA.md`, `SHELL_VISUAL.md` e documentos de etapas devem remeter às regras vigentes e delimitar suas especialidades.
+- `docs/README.md`: índice de navegação, classificação **vigente / histórico / validação**, sem repetir roadmap inteiro.
+- Documentos `ETAPA_*.md`: evidências e decisões **datadas**; não reescrever retroativamente, nem apresentar planos passados como status atual.
+- Não excluir arquivos apenas por semelhança de título: comparar conteúdo, links internos e decisões antes de arquivar ou consolidar.
+
+**Pendências de auditoria:** confirmar comportamento e contratos reais da `release` (especialmente vínculos de estagiários, autorização, pontos de impressão de Soluções/documento de entrada), revisar todas as referências cruzadas e executar testes após ajustes. Este mapa é ponto de partida, não homologação de produção.
+
+---
+
+
 > **Atualização de referência (26/10/2026):** a Etapa 8 está concluída e integrada às duas `main` por MR institucional; a Etapa 9 vigente é **Relatórios consolidados** (Projetos; Movimentações em Resumo/Detalhamento), preparada em `collab/etapa-9-relatorios-consolidados`. **Sem implementação funcional da Etapa 9 ainda.** Contrato e checklist atuais: `docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`. Informações datadas posteriores a este aviso dentro do documento são registros históricos, não o status mais recente.
 
 
