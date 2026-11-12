@@ -1,5 +1,7 @@
 # Iconografia — SGL Frontend
 
+> **Nota de autoridade (12/11/2026):** Registro conceitual de 1.3, não padrão implementado vigente. Para decisões atuais, consultar `PADRAO_VISUAL_PRE_PRODUCAO.md`, `REGRA_PADRONIZACAO_NOVOS_MODULOS.md` e os componentes da `release`.
+
 **Etapa:** 1.3 — Figma e padrões visuais  
 **Status:** decisão conceitual aprovada; implementação futura
 
