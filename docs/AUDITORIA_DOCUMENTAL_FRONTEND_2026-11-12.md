@@ -149,3 +149,9 @@ Os arquivos de estrutura, fluxos, inventário, identidade visual, padrões de p�
 - **Funcional condicionado à release:** `ROTULO_PRODUTOS.md`, `ROTULO_RESIDUOS.md` e `DECISAO_UNIDADES_CORPORATIVAS.md`; conferir código e decisões posteriores antes de modificar o sistema.
 
 **Pendente:** confrontar cada valor visual com CSS/tokens atuais e conferir os contratos e caminhos do código antes de declarar homologação documental.
+
+## Fechamento da organização e das redundâncias de autoridade — 12/11/2026
+
+**Concluído no âmbito editorial:** foi criado [`GOVERNANCA_DOCUMENTAL.md`](GOVERNANCA_DOCUMENTAL.md), que define fonte proprietária para cada assunto, separa referências canônicas, complementares e históricas e registra a política para documentos duplicados. Não houve exclusão, deslocamento ou fusão destrutiva de arquivos. Documentos históricos continuam disponíveis para rastreabilidade. Os READMEs finais permanecem reservados para o fechamento da auditoria de conteúdo.
+
+**Ainda não concluído:** revisão individual de todo o inventário, checagem de links, confronto de contratos e permissões com código e testes, e resolução das ambiguidades de negócio. As linhas `Pendente` da tabela significam **revisão de conteúdo**, não falta de classificação editorial. Organização não equivale a homologação.
