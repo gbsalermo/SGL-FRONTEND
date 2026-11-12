@@ -1,5 +1,7 @@
 # Padrões de Página — SGL Frontend
 
+> **Autoridade visual (12/11/2026):** referência complementar para composição de páginas; o padrão canônico de dimensões, tipografia, cores e componentes é `PADRAO_VISUAL_PRE_PRODUCAO.md`. Se houver divergência, verificar os tokens CSS e componentes da `release` e registrar decisão no documento canônico.
+
 **Etapa:** 1.3 — Figma e padrões visuais  
 **Status:** decisão conceitual aprovada; implementação futura
 
