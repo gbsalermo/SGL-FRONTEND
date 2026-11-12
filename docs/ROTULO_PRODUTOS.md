@@ -1,5 +1,7 @@
 # Rótulo físico de Produtos
 
+> **Nota de autoridade (12/11/2026):** Descrição funcional histórica do rótulo de Produto. Verificar a `release` e as decisões posteriores da Etapa 10 para impressão direta, Zebra, logos e campos. Não substituir arquivos de mídia nem vídeos da Central de Ajuda.
+
 ## Objetivo
 
 Permitir que a Gestão gere e imprima um rótulo físico para um Produto cadastrado, reaproveitando o padrão visual definido para Resíduos.
