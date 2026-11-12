@@ -1,5 +1,7 @@
 # Shell Visual — SGL Frontend
 
+> **Autoridade visual (12/11/2026):** referência especializada para navegação e shell; não duplicar tokens ou regras de componentes do padrão principal `PADRAO_VISUAL_PRE_PRODUCAO.md`. Confirmar o comportamento atual no shell da `release` antes de implementar.
+
 **Etapa:** 1.3 — Figma e padrões visuais  
 **Status:** decisão conceitual aprovada; implementação futura  
 **Próximo bloco:** componentes reutilizáveis
