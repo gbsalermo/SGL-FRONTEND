@@ -1,5 +1,7 @@
 # Roadmap Formal — SGL Frontend
 
+> **Nota de autoridade (12/11/2026):** Roadmap histórico datado de outubro. A indicação de Etapa 9 pré-merge e `main` como destino é histórica; o checkpoint atual está em `../CONTINUIDADE.md`. Não usar este arquivo para planejar trabalho novo sem reconciliação.
+
 ## Estado vigente — 27/10/2026 (Etapa 9 pré-merge)
 
 As **Etapas 1–8** já foram integradas; a **Etapa 9 — Relatórios consolidados** foi implementada e validada funcionalmente na branch `collab/etapa-9-relatorios-consolidados`. **Ainda sem merge para a main.** A Central reúne Movimentações nos modos Resumo/Detalhamento, incorpora Projetos e amplia consultas de Estoque/Lotes e Fiscalização com apresentações e rastreabilidade de recipientes. A distinção de apresentação/consumo deriva parcialmente do histórico, não de um campo persistido de intenção de pedido. A execução integral de testes de carga, E2E, autorização real e homologação de produção continua em etapas posteriores. O plano formal abaixo permanece **histórico e posterior** ao trilho atual; ele não redefine a próxima etapa. Consulte `CONTINUIDADE.md` e `docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`.
