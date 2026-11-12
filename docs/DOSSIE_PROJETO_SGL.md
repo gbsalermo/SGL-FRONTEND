@@ -1,5 +1,7 @@
 # Dossiê do Projeto SGL — Frontend
 
+> **Governança e redundâncias (12/11/2026):** consultar [`GOVERNANCA_DOCUMENTAL.md`](GOVERNANCA_DOCUMENTAL.md) para a autoridade de cada documento, escopo das referências especializadas e conflitos ainda pendentes. O dossiê é proprietário do **mapa de manutenção**, não de roadmaps, instruções Git ou tokens visuais.
+
 ## Mapa técnico de manutenção — checkpoint 12/11/2026 (base: GitHub/release)
 
 **Propósito:** localizar o ponto de alteração antes de editar. Este mapa foi confrontado com a árvore de arquivos da `release` do frontend em 12/11/2026; identifica arquivos existentes, **não** certifica sozinho contratos ou funcionamento de cada fluxo. Consulte a implementação e o Swagger/OpenAPI da `release` do backend antes de modificar payloads.
