@@ -1,5 +1,7 @@
 # Etapa 10 — Rótulos e impressão | preparação e auditoria inicial
 
+> **Vigência — 17/11/2026:** o cabeçalho “preparação documental, nenhuma mudança aplicada” é histórico. A `release` possui impressão A4/Zebra para Produto, Resíduo, Solução e entrada de lote; gatilho de Solução em `EM_PREPARACAO`/`ENTREGUE`, documento de entrada acessível após criação e pelo detalhe do lote e controle de Resíduo por `impressaoPermitida`. Os dois testes `node:test` da Zebra não entram em `npm run test` e há homologação física pendente. Ver [matriz C8/C12](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md).
+
 **Aberta em:** 27/10/2026
 **Branches:** `collab/etapa-10-rotulos-impressao` no backend `gbsalermo/Sistema-SGL` e frontend `gbsalermo/SGL-FRONTEND`, derivadas das respectivas `main` após integração da Etapa 9.
 **Estado:** preparação documental; nenhuma mudança de layout ou contrato aplicada; referência visual do cliente ainda será fornecida pelo mantenedor.
