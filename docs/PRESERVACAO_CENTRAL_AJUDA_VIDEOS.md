@@ -1,5 +1,7 @@
 # Proteção dos vídeos e materiais da Central de Ajuda
 
+> **Complemento de cobertura — 17/11/2026:** os testes `helpTasks.spec.ts` e `helpAssets.spec.ts` correspondem ao padrão `vitest.config.ts` da suíte `npm run test`. Verificam mapeamentos, posters e PDF, **não** entrega/streaming de MP4 na implantação. A validação operacional, sem tocar nos materiais publicados, permanece em [SGL-REV-012](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md).
+
 **Data:** 12/11/2026. **Status:** regra de preservação para a auditoria documental.
 
 ## Inventário verificado na release
