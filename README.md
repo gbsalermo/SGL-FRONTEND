@@ -1,7 +1,7 @@
 <a id="readme-top"></a>
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/gbsalermo/Sistema-SGL/main/docs/LOGO.png" alt="SGL Logo" width="340" height="auto">
+  <img src="https://raw.githubusercontent.com/gbsalermo/Sistema-SGL/release/docs/LOGO.png" alt="SGL Logo" width="340" height="auto">
 
 # SGL — Sistema de Gestão de Laboratórios
 
@@ -25,7 +25,7 @@ O SGL considera a estrutura **Unidade → Laboratório → Projeto → SCI → A
 
 A aplicação utiliza Vue e TypeScript, comunica-se com a API do SGL e busca oferecer uma navegação consistente, responsiva e com suporte a temas claro e escuro. O projeto está em **evolução de pré-produção**; autenticação definitiva e integração institucional pertencem a fases posteriores.
 
-> **Acompanhamento da evolução:** entregas, decisões e próximos passos estão em [`CONTINUIDADE.md`](CONTINUIDADE.md) e no roadmap do backend [`docs/PLANO_PRE_PRODUCAO.md`](https://github.com/gbsalermo/Sistema-SGL/blob/main/docs/PLANO_PRE_PRODUCAO.md). O histórico e o contrato da Etapa 9 estão em [`docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`](docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md).
+> **Acompanhamento da evolução:** entregas, decisões e próximos passos estão em [`CONTINUIDADE.md`](CONTINUIDADE.md) e no roadmap do backend [`docs/PLANO_PRE_PRODUCAO.md`](https://github.com/gbsalermo/Sistema-SGL/blob/release/docs/PLANO_PRE_PRODUCAO.md). O histórico e o contrato da Etapa 9 estão em [`docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`](docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md).
 
 ---
 
@@ -410,41 +410,36 @@ Visibilidade de menu/rota continua sendo só UX; quem decide é o backend.
 
 ---
 
-## Evolução do projeto
+## Evolução do projeto — referência de 17/11/2026
 
-O desenvolvimento de pré-produção evolui de forma incremental, preservando os fluxos homologados. A Etapa 9 está validada funcionalmente na branch colaborativa, mas ainda não integrada à `main`:
+A `release` integra módulos que documentos de outubro descreviam como “aguardando merge”. Esse quadro reflete **código presente**, não homologação de desempenho ou segurança:
 
-| Etapa | Escopo | Situação |
-|---|---|---|
-| 1–4 | Padrão visual, experiência inicial, Resíduos e expansão operacional | Concluídas |
-| 5 | Projetos, SCI e Atividades | Concluída |
-| 6 | Estagiários, vínculos, participações e formação | Concluída |
-| 7 | Estoque físico, apresentações, fracionamento, FEFO/FIFO e Soluções | Concluída |
-| 8 | Contextos operacionais, Pedidos, Soluções, Resíduos e vínculos adicionais | Concluída e integrada |
-| 9 | Relatórios consolidados: Projetos, Movimentações (Resumo/Detalhamento), Estoque/Lotes e Fiscalização | Implementada e validada funcionalmente; aguardando merge |
-| 10 | Rótulos e impressão operacional | Planejada |
-| 11 | Manual do usuário e revisão de inativação/delete lógico | Planejada |
-| 12 | Testes transversais de arquitetura, carga, E2E e regressão | Planejada |
-| 13 | Revisão estrutural e auditoria final integral | Planejada |
+| Escopo | Verificação estática |
+|---|---|
+| Projetos, SCI, Atividades e Estagiários | Telas e services de gestão e participação presentes |
+| Estoque, Pedidos e Soluções | Fluxos, fracionamento, baixa por aprovação e gestão presentes |
+| Resíduos e Relatórios | Prévia, filtros, histórico e exportação presentes |
+| Rótulos | Produto, Resíduo, Solução e Documento de Entrada com A4/Zebra/Browser Print; **teste físico pendente** |
+| Multilaboratório | Regras de empregados e estagiários diferentes; participação elegível para Estagiário |
+| Qualidade (Etapas 12–13) | Auditoria documental e de código avançada; **E2E, carga, PostgreSQL/Flyway e teste Android/iOS pendentes** |
 
-**Preparação para produção:** após a estabilização funcional, o plano contempla matriz de permissões, congelamento, homologação integrada, correções, identidade e autorização definitivas, integração institucional e liberação controlada.
-
-O detalhamento das decisões, entregas e critérios de validação fica em [`CONTINUIDADE.md`](CONTINUIDADE.md) e no [plano de pré-produção](https://github.com/gbsalermo/Sistema-SGL/blob/main/docs/PLANO_PRE_PRODUCAO.md). Este README apresenta a arquitetura e as capacidades do sistema; não substitui os checkpoints técnicos.
-
+**Riscos abertos:** autorização por objeto em consultas GET, desempenho do Dashboard e de Relatórios, consistência de quantidades físicas, compatibilidade API e acesso mobile. A documentação organiza os achados, mas **não os corrige nem os homologa**. O acompanhamento está no registro único de revisão do backend (`docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md`).
 ---
 
 ## Documentação
 
-| Documento | Uso |
+| Referência | Uso |
 |---|---|
-| [`CONTINUIDADE.md`](CONTINUIDADE.md) | checkpoint e fase atual |
-| [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) | handoff consolidado |
-| [`docs/README.md`](docs/README.md) | índice e classificação documental |
-| [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) | rotas/telas |
-| [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) | jornadas |
-| [`docs/ROADMAP_INTERFACE_GESTAO.md`](docs/ROADMAP_INTERFACE_GESTAO.md) | roadmap formal posterior |
-| [`docs/FECHAMENTO_PRIMEIRO_PROTOTIPO.md`](docs/FECHAMENTO_PRIMEIRO_PROTOTIPO.md) | registro do fechamento/aprovação do protótipo |
+| [`CONTINUIDADE.md`](CONTINUIDADE.md) | Checkpoint atual e regras de retomada |
+| [`docs/README.md`](docs/README.md) | **Índice técnico corrente** dos guias frontend |
+| [`docs/DOSSIE_PROJETO_SGL.md`](docs/DOSSIE_PROJETO_SGL.md) | Stack, stores, services, rotas e contratos frontend |
+| [`docs/GOVERNANCA_DOCUMENTAL.md`](docs/GOVERNANCA_DOCUMENTAL.md) | Fonte de verdade e separação histórica |
+| [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md) e [`docs/FLUXOS_NAVEGACAO.md`](docs/FLUXOS_NAVEGACAO.md) | Telas e jornadas |
+| [`docs/PRESERVACAO_CENTRAL_AJUDA_VIDEOS.md`](docs/PRESERVACAO_CENTRAL_AJUDA_VIDEOS.md) | **Proteção obrigatória** dos 20 tutoriais, vídeo, poster, PDF e FAQ |
+| [`docs/SINCRONIZACAO_GITLAB_GITHUB.md`](docs/SINCRONIZACAO_GITLAB_GITHUB.md) | GitLab `release`, GitHub espelho, branches `collab/*` e MR |
+| [`docs/PLANO_TESTES_PRIMEIRO_PROTOTIPO.md`](docs/PLANO_TESTES_PRIMEIRO_PROTOTIPO.md) | Plano inicial histórico; não atesta execução recente |
 
+No **backend**, consultar `docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md`, `docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md` (31 itens) e `docs/PLANO_HOMOLOGACAO_NUVEM_MOBILE_2026-11-17.md` (CL-01–11, MB-01–12). Todos os novos problemas são registrados **num único backlog**, sem duplicações entre repositórios.
 ---
 
 ## Vídeos da Central de Ajuda
@@ -481,23 +476,27 @@ Os MP4 da Central de Ajuda (`/ajuda`) **não** vão para o git nem para a imagem
 
 ---
 
-## Execução
+## Execução e testes
+
+Na raiz do repositório, com Node adequado à versão Vite do `package.json`:
 
 ```bash
-npm install
+npm ci
 npm run dev
-```
-
-Build e testes (Vitest + jsdom):
-
-```bash
+npm run type-check
+npm run test
 npm run build
-npm test
 ```
+
+`npm run test` usa Vitest + `jsdom`, com `src/**/__tests__/*.spec.ts`. Os testes de impressão Zebra `src/modules/rotulos/zebra/zpl.test.mjs` e `browserPrintLocal.test.mjs` usam `node:test` e **não entram no comando padrão**. O plano de execução deverá incluir os dois separadamente; ainda não foram executados nesta auditoria.
+
+**Operação:** Dockerfile compila Vite com base `/api` e Nginx encaminha `/api` ao serviço `sgl-api` na rede compartilhada. Não reutilizar `docker-compose.yml` de produção para homologação sem substituir **rede, volumes, gateway e segredos** por versões isoladas.
+
+**Mobile:** os formulários de Pedido, Solução e Resíduo possuem regras responsivas, mas **não há aceite em Android/Chrome ou iOS/Safari reais**. O plano do backend requer fluxo de Estagiário multilaboratório em celular, teclado virtual, toque, perda de rede, ausência de envios duplicados e E2E com API/PostgreSQL em staging.
 
 ---
 
 <div align="center">
-  <strong>SGL Frontend</strong><br/>
-  Sistema funcionalmente aprovado em preparação para o ciclo formal de produção.
+  <strong>SGL Frontend</strong>
+  <p>Documentação consolidada sobre a <code>release</code>; revisão de código e referências concluída parcialmente, homologação integrada ainda pendente.</p>
 </div>
