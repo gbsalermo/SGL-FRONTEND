@@ -1,5 +1,7 @@
 # Etapa 7.5 — Mapa de implementação frontend / contexto operacional
 
+> **Vigência — revisão de 17/11/2026:** o texto “ordem de implementação” e os checklists da branch `collab/etapa-7-unidades-solucoes-contexto` são **históricos**, mesmo quando descritos no presente. Os serviços de contexto, seletores de laboratório, regras para estagiários por participação e formulário de Pedidos/Soluções já constam na `release`; backend continua a fonte de autorização. O fechamento local de outubro **não é homologação E2E/concorrência em PostgreSQL**; riscos e evidências atuais ficam na [matriz técnica](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md) e no [backlog único](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md).
+
 ## Checkpoint de encerramento funcional — Etapa 7 (16/10/2026)
 
 **Estado:** Etapa 7 (7.0–7.7) concluída funcionalmente e validada pelo responsável; código e documentação preparados na branch `collab/etapa-7-unidades-solucoes-contexto` para merge **a ser realizado pelo responsável**. Não afirmar que o merge, publicação ou homologação integral de produção ocorreram.
