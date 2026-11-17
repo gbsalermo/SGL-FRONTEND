@@ -1,5 +1,7 @@
 # Etapa 10 — Piloto Zebra / ZPL — 29/10/2026
 
+> **Vigência — 17/11/2026:** a afirmação inicial “Browser Print não ativado” descreve o **piloto inicial de 29/10**, não o código da `release`. Já existem `ZebraExportPanel.vue`, `browserPrintLocal.ts` e `zpl.ts` para impressão direta local e exportação ZPL em Produto, Resíduo, Solução e documento de entrada; há testes `node:test` separados, **não incluídos em `npm run test`**. Impressão física, corte, resolução e logos **não homologados** por esta auditoria. Consulte [SGL-REV-011/023](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md) e o [dossiê](DOSSIE_PROJETO_SGL.md). Não editar vídeos da Central de Ajuda.
+
 **Estado vigente em 03/11/2026:** o suporte Zebra/ZPL foi estendido a **Soluções, Entradas de Lote, Produtos e Resíduos** na branch `collab/etapa-10-rotulos-impressao`. O visual de Soluções foi aprovado pelo mantenedor; os novos modelos de Produto/Resíduo ainda aguardam build, testes locais e validação visual. A impressão física ainda não foi homologada. O teste local aprovado em 29/10/2026 corresponde ao piloto anterior e não substitui a validação desta ampliação.
 
 ## Objetivo e limites
