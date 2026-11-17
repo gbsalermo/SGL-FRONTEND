@@ -197,3 +197,11 @@ Novos riscos e critérios de correção estão centralizados no [registro único
 **Cobertura de testes verificada por configuração:** `package.json` define `npm run test` como `vitest run` e `vitest.config.ts` seleciona `src/**/__tests__/*.spec.ts`. Portanto, os dois testes `.test.mjs` da Zebra, baseados em `node:test`, **não entram na suíte padrão** (`SGL-REV-023`). Os testes de mapeamento/asset da Central de Ajuda entram, mas não comprovam MP4 disponíveis no deploy (`SGL-REV-012`). Nada foi executado e nenhum arquivo funcional/asset foi modificado.
 
 **Pendências em documento único:** [registro pós-revisão no backend](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md), agora com 23 IDs. Este inventário continua o mapa de cobertura documental, não a fila de correções.
+
+## Etapa 4 — auditoria da cobertura frontend (17/11/2026)
+
+A árvore `release` possui **31 arquivos `*.spec.ts`** cobertos por `vitest.config.ts` (31 arquivos, não 31 casos de teste) e **2 testes de Zebra `.test.mjs`** fora do comando Vitest padrão, já rastreados em `SGL-REV-023`. Foram lidos `guards.spec.ts`, `http.spec.ts`, `session.spec.ts`, `NovoPedidoView.spec.ts`, `PedidosGestaoView.spec.ts`, `NovaSolucaoView.spec.ts` e `pessoasCorporativasService.spec.ts`.
+
+**Escopo efetivo:** guardas de rota, sessão, headers, 401/403, máscaras/seletores de laboratório, alertas e payloads usam `jsdom`, `fakeAdapter`, `vi.mock` e componentes montados com `@vue/test-utils`. Esses testes protegem a UI mas **não validam autorização no backend**, integração institucional ou jornada E2E num navegador real. O `package.json` não traz script E2E e a árvore GitHub da `release` não revelou projeto Cypress/Playwright. **Não inferir inexistência de CI externo no GitLab**. A matriz técnica C13–C14 está no backend, com ações em `SGL-REV-009` e `017`.
+
+**Estado:** revisão estática da cobertura, sem executar testes ou modificar a Central de Ajuda. A documentação de pendências permanece centralizada [no backend](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md), agora com 24 IDs.
