@@ -1,5 +1,7 @@
 # Dossiê técnico do SGL — Frontend
 
+> **Pontos de impressão (conferidos em 17/11):** rótulo de Solução tem prévia em `PENDENTE` e libera A4/Zebra em `EM_PREPARACAO` ou `ENTREGUE`; documento de entrada é acessível após criar lote e pelo detalhe do lote; Resíduo bloqueia impressão antes de `impressaoPermitida`; Produto oferece A4/Zebra. **Resta validar impressora e dados físicos, não localizar o botão.** Evidências na matriz de coerência do backend, seção C8.
+
 > **Revisão cruzada — 17/11/2026:** contratos de Pedidos, Soluções, Estoque, Estagiários, Resíduos e Relatórios conferidos estaticamente com controllers do backend. **Alerta prioritário:** verificar autorização por titularidade/perfil em consultas `GET` de dados de terceiros na mesma Unidade; ver `docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md` **no repositório backend**, seção C2/C6. Esta auditoria não modificou o código nem a Central de Ajuda.
 
 **Revisão técnica:** 12/11/2026  
