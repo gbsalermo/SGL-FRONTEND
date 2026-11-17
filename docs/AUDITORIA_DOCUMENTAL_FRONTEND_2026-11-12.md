@@ -155,3 +155,15 @@ Os arquivos de estrutura, fluxos, inventário, identidade visual, padrões de p�
 **Concluído no âmbito editorial:** foi criado [`GOVERNANCA_DOCUMENTAL.md`](GOVERNANCA_DOCUMENTAL.md), que define fonte proprietária para cada assunto, separa referências canônicas, complementares e históricas e registra a política para documentos duplicados. Não houve exclusão, deslocamento ou fusão destrutiva de arquivos. Documentos históricos continuam disponíveis para rastreabilidade. Os READMEs finais permanecem reservados para o fechamento da auditoria de conteúdo.
 
 **Ainda não concluído:** revisão individual de todo o inventário, checagem de links, confronto de contratos e permissões com código e testes, e resolução das ambiguidades de negócio. As linhas `Pendente` da tabela significam **revisão de conteúdo**, não falta de classificação editorial. Organização não equivale a homologação.
+
+## Verificação cruzada com o backend — 17/11/2026
+
+**Fonte técnica proprietária das comparações:** `docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md` no repositório **`gbsalermo/Sistema-SGL`**, seções C1–C6. Não duplicar integralmente essa matriz no inventário do frontend.
+
+**Confronto realizado:** `pedidoService.ts`, `solucaoService.ts`, `estoqueService.ts`, `residuoService.ts`, `estagiarioService.ts`, `contextoOperacionalService.ts`, `relatorioService.ts` e formulários de novos Pedidos/Soluções versus controllers, DTOs, `PedidoService`, `ContextoOperacionalConsultaService`, security chain e migrations relevantes. As rotas-chave inspecionadas correspondem; testes reais e auditoria completa de payloads permanecem pendentes.
+
+**Divergência documental conciliada:** funcionário da Unidade pode solicitar em laboratório ativo fora dos seus laboratórios habituais (registro sinalizado à Gestão), enquanto estagiário exige participação elegível e laboratório associado à participação e à pessoa. A Central de Ajuda continua **sem alterações**, preservando vídeos, posters, textos, player e PDFs.
+
+**Alerta para a revisão funcional:** não presumir que um botão oculto na UI limita o acesso a `GET` de dados de outros usuários da mesma Unidade. Há risco plausível de autorização horizontal insuficiente identificado no backend; exige matriz de permissões e testes antes da homologação. Também há enriquecimento condicional de itens por consultas adicionais a produtos, mas nenhum gargalo foi demonstrado.
+
+**Situação:** etapa de cotejo de rotas e regras selecionadas executada; segurança horizontal, desempenho, impressão e qualidade E2E **não homologados**. READMEs permanecem para a etapa final.
