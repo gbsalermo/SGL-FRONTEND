@@ -167,3 +167,15 @@ Os arquivos de estrutura, fluxos, inventário, identidade visual, padrões de p�
 **Alerta para a revisão funcional:** não presumir que um botão oculto na UI limita o acesso a `GET` de dados de outros usuários da mesma Unidade. Há risco plausível de autorização horizontal insuficiente identificado no backend; exige matriz de permissões e testes antes da homologação. Também há enriquecimento condicional de itens por consultas adicionais a produtos, mas nenhum gargalo foi demonstrado.
 
 **Situação:** etapa de cotejo de rotas e regras selecionadas executada; segurança horizontal, desempenho, impressão e qualidade E2E **não homologados**. READMEs permanecem para a etapa final.
+
+## Fila única de problemas e verificações — 17/11/2026
+
+A sequência de achados da auditoria frontend/backend foi transferida para o [registro único de pendências no repositório backend](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md) (`SGL-REV-001` a `SGL-REV-017`). **Este arquivo não contém uma segunda lista independente**: é o inventário da documentação frontend.
+
+Em especial, `SGL-REV-006` reúne as divergências entre o tutorial geral de laboratórios, as restrições de estagiário por participação/Projeto e a linguagem de “Projeto opcional”; o backend exige participação elegível e laboratório pertencente ao Projeto e à lista do estagiário. A correção editorial ficará para uma etapa **aprovada separadamente**, com conferência dos vídeos já publicados.
+
+`SGL-REV-007` acompanha a eventual ação “solicitar correção” em Pedidos: o contrato `StatusPedido` e o controller da release examinados **não apresentam fluxo próprio de devolução para correção**. Não inventar status nem alterar o tutorial até decisão do mantenedor.
+
+**Novas verificações registradas:** `SGL-REV-012` garante a validação da entrega dos vídeos no deploy sem tocá-los; `SGL-REV-013` trata enriquecimento condicional de itens por requisições de Produto como **hipótese de desempenho**, sem gargalo medido; `SGL-REV-011` registra a validação física pendente de A4/Zebra.
+
+Nenhum arquivo sob `src/modules/ajuda/` ou `public/ajuda/` foi modificado. Os READMEs finais continuam fora do escopo desta rodada.
