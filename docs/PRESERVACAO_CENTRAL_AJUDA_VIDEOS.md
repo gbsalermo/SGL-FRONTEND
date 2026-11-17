@@ -1,5 +1,7 @@
 # Proteção dos vídeos e materiais da Central de Ajuda
 
+> **Auditoria editorial e mobile somente-leitura — 17/11/2026:** foram lidos os 20 tutoriais e FAQ, sem mudanças nos arquivos. `pedido-em-qualquer-laboratorio.md`, tutoriais genéricos e FAQ generalizam permissões para estagiários (`SGL-REV-006`); o FAQ generaliza primeiro acesso pendente, embora empregados novos possam entrar ativos (`SGL-REV-031`). `HelpCenterView.vue` possui drawer responsivo a 959 px e vídeo com largura adaptável, mas requer teste em Android/iOS; ver [plano de homologação](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/PLANO_HOMOLOGACAO_NUVEM_MOBILE_2026-11-17.md). **Não editar mídia, textos, IDs, player ou scripts publicados** até autorização funcional separada.
+
 > **Complemento de cobertura — 17/11/2026:** os testes `helpTasks.spec.ts` e `helpAssets.spec.ts` correspondem ao padrão `vitest.config.ts` da suíte `npm run test`. Verificam mapeamentos, posters e PDF, **não** entrega/streaming de MP4 na implantação. A validação operacional, sem tocar nos materiais publicados, permanece em [SGL-REV-012](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md).
 
 **Data:** 12/11/2026. **Status:** regra de preservação para a auditoria documental.
