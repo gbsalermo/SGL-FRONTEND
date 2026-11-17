@@ -1,5 +1,7 @@
 # Etapa 9 — Integração da Central de Relatórios (26/10/2026)
 
+> **Vigência — 17/11/2026:** o aviso “sem merge ou homologação formal” descreve o checkpoint de 27/10, **não a integração atual**. Controllers e views da Central de Relatórios constam na `release`, sem que a leitura estática comprove equivalência exaustiva de prévia versus PDF/XLSX. O backend ainda usa filtragem em memória de Movimentações/Resumo (sem latência medida), e o DTO de Resumo soma quantidades de unidades incompatíveis; a interface de resumo analisada apresenta contagens. Para decisões futuras: [SGL-REV-015/025–027](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md).
+
 **Branch:** `collab/etapa-9-relatorios-consolidados`  
 **Situação em 27/10/2026:** implementado e validado funcionalmente pelo mantenedor na branch, com confirmações locais de suíte/build e verificação de prévias e exportações ao longo da etapa. **Sem merge ou homologação formal de produção.** Os checklists anteriores permanecem como histórico de validação à época dos commits.
 
