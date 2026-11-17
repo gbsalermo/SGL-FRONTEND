@@ -1,6 +1,8 @@
 
 # Etapa 7.4 — Validação integrada de Soluções pela interface
 
+> **Vigência — 17/11/2026:** este é o roteiro de validação **histórico da Etapa 7.4**, originalmente na branch `collab/etapa-7-unidades-solucoes-contexto`. Na `release` atual há JWT e o cliente HTTP envia `X-SGL-Unidade-Id` apenas quando `ADMINISTRADOR_GERAL` seleciona Unidade, não automaticamente para todos como dizia o roteiro de outubro. O fluxo atual de Soluções usa regras de participação por estagiário/Projeto e laboratório; ver [dossiê técnico](DOSSIE_PROJETO_SGL.md) e [backlog de revisão](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md). Não executar os comandos de checkout antigos para validar a versão integrada.
+
 **Decisão:** a antiga 7.5 (Frontend) foi antecipada para **7.4**, para testar o ciclo solicitante ↔ gestor ↔ estoque. O antigo contexto operacional da 7.4 será desenvolvido na **7.5**.
 
 **Estado atualizado (14/10/2026): 7.4 ENCERRADA POR ACEITE FUNCIONAL DO RESPONSÁVEL.** Os testes de fluxo principais foram validados localmente pelo responsável; o build final, isolamento de Unidades/perfis e QA transversal foram transferidos para 7.6/7.7. O roteiro abaixo contém instruções e pendências históricas; observar a nota final de encerramento.
