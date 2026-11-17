@@ -1,5 +1,7 @@
 # Governança documental — SGL Frontend
 
+> **Fechamento de organização — 17/11/2026:** `README.md` e `docs/README.md` de frontend/backend agora apontam para fontes técnicas da `release`; os índices anteriores foram arquivados integralmente em `docs/HISTORICO_INDICE_DOCUMENTACAO_ATE_2026-11-17.md`. O [relatório de links e sincronização](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/AUDITORIA_REFERENCIAS_E_SINCRONIZACAO_2026-11-17.md) conferiu 126 links relativos, sem destinos ausentes no recorte. **Não é aceite de deploy nem de vídeo em produção**. Integrar só por MR após confirmar SHAs; a Ajuda e seus assets continuam protegidos.
+
 > **Homologação staging/mobile — 17/11/2026:** a documentação proprietária da execução CL-01–11/MB-01–12 fica no [plano cloud/mobile do backend](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/PLANO_HOMOLOGACAO_NUVEM_MOBILE_2026-11-17.md), e a fila de problemas `SGL-REV-029–031` segue no backend. A Central de Ajuda permanece intocada; as divergências identificadas nos 20 tutoriais e FAQ são apenas registros de auditoria, não autorização para edição.
 
 > **Fila única de correções (17/11/2026):** [`REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md`](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md) fica no **backend**, mas cobre também o frontend. Não criar segundo backlog paralelo. Preservar a Central de Ajuda e seus vídeos.
