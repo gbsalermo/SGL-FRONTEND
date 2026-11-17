@@ -1,260 +1,63 @@
-> **ÍNDICE ATUALIZADO — 12/11/2026:** a fonte operacional atual é `GitLab/release`, espelhada em `GitHub/release`; `main` continua com sincronização independente. A leitura deve começar por `../CONTINUIDADE.md` e `SINCRONIZACAO_GITLAB_GITHUB.md`. Etapas antigas marcadas como pendentes abaixo são registros históricos, não o estado vigente. A Etapa 10 (rótulos) e a gestão multilaboratório de estagiários exigem conferência final na release; testes amplos de arquitetura, carga e E2E continuam como auditoria pendente.
+# Documentação técnica — SGL Frontend
 
-# Documentação — SGL Frontend
+**Revisão do índice:** 17/11/2026 · **Base de código:** `release` · **Estado:** organização documental e leitura estática de contratos, sem homologação integrada executada nesta revisão.
 
-## Auditoria documental em andamento — 12/11/2026
+> **Fonte canônica:** GitLab institucional `release`; GitHub `release` é espelho. `main` é uma linha distinta. A branch `collab/docs-release-estado-2026-11` contém somente documentação destinada a MR. A aparência de módulo “pendente” em arquivo de etapa antigo não invalida o código atual.
 
-**Inventário verificável:** [AUDITORIA_DOCUMENTAL_FRONTEND_2026-11-12.md](AUDITORIA_DOCUMENTAL_FRONTEND_2026-11-12.md) relaciona **87 arquivos Markdown**, inclusive 21 artigos da Central de Ajuda entregues ao usuário, que não apareciam no levantamento inicial de documentos da raiz/`docs`. O inventário classifica os arquivos provisoriamente e marca a revisão individual como pendente. **Não interpretar esta triagem como homologação integral.**
+O conteúdo **integral** do índice anterior foi preservado em [`HISTORICO_INDICE_DOCUMENTACAO_ATE_2026-11-17.md`](HISTORICO_INDICE_DOCUMENTACAO_ATE_2026-11-17.md). Sua referência a Etapa 6 como próxima, cabeçalho DEV e caminhos de `main` são **históricos**, não orientações correntes.
 
-**Leitura para manutenção:** começar por `../CONTINUIDADE.md`, consultar `DOSSIE_PROJETO_SGL.md` para encontrar arquivos e dependências e `SINCRONIZACAO_GITLAB_GITHUB.md` para operações Git. Documentos de etapas datadas são evidências históricas, salvo regras explicitamente ratificadas em documento canônico vigente. A ajuda em `src/modules/ajuda/textos/` deve ser validada como documentação operacional publicada.
+## Ordem de leitura para manutenção
 
----
-
-
-## Checkpoint histórico — 26/10/2026: Etapa 8 integrada; Etapa 9 iniciada documentalmente
-
-**Estado verificado:** os merges da Etapa 8 constam na `main` backend (`818d580`, GitLab MR `nti/sgl-api!10`) e frontend (`12a195a`, MR `nti/sgl-web!11`); os sincronizadores GitLab → GitHub reportaram sucesso. Etapa 8 concluída funcionalmente; V44/Flyway, build frontend e ArchUnit 5/5 foram validados nos checkpoints informados. Testes globais de carga/E2E continuam na Etapa 12.
-
-**Etapa 9 vigente = RELATÓRIOS CONSOLIDADOS.** Adicionar relatório de **Projetos** à Central de Relatórios; unificar visualmente **Movimentações** e **Resumo operacional** em uma opção com modos **Resumo / Detalhamento**, inicialmente mantendo endpoints existentes. Não confundir com seções antigas que denominavam "Etapa 9" de Pedidos/Soluções — esse trabalho foi absorvido pela Etapa 8.
-
-**Branches criadas, sem implementação funcional nem merge:** `collab/etapa-9-relatorios-consolidados` nos dois repositórios, derivadas dos HEADs da `main` pós-Etapa 8. Contrato de início, escopo, regras e checklist bilateral: `docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`. Auditoria prévia de dados institucionais: `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md`. GitLab é canônico; GitHub colaboração/espelho.
-
-**Status documental:** checkpoints históricos abaixo descrevem o estado de suas datas; qualquer menção antiga a "Etapa 8 pendente", "sem merge" ou "Etapa 9 Pedidos" não vale para o HEAD atual.
-
-
-
-> **Checkpoint histórico — 23/10/2026 (Etapa 8, MVP em DEV):** blocos funcionais Vínculos, Pedidos, Soluções e Resíduos homologados manualmente; Pedido/Solução/Resíduo permitem Projeto opcional para os perfis elegíveis; vínculo específico por Projeto/SCI/Atividade deriva contexto operacional sem criar vínculos formais automaticamente. Backend PostgreSQL/Flyway validou 44 migrations; o frontend compilou e o ArchUnit passou 5/5 regras. Auditorias completas de carga/E2E e eventual identidade institucional permanecem fora deste aceite. **Auditoria de campos e entradas:** `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md` — há dependência de provisionamento externo/seed para Unidade, Usuário e cadastro inicial de Estagiário, embora os cadastros operacionais restantes tenham telas. **Sem merge; não presumir sincronização GitLab confirmada.** Trechos históricos datados abaixo descrevem o estado *àquela época*, não substituem este checkpoint.
-
-
-## Checkpoint de encerramento funcional — Etapa 7 (16/10/2026)
-
-**Estado:** Etapa 7 (7.0–7.7) concluída funcionalmente e validada pelo responsável; código e documentação preparados na branch `collab/etapa-7-unidades-solucoes-contexto` para merge **a ser realizado pelo responsável**. Não afirmar que o merge, publicação ou homologação integral de produção ocorreram.
-
-**Entregas:** unidades de medida e apresentações físicas, conversão e decimais, recipientes individuais, FEFO/FIFO, Soluções, contrato de Pedidos convencionais por embalagem ou medida, aprovação em embalagens com conversão canônica, retirada individual de reações/unidades de kits quando o lote permite abertura, massa DEV/DEMO revisada, resumo físico na listagem de Estoque, mínimo configurável em embalagem ou medida (V39), revisão da nomenclatura e da configuração `fracionavel` por lote, QA e auditoria de integração. O valor mínimo salvo continua canônico; a preferência de apresentação é persistida separadamente.
-
-**Aceites relatados pelo responsável:** suítes Maven/JUnit verdes, API iniciando normalmente, build do frontend verde, solicitações/aprovações e refinamento de estoque validados, correções finais de cadastro/entrada, massa DEMO e documentação testadas e aceitas. Não extrapolar esses aceites para teste exaustivo de todos os perfis ou homologação para produção.
-
-**Regras importantes:** `fracionavel` controla permitir abrir embalagem e consumir parte do conteúdo; não permite dividir uma unidade indivisível como 1 reação. O lote governa a permissão; pedidos por medida não são pedidos de embalagem; pedidos por embalagem são aprovados visualmente em apresentações inteiras, enviados ao backend em quantidade canônica. FEFO/FIFO e baixa única na aprovação continuam no servidor. Kit fracionável admite retirada de uma reação individual; frasco de 500 mL admite pedido por medida, sem inventar “500 unidades”.
-
-**Etapa 8, próximo passo:** integração do contexto de participação do Estagiário (Projeto/SCI/Atividade) aos Pedidos/Soluções, incluindo regras de vínculo, acesso e aprovação. Executar também **roteiro operacional exaustivo ainda não realizado**: cadastro de produto → entrada de lotes → escolha de embalagem ou medida → pedido → liberação/aprovação → entrega → movimentação/rastreabilidade, com casos de abertura, estoque mínimo, validade, FEFO/FIFO e múltiplas unidades. Nenhuma mudança da Etapa 8 deve ser inferida como implementada.
-
-**Infra e migrations:** DEV PostgreSQL com Flyway; DEMO H2 em memória; massa de teste por inicializadores. V39 acrescenta metadados opcionais para exibição do mínimo. Flyway para evolução estrutural/dados de referência necessários, não para atualizar dados fictícios descartáveis. Confirmar ambos os repositórios após o merge e criar branch separada para a Etapa 8.
-
-**Documentação canônica:** backend `docs/PLANO_PRE_PRODUCAO.md`, `docs/CONTINUIDADE_ETAPA_7_2026-10-06.md`, `docs/ETAPA_7_7_AUDITORIA_INTEGRACAO_BACKEND_FRONTEND.md`; frontend `docs/PADRAO_VISUAL_PRE_PRODUCAO.md`, `docs/ETAPA_7_6_0_AUDITORIA_FRONTEND_PADRAO_VISUAL_PEDIDOS.md`. Registros datados anteriores refletem checkpoints históricos, não substituem este encerramento.
-
-
-**Atualizado em:** 16/10/2026
-
-Este índice separa documentação vigente, decisões de produto, referências visuais e registros históricos. O objetivo é evitar que uma etapa antiga seja interpretada como planejamento atual.
-
----
-
-## Ordem de leitura para retomada
-
-```text
-1. ../CONTINUIDADE.md
-2. SINCRONIZACAO_GITLAB_GITHUB.md
-3. backend: docs/PLANO_PRE_PRODUCAO.md
-4. backend: docs/CONTINUIDADE_ETAPA_5_2026-09-24.md
-5. ../README.md
-6. DOSSIE_PROJETO_SGL.md
-7. src/router/index.ts para rotas reais
-8. Swagger/OpenAPI do backend para contratos HTTP
-9. documento específico da área em trabalho
-```
-
----
-
-## Fonte de verdade
-
-```text
-código da main
-→ Swagger/OpenAPI
-→ ../CONTINUIDADE.md
-→ SINCRONIZACAO_GITLAB_GITHUB.md
-→ PADRAO_VISUAL_PRE_PRODUCAO.md durante a Etapa 1
-→ DOSSIE_PROJETO_SGL.md
-→ decisões específicas
-→ documentos de etapa e snapshots históricos
-```
-
-Um documento histórico pode continuar útil para explicar uma decisão, mas não define sozinho o próximo passo do projeto.
-
----
-
-## Estado do projeto
-
-```text
-Primeiro protótipo funcional                 ✅ aprovado
-Pré-produção pós-aprovação                   🔧 em andamento
-Etapa 1 — padrão visual global               ✅ concluída
-Etapa 2 — Dark Mode definitivo               ✅ concluída
-Etapa 3 — refinamentos de Resíduos           ✅ concluída e validada
-Etapa 4 — expansão operacional de Resíduos   ✅ concluída e validada
-Matriz formal de permissões                  ⏳ após a pré-produção atual
-Congelamento/homologação final               ⏳ posterior
-Autenticação definitiva                      ⏳ posterior
-Integração corporativa                       ⏳ posterior
-```
-
----
-
-## Documentos vigentes
-
-| Documento | Papel | Estado |
+| Ordem | Documento | O que consultar |
 |---|---|---|
-| `../CONTINUIDADE.md` | checkpoint, fase atual e regra de retomada | **ATUAL** |
-| `SINCRONIZACAO_GITLAB_GITHUB.md` | remotes, branches, Actions, push/pull e regras de sincronização | **ATUAL — 22/09** |
-| `PADRAO_VISUAL_PRE_PRODUCAO.md` | decisões concretas da Etapa 1.1: dimensões, tipografia, cards, ícones, filtros, setas, botões e estados | **DECISÃO VIGENTE — Etapa 1 concluída** |
-| `../README.md` | visão rápida e execução | **ATUAL** |
-| `DOSSIE_PROJETO_SGL.md` | handoff completo humano/IA | **ATUAL** |
-| backend: `docs/VALIDACAO_ETAPA_4.md` | bateria executada e critérios de fechamento da Etapa 4 | **FECHADO — 24/09** |
-| `INVENTARIO_TELAS.md` | inventário de rotas/telas | **REFERÊNCIA VIGENTE** |
-| `FLUXOS_NAVEGACAO.md` | jornadas atuais | **REFERÊNCIA VIGENTE** |
-| `ETAPA_CADASTROS_ADMIN.md` | decisões de Administração/Cadastros | **DECISÃO VIGENTE** |
-| `ETAPA_ESTAGIARIOS.md` | decisões do módulo Estagiários | **DECISÃO VIGENTE** |
-| `DECISAO_UNIDADES_CORPORATIVAS.md` | Unidade institucional e integração futura | **DECISÃO VIGENTE** |
-| `IDENTIDADE_VISUAL.md` | identidade visual conceitual original | **REFERÊNCIA BASE** |
-| `ICONOGRAFIA.md` | conceitos originais de iconografia | **REFERÊNCIA BASE** |
-| `PADROES_PAGINA.md` | padrões de composição | **REFERÊNCIA BASE** |
-| `SHELL_VISUAL.md` | sidebar/topbar/shell | **REFERÊNCIA** |
-| `ROTULO_PRODUTOS.md` | rótulo de Produto | **REFERÊNCIA** |
-| `ROTULO_RESIDUOS.md` | rótulo de Resíduo | **REFERÊNCIA** |
+| 1 | [`../CONTINUIDADE.md`](../CONTINUIDADE.md) | Checkpoint e regras da branch atual |
+| 2 | [`GOVERNANCA_DOCUMENTAL.md`](GOVERNANCA_DOCUMENTAL.md) | Hierarquia e vigência das fontes |
+| 3 | [`DOSSIE_PROJETO_SGL.md`](DOSSIE_PROJETO_SGL.md) | Stack, roteamento, stores, serviços, telas, API e impressão |
+| 4 | [`AUDITORIA_DOCUMENTAL_FRONTEND_2026-11-12.md`](AUDITORIA_DOCUMENTAL_FRONTEND_2026-11-12.md) | Inventário documental e revisões realizadas |
+| 5 | [`PRESERVACAO_CENTRAL_AJUDA_VIDEOS.md`](PRESERVACAO_CENTRAL_AJUDA_VIDEOS.md) | Política obrigatória para **20 tutoriais, 21 artigos contando FAQ e vídeos** |
+| 6 | [`SINCRONIZACAO_GITLAB_GITHUB.md`](SINCRONIZACAO_GITLAB_GITHUB.md) | Direções de espelhamento, branches e procedimentos de MR |
+| 7 | [`INVENTARIO_TELAS.md`](INVENTARIO_TELAS.md) e [`FLUXOS_NAVEGACAO.md`](FLUXOS_NAVEGACAO.md) | Catálogo de telas e jornadas; confrontar com router atual |
+| 8 | [`PADRAO_VISUAL_PRE_PRODUCAO.md`](PADRAO_VISUAL_PRE_PRODUCAO.md), [`IDENTIDADE_VISUAL.md`](IDENTIDADE_VISUAL.md), [`REGRA_PADRONIZACAO_NOVOS_MODULOS.md`](REGRA_PADRONIZACAO_NOVOS_MODULOS.md) | Padrões de componentes, identidade, tokens e responsividade |
+| 9 | [`PLANO_TESTES_PRIMEIRO_PROTOTIPO.md`](PLANO_TESTES_PRIMEIRO_PROTOTIPO.md) | Histórico do plano inicial, **não aceitação de E2E atual** |
 
-`PADRAO_VISUAL_PRE_PRODUCAO.md` permanece como referência do padrão aprovado na Etapa 1; `ETAPA_2_DARK_MODE.md` e `ETAPA_2_FECHAMENTO.md` registram o fechamento visual da Etapa 2.
+**Fontes cross-repo:** o backend contém a matriz `docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md`, o **registro único** `docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md` (SGL-REV-001 a 031), a Etapa 12 de qualidade e o plano `docs/PLANO_HOMOLOGACAO_NUVEM_MOBILE_2026-11-17.md`. Os links de revisão atuais estão no [dossiê deste frontend](DOSSIE_PROJETO_SGL.md), e serão conciliados com o GitLab após os MRs.
 
----
+**Inventário original:** `AUDITORIA_DOCUMENTAL_FRONTEND_2026-11-12.md` registra **87 arquivos Markdown na `release` original**, incluindo 21 artigos da Ajuda. Documentos criados na branch de revisão aumentam a contagem, não alteram retroativamente o inventário histórico.
 
-## Roadmap e fechamento
+## O que está implementado na release
 
-| Documento | Interpretação atual |
+- **Vue 3, Vite, TypeScript, Vue Router, Pinia, Vuetify, Axios e Vitest.** UI/rotas reais em `src/`; dados e autorizações operacionais são decididos pelo backend, não por botões ou filtros ocultos.
+- **Sessão:** login corporativo via `/v1/auth/login`, JWT local `sgl.session`, `/v1/auth/me`; login `dev/demo` somente em configuração permitida. Tenant vem da identidade no backend. O cliente só envia `X-SGL-Unidade-Id` para `ADMINISTRADOR_GERAL` quando seleciona outra Unidade.
+- **Estagiários:** o solicitante seleciona participação elegível Projeto/SCI/Atividade e laboratório simultaneamente permitido para Projeto e pessoa; funcionários podem escolher laboratório ativo da Unidade, com sinalização de exceção conforme regra atual. Projeto não é genericamente opcional para Estagiário.
+- **Pedidos, Soluções, Resíduos e Estoque:** formulários, aprovações, lote/recipiente, rótulos e relatórios integrados. O frontend da `release` possui impressão A4 e exportação/Browser Print Zebra para Produto/Resíduo/Solução/entrada de lote.
+- **Central de Ajuda:** 20 vídeos referenciados por `tasks.json`, FAQ separado, posters e PDF versionados; MP4 publicados por **volume externo do Nginx** conforme `docker-compose.yml` e `nginx.conf.template`. **A ausência dos vídeos no Git não comprova falha de publicação.**
+
+## Estado da revisão e limites
+
+A auditoria registrou uma matriz de riscos **sem corrigir funcionalidades**: autorização horizontal de GETs, conteúdo do FAQ/tutoriais por perfil, carga do Dashboard e de Relatórios, quantidade física heterogênea e limites da cobertura de testes.
+
+- `npm run test` chama Vitest e abrange os arquivos `src/**/__tests__/*.spec.ts`, mas **não** os testes Zebra `src/modules/rotulos/zebra/*.test.mjs` baseados em `node:test`.
+- Há CSS responsivo nos formulários de Pedido/Solução/Resíduo e menu móvel na Ajuda, porém ainda **não há evidência de jornada em Android Chrome e iOS Safari reais**.
+- **Plano de homologação não executado:** staging efêmero em nuvem com frontend, API, PostgreSQL/Flyway e JWT/test doubles corporativos autorizados; CL-01 a CL-11 para endpoints e MB-01 a MB-12 para Estagiário em celular. O uso de dados institucionais ou produção exige autorização específica.
+- **Central de Ajuda permanece intocada:** não modificar `src/modules/ajuda/`, `public/ajuda/`, vídeos, posters e PDFs durante revisão documental. Divergências editoriais ficaram no backlog, sem publicação.
+
+## Guias por área e registros históricos
+
+| Área | Guias |
 |---|---|
-| `ROADMAP_INTERFACE_GESTAO.md` | roadmap formal que será retomado **após** o bloco atual de pré-produção |
-| `FECHAMENTO_PRIMEIRO_PROTOTIPO.md` | registro de fechamento/aprovação do primeiro protótipo; não é mais um gate pendente |
-| `PLANO_TESTES_PRIMEIRO_PROTOTIPO.md` | bateria de testes reaproveitável na homologação formal posterior |
+| Interface e tema | [`SHELL_VISUAL.md`](SHELL_VISUAL.md), [`PADROES_PAGINA.md`](PADROES_PAGINA.md), [`GUIA_EFEITOS_VISUAIS.md`](GUIA_EFEITOS_VISUAIS.md), [`ICONOGRAFIA.md`](ICONOGRAFIA.md) |
+| Solicitante | [`ETAPA_2_MEUS_PEDIDOS.md`](ETAPA_2_MEUS_PEDIDOS.md), [`ETAPA_7_4_TESTE_FLUXO_SOLUCOES.md`](ETAPA_7_4_TESTE_FLUXO_SOLUCOES.md), [`ETAPA_8_INICIO_E_REGRAS.md`](ETAPA_8_INICIO_E_REGRAS.md) |
+| Estoque e Gestão | [`ETAPA_7_5_MAPA_IMPLEMENTACAO_FRONTEND.md`](ETAPA_7_5_MAPA_IMPLEMENTACAO_FRONTEND.md), [`ETAPA_2_GESTAO_ESTOQUE.md`](ETAPA_2_GESTAO_ESTOQUE.md) |
+| Relatórios | [`ETAPA_9_INTEGRACAO_FRONTEND_2026-10-26.md`](ETAPA_9_INTEGRACAO_FRONTEND_2026-10-26.md), [`ETAPA_9_1_AUDITORIA_CONTRATOS_RELATORIOS_2026-10-26.md`](ETAPA_9_1_AUDITORIA_CONTRATOS_RELATORIOS_2026-10-26.md) |
+| Impressão e Zebra | [`ETAPA_10_PREPARACAO_ROTULOS_IMPRESSAO_2026-10-27.md`](ETAPA_10_PREPARACAO_ROTULOS_IMPRESSAO_2026-10-27.md), [`ETAPA_10_ZEBRA_PILOTO_ZPL_2026-10-29.md`](ETAPA_10_ZEBRA_PILOTO_ZPL_2026-10-29.md), [`ROTULO_PRODUTOS.md`](ROTULO_PRODUTOS.md) e [`ROTULO_RESIDUOS.md`](ROTULO_RESIDUOS.md) |
+| Protótipo | [`FECHAMENTO_PRIMEIRO_PROTOTIPO.md`](FECHAMENTO_PRIMEIRO_PROTOTIPO.md) e demais Etapas 1–2: **registro histórico**, não o estado corrente da release |
 
-A matriz de permissões continua planejada, mas não deve ser descrita como tarefa imediata enquanto o bloco atual de pré-produção estiver aberto.
+## Execução e implantação
 
----
+**Desenvolvimento:** `npm ci`, `npm run dev`, `npm run type-check`, `npm run test`, `npm run build`. Usar `.env.example` e ambiente autorizado. **Não executar scripts antigos de checkout** descritos nas Etapas 7–10 como se fossem da release.
 
-## Decisões visuais atuais — Etapa 1
+**Deploy fiel à topologia real:** `Dockerfile` compila Vite com `VITE_API_BASE_URL=/api`; `nginx.conf.template` faz proxy na mesma origem `/api` para o backend; `docker-compose.yml` conecta à rede autorizada e ao volume externo **somente leitura** dos vídeos. Staging deve usar redes, volumes, segredos e banco **isolados**, nunca copiar credenciais institucionais.
 
-A subetapa 1.1 foi concluída em 09/09/2026. O padrão aprovado está em `PADRAO_VISUAL_PRE_PRODUCAO.md`.
+**Política de integração:** GitHub `collab/*` → GitLab `collab/*` → MR → GitLab `release`; GitHub `release` é espelho. Antes do merge, conferir SHAs, diff de assets/ajuda e regressão documental. Para próximos testes usar os planos do backend; não declarar testes executados pela presença de scripts.
 
-Resumo obrigatório para retomada:
-
-```text
-preservar MVP e identidade original
-Vuetify/MDI como família de iconografia
-controle comum 40 px
-icon-only 40 × 40 px
-ícone comum 20 px
-seta/chevron 24 px, centralizada e palpável
-raio controles 6 px
-raio cards 8 px
-linha de tabela 48 px
-padding de card 20 px
-título de página 24 px
-texto normal 14 px
-label 13 px
-texto auxiliar mínimo 12 px
-filtros sempre representados por funil
-azul = ação/informação
-verde = sucesso
-amarelo = atenção
-vermelho = erro/urgência
-cinza = neutro/sem interação
-Dark Mode consolidado e concluído na Etapa 2
-```
-
-Status da Etapa 1:
-
-```text
-1.1 definir padrão visual                  ✅
-1.2 fundação visual compartilhada          ✅
-1.3 padronizar componentes básicos         ✅
-1.4 aplicar tela a tela                     ✅
-1.5 limpar exceções/CSS corretivo           ✅
-1.6 revisão visual final                    ✅
-Etapa 1                                    ✅ concluída
-```
-
----
-
-## Documentos históricos
-
-Os arquivos abaixo registram etapas já concluídas ou concepções anteriores. Permanecem úteis para contexto, mas não definem o estado atual:
-
-| Documento | Uso correto |
-|---|---|
-| `ETAPA_2_BOOTSTRAP.md` | histórico de bootstrap e primeiras decisões |
-| `SIDEBAR_ALERTAS.md` | concepção anterior à implementação final de alertas/shell |
-| screenshots e registros visuais antigos | comparação histórica, não fonte de estado funcional |
-
-Se um documento histórico disser que Administração, Resíduos, Dashboard, Alertas, tema escuro ou outra funcionalidade já integrada “ainda será feita”, essa afirmação está superada.
-
----
-
-## Decisões vigentes
-
-- Lotes continuam dentro do contexto de Estoque;
-- não existe uma segunda área operacional independente de Produto;
-- Unidade não possui CRUD manual normal;
-- Administração usa `/administracao/cadastros` e é exclusiva de `ADMINISTRADOR`;
-- usuário não é criado manualmente em Cadastros; permissões alteram perfis existentes;
-- `Produto != Resíduo`;
-- modelos pré-cadastrados de Resíduo foram implementados e validados na Etapa 4;
-- QR Code não integra o rótulo visual atual;
-- sessão atual é DEV e expira em 5h;
-- o tema claro/escuro pertence às interfaces autenticadas e não deve alterar a tela de login sem decisão explícita;
-- o frontend envia `X-SGL-Unidade-Id` a partir da Unidade da sessão DEV;
-- o isolamento por Unidade é funcional, mas a segurança definitiva dependerá de identidade autenticada.
-
----
-
-## Fase atual e roadmap
-
-### Agora
-
-```text
-planejamento de pré-produção                 ✅
-→ Etapa 1 padrão visual                     ✅
-→ Etapa 2 Dark Mode definitivo              ✅
-→ Etapa 3 refinamentos de Resíduos          ✅
-→ Etapa 4 expansão operacional de Resíduos  ✅
-→ Etapa 5 Projetos e Atividades              ✅ concluída e validada
-→ Etapa 6 Estagiários e vínculos             ⏳ próxima
-→ Etapas 7 a 9
-→ estabilização do bloco
-```
-
-### Depois
-
-```text
-matriz de permissões
-→ congelamento funcional
-→ homologação integrada final
-→ autenticação/autorização/auditoria
-→ integração corporativa
-→ demais etapas formais de produção
-```
-
----
-
-## Regra para outra IA
-
-Antes de implementar algo novo:
-
-```text
-1. ler ../CONTINUIDADE.md
-2. ler SINCRONIZACAO_GITLAB_GITHUB.md
-3. ler o plano canônico do backend: docs/PLANO_PRE_PRODUCAO.md
-4. ler o handoff da Etapa 4 no backend
-5. conferir src/router/index.ts
-6. conferir gitlab/main e github/main
-7. conferir Swagger/OpenAPI quando houver contrato HTTP
-8. abrir o documento específico da área
-9. distinguir decisão atual de registro histórico
-```
-
-Não reconstruir módulos aprovados apenas porque uma documentação antiga descreve uma fase anterior. Preservar o padrão visual consolidado na Etapa 1 e a arquitetura de tema consolidada na Etapa 2; só reabrir esses blocos diante de regressão concreta ou nova decisão.
+**Estado deste índice:** referência atual de manutenção, preservando todo o histórico em arquivos de etapas e no índice arquivado.
