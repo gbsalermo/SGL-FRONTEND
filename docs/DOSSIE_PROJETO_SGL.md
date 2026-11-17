@@ -1,5 +1,7 @@
 # Dossiê técnico do SGL — Frontend
 
+> **Cobertura dos testes Zebra (17/11):** `npm run test` chama Vitest, cujo `vitest.config.ts` inclui apenas `src/**/__tests__/*.spec.ts`. Portanto, os testes `src/modules/rotulos/zebra/zpl.test.mjs` e `browserPrintLocal.test.mjs` **não são executados por esse comando**; seus cabeçalhos indicam execução separada via `node --experimental-strip-types --test`. A inclusão na suíte/CI é pendência [SGL-REV-023](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md), além de teste físico em Zebra. `helpTasks.spec.ts` e `helpAssets.spec.ts` entram no Vitest mas não testam a reprodução dos MP4 publicados.
+
 > **Pendências rastreadas (17/11/2026):** ver [registro único do SGL](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md) no repositório backend. Questões de permissões, fluxo de correções, tutoriais, desempenho e impressão não devem ser “resolvidas” automaticamente durante a auditoria.
 
 > **Pontos de impressão (conferidos em 17/11):** rótulo de Solução tem prévia em `PENDENTE` e libera A4/Zebra em `EM_PREPARACAO` ou `ENTREGUE`; documento de entrada é acessível após criar lote e pelo detalhe do lote; Resíduo bloqueia impressão antes de `impressaoPermitida`; Produto oferece A4/Zebra. **Resta validar impressora e dados físicos, não localizar o botão.** Evidências na matriz de coerência do backend, seção C8.
