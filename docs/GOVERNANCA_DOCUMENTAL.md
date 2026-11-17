@@ -1,5 +1,7 @@
 # Governança documental — SGL Frontend
 
+> **Fila única de correções (17/11/2026):** [`REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md`](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md) fica no **backend**, mas cobre também o frontend. Não criar segundo backlog paralelo. Preservar a Central de Ajuda e seus vídeos.
+
 **Estado:** organização e resolução de redundância de autoridade em 12/11/2026. **Não** equivale à validação funcional integral. Base: arquivos e roteador da `release`; branch de trabalho `collab/docs-release-estado-2026-11`.
 
 ## Regra de precedência
