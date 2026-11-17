@@ -1,5 +1,7 @@
 # Etapa 8 — Checkpoint de início | Frontend
 
+> **Vigência — 17/11/2026:** os trechos iniciais sobre “formulários ainda vinculados ao laboratório-base”, preparação sem alterações, ausência de merge e `X-SGL-Unidade-Id` pertencem ao início da Etapa 8 em outubro. A `release` já suporta `participacaoId` para Estagiário, laboratório associado ao Projeto e ao estagiário, e escolha de laboratório ativo da Unidade para empregado, sinalizando laboratório fora da lista. **Projeto não é genericamente opcional para estagiário**: é derivado da participação. Conferir `NovoPedidoView.vue`, `NovaSolucaoView.vue` e `PedidoService.resolverContextoPedido` antes de usar o roteiro. [Matriz de evidências](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md), C3.
+
 > **Checkpoint vigente — 23/10/2026 (Etapa 8):** blocos Vínculos, Pedidos, Soluções e Resíduos homologados manualmente em DEV. Projeto opcional; contexto herdado Projeto/SCI/Atividade. Flyway V44; build frontend aprovado; ArchUnit 5/5. Ver `docs/AUDITORIA_COBERTURA_DADOS_MVP_ETAPA_8_2026-10-23.md`: cadastros operacionais possuem entrada, mas inicialização de Unidades, Usuários e novos Estagiários depende de provisionamento/seed; não há CRUD manual completo. Testes globais E2E/carga e login institucional são trilhos separados. Não houve merge nem comprovação de sincronização GitLab. Registros antigos permanecem históricos.
 
 
