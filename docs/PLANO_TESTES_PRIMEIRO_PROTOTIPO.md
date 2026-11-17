@@ -1,5 +1,7 @@
 # Plano de Testes Integrados — SGL
 
+> **Releitura do roteiro — 17/11/2026:** o plano de setembro é **uma matriz de homologação planejada**, não prova de testes executados. O perfil `ADMINISTRADOR_GERAL`, a autenticação JWT/Unidade pela identidade, estagiários multilaboratório e cenários de acesso a dados de **outro usuário da mesma Unidade** devem ser incluídos no roteiro atualizado; o perfil test backend usa H2 sem Flyway e não valida migrations PostgreSQL. Na `release` atual existem 31 specs Vitest, 2 testes Zebra Node fora do glob, e 128 arquivos Java `*Test.java`, porém esses números **não significam testes aprovados**. Itens de aceite em [SGL-REV-009/017/023/024](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md).
+
 **Revisado em:** 04/09/2026  
 **Estado do produto:** primeiro protótipo funcional aprovado.  
 **Execução:** reutilizar/adaptar este plano na homologação formal posterior ao bloco atual de pré-produção.  
