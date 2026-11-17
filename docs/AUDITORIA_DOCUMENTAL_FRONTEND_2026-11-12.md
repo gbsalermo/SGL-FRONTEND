@@ -189,3 +189,11 @@ Novos riscos e critérios de correção estão centralizados no [registro único
 **Documentos especializados:** `SGL-REV-021` controla contratos datados sobre Projeto obrigatório para Soluções e laboratório limitado ao vínculo de funcionários; tais regras foram superadas pela `release` e não justificam regressão funcional. A Central de Ajuda permanece publicada e **intocada**, até revisão editorial aprovada e compatível com os vídeos.
 
 **Escopo:** leitura estática, sem execução de testes ou alteração de código. READMEs reservados para fechamento.
+
+## Cobertura real das suítes e frontend de integração corporativa — 17/11/2026
+
+**Rotas conferidas:** `pessoasCorporativasService.ts` faz `GET /v1/pessoas-corporativas` e `POST /v1/pessoas-corporativas/importar` usados em `ImportarPessoasView.vue`. O backend `PessoaCorporativaController` apresenta esses endpoints, com autorização de Gestão no service. O fluxo **não é o mesmo que login corporativo**, tampouco sincronização de bolsa/estágio. Os contratos e testes foram descritos na matriz C11 do repositório backend; ativação externa de eventos permanece pendente (`SGL-REV-022`).
+
+**Cobertura de testes verificada por configuração:** `package.json` define `npm run test` como `vitest run` e `vitest.config.ts` seleciona `src/**/__tests__/*.spec.ts`. Portanto, os dois testes `.test.mjs` da Zebra, baseados em `node:test`, **não entram na suíte padrão** (`SGL-REV-023`). Os testes de mapeamento/asset da Central de Ajuda entram, mas não comprovam MP4 disponíveis no deploy (`SGL-REV-012`). Nada foi executado e nenhum arquivo funcional/asset foi modificado.
+
+**Pendências em documento único:** [registro pós-revisão no backend](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md), agora com 23 IDs. Este inventário continua o mapa de cobertura documental, não a fila de correções.
