@@ -179,3 +179,13 @@ Em especial, `SGL-REV-006` reúne as divergências entre o tutorial geral de lab
 **Novas verificações registradas:** `SGL-REV-012` garante a validação da entrega dos vídeos no deploy sem tocá-los; `SGL-REV-013` trata enriquecimento condicional de itens por requisições de Produto como **hipótese de desempenho**, sem gargalo medido; `SGL-REV-011` registra a validação física pendente de A4/Zebra.
 
 Nenhum arquivo sob `src/modules/ajuda/` ou `public/ajuda/` foi modificado. Os READMEs finais continuam fora do escopo desta rodada.
+
+## Revisão cruzada complementar — 17/11/2026: consultas de pessoas e vínculos
+
+Foram conferidas no frontend as chamadas `estagiarioService.listarUsuarios` (`GET /v1/usuarios`), `cadastrosAdminService.listarUsuarios` (mesma rota), `estagiarioService.listarTodos` (`GET /v1/estagiarios`) e o uso das listagens em `EstagiariosGestaoView.vue`. Os endpoints correspondentes foram encontrados no backend, mas **a filtragem visual por perfil não substitui autorização do servidor**.
+
+Novos riscos e critérios de correção estão centralizados no [registro único do SGL](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md), IDs `SGL-REV-018` (Usuários), `019` (Estagiários) e `020` (fallback sem tenant). **Evitar duplicar a discussão técnica**: evidências aprofundadas na matriz do backend, seção C9. Uma correção no backend pode exigir respostas resumidas para os seletores da Gestão/Admin, preservando a experiência.
+
+**Documentos especializados:** `SGL-REV-021` controla contratos datados sobre Projeto obrigatório para Soluções e laboratório limitado ao vínculo de funcionários; tais regras foram superadas pela `release` e não justificam regressão funcional. A Central de Ajuda permanece publicada e **intocada**, até revisão editorial aprovada e compatível com os vídeos.
+
+**Escopo:** leitura estática, sem execução de testes ou alteração de código. READMEs reservados para fechamento.
