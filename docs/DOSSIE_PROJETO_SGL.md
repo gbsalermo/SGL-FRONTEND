@@ -1,5 +1,7 @@
 # Dossiê técnico do SGL — Frontend
 
+> **Revisão cruzada — 17/11/2026:** contratos de Pedidos, Soluções, Estoque, Estagiários, Resíduos e Relatórios conferidos estaticamente com controllers do backend. **Alerta prioritário:** verificar autorização por titularidade/perfil em consultas `GET` de dados de terceiros na mesma Unidade; ver `docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md` **no repositório backend**, seção C2/C6. Esta auditoria não modificou o código nem a Central de Ajuda.
+
 **Revisão técnica:** 12/11/2026  
 **Repositório:** `gbsalermo/SGL-FRONTEND` (espelho GitHub do `sgl-web` institucional)  
 **Base verificada:** árvore, arquivos de sessão, HTTP, roteador, bootstrap, testes e módulos da `release` espelhada.  
