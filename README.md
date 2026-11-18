@@ -453,7 +453,7 @@ A `release` integra módulos que documentos de outubro descreviam como “aguard
 | Multilaboratório | Regras de empregados e estagiários diferentes; participação elegível para Estagiário |
 | Qualidade (Etapas 12–13) | Auditoria documental e de código avançada; **E2E, carga, PostgreSQL/Flyway e teste Android/iOS pendentes** |
 
-**Riscos abertos:** autorização por objeto em consultas GET, desempenho do Dashboard e de Relatórios, consistência de quantidades físicas, compatibilidade API e acesso mobile. A documentação organiza os achados, mas **não os corrige nem os homologa**. O acompanhamento está no registro único de revisão do backend (`docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md`).
+**Riscos abertos:** autorização por objeto em consultas GET, desempenho do Dashboard e de Relatórios, consistência de quantidades físicas, compatibilidade API e acesso mobile. A documentação organiza os achados, mas **não os corrige nem os homologa**. O acompanhamento está no [registro único de revisão do backend](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md).
 ---
 
 ### Linha de evolução do produto
@@ -486,7 +486,7 @@ O histórico das decisões e mudanças fica nos [guias das etapas](docs/README.m
 | [`docs/SINCRONIZACAO_GITLAB_GITHUB.md`](docs/SINCRONIZACAO_GITLAB_GITHUB.md) | GitLab `release`, GitHub espelho, branches `collab/*` e MR |
 | [`docs/PLANO_TESTES_PRIMEIRO_PROTOTIPO.md`](docs/PLANO_TESTES_PRIMEIRO_PROTOTIPO.md) | Plano inicial histórico; não atesta execução recente |
 
-No **backend**, consultar `docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md`, `docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md` (31 itens) e `docs/PLANO_HOMOLOGACAO_NUVEM_MOBILE_2026-11-17.md` (CL-01–11, MB-01–12). Todos os novos problemas são registrados **num único backlog**, sem duplicações entre repositórios.
+No **backend**, consultar a [matriz de coerência](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/MATRIZ_COERENCIA_FRONTEND_BACKEND_2026-11-12.md), o [registro de pendências](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md) (31 itens) e o [plano cloud/mobile](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/PLANO_HOMOLOGACAO_NUVEM_MOBILE_2026-11-17.md) (CL-01–11, MB-01–12). Todos os novos problemas são registrados **num único backlog**, sem duplicações entre repositórios.
 ---
 
 ## Vídeos da Central de Ajuda
