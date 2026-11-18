@@ -87,11 +87,36 @@ Gestão
 
 **Resíduos seguem fluxo próprio:** o solicitante informa composição (produto cadastrado ou componente livre), local/contexto e risco; a Gestão avalia, libera e acompanha armazenamento/destinação. Isso não implica baixa automática de estoque por simples registro de composição.
 
+### Visão da jornada entre interface e API
+
+Exemplo **ilustrativo de pedido de material**; a autorização e a movimentação física são executadas no servidor. Este diagrama não representa um teste ponta a ponta homologado.
+
+```mermaid
+sequenceDiagram
+    actor E as Estagiário
+    participant W as Interface Vue
+    participant A as API SGL
+    actor G as Gestão
+    E->>W: Seleciona participação e laboratório elegíveis
+    W->>A: Consulta contextos permitidos (JWT)
+    A-->>W: Contextos autorizados
+    E->>W: Envia pedido de material
+    W->>A: Registra solicitação
+    A-->>W: Pendente, sem baixa
+    G->>W: Aprova o pedido
+    W->>A: Solicita aprovação
+    A->>A: FEFO/FIFO e baixa em lote/recipiente
+    A-->>W: Situação e rastreabilidade
+    G->>W: Confirma entrega
+    W->>A: Registra entrega
+    A->>A: Não efetua segunda baixa
+```
+
 ### Interface disponível neste repositório
 
 ![Tela de acesso do SGL — captura aprovada e versionada no repositório](docs/screenshots/login-final.png)
 
-A captura existente representa **a entrada do sistema**, não todas as jornadas. Imagens de Dashboard, Pedidos, Estoque e Relatórios devem ser adicionadas somente após captura recente, revisão visual e remoção de qualquer dado institucional ou pessoal. Não usar posters da Central de Ajuda como se fossem screenshots do produto.
+A captura existente representa **a entrada do sistema**, não todas as jornadas. Imagens de Dashboard, Pedidos, Estoque e Relatórios devem ser adicionadas somente após captura recente, revisão visual e remoção de qualquer dado institucional ou pessoal. Não usar posters da Central de Ajuda como se fossem screenshots do produto. O [protocolo de capturas](docs/screenshots/README.md) identifica as próximas telas e os critérios de publicação.
 
 ---
 
