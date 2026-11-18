@@ -436,6 +436,23 @@ A `release` integra módulos que documentos de outubro descreviam como “aguard
 **Riscos abertos:** autorização por objeto em consultas GET, desempenho do Dashboard e de Relatórios, consistência de quantidades físicas, compatibilidade API e acesso mobile. A documentação organiza os achados, mas **não os corrige nem os homologa**. O acompanhamento está no registro único de revisão do backend (`docs/REGISTRO_PENDENCIAS_REVISAO_SGL_2026-11.md`).
 ---
 
+### Linha de evolução do produto
+
+```text
+Protótipo visual e experiência por perfil
+  → cadastros, Estoque e Resíduos
+  → Projetos, SCI, Atividades e vínculos de estágio
+  → Pedidos/Soluções com contexto real
+  → integração de estoque físico e relatórios
+  → rótulos A4/Zebra e Central de Ajuda
+  → JWT corporativo e estagiários multilaboratório
+  → revisão técnica, responsividade e E2E cloud/mobile pendentes
+```
+
+O histórico das decisões e mudanças fica nos [guias das etapas](docs/README.md) e no [dossiê técnico](docs/DOSSIE_PROJETO_SGL.md). A auditoria encontrou e registrou riscos reais; ainda não há evidência suficiente para divulgar métricas de performance ou resultados de homologação mobile.
+
+---
+
 ## Documentação
 
 | Referência | Uso |
