@@ -89,12 +89,7 @@ Gestão
 
 ### Interface disponível neste repositório
 
-<details>
-<summary>Ver uma captura versionada (tela de login)</summary>
-
-![Tela de acesso do SGL, imagem versionada no repositório](docs/screenshots/login-final.png)
-
-</details>
+![Tela de acesso do SGL — captura aprovada e versionada no repositório](docs/screenshots/login-final.png)
 
 A captura existente representa **a entrada do sistema**, não todas as jornadas. Imagens de Dashboard, Pedidos, Estoque e Relatórios devem ser adicionadas somente após captura recente, revisão visual e remoção de qualquer dado institucional ou pessoal. Não usar posters da Central de Ajuda como se fossem screenshots do produto.
 
