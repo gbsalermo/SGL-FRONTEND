@@ -13,21 +13,32 @@
 
 ## O que é o SGL?
 
-O **SGL (Sistema de Gestão de Laboratórios)** é uma plataforma voltada à organização e ao acompanhamento das operações laboratoriais. Em vez de manter informações dispersas sobre materiais, projetos, atividades, pessoas e resíduos, o sistema reúne esses processos em uma experiência integrada, com registros rastreáveis e informações acessíveis conforme o contexto operacional.
+**A experiência web de um sistema que relaciona pessoas, laboratórios, pesquisas e materiais — com rastreabilidade até o lote e recipiente utilizados.**
 
-A interface web organiza o trabalho em diferentes perspectivas:
+Em laboratórios institucionais, um Pedido não começa no botão “Solicitar”: depende da **Unidade, do laboratório autorizado, do vínculo da pessoa e, quando aplicável, do Projeto, SCI e Atividade**. Depois do envio, o material precisa passar por análise, baixa física rastreável, entrega e relatórios. O SGL concentra essas jornadas numa aplicação com experiências próprias para solicitantes e Gestão.
 
-- **Solicitante:** consultar seu contexto, solicitar materiais e soluções, acompanhar pedidos e informar resíduos gerados nas atividades.
-- **Gestão:** acompanhar indicadores, analisar solicitações, administrar estoque e lotes, movimentações, resíduos, projetos, participações e relatórios.
-- **Administração:** manter os cadastros operacionais, as associações e os perfis previstos para a fase atual do sistema.
+Este repositório contém a interface **Vue 3 + TypeScript**; a API e as regras de negócio são mantidas no [SGL Backend](https://github.com/gbsalermo/Sistema-SGL).
 
-O SGL considera a estrutura **Unidade → Laboratório → Projeto → SCI → Atividade** e os vínculos aplicáveis a cada pessoa. Isso permite relacionar solicitações e registros ao seu contexto de origem, enquanto o backend permanece responsável pelas decisões e validações oficiais.
+| Quem utiliza | O que consegue fazer |
+|---|---|
+| **Empregado / solicitante** | Solicitar materiais ou soluções, informar resíduos e acompanhar seus registros |
+| **Estagiário** | Operar a partir de participação elegível, laboratório permitido e vínculo vigente |
+| **Orientador** | Acompanhar contextos e pedidos de orientandos conforme suas permissões |
+| **Gestão** | Analisar Pedidos, preparar Soluções, movimentar lotes, acompanhar resíduos e indicadores |
+| **Administração** | Gerenciar cadastros, vínculos, permissões e configurações autorizadas |
 
-A aplicação utiliza Vue e TypeScript, comunica-se com a API do SGL e busca oferecer uma navegação consistente, responsiva e com suporte a temas claro e escuro. O projeto está em **evolução de pré-produção**; autenticação definitiva e integração institucional pertencem a fases posteriores.
+**Estado em novembro de 2026:** os fluxos principais, autenticação corporativa com JWT, Relatórios e rótulos estão presentes na `release`. A revisão técnica/documental avançou, mas **a homologação em staging, PostgreSQL/Flyway, carga, impressão física e jornadas reais Android/iOS ainda está pendente**. Não afirmar que a existência de CSS mobile equivale a usabilidade aprovada.
 
-> **Acompanhamento da evolução:** entregas, decisões e próximos passos estão em [`CONTINUIDADE.md`](CONTINUIDADE.md) e no roadmap do backend [`docs/PLANO_PRE_PRODUCAO.md`](https://github.com/gbsalermo/Sistema-SGL/blob/release/docs/PLANO_PRE_PRODUCAO.md). O histórico e o contrato da Etapa 9 estão em [`docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md`](docs/ETAPA_9_INICIO_RELATORIOS_CONSOLIDADOS_2026-10-26.md).
+## Por que este projeto vai além de telas CRUD
 
----
+- **Permissões ligadas ao trabalho real:** estagiários escolhem participações em Atividades de Projetos e só visualizam laboratórios elegíveis; empregados possuem regra distinta. **O backend confirma a autorização**, mesmo que o frontend filtre seletores.
+- **Fluxo operacional de ponta a ponta:** Pedido, aprovação, lote e recipiente, baixa FEFO/FIFO, entrega e possível estorno aparecem como etapas distintas, com estados e mensagens apropriados.
+- **Soluções e Resíduos não são meros produtos:** composição, preparo, informação de risco, componentes de catálogo ou livres, rótulos e ciclos próprios fazem parte da experiência.
+- **Interfaces por perfil e contexto:** dashboards de solicitante e Gestão, participação em atividades, relatórios, alertas, busca e cadastros administrativos.
+- **Documentos operacionais:** rótulos A4, exportação ZPL e impressão direta Zebra (Browser Print) para Produto, Resíduo, Solução e entrada de lote; exportações PDF/XLSX para Relatórios.
+- **Uso institucional:** integração com identidade corporativa, isolamento por Unidade, modelos de autorização e Central de Ajuda contextual. A validação final de segurança e mobile permanece em aberto.
+
+Esses diferenciais são **decisões de produto e engenharia do SGL**, não uma alegação de que tecnologias semelhantes não existam em outros sistemas.
 
 ## Papel do frontend
 
@@ -58,6 +69,37 @@ Regras críticas de domínio continuam no backend.
 
 ---
 
+## Uma jornada no sistema
+
+```text
+Estagiário autenticado
+  → escolhe participação elegível (Atividade / SCI / Projeto)
+  → seleciona laboratório autorizado
+  → informa itens ou solicita Solução
+  → acompanha situação e mensagens em Meus Pedidos/Minhas Soluções
+
+Gestão
+  → analisa solicitação
+  → aprova e registra baixa física por lote/recipiente
+  → conclui entrega sem duplicar consumo
+  → acompanha estoque, alertas e relatórios
+```
+
+**Resíduos seguem fluxo próprio:** o solicitante informa composição (produto cadastrado ou componente livre), local/contexto e risco; a Gestão avalia, libera e acompanha armazenamento/destinação. Isso não implica baixa automática de estoque por simples registro de composição.
+
+### Interface disponível neste repositório
+
+<details>
+<summary>Ver uma captura versionada (tela de login)</summary>
+
+![Tela de acesso do SGL, imagem versionada no repositório](docs/screenshots/login-final.png)
+
+</details>
+
+A captura existente representa **a entrada do sistema**, não todas as jornadas. Imagens de Dashboard, Pedidos, Estoque e Relatórios devem ser adicionadas somente após captura recente, revisão visual e remoção de qualquer dado institucional ou pessoal. Não usar posters da Central de Ajuda como se fossem screenshots do produto.
+
+---
+
 ## Stack
 
 ```text
@@ -82,62 +124,44 @@ Diretrizes:
 
 ---
 
-## Rotas atuais
-
-Fonte de verdade: `src/router/index.ts`.
-
-### Comum
+## Arquitetura da interface e integração
 
 ```text
-/login
-/:pathMatch(.*)*
+Navegador (SPA Vue)
+  ├─ Vue Router → rotas e guardas UX por perfil
+  ├─ Views / Components → formulários, tabelas, drawers e rótulos
+  ├─ Pinia → estado compartilhado, sessão e contexto visível
+  └─ Services (Axios) → contratos HTTP /v1/*
+                              │ Authorization: Bearer JWT
+                              ▼
+                  Nginx encaminha /api
+                              ▼
+          SGL Backend (Spring Boot, regras e transações)
+                              ▼
+                    PostgreSQL + Flyway
 ```
 
-### Solicitante
+**Responsabilidade por camada:** o frontend orienta a experiência, valida entradas para feedback e apresenta dados; **o backend autoriza a ação e executa as invariantes** (Unidade, participação, estoque, estados e persistência). Um usuário não ganha acesso apenas porque determinada rota ou botão aparece no navegador.
 
-```text
-/inicio
-/meus-pedidos
-/meus-residuos
-/pedidos/novo
-/residuos/novo
-```
+**Modelagem refletida na UI:** Unidade e laboratórios; Projetos → SCIs → Atividades; participação/vínculo de Estagiário; Pedido ou Solução com contexto elegível; Produto → Lote → Recipiente → Movimentação; Resíduo com composição e estados próprios. **Projeto pode envolver múltiplos laboratórios**, então a seleção não é uma árvore fixa de um laboratório por Projeto.
 
-### Gestão / Administração
+**Implantação:** o `Dockerfile` compila a SPA e o Nginx entrega os arquivos estáticos. O proxy `/api` mantém web e API na mesma origem na topologia de implantação. Os MP4 da Ajuda são servidos por volume externo, independentemente do build do frontend.
 
-```text
-/dashboard
-/pedidos
-/estoque
-/estoque/lotes-vencendo
-/estoque/:id
-/movimentacoes
-/estagiarios
-/residuos
-/relatorios
-/relatorios/residuos
-/relatorios/pessoas-laboratorio
-/administracao/cadastros       ADMINISTRADOR
-/solicitacoes/novo
-/solicitacoes/meus-pedidos
-```
+---
 
-### Rótulos
+## Jornadas e rotas principais
 
-```text
-/residuos/:id/rotulo
-/produtos/:id/rotulo
-```
+**Fonte canônica:** `src/router/index.ts`. A tabela é uma seleção orientada à navegação, não uma cópia exaustiva do router. Algumas rotas exigem Gestão/Administração e o backend verifica permissões independentemente dos guardas de interface.
 
-Rota inicial por perfil:
+| Perfil ou experiência | Rotas representativas |
+|---|---|
+| Acesso e ajuda | `/login`, `/aguardando-aprovacao`, `/ajuda`, `/ajuda/:taskId` |
+| Solicitante | `/inicio`, `/pedidos/novo`, `/meus-pedidos`, `/minhas-solucoes`, `/solucoes/solicitar`, `/residuos/novo`, `/meus-residuos` |
+| Gestão | `/dashboard`, `/pedidos`, `/estoque`, `/estoque/:id`, `/movimentacoes`, `/solucoes`, `/residuos`, `/projetos`, `/estagiarios`, `/relatorios` |
+| Administração autorizada | `/administracao/cadastros`, `/administracao/cadastros/vinculos`, `/administracao/unidades` (Administrador Geral) |
+| Impressão | `/produtos/:id/rotulo`, `/residuos/:id/rotulo`, `/solucoes/:id/rotulo`, `/lotes/:id/documento-entrada` |
 
-```text
-GESTOR / ADMINISTRADOR
-→ /dashboard
-
-TECNICO / ANALISTA / PESQUISADOR / ESTAGIARIO
-→ /inicio
-```
+A aplicação usa guardas e layouts por perfil: solicitante, orientador, Gestão, Administração e Administrador Geral. **O inventário detalhado e histórico das telas** está em [`docs/INVENTARIO_TELAS.md`](docs/INVENTARIO_TELAS.md); versões anteriores de rotas nele devem ser confrontadas com o router da `release`.
 
 ---
 
@@ -269,30 +293,16 @@ A interface permite utilizar modelos de resíduos cadastrados administrativament
 ---
 
 
-## Estagiários
+## Estagiários e vínculos
 
-```text
-/estagiarios
-```
+A aplicação diferencia **a experiência do estagiário solicitante** das telas de **Gestão de estagiários**. Seu acesso operacional depende da situação de vínculo, de participações elegíveis em Atividades e dos laboratórios autorizados.
 
-Cobertura:
+- O solicitante seleciona participação e laboratório válidos; não pode usar a liberdade de laboratório permitida para empregados.
+- A Gestão acompanha registros, períodos, orientadores, treinamento de segurança, prorrogações, encerramentos e vínculos operacionais multilaboratório, respeitando permissões.
+- A pessoa pode ser **importada da base institucional** pela Gestão; cadastro manual, importação e sincronização de eventos de estágio são processos distintos, não um único formulário.
+- O dashboard, as solicitações e a Ajuda têm regras responsivas, mas a **jornada completa do estagiário em Android/iOS ainda não foi homologada**.
 
-```text
-listagem
-cadastro
-edição
-Unidade/Laboratório
-período
-tipo de vínculo
-encerramento com data efetiva
-indicadores de término/vencimento
-```
-
-Relatório complementar:
-
-```text
-/relatorios/pessoas-laboratorio
-```
+Rotas e serviços atuais incluem `/estagiarios`, `/administracao/cadastros/vinculos` e a importação corporativa da Gestão. Detalhes de contratos em [dossiê](docs/DOSSIE_PROJETO_SGL.md).
 
 ---
 
@@ -302,7 +312,7 @@ Relatório complementar:
 /administracao/cadastros
 ```
 
-Rota exclusiva de `ADMINISTRADOR`.
+Acesso limitado aos perfis administrativos autorizados pelo router e pelo backend; `/administracao/unidades` exige `ADMINISTRADOR_GERAL`.
 
 Áreas:
 
@@ -333,7 +343,7 @@ Central:
 /relatorios
 ```
 
-Cobertura funcional validada na Etapa 9:
+Relatórios presentes na `release`, com homologação integrada de filtros e exportações ainda pendente:
 
 ```text
 Estagiários
@@ -346,13 +356,13 @@ Resíduos
 Pessoas por laboratório
 ```
 
-A opção **Movimentações** reúne contagens por tipo no modo Resumo e consulta de registros no Detalhamento. Os filtros do Detalhamento contemplam contexto Laboratório/Projeto/SCI/Atividade, produto, apresentação/unidade, origem e período. A quantidade física pode ser exibida opcionalmente e é identificada pela unidade real de medida. Estoque e lotes exibem apresentações e estados dos recipientes; Fiscalização inclui rastreabilidade por recipiente. As exportações PDF/XLSX usam a consulta filtrada da prévia.
+A opção **Movimentações** reúne contagens por tipo no modo Resumo e consulta de registros no Detalhamento. Os filtros do Detalhamento contemplam contexto Laboratório/Projeto/SCI/Atividade, produto, apresentação/unidade, origem e período. A quantidade física pode ser exibida opcionalmente e é identificada pela unidade real de medida. Estoque e lotes exibem apresentações e estados dos recipientes; Fiscalização inclui rastreabilidade por recipiente. As exportações PDF/XLSX recebem os filtros selecionados; a equivalência exaustiva dos resultados para todas as combinações ainda depende de testes.
 
 A apresentação física e a quantidade consumida são conceitos distintos. A identificação histórica de consumo completo ou por medida é inferida dos detalhes registrados e não comprova a apresentação originalmente solicitada.
 
 Pedidos entregues são recorte de Movimentações, não relatório separado.
 
-Os mesmos filtros selecionados são utilizados na prévia e na exportação.
+Os filtros da prévia e da exportação são projetados para corresponder, mas o aceite de equivalência permanece aberto.
 
 ---
 
@@ -389,7 +399,7 @@ Alertas operacionais            ✅
 Busca global                    ✅
 Tema claro/escuro               ✅
 Persistência de preferência     ✅
-Responsividade                  ✅
+Estilos responsivos implementados ✅ · mobile real ainda não homologado
 ```
 
 O tema claro/escuro é aplicado às áreas autenticadas, mantendo a identidade visual própria da tela de acesso.
