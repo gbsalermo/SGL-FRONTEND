@@ -199,7 +199,7 @@ login + senha → POST /v1/auth/login → { token, expiraEm, usuario }
 - Usuário `PENDENTE_VINCULACAO` só vê `/aguardando-aprovacao` ("Verificar novamente" consulta `/v1/auth/me`).
 - 401 em rota protegida encerra a sessão e volta ao login; 403 com `USUARIO_PENDENTE` leva à tela de espera.
 - A Unidade vem da sessão no backend. O header `X-SGL-Unidade-Id` só é enviado pelo **Administrador geral**, quando ele escolhe outra Unidade no seletor da barra superior.
-- O botão "Entrar como desenvolvedor" aparece só quando o backend roda em `dev`/`demo` (`/v1/auth/config`).
+- Nos perfis locais `dev`/`demo`, `GET /v1/auth/config` retorna `devLoginAtivo: true`, habilitando o botão **Entrar como desenvolvedor**. Informe apenas o **login curto** de uma conta fictícia (ex.: `ricardo.almeida`), **sem senha**; a ação chama `POST /v1/auth/dev-login`. O botão normal **Entrar** continua usando a autenticação corporativa e não serve ao login da massa DEMO. Em produção, o endpoint DEV não existe.
 
 Telas novas da gestão: aba **Pendentes** e **Importar da Embrapa** em Vínculos de usuários; **Unidades** (habilitação), só para o Administrador geral.
 
@@ -534,6 +534,8 @@ npm run type-check
 npm run test
 npm run build
 ```
+
+**Frontend conectado ao DEMO local:** iniciar o backend em `demo`, configurar `VITE_API_BASE_URL=http://localhost:8080/api` (por exemplo, em `.env.local`; sem valor explícito o Vite em desenvolvimento usa esse mesmo fallback) e reiniciar o Vite. Confira `devLoginAtivo: true` em `http://localhost:8080/api/v1/auth/config`, escolha **Entrar como desenvolvedor** e use `ricardo.almeida` sem senha. Se o botão não aparecer, verifique qual API está sendo consultada. [Guia DEMO e diagnóstico no backend](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/DEMO_APRESENTACAO_EMBRAPA.md). Nunca apontar demonstrações à API institucional.
 
 `npm run test` usa Vitest + `jsdom`, com `src/**/__tests__/*.spec.ts`. Os testes de impressão Zebra `src/modules/rotulos/zebra/zpl.test.mjs` e `browserPrintLocal.test.mjs` usam `node:test` e **não entram no comando padrão**. O plano de execução deverá incluir os dois separadamente; ainda não foram executados nesta auditoria.
 
