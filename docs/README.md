@@ -54,6 +54,8 @@ A auditoria registrou uma matriz de riscos **sem corrigir funcionalidades**: aut
 
 ## Execução e implantação
 
+**DEMO local e autenticação (24/11/2026):** o frontend exibe **Entrar como desenvolvedor** quando a API `dev/demo` informa `devLoginAtivo: true` em `GET /v1/auth/config`. O usuário informa o login curto (ex.: `ricardo.almeida`) **sem senha**; `POST /v1/auth/dev-login` é separado do login corporativo. Configurar `VITE_API_BASE_URL=http://localhost:8080/api` no desenvolvimento local e reiniciar o Vite. Contas, execução H2 e diagnóstico no [guia DEMO do backend](https://github.com/gbsalermo/Sistema-SGL/blob/collab/docs-release-estado-2026-11/docs/DEMO_APRESENTACAO_EMBRAPA.md).
+
 **Desenvolvimento:** `npm ci`, `npm run dev`, `npm run type-check`, `npm run test`, `npm run build`. Usar `.env.example` e ambiente autorizado. **Não executar scripts antigos de checkout** descritos nas Etapas 7–10 como se fossem da release.
 
 **Deploy fiel à topologia real:** `Dockerfile` compila Vite com `VITE_API_BASE_URL=/api`; `nginx.conf.template` faz proxy na mesma origem `/api` para o backend; `docker-compose.yml` conecta à rede autorizada e ao volume externo **somente leitura** dos vídeos. Staging deve usar redes, volumes, segredos e banco **isolados**, nunca copiar credenciais institucionais.
