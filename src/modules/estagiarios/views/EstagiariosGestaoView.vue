@@ -3,6 +3,7 @@ import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 
 import CriarVinculoEstagioDialog from '@/modules/estagiarios/components/CriarVinculoEstagioDialog.vue'
+import ModalidadeBolsaPicker from '@/modules/estagiarios/components/ModalidadeBolsaPicker.vue'
 import EstagiariosVinculoPendente from '@/modules/estagiarios/components/EstagiariosVinculoPendente.vue'
 import { opcoesBolsa, opcoesFormacao, rotulosFormacao } from '@/modules/estagiarios/opcoesEstagio'
 import { estagiarioService } from '@/modules/estagiarios/services/estagiarioService'
@@ -66,6 +67,7 @@ const tipoOperacaoBolsa = ref<'PRORROGAR' | 'NOVA'>('PRORROGAR')
 const prorrogacaoFimPrevista = ref('')
 const referenciaBolsaVigente = ref('')
 const novaBolsaTipo = ref<TipoBolsaEstagiario>('BOLSA_INSTITUCIONAL')
+const novaBolsaModalidadeId = ref<string | null>(null)
 const novaBolsaEspecificacao = ref('')
 const novaBolsaInicio = ref('')
 const novaBolsaFimPrevista = ref('')
@@ -133,7 +135,8 @@ function estadoOperacional(estagiario: EstagiarioResponse): EstadoOperacional {
   return 'SEM_ATIVIDADE'
 }
 
-function rotuloBolsa(valor: TipoBolsaEstagiario | null | undefined) {
+function rotuloBolsa(valor: TipoBolsaEstagiario | null | undefined, modalidadeNome?: string | null) {
+  if (modalidadeNome) return modalidadeNome
   if (valor === 'BOLSA_CNPQ') return 'Bolsa CNPq'
   if (valor === 'BOLSA_CAPES') return 'Bolsa CAPES'
   if (valor === 'BOLSA_INSTITUCIONAL') return 'Bolsa institucional'
@@ -353,7 +356,7 @@ function termosPesquisa(estagiario: EstagiarioResponse) {
   return [
     estagiario.usuarioNome,
     estagiario.unidadeNome ?? '',
-    rotuloBolsa(vinculo?.tipoBolsa),
+    rotuloBolsa(vinculo?.tipoBolsa, vinculo?.modalidadeBolsaNome),
     rotuloFormacao(vinculo),
     vinculo?.cursoNome ?? '',
     vinculo?.orientadorNome ?? '',
@@ -530,6 +533,7 @@ function abrirEditarBolsa() {
   prorrogacaoFimPrevista.value = ''
   referenciaBolsaVigente.value = vinculo.referenciaInstitucional || ''
   novaBolsaTipo.value = vinculo.tipoBolsa
+  novaBolsaModalidadeId.value = null
   novaBolsaEspecificacao.value = ''
   novaBolsaInicio.value = hojeIso()
   novaBolsaFimPrevista.value = ''
@@ -628,6 +632,7 @@ async function salvarBolsa() {
   try {
     await estagiarioService.registrarNovaBolsa(vinculo.id, {
       tipoBolsa: novaBolsaTipo.value,
+      modalidadeBolsaId: novaBolsaModalidadeId.value,
       especificacaoBolsa: novaBolsaEspecificacao.value.trim() || null,
       dataInicio: novaBolsaInicio.value,
       dataFimPrevista: novaBolsaFimPrevista.value,
@@ -1417,7 +1422,7 @@ onMounted(carregar)
                 </div>
 
                 <div class="institutional-title">
-                  <strong>{{ rotuloBolsa(vinculoSelecionado.tipoBolsa) }}</strong>
+                  <strong>{{ rotuloBolsa(vinculoSelecionado.tipoBolsa, vinculoSelecionado.modalidadeBolsaNome) }}</strong>
                   <span class="link-state" :class="{ 'link-state--closed': vinculoSelecionado.situacao === 'FINALIZADO' }">
                     {{ rotuloSituacao(vinculoSelecionado.situacao) }}
                   </span>
@@ -1449,7 +1454,7 @@ onMounted(carregar)
                   <article v-for="vinculo in selecionado.vinculos" :key="vinculo.id" class="timeline-item">
                     <span class="timeline-dot" :class="{ 'timeline-dot--closed': vinculo.situacao === 'FINALIZADO' }" />
                     <div>
-                      <strong>{{ rotuloBolsa(vinculo.tipoBolsa) }}</strong>
+                      <strong>{{ rotuloBolsa(vinculo.tipoBolsa, vinculo.modalidadeBolsaNome) }}</strong>
                       <small>
                         {{ formatarData(vinculo.dataInicio) }}
                         até
@@ -1704,7 +1709,7 @@ onMounted(carregar)
 
             <div class="action-field action-field--readonly">
               <span>Bolsa / modalidade</span>
-              <strong>{{ rotuloBolsa(edicaoTipoBolsa) }}</strong>
+              <strong>{{ rotuloBolsa(edicaoTipoBolsa, vinculoSelecionado?.modalidadeBolsaNome) }}</strong>
               <small>Somente leitura. Para trocar a bolsa, use “Editar bolsa” nas Ações operacionais.</small>
             </div>
 
@@ -1771,7 +1776,7 @@ onMounted(carregar)
 
           <div class="scholarship-current">
             <span>Bolsa atual</span>
-            <strong>{{ rotuloBolsa(vinculoSelecionado?.tipoBolsa) }}</strong>
+            <strong>{{ rotuloBolsa(vinculoSelecionado?.tipoBolsa, vinculoSelecionado?.modalidadeBolsaNome) }}</strong>
             <small>
               {{ formatarData(vinculoSelecionado?.dataInicio) }}
               até
@@ -1846,6 +1851,11 @@ onMounted(carregar)
                 </option>
               </select>
             </label>
+
+            <ModalidadeBolsaPicker
+              v-model="novaBolsaModalidadeId"
+              :tipo-base="novaBolsaTipo"
+            />
 
             <label class="action-field">
               <span>Especificar bolsa</span>
