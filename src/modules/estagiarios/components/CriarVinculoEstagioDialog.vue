@@ -3,6 +3,7 @@ import axios from 'axios'
 import { computed, ref, watch } from 'vue'
 
 import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
+import ModalidadeBolsaPicker from '@/modules/estagiarios/components/ModalidadeBolsaPicker.vue'
 import { listarLaboratoriosOperacionais } from '@/modules/operacao/services/laboratoriosOperacionais'
 import type { LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { opcoesBolsa, opcoesFormacao } from '@/modules/estagiarios/opcoesEstagio'
@@ -43,6 +44,7 @@ const orientadorId = ref('')
 const dataInicio = ref('')
 const dataFim = ref('')
 const tipoBolsa = ref<TipoBolsaEstagiario | ''>('')
+const modalidadeBolsaId = ref<string | null>(null)
 const formacao = ref<FormacaoEstagiario | ''>('')
 const formacaoOutro = ref('')
 const atividadeId = ref('')
@@ -81,6 +83,7 @@ function reiniciarFormulario() {
   dataInicio.value = ''
   dataFim.value = ''
   tipoBolsa.value = ''
+  modalidadeBolsaId.value = null
   formacao.value = ''
   formacaoOutro.value = ''
   atividadeId.value = ''
@@ -147,6 +150,7 @@ async function salvar() {
       dataInicioEstagio: dataInicio.value,
       dataFimEstagio: dataFim.value,
       tipoBolsa: tipoBolsa.value as TipoBolsaEstagiario,
+      modalidadeBolsaId: modalidadeBolsaId.value,
       formacao: formacao.value as FormacaoEstagiario,
       formacaoOutro: formacao.value === 'OUTRO' ? formacaoOutro.value.trim() : null,
       atividadeId: atividadeId.value,
@@ -222,6 +226,11 @@ async function salvar() {
             </option>
           </select>
         </label>
+
+        <ModalidadeBolsaPicker
+          v-model="modalidadeBolsaId"
+          :tipo-base="tipoBolsa"
+        />
 
         <label>
           <span>Formação</span>
