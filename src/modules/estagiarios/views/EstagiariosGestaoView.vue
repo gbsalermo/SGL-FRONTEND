@@ -3,8 +3,8 @@ import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 
 import CriarVinculoEstagioDialog from '@/modules/estagiarios/components/CriarVinculoEstagioDialog.vue'
-import ModalidadeBolsaPicker from '@/modules/estagiarios/components/ModalidadeBolsaPicker.vue'
-import ModalidadesBolsaGestaoDialog from '@/modules/estagiarios/components/ModalidadesBolsaGestaoDialog.vue'
+import BolsaPicker from '@/modules/estagiarios/components/BolsaPicker.vue'
+import BolsasGestaoDialog from '@/modules/estagiarios/components/BolsasGestaoDialog.vue'
 import EstagiariosVinculoPendente from '@/modules/estagiarios/components/EstagiariosVinculoPendente.vue'
 import { opcoesBolsa, opcoesFormacao, rotulosFormacao } from '@/modules/estagiarios/opcoesEstagio'
 import { estagiarioService } from '@/modules/estagiarios/services/estagiarioService'
@@ -63,13 +63,14 @@ const participacaoEncerramento = ref<VinculoEstagioAtividadeResponse | null>(nul
 const participacaoEncerramentoId = ref('')
 const participacaoDataFim = ref('')
 
-const modalModalidadesAberto = ref(false)
+const modalBolsasAberto = ref(false)
 const modalBolsaAberto = ref(false)
 const tipoOperacaoBolsa = ref<'PRORROGAR' | 'NOVA'>('PRORROGAR')
 const prorrogacaoFimPrevista = ref('')
 const referenciaBolsaVigente = ref('')
-const novaBolsaTipo = ref<TipoBolsaEstagiario>('BOLSA_INSTITUCIONAL')
-const novaBolsaModalidadeId = ref<string | null>(null)
+const novaBolsaOrigem = ref<'LEGADO' | 'CATALOGO'>('LEGADO')
+const novaBolsaTipo = ref<TipoBolsaEstagiario | ''>('BOLSA_INSTITUCIONAL')
+const novaBolsaBolsaId = ref<string | null>(null)
 const novaBolsaEspecificacao = ref('')
 const novaBolsaInicio = ref('')
 const novaBolsaFimPrevista = ref('')
@@ -95,7 +96,7 @@ const orientadoresDisponiveis = ref<UsuarioOpcaoEstagioResponse[]>([])
 const edicaoOrientadorId = ref('')
 const edicaoDataInicio = ref('')
 const edicaoDataFimPrevista = ref('')
-const edicaoTipoBolsa = ref<TipoBolsaEstagiario>('BOLSA_INSTITUCIONAL')
+const edicaoTipoBolsa = ref<TipoBolsaEstagiario | null>(null)
 const edicaoFormacao = ref<FormacaoEstagiario>('GRADUACAO')
 const edicaoFormacaoOutro = ref('')
 const NOVO_CURSO_VALUE = '__NOVO_CURSO__'
@@ -137,8 +138,8 @@ function estadoOperacional(estagiario: EstagiarioResponse): EstadoOperacional {
   return 'SEM_ATIVIDADE'
 }
 
-function rotuloBolsa(valor: TipoBolsaEstagiario | null | undefined, modalidadeNome?: string | null) {
-  if (modalidadeNome) return modalidadeNome
+function rotuloBolsa(valor: TipoBolsaEstagiario | null | undefined, bolsaNome?: string | null) {
+  if (bolsaNome) return bolsaNome
   if (valor === 'BOLSA_CNPQ') return 'Bolsa CNPq'
   if (valor === 'BOLSA_CAPES') return 'Bolsa CAPES'
   if (valor === 'BOLSA_INSTITUCIONAL') return 'Bolsa institucional'
@@ -358,7 +359,7 @@ function termosPesquisa(estagiario: EstagiarioResponse) {
   return [
     estagiario.usuarioNome,
     estagiario.unidadeNome ?? '',
-    rotuloBolsa(vinculo?.tipoBolsa, vinculo?.modalidadeBolsaNome),
+    rotuloBolsa(vinculo?.tipoBolsa, vinculo?.bolsaNome),
     rotuloFormacao(vinculo),
     vinculo?.cursoNome ?? '',
     vinculo?.orientadorNome ?? '',
@@ -534,8 +535,9 @@ function abrirEditarBolsa() {
   tipoOperacaoBolsa.value = 'PRORROGAR'
   prorrogacaoFimPrevista.value = ''
   referenciaBolsaVigente.value = vinculo.referenciaInstitucional || ''
-  novaBolsaTipo.value = vinculo.tipoBolsa
-  novaBolsaModalidadeId.value = null
+  novaBolsaOrigem.value = vinculo.bolsaId ? 'CATALOGO' : 'LEGADO'
+  novaBolsaTipo.value = vinculo.tipoBolsa ?? 'BOLSA_INSTITUCIONAL'
+  novaBolsaBolsaId.value = null
   novaBolsaEspecificacao.value = ''
   novaBolsaInicio.value = hojeIso()
   novaBolsaFimPrevista.value = ''
@@ -629,12 +631,21 @@ async function salvarBolsa() {
     return
   }
 
+  if (novaBolsaOrigem.value === 'LEGADO' && !novaBolsaTipo.value) {
+    acaoErro.value = 'Selecione um tipo de vínculo.'
+    return
+  }
+  if (novaBolsaOrigem.value === 'CATALOGO' && !novaBolsaBolsaId.value) {
+    acaoErro.value = 'Selecione ou cadastre uma bolsa da Unidade.'
+    return
+  }
+
   processandoAcao.value = true
 
   try {
     await estagiarioService.registrarNovaBolsa(vinculo.id, {
-      tipoBolsa: novaBolsaTipo.value,
-      modalidadeBolsaId: novaBolsaModalidadeId.value,
+      tipoBolsa: novaBolsaOrigem.value === 'LEGADO' ? novaBolsaTipo.value as TipoBolsaEstagiario : null,
+      bolsaId: novaBolsaOrigem.value === 'CATALOGO' ? novaBolsaBolsaId.value : null,
       especificacaoBolsa: novaBolsaEspecificacao.value.trim() || null,
       dataInicio: novaBolsaInicio.value,
       dataFimPrevista: novaBolsaFimPrevista.value,
@@ -1099,8 +1110,8 @@ onMounted(carregar)
       </div>
 
       <div class="heading-actions">
-        <button class="drawer-action" type="button" @click="modalModalidadesAberto = true">
-          Gerenciar modalidades de bolsa
+        <button class="drawer-action" type="button" @click="modalBolsasAberto = true">
+          Gerenciar bolsas cadastradas
         </button>
         <button class="primary-action" type="button" :disabled="carregando" @click="carregar">
           {{ carregando ? 'Atualizando...' : 'Atualizar' }}
@@ -1108,7 +1119,7 @@ onMounted(carregar)
       </div>
     </header>
 
-    <ModalidadesBolsaGestaoDialog v-if="modalModalidadesAberto" @fechar="modalModalidadesAberto = false" />
+    <BolsasGestaoDialog v-if="modalBolsasAberto" @fechar="modalBolsasAberto = false" />
 
     <section class="metrics-grid">
       <article class="metric-card metric-card--success">
@@ -1429,7 +1440,7 @@ onMounted(carregar)
                 </div>
 
                 <div class="institutional-title">
-                  <strong>{{ rotuloBolsa(vinculoSelecionado.tipoBolsa, vinculoSelecionado.modalidadeBolsaNome) }}</strong>
+                  <strong>{{ rotuloBolsa(vinculoSelecionado.tipoBolsa, vinculoSelecionado.bolsaNome) }}</strong>
                   <span class="link-state" :class="{ 'link-state--closed': vinculoSelecionado.situacao === 'FINALIZADO' }">
                     {{ rotuloSituacao(vinculoSelecionado.situacao) }}
                   </span>
@@ -1461,7 +1472,7 @@ onMounted(carregar)
                   <article v-for="vinculo in selecionado.vinculos" :key="vinculo.id" class="timeline-item">
                     <span class="timeline-dot" :class="{ 'timeline-dot--closed': vinculo.situacao === 'FINALIZADO' }" />
                     <div>
-                      <strong>{{ rotuloBolsa(vinculo.tipoBolsa, vinculo.modalidadeBolsaNome) }}</strong>
+                      <strong>{{ rotuloBolsa(vinculo.tipoBolsa, vinculo.bolsaNome) }}</strong>
                       <small>
                         {{ formatarData(vinculo.dataInicio) }}
                         até
@@ -1715,8 +1726,8 @@ onMounted(carregar)
             </label>
 
             <div class="action-field action-field--readonly">
-              <span>Bolsa / modalidade</span>
-              <strong>{{ rotuloBolsa(edicaoTipoBolsa, vinculoSelecionado?.modalidadeBolsaNome) }}</strong>
+              <span>Bolsa / vínculo</span>
+              <strong>{{ rotuloBolsa(edicaoTipoBolsa, vinculoSelecionado?.bolsaNome) }}</strong>
               <small>Somente leitura. Para trocar a bolsa, use “Editar bolsa” nas Ações operacionais.</small>
             </div>
 
@@ -1783,7 +1794,7 @@ onMounted(carregar)
 
           <div class="scholarship-current">
             <span>Bolsa atual</span>
-            <strong>{{ rotuloBolsa(vinculoSelecionado?.tipoBolsa, vinculoSelecionado?.modalidadeBolsaNome) }}</strong>
+            <strong>{{ rotuloBolsa(vinculoSelecionado?.tipoBolsa, vinculoSelecionado?.bolsaNome) }}</strong>
             <small>
               {{ formatarData(vinculoSelecionado?.dataInicio) }}
               até
@@ -1851,7 +1862,15 @@ onMounted(carregar)
 
           <template v-else>
             <label class="action-field">
-              <span>Nova bolsa / modalidade</span>
+              <span>Origem da nova bolsa / vínculo</span>
+              <select v-model="novaBolsaOrigem" @change="novaBolsaBolsaId = null">
+                <option value="LEGADO">Tipo de vínculo existente</option>
+                <option value="CATALOGO">Bolsa cadastrada na Unidade</option>
+              </select>
+            </label>
+
+            <label v-if="novaBolsaOrigem === 'LEGADO'" class="action-field">
+              <span>Tipo de vínculo</span>
               <select v-model="novaBolsaTipo">
                 <option v-for="opcao in opcoesBolsa" :key="opcao.valor" :value="opcao.valor">
                   {{ opcao.rotulo }}
@@ -1859,10 +1878,7 @@ onMounted(carregar)
               </select>
             </label>
 
-            <ModalidadeBolsaPicker
-              v-model="novaBolsaModalidadeId"
-              :tipo-base="novaBolsaTipo"
-            />
+            <BolsaPicker v-else v-model="novaBolsaBolsaId" />
 
             <label class="action-field">
               <span>Especificar bolsa</span>
