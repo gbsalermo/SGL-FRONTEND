@@ -8,7 +8,8 @@ export interface RelatorioEstagiarioItem {
   unidadeNome: string | null
   dataInicioEstagio: string
   dataFimEstagio: string | null
-  tipoBolsa: string
+  tipoBolsa: string | null
+  bolsaNome: string | null
   ativo: boolean
   observacao: string | null
 }
