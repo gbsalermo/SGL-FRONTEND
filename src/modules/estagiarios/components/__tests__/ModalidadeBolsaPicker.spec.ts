@@ -69,6 +69,7 @@ describe('ModalidadeBolsaPicker', () => {
     })
     await flushPromises()
     expect(wrapper.get('[data-test="selecionar-modalidade"]').element).toBeTruthy()
-    expect(wrapper.get('[data-test="selecionar-modalidade"]').element.value).toBe('')
+    const select = wrapper.get('[data-test="selecionar-modalidade"]').element as HTMLSelectElement
+    expect(select.value).toBe('')
   })
 })
