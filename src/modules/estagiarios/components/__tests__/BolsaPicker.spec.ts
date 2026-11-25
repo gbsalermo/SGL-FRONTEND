@@ -41,7 +41,7 @@ describe('BolsaPicker', () => {
   it('cadastra uma bolsa sem enviar qualquer valor do enum legado', async () => {
     const wrapper = mount(BolsaPicker, { props: { modelValue: null } })
     await flushPromises()
-    await wrapper.get('button.modalidade-link').trigger('click')
+    await wrapper.get('button.bolsa-link').trigger('click')
     await wrapper.get('[data-test="nome-nova-bolsa"]').setValue('Bolsa PIBIC')
     await wrapper.get('[data-test="criar-bolsa"]').trigger('click')
     await flushPromises()
