@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 
 import CriarVinculoEstagioDialog from '@/modules/estagiarios/components/CriarVinculoEstagioDialog.vue'
 import ModalidadeBolsaPicker from '@/modules/estagiarios/components/ModalidadeBolsaPicker.vue'
+import ModalidadesBolsaGestaoDialog from '@/modules/estagiarios/components/ModalidadesBolsaGestaoDialog.vue'
 import EstagiariosVinculoPendente from '@/modules/estagiarios/components/EstagiariosVinculoPendente.vue'
 import { opcoesBolsa, opcoesFormacao, rotulosFormacao } from '@/modules/estagiarios/opcoesEstagio'
 import { estagiarioService } from '@/modules/estagiarios/services/estagiarioService'
@@ -62,6 +63,7 @@ const participacaoEncerramento = ref<VinculoEstagioAtividadeResponse | null>(nul
 const participacaoEncerramentoId = ref('')
 const participacaoDataFim = ref('')
 
+const modalModalidadesAberto = ref(false)
 const modalBolsaAberto = ref(false)
 const tipoOperacaoBolsa = ref<'PRORROGAR' | 'NOVA'>('PRORROGAR')
 const prorrogacaoFimPrevista = ref('')
@@ -1097,11 +1099,16 @@ onMounted(carregar)
       </div>
 
       <div class="heading-actions">
+        <button class="drawer-action" type="button" @click="modalModalidadesAberto = true">
+          Gerenciar modalidades de bolsa
+        </button>
         <button class="primary-action" type="button" :disabled="carregando" @click="carregar">
           {{ carregando ? 'Atualizando...' : 'Atualizar' }}
         </button>
       </div>
     </header>
+
+    <ModalidadesBolsaGestaoDialog v-if="modalModalidadesAberto" @fechar="modalModalidadesAberto = false" />
 
     <section class="metrics-grid">
       <article class="metric-card metric-card--success">
