@@ -5,7 +5,7 @@ import { onMounted, ref } from 'vue'
 import { estagiarioService } from '@/modules/estagiarios/services/estagiarioService'
 import type { BolsaResponse } from '@/modules/estagiarios/types/estagiario'
 
-const props = defineProps<{
+defineProps<{
   modelValue: string | null
 }>()
 
