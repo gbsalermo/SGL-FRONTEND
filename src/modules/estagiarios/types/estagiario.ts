@@ -61,9 +61,9 @@ export interface VinculoEstagioResponse {
   dataFimPrevista: string | null
   dataFimPrevistaOriginal: string | null
   dataFimEfetiva: string | null
-  tipoBolsa: TipoBolsaEstagiario
-  modalidadeBolsaId: string | null
-  modalidadeBolsaNome: string | null
+  tipoBolsa: TipoBolsaEstagiario | null
+  bolsaId: string | null
+  bolsaNome: string | null
   situacao: SituacaoEstagio
   participacoesAtividade: VinculoEstagioAtividadeResponse[]
   formacao: FormacaoEstagiario | null
@@ -97,8 +97,8 @@ export interface EstagiarioRequest {
   laboratorioIds: string[]
   dataInicioEstagio: string
   dataFimEstagio: string
-  tipoBolsa: TipoBolsaEstagiario
-  modalidadeBolsaId?: string | null
+  tipoBolsa: TipoBolsaEstagiario | null
+  bolsaId?: string | null
   observacao: string | null
   ativo: boolean | null
   orientadorId: string
@@ -145,17 +145,16 @@ export interface VinculoEstagioAtividadeRequest {
 }
 
 
-export interface ModalidadeBolsaResponse {
+export interface BolsaResponse {
   id: string
   unidadeId: string
   nome: string
-  tipoBase: TipoBolsaEstagiario
   ativo: boolean
 }
 
-export interface CriarModalidadeBolsaRequest {
+export interface CriarBolsaRequest {
   nome: string
-  tipoBase: TipoBolsaEstagiario
+  ativo?: boolean
 }
 
 export interface CursoEstagioResponse {
@@ -180,7 +179,7 @@ export interface AtualizarVinculoEstagioRequest {
   orientadorId: string
   dataInicio: string
   dataFimPrevista: string
-  tipoBolsa: TipoBolsaEstagiario
+  tipoBolsa: TipoBolsaEstagiario | null
   formacao: FormacaoEstagiario
   formacaoOutro?: string | null
   cursoId?: string | null
@@ -188,8 +187,8 @@ export interface AtualizarVinculoEstagioRequest {
 }
 
 export interface NovaBolsaVinculoEstagioRequest {
-  tipoBolsa: TipoBolsaEstagiario
-  modalidadeBolsaId?: string | null
+  tipoBolsa: TipoBolsaEstagiario | null
+  bolsaId?: string | null
   especificacaoBolsa?: string | null
   dataInicio: string
   dataFimPrevista: string
