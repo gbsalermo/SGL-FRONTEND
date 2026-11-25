@@ -3,8 +3,8 @@ import type {
   AtividadeDisponivelEstagioResponse,
   AtualizarVinculoEstagioRequest,
   CulturaEstagioResponse,
-  ModalidadeBolsaResponse,
-  CriarModalidadeBolsaRequest,
+  BolsaResponse,
+  CriarBolsaRequest,
   CursoEstagioResponse,
   EstagiarioRequest,
   EstagiarioResponse,
@@ -104,28 +104,28 @@ export const estagiarioService = {
     return data
   },
 
-  async listarModalidadesBolsaAtivas() {
-    const { data } = await http.get<ModalidadeBolsaResponse[]>('/v1/modalidades-bolsa/ativas')
+  async listarBolsasAtivas() {
+    const { data } = await http.get<BolsaResponse[]>('/v1/bolsas/ativas')
     return data
   },
 
-  async criarModalidadeBolsa(payload: CriarModalidadeBolsaRequest) {
-    const { data } = await http.post<ModalidadeBolsaResponse>('/v1/modalidades-bolsa', payload)
+  async criarBolsa(payload: CriarBolsaRequest) {
+    const { data } = await http.post<BolsaResponse>('/v1/bolsas', payload)
     return data
   },
 
-  async listarModalidadesBolsa() {
-    const { data } = await http.get<ModalidadeBolsaResponse[]>('/v1/modalidades-bolsa')
+  async listarBolsas() {
+    const { data } = await http.get<BolsaResponse[]>('/v1/bolsas')
     return data
   },
 
-  async atualizarModalidadeBolsa(id: string, payload: CriarModalidadeBolsaRequest & { ativo?: boolean }) {
-    const { data } = await http.put<ModalidadeBolsaResponse>(`/v1/modalidades-bolsa/${id}`, payload)
+  async atualizarBolsa(id: string, payload: CriarBolsaRequest & { ativo?: boolean }) {
+    const { data } = await http.put<BolsaResponse>(`/v1/bolsas/${id}`, payload)
     return data
   },
 
-  async inativarModalidadeBolsa(id: string) {
-    await http.delete(`/v1/modalidades-bolsa/${id}`)
+  async inativarBolsa(id: string) {
+    await http.delete(`/v1/bolsas/${id}`)
   },
 
   async listarCursosAtivos() {
