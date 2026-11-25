@@ -6,7 +6,7 @@ import { estagiarioService } from '@/modules/estagiarios/services/estagiarioServ
 import type { BolsaResponse } from '@/modules/estagiarios/types/estagiario'
 
 const emit = defineEmits<{ (event: 'fechar'): void }>()
-const itens = ref<BolsaBolsaResponse[]>([])
+const itens = ref<BolsaResponse[]>([])
 const nomes = ref<Record<string, string>>({})
 const carregando = ref(false)
 const salvandoId = ref('')
@@ -34,7 +34,7 @@ async function carregar() {
   }
 }
 
-async function atualizar(item: BolsaBolsaResponse, ativo = item.ativo) {
+async function atualizar(item: BolsaResponse, ativo = item.ativo) {
   const nome = (nomes.value[item.id] ?? '').trim()
   if (!nome) {
     erro.value = 'Informe um nome para a bolsa.'
@@ -63,11 +63,11 @@ onMounted(() => { void carregar() })
 
 <template>
   <div class="bolsas-backdrop" @click.self="emit('fechar')">
-    <section class="bolsas-card" role="dialog" aria-modal="true" aria-label="Gerenciar bolsas de bolsa">
+    <section class="bolsas-card" role="dialog" aria-modal="true" aria-label="Gerenciar bolsas cadastradas">
       <header>
         <div>
           <span class="overline">GESTÃO / ESTAGIÁRIOS</span>
-          <h2>Bolsas de bolsa</h2>
+          <h2>Bolsas cadastradas</h2>
           <p>Cadastre bolsas diretamente na Unidade, sem depender dos tipos legados. Reutilize-as nos vínculos. Aqui você pode renomear e inativar opções existentes.</p>
         </div>
         <button type="button" class="close" aria-label="Fechar" @click="emit('fechar')">×</button>
