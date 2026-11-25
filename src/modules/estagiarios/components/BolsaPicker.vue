@@ -25,7 +25,7 @@ function mensagemErro(error: unknown) {
   if (axios.isAxiosError<{ message?: string }>(error)) {
     return error.response?.data?.message || 'Não foi possível cadastrar a bolsa.'
   }
-  return error instanceof Error ? error.message : 'Não foi possível registrar a modalidade.'
+  return error instanceof Error ? error.message : 'Não foi possível cadastrar a bolsa.'
 }
 
 async function carregar() {
