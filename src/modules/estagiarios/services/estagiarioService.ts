@@ -3,6 +3,8 @@ import type {
   AtividadeDisponivelEstagioResponse,
   AtualizarVinculoEstagioRequest,
   CulturaEstagioResponse,
+  ModalidadeBolsaResponse,
+  CriarModalidadeBolsaRequest,
   CursoEstagioResponse,
   EstagiarioRequest,
   EstagiarioResponse,
@@ -100,6 +102,30 @@ export const estagiarioService = {
       payload,
     )
     return data
+  },
+
+  async listarModalidadesBolsaAtivas() {
+    const { data } = await http.get<ModalidadeBolsaResponse[]>('/v1/modalidades-bolsa/ativas')
+    return data
+  },
+
+  async criarModalidadeBolsa(payload: CriarModalidadeBolsaRequest) {
+    const { data } = await http.post<ModalidadeBolsaResponse>('/v1/modalidades-bolsa', payload)
+    return data
+  },
+
+  async listarModalidadesBolsa() {
+    const { data } = await http.get<ModalidadeBolsaResponse[]>('/v1/modalidades-bolsa')
+    return data
+  },
+
+  async atualizarModalidadeBolsa(id: string, payload: CriarModalidadeBolsaRequest & { ativo?: boolean }) {
+    const { data } = await http.put<ModalidadeBolsaResponse>(`/v1/modalidades-bolsa/${id}`, payload)
+    return data
+  },
+
+  async inativarModalidadeBolsa(id: string) {
+    await http.delete(`/v1/modalidades-bolsa/${id}`)
   },
 
   async listarCursosAtivos() {
