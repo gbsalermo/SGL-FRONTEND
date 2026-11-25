@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { http } from '@/services/http'
 import type {
   AlterarPerfilRequest,
@@ -55,8 +56,16 @@ export const cadastrosAdminService = {
   },
 
   async listarProdutos() {
-    const { data } = await http.get<ProdutoCadastro[]>('/v1/produtos')
-    return data
+    // A gestao consulta o catalogo, inclusive itens sem lotes/estoque.
+    // Compatibilidade temporaria: API antiga ainda nao tem a rota /catalogo.
+    try {
+      const { data } = await http.get<ProdutoCadastro[]>('/v1/produtos/catalogo')
+      return data
+    } catch (error) {
+      if (!axios.isAxiosError(error) || error.response?.status !== 404) throw error
+      const { data } = await http.get<ProdutoCadastro[]>('/v1/produtos')
+      return data
+    }
   },
 
   async criarProduto(payload: ProdutoRequest) {
