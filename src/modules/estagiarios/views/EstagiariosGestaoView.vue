@@ -509,7 +509,7 @@ async function abrirEditarVinculo() {
     orientadoresDisponiveis.value = usuarios.filter((usuario) =>
       usuario.ativo
       && usuario.unidadeId === estagiario.unidadeId
-      && ['ANALISTA', 'PESQUISADOR'].includes(usuario.perfil),
+      && (usuario.categoriaCargo === 'ANALISTA' || usuario.categoriaCargo === 'PESQUISADOR'),
     )
   } catch (error) {
     acaoErro.value = mensagemErro(error, 'Não foi possível carregar os dados de edição do vínculo.')

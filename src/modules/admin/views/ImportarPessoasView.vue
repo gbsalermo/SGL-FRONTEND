@@ -13,7 +13,7 @@ import {
   type TipoPessoaCorporativa,
 } from '@/modules/admin/services/pessoasCorporativasService'
 import type { LaboratorioCadastro } from '@/modules/admin/types/cadastros'
-import type { PerfilUsuario } from '@/modules/auth/types/session'
+import type { CategoriaCargo, PapelSistema } from '@/modules/auth/types/session'
 import { useSessionStore } from '@/stores/session'
 
 const ATRASO_BUSCA_MS = 400
@@ -97,7 +97,7 @@ function abrir(pessoa: PessoaCorporativa) {
   selecionada.value = pessoa
 }
 
-async function cadastrar(payload: { perfil: PerfilUsuario; laboratorioIds: string[] }) {
+async function cadastrar(payload: { papeis: PapelSistema[]; categoriaCargo: CategoriaCargo; laboratorioIds: string[] }) {
   const pessoa = selecionada.value
   if (!pessoa) return
   salvando.value = true
@@ -122,7 +122,7 @@ async function cadastrar(payload: { perfil: PerfilUsuario; laboratorioIds: strin
       <div>
         <p class="eyebrow">ADMINISTRAÇÃO / CADASTROS / VÍNCULOS</p>
         <h1>Importar da Embrapa</h1>
-        <span>Busque empregados e estagiários/bolsistas nas bases corporativas e cadastre-os já com laboratório e perfil.</span>
+        <span>Busque empregados e estagiários/bolsistas nas bases corporativas e cadastre-os já com laboratório, categoria e papéis.</span>
       </div>
       <RouterLink class="btn btn--ghost" to="/administracao/cadastros/vinculos">Voltar aos vínculos</RouterLink>
     </header>
@@ -169,7 +169,7 @@ async function cadastrar(payload: { perfil: PerfilUsuario; laboratorioIds: strin
       modo="importar"
       :nome="selecionada.nome"
       :dados="dadosSelecionada"
-      :perfil-sugerido="selecionada.perfilSugerido"
+      :categoria-sugerida="selecionada.categoriaSugerida"
       :laboratorios="laboratorios"
       :salvando="salvando"
       :erro="erroDrawer"

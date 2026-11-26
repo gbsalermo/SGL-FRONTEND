@@ -5,10 +5,9 @@ import { useRouter } from 'vue-router'
 import UsuarioTesteCard from '@/modules/auth/components/UsuarioTesteCard.vue'
 import { destinoAposLogin } from '@/modules/auth/destinoAposLogin'
 import { mensagemDeErroDeLogin } from '@/modules/auth/loginErrors'
-import { ROTULOS_PERFIL } from '@/modules/auth/perfis'
+import { type PerfilLegado, ROTULOS_PERFIL_LEGADO as ROTULOS_PERFIL } from '@/modules/auth/perfilLegado'
 import { buscarUsuariosDeTeste, carregarResumoDeTeste } from '@/modules/auth/services/devLoginService'
 import type { ResumoDeTeste, UsuarioDeTeste } from '@/modules/auth/types/devLogin'
-import type { PerfilUsuario } from '@/modules/auth/types/session'
 import { useSessionStore } from '@/stores/session'
 
 const ATRASO_DA_BUSCA_MS = 300
@@ -16,9 +15,9 @@ const ATRASO_DA_BUSCA_MS = 300
 const router = useRouter()
 const session = useSessionStore()
 
-const PERFIS = Object.keys(ROTULOS_PERFIL) as PerfilUsuario[]
+const PERFIS = Object.keys(ROTULOS_PERFIL) as PerfilLegado[]
 
-const perfil = ref<PerfilUsuario | null>(null)
+const perfil = ref<PerfilLegado | null>(null)
 const unidadeId = ref('')
 const busca = ref('')
 
@@ -76,7 +75,7 @@ function carregarTudo() {
   void carregarUsuarios()
 }
 
-function selecionarPerfil(novoPerfil: PerfilUsuario | null) {
+function selecionarPerfil(novoPerfil: PerfilLegado | null) {
   if (perfil.value === novoPerfil) return
   perfil.value = novoPerfil
   void carregarUsuarios()

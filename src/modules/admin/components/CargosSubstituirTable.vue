@@ -7,7 +7,7 @@ import { useRouter, type RouteLocationRaw } from 'vue-router'
 
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
 import type { CargoSubstituicao, TipoCargoSubstituicao } from '@/modules/admin/types/cadastros'
-import type { PerfilUsuario } from '@/modules/auth/types/session'
+import { permiteAcesso } from '@/router'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -32,16 +32,12 @@ function destino(cargo: CargoSubstituicao): RouteLocationRaw {
   return { path: '/residuos' }
 }
 
-// Só mostra o link se o perfil de quem vê pode abrir a rota (meta.perfis do router, a regra
-// mais específica vence, como no guard). Caso contrário a linha mostra só o texto.
+// Só mostra o link se quem vê pode abrir a rota, pela mesma regra do guard. Caso contrário a
+// linha mostra só o texto.
 function destinoPermitido(cargo: CargoSubstituicao): RouteLocationRaw | null {
   const alvo = destino(cargo)
-  const perfil = session.usuario?.perfil
-  const perfis = [...router.resolve(alvo).matched]
-    .reverse()
-    .find((r) => r.meta?.perfis)?.meta.perfis as PerfilUsuario[] | undefined
-  if (perfis && (!perfil || !perfis.includes(perfil))) return null
-  return alvo
+  const permitido = router.resolve(alvo).matched.every((registro) => permiteAcesso(registro.meta, session.usuario))
+  return permitido ? alvo : null
 }
 
 async function carregar() {

@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { ehGestao } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 import { aplicarTema, tema } from '@/services/themeService'
 
 const session = useSessionStore()
 
 const visivel = computed(() => {
-  const perfil = session.usuario?.perfil
-  return perfil === 'TECNICO'
-    || perfil === 'ANALISTA'
-    || perfil === 'PESQUISADOR'
-    || perfil === 'ESTAGIARIO'
+  // The solicitante area: a signed-in person with no management role.
+  return Boolean(session.usuario) && !ehGestao(session.usuario)
 })
 
 </script>

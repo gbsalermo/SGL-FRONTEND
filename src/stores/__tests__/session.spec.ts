@@ -3,12 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { UsuarioSessao } from '@/modules/auth/types/session'
 import { fakeAdapter } from '@/test/fakeAdapter'
+import { acessoDe } from '@/test/sessaoDeTeste'
 
 const usuario: UsuarioSessao = {
   id: 'u-1',
   nome: 'Fulano',
   email: 'fulano@embrapa.br',
-  perfil: 'GESTOR',
+  ...acessoDe('GESTOR'),
+  cargo: null,
+  responsavelPor: [],
   situacao: 'ATIVO',
   unidadeId: 'unidade-1',
   unidadeNome: 'Mandioca',
@@ -78,7 +81,7 @@ describe('session store', () => {
 
   it('unidadeEmOperacaoId usa a escolha do administrador geral e, sem ela, a do usuario', async () => {
     const { session } = await carregar()
-    session.usuario = { ...usuario, perfil: 'ADMINISTRADOR_GERAL' }
+    session.usuario = { ...usuario, ...acessoDe('ADMINISTRADOR_GERAL') }
     expect(session.unidadeEmOperacaoId).toBe('unidade-1')
 
     session.selecionarUnidade('unidade-2', 'CNPTIA')
@@ -95,7 +98,7 @@ describe('session store', () => {
     expect(session.pendente).toBe(true)
     expect(session.administradorGeral).toBe(false)
 
-    session.$patch({ usuario: { ...usuario, perfil: 'ADMINISTRADOR_GERAL' } })
+    session.$patch({ usuario: { ...usuario, ...acessoDe('ADMINISTRADOR_GERAL') } })
     expect(session.pendente).toBe(false)
     expect(session.administradorGeral).toBe(true)
   })

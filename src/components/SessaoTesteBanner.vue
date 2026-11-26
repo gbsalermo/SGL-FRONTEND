@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { ROTULOS_PERFIL } from '@/modules/auth/perfis'
+import { rotuloAcesso } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 
 const session = useSessionStore()
@@ -26,7 +26,7 @@ onBeforeUnmount(() => document.documentElement.style.removeProperty(VARIAVEL_ALT
 const descricao = computed(() => {
   const usuario = session.usuario
   if (!usuario) return ''
-  return [ROTULOS_PERFIL[usuario.perfil], usuario.unidadeSigla].filter(Boolean).join(' · ')
+  return [rotuloAcesso(usuario), usuario.unidadeSigla].filter(Boolean).join(' · ')
 })
 
 async function trocarUsuario() {

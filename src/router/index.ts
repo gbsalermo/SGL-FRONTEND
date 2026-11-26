@@ -299,7 +299,7 @@ export const router = createRouter({
  * `categorias`: any of these job categories; `somenteSemPapelDeGestao`: the solicitante area, which
  * people with a management role do not use yet (they keep the gestão layout).
  */
-function permiteAcesso(meta: RouteMeta, usuario: UsuarioSessao | null) {
+export function permiteAcesso(meta: RouteMeta, usuario: UsuarioSessao | null) {
   const papeis = meta.papeis as PapelSistema[] | undefined
   if (papeis?.length && !temAlgumPapel(usuario, papeis)) return false
   const categorias = meta.categorias as CategoriaCargo[] | undefined

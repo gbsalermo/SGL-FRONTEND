@@ -3,8 +3,8 @@ import { computed, ref, watch } from 'vue'
 
 import type { DadoEmbrapa } from '@/modules/admin/services/pessoasCorporativasService'
 import type { LaboratorioCadastro } from '@/modules/admin/types/cadastros'
-import { ehPerfilGestao, perfisConcedidosPor, ROTULOS_PERFIL } from '@/modules/auth/perfis'
-import type { PerfilUsuario } from '@/modules/auth/types/session'
+import { CATEGORIAS, papeisConcedidosPor, ROTULOS_CATEGORIA, ROTULOS_PAPEL } from '@/modules/auth/papeis'
+import type { CategoriaCargo, PapelSistema } from '@/modules/auth/types/session'
 import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 import { useSessionStore } from '@/stores/session'
@@ -13,7 +13,7 @@ const props = defineProps<{
   modo: 'importar' | 'aprovar'
   nome: string
   dados: DadoEmbrapa[]
-  perfilSugerido: PerfilUsuario | null
+  categoriaSugerida: CategoriaCargo | null
   laboratorios: LaboratorioCadastro[]
   salvando: boolean
   erro: string
@@ -21,33 +21,38 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   fechar: []
-  confirmar: [payload: { perfil: PerfilUsuario; laboratorioIds: string[] }]
+  confirmar: [payload: { papeis: PapelSistema[]; categoriaCargo: CategoriaCargo; laboratorioIds: string[] }]
   recusar: []
 }>()
 
 const session = useSessionStore()
 
-const perfisDisponiveis = computed(() => perfisConcedidosPor(session.usuario?.perfil))
+const papeisDisponiveis = computed(() => papeisConcedidosPor(session.usuario))
 const laboratoriosAtivos = computed<LaboratorioResumo[]>(() =>
   props.laboratorios.filter((lab) => lab.ativo).map(({ id, nome, ativo }) => ({ id, nome, ativo })))
 
 const laboratorioIds = ref<string[]>([])
-const perfil = ref<PerfilUsuario | ''>('')
+const categoria = ref<CategoriaCargo | ''>('')
+const papeis = ref<PapelSistema[]>([])
 const confirmandoRecusa = ref(false)
 
-// The suggestion is only a starting point and is dropped when the session cannot grant it.
-watch(() => [props.perfilSugerido, perfisDisponiveis.value] as const, ([sugerido, disponiveis]) => {
-  perfil.value = sugerido && disponiveis.includes(sugerido) ? sugerido : ''
+// The category from the Embrapa cargo is only a starting point; management may correct it.
+watch(() => props.categoriaSugerida, (sugerida) => {
+  categoria.value = sugerida ?? ''
 }, { immediate: true })
 
-// Management profiles act on the whole Unidade, so only operational ones need a laboratory.
-const exigeLaboratorio = computed(() => !ehPerfilGestao(perfil.value || null))
+function alternarPapel(papel: PapelSistema, marcado: boolean) {
+  papeis.value = marcado ? [...papeis.value, papel] : papeis.value.filter((item) => item !== papel)
+}
+
+// Management roles act on the whole Unidade, so only people without one need a laboratory.
+const exigeLaboratorio = computed(() => papeis.value.length === 0)
 const podeConfirmar = computed(() =>
-  Boolean(perfil.value) && (!exigeLaboratorio.value || laboratorioIds.value.length > 0) && !props.salvando)
+  Boolean(categoria.value) && (!exigeLaboratorio.value || laboratorioIds.value.length > 0) && !props.salvando)
 
 function confirmar() {
-  if (!perfil.value || !podeConfirmar.value) return
-  emit('confirmar', { perfil: perfil.value, laboratorioIds: laboratorioIds.value })
+  if (!categoria.value || !podeConfirmar.value) return
+  emit('confirmar', { papeis: [...papeis.value], categoriaCargo: categoria.value, laboratorioIds: laboratorioIds.value })
 }
 </script>
 
@@ -78,13 +83,25 @@ function confirmar() {
         <section class="people-section">
           <div class="people-section-head"><div><span class="people-section-number">02</span><h3>No SGL</h3></div></div>
           <div class="people-filter-grid">
-            <label class="people-field"><span>Perfil *</span>
-              <select v-model="perfil" required data-test="perfil">
+            <label class="people-field"><span>Categoria do cargo *</span>
+              <select v-model="categoria" required data-test="categoria">
                 <option value="" disabled>Selecione</option>
-                <option v-for="p in perfisDisponiveis" :key="p" :value="p">{{ ROTULOS_PERFIL[p] }}</option>
+                <option v-for="item in CATEGORIAS" :key="item" :value="item">{{ ROTULOS_CATEGORIA[item] }}</option>
               </select>
             </label>
           </div>
+          <fieldset v-if="papeisDisponiveis.length > 0" class="importar-papeis">
+            <legend>Papéis no sistema (opcional)</legend>
+            <label v-for="papel in papeisDisponiveis" :key="papel" class="importar-papel">
+              <input
+                type="checkbox"
+                :data-test="`papel-${papel}`"
+                :checked="papeis.includes(papel)"
+                @change="alternarPapel(papel, ($event.target as HTMLInputElement).checked)"
+              >
+              {{ ROTULOS_PAPEL[papel] }}
+            </label>
+          </fieldset>
           <LaboratoriosSelect v-model="laboratorioIds" :opcoes="laboratoriosAtivos" :vinculados="[]" :obrigatorio="exigeLaboratorio" />
           <p class="people-footnote">Vínculos adicionais (projetos, SCIs, atividades) são cadastrados depois, em Vínculos operacionais.</p>
         </section>
@@ -108,6 +125,27 @@ function confirmar() {
 </template>
 
 <style scoped>
+.importar-papeis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 12px 0;
+  padding: 0;
+  border: 0;
+}
+
+.importar-papeis legend {
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.importar-papel {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
 .importar-dados {
   display: grid;
   grid-template-columns: max-content 1fr;

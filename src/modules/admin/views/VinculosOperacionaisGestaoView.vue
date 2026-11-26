@@ -9,8 +9,8 @@ import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminSe
 import type { DadoEmbrapa } from '@/modules/admin/services/pessoasCorporativasService'
 import { vinculosOperacionaisService } from '@/modules/admin/services/vinculosOperacionaisService'
 import type { UsuarioPermissao, LaboratorioCadastro, ProjetoCadastro } from '@/modules/admin/types/cadastros'
-import { ROTULOS_PERFIL } from '@/modules/auth/perfis'
-import type { PerfilUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import { ROTULOS_CATEGORIA } from '@/modules/auth/papeis'
+import type { CategoriaCargo, PapelSistema, UsuarioSessao } from '@/modules/auth/types/session'
 const usuarios = ref<UsuarioPermissao[]>([])
 const laboratorios = ref<LaboratorioCadastro[]>([])
 const projetos = ref<ProjetoCadastro[]>([])
@@ -68,7 +68,7 @@ async function concluir(acao: () => Promise<unknown>, texto: string) {
     erroDrawer.value = mensagem(e, 'Não foi possível concluir a operação.')
   } finally { salvando.value = false }
 }
-function aprovar(payload: { perfil: PerfilUsuario; laboratorioIds: string[] }) {
+function aprovar(payload: { papeis: PapelSistema[]; categoriaCargo: CategoriaCargo; laboratorioIds: string[] }) {
   const alvo = analisando.value
   if (alvo) void concluir(() => vinculosOperacionaisService.aprovar(alvo.id, payload), `${alvo.nome} foi aprovado(a).`)
 }
@@ -108,12 +108,12 @@ function recusar() {
       <div v-if="pendentes.length === 0" class="people-empty">Nenhum acesso aguardando aprovação.</div>
       <div v-else class="people-table-wrap">
         <table class="people-table">
-          <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil sugerido</th><th /></tr></thead>
+          <thead><tr><th>Nome</th><th>E-mail</th><th>Categoria sugerida</th><th /></tr></thead>
           <tbody>
             <tr v-for="p in pendentes" :key="p.id">
               <td><strong>{{ p.nome }}</strong></td>
               <td>{{ p.email || '—' }}</td>
-              <td>{{ ROTULOS_PERFIL[p.perfil] }}</td>
+              <td>{{ p.categoriaCargo ? ROTULOS_CATEGORIA[p.categoriaCargo] : '—' }}</td>
               <td><button type="button" class="people-outline" @click="analisar(p)">Analisar <span aria-hidden="true">→</span></button></td>
             </tr>
           </tbody>
@@ -125,7 +125,7 @@ function recusar() {
       modo="aprovar"
       :nome="analisando.nome"
       :dados="dadosAnalisando"
-      :perfil-sugerido="analisando.perfil"
+      :categoria-sugerida="analisando.categoriaCargo"
       :laboratorios="laboratorios"
       :salvando="salvando"
       :erro="erroDrawer"

@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { ROTULOS_PERFIL } from '@/modules/auth/perfis'
+import { rotuloAcesso } from '@/modules/auth/papeis'
+import { type PerfilLegado, perfilLegadoDe } from '@/modules/auth/perfilLegado'
 import type { UsuarioDeTeste } from '@/modules/auth/types/devLogin'
-import type { PerfilUsuario } from '@/modules/auth/types/session'
 
 const props = defineProps<{ usuario: UsuarioDeTeste }>()
 
 const emit = defineEmits<{ entrar: [login: string] }>()
 
 // Only a few profiles get a tint so the eye can find admins and managers quickly; the rest stay neutral.
-const TOM_DO_PERFIL: Partial<Record<PerfilUsuario, string>> = {
+const TOM_DO_PERFIL: Partial<Record<PerfilLegado, string>> = {
   ADMINISTRADOR_GERAL: 'teste-card__tag--alerta',
   ADMINISTRADOR: 'teste-card__tag--alerta',
   GESTOR: 'teste-card__tag--primario',
@@ -45,7 +45,7 @@ const laboratoriosRestantes = computed(() => Math.max(props.usuario.laboratorios
     </header>
 
     <ul class="teste-card__tags">
-      <li class="teste-card__tag" :class="TOM_DO_PERFIL[usuario.perfil]">{{ ROTULOS_PERFIL[usuario.perfil] }}</li>
+      <li class="teste-card__tag" :class="TOM_DO_PERFIL[perfilLegadoDe(usuario)]">{{ rotuloAcesso(usuario) }}</li>
       <li v-if="usuario.unidadeSigla" class="teste-card__tag">{{ usuario.unidadeSigla }}</li>
       <li v-if="primeiroLaboratorio" class="teste-card__tag">
         {{ primeiroLaboratorio }}

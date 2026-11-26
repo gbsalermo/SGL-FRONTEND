@@ -33,6 +33,7 @@ vi.mock('@/modules/operacao/services/contextoOperacionalService', () => ({
 }))
 
 import NovaSolucaoView from '@/modules/solucoes/views/NovaSolucaoView.vue'
+import { acessoDe, type PerfilDeTeste } from '@/test/sessaoDeTeste'
 
 async function montarComoEstagiario(laboratorios: LaboratorioResumo[], laboratoriosDaPessoa?: LaboratorioResumo[]) {
   entrarComoEstagiario(laboratoriosDaPessoa)
@@ -111,7 +112,7 @@ describe('NovaSolucaoView - laboratórios do empregado', () => {
 
   it('empregadoVeTodosOsLaboratoriosAtivosComOsDaListaPrimeiro', async () => {
     const usuario: UsuarioSessao = {
-      id: 'u-2', nome: 'Técnico', email: 't@embrapa.br', perfil: 'TECNICO', situacao: 'ATIVO',
+      id: 'u-2', nome: 'Técnico', email: 't@embrapa.br', ...acessoDe('TECNICO'), cargo: null, responsavelPor: [], situacao: 'ATIVO',
       unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF', ativo: true,
       laboratorios: [{ id: 'B', nome: 'Lab B', ativo: true }],
     }

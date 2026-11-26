@@ -1,4 +1,4 @@
-import type { PerfilUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import type { CategoriaCargo, PapelSistema, UsuarioSessao } from '@/modules/auth/types/session'
 import { http } from '@/services/http'
 
 export interface VinculoOperacional {
@@ -34,7 +34,8 @@ export interface ResumoVinculosUsuario {
   laboratoriosAdicionais: string[]
 }
 export interface AprovarUsuarioRequest {
-  perfil: PerfilUsuario
+  papeis: PapelSistema[]
+  categoriaCargo: CategoriaCargo
   laboratorioIds: string[]
 }
 export const vinculosOperacionaisService = {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { ehEstagiario } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 import SeletorParticipacaoOperacional from '@/modules/operacao/components/SeletorParticipacaoOperacional.vue'
 import { contextoOperacionalService } from '@/modules/operacao/services/contextoOperacionalService'
@@ -43,8 +44,8 @@ const vinculosAdicionais = ref<VinculoOperacional[]>([])
 const autorizacaoAtualizada = ref(false)
 const laboratorioPermitido = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratoriosDaUnidadeComOsDaPessoaPrimeiro(
   laboratorios.value, session.usuario?.laboratorios ?? []))
-const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
-const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
+const gestao = computed(() => podeEscolherLaboratorio(session.usuario))
+const estagiario = computed(() => ehEstagiario(session.usuario))
 const contextos = ref<ContextoParticipacaoOperacional[]>([])
 const participacaoSelecionadaId = ref('')
 const opcoesContexto = computed(() => prepararSelecaoContextoEstagiario(contextos.value, session.usuario?.unidadeId || ''))

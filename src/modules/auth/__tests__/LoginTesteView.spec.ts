@@ -5,9 +5,10 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 
 import { buscarUsuariosDeTeste, carregarResumoDeTeste } from '@/modules/auth/services/devLoginService'
 import type { ResumoDeTeste, UsuarioDeTeste } from '@/modules/auth/types/devLogin'
-import type { LoginResponse, SituacaoUsuario, PerfilUsuario } from '@/modules/auth/types/session'
+import type {LoginResponse, SituacaoUsuario } from '@/modules/auth/types/session'
 import LoginTesteView from '@/modules/auth/views/LoginTesteView.vue'
 import { http } from '@/services/http'
+import { acessoDe, type PerfilDeTeste } from '@/test/sessaoDeTeste'
 
 // The service is the HTTP boundary of this view; the session store keeps its real implementation.
 vi.mock('@/modules/auth/services/devLoginService', () => ({
@@ -31,16 +32,16 @@ function resumo(gestores = 6): ResumoDeTeste {
   }
 }
 
-function usuarioDeTeste(id: string, nome: string, perfil: PerfilUsuario = 'GESTOR'): UsuarioDeTeste {
-  return { id, nome, login: `login.${id}`, perfil, unidadeId: 'unidade-1', unidadeSigla: 'CNPMA', laboratorios: [] }
+function usuarioDeTeste(id: string, nome: string, perfil: PerfilDeTeste = 'GESTOR'): UsuarioDeTeste {
+  return { id, nome, login: `login.${id}`, ...acessoDe(perfil), unidadeId: 'unidade-1', unidadeSigla: 'CNPMA', laboratorios: [] }
 }
 
-function respostaDeLogin(perfil: PerfilUsuario, situacao: SituacaoUsuario): LoginResponse {
+function respostaDeLogin(perfil: PerfilDeTeste, situacao: SituacaoUsuario): LoginResponse {
   return {
     token: 'jwt',
     expiraEm: new Date(Date.now() + 60_000).toISOString(),
     usuario: {
-      id: 'u-1', nome: 'Ana Moreira', email: 'ana@sgl.local', perfil, situacao,
+      id: 'u-1', nome: 'Ana Moreira', email: 'ana@sgl.local', ...acessoDe(perfil), cargo: null, responsavelPor: [], situacao,
       unidadeId: 'unidade-1', unidadeNome: 'Meio Ambiente', unidadeSigla: 'CNPMA',
       laboratorios: [], ativo: true,
     },
