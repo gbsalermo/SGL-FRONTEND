@@ -3,6 +3,7 @@ import axios from 'axios'
 import { computed, ref, watch } from 'vue'
 
 import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
+import BolsaPicker from '@/modules/estagiarios/components/BolsaPicker.vue'
 import { listarLaboratoriosOperacionais } from '@/modules/operacao/services/laboratoriosOperacionais'
 import type { LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { opcoesBolsa, opcoesFormacao } from '@/modules/estagiarios/opcoesEstagio'
@@ -42,7 +43,10 @@ const laboratorioIds = ref<string[]>([])
 const orientadorId = ref('')
 const dataInicio = ref('')
 const dataFim = ref('')
+const origemBolsa = ref<'LEGADO' | 'CATALOGO'>('LEGADO')
 const tipoBolsa = ref<TipoBolsaEstagiario | ''>('')
+const bolsaId = ref<string | null>(null)
+watch(origemBolsa, () => { tipoBolsa.value = ''; bolsaId.value = null })
 const formacao = ref<FormacaoEstagiario | ''>('')
 const formacaoOutro = ref('')
 const atividadeId = ref('')
@@ -66,7 +70,7 @@ const podeSalvar = computed(() =>
     && orientadorId.value
     && dataInicio.value
     && dataFim.value
-    && tipoBolsa.value
+    && (origemBolsa.value === 'LEGADO' ? !!tipoBolsa.value : !!bolsaId.value)
     && formacao.value
     && atividadeId.value,
   )
@@ -80,7 +84,9 @@ function reiniciarFormulario() {
   orientadorId.value = ''
   dataInicio.value = ''
   dataFim.value = ''
+  origemBolsa.value = 'LEGADO'
   tipoBolsa.value = ''
+  bolsaId.value = null
   formacao.value = ''
   formacaoOutro.value = ''
   atividadeId.value = ''
@@ -146,7 +152,8 @@ async function salvar() {
       orientadorId: orientadorId.value,
       dataInicioEstagio: dataInicio.value,
       dataFimEstagio: dataFim.value,
-      tipoBolsa: tipoBolsa.value as TipoBolsaEstagiario,
+      tipoBolsa: origemBolsa.value === 'LEGADO' ? tipoBolsa.value as TipoBolsaEstagiario : null,
+      bolsaId: origemBolsa.value === 'CATALOGO' ? bolsaId.value : null,
       formacao: formacao.value as FormacaoEstagiario,
       formacaoOutro: formacao.value === 'OUTRO' ? formacaoOutro.value.trim() : null,
       atividadeId: atividadeId.value,
@@ -214,6 +221,14 @@ async function salvar() {
         </small>
 
         <label>
+          <span>Bolsa / vínculo</span>
+          <select v-model="origemBolsa" data-test="origem-bolsa">
+            <option value="LEGADO">Tipo de vínculo existente</option>
+            <option value="CATALOGO">Bolsa cadastrada na Unidade</option>
+          </select>
+        </label>
+
+        <label v-if="origemBolsa === 'LEGADO'">
           <span>Tipo de vínculo</span>
           <select v-model="tipoBolsa" data-test="tipo-bolsa">
             <option value="" disabled>Selecione</option>
@@ -222,6 +237,8 @@ async function salvar() {
             </option>
           </select>
         </label>
+
+        <BolsaPicker v-else v-model="bolsaId" />
 
         <label>
           <span>Formação</span>

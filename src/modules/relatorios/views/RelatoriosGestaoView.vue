@@ -194,7 +194,7 @@ const geradoEm = computed(() => {
 const tiposBolsa = computed(() => {
   const valores = new Set(
     (resultadoEstagiarios.value?.itens ?? [])
-      .map((item) => item.tipoBolsa)
+      .map((item) => item.bolsaNome || item.tipoBolsa)
       .filter((valor): valor is string => Boolean(valor)),
   )
   return [...valores].sort((a, b) => a.localeCompare(b, 'pt-BR'))
@@ -203,7 +203,7 @@ const tiposBolsa = computed(() => {
 const itensEstagiariosFiltrados = computed(() => {
   const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
   return (resultadoEstagiarios.value?.itens ?? []).filter((item) => {
-    const bolsaOk = !tipoBolsa.value || item.tipoBolsa === tipoBolsa.value
+    const bolsaOk = !tipoBolsa.value || (item.bolsaNome || item.tipoBolsa) === tipoBolsa.value
     const buscaOk =
       !termo ||
       item.nome.toLocaleLowerCase('pt-BR').includes(termo) ||
@@ -603,7 +603,7 @@ onMounted(async () => {
             <div class="campo"><label for="situacao">Situação</label><select id="situacao" v-model="situacao"><option value="">Todos</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select></div>
             <div class="campo"><label for="laboratorio">Laboratório</label><select id="laboratorio" v-model="laboratorioId"><option value="">Todos os laboratórios</option><option v-for="laboratorio in laboratorios" :key="laboratorio.id" :value="laboratorio.id">{{ laboratorio.nome }}</option></select></div>
             <div class="campo campo--periodo"><label>Período do estágio</label><div class="periodo-inputs"><input v-model="dataInicio" type="date" aria-label="Data inicial" /><span>até</span><input v-model="dataFim" type="date" aria-label="Data final" /></div></div>
-            <div class="campo"><label for="tipoBolsa">Tipo de bolsa</label><select id="tipoBolsa" v-model="tipoBolsa"><option value="">Todos</option><option v-for="tipo in tiposBolsa" :key="tipo" :value="tipo">{{ formatarRotulo(tipo) }}</option></select></div>
+            <div class="campo"><label for="tipoBolsa">Bolsa / vínculo</label><select id="tipoBolsa" v-model="tipoBolsa"><option value="">Todos</option><option v-for="tipo in tiposBolsa" :key="tipo" :value="tipo">{{ formatarRotulo(tipo) }}</option></select></div>
             <div class="campo campo--busca"><label for="busca">Buscar por nome ou email</label><input id="busca" v-model="busca" type="search" placeholder="Digite o nome ou email do estagiário" /></div>
           </div>
 
@@ -679,7 +679,7 @@ onMounted(async () => {
 
           <div v-else-if="relatorioEstagiariosSelecionado && resultadoEstagiarios" class="preview-result">
             <div class="resumo-cards"><article><span>Total</span><strong>{{ resumoEstagiarios.total }}</strong></article><article><span>Ativos</span><strong>{{ resumoEstagiarios.ativos }}</strong></article><article><span>Inativos</span><strong>{{ resumoEstagiarios.inativos }}</strong></article></div>
-            <div class="table-wrap"><table><thead><tr><th>Estagiário</th><th>Laboratórios</th><th>Unidade</th><th>Bolsa</th><th>Início</th><th>Fim</th><th>Situação</th></tr></thead><tbody><tr v-for="item in itensEstagiariosFiltrados" :key="item.id"><td><strong>{{ item.nome }}</strong><small>{{ item.email }}</small></td><td>{{ nomesDosLaboratoriosDaPessoa(item.laboratorios, '; ') || '—' }}</td><td>{{ item.unidadeNome || '—' }}</td><td>{{ formatarRotulo(item.tipoBolsa) }}</td><td>{{ formatarData(item.dataInicioEstagio) }}</td><td>{{ formatarData(item.dataFimEstagio) }}</td><td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td></tr><tr v-if="itensEstagiariosFiltrados.length === 0"><td colspan="7" class="table-empty">Nenhum estagiário encontrado com os filtros informados.</td></tr></tbody></table></div>
+            <div class="table-wrap"><table><thead><tr><th>Estagiário</th><th>Laboratórios</th><th>Unidade</th><th>Bolsa</th><th>Início</th><th>Fim</th><th>Situação</th></tr></thead><tbody><tr v-for="item in itensEstagiariosFiltrados" :key="item.id"><td><strong>{{ item.nome }}</strong><small>{{ item.email }}</small></td><td>{{ nomesDosLaboratoriosDaPessoa(item.laboratorios, '; ') || '—' }}</td><td>{{ item.unidadeNome || '—' }}</td><td>{{ item.bolsaNome || formatarRotulo(item.tipoBolsa) }}</td><td>{{ formatarData(item.dataInicioEstagio) }}</td><td>{{ formatarData(item.dataFimEstagio) }}</td><td><span class="status" :class="item.ativo ? 'status--ativo' : 'status--inativo'">{{ item.ativo ? 'Ativo' : 'Inativo' }}</span></td></tr><tr v-if="itensEstagiariosFiltrados.length === 0"><td colspan="7" class="table-empty">Nenhum estagiário encontrado com os filtros informados.</td></tr></tbody></table></div>
           </div>
 
           <div v-else-if="relatorioProdutosSelecionado && resultadoProdutos" class="preview-result">
