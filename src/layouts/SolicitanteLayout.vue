@@ -7,7 +7,7 @@ import { helpTaskForRoute } from '@/modules/ajuda/routeHelp'
 
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { useProfilePreferencesStore } from '@/stores/profilePreferences'
-import { rotuloAcesso } from '@/modules/auth/papeis'
+import { ehResponsavel, rotuloAcesso } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -139,6 +139,13 @@ function sair() {
             <path d="M10 9v8M14 9v8" />
           </svg>
           <span>Meus resíduos</span>
+        </router-link>
+
+        <router-link v-if="ehResponsavel(session.usuario)" class="solicitante-nav__item" to="/meu-laboratorio">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6" />
+          </svg>
+          <span>Meu laboratório</span>
         </router-link>
 
         <p class="solicitante-nav__group solicitante-nav__group--spaced">SOLICITAÇÕES</p>

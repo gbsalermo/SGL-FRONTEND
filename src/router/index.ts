@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, type RouteLocationNormalized, type RouteMeta } from 'vue-router'
 
 import { FAQ_ID, findHelpTask } from '@/modules/ajuda/helpTasks'
-import { ehGestao, PAPEIS_ADMIN, PAPEIS_GESTAO, temAlgumPapel } from '@/modules/auth/papeis'
+import { ehAdmin, ehGestao, ehResponsavel, PAPEIS_ADMIN, PAPEIS_GESTAO, temAlgumPapel } from '@/modules/auth/papeis'
 import type { AuthConfig, CategoriaCargo, PapelSistema, UsuarioSessao } from '@/modules/auth/types/session'
 import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
@@ -100,6 +100,12 @@ export const router = createRouter({
           name: 'pedidos-orientandos',
           redirect: { path: '/meus-pedidos', query: { visao: 'orientandos' } },
           meta: { categorias: ['PESQUISADOR', 'ANALISTA'] },
+        },
+        {
+          path: 'meu-laboratorio',
+          name: 'solicitante-meu-laboratorio',
+          component: () => import('@/modules/equipe/views/MeuLaboratorioView.vue'),
+          meta: { exigeResponsavelOuAdmin: true },
         },
         {
           path: 'meus-pedidos',
@@ -224,13 +230,20 @@ export const router = createRouter({
           path: 'administracao/cadastros/vinculos/importar',
           name: 'gestao-vinculos-importar',
           component: () => import('@/modules/admin/views/ImportarPessoasView.vue'),
-          meta: { requiresSession: true, papeis: PAPEIS_GESTAO },
+          meta: { requiresSession: true, papeis: PAPEIS_ADMIN },
         },
         {
           path: 'administracao/cadastros/vinculos',
           name: 'gestao-vinculos-cadastros',
           component: () => import('@/modules/admin/views/VinculosOperacionaisGestaoView.vue'),
-          meta: { requiresSession: true, papeis: PAPEIS_GESTAO },
+          meta: { requiresSession: true, papeis: PAPEIS_ADMIN },
+        },
+        {
+          // Same screen as /meu-laboratorio, inside the gestão layout (a GESTOR or admin who is responsável).
+          path: 'equipe-do-laboratorio',
+          name: 'gestao-equipe-laboratorio',
+          component: () => import('@/modules/equipe/views/MeuLaboratorioView.vue'),
+          meta: { requiresSession: true, exigeResponsavelOuAdmin: true },
         },
         {
           path: 'administracao/cadastros',
@@ -297,7 +310,8 @@ export const router = createRouter({
 /**
  * Every matched record's rule must hold (a child narrows its parent). `papeis`: any of these roles;
  * `categorias`: any of these job categories; `somenteSemPapelDeGestao`: the solicitante area, which
- * people with a management role do not use yet (they keep the gestão layout).
+ * people with a management role do not use yet (they keep the gestão layout); `exigeResponsavelOuAdmin`:
+ * the laboratory team screen.
  */
 export function permiteAcesso(meta: RouteMeta, usuario: UsuarioSessao | null) {
   const papeis = meta.papeis as PapelSistema[] | undefined
@@ -305,6 +319,8 @@ export function permiteAcesso(meta: RouteMeta, usuario: UsuarioSessao | null) {
   const categorias = meta.categorias as CategoriaCargo[] | undefined
   if (categorias?.length && !(usuario?.categoriaCargo && categorias.includes(usuario.categoriaCargo))) return false
   if (meta.somenteSemPapelDeGestao && ehGestao(usuario)) return false
+  // A laboratory's team is managed by its responsável (an association, not a role) or an administrator.
+  if (meta.exigeResponsavelOuAdmin && !(ehResponsavel(usuario) || ehAdmin(usuario))) return false
   return true
 }
 
