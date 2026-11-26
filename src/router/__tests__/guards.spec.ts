@@ -1,17 +1,14 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { PerfilUsuario, SituacaoUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import type { SituacaoUsuario, UsuarioSessao } from '@/modules/auth/types/session'
 import { entradaLoginTeste, guardaDeRota, router } from '@/router'
 import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
+import { type PerfilDeTeste, usuarioDeTeste } from '@/test/sessaoDeTeste'
 
-function entrarComo(perfil: PerfilUsuario, situacao: SituacaoUsuario = 'ATIVO') {
-  const usuario: UsuarioSessao = {
-    id: 'u-1', nome: 'Fulano', email: 'f@embrapa.br', perfil, situacao,
-    unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF',
-    laboratorios: [], ativo: true,
-  }
+function entrarComo(perfil: PerfilDeTeste, situacao: SituacaoUsuario = 'ATIVO', extra: Partial<UsuarioSessao> = {}) {
+  const usuario = usuarioDeTeste(perfil, { situacao, ...extra })
   useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
 }
 
@@ -56,6 +53,34 @@ describe('guardas de rota', () => {
     expect(destino('/administracao/cadastros/vinculos')).toBe(true)
     expect(destino('/administracao/cadastros')).toBe(true)
     expect(destino('/login')).toBe('/dashboard')
+  })
+
+  it('gestor que tambem e responsavel entra na gestao', () => {
+    entrarComo('GESTOR', 'ATIVO', {
+      categoriaCargo: 'PESQUISADOR',
+      responsavelPor: [{ id: 'lab-1', nome: 'Lab', ativo: true }],
+    })
+
+    expect(destino('/dashboard')).toBe(true)
+    expect(destino('/login')).toBe('/dashboard')
+  })
+
+  it('gestor que tambem e administrador local acessa rotas de admin', () => {
+    entrarComo('GESTOR', 'ATIVO', { papeis: ['GESTOR', 'ADMINISTRADOR_LOCAL'] })
+
+    expect(destino('/administracao/cadastros')).toBe(true)
+  })
+
+  it('quem nao tem papel nao acessa cadastros', () => {
+    entrarComo('PESQUISADOR')
+
+    expect(destino('/administracao/cadastros')).toBe('/inicio')
+  })
+
+  it('gestor continua fora das rotas de solicitante nesta fase', () => {
+    entrarComo('GESTOR')
+
+    expect(destino('/inicio')).toBe('/dashboard')
   })
 
   it('gestor nao acessa rotas de admin', () => {
