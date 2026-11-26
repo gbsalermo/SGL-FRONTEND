@@ -60,6 +60,8 @@ export const useSessionStore = defineStore('session', {
     unidadeOperacaoRotulo: sessaoInicial?.unidadeOperacaoRotulo ?? null as string | null,
     // Marks a session opened through the developer-only test login, so the UI can warn about it.
     sessaoDeTeste: sessaoInicial?.sessaoDeTeste ?? false,
+    // Last time the session user was re-read; not persisted.
+    ultimaAtualizacao: 0,
   }),
 
   getters: {
@@ -91,6 +93,21 @@ export const useSessionStore = defineStore('session', {
       this.usuario = data
       this.persistir()
       return data
+    },
+
+    /**
+     * Re-reads the session user when the window regains focus, at most once a minute, so that a change
+     * made by an administrator (e.g. being named responsável of a laboratory) shows up without a new login.
+     * Failures are ignored: the next request already handles an expired session.
+     */
+    async atualizarAoVoltar(agora: number = Date.now()) {
+      if (!this.token || agora - this.ultimaAtualizacao < 60_000) return
+      this.ultimaAtualizacao = agora
+      try {
+        await this.atualizarUsuario()
+      } catch {
+        // Expired or offline: the http interceptor and the route guard take care of it.
+      }
     },
 
     selecionarUnidade(unidadeId: string | null, rotulo: string | null = null) {

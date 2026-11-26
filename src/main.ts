@@ -111,4 +111,9 @@ configurarRespostasDeSessao({
   },
 })
 
+// Picks up changes made by an administrator (e.g. a new laboratory responsável) without a new login.
+window.addEventListener('focus', () => {
+  void session.atualizarAoVoltar()
+})
+
 app.mount('#app')

@@ -85,6 +85,32 @@ describe('session store', () => {
     expect(localStorage.getItem('sgl.session')).toBeNull()
   })
 
+  // A new responsável only sees "Meu laboratório" after the session is read again; doing it when the
+  // window regains focus avoids a new login, at most once a minute.
+  it('atualizarAoVoltar consulta /auth/me no maximo uma vez por minuto', async () => {
+    const { http, session } = await carregar()
+    const fake = fakeAdapter(() => ({ status: 200, data: { ...usuario, responsavelPor: [{ id: 'lab-1', nome: 'Lab', ativo: true }] } }))
+    http.defaults.adapter = fake.adapter
+    session.$patch({ token: 't', expiraEm: Date.now() + 600_000, usuario })
+
+    await session.atualizarAoVoltar(1_000_000)
+    await session.atualizarAoVoltar(1_030_000)
+    await session.atualizarAoVoltar(1_061_000)
+
+    expect(fake.requests.filter((r) => r.url === '/v1/auth/me')).toHaveLength(2)
+    expect(session.usuario?.responsavelPor).toHaveLength(1)
+  })
+
+  it('atualizarAoVoltar sem sessao nao faz nada', async () => {
+    const { http, session } = await carregar()
+    const fake = fakeAdapter(() => ({ status: 200, data: usuario }))
+    http.defaults.adapter = fake.adapter
+
+    await session.atualizarAoVoltar(1_000_000)
+
+    expect(fake.requests).toHaveLength(0)
+  })
+
   it('remove a chave antiga sgl.dev-session', async () => {
     localStorage.setItem('sgl.dev-session', JSON.stringify({ usuario, expiraEm: Date.now() + 60_000 }))
 

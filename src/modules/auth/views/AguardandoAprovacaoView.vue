@@ -43,7 +43,7 @@ async function sair() {
       <div class="aguardando__content">
         <h1 id="aguardando-title">Aguardando aprovação</h1>
         <p class="aguardando__texto">
-          Seu acesso ao SGL foi registrado. Um gestor da sua Unidade precisa liberar seu laboratório e perfil.
+          Seu acesso ao SGL foi registrado. Avise o responsável do seu laboratório: ele aprova o seu acesso no SGL.
         </p>
         <p v-if="session.usuario" class="aguardando__quem">
           {{ session.usuario.nome }}<span v-if="session.usuario.unidadeSigla"> · {{ session.usuario.unidadeSigla }}</span>

@@ -8,7 +8,7 @@ import { helpTaskForRoute } from '@/modules/ajuda/routeHelp'
 import UnidadeSelector from '@/components/UnidadeSelector.vue'
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { gestaoShellService, type BaseBuscaGestao } from '@/services/gestaoShellService'
-import { ehAdmin, rotuloAcesso } from '@/modules/auth/papeis'
+import { ehAdmin, ehResponsavel, rotuloAcesso } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 import { alternarTema, aplicarTema, tema } from '@/services/themeService'
 
@@ -71,6 +71,7 @@ const baseBusca = ref<BaseBuscaGestao>({
 })
 
 const ehAdministrador = computed(() => ehAdmin(session.usuario))
+const gereEquipe = computed(() => ehResponsavel(session.usuario) || ehAdministrador.value)
 
 // O retorno no topbar é reservado a telas realmente aninhadas/detalhadas.
 // Seções principais acessadas pela sidebar não exibem uma seta de retorno.
@@ -697,12 +698,16 @@ onBeforeUnmount(() => {
           <span v-show="!recolhida">Meus pedidos</span>
         </router-link>
 
-        <p v-show="!recolhida" class="gestao-nav__group">ADMINISTRAÇÃO</p>
-        <router-link to="/administracao/cadastros/vinculos" title="Gerenciar vínculos de usuários">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="3"/><circle cx="18" cy="7" r="3"/><path d="M2 20v-3a5 5 0 0 1 10 0v3M13 20v-3a5 5 0 0 1 9 0v3M10 12h5"/></svg>
-          <span v-show="!recolhida">Vínculos de usuários</span>
+        <p v-show="!recolhida && (gereEquipe || ehAdministrador)" class="gestao-nav__group">ADMINISTRAÇÃO</p>
+        <router-link v-if="gereEquipe" to="/equipe-do-laboratorio" title="Equipe do meu laboratório">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6" /></svg>
+          <span v-show="!recolhida">Meu laboratório</span>
         </router-link>
         <template v-if="ehAdministrador">
+          <router-link to="/administracao/cadastros/vinculos" title="Gerenciar vínculos de usuários">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="3"/><circle cx="18" cy="7" r="3"/><path d="M2 20v-3a5 5 0 0 1 10 0v3M13 20v-3a5 5 0 0 1 9 0v3M10 12h5"/></svg>
+            <span v-show="!recolhida">Vínculos de usuários</span>
+          </router-link>
           <router-link to="/administracao/cadastros" title="Cadastros administrativos">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="9" cy="8" r="3" />

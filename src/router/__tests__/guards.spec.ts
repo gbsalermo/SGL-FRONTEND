@@ -83,6 +83,38 @@ describe('guardas de rota', () => {
     expect(destino('/inicio')).toBe('/dashboard')
   })
 
+  it('responsavel sem papel abre Meu laboratorio na area de solicitante', () => {
+    entrarComo('PESQUISADOR', 'ATIVO', { responsavelPor: [{ id: 'lab-1', nome: 'Lab', ativo: true }] })
+
+    expect(destino('/meu-laboratorio')).toBe(true)
+  })
+
+  it('solicitante que nao e responsavel nao abre Meu laboratorio', () => {
+    entrarComo('PESQUISADOR')
+
+    expect(destino('/meu-laboratorio')).toBe('/inicio')
+  })
+
+  it('gestor sozinho nao abre a equipe do laboratorio nem os vinculos', () => {
+    entrarComo('GESTOR')
+
+    expect(destino('/equipe-do-laboratorio')).toBe('/dashboard')
+    expect(destino('/administracao/cadastros/vinculos')).toBe('/dashboard')
+  })
+
+  it('gestor que e responsavel abre a equipe do laboratorio na gestao', () => {
+    entrarComo('GESTOR', 'ATIVO', { responsavelPor: [{ id: 'lab-1', nome: 'Lab', ativo: true }] })
+
+    expect(destino('/equipe-do-laboratorio')).toBe(true)
+  })
+
+  it('administrador local abre a equipe do laboratorio e os vinculos', () => {
+    entrarComo('ADMINISTRADOR')
+
+    expect(destino('/equipe-do-laboratorio')).toBe(true)
+    expect(destino('/administracao/cadastros/vinculos')).toBe(true)
+  })
+
   it('gestor nao acessa rotas de admin', () => {
     entrarComo('GESTOR')
 

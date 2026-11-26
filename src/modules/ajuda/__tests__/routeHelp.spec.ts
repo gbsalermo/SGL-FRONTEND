@@ -9,6 +9,8 @@ const ROUTE_TABLE: Array<[string, string]> = [
   ['/solicitacoes/novo', 'fazer-um-pedido-e-acompanhar'],
   ['/solicitacoes/meus-pedidos', 'fazer-um-pedido-e-acompanhar'],
   ['/administracao/cadastros/vinculos', 'importar-pessoa-da-embrapa'],
+  ['/meu-laboratorio', 'importar-pessoa-da-embrapa'],
+  ['/equipe-do-laboratorio', 'importar-pessoa-da-embrapa'],
   ['/solucoes/solicitar', 'solicitar-uma-solucao'],
   ['/minhas-solucoes', 'solicitar-uma-solucao'],
   ['/residuos/novo', 'informar-um-residuo'],
