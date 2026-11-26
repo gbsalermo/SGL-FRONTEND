@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import LoginBrandPanel from '../components/LoginBrandPanel.vue'
-import { ehPerfilGestao } from '@/modules/auth/perfis'
+import { ehGestao } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -18,7 +18,7 @@ async function verificarNovamente() {
   try {
     const usuario = await session.atualizarUsuario()
     if (usuario.situacao === 'ATIVO') {
-      await router.replace(ehPerfilGestao(usuario.perfil) ? '/dashboard' : '/inicio')
+      await router.replace(ehGestao(usuario) ? '/dashboard' : '/inicio')
       return
     }
     aviso.value = 'Seu acesso ainda não foi liberado.'

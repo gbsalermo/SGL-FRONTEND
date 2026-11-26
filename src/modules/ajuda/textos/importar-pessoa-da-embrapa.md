@@ -14,7 +14,7 @@ Gestão e administradores.
 4. A busca consulta as bases da Embrapa. O ponto verde indica quem já está no SGL.
 5. Para esconder quem já está no SGL, marque **Só quem ainda não está no SGL**.
 6. Na linha da pessoa, clique em **Importar**.
-7. O painel traz os dados da Embrapa. Em **No SGL**, o perfil vem sugerido pelo cargo; troque se precisar.
+7. O painel traz os dados da Embrapa. Em **No SGL**, a categoria vem sugerida pelo cargo; troque se precisar. Marque papéis (Administrador local, Gestor) só para quem vai cuidar da gestão.
 8. Em **Laboratórios**, marque os laboratórios em que a pessoa vai atuar. Pode marcar mais de um.
 9. Confira os dados e clique em **Cadastrar e vincular**.
 10. A mensagem confirma que a pessoa foi cadastrada no SGL.

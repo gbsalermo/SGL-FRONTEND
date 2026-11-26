@@ -29,7 +29,7 @@ export const http = axios.create({
 interface SessaoArmazenada {
   token?: string
   unidadeOperacaoId?: string | null
-  usuario?: { perfil?: string }
+  usuario?: { papeis?: string[] }
 }
 
 // Read straight from localStorage: importing the session store here would be a circular import.
@@ -62,7 +62,7 @@ http.interceptors.request.use((config) => {
   }
 
   // The backend derives the Unidade from the session; only a general administrator may override it.
-  if (sessao?.usuario?.perfil === 'ADMINISTRADOR_GERAL' && sessao.unidadeOperacaoId) {
+  if (sessao?.usuario?.papeis?.includes('ADMINISTRADOR_GERAL') && sessao.unidadeOperacaoId) {
     config.headers.set(TENANT_HEADER, sessao.unidadeOperacaoId)
   }
 

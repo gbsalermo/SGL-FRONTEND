@@ -2,7 +2,8 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import type { PerfilUsuario } from '@/modules/auth/types/session'
+import { rotuloAcesso } from '@/modules/auth/papeis'
+import { type PerfilLegado, ROTULOS_PERFIL_LEGADO } from '@/modules/auth/perfilLegado'
 import { relatorioService } from '@/modules/relatorios/services/relatorioService'
 import type {
   RelatorioPessoasLaboratorioFiltros,
@@ -22,14 +23,14 @@ type SituacaoFiltro = 'ATIVOS' | 'INATIVOS' | 'TODOS'
 const router = useRouter()
 const laboratorios = ref<LaboratorioResumo[]>([])
 const laboratorioId = ref('')
-const perfil = ref<'' | PerfilUsuario>('')
+const perfil = ref<'' | PerfilLegado>('')
 const situacao = ref<SituacaoFiltro>('ATIVOS')
 const resultado = ref<RelatorioPessoasLaboratorioResponse | null>(null)
 const carregando = ref(false)
 const exportando = ref<'PDF' | 'XLSX' | null>(null)
 const erro = ref('')
 
-const perfis: PerfilUsuario[] = ['GESTOR', 'PESQUISADOR', 'TECNICO', 'ANALISTA', 'ESTAGIARIO', 'ADMINISTRADOR']
+const perfis: PerfilLegado[] = ['GESTOR', 'PESQUISADOR', 'TECNICO', 'ANALISTA', 'ESTAGIARIO', 'ADMINISTRADOR']
 
 function filtros(): RelatorioPessoasLaboratorioFiltros | null {
   if (!laboratorioId.value) return null
@@ -94,17 +95,8 @@ async function exportar(formato: 'PDF' | 'XLSX') {
   }
 }
 
-function rotuloPerfil(valor: PerfilUsuario) {
-  const mapa: Record<PerfilUsuario, string> = {
-    ADMINISTRADOR_GERAL: 'Administrador geral',
-    ADMINISTRADOR: 'Administrador',
-    GESTOR: 'Gestor',
-    TECNICO: 'Técnico',
-    ANALISTA: 'Analista',
-    PESQUISADOR: 'Pesquisador',
-    ESTAGIARIO: 'Estagiário',
-  }
-  return mapa[valor]
+function rotuloPerfil(valor: PerfilLegado) {
+  return ROTULOS_PERFIL_LEGADO[valor]
 }
 
 function rotuloVinculo(valor: string | null) {
@@ -213,7 +205,7 @@ onMounted(async () => {
           <span>Perfis encontrados</span>
           <div>
             <b v-for="(quantidade, chave) in resultado.porPerfil" :key="chave">
-              {{ rotuloPerfil(chave as PerfilUsuario) }}: {{ quantidade }}
+              {{ rotuloPerfil(chave as PerfilLegado) }}: {{ quantidade }}
             </b>
             <em v-if="Object.keys(resultado.porPerfil).length === 0">Nenhum</em>
           </div>
@@ -249,7 +241,7 @@ onMounted(async () => {
                 </td>
                 <td><strong>{{ pessoa.nome }}</strong></td>
                 <td>{{ pessoa.email }}</td>
-                <td>{{ rotuloPerfil(pessoa.perfil) }}</td>
+                <td>{{ rotuloAcesso(pessoa) }}</td>
                 <td><span class="status" :class="pessoa.ativo ? 'status--active' : 'status--inactive'">{{ pessoa.ativo ? 'Ativo' : 'Inativo' }}</span></td>
                 <td>{{ rotuloVinculo(pessoa.tipoVinculoEstagio) }}</td>
                 <td>

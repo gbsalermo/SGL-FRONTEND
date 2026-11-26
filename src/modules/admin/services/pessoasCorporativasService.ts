@@ -1,6 +1,6 @@
 import { isAxiosError } from 'axios'
 
-import type { PerfilUsuario, SituacaoUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import type { CategoriaCargo, PapelSistema, SituacaoUsuario, UsuarioSessao } from '@/modules/auth/types/session'
 import { http } from '@/services/http'
 
 export type TipoPessoaCorporativa = 'EMPREGADO' | 'COLABORADOR'
@@ -17,13 +17,14 @@ export interface PessoaCorporativa {
   email: string | null
   jaCadastrado: boolean
   situacao: SituacaoUsuario | null
-  perfilSugerido: PerfilUsuario | null
+  categoriaSugerida: CategoriaCargo | null
 }
 
 export interface ImportarPessoaRequest {
   tipo: TipoPessoaCorporativa
   referencia: string
-  perfil: PerfilUsuario
+  papeis: PapelSistema[]
+  categoriaCargo: CategoriaCargo
   laboratorioIds: string[]
 }
 

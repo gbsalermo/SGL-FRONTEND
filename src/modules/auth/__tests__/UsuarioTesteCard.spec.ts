@@ -3,13 +3,14 @@ import { describe, expect, it } from 'vitest'
 
 import UsuarioTesteCard from '@/modules/auth/components/UsuarioTesteCard.vue'
 import type { UsuarioDeTeste } from '@/modules/auth/types/devLogin'
+import { acessoDe, type PerfilDeTeste } from '@/test/sessaoDeTeste'
 
 function usuario(sobrescrever: Partial<UsuarioDeTeste> = {}): UsuarioDeTeste {
   return {
     id: 'u-1',
     nome: 'Ana Beatriz Moreira',
     login: 'teste.gestor.1',
-    perfil: 'GESTOR',
+    ...acessoDe('GESTOR'),
     unidadeId: 'unidade-1',
     unidadeSigla: 'CNPMA',
     laboratorios: [],

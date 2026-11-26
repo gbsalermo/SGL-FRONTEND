@@ -3,19 +3,20 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import UnidadeSelector from '@/components/UnidadeSelector.vue'
-import type { PerfilUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import type {UsuarioSessao } from '@/modules/auth/types/session'
 import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
 import { fakeAdapter } from '@/test/fakeAdapter'
+import { acessoDe, type PerfilDeTeste } from '@/test/sessaoDeTeste'
 
 const unidades = [
   { id: 'unidade-1', sigla: 'CNPMF', nome: 'Mandioca e Fruticultura' },
   { id: 'unidade-2', sigla: 'CNPAT', nome: 'Agroindústria Tropical' },
 ]
 
-function entrarComo(perfil: PerfilUsuario) {
+function entrarComo(perfil: PerfilDeTeste) {
   const usuario: UsuarioSessao = {
-    id: 'u-1', nome: 'Fulano', email: 'f@embrapa.br', perfil, situacao: 'ATIVO',
+    id: 'u-1', nome: 'Fulano', email: 'f@embrapa.br', ...acessoDe(perfil), cargo: null, responsavelPor: [], situacao: 'ATIVO',
     unidadeId: 'unidade-1', unidadeNome: 'Mandioca e Fruticultura', unidadeSigla: 'CNPMF',
     laboratorios: [], ativo: true,
   }

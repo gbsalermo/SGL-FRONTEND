@@ -1,4 +1,4 @@
-import type { PerfilUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import type { CategoriaCargo, PapelSistema, UsuarioSessao } from '@/modules/auth/types/session'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 
 export interface UnidadeCadastro {
@@ -160,10 +160,15 @@ export interface LocalArmazenamentoResiduoRequest {
   ativo: boolean
 }
 
-export interface UsuarioPermissao extends UsuarioSessao {}
+/** A user row in Cadastros. Unlike the session, it does not carry `responsavelPor`. */
+export interface UsuarioPermissao extends Omit<UsuarioSessao, 'responsavelPor'> {}
 
-export interface AlterarPerfilRequest {
-  perfil: PerfilUsuario
+export interface AlterarPapeisRequest {
+  papeis: PapelSistema[]
+}
+
+export interface AlterarCategoriaCargoRequest {
+  categoriaCargo: CategoriaCargo
 }
 
 export interface ApiErrorAdmin {

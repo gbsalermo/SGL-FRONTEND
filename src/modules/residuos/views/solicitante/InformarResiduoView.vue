@@ -19,6 +19,7 @@ import type {
   TipoRiscoResiduo,
   UnidadeMedidaResiduo,
 } from '@/modules/residuos/types/residuo'
+import { ehEstagiario } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 import { listarLaboratoriosOperacionais, podeEscolherLaboratorio, type LaboratorioOperacional } from '@/modules/operacao/services/laboratoriosOperacionais'
 import { vinculosOperacionaisService, type VinculoOperacional } from '@/modules/admin/services/vinculosOperacionaisService'
@@ -99,8 +100,8 @@ const vinculosAdicionais = ref<VinculoOperacional[]>([])
 const autorizacaoAtualizada = ref(false)
 const laboratoriosPermitidos = computed(() => !autorizacaoAtualizada.value ? [] : gestao.value ? laboratorios.value : laboratoriosDaUnidadeComOsDaPessoaPrimeiro(
   laboratorios.value, session.usuario?.laboratorios ?? []))
-const gestao = computed(() => podeEscolherLaboratorio(session.usuario?.perfil))
-const estagiario = computed(() => session.usuario?.perfil === 'ESTAGIARIO')
+const gestao = computed(() => podeEscolherLaboratorio(session.usuario))
+const estagiario = computed(() => ehEstagiario(session.usuario))
 const participacoes = ref<ContextoParticipacaoOperacional[]>([])
 const participacaoSelecionadaId = ref('')
 const participacaoSelecionada = computed(() => participacoes.value.find(p => p.participacaoId === participacaoSelecionadaId.value))

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 
 import { http, SESSION_STORAGE_KEY } from '@/services/http'
+import { ehAdministradorGeral } from '@/modules/auth/papeis'
 import type { LoginResponse, UsuarioSessao } from '@/modules/auth/types/session'
 
 // Left behind by the browser-side DEV login that the JWT session replaced.
@@ -24,7 +25,11 @@ function carregarSessao(): SessaoPersistida | null {
 
     const sessao = JSON.parse(raw) as Partial<SessaoPersistida>
 
-    if (!sessao.token || !sessao.usuario || typeof sessao.expiraEm !== 'number' || sessao.expiraEm <= Date.now()) {
+    // A session saved before accumulable roles has no `papeis`; trusting it would hide the gestão area
+    // from Gestores and administrators until the token expired, so it is dropped and a new login asked.
+    const formatoAtual = Array.isArray(sessao.usuario?.papeis)
+    if (!sessao.token || !sessao.usuario || !formatoAtual || typeof sessao.expiraEm !== 'number'
+      || sessao.expiraEm <= Date.now()) {
       localStorage.removeItem(SESSION_STORAGE_KEY)
       return null
     }
@@ -60,12 +65,12 @@ export const useSessionStore = defineStore('session', {
   getters: {
     autenticado: (state) => Boolean(state.token && state.usuario && state.expiraEm),
     pendente: (state) => state.usuario?.situacao === 'PENDENTE_VINCULACAO',
-    administradorGeral: (state) => state.usuario?.perfil === 'ADMINISTRADOR_GERAL',
+    administradorGeral: (state) => ehAdministradorGeral(state.usuario),
     // Unidade em que a tela trabalha: a escolhida no seletor pelo ADMINISTRADOR_GERAL ou, sem
     // escolha (e para os demais perfis), a do próprio usuário. Use este getter sempre que a tela
     // precisar saber "de qual unidade" mostrar os dados — é a mesma que a API usa como tenant.
     unidadeEmOperacaoId: (state): string | null =>
-      (state.usuario?.perfil === 'ADMINISTRADOR_GERAL' ? state.unidadeOperacaoId : null)
+      (ehAdministradorGeral(state.usuario) ? state.unidadeOperacaoId : null)
         ?? state.usuario?.unidadeId ?? null,
   },
 

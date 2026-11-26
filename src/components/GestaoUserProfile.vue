@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 
 import { useProfilePreferencesStore } from '@/stores/profilePreferences'
+import { rotuloAcesso } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 
 withDefaults(defineProps<{ compact?: boolean }>(), {
@@ -109,7 +110,7 @@ function salvarConfiguracoes() {
     <div v-if="!compact" class="gestao-profile__copy">
       <div class="gestao-profile__line">
         <strong>{{ nomeExibicao }}</strong>
-        <small>{{ session.usuario?.perfil }}</small>
+        <small>{{ rotuloAcesso(session.usuario) }}</small>
       </div>
       <span>{{ session.usuario?.email }}</span>
       <span class="gestao-profile__unit" :title="unidadeExibicao">{{ unidadeExibicao }}</span>
@@ -187,7 +188,7 @@ function salvarConfiguracoes() {
             </div>
             <div>
               <span>Perfil</span>
-              <strong>{{ session.usuario?.perfil }}</strong>
+              <strong>{{ rotuloAcesso(session.usuario) }}</strong>
             </div>
             <div>
               <span>Unidade</span>

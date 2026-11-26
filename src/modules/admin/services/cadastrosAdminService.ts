@@ -1,6 +1,7 @@
 import { http } from '@/services/http'
 import type {
-  AlterarPerfilRequest,
+  AlterarCategoriaCargoRequest,
+  AlterarPapeisRequest,
   CargoSubstituicao,
   ClasseResiduoCadastro,
   ClasseResiduoRequest,
@@ -123,8 +124,13 @@ export const cadastrosAdminService = {
     return data
   },
 
-  async alterarPerfil(id: string, payload: AlterarPerfilRequest) {
-    const { data } = await http.put<UsuarioPermissao>(`/v1/usuarios/${id}/perfil`, payload)
+  async alterarPapeis(id: string, payload: AlterarPapeisRequest) {
+    const { data } = await http.put<UsuarioPermissao>(`/v1/usuarios/${id}/papeis`, payload)
+    return data
+  },
+
+  async alterarCategoriaCargo(id: string, payload: AlterarCategoriaCargoRequest) {
+    const { data } = await http.put<UsuarioPermissao>(`/v1/usuarios/${id}/categoria-cargo`, payload)
     return data
   },
   async listarCargosASubstituir() {

@@ -7,6 +7,7 @@ import { helpTaskForRoute } from '@/modules/ajuda/routeHelp'
 
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { useProfilePreferencesStore } from '@/stores/profilePreferences'
+import { rotuloAcesso } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -171,7 +172,7 @@ function sair() {
         <div class="solicitante-usercopy">
           <strong>{{ nomeExibicao }}</strong>
           <span>{{ session.usuario?.email }}</span>
-          <small>{{ session.usuario?.perfil }}</small>
+          <small>{{ rotuloAcesso(session.usuario) }}</small>
         </div>
 
         <button
@@ -270,7 +271,7 @@ function sair() {
             </div>
             <div>
               <span>Perfil</span>
-              <strong>{{ session.usuario?.perfil }}</strong>
+              <strong>{{ rotuloAcesso(session.usuario) }}</strong>
             </div>
           </div>
         </div>

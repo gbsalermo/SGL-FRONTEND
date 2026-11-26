@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { fakeAdapter } from '@/test/fakeAdapter'
+import { acessoDe, type PerfilDeTeste } from '@/test/sessaoDeTeste'
 
-function salvarSessao(perfil: string, unidadeOperacaoId: string | null = null) {
+function salvarSessao(perfil: PerfilDeTeste, unidadeOperacaoId: string | null = null, extra: object = {}) {
   localStorage.setItem('sgl.session', JSON.stringify({
     token: 'jwt-1',
     expiraEm: Date.now() + 60_000,
     unidadeOperacaoId,
-    usuario: { id: 'u-1', perfil, situacao: 'ATIVO', unidadeId: 'unidade-1' },
+    usuario: { id: 'u-1', ...acessoDe(perfil), situacao: 'ATIVO', unidadeId: 'unidade-1', ...extra },
   }))
 }
 
@@ -46,6 +47,17 @@ describe('http', () => {
     expect(fake.requests[0].headers.has('X-SGL-Unidade-Id')).toBe(false)
     expect(fake.requests[1].headers.has('X-SGL-Unidade-Id')).toBe(false)
     expect(fake.requests[2].headers.get('X-SGL-Unidade-Id')).toBe('unidade-2')
+  })
+
+  it('administrador geral que acumula outros papeis continua escolhendo a unidade', async () => {
+    const { http } = await carregar()
+    const fake = fakeAdapter(() => ({ status: 200, data: [] }))
+    http.defaults.adapter = fake.adapter
+
+    salvarSessao('GESTOR', 'unidade-2', { papeis: ['GESTOR', 'ADMINISTRADOR_GERAL'] })
+    await http.get('/v1/pedidos')
+
+    expect(fake.requests[0].headers.get('X-SGL-Unidade-Id')).toBe('unidade-2')
   })
 
   it('401 limpa a sessao', async () => {

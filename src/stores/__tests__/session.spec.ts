@@ -3,12 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { UsuarioSessao } from '@/modules/auth/types/session'
 import { fakeAdapter } from '@/test/fakeAdapter'
+import { acessoDe } from '@/test/sessaoDeTeste'
 
 const usuario: UsuarioSessao = {
   id: 'u-1',
   nome: 'Fulano',
   email: 'fulano@embrapa.br',
-  perfil: 'GESTOR',
+  ...acessoDe('GESTOR'),
+  cargo: null,
+  responsavelPor: [],
   situacao: 'ATIVO',
   unidadeId: 'unidade-1',
   unidadeNome: 'Mandioca',
@@ -67,6 +70,21 @@ describe('session store', () => {
     expect(session.unidadeOperacaoId).toBe('unidade-2')
   })
 
+  // A session saved before roles existed has `perfil` and no `papeis`: reading it would quietly drop a
+  // Gestor or administrator into the requester area until the token expired, so it is discarded.
+  it('sessao salva no formato antigo, sem papeis, e descartada', async () => {
+    localStorage.setItem('sgl.session', JSON.stringify({
+      token: 'jwt-antigo',
+      expiraEm: Date.now() + 60_000,
+      usuario: { id: 'u-1', nome: 'Fulano', perfil: 'GESTOR', situacao: 'ATIVO', unidadeId: 'unidade-1' },
+    }))
+
+    const { session } = await carregar()
+
+    expect(session.autenticado).toBe(false)
+    expect(localStorage.getItem('sgl.session')).toBeNull()
+  })
+
   it('remove a chave antiga sgl.dev-session', async () => {
     localStorage.setItem('sgl.dev-session', JSON.stringify({ usuario, expiraEm: Date.now() + 60_000 }))
 
@@ -78,7 +96,7 @@ describe('session store', () => {
 
   it('unidadeEmOperacaoId usa a escolha do administrador geral e, sem ela, a do usuario', async () => {
     const { session } = await carregar()
-    session.usuario = { ...usuario, perfil: 'ADMINISTRADOR_GERAL' }
+    session.usuario = { ...usuario, ...acessoDe('ADMINISTRADOR_GERAL') }
     expect(session.unidadeEmOperacaoId).toBe('unidade-1')
 
     session.selecionarUnidade('unidade-2', 'CNPTIA')
@@ -95,7 +113,7 @@ describe('session store', () => {
     expect(session.pendente).toBe(true)
     expect(session.administradorGeral).toBe(false)
 
-    session.$patch({ usuario: { ...usuario, perfil: 'ADMINISTRADOR_GERAL' } })
+    session.$patch({ usuario: { ...usuario, ...acessoDe('ADMINISTRADOR_GERAL') } })
     expect(session.pendente).toBe(false)
     expect(session.administradorGeral).toBe(true)
   })

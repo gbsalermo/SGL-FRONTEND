@@ -1,9 +1,9 @@
 import type { ResumoDeTeste, UsuarioDeTeste } from '@/modules/auth/types/devLogin'
-import type { PerfilUsuario } from '@/modules/auth/types/session'
+import type { PerfilLegado } from '@/modules/auth/perfilLegado'
 import { http } from '@/services/http'
 
 interface FiltrosDeUsuariosDeTeste {
-  perfil?: PerfilUsuario | null
+  perfil?: PerfilLegado | null
   unidadeId?: string | null
   busca?: string
 }

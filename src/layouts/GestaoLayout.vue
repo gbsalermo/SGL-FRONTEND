@@ -8,7 +8,7 @@ import { helpTaskForRoute } from '@/modules/ajuda/routeHelp'
 import UnidadeSelector from '@/components/UnidadeSelector.vue'
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { gestaoShellService, type BaseBuscaGestao } from '@/services/gestaoShellService'
-import { ehPerfilAdmin } from '@/modules/auth/perfis'
+import { ehAdmin, rotuloAcesso } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 import { alternarTema, aplicarTema, tema } from '@/services/themeService'
 
@@ -70,7 +70,7 @@ const baseBusca = ref<BaseBuscaGestao>({
   falhas: [],
 })
 
-const ehAdministrador = computed(() => ehPerfilAdmin(session.usuario?.perfil))
+const ehAdministrador = computed(() => ehAdmin(session.usuario))
 
 // O retorno no topbar é reservado a telas realmente aninhadas/detalhadas.
 // Seções principais acessadas pela sidebar não exibem uma seta de retorno.
@@ -173,7 +173,7 @@ const resultadosBusca = computed<ResultadoBuscaGlobal[]>(() => {
     const termos = normalizarBusca([
       usuario.nome,
       usuario.email,
-      usuario.perfil,
+      rotuloAcesso(usuario),
       usuario.unidadeNome,
       nomesDosLaboratoriosDaPessoa(usuario.laboratorios),
     ].filter(Boolean).join(' '))
@@ -184,7 +184,7 @@ const resultadosBusca = computed<ResultadoBuscaGlobal[]>(() => {
       id: `usuario-${usuario.id}`,
       tipo: 'usuario',
       titulo: usuario.nome,
-      descricao: `${usuario.email} · ${rotuloPerfil(usuario.perfil)}`,
+      descricao: `${usuario.email} · ${rotuloAcesso(usuario)}`,
       detalhe: nomesDosLaboratoriosDaPessoa(usuario.laboratorios) || usuario.unidadeNome || 'Sem vínculo operacional',
       termos,
       destino: ehAdministrador.value
@@ -229,10 +229,6 @@ function rotuloStatusPedido(status: string) {
     CANCELADO: 'Cancelado',
   }
   return rotulos[status] ?? status
-}
-
-function rotuloPerfil(perfil: string) {
-  return perfil.toLowerCase().replaceAll('_', ' ').replace(/^./, (letra) => letra.toUpperCase())
 }
 
 function rotuloTipoResultado(tipo: TipoResultadoBusca) {

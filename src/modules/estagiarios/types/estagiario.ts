@@ -1,4 +1,5 @@
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+import type { CategoriaCargo } from '@/modules/auth/types/session'
 
 export type TipoBolsaEstagiario =
   | 'BOLSA_CNPQ'
@@ -115,7 +116,7 @@ export interface EstagiarioSemVinculoResponse {
 export interface OrientadorElegivelResponse {
   usuarioId: string
   nome: string
-  perfil: string
+  categoriaCargo: CategoriaCargo | null
   cargo: string | null
 }
 
@@ -154,7 +155,7 @@ export interface UsuarioOpcaoEstagioResponse {
   id: string
   nome: string
   email: string
-  perfil: string
+  categoriaCargo: CategoriaCargo | null
   unidadeId: string | null
   unidadeNome: string | null
   ativo: boolean

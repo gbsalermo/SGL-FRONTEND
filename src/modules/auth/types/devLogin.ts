@@ -1,12 +1,14 @@
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 
-import type { PerfilUsuario } from './session'
+import type { PerfilLegado } from '../perfilLegado'
+import type { CategoriaCargo, PapelSistema } from './session'
 
 export interface UsuarioDeTeste {
   id: string
   nome: string
   login: string
-  perfil: PerfilUsuario
+  papeis: PapelSistema[]
+  categoriaCargo: CategoriaCargo | null
   unidadeId: string | null
   unidadeSigla: string | null
   laboratorios: LaboratorioResumo[]
@@ -19,6 +21,6 @@ export interface UnidadeOpcao {
 }
 
 export interface ResumoDeTeste {
-  contagemPorPerfil: Record<PerfilUsuario, number>
+  contagemPorPerfil: Record<PerfilLegado, number>
   unidades: UnidadeOpcao[]
 }

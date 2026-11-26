@@ -4,12 +4,12 @@ import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaP
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { aguardaAprovacao, ROTA_APROVAR_PENDENTES } from '@/modules/auth/perfis'
+import { aguardaAprovacao, ROTA_APROVAR_PENDENTES, rotuloAcesso } from '@/modules/auth/papeis'
+import AcessoUsuarioEditor from '@/modules/admin/components/AcessoUsuarioEditor.vue'
 import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 import CatalogosResiduosSolucoesView from '@/modules/admin/views/CatalogosResiduosSolucoesView.vue'
 
-import type { PerfilUsuario } from '@/modules/auth/types/session'
 import HelpLink from '@/modules/ajuda/components/HelpLink.vue'
 import { helpTaskForCadastroTab } from '@/modules/ajuda/routeHelp'
 import type { AbaCadastro } from '@/modules/admin/types/cadastros'
@@ -112,7 +112,6 @@ const usuarios = ref<UsuarioPermissao[]>([])
 const carregando = ref(false)
 const salvando = ref(false)
 const alterandoStatus = ref<string | null>(null)
-const salvandoPerfil = ref<string | null>(null)
 const erro = ref('')
 const sucesso = ref('')
 const busca = ref('')
@@ -127,16 +126,6 @@ const projetoForm = ref<ProjetoForm>(novoProjeto())
 const produtoForm = ref<ProdutoForm>(novoProduto())
 const classeResiduoForm = ref<ClasseResiduoForm>(novaClasseResiduo())
 const localArmazenamentoForm = ref<LocalArmazenamentoForm>(novoLocalArmazenamento())
-const perfisEdicao = ref<Record<string, PerfilUsuario>>({})
-
-const perfis: Array<{ valor: PerfilUsuario; rotulo: string }> = [
-  { valor: 'ADMINISTRADOR', rotulo: 'Administrador' },
-  { valor: 'GESTOR', rotulo: 'Gestor' },
-  { valor: 'TECNICO', rotulo: 'Técnico' },
-  { valor: 'ANALISTA', rotulo: 'Analista' },
-  { valor: 'PESQUISADOR', rotulo: 'Pesquisador' },
-  { valor: 'ESTAGIARIO', rotulo: 'Estagiário' },
-]
 
 const unidadesMedida: UnidadeMedidaCadastro[] = [
   'ML', 'L', 'MG', 'G', 'KG', 'METRO', 'UNIDADE',
@@ -174,7 +163,7 @@ const abas: Array<{ id: AbaCadastro; titulo: string; descricao: string }> = [
   { id: 'residuos-solucoes', titulo: 'Resíduos e Soluções', descricao: 'Modelos reutilizáveis e composições por Unidade' },
   { id: 'classes-residuo', titulo: 'Classes de resíduo', descricao: 'Classificações disponíveis para a Unidade' },
   { id: 'locais-armazenamento', titulo: 'Locais de armazenamento', descricao: 'Locais temporários disponíveis para Resíduos' },
-  { id: 'permissoes', titulo: 'Permissões', descricao: 'Perfis de acesso dos usuários existentes' },
+  { id: 'permissoes', titulo: 'Permissões', descricao: 'Papéis e categoria dos usuários existentes' },
 ]
 
 const termoBusca = computed(() => busca.value.trim().toLocaleLowerCase('pt-BR'))
@@ -222,7 +211,7 @@ const locaisArmazenamentoFiltrados = computed(() => locaisArmazenamento.value.fi
 
 const usuariosFiltrados = computed(() => usuarios.value.filter((item) => {
   if (!termoBusca.value) return true
-  return [item.nome, item.email, item.unidadeNome ?? '', nomesDosLaboratoriosDaPessoa(item.laboratorios), rotuloPerfil(item.perfil)]
+  return [item.nome, item.email, item.unidadeNome ?? '', nomesDosLaboratoriosDaPessoa(item.laboratorios), rotuloAcesso(item)]
     .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termoBusca.value))
 }))
 
@@ -306,10 +295,6 @@ function rotuloEnum(valor: string | null) {
   }
   if (especiais[valor]) return especiais[valor]
   return valor.toLocaleLowerCase('pt-BR').replaceAll('_', ' ').replace(/(^|\s)\S/g, (letra) => letra.toLocaleUpperCase('pt-BR'))
-}
-
-function rotuloPerfil(perfil: PerfilUsuario) {
-  return perfis.find((item) => item.valor === perfil)?.rotulo ?? perfil
 }
 
 function formatarData(valor: string | null) {
@@ -752,22 +737,9 @@ async function alternarLocalArmazenamento(item: LocalArmazenamentoResiduoCadastr
   }
 }
 
-async function salvarPermissao(usuario: UsuarioPermissao) {
-  const novoPerfil = perfisEdicao.value[usuario.id]
-  if (!novoPerfil || novoPerfil === usuario.perfil || usuario.id === session.usuario?.id || aguardaAprovacao(usuario)) return
-
-  salvandoPerfil.value = usuario.id
-  erro.value = ''
-  try {
-    await cadastrosAdminService.alterarPerfil(usuario.id, { perfil: novoPerfil })
-    sucesso.value = `Permissão de ${usuario.nome} atualizada para ${rotuloPerfil(novoPerfil)}.`
-    await carregar()
-  } catch (error) {
-    perfisEdicao.value[usuario.id] = usuario.perfil
-    erro.value = mensagemErro(error)
-  } finally {
-    salvandoPerfil.value = null
-  }
+async function acessoSalvo(usuario: UsuarioPermissao) {
+  sucesso.value = `Acesso de ${usuario.nome} atualizado: ${rotuloAcesso(usuario)}.`
+  await carregar()
 }
 
 async function carregar() {
@@ -790,7 +762,6 @@ async function carregar() {
     classesResiduo.value = [...residueClasses].sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
     locaisArmazenamento.value = [...storageLocations].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
     usuarios.value = [...users].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    perfisEdicao.value = Object.fromEntries(usuarios.value.map((usuario) => [usuario.id, usuario.perfil]))
   } catch (error) {
     erro.value = mensagemErro(error, 'Não foi possível carregar os cadastros administrativos.')
   } finally {
@@ -833,7 +804,7 @@ onMounted(() => {
 
     <div class="scope-note">
       <strong>Escopo desta área</strong>
-      <span>Unidades e usuários são dados institucionais. Aqui não existe cadastro manual de usuário nem de unidade; o Administrador apenas mantém os cadastros operacionais e pode alterar perfis de acesso.</span>
+      <span>Unidades e usuários são dados institucionais. Aqui não existe cadastro manual de usuário nem de unidade; o Administrador apenas mantém os cadastros operacionais e pode alterar papéis de acesso.</span>
     </div>
 
     <div v-if="sucesso" class="feedback feedback--success">{{ sucesso }}</div>
@@ -865,7 +836,7 @@ onMounted(() => {
             <p v-else-if="aba === 'residuos-solucoes'">Gerencie os modelos de resíduos e soluções em um mesmo espaço administrativo. Pedidos e preparações permanecem nas áreas operacionais.</p>
             <p v-else-if="aba === 'classes-residuo'">Mantenha as classes disponíveis para classificação de resíduos nesta Unidade.</p>
             <p v-else-if="aba === 'locais-armazenamento'">Mantenha os locais temporários que poderão ser selecionados no fluxo de Resíduos.</p>
-            <p v-else>Usuários são criados pelo fluxo institucional. Aqui é alterado somente o perfil de acesso.</p>
+            <p v-else>Usuários são criados pelo fluxo institucional. Aqui se alteram somente os papéis e a categoria do cargo.</p>
           </div>
           <button v-if="aba !== 'permissoes' && aba !== 'residuos-solucoes'" class="btn btn--primary" type="button" @click="abrirNovo">
             {{ rotuloNovoCadastro }}
@@ -875,7 +846,7 @@ onMounted(() => {
         <div v-if="aba !== 'residuos-solucoes'" class="toolbar">
           <label class="search-field">
             <span>Buscar</span>
-            <input v-model="busca" type="search" :placeholder="aba === 'permissoes' ? 'Nome, e-mail, unidade, laboratório ou perfil...' : 'Nome, código, responsável ou descrição...'" />
+            <input v-model="busca" type="search" :placeholder="aba === 'permissoes' ? 'Nome, e-mail, unidade, laboratório ou papel...' : 'Nome, código, responsável ou descrição...'" />
           </label>
           <label v-if="aba !== 'permissoes'" class="toggle-field">
             <input v-model="mostrarInativos" type="checkbox" />
@@ -986,7 +957,7 @@ onMounted(() => {
           <router-link class="btn btn--primary" to="/administracao/cadastros/vinculos">Gerenciar vínculos de usuários →</router-link>
           <div class="table-wrap">
           <table class="permissions-table">
-            <thead><tr><th>Usuário</th><th>Unidade / laboratórios</th><th>Situação</th><th>Perfil atual</th><th>Novo perfil</th><th></th></tr></thead>
+            <thead><tr><th>Usuário</th><th>Unidade / laboratórios</th><th>Situação</th><th>Acesso atual</th><th>Papéis e categoria</th></tr></thead>
             <tbody>
               <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
                 <td><strong>{{ usuario.nome }}</strong><small>{{ usuario.email }}</small></td>
@@ -996,29 +967,18 @@ onMounted(() => {
                   <span v-if="aguardaAprovacao(usuario)" class="status status--pending">Aguardando aprovação</span>
                   <span v-else class="status" :class="usuario.ativo ? 'status--active' : 'status--inactive'">{{ usuario.ativo ? 'Ativo' : 'Inativo' }}</span>
                 </td>
-                <td>{{ rotuloPerfil(usuario.perfil) }}</td>
+                <td>{{ rotuloAcesso(usuario) }}</td>
                 <td v-if="aguardaAprovacao(usuario)">
-                  <!-- Trocar o perfil de um pendente não libera o acesso; a aprovação define perfil e laboratórios. -->
+                  <!-- Trocar o acesso de um pendente não o libera; a aprovação define papéis, categoria e laboratórios. -->
                   <router-link class="pending-link" :to="ROTA_APROVAR_PENDENTES">Aprovar em Vínculos → Pendentes</router-link>
-                  <small class="self-note">O perfil é escolhido na aprovação</small>
+                  <small class="self-note">Papéis e categoria são definidos na aprovação</small>
                 </td>
                 <td v-else>
-                  <select v-model="perfisEdicao[usuario.id]" :disabled="usuario.id === session.usuario?.id">
-                    <option v-for="perfilItem in perfis" :key="perfilItem.valor" :value="perfilItem.valor">{{ perfilItem.rotulo }}</option>
-                  </select>
+                  <AcessoUsuarioEditor :usuario="usuario" @salvo="acessoSalvo" />
                   <small v-if="usuario.id === session.usuario?.id" class="self-note">Sessão atual — alteração bloqueada nesta tela</small>
                 </td>
-                <td class="actions">
-                  <button
-                    type="button"
-                    :disabled="aguardaAprovacao(usuario) || usuario.id === session.usuario?.id || perfisEdicao[usuario.id] === usuario.perfil || salvandoPerfil === usuario.id"
-                    @click="salvarPermissao(usuario)"
-                  >
-                    {{ salvandoPerfil === usuario.id ? 'Salvando...' : 'Salvar perfil' }}
-                  </button>
-                </td>
               </tr>
-              <tr v-if="usuariosFiltrados.length === 0"><td colspan="6" class="empty-table">Nenhum usuário encontrado.</td></tr>
+              <tr v-if="usuariosFiltrados.length === 0"><td colspan="5" class="empty-table">Nenhum usuário encontrado.</td></tr>
             </tbody>
           </table>
           </div>
@@ -1043,7 +1003,7 @@ onMounted(() => {
             <label class="field"><span>Unidade *</span><select v-model="laboratorioForm.unidadeId" required @change="sincronizarResponsavel"><option value="">Selecione...</option><option v-for="unidade in unidades" :key="unidade.id" :value="unidade.id">{{ unidade.sigla ? `${unidade.sigla} — ${unidade.nome}` : unidade.nome }}</option></select></label>
             <label class="field"><span>Nome *</span><input v-model="laboratorioForm.nome" required /></label>
           </div>
-          <label class="field"><span>Responsável</span><select v-model="laboratorioForm.responsavelId" :disabled="!laboratorioForm.unidadeId"><option value="">Sem responsável definido</option><option v-for="usuario in responsaveisLaboratorio" :key="usuario.id" :value="usuario.id">{{ usuario.nome }} — {{ rotuloPerfil(usuario.perfil) }}</option></select><small>Somente usuários ativos da mesma unidade.</small></label>
+          <label class="field"><span>Responsável</span><select v-model="laboratorioForm.responsavelId" :disabled="!laboratorioForm.unidadeId"><option value="">Sem responsável definido</option><option v-for="usuario in responsaveisLaboratorio" :key="usuario.id" :value="usuario.id">{{ usuario.nome }} — {{ rotuloAcesso(usuario) }}</option></select><small>Somente usuários ativos da mesma unidade.</small></label>
           <label class="field"><span>Descrição</span><textarea v-model="laboratorioForm.descricao" rows="4" /></label>
           <label class="check-line"><input v-model="laboratorioForm.ativo" type="checkbox" /><span>Laboratório ativo</span></label>
           <footer class="modal-actions"><button class="btn btn--ghost" type="button" :disabled="salvando" @click="fecharModal">Cancelar</button><button class="btn btn--primary" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar laboratório' }}</button></footer>

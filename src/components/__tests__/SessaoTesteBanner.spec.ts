@@ -4,21 +4,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import SessaoTesteBanner from '@/components/SessaoTesteBanner.vue'
-import type { PerfilUsuario, SituacaoUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import type {SituacaoUsuario, UsuarioSessao } from '@/modules/auth/types/session'
 import { router as appRouter } from '@/router'
 import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
 import { fakeAdapter } from '@/test/fakeAdapter'
+import { acessoDe, type PerfilDeTeste } from '@/test/sessaoDeTeste'
 
 function entrar(opcoes: {
   sessaoDeTeste: boolean
   unidadeSigla?: string | null
-  perfil?: PerfilUsuario
+  perfil?: PerfilDeTeste
   situacao?: SituacaoUsuario
 }) {
   const usuario: UsuarioSessao = {
     id: 'u-1', nome: 'Carlos Eduardo Lima', email: 'c@sgl.local',
-    perfil: opcoes.perfil ?? 'GESTOR', situacao: opcoes.situacao ?? 'ATIVO',
+    ...acessoDe(opcoes.perfil ?? 'GESTOR'), cargo: null, responsavelPor: [], situacao: opcoes.situacao ?? 'ATIVO',
     unidadeId: 'unidade-1', unidadeNome: 'Mandioca e Fruticultura',
     unidadeSigla: opcoes.unidadeSigla === undefined ? 'CNPMF' : opcoes.unidadeSigla,
     laboratorios: [], ativo: true,

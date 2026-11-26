@@ -5,11 +5,12 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 
 import CargosSubstituirTable from '@/modules/admin/components/CargosSubstituirTable.vue'
 import type { CargoSubstituicao } from '@/modules/admin/types/cadastros'
-import { PERFIS_ADMIN, PERFIS_GESTAO } from '@/modules/auth/perfis'
-import type { PerfilUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import { PAPEIS_ADMIN, PAPEIS_GESTAO } from '@/modules/auth/papeis'
+import type {UsuarioSessao } from '@/modules/auth/types/session'
 import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
 import { fakeAdapter } from '@/test/fakeAdapter'
+import { acessoDe, type PerfilDeTeste } from '@/test/sessaoDeTeste'
 
 const cargos: CargoSubstituicao[] = [
   { tipo: 'RESPONSAVEL_LABORATORIO', registroId: 'lab-1', descricao: 'Responsável pelo laboratório Química', ocupanteId: 'u-9', ocupanteNome: 'Beltrano' },
@@ -24,16 +25,16 @@ function criarRouter() {
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: vazio },
-      { path: '/administracao/cadastros', component: vazio, meta: { perfis: PERFIS_ADMIN } },
-      { path: '/estagiarios', component: vazio, meta: { perfis: PERFIS_GESTAO } },
-      { path: '/residuos', component: vazio, meta: { perfis: PERFIS_GESTAO } },
+      { path: '/administracao/cadastros', component: vazio, meta: { papeis: PAPEIS_ADMIN } },
+      { path: '/estagiarios', component: vazio, meta: { papeis: PAPEIS_GESTAO } },
+      { path: '/residuos', component: vazio, meta: { papeis: PAPEIS_GESTAO } },
     ],
   })
 }
 
-function entrarComo(perfil: PerfilUsuario) {
+function entrarComo(perfil: PerfilDeTeste) {
   const usuario: UsuarioSessao = {
-    id: 'u-1', nome: 'Gestor', email: 'g@embrapa.br', perfil, situacao: 'ATIVO',
+    id: 'u-1', nome: 'Gestor', email: 'g@embrapa.br', ...acessoDe(perfil), cargo: null, responsavelPor: [], situacao: 'ATIVO',
     unidadeId: 'unidade-1', unidadeNome: 'Mandioca e Fruticultura', unidadeSigla: 'CNPMF',
     laboratorios: [], ativo: true,
   }
