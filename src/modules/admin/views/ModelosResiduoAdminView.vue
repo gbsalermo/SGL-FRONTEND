@@ -69,7 +69,7 @@ const form = ref<ModeloForm>(novoForm())
 
 const estadosFisicos: EstadoFisicoModeloResiduo[] = ['LIQUIDO', 'SOLIDO', 'SEMISSOLIDO', 'GASOSO', 'OUTRO']
 const unidadesMedida: UnidadeMedidaCadastro[] = [
-  'ML', 'L', 'MG', 'G', 'KG', 'UNIDADE', 'REACAO', 'CAIXA', 'FRASCO', 'AMPOLA', 'PAR', 'METRO', 'OUTRO',
+  'ML', 'L', 'MG', 'G', 'KG', 'METRO', 'UNIDADE', 'REACAO',
 ]
 const niveisRisco: NivelRiscoCadastro[] = ['NENHUM', 'BAIXO', 'MEDIO', 'ALTO']
 const tiposRisco: TipoRiscoCadastro[] = [
@@ -341,7 +341,7 @@ onMounted(carregar)
 </script>
 
 <template>
-  <section class="models-page">
+  <section class="models-page" :class="{ 'models-page--embedded': embedded }">
     <header class="page-header">
       <div>
         <p v-if="!embedded">ADMINISTRAÇÃO / CADASTROS / RESÍDUOS E SOLUÇÕES</p>
@@ -421,7 +421,7 @@ onMounted(carregar)
 
           <div class="grid three">
             <label><span>Recipiente</span><input v-model="form.recipiente" maxlength="255" required /></label>
-            <label><span>Unidade padrão</span><select v-model="form.unidadeMedida"><option v-for="item in unidadesMedida" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select></label>
+            <label><span>Unidade padrão</span><select v-model="form.unidadeMedida"><option v-for="item in unidadesMedida" :key="item" :value="item">{{ rotuloEnum(item) }}</option><option v-if="!unidadesMedida.includes(form.unidadeMedida)" :value="form.unidadeMedida">{{ rotuloEnum(form.unidadeMedida) }} (cadastro existente)</option></select><small>Informe frasco, bombona ou outro recipiente no campo Recipiente, não como unidade de medida.</small></label>
             <label><span>Nível de risco</span><select v-model="form.nivelRisco"><option v-for="item in niveisRisco" :key="item" :value="item">{{ rotuloEnum(item) }}</option></select></label>
           </div>
 
@@ -552,6 +552,9 @@ onMounted(carregar)
 <style scoped>
 .models-page { width: min(100%, 1500px); margin: 0 auto; color: var(--sgl-text, #16243b); }
 .page-header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; margin-bottom: 20px; }
+/* Espaçamento do cabeçalho quando integrado à central de cadastros. */
+.models-page--embedded > .page-header { padding: 19px 20px 0; }
+.models-page--embedded > .page-header h1 { line-height: 1.15; }
 .page-header p { margin: 0 0 7px; color: var(--sgl-primary); font-size: 11px; font-weight: 900; letter-spacing: .05em; }
 .page-header h1 { margin: 0; font-size: 34px; }
 .page-header span { display: block; margin-top: 7px; color: var(--sgl-text-muted); font-size: 13px; }

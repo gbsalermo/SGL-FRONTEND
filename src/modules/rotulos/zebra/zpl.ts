@@ -50,6 +50,9 @@ export interface PictogramaZpl {
 const POL_MILIMETROS = 25.4
 
 /** Tamanhos iniciais sugeridos para mídia térmica; não são padrões físicos universais. */
+export const LARGURA_PADRAO_ZPL_MM = 110
+export const LARGURA_MAXIMA_ZPL_MM = 168
+
 export const ALTURAS_PADRAO_ZEBRA_MM = [125, 140, 150, 160, 175, 180, 200, 225, 250, 275, 300] as const
 /** Na horizontal, comprimentos menores também podem acomodar o mesmo conteúdo. */
 export const ALTURAS_HORIZONTAIS_ZEBRA_MM = [90, 100, 110, 120, ...ALTURAS_PADRAO_ZEBRA_MM] as const
@@ -98,9 +101,12 @@ export function recomendarConfiguracaoZpl(
   dpi: ResolucaoZebra,
   orientacao: OrientacaoConteudoZpl = 'VERTICAL',
 ): ConfiguracaoZpl {
-  const minimo = orientacao === 'HORIZONTAL' ? 90 : alturaInicialZpl(documento)
+  const minimo = orientacao === 'HORIZONTAL' ? 40 : alturaInicialZpl(documento)
+  // Horizontal: buscar a menor altura válida em incrementos de 5 mm.
+  // Vertical: preservar os tamanhos institucionais já homologados.
   const opcoes = orientacao === 'HORIZONTAL'
-    ? ALTURAS_HORIZONTAIS_ZEBRA_MM : ALTURAS_PADRAO_ZEBRA_MM
+    ? Array.from({ length: 53 }, (_, i) => 40 + i * 5)
+    : [...ALTURAS_PADRAO_ZEBRA_MM]
   for (const alturaMm of opcoes) {
     if (alturaMm < minimo) continue
     const configuracao: ConfiguracaoZpl = { larguraMm, alturaMm, dpi, ...(orientacao === 'HORIZONTAL' ? { orientacao } : {}) }
@@ -125,8 +131,8 @@ function validar(config: ConfiguracaoZpl): void {
   if (config.dpi !== 203 && config.dpi !== 300) {
     throw new Error('Selecione resolução Zebra de 203 ou 300 dpi.')
   }
-  if (!Number.isFinite(config.larguraMm) || config.larguraMm < 40 || config.larguraMm > 110) {
-    throw new Error('A largura do piloto ZPL deve estar entre 40 e 110 mm.')
+  if (!Number.isFinite(config.larguraMm) || config.larguraMm < 40 || config.larguraMm > LARGURA_MAXIMA_ZPL_MM) {
+    throw new Error('A largura do ZPL deve estar entre 40 e 168 mm. Acima de 110 mm, confirme que sua Zebra suporta mídia larga.')
   }
   if (!Number.isFinite(config.alturaMm) || config.alturaMm < 40 || config.alturaMm > 300) {
     throw new Error('A altura do piloto ZPL deve estar entre 40 e 300 mm.')
