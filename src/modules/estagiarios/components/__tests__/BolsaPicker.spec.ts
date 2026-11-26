@@ -35,7 +35,7 @@ describe('BolsaPicker', () => {
     const wrapper = mount(BolsaPicker, { props: { modelValue: null } })
     await flushPromises()
     expect(wrapper.text()).toContain('Bolsa FAPESB')
-    expect(wrapper.get('[data-test="selecionar-bolsa"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="selecionar-bolsa"]').exists()).toBe(true)
   })
 
   it('cadastra uma bolsa sem enviar qualquer valor do enum legado', async () => {
