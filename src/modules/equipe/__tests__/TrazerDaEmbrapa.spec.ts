@@ -74,8 +74,8 @@ describe('TrazerDaEmbrapa', () => {
       { tipo: 'COLABORADOR', referencia: '2', categoriaCargo: 'ESTAGIARIO' },
       { tipo: 'COLABORADOR', referencia: '3', categoriaCargo: 'ANALISTA' },
     ])
-    expect(wrapper.text()).toContain('Cadastrada')
-    expect(wrapper.text()).toContain('Já estava no SGL')
+    expect(wrapper.text()).toContain('Ana Bolsista: Cadastrada')
+    expect(wrapper.text()).toContain('Ana Estagiária: Já estava no SGL')
     expect(wrapper.emitted('cadastradas')).toHaveLength(1)
   })
 

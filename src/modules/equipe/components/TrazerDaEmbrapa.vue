@@ -37,7 +37,8 @@ const relatorio = ref<ResultadoImportacao[]>([])
 
 const chave = (pessoa: Pick<PessoaCorporativa, 'tipo' | 'referencia'>) => `${pessoa.tipo}:${pessoa.referencia}`
 const listaSelecionada = computed(() => [...selecionadas.value.values()])
-const nomes = computed(() => new Map(listaSelecionada.value.map((s) => [s.pessoa.referencia, s.pessoa.nome])))
+// Names of the last batch: the API only names people it registered, and the selection is cleared afterwards.
+const nomesDoLote = ref<Map<string, string>>(new Map())
 
 let temporizador: ReturnType<typeof setTimeout> | null = null
 
@@ -81,12 +82,14 @@ async function cadastrar() {
   if (listaSelecionada.value.length === 0) return
   cadastrando.value = true
   erro.value = ''
+  const nomes = new Map(listaSelecionada.value.map((s) => [s.pessoa.referencia, s.pessoa.nome]))
   try {
     relatorio.value = await equipeService.importar(props.laboratorioId, listaSelecionada.value.map((s) => ({
       tipo: s.pessoa.tipo,
       referencia: s.pessoa.referencia,
       categoriaCargo: s.categoria || null,
     })))
+    nomesDoLote.value = nomes
     selecionadas.value = new Map()
     resultados.value = []
     termo.value = ''
@@ -174,7 +177,7 @@ async function cadastrar() {
       <h3>Resultado do cadastro</h3>
       <ul>
         <li v-for="item in relatorio" :key="item.referencia">
-          <strong>{{ item.nome || nomes.get(item.referencia) || item.referencia }}</strong>:
+          <strong>{{ item.nome || nomesDoLote.get(item.referencia) || item.referencia }}</strong>:
           {{ ROTULOS_RESULTADO[item.resultado] }}<span v-if="item.resultado === 'ERRO' && item.mensagem"> ({{ item.mensagem }})</span>
         </li>
       </ul>

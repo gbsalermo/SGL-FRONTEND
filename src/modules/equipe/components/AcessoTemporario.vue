@@ -50,8 +50,38 @@ const atividadesDoSci = computed(() => atividades.value.filter((a) => !sciId.val
 const vinculoGenerico = computed(() => !projetoId.value && !dataFim.value)
 const podeCriar = computed(() => Boolean(usuarioId.value && dataInicio.value) && !vinculoGenerico.value && !salvando.value)
 
-function vigente(v: VinculoOperacional) {
-  return !v.encerrado && v.dataInicio <= hoje && (!v.dataFim || v.dataFim >= hoje)
+type Situacao = 'Agendado' | 'Vigente' | 'Encerrado'
+function situacao(v: VinculoOperacional): Situacao {
+  if (v.encerrado || (v.dataFim && v.dataFim < hoje)) return 'Encerrado'
+  return v.dataInicio > hoje ? 'Agendado' : 'Vigente'
+}
+
+const editando = ref<VinculoOperacional | null>(null)
+const edicaoDataFim = ref('')
+const edicaoObservacao = ref('')
+
+function abrirEdicao(v: VinculoOperacional) {
+  editando.value = v
+  edicaoDataFim.value = v.dataFim ?? ''
+  edicaoObservacao.value = v.observacao ?? ''
+}
+
+async function salvarEdicao() {
+  const vinculo = editando.value
+  if (!vinculo) return
+  erro.value = ''
+  try {
+    await equipeService.editarVinculo(props.laboratorioId, vinculo.id, {
+      dataFim: edicaoDataFim.value || null,
+      observacao: edicaoObservacao.value.trim() || null,
+    })
+    sucesso.value = 'Acesso temporário atualizado.'
+    editando.value = null
+    await carregar()
+    emit('alterado')
+  } catch (error) {
+    erro.value = mensagemDeErro(error, 'Não foi possível atualizar o acesso.')
+  }
 }
 
 function data(valor: string | null) {
@@ -194,6 +224,20 @@ onMounted(carregar)
       <button type="button" class="people-danger" data-test="confirmar-encerramento" @click="confirmarEncerramento">Encerrar</button>
     </div>
 
+    <div v-if="editando" class="people-inline-form" aria-label="Editar acesso temporário">
+      <p>Acesso de {{ nomes.get(editando.usuarioId) ?? 'esta pessoa' }}, a partir de {{ data(editando.dataInicio) }}</p>
+      <div class="people-filter-grid">
+        <label class="people-field"><span>Fim</span>
+          <input v-model="edicaoDataFim" type="date" data-test="editar-data-fim" :min="editando.dataInicio">
+        </label>
+        <label class="people-field"><span>Observação</span>
+          <input v-model="edicaoObservacao" type="text" maxlength="500" data-test="editar-observacao">
+        </label>
+      </div>
+      <button type="button" class="people-outline" @click="editando = null">Cancelar</button>
+      <button type="button" class="people-primary" data-test="salvar-edicao" @click="salvarEdicao">Salvar</button>
+    </div>
+
     <div v-if="vinculos.length === 0" class="people-empty">Nenhum acesso temporário neste laboratório.</div>
     <div v-else class="people-table-wrap">
       <table class="people-table">
@@ -203,10 +247,19 @@ onMounted(carregar)
             <td><strong>{{ nomes.get(vinculo.usuarioId) ?? '—' }}</strong><small>{{ vinculo.observacao || '' }}</small></td>
             <td>{{ contexto(vinculo) }}</td>
             <td>{{ data(vinculo.dataInicio) }} a {{ data(vinculo.dataFim) }}</td>
-            <td>{{ vigente(vinculo) ? 'Vigente' : 'Encerrado' }}</td>
+            <td>{{ situacao(vinculo) }}</td>
             <td>
               <button
-                v-if="vigente(vinculo)"
+                v-if="situacao(vinculo) !== 'Encerrado'"
+                type="button"
+                class="people-outline"
+                :data-test="`editar-${vinculo.id}`"
+                @click="abrirEdicao(vinculo)"
+              >
+                Editar
+              </button>
+              <button
+                v-if="situacao(vinculo) !== 'Encerrado'"
                 type="button"
                 class="people-danger-outline"
                 :data-test="`encerrar-${vinculo.id}`"

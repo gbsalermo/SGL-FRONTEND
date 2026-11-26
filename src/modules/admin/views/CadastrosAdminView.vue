@@ -4,6 +4,7 @@ import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaP
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { responsaveisElegiveis } from '@/modules/admin/responsaveisElegiveis'
 import { aguardaAprovacao, ROTA_APROVAR_PENDENTES, rotuloAcesso } from '@/modules/auth/papeis'
 import AcessoUsuarioEditor from '@/modules/admin/components/AcessoUsuarioEditor.vue'
 import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
@@ -215,12 +216,7 @@ const usuariosFiltrados = computed(() => usuarios.value.filter((item) => {
     .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termoBusca.value))
 }))
 
-const responsaveisLaboratorio = computed(() => {
-  if (!laboratorioForm.value.unidadeId) return []
-  return usuarios.value
-    .filter((usuario) => usuario.ativo && usuario.unidadeId === laboratorioForm.value.unidadeId)
-    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-})
+const responsaveisLaboratorio = computed(() => responsaveisElegiveis(usuarios.value, laboratorioForm.value.unidadeId))
 
 const resumo = computed(() => ({
   laboratorios: laboratorios.value.filter((item) => item.ativo).length,
@@ -1003,7 +999,7 @@ onMounted(() => {
             <label class="field"><span>Unidade *</span><select v-model="laboratorioForm.unidadeId" required @change="sincronizarResponsavel"><option value="">Selecione...</option><option v-for="unidade in unidades" :key="unidade.id" :value="unidade.id">{{ unidade.sigla ? `${unidade.sigla} — ${unidade.nome}` : unidade.nome }}</option></select></label>
             <label class="field"><span>Nome *</span><input v-model="laboratorioForm.nome" required /></label>
           </div>
-          <label class="field"><span>Responsável</span><select v-model="laboratorioForm.responsavelId" :disabled="!laboratorioForm.unidadeId"><option value="">Sem responsável definido</option><option v-for="usuario in responsaveisLaboratorio" :key="usuario.id" :value="usuario.id">{{ usuario.nome }} — {{ rotuloAcesso(usuario) }}</option></select><small>Somente usuários ativos da mesma unidade.</small></label>
+          <label class="field"><span>Responsável{{ laboratorioForm.ativo ? ' *' : '' }}</span><select v-model="laboratorioForm.responsavelId" :disabled="!laboratorioForm.unidadeId" :required="laboratorioForm.ativo"><option value="" disabled>Selecione...</option><option v-for="usuario in responsaveisLaboratorio" :key="usuario.id" :value="usuario.id">{{ usuario.nome }} — {{ rotuloAcesso(usuario) }}</option></select><small>Todo laboratório ativo tem um responsável: ele organiza a equipe. Somente pessoas ativas e já aprovadas da mesma unidade.</small></label>
           <label class="field"><span>Descrição</span><textarea v-model="laboratorioForm.descricao" rows="4" /></label>
           <label class="check-line"><input v-model="laboratorioForm.ativo" type="checkbox" /><span>Laboratório ativo</span></label>
           <footer class="modal-actions"><button class="btn btn--ghost" type="button" :disabled="salvando" @click="fecharModal">Cancelar</button><button class="btn btn--primary" type="submit" :disabled="salvando">{{ salvando ? 'Salvando...' : 'Salvar laboratório' }}</button></footer>

@@ -13,6 +13,7 @@ const vinculoVigente = {
   sciId: null, sciNome: null, atividadeId: null, atividadeNome: null,
   dataInicio: '2026-11-01', dataFim: '2099-12-31', encerrado: false, observacao: null,
 }
+const vinculoAgendado = { ...vinculoVigente, id: 'v-2', dataInicio: '2099-01-01', dataFim: '2099-02-01' }
 const usuarios = [
   { id: 'u-2', nome: 'Tiago Técnico', ativo: true, situacao: 'ATIVO', categoriaCargo: 'TECNICO', papeis: [] },
   { id: 'u-3', nome: 'Edu Estagiário', ativo: true, situacao: 'ATIVO', categoriaCargo: 'ESTAGIARIO', papeis: [] },
@@ -27,7 +28,7 @@ describe('AcessoTemporario', () => {
     setActivePinia(createPinia())
     useSessionStore().$patch({ token: 't', usuario: usuarioDeTeste('PESQUISADOR', { id: 'eu' }), expiraEm: Date.now() + 60_000 })
     fake = fakeAdapter((config) => {
-      if (config.method === 'get' && config.url === '/v1/laboratorios/lab-1/equipe/vinculos') return { status: 200, data: [vinculoVigente] }
+      if (config.method === 'get' && config.url === '/v1/laboratorios/lab-1/equipe/vinculos') return { status: 200, data: [vinculoVigente, vinculoAgendado] }
       if (config.method === 'get' && config.url === '/v1/usuarios') return { status: 200, data: usuarios }
       if (config.method === 'get' && config.url === '/v1/projetos') return { status: 200, data: [] }
       return { status: 200, data: vinculoVigente }
@@ -75,6 +76,27 @@ describe('AcessoTemporario', () => {
     expect(JSON.parse(post?.data as string)).toMatchObject({
       usuarioId: 'u-2', laboratorioId: 'lab-1', dataInicio: '2026-12-01', dataFim: '2026-12-31',
     })
+  })
+
+  it('acesso com inicio futuro aparece como agendado e pode ser encerrado', async () => {
+    const wrapper = await montar()
+
+    expect(wrapper.text()).toContain('Agendado')
+    expect(wrapper.find('[data-test="encerrar-v-2"]').exists()).toBe(true)
+  })
+
+  it('edita a data final e a observacao', async () => {
+    const wrapper = await montar()
+
+    await wrapper.get('[data-test="editar-v-1"]').trigger('click')
+    await wrapper.get('[data-test="editar-data-fim"]').setValue('2100-01-31')
+    await wrapper.get('[data-test="editar-observacao"]').setValue('prorrogado')
+    await wrapper.get('[data-test="salvar-edicao"]').trigger('click')
+    await flushPromises()
+
+    const put = fake.requests.find((r) => r.method === 'put')
+    expect(put?.url).toBe('/v1/laboratorios/lab-1/equipe/vinculos/v-1')
+    expect(JSON.parse(put?.data as string)).toEqual({ dataFim: '2100-01-31', observacao: 'prorrogado' })
   })
 
   it('encerrar pede confirmacao na tela', async () => {
