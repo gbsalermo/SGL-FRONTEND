@@ -28,7 +28,7 @@ const ROUTE_HELP_RULES: RouteHelpRule[] = [
   { match: exact('/residuos', '/residuos/informar'), taskId: 'gestao-de-residuos' },
   { match: prefix('/relatorios'), taskId: 'relatorios' },
   // The list is where the import starts (step 1 of the text opens "Vínculos de usuários").
-  { match: exact('/administracao/cadastros/vinculos', '/administracao/cadastros/vinculos/importar'), taskId: 'importar-pessoa-da-embrapa' },
+  { match: exact('/administracao/cadastros/vinculos', '/administracao/cadastros/vinculos/importar', '/meu-laboratorio', '/equipe-do-laboratorio'), taskId: 'importar-pessoa-da-embrapa' },
   { match: exact('/estagiarios'), taskId: 'acompanhar-estagiarios' },
   { match: exact('/projetos'), taskId: 'projeto-em-varios-laboratorios' },
   {
