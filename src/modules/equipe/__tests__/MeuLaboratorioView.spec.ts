@@ -51,6 +51,17 @@ describe('MeuLaboratorioView', () => {
     expect(opcoes).toEqual(['Lab A', 'Lab B'])
   })
 
+  it('administrador sem laboratorio escolhido ve o titulo das equipes', async () => {
+    fake = fakeAdapter(() => ({ status: 200, data: [] }))
+    http.defaults.adapter = fake.adapter
+    entrar('ADMINISTRADOR')
+    const wrapper = mount(MeuLaboratorioView, { global: { stubs } })
+    await flushPromises()
+
+    expect(wrapper.get('h1').text()).toBe('Equipes dos laboratórios')
+    expect(wrapper.text()).toContain('Nenhum laboratório ativo na Unidade.')
+  })
+
   it('mostra as quatro abas', async () => {
     entrar('PESQUISADOR', [{ id: 'lab-a', nome: 'Lab A', ativo: true }])
     const wrapper = mount(MeuLaboratorioView, { global: { stubs } })

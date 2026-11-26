@@ -11,6 +11,7 @@ import EquipeTabela from '../components/EquipeTabela.vue'
 import PendentesAprovacao from '../components/PendentesAprovacao.vue'
 import TrazerDaEmbrapa from '../components/TrazerDaEmbrapa.vue'
 import { mensagemDeErro } from '../mensagemDeErro'
+import { rotuloDaEquipe } from '../rotuloDaEquipe'
 
 type Aba = 'EQUIPE' | 'PENDENTES' | 'EMBRAPA' | 'TEMPORARIO'
 const ABAS: Array<{ id: Aba; rotulo: string }> = [
@@ -57,7 +58,7 @@ onMounted(carregarLaboratorios)
     <header class="meu-laboratorio__cabecalho">
       <div>
         <span class="people-eyebrow">EQUIPE DO LABORATÓRIO</span>
-        <h1 id="titulo-meu-laboratorio">{{ laboratorioAtual?.nome ?? 'Meu laboratório' }}</h1>
+        <h1 id="titulo-meu-laboratorio">{{ laboratorioAtual?.nome ?? rotuloDaEquipe(session.usuario) }}</h1>
         <p>Organize quem faz parte do laboratório: aprove quem chega, cadastre pessoas da Embrapa, retire quem saiu e dê acessos temporários.</p>
       </div>
       <label v-if="laboratorios.length > 1" class="people-field">
@@ -72,7 +73,9 @@ onMounted(carregarLaboratorios)
     </header>
 
     <div v-if="erro" class="people-feedback people-feedback--error" role="alert">{{ erro }}</div>
-    <div v-else-if="laboratorios.length === 0" class="people-empty">Você não é responsável por nenhum laboratório ativo.</div>
+    <div v-else-if="laboratorios.length === 0" class="people-empty">
+      {{ ehAdmin(session.usuario) ? 'Nenhum laboratório ativo na Unidade.' : 'Você não é responsável por nenhum laboratório ativo.' }}
+    </div>
 
     <template v-else-if="laboratorioId">
       <div class="people-tabs" role="tablist" aria-label="Organização da equipe">
