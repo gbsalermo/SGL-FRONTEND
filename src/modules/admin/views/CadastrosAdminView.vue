@@ -163,7 +163,7 @@ const abas: Array<{ id: AbaCadastro; titulo: string; descricao: string }> = [
   { id: 'residuos-solucoes', titulo: 'Resíduos e Soluções', descricao: 'Modelos reutilizáveis e composições por Unidade' },
   { id: 'classes-residuo', titulo: 'Classes de resíduo', descricao: 'Classificações disponíveis para a Unidade' },
   { id: 'locais-armazenamento', titulo: 'Locais de armazenamento', descricao: 'Locais temporários disponíveis para Resíduos' },
-  { id: 'permissoes', titulo: 'Permissões', descricao: 'Perfis de acesso dos usuários existentes' },
+  { id: 'permissoes', titulo: 'Permissões', descricao: 'Papéis e categoria dos usuários existentes' },
 ]
 
 const termoBusca = computed(() => busca.value.trim().toLocaleLowerCase('pt-BR'))
@@ -836,7 +836,7 @@ onMounted(() => {
             <p v-else-if="aba === 'residuos-solucoes'">Gerencie os modelos de resíduos e soluções em um mesmo espaço administrativo. Pedidos e preparações permanecem nas áreas operacionais.</p>
             <p v-else-if="aba === 'classes-residuo'">Mantenha as classes disponíveis para classificação de resíduos nesta Unidade.</p>
             <p v-else-if="aba === 'locais-armazenamento'">Mantenha os locais temporários que poderão ser selecionados no fluxo de Resíduos.</p>
-            <p v-else>Usuários são criados pelo fluxo institucional. Aqui é alterado somente o perfil de acesso.</p>
+            <p v-else>Usuários são criados pelo fluxo institucional. Aqui se alteram somente os papéis e a categoria do cargo.</p>
           </div>
           <button v-if="aba !== 'permissoes' && aba !== 'residuos-solucoes'" class="btn btn--primary" type="button" @click="abrirNovo">
             {{ rotuloNovoCadastro }}
@@ -846,7 +846,7 @@ onMounted(() => {
         <div v-if="aba !== 'residuos-solucoes'" class="toolbar">
           <label class="search-field">
             <span>Buscar</span>
-            <input v-model="busca" type="search" :placeholder="aba === 'permissoes' ? 'Nome, e-mail, unidade, laboratório ou perfil...' : 'Nome, código, responsável ou descrição...'" />
+            <input v-model="busca" type="search" :placeholder="aba === 'permissoes' ? 'Nome, e-mail, unidade, laboratório ou papel...' : 'Nome, código, responsável ou descrição...'" />
           </label>
           <label v-if="aba !== 'permissoes'" class="toggle-field">
             <input v-model="mostrarInativos" type="checkbox" />
