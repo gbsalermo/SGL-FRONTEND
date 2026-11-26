@@ -70,6 +70,21 @@ describe('session store', () => {
     expect(session.unidadeOperacaoId).toBe('unidade-2')
   })
 
+  // A session saved before roles existed has `perfil` and no `papeis`: reading it would quietly drop a
+  // Gestor or administrator into the requester area until the token expired, so it is discarded.
+  it('sessao salva no formato antigo, sem papeis, e descartada', async () => {
+    localStorage.setItem('sgl.session', JSON.stringify({
+      token: 'jwt-antigo',
+      expiraEm: Date.now() + 60_000,
+      usuario: { id: 'u-1', nome: 'Fulano', perfil: 'GESTOR', situacao: 'ATIVO', unidadeId: 'unidade-1' },
+    }))
+
+    const { session } = await carregar()
+
+    expect(session.autenticado).toBe(false)
+    expect(localStorage.getItem('sgl.session')).toBeNull()
+  })
+
   it('remove a chave antiga sgl.dev-session', async () => {
     localStorage.setItem('sgl.dev-session', JSON.stringify({ usuario, expiraEm: Date.now() + 60_000 }))
 

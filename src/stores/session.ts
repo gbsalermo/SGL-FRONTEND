@@ -25,7 +25,11 @@ function carregarSessao(): SessaoPersistida | null {
 
     const sessao = JSON.parse(raw) as Partial<SessaoPersistida>
 
-    if (!sessao.token || !sessao.usuario || typeof sessao.expiraEm !== 'number' || sessao.expiraEm <= Date.now()) {
+    // A session saved before accumulable roles has no `papeis`; trusting it would hide the gestão area
+    // from Gestores and administrators until the token expired, so it is dropped and a new login asked.
+    const formatoAtual = Array.isArray(sessao.usuario?.papeis)
+    if (!sessao.token || !sessao.usuario || !formatoAtual || typeof sessao.expiraEm !== 'number'
+      || sessao.expiraEm <= Date.now()) {
       localStorage.removeItem(SESSION_STORAGE_KEY)
       return null
     }
