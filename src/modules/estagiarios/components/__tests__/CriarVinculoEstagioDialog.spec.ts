@@ -92,6 +92,8 @@ describe('CriarVinculoEstagioDialog', () => {
       dataInicioEstagio: '2026-11-01',
       dataFimEstagio: '2027-02-01',
       tipoBolsa: 'VOLUNTARIO',
+      // The API requires exactly one bolsa origin; a legacy tipoBolsa is sent with an explicit null bolsaId.
+      bolsaId: null,
       formacao: 'GRADUACAO',
       formacaoOutro: null,
       atividadeId: 'a-1',
