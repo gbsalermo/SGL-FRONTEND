@@ -7,6 +7,7 @@ import {
   ehEstagiario,
   ehGestao,
   ehResponsavel,
+  listaAcesso,
   papeisConcedidosPor,
   rotuloAcesso,
   ROTA_APROVAR_PENDENTES,
@@ -80,5 +81,27 @@ describe('aguardaAprovacao', () => {
 
   it('a rota de aprovacao abre a aba Pendentes de Vinculos', () => {
     expect(ROTA_APROVAR_PENDENTES).toEqual({ path: '/administracao/cadastros/vinculos', query: { aba: 'PENDENTES' } })
+  })
+})
+
+describe('listaAcesso', () => {
+  it('lista papeis na ordem da gestao e depois as responsabilidades', () => {
+    expect(listaAcesso({
+      papeis: ['GESTOR', 'ADMINISTRADOR_LOCAL'],
+      responsavelPor: [{ id: 'lab-a', nome: 'Lab A' }],
+    })).toEqual(['Administrador local', 'Gestor', 'Responsável por Lab A'])
+  })
+
+  it('sem papeis mostra a categoria', () => {
+    expect(listaAcesso({ papeis: [], categoriaCargo: 'TECNICO' })).toEqual(['Técnico'])
+  })
+
+  it('sem nada devolve lista vazia', () => {
+    expect(listaAcesso({})).toEqual([])
+    expect(listaAcesso(null)).toEqual([])
+  })
+
+  it('responsavel sem nome e ignorado', () => {
+    expect(listaAcesso({ papeis: ['GESTOR'], responsavelPor: [{ id: 'lab-a' }] })).toEqual(['Gestor'])
   })
 })

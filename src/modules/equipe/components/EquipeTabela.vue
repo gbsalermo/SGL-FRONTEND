@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
 import type { UsuarioPermissao } from '@/modules/admin/types/cadastros'
-import { rotuloAcesso } from '@/modules/auth/papeis'
+import PapeisBadge from '@/components/PapeisBadge.vue'
 import { useSessionStore } from '@/stores/session'
 
 import { equipeService } from '../equipeService'
@@ -146,7 +146,7 @@ defineExpose({ carregar })
               <span v-if="membro.responsavel" class="people-pill people-pill--vinculado">Responsável</span>
               <small>{{ membro.email || membro.cargo || '—' }}</small>
             </td>
-            <td>{{ rotuloAcesso(membro) }}</td>
+            <td><PapeisBadge :usuario="membro" /></td>
             <td>{{ acesso(membro) }}</td>
             <td>
               <button

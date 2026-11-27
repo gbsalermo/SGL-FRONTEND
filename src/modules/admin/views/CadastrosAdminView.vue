@@ -8,6 +8,7 @@ import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useRoute } from 'vue-router'
 import { responsaveisElegiveis } from '@/modules/admin/responsaveisElegiveis'
 import { aguardaAprovacao, ROTA_APROVAR_PENDENTES, rotuloAcesso } from '@/modules/auth/papeis'
+import PapeisBadge from '@/components/PapeisBadge.vue'
 import AcessoUsuarioEditor from '@/modules/admin/components/AcessoUsuarioEditor.vue'
 import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
@@ -975,7 +976,7 @@ onMounted(() => {
                   <span v-if="aguardaAprovacao(usuario)" class="status status--pending">Aguardando aprovação</span>
                   <span v-else class="status" :class="usuario.ativo ? 'status--active' : 'status--inactive'">{{ usuario.ativo ? 'Ativo' : 'Inativo' }}</span>
                 </td>
-                <td>{{ rotuloAcesso(usuario) }}</td>
+                <td><PapeisBadge :usuario="usuario" /></td>
                 <td v-if="aguardaAprovacao(usuario)">
                   <!-- Trocar o acesso de um pendente não o libera; a aprovação define papéis, categoria e laboratórios. -->
                   <router-link class="pending-link" :to="ROTA_APROVAR_PENDENTES">Aprovar em Vínculos → Pendentes</router-link>

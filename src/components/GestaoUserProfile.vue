@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 import { useProfilePreferencesStore } from '@/stores/profilePreferences'
 import { rotuloAcesso } from '@/modules/auth/papeis'
+import PapeisBadge from '@/components/PapeisBadge.vue'
 import { useSessionStore } from '@/stores/session'
 
 withDefaults(defineProps<{ compact?: boolean }>(), {
@@ -110,7 +111,7 @@ function salvarConfiguracoes() {
     <div v-if="!compact" class="gestao-profile__copy">
       <div class="gestao-profile__line">
         <strong>{{ nomeExibicao }}</strong>
-        <small>{{ rotuloAcesso(session.usuario) }}</small>
+        <small><PapeisBadge :usuario="session.usuario" /></small>
       </div>
       <span>{{ session.usuario?.email }}</span>
       <span class="gestao-profile__unit" :title="unidadeExibicao">{{ unidadeExibicao }}</span>
@@ -213,7 +214,9 @@ function salvarConfiguracoes() {
 .gestao-profile__avatar { width: 42px; height: 42px; font-size: 12px; }
 .gestao-profile__avatar img, .profile-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
 .gestao-profile__copy { min-width: 0; flex: 1; display: flex; flex-direction: column; }
-.gestao-profile__line { min-width: 0; display: flex; align-items: center; gap: 6px; }
+/* Wraps so a long role badge drops below the name instead of squeezing it to a couple of letters. */
+.gestao-profile__line { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 3px 6px; }
+.gestao-profile__line strong { max-width: 100%; }
 .gestao-profile__copy strong, .gestao-profile__copy > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gestao-profile__copy strong { min-width: 0; font-size: 12px; }
 .gestao-profile__copy > span { margin-top: 3px; color: #aebed7; font-size: 10px; }
