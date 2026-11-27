@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { computed, onMounted, ref, watch } from 'vue'
+import AtualizadoEm from '@/components/AtualizadoEm.vue'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useRoute, useRouter } from 'vue-router'
 
 import { residuoService } from '@/modules/residuos/services/residuoService'
@@ -281,21 +283,36 @@ function fecharAdministracao() {
   erroAdministracao.value = ''
 }
 
-async function carregar() {
+/** Returns false when a newer load started meanwhile; its results were discarded. */
+async function buscarDados(): Promise<boolean> {
+  const isLatest = beginLoad()
+  const [residuosCarregados, classesCarregadas, locaisCarregados] = await Promise.all([
+    residuoService.listarTodos(),
+    residuoService.listarClassesAtivas(),
+    residuoService.listarLocaisArmazenamentoAtivos(),
+  ])
+  if (!isLatest()) return false
+  residuos.value = residuosCarregados
+  classesResiduo.value = classesCarregadas
+  locaisArmazenamento.value = locaisCarregados
+  if (selecionado.value) {
+    selecionado.value = residuos.value.find((item) => item.id === selecionado.value?.id) ?? null
+  }
+  return true
+}
+
+async function carregar(options: { silent?: boolean } = {}) {
+  // A silent reload keeps the list on screen, does not reopen the residue from the URL and rethrows,
+  // so the indicator keeps the last good time.
+  if (options.silent) {
+    await buscarDados()
+    return
+  }
   carregando.value = true
   erro.value = ''
   try {
-    const [residuosCarregados, classesCarregadas, locaisCarregados] = await Promise.all([
-      residuoService.listarTodos(),
-      residuoService.listarClassesAtivas(),
-      residuoService.listarLocaisArmazenamentoAtivos(),
-    ])
-    residuos.value = residuosCarregados
-    classesResiduo.value = classesCarregadas
-    locaisArmazenamento.value = locaisCarregados
-    if (selecionado.value) {
-      selecionado.value = residuos.value.find((item) => item.id === selecionado.value?.id) ?? null
-    }
+    if (!(await buscarDados())) return
+    markUpdated()
     await abrirResiduoDaRota()
   } catch (error) {
     erro.value = mensagemErro(error)
@@ -303,6 +320,7 @@ async function carregar() {
     carregando.value = false
   }
 }
+const { lastUpdatedAt, refreshing, refreshNow, markUpdated, beginLoad } = useAutoRefresh(() => carregar({ silent: true }))
 
 async function carregarHistorico(id: string) {
   carregandoHistorico.value = true
@@ -665,7 +683,7 @@ onMounted(carregar)
         <h1>Central de resíduos</h1>
         <p>Receba, classifique, rotule, armazene e acompanhe a destinação dos resíduos laboratoriais.</p>
       </div>
-      <button class="secondary-action" type="button" :disabled="carregando" @click="carregar">Atualizar dados</button>
+      <AtualizadoEm :at="lastUpdatedAt" :busy="refreshing || carregando" @refresh="refreshNow" />
     </header>
 
     <div class="metrics-grid metrics-grid--six">

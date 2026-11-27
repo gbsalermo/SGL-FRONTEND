@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { aguardaAprovacao, ehEstagiario as ehCategoriaEstagiario, ehGestao, ROTA_APROVAR_PENDENTES, rotuloAcesso } from '@/modules/auth/papeis'
+import PapeisBadge from '@/components/PapeisBadge.vue'
 import { descrevePerfilLegado } from '@/modules/auth/perfilLegado'
 import { computed, onMounted, ref, watch } from 'vue'
 import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
@@ -341,7 +342,7 @@ onMounted(() => { void carregarResumo() })
             <tr v-for="item in listaFiltrada" :key="item.id">
               <td><span class="people-pill" :class="'people-pill--' + status(item).toLowerCase()"><span class="people-dot" />{{ statusRotulo(item) }}</span></td>
               <td><strong>{{ item.nome }}</strong><small>{{ item.email }}</small></td>
-              <td>{{ rotuloAcesso(item) }}</td>
+              <td><PapeisBadge :usuario="item" /></td>
               <td>{{ nomesDosLaboratoriosDaPessoa(listaAtual(item)) || 'Não atribuído' }}</td>
               <td><strong>{{ resumoDoUsuario(item.id)?.vinculosVigentes ?? 0 }}</strong><small>{{ (resumoDoUsuario(item.id)?.laboratoriosAdicionais || []).slice(0,2).join(', ') || 'Nenhum adicional vigente' }}</small></td>
               <td><button type="button" class="people-outline" @click="abrirUsuario(item.id)">Gerenciar <span aria-hidden="true">→</span></button></td>
@@ -355,7 +356,7 @@ onMounted(() => { void carregarResumo() })
       <aside class="people-drawer" role="dialog" aria-modal="true" :aria-label="'Vínculos de ' + usuario.nome">
         <header class="people-drawer-header">
           <div><span class="people-eyebrow">CADASTROS / VÍNCULOS DO USUÁRIO</span><h2>{{ usuario.nome }}</h2>
-            <p>{{ rotuloAcesso(usuario) }} · {{ usuario.email }}</p>
+            <p><PapeisBadge :usuario="usuario" /> · {{ usuario.email }}</p>
             <span class="people-pill" :class="'people-pill--' + status(usuario).toLowerCase()"><span class="people-dot" />{{ statusRotulo(usuario) }}</span>
           </div>
           <button class="people-close" type="button" aria-label="Fechar detalhes" @click="fecharUsuario">×</button>

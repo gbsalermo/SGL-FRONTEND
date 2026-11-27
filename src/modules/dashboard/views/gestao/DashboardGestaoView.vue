@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import AtualizadoEm from '@/components/AtualizadoEm.vue'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useRouter } from 'vue-router'
 
 import { cadastrosAdminService } from '@/modules/admin/services/cadastrosAdminService'
@@ -61,7 +63,6 @@ const session = useSessionStore()
 
 const carregando = ref(true)
 const erro = ref('')
-const atualizadoEm = ref<Date | null>(null)
 const pedidos = ref<PedidoResponse[]>([])
 const estoquesBaixos = ref<EstoqueCentralResponse[]>([])
 const residuos = ref<ResiduoResponse[]>([])
@@ -347,9 +348,18 @@ const laboratorioAtual = computed(() => {
   return resumoLaboratorios.value[indice]
 })
 
-async function carregarDashboard() {
-  carregando.value = true
-  erro.value = ''
+/**
+ * A silent reload (automatic or from the refresh icon) keeps the panel on screen: a source that fails keeps
+ * its previous data instead of becoming empty, the laboratory carousel stays where it is, and any failure is
+ * rethrown so the indicator keeps the last good time.
+ */
+async function carregarDashboard(options: { silent?: boolean } = {}) {
+  const silent = options.silent ?? false
+  const isLatest = beginLoad()
+  if (!silent) {
+    carregando.value = true
+    erro.value = ''
+  }
 
   if (!unidadeId.value) {
     erro.value = 'O usuário de gestão não possui unidade vinculada. Alguns indicadores podem ficar indisponíveis.'
@@ -376,24 +386,27 @@ async function carregarDashboard() {
       cadastrosAdminService.listarUsuarios(),
     ])
 
-    pedidos.value = pedidosResult.status === 'fulfilled' ? pedidosResult.value : []
-    estoquesBaixos.value = baixosResult.status === 'fulfilled' ? baixosResult.value.filter((item) => item.ativo) : []
-    residuos.value = residuosResult.status === 'fulfilled' ? residuosResult.value : []
-    movimentacoes.value = movimentacoesResult.status === 'fulfilled' ? movimentacoesResult.value : []
-    historicoResiduos.value = historicoResiduosResult.status === 'fulfilled' ? historicoResiduosResult.value : []
-    laboratorios.value = laboratoriosResult.status === 'fulfilled' ? laboratoriosResult.value : []
-    usuarios.value = usuariosResult.status === 'fulfilled' ? usuariosResult.value : []
+    if (!isLatest()) return
+    pedidos.value = pedidosResult.status === 'fulfilled' ? pedidosResult.value : silent ? pedidos.value : []
+    estoquesBaixos.value = baixosResult.status === 'fulfilled' ? baixosResult.value.filter((item) => item.ativo) : silent ? estoquesBaixos.value : []
+    residuos.value = residuosResult.status === 'fulfilled' ? residuosResult.value : silent ? residuos.value : []
+    movimentacoes.value = movimentacoesResult.status === 'fulfilled' ? movimentacoesResult.value : silent ? movimentacoes.value : []
+    historicoResiduos.value = historicoResiduosResult.status === 'fulfilled' ? historicoResiduosResult.value : silent ? historicoResiduos.value : []
+    laboratorios.value = laboratoriosResult.status === 'fulfilled' ? laboratoriosResult.value : silent ? laboratorios.value : []
+    usuarios.value = usuariosResult.status === 'fulfilled' ? usuariosResult.value : silent ? usuarios.value : []
 
     const estoques = estoquesResult.status === 'fulfilled' ? estoquesResult.value.filter((item) => item.ativo) : []
+    if (silent && estoquesResult.status === 'rejected') throw estoquesResult.reason
     const resultadosLotes = await Promise.allSettled(
       estoques.map((estoque) => estoqueService.listarLotesPorEstoque(estoque.id)),
     )
+    if (!isLatest()) return
     lotes.value = resultadosLotes
       .filter((resultado): resultado is PromiseFulfilledResult<LoteResponse[]> => resultado.status === 'fulfilled')
       .flatMap((resultado) => resultado.value)
       .filter((lote) => lote.ativo)
 
-    indiceLaboratorio.value = 0
+    if (!silent) indiceLaboratorio.value = 0
 
     const falhas = [
       pedidosResult,
@@ -406,18 +419,25 @@ async function carregarDashboard() {
       usuariosResult,
     ].filter((resultado) => resultado.status === 'rejected').length
 
+    if (silent) {
+      if (falhas > 0) throw new Error(`${falhas} dashboard source(s) failed`)
+      return
+    }
+
     if (falhas > 0) {
       erro.value = `Alguns indicadores não puderam ser atualizados (${falhas} fonte${falhas > 1 ? 's' : ''}). Os dados disponíveis continuam exibidos.`
     }
 
-    atualizadoEm.value = new Date()
+    markUpdated()
   } catch (error) {
+    if (silent) throw error
     console.error(error)
     erro.value = 'Não foi possível carregar o painel operacional. Tente atualizar novamente.'
   } finally {
-    carregando.value = false
+    if (!silent) carregando.value = false
   }
 }
+const { lastUpdatedAt, refreshing, refreshNow, markUpdated, beginLoad } = useAutoRefresh(() => carregarDashboard({ silent: true }))
 
 function abrir(rota: string) {
   router.push(rota)
@@ -551,7 +571,7 @@ function descricaoMovimentacao(movimentacao: MovimentacaoEstoqueResponse) {
   return `${movimentacao.produtoNome}${lote} · ${quantidade}${contexto}`
 }
 
-onMounted(carregarDashboard)
+onMounted(() => carregarDashboard())
 </script>
 
 <template>
@@ -562,10 +582,7 @@ onMounted(carregarDashboard)
         <h1>Painel Operacional do Dia</h1>
         <p>Tudo o que precisa de atenção, o que está pendente e o que vem acontecendo na operação.</p>
       </div>
-      <button class="dashboard-refresh" type="button" :disabled="carregando" @click="carregarDashboard">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" /></svg>
-        {{ carregando ? 'Atualizando...' : 'Atualizar dados' }}
-      </button>
+      <AtualizadoEm :at="lastUpdatedAt" :busy="refreshing || carregando" @refresh="refreshNow" />
     </header>
 
     <div v-if="erro" class="dashboard-warning" role="status">
@@ -800,7 +817,7 @@ onMounted(carregarDashboard)
             </div>
             <div class="quick-summary-updated">
               <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" /></svg>
-              <span v-if="atualizadoEm">Atualizado às {{ formatarHora(atualizadoEm.toISOString()) }}</span>
+              <span v-if="lastUpdatedAt">Atualizado às {{ formatarHora(lastUpdatedAt.toISOString()) }}</span>
               <span v-else>Aguardando atualização</span>
             </div>
           </div>
@@ -848,30 +865,6 @@ onMounted(carregarDashboard)
   color: var(--sgl-text-muted);
   font-size: 13px;
 }
-.dashboard-refresh {
-  min-height: 38px;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 13px;
-  border: 1px solid #b7c7df;
-  border-radius: 7px;
-  background: #fff;
-  color: var(--sgl-primary);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
-}
-.dashboard-refresh:hover:not(:disabled) {
-  transform: translateY(-1px);
-  border-color: #7e9bc4;
-  box-shadow: 0 6px 16px rgb(13 43 94 / 10%);
-}
-.dashboard-refresh:disabled { opacity: .55; cursor: wait; }
-.dashboard-refresh svg,
 .dashboard-warning svg {
   width: 18px;
   height: 18px;
@@ -1612,7 +1605,6 @@ onMounted(carregarDashboard)
 
 @media (max-width: 900px) {
   .dashboard-heading { flex-direction: column; }
-  .dashboard-refresh { width: 100%; justify-content: center; }
   .dashboard-content-grid { grid-template-columns: 1fr; }
   .dashboard-panel--summary { grid-column: auto; }
   .dashboard-panel--fixed,

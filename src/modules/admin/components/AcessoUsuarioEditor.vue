@@ -25,11 +25,17 @@ const categoria = ref<CategoriaCargo | ''>('')
 const salvando = ref(false)
 const erro = ref('')
 
-watch(() => props.usuario, (usuario) => {
-  papeis.value = [...usuario.papeis]
-  categoria.value = usuario.categoriaCargo ?? ''
-  erro.value = ''
-}, { immediate: true })
+// Keyed by content, not by object: the screen reloads in the background every few minutes and hands over
+// new objects with the same data, which must not wipe a choice the person has not saved yet.
+watch(
+  () => `${props.usuario.id}|${[...props.usuario.papeis].sort().join(',')}|${props.usuario.categoriaCargo ?? ''}`,
+  () => {
+    papeis.value = [...props.usuario.papeis]
+    categoria.value = props.usuario.categoriaCargo ?? ''
+    erro.value = ''
+  },
+  { immediate: true },
+)
 
 const concedidos = computed(() => papeisConcedidosPor(session.usuario))
 // Roles the actor cannot grant are still shown when the person holds them, but read-only.

@@ -93,4 +93,26 @@ describe('AcessoUsuarioEditor', () => {
 
     expect(wrapper.text()).toContain('PESQUISADOR A')
   })
+
+  it('recarga com os mesmos dados nao desfaz a edicao em andamento', async () => {
+    entrarComo('ADMINISTRADOR')
+    const wrapper = mount(AcessoUsuarioEditor, { props: { usuario: alvo() } })
+    await wrapper.get('[data-test="papel-GESTOR"]').setValue(true)
+
+    // A background reload hands over a new object with the same content.
+    await wrapper.setProps({ usuario: alvo() })
+
+    expect((wrapper.get('[data-test="papel-GESTOR"]').element as HTMLInputElement).checked).toBe(true)
+  })
+
+  it('dados novos da pessoa reiniciam a edicao', async () => {
+    entrarComo('ADMINISTRADOR')
+    const wrapper = mount(AcessoUsuarioEditor, { props: { usuario: alvo() } })
+    await wrapper.get('[data-test="papel-GESTOR"]').setValue(true)
+
+    await wrapper.setProps({ usuario: alvo({ papeis: ['ADMINISTRADOR_LOCAL'] }) })
+
+    expect((wrapper.get('[data-test="papel-GESTOR"]').element as HTMLInputElement).checked).toBe(false)
+    expect((wrapper.get('[data-test="papel-ADMINISTRADOR_LOCAL"]').element as HTMLInputElement).checked).toBe(true)
+  })
 })

@@ -3,9 +3,12 @@ import { newCadastroButtonLabel } from '@/modules/admin/newCadastroButtonLabel'
 import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
+import AtualizadoEm from '@/components/AtualizadoEm.vue'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useRoute } from 'vue-router'
 import { responsaveisElegiveis } from '@/modules/admin/responsaveisElegiveis'
 import { aguardaAprovacao, ROTA_APROVAR_PENDENTES, rotuloAcesso } from '@/modules/auth/papeis'
+import PapeisBadge from '@/components/PapeisBadge.vue'
 import AcessoUsuarioEditor from '@/modules/admin/components/AcessoUsuarioEditor.vue'
 import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
@@ -738,32 +741,47 @@ async function acessoSalvo(usuario: UsuarioPermissao) {
   await carregar()
 }
 
-async function carregar() {
+/** Returns false when a newer load started meanwhile; its results were discarded. */
+async function buscarCadastros(): Promise<boolean> {
+  const isLatest = beginLoad()
+  const [units, labs, projects, products, residueClasses, storageLocations, users] = await Promise.all([
+    cadastrosAdminService.listarUnidades(),
+    cadastrosAdminService.listarLaboratorios(),
+    cadastrosAdminService.listarProjetos(),
+    cadastrosAdminService.listarProdutos(),
+    cadastrosAdminService.listarClassesResiduo(),
+    cadastrosAdminService.listarLocaisArmazenamentoResiduo(),
+    cadastrosAdminService.listarUsuarios(),
+  ])
+  if (!isLatest()) return false
+  unidades.value = [...units].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  laboratorios.value = [...labs].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  projetos.value = [...projects].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  produtos.value = [...products].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  classesResiduo.value = [...residueClasses].sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
+  locaisArmazenamento.value = [...storageLocations].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  usuarios.value = [...users].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  return true
+}
+
+async function carregar(options: { silent?: boolean } = {}) {
+  // A silent reload keeps tab, search and open forms untouched and rethrows, so the indicator keeps the
+  // last good time; the messages of the person's own actions are not cleared either.
+  if (options.silent) {
+    await buscarCadastros()
+    return
+  }
   carregando.value = true
   erro.value = ''
   try {
-    const [units, labs, projects, products, residueClasses, storageLocations, users] = await Promise.all([
-      cadastrosAdminService.listarUnidades(),
-      cadastrosAdminService.listarLaboratorios(),
-      cadastrosAdminService.listarProjetos(),
-      cadastrosAdminService.listarProdutos(),
-      cadastrosAdminService.listarClassesResiduo(),
-      cadastrosAdminService.listarLocaisArmazenamentoResiduo(),
-      cadastrosAdminService.listarUsuarios(),
-    ])
-    unidades.value = [...units].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    laboratorios.value = [...labs].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    projetos.value = [...projects].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    produtos.value = [...products].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    classesResiduo.value = [...residueClasses].sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
-    locaisArmazenamento.value = [...storageLocations].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    usuarios.value = [...users].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+    if (await buscarCadastros()) markUpdated()
   } catch (error) {
     erro.value = mensagemErro(error, 'Não foi possível carregar os cadastros administrativos.')
   } finally {
     carregando.value = false
   }
 }
+const { lastUpdatedAt, refreshing, refreshNow, markUpdated, beginLoad } = useAutoRefresh(() => carregar({ silent: true }))
 
 onMounted(() => {
   const secao = route.query.secao
@@ -783,9 +801,7 @@ onMounted(() => {
       </div>
       <div class="page-header__actions">
         <HelpLink :task-id="helpTaskForCadastroTab(aba)" />
-        <button class="btn btn--ghost" type="button" :disabled="carregando" @click="carregar">
-          {{ carregando ? 'Atualizando...' : 'Atualizar dados' }}
-        </button>
+        <AtualizadoEm :at="lastUpdatedAt" :busy="refreshing || carregando" @refresh="refreshNow" />
       </div>
     </header>
 
@@ -963,7 +979,7 @@ onMounted(() => {
                   <span v-if="aguardaAprovacao(usuario)" class="status status--pending">Aguardando aprovação</span>
                   <span v-else class="status" :class="usuario.ativo ? 'status--active' : 'status--inactive'">{{ usuario.ativo ? 'Ativo' : 'Inativo' }}</span>
                 </td>
-                <td>{{ rotuloAcesso(usuario) }}</td>
+                <td><PapeisBadge :usuario="usuario" /></td>
                 <td v-if="aguardaAprovacao(usuario)">
                   <!-- Trocar o acesso de um pendente não o libera; a aprovação define papéis, categoria e laboratórios. -->
                   <router-link class="pending-link" :to="ROTA_APROVAR_PENDENTES">Aprovar em Vínculos → Pendentes</router-link>

@@ -8,6 +8,7 @@ import { helpTaskForRoute } from '@/modules/ajuda/routeHelp'
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { useProfilePreferencesStore } from '@/stores/profilePreferences'
 import { ehResponsavel, rotuloAcesso } from '@/modules/auth/papeis'
+import PapeisBadge from '@/components/PapeisBadge.vue'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -179,7 +180,7 @@ function sair() {
         <div class="solicitante-usercopy">
           <strong>{{ nomeExibicao }}</strong>
           <span>{{ session.usuario?.email }}</span>
-          <small>{{ rotuloAcesso(session.usuario) }}</small>
+          <small><PapeisBadge :usuario="session.usuario" /></small>
         </div>
 
         <button
