@@ -1,6 +1,8 @@
+import axios from 'axios'
 import { http } from '@/services/http'
 import type {
-  AlterarPerfilRequest,
+  AlterarCategoriaCargoRequest,
+  AlterarPapeisRequest,
   CargoSubstituicao,
   ClasseResiduoCadastro,
   ClasseResiduoRequest,
@@ -55,8 +57,16 @@ export const cadastrosAdminService = {
   },
 
   async listarProdutos() {
-    const { data } = await http.get<ProdutoCadastro[]>('/v1/produtos')
-    return data
+    // A gestao consulta o catalogo, inclusive itens sem lotes/estoque.
+    // Compatibilidade temporaria: API antiga ainda nao tem a rota /catalogo.
+    try {
+      const { data } = await http.get<ProdutoCadastro[]>('/v1/produtos/catalogo')
+      return data
+    } catch (error) {
+      if (!axios.isAxiosError(error) || error.response?.status !== 404) throw error
+      const { data } = await http.get<ProdutoCadastro[]>('/v1/produtos')
+      return data
+    }
   },
 
   async criarProduto(payload: ProdutoRequest) {
@@ -123,8 +133,13 @@ export const cadastrosAdminService = {
     return data
   },
 
-  async alterarPerfil(id: string, payload: AlterarPerfilRequest) {
-    const { data } = await http.put<UsuarioPermissao>(`/v1/usuarios/${id}/perfil`, payload)
+  async alterarPapeis(id: string, payload: AlterarPapeisRequest) {
+    const { data } = await http.put<UsuarioPermissao>(`/v1/usuarios/${id}/papeis`, payload)
+    return data
+  },
+
+  async alterarCategoriaCargo(id: string, payload: AlterarCategoriaCargoRequest) {
+    const { data } = await http.put<UsuarioPermissao>(`/v1/usuarios/${id}/categoria-cargo`, payload)
     return data
   },
   async listarCargosASubstituir() {

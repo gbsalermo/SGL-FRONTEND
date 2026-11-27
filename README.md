@@ -155,7 +155,7 @@ login + senha → POST /v1/auth/login → { token, expiraEm, usuario }
 - Usuário `PENDENTE_VINCULACAO` só vê `/aguardando-aprovacao` ("Verificar novamente" consulta `/v1/auth/me`).
 - 401 em rota protegida encerra a sessão e volta ao login; 403 com `USUARIO_PENDENTE` leva à tela de espera.
 - A Unidade vem da sessão no backend. O header `X-SGL-Unidade-Id` só é enviado pelo **Administrador geral**, quando ele escolhe outra Unidade no seletor da barra superior.
-- O botão "Entrar como desenvolvedor" aparece só quando o backend roda em `dev`/`demo` (`/v1/auth/config`).
+- O link "Entrar como usuário de teste" (tela de login, leva a `/login/teste`) aparece só quando o backend roda em `dev`/`demo` (`/v1/auth/config`). Enquanto a sessão for de teste, uma faixa no topo mostra o usuário e permite "Trocar usuário".
 
 Telas novas da gestão: aba **Pendentes** e **Importar da Embrapa** em Vínculos de usuários; **Unidades** (habilitação), só para o Administrador geral.
 

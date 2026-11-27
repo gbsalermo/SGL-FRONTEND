@@ -3,7 +3,10 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import ImportarPessoaDrawer from '@/modules/admin/components/ImportarPessoaDrawer.vue'
+import type { CategoriaCargo } from '@/modules/auth/types/session'
+import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 import { useSessionStore } from '@/stores/session'
+import { type PerfilDeTeste, usuarioDeTeste } from '@/test/sessaoDeTeste'
 
 const laboratorios = [
   { id: 'l-1', unidadeId: 'u-1', nome: 'Lab Um', descricao: null, responsavelId: null, responsavelNome: null, ativo: true },
@@ -14,49 +17,74 @@ const laboratorios = [
 describe('ImportarPessoaDrawer', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    useSessionStore().$patch({ usuario: { id: 'a-1', perfil: 'ADMINISTRADOR_GERAL' } as never })
+    entrarComo('ADMINISTRADOR_GERAL')
   })
 
-  function montar() {
+  function entrarComo(perfil: PerfilDeTeste) {
+    useSessionStore().$patch({ usuario: usuarioDeTeste(perfil) })
+  }
+
+  function montar(categoriaSugerida: CategoriaCargo | null = null) {
     return mount(ImportarPessoaDrawer, {
-      props: { modo: 'importar', nome: 'MARIA', dados: [], perfilSugerido: null, laboratorios, salvando: false, erro: '' },
+      props: { modo: 'importar', nome: 'MARIA', dados: [], categoriaSugerida, laboratorios, salvando: false, erro: '' },
     })
   }
   const confirmar = (wrapper: ReturnType<typeof montar>) => wrapper.get('[data-test="confirmar"]')
+  const caixasDeLaboratorio = (wrapper: ReturnType<typeof montar>) =>
+    wrapper.getComponent(LaboratoriosSelect).findAll('input[type="checkbox"]')
 
-  it('importaComDoisLaboratorios', async () => {
+  it('importaComDoisLaboratoriosSemPapel', async () => {
     const wrapper = montar()
-    await wrapper.get('[data-test="perfil"]').setValue('TECNICO')
-    const caixas = wrapper.findAll('input[type="checkbox"]')
+    await wrapper.get('[data-test="categoria"]').setValue('TECNICO')
+    const caixas = caixasDeLaboratorio(wrapper)
     expect(caixas).toHaveLength(2) // inactive labs are not offered
     await caixas[0].setValue(true)
     await caixas[1].setValue(true)
 
     await confirmar(wrapper).trigger('click')
 
-    expect(wrapper.emitted('confirmar')).toEqual([[{ perfil: 'TECNICO', laboratorioIds: ['l-2', 'l-1'] }]])
+    expect(wrapper.emitted('confirmar')).toEqual([[{ papeis: [], categoriaCargo: 'TECNICO', laboratorioIds: ['l-2', 'l-1'] }]])
     expect(wrapper.text()).toContain('Laboratórios')
-    expect(wrapper.text()).not.toContain('base')
   })
 
-  it('perfilDeGestaoPodeConfirmarSemLaboratorio', async () => {
-    const wrapper = montar()
-    await wrapper.get('[data-test="perfil"]').setValue('GESTOR')
+  it('categoriaSugeridaJaVemSelecionada', () => {
+    const wrapper = montar('PESQUISADOR')
+    expect((wrapper.get('[data-test="categoria"]').element as HTMLSelectElement).value).toBe('PESQUISADOR')
+  })
+
+  it('papelDeGestaoPodeConfirmarSemLaboratorio', async () => {
+    const wrapper = montar('PESQUISADOR')
+    await wrapper.get('[data-test="papel-GESTOR"]').setValue(true)
 
     expect(confirmar(wrapper).attributes('disabled')).toBeUndefined()
     await confirmar(wrapper).trigger('click')
 
-    expect(wrapper.emitted('confirmar')).toEqual([[{ perfil: 'GESTOR', laboratorioIds: [] }]])
+    expect(wrapper.emitted('confirmar')).toEqual([[{ papeis: ['GESTOR'], categoriaCargo: 'PESQUISADOR', laboratorioIds: [] }]])
   })
 
-  it('perfilOperacionalExigeAoMenosUm', async () => {
-    const wrapper = montar()
-    await wrapper.get('[data-test="perfil"]').setValue('ESTAGIARIO')
+  it('semPapelExigeAoMenosUmLaboratorio', async () => {
+    const wrapper = montar('ESTAGIARIO')
 
     expect(confirmar(wrapper).attributes('disabled')).toBeDefined()
 
-    await wrapper.findAll('input[type="checkbox"]')[0].setValue(true)
+    await caixasDeLaboratorio(wrapper)[0].setValue(true)
 
     expect(confirmar(wrapper).attributes('disabled')).toBeUndefined()
+  })
+
+  it('gestorNaoVeCaixasDePapel', () => {
+    entrarComo('GESTOR')
+    const wrapper = montar('TECNICO')
+
+    expect(wrapper.find('[data-test^="papel-"]').exists()).toBe(false)
+  })
+
+  it('administradorLocalOfereceAdministradorLocalEGestor', () => {
+    entrarComo('ADMINISTRADOR')
+    const wrapper = montar('TECNICO')
+
+    expect(wrapper.find('[data-test="papel-ADMINISTRADOR_LOCAL"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="papel-GESTOR"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="papel-ADMINISTRADOR_GERAL"]').exists()).toBe(false)
   })
 })

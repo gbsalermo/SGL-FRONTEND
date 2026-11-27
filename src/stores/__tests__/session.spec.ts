@@ -3,12 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { UsuarioSessao } from '@/modules/auth/types/session'
 import { fakeAdapter } from '@/test/fakeAdapter'
+import { acessoDe } from '@/test/sessaoDeTeste'
 
 const usuario: UsuarioSessao = {
   id: 'u-1',
   nome: 'Fulano',
   email: 'fulano@embrapa.br',
-  perfil: 'GESTOR',
+  ...acessoDe('GESTOR'),
+  cargo: null,
+  responsavelPor: [],
   situacao: 'ATIVO',
   unidadeId: 'unidade-1',
   unidadeNome: 'Mandioca',
@@ -67,6 +70,47 @@ describe('session store', () => {
     expect(session.unidadeOperacaoId).toBe('unidade-2')
   })
 
+  // A session saved before roles existed has `perfil` and no `papeis`: reading it would quietly drop a
+  // Gestor or administrator into the requester area until the token expired, so it is discarded.
+  it('sessao salva no formato antigo, sem papeis, e descartada', async () => {
+    localStorage.setItem('sgl.session', JSON.stringify({
+      token: 'jwt-antigo',
+      expiraEm: Date.now() + 60_000,
+      usuario: { id: 'u-1', nome: 'Fulano', perfil: 'GESTOR', situacao: 'ATIVO', unidadeId: 'unidade-1' },
+    }))
+
+    const { session } = await carregar()
+
+    expect(session.autenticado).toBe(false)
+    expect(localStorage.getItem('sgl.session')).toBeNull()
+  })
+
+  // A new responsável only sees "Meu laboratório" after the session is read again; doing it when the
+  // window regains focus avoids a new login, at most once a minute.
+  it('atualizarAoVoltar consulta /auth/me no maximo uma vez por minuto', async () => {
+    const { http, session } = await carregar()
+    const fake = fakeAdapter(() => ({ status: 200, data: { ...usuario, responsavelPor: [{ id: 'lab-1', nome: 'Lab', ativo: true }] } }))
+    http.defaults.adapter = fake.adapter
+    session.$patch({ token: 't', expiraEm: Date.now() + 600_000, usuario })
+
+    await session.atualizarAoVoltar(1_000_000)
+    await session.atualizarAoVoltar(1_030_000)
+    await session.atualizarAoVoltar(1_061_000)
+
+    expect(fake.requests.filter((r) => r.url === '/v1/auth/me')).toHaveLength(2)
+    expect(session.usuario?.responsavelPor).toHaveLength(1)
+  })
+
+  it('atualizarAoVoltar sem sessao nao faz nada', async () => {
+    const { http, session } = await carregar()
+    const fake = fakeAdapter(() => ({ status: 200, data: usuario }))
+    http.defaults.adapter = fake.adapter
+
+    await session.atualizarAoVoltar(1_000_000)
+
+    expect(fake.requests).toHaveLength(0)
+  })
+
   it('remove a chave antiga sgl.dev-session', async () => {
     localStorage.setItem('sgl.dev-session', JSON.stringify({ usuario, expiraEm: Date.now() + 60_000 }))
 
@@ -78,7 +122,7 @@ describe('session store', () => {
 
   it('unidadeEmOperacaoId usa a escolha do administrador geral e, sem ela, a do usuario', async () => {
     const { session } = await carregar()
-    session.usuario = { ...usuario, perfil: 'ADMINISTRADOR_GERAL' }
+    session.usuario = { ...usuario, ...acessoDe('ADMINISTRADOR_GERAL') }
     expect(session.unidadeEmOperacaoId).toBe('unidade-1')
 
     session.selecionarUnidade('unidade-2', 'CNPTIA')
@@ -95,7 +139,7 @@ describe('session store', () => {
     expect(session.pendente).toBe(true)
     expect(session.administradorGeral).toBe(false)
 
-    session.$patch({ usuario: { ...usuario, perfil: 'ADMINISTRADOR_GERAL' } })
+    session.$patch({ usuario: { ...usuario, ...acessoDe('ADMINISTRADOR_GERAL') } })
     expect(session.pendente).toBe(false)
     expect(session.administradorGeral).toBe(true)
   })
@@ -121,5 +165,53 @@ describe('session store', () => {
 
     expect(session.autenticado).toBe(false)
     expect(localStorage.getItem('sgl.session')).toBeNull()
+  })
+
+  describe('sessao de teste', () => {
+    function respostaDeLogin() {
+      const expiraEm = new Date(Date.now() + 60_000).toISOString()
+      return { data: { token: 'jwt-teste', expiraEm, usuario } }
+    }
+
+    it('entrarComoTeste_marcaSessaoDeTesteEPersiste', async () => {
+      const { http, session } = await carregar()
+      const post = vi.spyOn(http, 'post').mockResolvedValue(respostaDeLogin())
+
+      await session.entrarComoTeste(' teste.gestor.1 ')
+
+      expect(post).toHaveBeenCalledWith('/v1/auth/dev/entrar', { login: 'teste.gestor.1' })
+      expect(session.sessaoDeTeste).toBe(true)
+      expect(JSON.parse(localStorage.getItem('sgl.session') ?? '{}').sessaoDeTeste).toBe(true)
+    })
+
+    it('entrarReal_aposSessaoDeTeste_limpaMarca', async () => {
+      const { http, session } = await carregar()
+      vi.spyOn(http, 'post').mockResolvedValue(respostaDeLogin())
+
+      await session.entrarComoTeste('teste.gestor.1')
+      await session.entrar('m344136', 'senha')
+
+      expect(session.sessaoDeTeste).toBe(false)
+      expect(JSON.parse(localStorage.getItem('sgl.session') ?? '{}').sessaoDeTeste).toBe(false)
+    })
+
+    it('sair_limpaSessaoDeTeste', async () => {
+      const { http, session } = await carregar()
+      vi.spyOn(http, 'post').mockResolvedValue(respostaDeLogin())
+
+      await session.entrarComoTeste('teste.gestor.1')
+      session.sair()
+
+      expect(session.sessaoDeTeste).toBe(false)
+    })
+
+    it('sessaoAntigaSemCampo_carregaComoFalse', async () => {
+      localStorage.setItem('sgl.session', JSON.stringify({ token: 'jwt-1', usuario, expiraEm: Date.now() + 60_000 }))
+
+      const { session } = await carregar()
+
+      expect(session.autenticado).toBe(true)
+      expect(session.sessaoDeTeste).toBe(false)
+    })
   })
 })

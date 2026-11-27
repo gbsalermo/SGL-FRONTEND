@@ -1,4 +1,5 @@
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
+import type { CategoriaCargo } from '@/modules/auth/types/session'
 
 export type TipoBolsaEstagiario =
   | 'BOLSA_CNPQ'
@@ -61,7 +62,9 @@ export interface VinculoEstagioResponse {
   dataFimPrevista: string | null
   dataFimPrevistaOriginal: string | null
   dataFimEfetiva: string | null
-  tipoBolsa: TipoBolsaEstagiario
+  tipoBolsa: TipoBolsaEstagiario | null
+  bolsaId: string | null
+  bolsaNome: string | null
   situacao: SituacaoEstagio
   participacoesAtividade: VinculoEstagioAtividadeResponse[]
   formacao: FormacaoEstagiario | null
@@ -95,7 +98,8 @@ export interface EstagiarioRequest {
   laboratorioIds: string[]
   dataInicioEstagio: string
   dataFimEstagio: string
-  tipoBolsa: TipoBolsaEstagiario
+  tipoBolsa: TipoBolsaEstagiario | null
+  bolsaId?: string | null
   observacao: string | null
   ativo: boolean | null
   orientadorId: string
@@ -115,7 +119,7 @@ export interface EstagiarioSemVinculoResponse {
 export interface OrientadorElegivelResponse {
   usuarioId: string
   nome: string
-  perfil: string
+  categoriaCargo: CategoriaCargo | null
   cargo: string | null
 }
 
@@ -142,6 +146,18 @@ export interface VinculoEstagioAtividadeRequest {
 }
 
 
+export interface BolsaResponse {
+  id: string
+  unidadeId: string
+  nome: string
+  ativo: boolean
+}
+
+export interface CriarBolsaRequest {
+  nome: string
+  ativo?: boolean
+}
+
 export interface CursoEstagioResponse {
   id: string
   unidadeId: string
@@ -154,7 +170,7 @@ export interface UsuarioOpcaoEstagioResponse {
   id: string
   nome: string
   email: string
-  perfil: string
+  categoriaCargo: CategoriaCargo | null
   unidadeId: string | null
   unidadeNome: string | null
   ativo: boolean
@@ -164,7 +180,7 @@ export interface AtualizarVinculoEstagioRequest {
   orientadorId: string
   dataInicio: string
   dataFimPrevista: string
-  tipoBolsa: TipoBolsaEstagiario
+  tipoBolsa: TipoBolsaEstagiario | null
   formacao: FormacaoEstagiario
   formacaoOutro?: string | null
   cursoId?: string | null
@@ -172,7 +188,8 @@ export interface AtualizarVinculoEstagioRequest {
 }
 
 export interface NovaBolsaVinculoEstagioRequest {
-  tipoBolsa: TipoBolsaEstagiario
+  tipoBolsa: TipoBolsaEstagiario | null
+  bolsaId?: string | null
   especificacaoBolsa?: string | null
   dataInicio: string
   dataFimPrevista: string

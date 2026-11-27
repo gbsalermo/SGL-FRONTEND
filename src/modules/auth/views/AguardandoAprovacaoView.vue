@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import LoginBrandPanel from '../components/LoginBrandPanel.vue'
-import { ehPerfilGestao } from '@/modules/auth/perfis'
+import { ehGestao } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -18,7 +18,7 @@ async function verificarNovamente() {
   try {
     const usuario = await session.atualizarUsuario()
     if (usuario.situacao === 'ATIVO') {
-      await router.replace(ehPerfilGestao(usuario.perfil) ? '/dashboard' : '/inicio')
+      await router.replace(ehGestao(usuario) ? '/dashboard' : '/inicio')
       return
     }
     aviso.value = 'Seu acesso ainda não foi liberado.'
@@ -43,7 +43,7 @@ async function sair() {
       <div class="aguardando__content">
         <h1 id="aguardando-title">Aguardando aprovação</h1>
         <p class="aguardando__texto">
-          Seu acesso ao SGL foi registrado. Um gestor da sua Unidade precisa liberar seu laboratório e perfil.
+          Seu acesso ao SGL foi registrado. Avise o responsável do seu laboratório: ele aprova o seu acesso no SGL.
         </p>
         <p v-if="session.usuario" class="aguardando__quem">
           {{ session.usuario.nome }}<span v-if="session.usuario.unidadeSigla"> · {{ session.usuario.unidadeSigla }}</span>

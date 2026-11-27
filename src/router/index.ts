@@ -1,16 +1,35 @@
-import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vue-router'
+import { createRouter, createWebHistory, type RouteLocationNormalized, type RouteMeta } from 'vue-router'
 
 import { FAQ_ID, findHelpTask } from '@/modules/ajuda/helpTasks'
-import { ehPerfilGestao, PERFIS_ADMIN, PERFIS_GESTAO, PERFIS_SOLICITANTE } from '@/modules/auth/perfis'
-import type { PerfilUsuario } from '@/modules/auth/types/session'
+import { ehAdmin, ehGestao, ehResponsavel, PAPEIS_ADMIN, PAPEIS_GESTAO, temAlgumPapel } from '@/modules/auth/papeis'
+import type { AuthConfig, CategoriaCargo, PapelSistema, UsuarioSessao } from '@/modules/auth/types/session'
+import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
 
 const ROTA_AGUARDANDO = '/aguardando-aprovacao'
 
+/**
+ * The test-user page only exists while the API exposes the developer login; any failure to confirm
+ * that sends the visitor back to the corporate login instead of showing a page that cannot work.
+ */
+export async function entradaLoginTeste(): Promise<true | string> {
+  try {
+    const { data } = await http.get<AuthConfig>('/v1/auth/config')
+    if (!data.devLoginAtivo) return '/login'
+  } catch {
+    return '/login'
+  }
+
+  // "Trocar usuário" lands here: picking another test user starts from a clean session.
+  const session = useSessionStore()
+  if (session.autenticado) session.sair()
+  return true
+}
+
 function rotaInicial() {
   const session = useSessionStore()
   if (session.pendente) return ROTA_AGUARDANDO
-  return ehPerfilGestao(session.usuario?.perfil) ? '/dashboard' : '/inicio'
+  return ehGestao(session.usuario) ? '/dashboard' : '/inicio'
 }
 
 export const router = createRouter({
@@ -30,6 +49,13 @@ export const router = createRouter({
       meta: { public: true },
     },
     {
+      path: '/login/teste',
+      name: 'login-teste',
+      component: () => import('@/modules/auth/views/LoginTesteView.vue'),
+      meta: { public: true },
+      beforeEnter: entradaLoginTeste,
+    },
+    {
       path: ROTA_AGUARDANDO,
       name: 'aguardando-aprovacao',
       component: () => import('@/modules/auth/views/AguardandoAprovacaoView.vue'),
@@ -39,30 +65,30 @@ export const router = createRouter({
       path: '/residuos/:id/rotulo',
       name: 'gestao-residuo-rotulo',
       component: () => import('@/modules/residuos/views/gestao/RotuloResiduoAjustadoView.vue'),
-      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+      meta: { requiresSession: true, papeis: PAPEIS_GESTAO },
     },
     {
       path: '/produtos/:id/rotulo',
       name: 'gestao-produto-rotulo',
       component: () => import('@/modules/produtos/views/RotuloProdutoView.vue'),
-      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+      meta: { requiresSession: true, papeis: PAPEIS_GESTAO },
     },
     {
       path: '/solucoes/:id/rotulo',
       name: 'gestao-solucao-rotulo',
       component: () => import('@/modules/solucoes/views/RotuloSolucaoView.vue'),
-      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+      meta: { requiresSession: true, papeis: PAPEIS_GESTAO },
     },
     {
       path: '/lotes/:id/documento-entrada',
       name: 'gestao-documento-entrada-lote',
       component: () => import('@/modules/estoque/views/DocumentoEntradaLoteView.vue'),
-      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+      meta: { requiresSession: true, papeis: PAPEIS_GESTAO },
     },
     {
       path: '/',
       component: () => import('@/layouts/SolicitanteLayout.vue'),
-      meta: { requiresSession: true, perfis: PERFIS_SOLICITANTE },
+      meta: { requiresSession: true, somenteSemPapelDeGestao: true },
       children: [
         {
           path: 'inicio',
@@ -73,7 +99,13 @@ export const router = createRouter({
           path: 'pedidos-orientandos',
           name: 'pedidos-orientandos',
           redirect: { path: '/meus-pedidos', query: { visao: 'orientandos' } },
-          meta: { perfis: ['PESQUISADOR', 'ANALISTA'] },
+          meta: { categorias: ['PESQUISADOR', 'ANALISTA'] },
+        },
+        {
+          path: 'meu-laboratorio',
+          name: 'solicitante-meu-laboratorio',
+          component: () => import('@/modules/equipe/views/MeuLaboratorioView.vue'),
+          meta: { exigeResponsavelOuAdmin: true },
         },
         {
           path: 'meus-pedidos',
@@ -111,7 +143,7 @@ export const router = createRouter({
     {
       path: '/',
       component: () => import('@/layouts/GestaoLayout.vue'),
-      meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+      meta: { requiresSession: true, papeis: PAPEIS_GESTAO },
       children: [
         {
           path: 'dashboard',
@@ -192,43 +224,50 @@ export const router = createRouter({
           path: 'administracao/unidades',
           name: 'admin-unidades',
           component: () => import('@/modules/admin/views/UnidadesHabilitacaoView.vue'),
-          meta: { requiresSession: true, perfis: ['ADMINISTRADOR_GERAL'] },
+          meta: { requiresSession: true, papeis: ['ADMINISTRADOR_GERAL'] },
         },
         {
           path: 'administracao/cadastros/vinculos/importar',
           name: 'gestao-vinculos-importar',
           component: () => import('@/modules/admin/views/ImportarPessoasView.vue'),
-          meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+          meta: { requiresSession: true, papeis: PAPEIS_ADMIN },
         },
         {
           path: 'administracao/cadastros/vinculos',
           name: 'gestao-vinculos-cadastros',
           component: () => import('@/modules/admin/views/VinculosOperacionaisGestaoView.vue'),
-          meta: { requiresSession: true, perfis: PERFIS_GESTAO },
+          meta: { requiresSession: true, papeis: PAPEIS_ADMIN },
+        },
+        {
+          // Same screen as /meu-laboratorio, inside the gestão layout (a GESTOR or admin who is responsável).
+          path: 'equipe-do-laboratorio',
+          name: 'gestao-equipe-laboratorio',
+          component: () => import('@/modules/equipe/views/MeuLaboratorioView.vue'),
+          meta: { requiresSession: true, exigeResponsavelOuAdmin: true },
         },
         {
           path: 'administracao/cadastros',
           name: 'admin-cadastros',
           component: () => import('@/modules/admin/views/CadastrosAdminView.vue'),
-          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+          meta: { requiresSession: true, papeis: PAPEIS_ADMIN },
         },
         {
           path: 'administracao/cadastros/residuos-solucoes',
           name: 'admin-catalogos-residuos-solucoes',
           component: () => import('@/modules/admin/views/CatalogosResiduosSolucoesView.vue'),
-          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+          meta: { requiresSession: true, papeis: PAPEIS_ADMIN },
         },
         {
           path: 'administracao/cadastros/modelos-residuo',
           name: 'admin-modelos-residuo',
           redirect: '/administracao/cadastros/residuos-solucoes?tipo=residuos',
-          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+          meta: { requiresSession: true, papeis: PAPEIS_ADMIN },
         },
         {
           path: 'administracao/cadastros/modelos-solucao',
           name: 'admin-modelos-solucao',
           redirect: '/administracao/cadastros/residuos-solucoes?tipo=solucoes',
-          meta: { requiresSession: true, perfis: PERFIS_ADMIN },
+          meta: { requiresSession: true, papeis: PAPEIS_ADMIN },
         },
         {
           path: 'solicitacoes/novo',
@@ -268,6 +307,23 @@ export const router = createRouter({
   ],
 })
 
+/**
+ * Every matched record's rule must hold (a child narrows its parent). `papeis`: any of these roles;
+ * `categorias`: any of these job categories; `somenteSemPapelDeGestao`: the solicitante area, which
+ * people with a management role do not use yet (they keep the gestão layout); `exigeResponsavelOuAdmin`:
+ * the laboratory team screen.
+ */
+export function permiteAcesso(meta: RouteMeta, usuario: UsuarioSessao | null) {
+  const papeis = meta.papeis as PapelSistema[] | undefined
+  if (papeis?.length && !temAlgumPapel(usuario, papeis)) return false
+  const categorias = meta.categorias as CategoriaCargo[] | undefined
+  if (categorias?.length && !(usuario?.categoriaCargo && categorias.includes(usuario.categoriaCargo))) return false
+  if (meta.somenteSemPapelDeGestao && ehGestao(usuario)) return false
+  // A laboratory's team is managed by its responsável (an association, not a role) or an administrator.
+  if (meta.exigeResponsavelOuAdmin && !(ehResponsavel(usuario) || ehAdmin(usuario))) return false
+  return true
+}
+
 // Only the fields the guard reads, so tests can pass router.resolve() results directly.
 export function guardaDeRota(to: Pick<RouteLocationNormalized, 'path' | 'fullPath' | 'meta' | 'matched'>) {
   const session = useSessionStore()
@@ -303,16 +359,8 @@ export function guardaDeRota(to: Pick<RouteLocationNormalized, 'path' | 'fullPat
     return { path: '/login', query: { redirect: to.fullPath } }
   }
 
-  if (session.autenticado) {
-    const perfil = session.usuario?.perfil
-    const perfisPermitidos = [...to.matched]
-      .reverse()
-      .map((record) => (record.meta.perfis as PerfilUsuario[] | undefined) ?? [])
-      .find((perfis) => perfis.length > 0) ?? []
-
-    if (perfisPermitidos.length > 0 && (!perfil || !perfisPermitidos.includes(perfil))) {
-      return rotaInicial()
-    }
+  if (session.autenticado && !to.matched.every((record) => permiteAcesso(record.meta, session.usuario))) {
+    return rotaInicial()
   }
 
   return true

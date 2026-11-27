@@ -1,16 +1,14 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { PerfilUsuario, SituacaoUsuario, UsuarioSessao } from '@/modules/auth/types/session'
-import { guardaDeRota, router } from '@/router'
+import type { SituacaoUsuario, UsuarioSessao } from '@/modules/auth/types/session'
+import { entradaLoginTeste, guardaDeRota, router } from '@/router'
+import { http } from '@/services/http'
 import { useSessionStore } from '@/stores/session'
+import { type PerfilDeTeste, usuarioDeTeste } from '@/test/sessaoDeTeste'
 
-function entrarComo(perfil: PerfilUsuario, situacao: SituacaoUsuario = 'ATIVO') {
-  const usuario: UsuarioSessao = {
-    id: 'u-1', nome: 'Fulano', email: 'f@embrapa.br', perfil, situacao,
-    unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF',
-    laboratorios: [], ativo: true,
-  }
+function entrarComo(perfil: PerfilDeTeste, situacao: SituacaoUsuario = 'ATIVO', extra: Partial<UsuarioSessao> = {}) {
+  const usuario = usuarioDeTeste(perfil, { situacao, ...extra })
   useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })
 }
 
@@ -57,6 +55,66 @@ describe('guardas de rota', () => {
     expect(destino('/login')).toBe('/dashboard')
   })
 
+  it('gestor que tambem e responsavel entra na gestao', () => {
+    entrarComo('GESTOR', 'ATIVO', {
+      categoriaCargo: 'PESQUISADOR',
+      responsavelPor: [{ id: 'lab-1', nome: 'Lab', ativo: true }],
+    })
+
+    expect(destino('/dashboard')).toBe(true)
+    expect(destino('/login')).toBe('/dashboard')
+  })
+
+  it('gestor que tambem e administrador local acessa rotas de admin', () => {
+    entrarComo('GESTOR', 'ATIVO', { papeis: ['GESTOR', 'ADMINISTRADOR_LOCAL'] })
+
+    expect(destino('/administracao/cadastros')).toBe(true)
+  })
+
+  it('quem nao tem papel nao acessa cadastros', () => {
+    entrarComo('PESQUISADOR')
+
+    expect(destino('/administracao/cadastros')).toBe('/inicio')
+  })
+
+  it('gestor continua fora das rotas de solicitante nesta fase', () => {
+    entrarComo('GESTOR')
+
+    expect(destino('/inicio')).toBe('/dashboard')
+  })
+
+  it('responsavel sem papel abre Meu laboratorio na area de solicitante', () => {
+    entrarComo('PESQUISADOR', 'ATIVO', { responsavelPor: [{ id: 'lab-1', nome: 'Lab', ativo: true }] })
+
+    expect(destino('/meu-laboratorio')).toBe(true)
+  })
+
+  it('solicitante que nao e responsavel nao abre Meu laboratorio', () => {
+    entrarComo('PESQUISADOR')
+
+    expect(destino('/meu-laboratorio')).toBe('/inicio')
+  })
+
+  it('gestor sozinho nao abre a equipe do laboratorio nem os vinculos', () => {
+    entrarComo('GESTOR')
+
+    expect(destino('/equipe-do-laboratorio')).toBe('/dashboard')
+    expect(destino('/administracao/cadastros/vinculos')).toBe('/dashboard')
+  })
+
+  it('gestor que e responsavel abre a equipe do laboratorio na gestao', () => {
+    entrarComo('GESTOR', 'ATIVO', { responsavelPor: [{ id: 'lab-1', nome: 'Lab', ativo: true }] })
+
+    expect(destino('/equipe-do-laboratorio')).toBe(true)
+  })
+
+  it('administrador local abre a equipe do laboratorio e os vinculos', () => {
+    entrarComo('ADMINISTRADOR')
+
+    expect(destino('/equipe-do-laboratorio')).toBe(true)
+    expect(destino('/administracao/cadastros/vinculos')).toBe(true)
+  })
+
   it('gestor nao acessa rotas de admin', () => {
     entrarComo('GESTOR')
 
@@ -89,5 +147,38 @@ describe('guardas de rota', () => {
   it('faq route is valid', async () => {
     await router.push('/ajuda/perguntas-frequentes')
     expect(router.currentRoute.value.path).toBe('/ajuda/perguntas-frequentes')
+  })
+
+  describe('entradaLoginTeste', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('entradaLoginTeste_devLoginInativo_redirecionaLogin', async () => {
+      vi.spyOn(http, 'get').mockResolvedValue({ data: { devLoginAtivo: false } })
+
+      await expect(entradaLoginTeste()).resolves.toBe('/login')
+      expect(http.get).toHaveBeenCalledWith('/v1/auth/config')
+    })
+
+    it('entradaLoginTeste_erro_redirecionaLogin', async () => {
+      vi.spyOn(http, 'get').mockRejectedValue(new Error('offline'))
+
+      await expect(entradaLoginTeste()).resolves.toBe('/login')
+    })
+
+    it('entradaLoginTeste_ativoComSessao_encerraSessao', async () => {
+      vi.spyOn(http, 'get').mockResolvedValue({ data: { devLoginAtivo: true } })
+      entrarComo('GESTOR')
+
+      await expect(entradaLoginTeste()).resolves.toBe(true)
+      expect(useSessionStore().autenticado).toBe(false)
+    })
+
+    it('entradaLoginTeste_ativoSemSessao_permite', async () => {
+      vi.spyOn(http, 'get').mockResolvedValue({ data: { devLoginAtivo: true } })
+
+      await expect(entradaLoginTeste()).resolves.toBe(true)
+    })
   })
 })

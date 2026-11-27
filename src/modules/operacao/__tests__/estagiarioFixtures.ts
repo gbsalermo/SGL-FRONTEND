@@ -2,6 +2,7 @@ import type { UsuarioSessao } from '@/modules/auth/types/session'
 import type { ContextoParticipacaoOperacional } from '@/modules/operacao/types/contextoOperacional'
 import type { LaboratorioResumo } from '@/modules/projetos/types/projetos'
 import { useSessionStore } from '@/stores/session'
+import { acessoDe, type PerfilDeTeste } from '@/test/sessaoDeTeste'
 
 export function participacaoEstagio(laboratorios: LaboratorioResumo[]): ContextoParticipacaoOperacional {
   return {
@@ -20,7 +21,7 @@ export function entrarComoEstagiario(
   ],
 ) {
   const usuario: UsuarioSessao = {
-    id: 'u-1', nome: 'Estagiária', email: 'e@embrapa.br', perfil: 'ESTAGIARIO', situacao: 'ATIVO',
+    id: 'u-1', nome: 'Estagiária', email: 'e@embrapa.br', ...acessoDe('ESTAGIARIO'), cargo: null, responsavelPor: [], situacao: 'ATIVO',
     unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF',
     laboratorios: laboratoriosDaPessoa, ativo: true,
   }

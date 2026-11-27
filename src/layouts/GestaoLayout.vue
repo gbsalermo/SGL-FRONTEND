@@ -8,7 +8,8 @@ import { helpTaskForRoute } from '@/modules/ajuda/routeHelp'
 import UnidadeSelector from '@/components/UnidadeSelector.vue'
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { gestaoShellService, type BaseBuscaGestao } from '@/services/gestaoShellService'
-import { ehPerfilAdmin } from '@/modules/auth/perfis'
+import { ehAdmin, ehResponsavel, rotuloAcesso } from '@/modules/auth/papeis'
+import { rotuloDaEquipe } from '@/modules/equipe/rotuloDaEquipe'
 import { useSessionStore } from '@/stores/session'
 import { alternarTema, aplicarTema, tema } from '@/services/themeService'
 
@@ -70,7 +71,9 @@ const baseBusca = ref<BaseBuscaGestao>({
   falhas: [],
 })
 
-const ehAdministrador = computed(() => ehPerfilAdmin(session.usuario?.perfil))
+const ehAdministrador = computed(() => ehAdmin(session.usuario))
+const gereEquipe = computed(() => ehResponsavel(session.usuario) || ehAdministrador.value)
+const rotuloEquipe = computed(() => rotuloDaEquipe(session.usuario))
 
 // O retorno no topbar é reservado a telas realmente aninhadas/detalhadas.
 // Seções principais acessadas pela sidebar não exibem uma seta de retorno.
@@ -173,7 +176,7 @@ const resultadosBusca = computed<ResultadoBuscaGlobal[]>(() => {
     const termos = normalizarBusca([
       usuario.nome,
       usuario.email,
-      usuario.perfil,
+      rotuloAcesso(usuario),
       usuario.unidadeNome,
       nomesDosLaboratoriosDaPessoa(usuario.laboratorios),
     ].filter(Boolean).join(' '))
@@ -184,7 +187,7 @@ const resultadosBusca = computed<ResultadoBuscaGlobal[]>(() => {
       id: `usuario-${usuario.id}`,
       tipo: 'usuario',
       titulo: usuario.nome,
-      descricao: `${usuario.email} · ${rotuloPerfil(usuario.perfil)}`,
+      descricao: `${usuario.email} · ${rotuloAcesso(usuario)}`,
       detalhe: nomesDosLaboratoriosDaPessoa(usuario.laboratorios) || usuario.unidadeNome || 'Sem vínculo operacional',
       termos,
       destino: ehAdministrador.value
@@ -229,10 +232,6 @@ function rotuloStatusPedido(status: string) {
     CANCELADO: 'Cancelado',
   }
   return rotulos[status] ?? status
-}
-
-function rotuloPerfil(perfil: string) {
-  return perfil.toLowerCase().replaceAll('_', ' ').replace(/^./, (letra) => letra.toUpperCase())
 }
 
 function rotuloTipoResultado(tipo: TipoResultadoBusca) {
@@ -701,12 +700,16 @@ onBeforeUnmount(() => {
           <span v-show="!recolhida">Meus pedidos</span>
         </router-link>
 
-        <p v-show="!recolhida" class="gestao-nav__group">ADMINISTRAÇÃO</p>
-        <router-link to="/administracao/cadastros/vinculos" title="Gerenciar vínculos de usuários">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="3"/><circle cx="18" cy="7" r="3"/><path d="M2 20v-3a5 5 0 0 1 10 0v3M13 20v-3a5 5 0 0 1 9 0v3M10 12h5"/></svg>
-          <span v-show="!recolhida">Vínculos de usuários</span>
+        <p v-show="!recolhida && (gereEquipe || ehAdministrador)" class="gestao-nav__group">ADMINISTRAÇÃO</p>
+        <router-link v-if="gereEquipe" to="/equipe-do-laboratorio" :title="rotuloEquipe">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6" /></svg>
+          <span v-show="!recolhida">{{ rotuloEquipe }}</span>
         </router-link>
         <template v-if="ehAdministrador">
+          <router-link to="/administracao/cadastros/vinculos" title="Gerenciar vínculos de usuários">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="3"/><circle cx="18" cy="7" r="3"/><path d="M2 20v-3a5 5 0 0 1 10 0v3M13 20v-3a5 5 0 0 1 9 0v3M10 12h5"/></svg>
+            <span v-show="!recolhida">Vínculos de usuários</span>
+          </router-link>
           <router-link to="/administracao/cadastros" title="Cadastros administrativos">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="9" cy="8" r="3" />
@@ -851,9 +854,9 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.gestao-shell { --sidebar-width: 264px; min-height: 100vh; background: var(--sgl-background, #f5f7fa); color: var(--sgl-text, #1a1a2e); }
+.gestao-shell { --sidebar-width: 264px; min-height: calc(100vh - var(--sgl-faixa-teste-altura, 0px)); background: var(--sgl-background, #f5f7fa); color: var(--sgl-text, #1a1a2e); }
 .gestao-shell--collapsed { --sidebar-width: 72px; }
-.gestao-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 30; width: var(--sidebar-width); height: 100vh; display: flex; flex-direction: column; padding: 18px 14px 16px; background: linear-gradient(180deg, #07142f 0%, #0b1b3a 55%, #0d2147 100%); color: #fff; transition: width 300ms ease; }
+.gestao-sidebar { position: fixed; inset: var(--sgl-faixa-teste-altura, 0px) auto 0 0; z-index: 30; width: var(--sidebar-width); height: calc(100vh - var(--sgl-faixa-teste-altura, 0px)); display: flex; flex-direction: column; padding: 18px 14px 16px; background: linear-gradient(180deg, #07142f 0%, #0b1b3a 55%, #0d2147 100%); color: #fff; transition: width 300ms ease; }
 .gestao-brand {
   width: 100%;
   min-height: 96px;
@@ -963,7 +966,7 @@ button.gestao-tool { cursor: pointer; }
   display: none;
 }
 .gestao-workspace { min-width: 0; margin-left: var(--sidebar-width); transition: margin-left 300ms ease; }
-.gestao-topbar { position: sticky; top: 0; z-index: 20; min-height: 72px; display: flex; align-items: center; gap: 10px; padding: 0 24px; background: linear-gradient(90deg, #08162f 0%, #0b1934 100%); color: #fff; box-shadow: 0 1px 0 rgb(255 255 255 / 7%); }
+.gestao-topbar { position: sticky; top: var(--sgl-faixa-teste-altura, 0px); z-index: 20; min-height: 72px; display: flex; align-items: center; gap: 10px; padding: 0 24px; background: linear-gradient(90deg, #08162f 0%, #0b1934 100%); color: #fff; box-shadow: 0 1px 0 rgb(255 255 255 / 7%); }
 .gestao-topbar button { border: 0; background: transparent; color: inherit; cursor: pointer; }
 .gestao-topbar__collapse, .gestao-topbar__back, .gestao-topbar__search { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; font-size: 25px; }
 .gestao-topbar__collapse:hover, .gestao-topbar__back:hover, .gestao-topbar__search:hover, .gestao-topbar__logout:hover { background: rgb(255 255 255 / 8%); }
@@ -1007,10 +1010,10 @@ button.gestao-tool { cursor: pointer; }
 .gestao-search-result__type { padding: 4px 6px; border: 1px solid var(--sgl-border); border-radius: 999px; color: var(--sgl-text-muted); font-size: 8px; font-weight: 700; }
 .gestao-topbar__logout { min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 13px; border: 1px solid rgb(255 255 255 / 18%) !important; border-radius: 8px; font-size: 13px; }
 .gestao-topbar__logout svg { width: 18px; height: 18px; }
-.gestao-main { min-height: calc(100vh - 72px); padding: 28px 30px 40px; background: linear-gradient(135deg, #f8fafc 0%, #f2f5fa 100%); transition: background 180ms ease, color 180ms ease; }
+.gestao-main { min-height: calc(100vh - 72px - var(--sgl-faixa-teste-altura, 0px)); padding: 28px 30px 40px; background: linear-gradient(135deg, #f8fafc 0%, #f2f5fa 100%); transition: background 180ms ease, color 180ms ease; }
 .gestao-panel-enter-active, .gestao-panel-leave-active { transition: opacity 150ms ease, transform 150ms ease; transform-origin: top right; }
 .gestao-panel-enter-from, .gestao-panel-leave-to { opacity: 0; transform: translateY(-4px) scale(.985); }
-@media (max-width: 900px) { .gestao-sidebar { position: static; width: 100%; height: auto; } .gestao-shell--collapsed .gestao-sidebar { width: 100%; } .gestao-workspace { margin-left: 0; } .gestao-brand img { width: 150px !important; object-fit: contain !important; } .gestao-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .gestao-nav p { grid-column: 1 / -1; } .gestao-subnav { grid-column: 1 / -1; } .gestao-topbar__collapse { display: none; } .gestao-main { padding: 18px 16px 30px; } .gestao-alert-panel { position: fixed; top: 96px; right: 16px; left: 16px; width: auto; } .gestao-search-panel { position: fixed; top: 78px; right: 16px; left: 16px; width: auto; } }
+@media (max-width: 900px) { .gestao-sidebar { position: static; width: 100%; height: auto; } .gestao-shell--collapsed .gestao-sidebar { width: 100%; } .gestao-workspace { margin-left: 0; } .gestao-brand img { width: 150px !important; object-fit: contain !important; } .gestao-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .gestao-nav p { grid-column: 1 / -1; } .gestao-subnav { grid-column: 1 / -1; } .gestao-topbar__collapse { display: none; } .gestao-main { padding: 18px 16px 30px; } .gestao-alert-panel { position: fixed; top: calc(96px + var(--sgl-faixa-teste-altura, 0px)); right: 16px; left: 16px; width: auto; } .gestao-search-panel { position: fixed; top: calc(78px + var(--sgl-faixa-teste-altura, 0px)); right: 16px; left: 16px; width: auto; } }
 @media (max-width: 560px) { .gestao-topbar { padding-inline: 14px; } .gestao-topbar__logout span { display: none; } .gestao-search-panel { right: 10px; left: 10px; } .gestao-search-input kbd { display: none; } .gestao-search-input { grid-template-columns: 18px minmax(0, 1fr); } }
 </style>
 

@@ -1,30 +1,28 @@
 ## Para que serve
 
-Cadastrar no SGL uma pessoa que já existe nas bases da Embrapa e vinculá-la aos laboratórios.
+Organizar a equipe do seu laboratório no SGL: aprovar quem entrou pela primeira vez, cadastrar várias pessoas da Embrapa de uma vez, incluir quem já usa o SGL, retirar quem saiu e dar acesso temporário.
 
 ## Quem pode fazer
 
-Gestão e administradores.
+O responsável pelo laboratório, no próprio laboratório. O Administrador Local pode fazer o mesmo em qualquer laboratório da Unidade.
 
 ## Passo a passo
 
-1. No menu lateral, em Administração, clique em **Vínculos de usuários**.
-2. Na tela de vínculos, clique em **Importar da Embrapa**.
-3. Na aba **Empregados**, digite ao menos 3 caracteres do nome ou da matrícula.
-4. A busca consulta as bases da Embrapa. O ponto verde indica quem já está no SGL.
-5. Para esconder quem já está no SGL, marque **Só quem ainda não está no SGL**.
-6. Na linha da pessoa, clique em **Importar**.
-7. O painel traz os dados da Embrapa. Em **No SGL**, o perfil vem sugerido pelo cargo; troque se precisar.
-8. Em **Laboratórios**, marque os laboratórios em que a pessoa vai atuar. Pode marcar mais de um.
-9. Confira os dados e clique em **Cadastrar e vincular**.
-10. A mensagem confirma que a pessoa foi cadastrada no SGL.
-
-Para mudar os laboratórios de quem já está no SGL:
-
-1. Volte aos vínculos e, na linha da pessoa, clique em **Gerenciar**.
-2. Em **Laboratórios**, marque ou desmarque os laboratórios da pessoa.
-3. Clique em **Salvar laboratórios**.
+1. No menu lateral, clique em **Meu laboratório**. Se você é responsável por mais de um laboratório, escolha qual no alto da tela.
+2. Na aba **Equipe** você vê quem faz parte do laboratório e se o acesso é permanente ou temporário.
+3. Para cadastrar pessoas que ainda não estão no SGL, abra **Trazer da Embrapa**.
+4. Escolha **Colaboradores** (estagiários, bolsistas) ou **Empregados** e digite ao menos 3 letras do nome.
+5. Marque as pessoas. Digite outro nome e marque mais: elas ficam guardadas em **Selecionados**.
+6. Em **Selecionados**, confira a categoria do cargo de cada pessoa e clique em **Cadastrar**.
+7. O resultado mostra quem foi cadastrado e quem já estava no SGL. Avise as pessoas: elas já podem entrar.
+8. Para aprovar quem entrou sozinho pela primeira vez, abra **Aguardando aprovação**, confira a categoria e clique em **Aprovar para este laboratório**.
+9. Para incluir quem já usa o SGL, volte à aba **Equipe** e clique em **Incluir pessoa já cadastrada**.
+10. Para tirar alguém do laboratório, clique em **Retirar** na linha da pessoa e confirme.
 
 ## Dicas
 
-- Estagiários e bolsistas ficam na aba ao lado. Lá a busca é só por nome, e os passos são os mesmos.
+- Todos os responsáveis da Unidade veem a mesma lista de **Aguardando aprovação**: aprove só quem é do seu laboratório.
+- Recusar um cadastro que aguarda aprovação é só com o Administrador Local.
+- Retirar alguém do seu laboratório não tira a pessoa dos outros laboratórios dela.
+- Para dar acesso por um período, ou só a um projeto, use a aba **Acesso temporário**.
+- Quem não trabalha em laboratório (chefia, área administrativa) é cadastrado pelo Administrador Local, em **Vínculos de usuários**.

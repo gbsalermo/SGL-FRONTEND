@@ -1,6 +1,6 @@
 ## Para que serve
 
-Manter os dados-base do SGL: produtos, classes de resíduo, locais de armazenamento e perfis de acesso.
+Manter os dados-base do SGL: produtos, classes de resíduo, locais de armazenamento e papéis de acesso.
 
 ## Quem pode fazer
 
@@ -16,12 +16,13 @@ Administradores.
 6. Em **Classes de resíduo**, mantenha as classes usadas para classificar os resíduos. Clique em **+ Nova classe** para incluir uma.
 7. Informe a unidade, o código e a descrição da classe e salve.
 8. Em **Locais de armazenamento**, cadastre onde os resíduos ficam guardados até o descarte. Os botões são os mesmos.
-9. Em **Permissões** estão as pessoas já cadastradas. Aqui só se troca o perfil de acesso.
-10. Em **Novo perfil**, escolha o perfil e clique em **Salvar perfil**.
+9. Em **Permissões** estão as pessoas já cadastradas. Aqui se marcam os papéis (Administrador local, Gestor) e se ajusta a categoria do cargo. Uma pessoa pode ter mais de um papel.
+10. Marque ou desmarque os papéis, ajuste a categoria se precisar e clique em **Salvar acesso**.
 
 ## Dicas
 
 - O catálogo diz o que existe; quantidades e lotes ficam no **Estoque**.
 - Os dados de perecível e de controle externo alimentam os alertas e o relatório de fiscalização.
-- Quem aguarda aprovação recebe o perfil na própria aprovação.
+- Quem aguarda aprovação recebe papéis e categoria na própria aprovação.
+- A Unidade precisa de pelo menos um administrador local ativo: o último não pode perder o papel.
 - Laboratórios e vínculos de cada pessoa ficam em **Vínculos de usuários**, como em "Importar pessoa da Embrapa".

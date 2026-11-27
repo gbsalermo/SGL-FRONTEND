@@ -3,6 +3,8 @@ import type {
   AtividadeDisponivelEstagioResponse,
   AtualizarVinculoEstagioRequest,
   CulturaEstagioResponse,
+  BolsaResponse,
+  CriarBolsaRequest,
   CursoEstagioResponse,
   EstagiarioRequest,
   EstagiarioResponse,
@@ -100,6 +102,30 @@ export const estagiarioService = {
       payload,
     )
     return data
+  },
+
+  async listarBolsasAtivas() {
+    const { data } = await http.get<BolsaResponse[]>('/v1/bolsas/ativas')
+    return data
+  },
+
+  async criarBolsa(payload: CriarBolsaRequest) {
+    const { data } = await http.post<BolsaResponse>('/v1/bolsas', payload)
+    return data
+  },
+
+  async listarBolsas() {
+    const { data } = await http.get<BolsaResponse[]>('/v1/bolsas')
+    return data
+  },
+
+  async atualizarBolsa(id: string, payload: CriarBolsaRequest & { ativo?: boolean }) {
+    const { data } = await http.put<BolsaResponse>(`/v1/bolsas/${id}`, payload)
+    return data
+  },
+
+  async inativarBolsa(id: string) {
+    await http.delete(`/v1/bolsas/${id}`)
   },
 
   async listarCursosAtivos() {

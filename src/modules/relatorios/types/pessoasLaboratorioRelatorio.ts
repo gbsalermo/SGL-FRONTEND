@@ -1,11 +1,13 @@
-import type { PerfilUsuario } from '@/modules/auth/types/session'
+import type { PerfilLegado } from '@/modules/auth/perfilLegado'
+import type { CategoriaCargo, PapelSistema } from '@/modules/auth/types/session'
 import type { TipoBolsaEstagiario } from '@/modules/estagiarios/types/estagiario'
 
 export interface PessoaLaboratorioRelatorioItem {
   usuarioId: string
   nome: string
   email: string
-  perfil: PerfilUsuario
+  papeis: PapelSistema[]
+  categoriaCargo: CategoriaCargo | null
   ativo: boolean
   responsavelLaboratorio: boolean
   tipoVinculoEstagio: TipoBolsaEstagiario | null
@@ -25,12 +27,12 @@ export interface RelatorioPessoasLaboratorioResponse {
   totalPessoas: number
   ativos: number
   inativos: number
-  porPerfil: Partial<Record<PerfilUsuario, number>>
+  porPerfil: Partial<Record<PerfilLegado, number>>
   pessoas: PessoaLaboratorioRelatorioItem[]
 }
 
 export interface RelatorioPessoasLaboratorioFiltros {
   laboratorioId: string
-  perfil?: PerfilUsuario
+  perfil?: PerfilLegado
   ativo?: boolean
 }

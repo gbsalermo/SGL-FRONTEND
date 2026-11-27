@@ -3,11 +3,13 @@ import '@/modules/admin/styles/cadastros-scale.css'
 import AdminCadastrosNavLink from '@/modules/admin/components/AdminCadastrosNavLink.vue'
 import EstoqueFiltroEmbalagem from '@/modules/estoque/components/EstoqueFiltroEmbalagem.vue'
 import ProdutoRotuloAtalho from '@/modules/produtos/components/ProdutoRotuloAtalho.vue'
+import SessaoTesteBanner from '@/components/SessaoTesteBanner.vue'
 import SolicitanteThemeToggle from '@/components/SolicitanteThemeToggle.vue'
 </script>
 
 <template>
   <v-app>
+    <SessaoTesteBanner />
     <router-view />
     <SolicitanteThemeToggle />
     <ProdutoRotuloAtalho />

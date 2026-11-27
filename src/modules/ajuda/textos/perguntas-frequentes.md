@@ -6,7 +6,7 @@ Na tela de entrada, use o **login de rede** da Embrapa (ou o seu CPF) e a **senh
 
 ### Entrei, mas apareceu "Aguardando aprovação"
 
-É o seu primeiro acesso e a Gestão ainda não definiu o seu laboratório e o seu perfil. Avise a Gestão do laboratório: ela aprova o seu cadastro em **Vínculos de usuários**. Depois disso, entre de novo.
+É o seu primeiro acesso e o seu cadastro ainda não foi aprovado. Avise o responsável do seu laboratório: ele aprova o seu acesso em **Meu laboratório**. Se você não sabe quem é o responsável, procure o Administrador Local da sua Unidade. Depois da aprovação, entre de novo.
 
 ### Não vejo o laboratório na lista
 

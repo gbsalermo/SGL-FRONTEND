@@ -25,7 +25,7 @@ describe('EstagiariosGestaoView - vínculo pendente', () => {
     useSessionStore().$patch({
       token: 'jwt',
       expiraEm: Date.now() + 60_000,
-      usuario: { id: 'g-1', perfil: 'GESTOR', unidadeId: 'unidade-1' } as never,
+      usuario: { id: 'g-1', papeis: ['GESTOR'], categoriaCargo: null, unidadeId: 'unidade-1' } as never,
     })
     semVinculo = [pendente]
     fake = fakeAdapter((config) => {

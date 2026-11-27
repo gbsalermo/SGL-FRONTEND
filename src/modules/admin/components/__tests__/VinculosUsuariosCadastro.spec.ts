@@ -8,7 +8,7 @@ import { fakeAdapter } from '@/test/fakeAdapter'
 
 const lab = (id: string, nome: string) => ({ id, unidadeId: 'u-1', nome, descricao: null, responsavelId: null, responsavelNome: null, ativo: true })
 const usuario = {
-  id: 'p-1', nome: 'JOANA', email: 'joana@x', perfil: 'TECNICO', ativo: true, unidadeId: 'u-1',
+  id: 'p-1', nome: 'JOANA', email: 'joana@x', papeis: [], categoriaCargo: 'TECNICO', ativo: true, unidadeId: 'u-1',
   unidadeNome: 'Unidade', situacao: 'ATIVO', laboratorios: [{ id: 'l-1', nome: 'Lab Um', ativo: true }],
 }
 
@@ -67,7 +67,7 @@ describe('VinculosUsuariosCadastro', () => {
   })
 
   it('salvaListaDeEstagiario', async () => {
-    const estagiario = { ...usuario, id: 'e-1', nome: 'ESTAGIARIO', perfil: 'ESTAGIARIO' }
+    const estagiario = { ...usuario, id: 'e-1', nome: 'ESTAGIARIO', categoriaCargo: 'ESTAGIARIO' }
     const wrapper = await abrir(estagiario)
     const caixas = wrapper.findAll('[data-test="lista-laboratorios"] input[type="checkbox"]')
     await caixas[0].setValue(true)
@@ -82,7 +82,7 @@ describe('VinculosUsuariosCadastro', () => {
   })
 
   it('estagiarioNaoRecebeVinculoAdicional', async () => {
-    const wrapper = await abrir({ ...usuario, id: 'e-1', perfil: 'ESTAGIARIO' })
+    const wrapper = await abrir({ ...usuario, id: 'e-1', categoriaCargo: 'ESTAGIARIO' })
 
     expect(wrapper.find('[data-test="novo-vinculo"]').exists()).toBe(false)
     expect(wrapper.text()).toContain('Estagiários usam vínculos de estágio e participações existentes.')

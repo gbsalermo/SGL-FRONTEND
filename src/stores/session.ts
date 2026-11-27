@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 
 import { http, SESSION_STORAGE_KEY } from '@/services/http'
+import { ehAdministradorGeral } from '@/modules/auth/papeis'
 import type { LoginResponse, UsuarioSessao } from '@/modules/auth/types/session'
 
 // Left behind by the browser-side DEV login that the JWT session replaced.
@@ -12,6 +13,7 @@ interface SessaoPersistida {
   expiraEm: number
   unidadeOperacaoId: string | null
   unidadeOperacaoRotulo: string | null
+  sessaoDeTeste: boolean
 }
 
 function carregarSessao(): SessaoPersistida | null {
@@ -23,7 +25,11 @@ function carregarSessao(): SessaoPersistida | null {
 
     const sessao = JSON.parse(raw) as Partial<SessaoPersistida>
 
-    if (!sessao.token || !sessao.usuario || typeof sessao.expiraEm !== 'number' || sessao.expiraEm <= Date.now()) {
+    // A session saved before accumulable roles has no `papeis`; trusting it would hide the gestão area
+    // from Gestores and administrators until the token expired, so it is dropped and a new login asked.
+    const formatoAtual = Array.isArray(sessao.usuario?.papeis)
+    if (!sessao.token || !sessao.usuario || !formatoAtual || typeof sessao.expiraEm !== 'number'
+      || sessao.expiraEm <= Date.now()) {
       localStorage.removeItem(SESSION_STORAGE_KEY)
       return null
     }
@@ -34,6 +40,7 @@ function carregarSessao(): SessaoPersistida | null {
       expiraEm: sessao.expiraEm,
       unidadeOperacaoId: sessao.unidadeOperacaoId ?? null,
       unidadeOperacaoRotulo: sessao.unidadeOperacaoRotulo ?? null,
+      sessaoDeTeste: sessao.sessaoDeTeste ?? false,
     }
   } catch {
     localStorage.removeItem(SESSION_STORAGE_KEY)
@@ -51,17 +58,21 @@ export const useSessionStore = defineStore('session', {
     unidadeOperacaoId: sessaoInicial?.unidadeOperacaoId ?? null as string | null,
     // Display label of the selected Unidade, so screens can show it without another request.
     unidadeOperacaoRotulo: sessaoInicial?.unidadeOperacaoRotulo ?? null as string | null,
+    // Marks a session opened through the developer-only test login, so the UI can warn about it.
+    sessaoDeTeste: sessaoInicial?.sessaoDeTeste ?? false,
+    // Last time the session user was re-read; not persisted.
+    ultimaAtualizacao: 0,
   }),
 
   getters: {
     autenticado: (state) => Boolean(state.token && state.usuario && state.expiraEm),
     pendente: (state) => state.usuario?.situacao === 'PENDENTE_VINCULACAO',
-    administradorGeral: (state) => state.usuario?.perfil === 'ADMINISTRADOR_GERAL',
+    administradorGeral: (state) => ehAdministradorGeral(state.usuario),
     // Unidade em que a tela trabalha: a escolhida no seletor pelo ADMINISTRADOR_GERAL ou, sem
     // escolha (e para os demais perfis), a do próprio usuário. Use este getter sempre que a tela
     // precisar saber "de qual unidade" mostrar os dados — é a mesma que a API usa como tenant.
     unidadeEmOperacaoId: (state): string | null =>
-      (state.usuario?.perfil === 'ADMINISTRADOR_GERAL' ? state.unidadeOperacaoId : null)
+      (ehAdministradorGeral(state.usuario) ? state.unidadeOperacaoId : null)
         ?? state.usuario?.unidadeId ?? null,
   },
 
@@ -71,9 +82,9 @@ export const useSessionStore = defineStore('session', {
       return this.aplicarLogin(data)
     },
 
-    async entrarDesenvolvimento(login: string) {
-      const { data } = await http.post<LoginResponse>('/v1/auth/dev-login', { login: login.trim() })
-      return this.aplicarLogin(data)
+    async entrarComoTeste(login: string) {
+      const { data } = await http.post<LoginResponse>('/v1/auth/dev/entrar', { login: login.trim() })
+      return this.aplicarLogin(data, { sessaoDeTeste: true })
     },
 
     async atualizarUsuario() {
@@ -82,6 +93,21 @@ export const useSessionStore = defineStore('session', {
       this.usuario = data
       this.persistir()
       return data
+    },
+
+    /**
+     * Re-reads the session user when the window regains focus, at most once a minute, so that a change
+     * made by an administrator (e.g. being named responsável of a laboratory) shows up without a new login.
+     * Failures are ignored: the next request already handles an expired session.
+     */
+    async atualizarAoVoltar(agora: number = Date.now()) {
+      if (!this.token || agora - this.ultimaAtualizacao < 60_000) return
+      this.ultimaAtualizacao = agora
+      try {
+        await this.atualizarUsuario()
+      } catch {
+        // Expired or offline: the http interceptor and the route guard take care of it.
+      }
     },
 
     selecionarUnidade(unidadeId: string | null, rotulo: string | null = null) {
@@ -107,15 +133,18 @@ export const useSessionStore = defineStore('session', {
       this.expiraEm = null
       this.unidadeOperacaoId = null
       this.unidadeOperacaoRotulo = null
+      this.sessaoDeTeste = false
       localStorage.removeItem(SESSION_STORAGE_KEY)
     },
 
-    aplicarLogin(resposta: LoginResponse) {
+    aplicarLogin(resposta: LoginResponse, opcoes: { sessaoDeTeste?: boolean } = {}) {
       this.token = resposta.token
       this.usuario = resposta.usuario
       this.expiraEm = Date.parse(resposta.expiraEm)
       this.unidadeOperacaoId = null
       this.unidadeOperacaoRotulo = null
+      // Always reset: a regular login after a test session must not inherit the mark.
+      this.sessaoDeTeste = opcoes.sessaoDeTeste ?? false
       this.persistir()
       return resposta.usuario
     },
@@ -128,6 +157,7 @@ export const useSessionStore = defineStore('session', {
         expiraEm: this.expiraEm,
         unidadeOperacaoId: this.unidadeOperacaoId,
         unidadeOperacaoRotulo: this.unidadeOperacaoRotulo,
+        sessaoDeTeste: this.sessaoDeTeste,
       }
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessao))
     },

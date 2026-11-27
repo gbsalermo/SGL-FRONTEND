@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { ehGestao } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 import { aplicarTema, tema } from '@/services/themeService'
 
 const session = useSessionStore()
 
 const visivel = computed(() => {
-  const perfil = session.usuario?.perfil
-  return perfil === 'TECNICO'
-    || perfil === 'ANALISTA'
-    || perfil === 'PESQUISADOR'
-    || perfil === 'ESTAGIARIO'
+  // The solicitante area: a signed-in person with no management role.
+  return Boolean(session.usuario) && !ehGestao(session.usuario)
 })
 
 </script>
@@ -48,7 +46,7 @@ const visivel = computed(() => {
 .solicitante-theme-toggle {
   position: fixed;
   z-index: 45;
-  top: 118px;
+  top: calc(118px + var(--sgl-faixa-teste-altura, 0px));
   left: 18px;
   width: 222px;
   min-height: 48px;
@@ -129,7 +127,7 @@ const visivel = computed(() => {
 
 @media (max-width: 720px) {
   .solicitante-theme-toggle {
-    top: 112px;
+    top: calc(112px + var(--sgl-faixa-teste-altura, 0px));
     left: 14px;
     width: 214px;
   }

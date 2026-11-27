@@ -14,7 +14,7 @@ const session = useSessionStore()
 
 const pedidos = ref<PedidoResponse[]>([])
 const pedidosOrientandos = ref<PedidoResponse[]>([])
-const perfilOrientador = computed(() => session.usuario?.perfil === 'ANALISTA' || session.usuario?.perfil === 'PESQUISADOR')
+const perfilOrientador = computed(() => session.usuario?.categoriaCargo === 'ANALISTA' || session.usuario?.categoriaCargo === 'PESQUISADOR')
 const visao = ref<'MEUS' | 'ORIENTANDOS'>(perfilOrientador.value && route.query.visao === 'orientandos' ? 'ORIENTANDOS' : 'MEUS')
 const listaAtual = computed(() => visao.value === 'ORIENTANDOS' ? pedidosOrientandos.value : pedidos.value)
 const orientandosCarregados = ref(false)

@@ -32,6 +32,7 @@ vi.mock('@/modules/operacao/services/contextoOperacionalService', () => ({
 }))
 
 import NovoPedidoView from '@/modules/pedidos/views/solicitante/NovoPedidoView.vue'
+import { acessoDe, type PerfilDeTeste } from '@/test/sessaoDeTeste'
 
 async function montarComoEstagiario(laboratorios: LaboratorioResumo[], laboratoriosDaPessoa?: LaboratorioResumo[]) {
   entrarComoEstagiario(laboratoriosDaPessoa)
@@ -120,7 +121,7 @@ describe('NovoPedidoView - laboratórios da pessoa', () => {
 
   it('empregadoVeTodosOsLaboratoriosAtivosComOsDaListaPrimeiro', async () => {
     const usuario: UsuarioSessao = {
-      id: 'u-2', nome: 'Pesquisadora', email: 'p@embrapa.br', perfil: 'PESQUISADOR', situacao: 'ATIVO',
+      id: 'u-2', nome: 'Pesquisadora', email: 'p@embrapa.br', ...acessoDe('PESQUISADOR'), cargo: null, responsavelPor: [], situacao: 'ATIVO',
       unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF', ativo: true,
       laboratorios: [{ id: 'B', nome: 'Lab B', ativo: true }],
     }
@@ -149,7 +150,7 @@ describe('NovoPedidoView - laboratórios da pessoa', () => {
 
   it('empregadoSemLaboratorioAtivoNaUnidadeVeAvisoDaUnidade', async () => {
     const usuario: UsuarioSessao = {
-      id: 'u-3', nome: 'Técnico', email: 't@embrapa.br', perfil: 'TECNICO', situacao: 'ATIVO',
+      id: 'u-3', nome: 'Técnico', email: 't@embrapa.br', ...acessoDe('TECNICO'), cargo: null, responsavelPor: [], situacao: 'ATIVO',
       unidadeId: 'unidade-1', unidadeNome: 'Mandioca', unidadeSigla: 'CNPMF', ativo: true, laboratorios: [],
     }
     useSessionStore().$patch({ token: 'jwt', usuario, expiraEm: Date.now() + 60_000 })

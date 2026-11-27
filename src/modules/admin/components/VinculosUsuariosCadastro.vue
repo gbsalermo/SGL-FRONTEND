@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { aguardaAprovacao, ehPerfilGestao, ROTA_APROVAR_PENDENTES } from '@/modules/auth/perfis'
+import { aguardaAprovacao, ehEstagiario as ehCategoriaEstagiario, ehGestao, ROTA_APROVAR_PENDENTES, rotuloAcesso } from '@/modules/auth/papeis'
+import { descrevePerfilLegado } from '@/modules/auth/perfilLegado'
 import { computed, onMounted, ref, watch } from 'vue'
 import LaboratoriosSelect from '@/modules/operacao/components/LaboratoriosSelect.vue'
 import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
@@ -55,7 +56,7 @@ const tab = ref<'ATIVOS' | 'HISTORICO'>('ATIVOS')
 // Estagiários are included: Gestão edits their laboratory list here. Only the additional-link form
 // is withheld from them, because the API refuses operational links for interns.
 const usuariosGerenciaveis = computed(() => props.usuarios)
-const ehEstagiario = computed(() => usuario.value?.perfil === 'ESTAGIARIO')
+const ehEstagiario = computed(() => ehCategoriaEstagiario(usuario.value))
 function listaAtual(u: UsuarioPermissao): LaboratorioResumo[] {
   return listasAtualizadas.value[u.id] ?? u.laboratorios
 }
@@ -67,10 +68,6 @@ function status(u: UsuarioPermissao): 'PENDENTE' | 'VINCULADO' | 'INATIVO' {
 function statusRotulo(u: UsuarioPermissao) {
   return status(u) === 'PENDENTE' ? 'Pendente de vinculação'
     : status(u) === 'INATIVO' ? 'Inativo' : 'Vinculado'
-}
-function perfilRotulo(p: string) {
-  return ({ ESTAGIARIO: 'Estagiário', TECNICO: 'Técnico', ANALISTA: 'Analista', PESQUISADOR: 'Pesquisador',
-    GESTOR: 'Gestor', ADMINISTRADOR: 'Administrador', ADMINISTRADOR_GERAL: 'Administrador geral' } as Record<string,string>)[p] || p
 }
 function vigente(v: VinculoOperacional) {
   const agora = new Date().toLocaleDateString('en-CA')
@@ -90,11 +87,11 @@ function dataFormatada(v: string | null) {
 const listaFiltrada = computed(() => usuariosGerenciaveis.value
   .filter(u => {
     const q = busca.value.toLocaleLowerCase('pt-BR').trim()
-    const texto = [u.nome, u.email, perfilRotulo(u.perfil), u.unidadeNome || '', nomesDosLaboratoriosDaPessoa(listaAtual(u)),
+    const texto = [u.nome, u.email, rotuloAcesso(u), u.unidadeNome || '', nomesDosLaboratoriosDaPessoa(listaAtual(u)),
       ...(resumoDoUsuario(u.id)?.laboratoriosAdicionais ?? [])].join(' ').toLocaleLowerCase('pt-BR')
     return (!q || texto.includes(q))
       && (filtroStatus.value === 'TODOS' || status(u) === filtroStatus.value)
-      && (filtroPerfil.value === 'TODOS' || u.perfil === filtroPerfil.value)
+      && (filtroPerfil.value === 'TODOS' || descrevePerfilLegado(filtroPerfil.value, u))
   }).sort((a,b) => {
     if (status(a) === 'PENDENTE' && status(b) !== 'PENDENTE') return -1
     if (status(a) !== 'PENDENTE' && status(b) === 'PENDENTE') return 1
@@ -110,8 +107,8 @@ const ativos = computed(() => vinculos.value.filter(vigente))
 const historico = computed(() => vinculos.value.filter(v => !vigente(v)))
 const opcoesLaboratorios = computed<LaboratorioResumo[]>(() =>
   laboratoriosValidos.value.map(({ id, nome, ativo }) => ({ id, nome, ativo })))
-// Management profiles may have an empty list; every other profile needs at least one laboratory.
-const listaObrigatoria = computed(() => !ehPerfilGestao(usuario.value?.perfil))
+// People with a management role may have an empty list; everyone else needs at least one laboratory.
+const listaObrigatoria = computed(() => !ehGestao(usuario.value))
 const listaAlterada = computed(() => {
   if (!usuario.value) return false
   const atual = listaAtual(usuario.value).map(l => l.id).sort()
@@ -330,7 +327,7 @@ onMounted(() => { void carregarResumo() })
           <select v-model="filtroPerfil">
             <option value="TODOS">Todos os perfis</option><option value="ESTAGIARIO">Estagiário</option><option value="TECNICO">Técnico</option>
             <option value="ANALISTA">Analista</option><option value="PESQUISADOR">Pesquisador</option>
-            <option value="GESTOR">Gestor</option><option value="ADMINISTRADOR">Administrador</option>
+            <option value="GESTOR">Gestor</option><option value="ADMINISTRADOR">Administrador local</option>
           </select>
         </label>
       </div>
@@ -339,12 +336,12 @@ onMounted(() => { void carregarResumo() })
       <div v-else-if="listaFiltrada.length === 0" class="people-empty">Nenhum usuário encontrado para os filtros informados.</div>
       <div v-else class="people-table-wrap">
         <table class="people-table">
-          <thead><tr><th>Situação</th><th>Usuário</th><th>Perfil</th><th>Laboratórios</th><th>Vínculos adicionais</th><th>Ação</th></tr></thead>
+          <thead><tr><th>Situação</th><th>Usuário</th><th>Acesso</th><th>Laboratórios</th><th>Vínculos adicionais</th><th>Ação</th></tr></thead>
           <tbody>
             <tr v-for="item in listaFiltrada" :key="item.id">
               <td><span class="people-pill" :class="'people-pill--' + status(item).toLowerCase()"><span class="people-dot" />{{ statusRotulo(item) }}</span></td>
               <td><strong>{{ item.nome }}</strong><small>{{ item.email }}</small></td>
-              <td>{{ perfilRotulo(item.perfil) }}</td>
+              <td>{{ rotuloAcesso(item) }}</td>
               <td>{{ nomesDosLaboratoriosDaPessoa(listaAtual(item)) || 'Não atribuído' }}</td>
               <td><strong>{{ resumoDoUsuario(item.id)?.vinculosVigentes ?? 0 }}</strong><small>{{ (resumoDoUsuario(item.id)?.laboratoriosAdicionais || []).slice(0,2).join(', ') || 'Nenhum adicional vigente' }}</small></td>
               <td><button type="button" class="people-outline" @click="abrirUsuario(item.id)">Gerenciar <span aria-hidden="true">→</span></button></td>
@@ -358,7 +355,7 @@ onMounted(() => { void carregarResumo() })
       <aside class="people-drawer" role="dialog" aria-modal="true" :aria-label="'Vínculos de ' + usuario.nome">
         <header class="people-drawer-header">
           <div><span class="people-eyebrow">CADASTROS / VÍNCULOS DO USUÁRIO</span><h2>{{ usuario.nome }}</h2>
-            <p>{{ perfilRotulo(usuario.perfil) }} · {{ usuario.email }}</p>
+            <p>{{ rotuloAcesso(usuario) }} · {{ usuario.email }}</p>
             <span class="people-pill" :class="'people-pill--' + status(usuario).toLowerCase()"><span class="people-dot" />{{ statusRotulo(usuario) }}</span>
           </div>
           <button class="people-close" type="button" aria-label="Fechar detalhes" @click="fecharUsuario">×</button>

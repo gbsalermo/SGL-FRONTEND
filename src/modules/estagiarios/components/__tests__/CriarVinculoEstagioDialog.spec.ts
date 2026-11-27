@@ -18,7 +18,7 @@ const pendente: EstagiarioSemVinculoResponse = {
 }
 
 const orientadores = [
-  { usuarioId: 'o-1', nome: 'LEANDRO DE SOUZA ROCHA', perfil: 'ADMINISTRADOR', cargo: 'ANALISTA A' },
+  { usuarioId: 'o-1', nome: 'LEANDRO DE SOUZA ROCHA', categoriaCargo: null, cargo: 'ANALISTA A' },
 ]
 const atividades = [{ id: 'a-1', codigoSeg: '01.20', nome: 'Atividade Um' }]
 const laboratorios = [
@@ -37,7 +37,7 @@ describe('CriarVinculoEstagioDialog', () => {
     useSessionStore().$patch({
       token: 'jwt',
       expiraEm: Date.now() + 60_000,
-      usuario: { id: 'g-1', perfil: 'GESTOR', unidadeId: 'unidade-1' } as never,
+      usuario: { id: 'g-1', papeis: ['GESTOR'], categoriaCargo: null, unidadeId: 'unidade-1' } as never,
     })
     respostaPost = () => ({ status: 201, data: { id: 'e-1', usuarioId: 'u-9' } })
     fake = fakeAdapter((config) => {
@@ -92,6 +92,8 @@ describe('CriarVinculoEstagioDialog', () => {
       dataInicioEstagio: '2026-11-01',
       dataFimEstagio: '2027-02-01',
       tipoBolsa: 'VOLUNTARIO',
+      // The API requires exactly one bolsa origin; a legacy tipoBolsa is sent with an explicit null bolsaId.
+      bolsaId: null,
       formacao: 'GRADUACAO',
       formacaoOutro: null,
       atividadeId: 'a-1',

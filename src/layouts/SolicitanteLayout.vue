@@ -7,6 +7,7 @@ import { helpTaskForRoute } from '@/modules/ajuda/routeHelp'
 
 import logoSgl from '@/assets/images/auth/sgl-logo.png'
 import { useProfilePreferencesStore } from '@/stores/profilePreferences'
+import { ehResponsavel, rotuloAcesso } from '@/modules/auth/papeis'
 import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
@@ -140,6 +141,13 @@ function sair() {
           <span>Meus resíduos</span>
         </router-link>
 
+        <router-link v-if="ehResponsavel(session.usuario)" class="solicitante-nav__item" to="/meu-laboratorio">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 21V9l8-5 8 5v12M9 21v-6h6v6" />
+          </svg>
+          <span>Meu laboratório</span>
+        </router-link>
+
         <p class="solicitante-nav__group solicitante-nav__group--spaced">SOLICITAÇÕES</p>
 
         <router-link class="solicitante-nav__item" to="/pedidos/novo">
@@ -171,7 +179,7 @@ function sair() {
         <div class="solicitante-usercopy">
           <strong>{{ nomeExibicao }}</strong>
           <span>{{ session.usuario?.email }}</span>
-          <small>{{ session.usuario?.perfil }}</small>
+          <small>{{ rotuloAcesso(session.usuario) }}</small>
         </div>
 
         <button
@@ -270,7 +278,7 @@ function sair() {
             </div>
             <div>
               <span>Perfil</span>
-              <strong>{{ session.usuario?.perfil }}</strong>
+              <strong>{{ rotuloAcesso(session.usuario) }}</strong>
             </div>
           </div>
         </div>
@@ -286,17 +294,17 @@ function sair() {
 
 <style scoped>
 .solicitante-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--sgl-faixa-teste-altura, 0px));
   background: var(--sgl-background);
   color: var(--sgl-text);
 }
 
 .solicitante-sidebar {
   position: fixed;
-  inset: 0 auto 0 0;
+  inset: var(--sgl-faixa-teste-altura, 0px) auto 0 0;
   z-index: 20;
   width: 258px;
-  height: 100vh;
+  height: calc(100vh - var(--sgl-faixa-teste-altura, 0px));
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -438,7 +446,7 @@ function sair() {
 
 .solicitante-topbar {
   position: sticky;
-  top: 0;
+  top: var(--sgl-faixa-teste-altura, 0px);
   z-index: 10;
   min-height: 72px;
   display: flex;
@@ -472,7 +480,7 @@ function sair() {
 .solicitante-logout svg { width: 19px; height: 19px; }
 
 .solicitante-main {
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 72px - var(--sgl-faixa-teste-altura, 0px));
   padding: 30px;
   background: radial-gradient(circle at top left, rgb(45 107 196 / 6%), transparent 28%), var(--sgl-background);
 }
@@ -623,7 +631,7 @@ function sair() {
   .solicitante-nav__group,
   .solicitante-sidebar__user { display: none; }
   .solicitante-topbar { position: static; min-height: 62px; padding-inline: 18px; }
-  .solicitante-main { min-height: calc(100vh - 62px); padding: 20px; }
+  .solicitante-main { min-height: calc(100vh - 62px - var(--sgl-faixa-teste-altura, 0px)); padding: 20px; }
 }
 
 @media (max-width: 560px) {
