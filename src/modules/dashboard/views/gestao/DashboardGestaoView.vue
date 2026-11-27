@@ -355,6 +355,7 @@ const laboratorioAtual = computed(() => {
  */
 async function carregarDashboard(options: { silent?: boolean } = {}) {
   const silent = options.silent ?? false
+  const isLatest = beginLoad()
   if (!silent) {
     carregando.value = true
     erro.value = ''
@@ -385,6 +386,7 @@ async function carregarDashboard(options: { silent?: boolean } = {}) {
       cadastrosAdminService.listarUsuarios(),
     ])
 
+    if (!isLatest()) return
     pedidos.value = pedidosResult.status === 'fulfilled' ? pedidosResult.value : silent ? pedidos.value : []
     estoquesBaixos.value = baixosResult.status === 'fulfilled' ? baixosResult.value.filter((item) => item.ativo) : silent ? estoquesBaixos.value : []
     residuos.value = residuosResult.status === 'fulfilled' ? residuosResult.value : silent ? residuos.value : []
@@ -398,6 +400,7 @@ async function carregarDashboard(options: { silent?: boolean } = {}) {
     const resultadosLotes = await Promise.allSettled(
       estoques.map((estoque) => estoqueService.listarLotesPorEstoque(estoque.id)),
     )
+    if (!isLatest()) return
     lotes.value = resultadosLotes
       .filter((resultado): resultado is PromiseFulfilledResult<LoteResponse[]> => resultado.status === 'fulfilled')
       .flatMap((resultado) => resultado.value)
@@ -434,7 +437,7 @@ async function carregarDashboard(options: { silent?: boolean } = {}) {
     if (!silent) carregando.value = false
   }
 }
-const { lastUpdatedAt, refreshing, refreshNow, markUpdated } = useAutoRefresh(() => carregarDashboard({ silent: true }))
+const { lastUpdatedAt, refreshing, refreshNow, markUpdated, beginLoad } = useAutoRefresh(() => carregarDashboard({ silent: true }))
 
 function abrir(rota: string) {
   router.push(rota)

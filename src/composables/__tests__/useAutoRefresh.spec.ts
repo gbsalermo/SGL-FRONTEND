@@ -99,4 +99,13 @@ describe('useAutoRefresh', () => {
     await vi.advanceTimersByTimeAsync(0)
     expect(load).not.toHaveBeenCalled()
   })
+
+  it('beginLoadSoAUltimaCargaEAtual', () => {
+    const { api } = mountWith(vi.fn().mockResolvedValue(undefined))
+    const primeira = api().beginLoad()
+    expect(primeira()).toBe(true)
+    const segunda = api().beginLoad()
+    expect(primeira()).toBe(false)
+    expect(segunda()).toBe(true)
+  })
 })

@@ -12,6 +12,7 @@ export interface AutoRefreshOptions {
  *
  * The screen keeps its own first load (with its loading state) and calls `markUpdated()` when it succeeds.
  * `load` must be a silent reload that throws on failure, so a failed attempt keeps the last good time.
+ * Screens guard their writes with `beginLoad()`.
  */
 export function useAutoRefresh(load: () => Promise<void>, options: AutoRefreshOptions = {}) {
   const intervalMs = options.intervalMs ?? 300_000
@@ -20,6 +21,17 @@ export function useAutoRefresh(load: () => Promise<void>, options: AutoRefreshOp
   const lastUpdatedAt = ref<Date | null>(null)
   const refreshing = ref(false)
   let timer: ReturnType<typeof setInterval> | undefined
+  let generation = 0
+
+  /**
+   * Call at the start of every load, silent or not, and write the results only while the returned check
+   * is still true. A background reload that started before a load triggered by the person's own action
+   * would otherwise finish last and put the older data back on screen.
+   */
+  function beginLoad(): () => boolean {
+    const mine = ++generation
+    return () => mine === generation
+  }
 
   function markUpdated() {
     lastUpdatedAt.value = new Date()
@@ -62,5 +74,5 @@ export function useAutoRefresh(load: () => Promise<void>, options: AutoRefreshOp
     document.removeEventListener('visibilitychange', onVisibilityChange)
   })
 
-  return { lastUpdatedAt, refreshing, refreshNow, markUpdated }
+  return { lastUpdatedAt, refreshing, refreshNow, markUpdated, beginLoad }
 }

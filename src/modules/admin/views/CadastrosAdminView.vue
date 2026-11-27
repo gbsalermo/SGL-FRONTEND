@@ -741,7 +741,9 @@ async function acessoSalvo(usuario: UsuarioPermissao) {
   await carregar()
 }
 
-async function buscarCadastros() {
+/** Returns false when a newer load started meanwhile; its results were discarded. */
+async function buscarCadastros(): Promise<boolean> {
+  const isLatest = beginLoad()
   const [units, labs, projects, products, residueClasses, storageLocations, users] = await Promise.all([
     cadastrosAdminService.listarUnidades(),
     cadastrosAdminService.listarLaboratorios(),
@@ -751,6 +753,7 @@ async function buscarCadastros() {
     cadastrosAdminService.listarLocaisArmazenamentoResiduo(),
     cadastrosAdminService.listarUsuarios(),
   ])
+  if (!isLatest()) return false
   unidades.value = [...units].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
   laboratorios.value = [...labs].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
   projetos.value = [...projects].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
@@ -758,6 +761,7 @@ async function buscarCadastros() {
   classesResiduo.value = [...residueClasses].sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
   locaisArmazenamento.value = [...storageLocations].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
   usuarios.value = [...users].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  return true
 }
 
 async function carregar(options: { silent?: boolean } = {}) {
@@ -770,15 +774,14 @@ async function carregar(options: { silent?: boolean } = {}) {
   carregando.value = true
   erro.value = ''
   try {
-    await buscarCadastros()
-    markUpdated()
+    if (await buscarCadastros()) markUpdated()
   } catch (error) {
     erro.value = mensagemErro(error, 'Não foi possível carregar os cadastros administrativos.')
   } finally {
     carregando.value = false
   }
 }
-const { lastUpdatedAt, refreshing, refreshNow, markUpdated } = useAutoRefresh(() => carregar({ silent: true }))
+const { lastUpdatedAt, refreshing, refreshNow, markUpdated, beginLoad } = useAutoRefresh(() => carregar({ silent: true }))
 
 onMounted(() => {
   const secao = route.query.secao

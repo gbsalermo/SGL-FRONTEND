@@ -67,4 +67,24 @@ describe('SolucoesGestaoView - atualização automática', () => {
     expect(wrapper.text()).toContain('Tampão')
     expect(wrapper.find('.state-box--error, [role="alert"]').exists()).toBe(false)
   })
+
+  it('recargaSilenciosaAntigaNaoSobrescreveCargaMaisNova', async () => {
+    mocks.listarPedidos.mockResolvedValueOnce([PEDIDO])
+    const wrapper = mount(SolucoesGestaoView)
+    await flushPromises()
+
+    let resolverSilenciosa!: (value: unknown) => void
+    mocks.listarPedidos.mockReturnValueOnce(new Promise((r) => { resolverSilenciosa = r }))
+    await vi.advanceTimersByTimeAsync(300_000)
+
+    // The person approves the request meanwhile; the screen reloads normally and gets the newer state.
+    mocks.listarPedidos.mockResolvedValueOnce([{ ...PEDIDO, status: 'APROVADO', nomeSolucao: 'Tampão aprovado' }])
+    await (wrapper.vm as unknown as { carregar: () => Promise<void> }).carregar()
+    await flushPromises()
+
+    resolverSilenciosa([PEDIDO])
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Tampão aprovado')
+  })
 })

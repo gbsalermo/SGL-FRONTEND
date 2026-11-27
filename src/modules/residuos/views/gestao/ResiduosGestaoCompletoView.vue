@@ -283,18 +283,22 @@ function fecharAdministracao() {
   erroAdministracao.value = ''
 }
 
-async function buscarDados() {
+/** Returns false when a newer load started meanwhile; its results were discarded. */
+async function buscarDados(): Promise<boolean> {
+  const isLatest = beginLoad()
   const [residuosCarregados, classesCarregadas, locaisCarregados] = await Promise.all([
     residuoService.listarTodos(),
     residuoService.listarClassesAtivas(),
     residuoService.listarLocaisArmazenamentoAtivos(),
   ])
+  if (!isLatest()) return false
   residuos.value = residuosCarregados
   classesResiduo.value = classesCarregadas
   locaisArmazenamento.value = locaisCarregados
   if (selecionado.value) {
     selecionado.value = residuos.value.find((item) => item.id === selecionado.value?.id) ?? null
   }
+  return true
 }
 
 async function carregar(options: { silent?: boolean } = {}) {
@@ -307,7 +311,7 @@ async function carregar(options: { silent?: boolean } = {}) {
   carregando.value = true
   erro.value = ''
   try {
-    await buscarDados()
+    if (!(await buscarDados())) return
     markUpdated()
     await abrirResiduoDaRota()
   } catch (error) {
@@ -316,7 +320,7 @@ async function carregar(options: { silent?: boolean } = {}) {
     carregando.value = false
   }
 }
-const { lastUpdatedAt, refreshing, refreshNow, markUpdated } = useAutoRefresh(() => carregar({ silent: true }))
+const { lastUpdatedAt, refreshing, refreshNow, markUpdated, beginLoad } = useAutoRefresh(() => carregar({ silent: true }))
 
 async function carregarHistorico(id: string) {
   carregandoHistorico.value = true

@@ -60,20 +60,24 @@ function total(filtro: Filtro): number {
 }
 async function carregar(options: { silent?: boolean } = {}) {
   // A silent reload keeps the list on screen and rethrows, so the indicator keeps the last good time.
+  const isLatest = beginLoad()
   if (options.silent) {
-    pedidos.value = await solucaoService.listarPedidos()
+    const recarregados = await solucaoService.listarPedidos()
+    if (isLatest()) pedidos.value = recarregados
     return
   }
   carregando.value = true
   erro.value = ''
   try {
-    pedidos.value = await solucaoService.listarPedidos()
+    const carregados = await solucaoService.listarPedidos()
+    if (!isLatest()) return
+    pedidos.value = carregados
     markUpdated()
   }
   catch(e) { erro.value = erroSolucao(e) }
   finally { carregando.value = false }
 }
-const { lastUpdatedAt, refreshing, refreshNow, markUpdated } = useAutoRefresh(() => carregar({ silent: true }))
+const { lastUpdatedAt, refreshing, refreshNow, markUpdated, beginLoad } = useAutoRefresh(() => carregar({ silent: true }))
 async function alternarDetalhes(p: PedidoSolucao) {
   expandidoId.value = expandidoId.value === p.id ? null : p.id
   if (expandidoId.value !== p.id || movimentacoes.value[p.id]) return

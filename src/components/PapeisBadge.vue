@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useId } from 'vue'
+import { computed, nextTick, ref, useId } from 'vue'
 
 import { listaAcesso, type ComAcesso } from '@/modules/auth/papeis'
 
@@ -13,11 +13,26 @@ const gatilho = ref<HTMLElement | null>(null)
 // Fixed positioning lets the balloon escape containers that clip overflow, such as the sidebar card.
 const posicao = ref({ top: 0, left: 0 })
 
-function abrir() {
+const balao = ref<HTMLElement | null>(null)
+const MARGEM = 8
+const DISTANCIA = 6
+
+async function abrir() {
   if (!temMais.value) return
   const rect = gatilho.value?.getBoundingClientRect()
-  if (rect) posicao.value = { top: rect.bottom + 6, left: rect.left }
+  if (!rect) return
+  posicao.value = { top: rect.bottom + DISTANCIA, left: rect.left }
   aberto.value = true
+  // Measure after rendering: the profile card sits at the bottom of the sidebar, so the balloon often has
+  // to open upwards, and it must never run past the right edge either.
+  await nextTick()
+  const tamanho = balao.value?.getBoundingClientRect()
+  if (!tamanho) return
+  const cabeAbaixo = rect.bottom + DISTANCIA + tamanho.height <= window.innerHeight - MARGEM
+  posicao.value = {
+    top: cabeAbaixo ? rect.bottom + DISTANCIA : Math.max(MARGEM, rect.top - tamanho.height - DISTANCIA),
+    left: Math.max(MARGEM, Math.min(rect.left, window.innerWidth - tamanho.width - MARGEM)),
+  }
 }
 
 function fechar() {
@@ -42,6 +57,7 @@ function fechar() {
     <template v-else>{{ itens[0] ?? '—' }}</template>
     <span
       v-if="aberto"
+      ref="balao"
       :id="tooltipId"
       class="papeis-badge__tooltip"
       role="tooltip"
