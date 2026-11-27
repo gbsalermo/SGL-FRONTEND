@@ -3,6 +3,8 @@ import { newCadastroButtonLabel } from '@/modules/admin/newCadastroButtonLabel'
 import { nomesDosLaboratoriosDaPessoa } from '@/modules/operacao/laboratoriosDaPessoa'
 import axios from 'axios'
 import { computed, onMounted, ref } from 'vue'
+import AtualizadoEm from '@/components/AtualizadoEm.vue'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useRoute } from 'vue-router'
 import { responsaveisElegiveis } from '@/modules/admin/responsaveisElegiveis'
 import { aguardaAprovacao, ROTA_APROVAR_PENDENTES, rotuloAcesso } from '@/modules/auth/papeis'
@@ -738,32 +740,44 @@ async function acessoSalvo(usuario: UsuarioPermissao) {
   await carregar()
 }
 
-async function carregar() {
+async function buscarCadastros() {
+  const [units, labs, projects, products, residueClasses, storageLocations, users] = await Promise.all([
+    cadastrosAdminService.listarUnidades(),
+    cadastrosAdminService.listarLaboratorios(),
+    cadastrosAdminService.listarProjetos(),
+    cadastrosAdminService.listarProdutos(),
+    cadastrosAdminService.listarClassesResiduo(),
+    cadastrosAdminService.listarLocaisArmazenamentoResiduo(),
+    cadastrosAdminService.listarUsuarios(),
+  ])
+  unidades.value = [...units].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  laboratorios.value = [...labs].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  projetos.value = [...projects].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  produtos.value = [...products].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  classesResiduo.value = [...residueClasses].sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
+  locaisArmazenamento.value = [...storageLocations].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+  usuarios.value = [...users].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+}
+
+async function carregar(options: { silent?: boolean } = {}) {
+  // A silent reload keeps tab, search and open forms untouched and rethrows, so the indicator keeps the
+  // last good time; the messages of the person's own actions are not cleared either.
+  if (options.silent) {
+    await buscarCadastros()
+    return
+  }
   carregando.value = true
   erro.value = ''
   try {
-    const [units, labs, projects, products, residueClasses, storageLocations, users] = await Promise.all([
-      cadastrosAdminService.listarUnidades(),
-      cadastrosAdminService.listarLaboratorios(),
-      cadastrosAdminService.listarProjetos(),
-      cadastrosAdminService.listarProdutos(),
-      cadastrosAdminService.listarClassesResiduo(),
-      cadastrosAdminService.listarLocaisArmazenamentoResiduo(),
-      cadastrosAdminService.listarUsuarios(),
-    ])
-    unidades.value = [...units].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    laboratorios.value = [...labs].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    projetos.value = [...projects].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    produtos.value = [...products].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    classesResiduo.value = [...residueClasses].sort((a, b) => a.codigo.localeCompare(b.codigo, 'pt-BR'))
-    locaisArmazenamento.value = [...storageLocations].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    usuarios.value = [...users].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+    await buscarCadastros()
+    markUpdated()
   } catch (error) {
     erro.value = mensagemErro(error, 'Não foi possível carregar os cadastros administrativos.')
   } finally {
     carregando.value = false
   }
 }
+const { lastUpdatedAt, refreshing, refreshNow, markUpdated } = useAutoRefresh(() => carregar({ silent: true }))
 
 onMounted(() => {
   const secao = route.query.secao
@@ -783,9 +797,7 @@ onMounted(() => {
       </div>
       <div class="page-header__actions">
         <HelpLink :task-id="helpTaskForCadastroTab(aba)" />
-        <button class="btn btn--ghost" type="button" :disabled="carregando" @click="carregar">
-          {{ carregando ? 'Atualizando...' : 'Atualizar dados' }}
-        </button>
+        <AtualizadoEm :at="lastUpdatedAt" :busy="refreshing || carregando" @refresh="refreshNow" />
       </div>
     </header>
 

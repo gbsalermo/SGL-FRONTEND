@@ -19,4 +19,4 @@ Gestores de laboratório.
 
 ## Dicas
 
-- O painel se atualiza ao entrar. Para recarregar na hora, clique em **Atualizar dados**.
+- O painel se atualiza sozinho ao entrar, quando você volta para a aba e a cada 5 minutos. Para recarregar na hora, clique no ícone ao lado de **Atualizado às**.
