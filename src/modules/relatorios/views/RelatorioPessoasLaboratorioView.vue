@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { rotuloAcesso } from '@/modules/auth/papeis'
+import PapeisBadge from '@/components/PapeisBadge.vue'
 import { type PerfilLegado, ROTULOS_PERFIL_LEGADO } from '@/modules/auth/perfilLegado'
 import { relatorioService } from '@/modules/relatorios/services/relatorioService'
 import type {
@@ -241,7 +241,7 @@ onMounted(async () => {
                 </td>
                 <td><strong>{{ pessoa.nome }}</strong></td>
                 <td>{{ pessoa.email }}</td>
-                <td>{{ rotuloAcesso(pessoa) }}</td>
+                <td><PapeisBadge :usuario="pessoa" /></td>
                 <td><span class="status" :class="pessoa.ativo ? 'status--active' : 'status--inactive'">{{ pessoa.ativo ? 'Ativo' : 'Inativo' }}</span></td>
                 <td>{{ rotuloVinculo(pessoa.tipoVinculoEstagio) }}</td>
                 <td>

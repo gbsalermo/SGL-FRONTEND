@@ -4,7 +4,7 @@ import type { CategoriaCargo, PapelSistema, SituacaoUsuario } from './types/sess
 export interface ComAcesso {
   papeis?: readonly PapelSistema[] | null
   categoriaCargo?: CategoriaCargo | null
-  responsavelPor?: readonly { id: string }[] | null
+  responsavelPor?: readonly { id: string; nome?: string }[] | null
 }
 
 // Mirrors the backend PapelPolicy: roles accumulate, so every check asks "does any role allow it".
@@ -63,6 +63,20 @@ export function rotuloAcesso(usuario: ComAcesso | null | undefined): string {
   const papeis = PAPEIS_GESTAO.filter((papel) => usuario?.papeis?.includes(papel))
   if (papeis.length > 0) return papeis.map((papel) => ROTULOS_PAPEL[papel]).join(' · ')
   return usuario?.categoriaCargo ? ROTULOS_CATEGORIA[usuario.categoriaCargo] : '—'
+}
+
+/**
+ * Every item of someone's access, for places that show them one by one: the roles (or the job category
+ * when there are none), then each laboratory they are responsible for. Laboratories without a name in
+ * the payload are skipped because "Responsável por" alone says nothing.
+ */
+export function listaAcesso(usuario: ComAcesso | null | undefined): string[] {
+  const papeis = PAPEIS_GESTAO.filter((papel) => usuario?.papeis?.includes(papel)).map((papel) => ROTULOS_PAPEL[papel])
+  const base = papeis.length > 0 ? papeis : usuario?.categoriaCargo ? [ROTULOS_CATEGORIA[usuario.categoriaCargo]] : []
+  const responsabilidades = (usuario?.responsavelPor ?? [])
+    .filter((laboratorio) => laboratorio.nome)
+    .map((laboratorio) => `Responsável por ${laboratorio.nome}`)
+  return [...base, ...responsabilidades]
 }
 
 /**

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import AtualizadoEm from '@/components/AtualizadoEm.vue'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useRoute, useRouter } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 import { solucaoService } from '../services/solucaoService'
@@ -56,13 +58,26 @@ const pedidosFiltrados = computed(() => pedidos.value
 function total(filtro: Filtro): number {
   return filtro === 'TODOS' ? pedidos.value.length : pedidos.value.filter(p => p.status === filtro).length
 }
-async function carregar() {
+async function carregar(options: { silent?: boolean } = {}) {
+  // A silent reload keeps the list on screen and rethrows, so the indicator keeps the last good time.
+  const isLatest = beginLoad()
+  if (options.silent) {
+    const recarregados = await solucaoService.listarPedidos()
+    if (isLatest()) pedidos.value = recarregados
+    return
+  }
   carregando.value = true
   erro.value = ''
-  try { pedidos.value = await solucaoService.listarPedidos() }
+  try {
+    const carregados = await solucaoService.listarPedidos()
+    if (!isLatest()) return
+    pedidos.value = carregados
+    markUpdated()
+  }
   catch(e) { erro.value = erroSolucao(e) }
   finally { carregando.value = false }
 }
+const { lastUpdatedAt, refreshing, refreshNow, markUpdated, beginLoad } = useAutoRefresh(() => carregar({ silent: true }))
 async function alternarDetalhes(p: PedidoSolucao) {
   expandidoId.value = expandidoId.value === p.id ? null : p.id
   if (expandidoId.value !== p.id || movimentacoes.value[p.id]) return
@@ -146,7 +161,7 @@ onMounted(async () => { await carregar(); await abrirPedidoDaRota() })
         <h1>Central de soluções</h1>
         <p>Analise solicitações, acompanhe preparações, confirme entregas e gerencie os cancelamentos.</p>
       </div>
-      <button class="secondary-action" type="button" :disabled="carregando" @click="carregar">Atualizar dados</button>
+      <AtualizadoEm :at="lastUpdatedAt" :busy="refreshing || carregando" @refresh="refreshNow" />
     </header>
 
     <div class="metrics-grid metrics-grid--solucoes">

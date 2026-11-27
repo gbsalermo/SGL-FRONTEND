@@ -1,8 +1,13 @@
+/*
+ * overflow-x: clip (not hidden) on the shell and workspace: hidden turns them into scroll containers, so the
+ * sticky top bar offsets itself against the workspace instead of the viewport. With the test-session banner
+ * that doubled its top offset and the bar covered the top of every page (heading and its action button).
+ */
 .gestao-shell {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   box-sizing: border-box;
 }
 
@@ -15,7 +20,7 @@
   max-width: calc(100% - var(--sidebar-width));
   min-width: 0;
   margin-left: var(--sidebar-width);
-  overflow-x: hidden;
+  overflow-x: clip;
   box-sizing: border-box;
   transition: width 300ms ease, max-width 300ms ease, margin-left 300ms ease;
 }
